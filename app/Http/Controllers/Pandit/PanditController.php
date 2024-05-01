@@ -10,9 +10,18 @@ class PanditController extends Controller
     //
    
     public function panditlogin(){
-        return view("adminlogin");
+        return view("panditlogin");
+        // dd("hi");
+    }
+
+    public function panditprofile(){
+        return view("/pandit/profile");
         // dd("hi");
     }
     
+    public function panditdashboard(){
+        return view("/pandit/dashboard");
+        // dd("hi");
+    }
 
 }

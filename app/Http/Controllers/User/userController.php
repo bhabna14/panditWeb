@@ -23,7 +23,7 @@ class userController extends Controller
         return view("login");
     }
     public function demo(){
-        return view("demo");
+        return view("panditlogin");
     }
     public function userauthenticate(Request $request)
     {

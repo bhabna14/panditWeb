@@ -1,4 +1,4 @@
-@extends('layouts.custom-app')
+@extends('pandit.layouts.custom-app')
 
     @section('styles')
 
@@ -22,7 +22,7 @@
                                     <div class="wd-100p"><div class="d-flex mb-4"><a href="#"><img src="{{asset('assets/img/brand/logo.png')}}" class="sign-favicon ht-40" alt="logo"></a></div>
                                         <div class="">
                                             <div class="main-signup-header">
-                                                <h2>Welcome Admin!</h2>
+                                                <h2>Welcome Pandit!</h2>
                                                 <h6 class="font-weight-semibold mb-4">Please sign in to continue.</h6>
                                                 <div class="panel panel-primary">
                                                 <div class=" tab-menu-heading mb-2 border-bottom-0">
@@ -59,8 +59,8 @@
                                                                
                                                         </form> --}}
 
-                                                        <form id="loginForm" method="POST" action="{{ route('adminauthenticate') }}">
-                                                            @csrf
+                                                        <form id="loginForm"  action="{{ url('/pandit/profile') }}">
+                                                            {{-- @csrf --}}
                                 
                                                             <div id="step1">
                                                                 <div class="form-group">

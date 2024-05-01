@@ -149,7 +149,7 @@ Route::controller(userController::class)->group(function() {
     Route::post('store', 'store')->name('store');
 
     Route::get('/', 'userlogin')->name('userlogin');
-    Route::get('/demo', 'demo')->name('demo');
+    // Route::get('/demo', 'demo')->name('demo');
 
     Route::post('user/authenticate', 'userauthenticate')->name('userauthenticate');
     Route::post('user/logout', 'userlogout')->name('userlogout');
@@ -274,7 +274,9 @@ Route::prefix('user')->middleware(['user'])->group(function () {
 Route::controller(PanditController::class)->group(function() {
    
 
-    Route::get('/pandit', 'panditlogin')->name('pandit.panditlogin');
+    Route::get('/panditlogin', 'panditlogin');
+    Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
+    Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
   
 
 });
