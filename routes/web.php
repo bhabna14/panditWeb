@@ -149,6 +149,8 @@ Route::controller(userController::class)->group(function() {
     Route::post('store', 'store')->name('store');
 
     Route::get('/', 'userlogin')->name('userlogin');
+    Route::get('/demo', 'demo')->name('demo');
+
     Route::post('user/authenticate', 'userauthenticate')->name('userauthenticate');
     Route::post('user/logout', 'userlogout')->name('userlogout');
 

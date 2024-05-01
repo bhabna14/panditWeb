@@ -22,6 +22,9 @@ class userController extends Controller
     public function userlogin(){
         return view("login");
     }
+    public function demo(){
+        return view("demo");
+    }
     public function userauthenticate(Request $request)
     {
 // dd($request);
