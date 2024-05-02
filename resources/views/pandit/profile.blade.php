@@ -4,6 +4,9 @@
 
 	<!--- Internal Select2 css-->
 	<link href="{{asset('assets/plugins/select2/css/select2.min.css')}}" rel="stylesheet">
+	<link href="{{asset('assets/css/choices.min.css')}}" rel="stylesheet">
+
+	
 
 	<!--  smart photo master css -->
 	<link href="{{asset('assets/plugins/SmartPhoto-master/smartphoto.css')}}" rel="stylesheet">
@@ -67,7 +70,7 @@
 										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career">Career</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab"
 											href="#timeline">Skills & Expertise</a>
-										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#gallery">Add Details of Puja</a>
+										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#pujadetails">Add Details of Puja</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#bank">Bank Details</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#settings">Address Details
 											</a>
@@ -668,104 +671,67 @@
 										</div>
 									</div>
 								</div>
-								<div class="main-content-body  border tab-pane border-top-0" id="gallery">
-									<div class="card-body border">
-										<div class="masonry row">
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/1.jpg')}}" class="js-img-viewer"
-														data-caption="IMAGE-01" data-id="lion">
-														<img src="{{asset('assets/img/photos/1.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/2.jpg')}}" class="js-img-viewer"
-														data-caption="IMAGE-02" data-id="camel">
-														<img src="{{asset('assets/img/photos/2.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/3.jpg')}}" class="js-img-viewer"
-														data-caption="IMAGE-03" data-id="hippo">
-														<img src="{{asset('assets/img/photos/3.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/4.jpg')}}" class="js-img-viewer"
-														data-caption="IMAGE-04" data-id="koala">
-														<img src="{{asset('assets/img/photos/4.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/5.jpg')}}" class="js-img-viewer"
-														data-caption="IMAGE-05" data-id=" bear">
-														<img src="{{asset('assets/img/photos/5.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/6.jpg')}}" class=" js-img-viewer"
-														data-caption="IMAGE-06" data-id=" rhino">
-														<img src="{{asset('assets/img/photos/6.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/7.jpg')}}" class=" js-img-viewer"
-														data-caption="IMAGE-07" data-id=" rhino">
-														<img src="{{asset('assets/img/photos/7.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/8.jpg')}}" class=" js-img-viewer"
-														data-caption="IMAGE-08" data-id=" rhino">
-														<img src=" {{asset('assets/img/photos/8.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/9.jpg')}}" class=" js-img-viewer"
-														data-caption="IMAGE-09" data-id=" rhino">
-														<img src="{{asset('assets/img/photos/9.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/10.jpg')}}" class=" js-img-viewer"
-														data-caption="IMAGE-10" data-id=" rhino">
-														<img src="{{asset('assets/img/photos/10.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/11.jpg')}}" class=" js-img-viewer"
-														data-caption="IMAGE-11" data-id=" rhino">
-														<img src="{{asset('assets/img/photos/11.jpg')}}" alt="" />
-													</a>
-												</div>
-											</div>
-											<div class="col-xl-3 col-lg-4 col-sm-6">
-												<div class="brick">
-													<a href="{{asset('assets/img/photos/12.jpg')}}" class=" js-img-viewer"
-														data-caption="IMAGE-11" data-id=" rhino">
-														<img src="{{asset('assets/img/photos/12.jpg')}}" alt="" />
-													</a>
-												</div>
+								<div class="main-content-body  border tab-pane border-top-0" id="pujadetails">
+									<div class="card">
+										<div class="card-body">
+											<div class="table-responsive  export-table">
+												<table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+													<thead>
+														<tr>
+														<th class="border-bottom-0">#</th>
+		
+															<th class="border-bottom-0">Puja Name</th>
+															<th class="border-bottom-0">Fee</th>
+															<th class="border-bottom-0">Duration</th>
+															<th class="border-bottom-0">Create Puja List</th>
+															<th class="border-bottom-0">Add Videos/Images</th>
+															
+														</tr>
+													</thead>
+													<tbody>
+														<tr>
+															<td>1</td>
+															<td class="tb-col">
+																<div class="media-group">
+																	<div class="media media-md media-middle media-circle">
+																		<img src="{{asset('assets/img/user.jpg') }}" alt="user">
+																	</div>
+																	<div class="media-text">
+																		<a href="" class="title">Ganesh Puja</a>
+																		
+																	</div>
+																</div>
+															</td>
+															
+														   <td><input type="text" name="fee" class="form-control" id=""></td>
+														   <td><input type="text" name="duration" class="form-control" id=""></td>
+														   <td> 
+															<div class="choices" data-type="select-multiple" role="combobox" aria-autocomplete="list" aria-haspopup="true" aria-expanded="false">
+																<div class="choices__inner">
+																	<select class="form-control choices__input" name="choices-multiple-remove-button" id="choices-multiple-remove-button" multiple="" hidden="" tabindex="-1" data-choice="active"></select>
+																	<div class="choices__list choices__list--multiple"></div>
+																	<input type="text" class="choices__input choices__input--cloned" autocomplete="off" autocapitalize="off" spellcheck="false" role="textbox" aria-autocomplete="list" aria-label="null" aria-activedescendant="choices--choices-multiple-remove-button-item-choice-4" style="min-width: 1ch; width: 1ch;">
+																</div>
+																<div class="choices__list choices__list--dropdown" aria-expanded="false">
+																	<div class="choices__list" aria-multiselectable="true" role="listbox">
+																		<div id="choices--choices-multiple-remove-button-item-choice-1" class="choices__item choices__item--choice choices__item--selectable" role="option" data-choice="" data-id="1" data-value="Choice 1" data-select-text="Press to select" data-choice-selectable="" aria-selected="false">Choice 1</div>
+																		<div id="choices--choices-multiple-remove-button-item-choice-2" class="choices__item choices__item--choice choices__item--selectable" role="option" data-choice="" data-id="2" data-value="Choice 2" data-select-text="Press to select" data-choice-selectable="">Choice 2</div>
+																		<div id="choices--choices-multiple-remove-button-item-choice-3" class="choices__item choices__item--choice choices__item--selectable" role="option" data-choice="" data-id="3" data-value="Choice 3" data-select-text="Press to select" data-choice-selectable="" aria-selected="false">Choice 3</div>
+																		<div id="choices--choices-multiple-remove-button-item-choice-4" class="choices__item choices__item--choice choices__item--selectable is-highlighted" role="option" data-choice="" data-id="4" data-value="Choice 4" data-select-text="Press to select" data-choice-selectable="" aria-selected="true">Choice 4</div>
+																	</div>
+																</div>
+															</div>
+															
+															
+															</td>
+															<td>
+																<input type="file" name="" class="form-control" id="">
+															</td>
+															
+														</tr>
+														
+													</tbody>
+												</table>
 											</div>
 										</div>
 									</div>
@@ -1040,9 +1006,20 @@
         <script src="{{asset('assets/js/select2.js')}}"></script>
 		<script src="{{asset('assets/js/pandit-profile.js')}}"></script>
 
+		<script src="{{ asset('assets/js/form-layouts.js') }}"></script>
 
         <!-- smart photo master js -->
         <script src="{{asset('assets/plugins/SmartPhoto-master/smartphoto.js')}}"></script>
         <script src="{{asset('assets/js/gallery.js')}}"></script>
+        <script src="{{asset('assets/js/choices.js')}}"></script>
+
+        <script src="{{asset('assets/js/choices.min.js')}}"></script>
+
+		<script>
+			
+			setTimeout(function(){
+				document.getElementById('Message').style.display = 'none';
+			}, 3000);
+		</script>
 
     @endsection
