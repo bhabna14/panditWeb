@@ -65,8 +65,7 @@
 										<a class="nav-link  mb-2 mt-2 active" data-bs-toggle="tab"
 											href="#profile">Profile</a>
 										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career">Career</a>
-										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab"
-											href="#timeline">Skills & Expertise</a>
+										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#skill">Skills & Expertise</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#gallery">Add Details of Puja</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#bank">Bank Details</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#settings">Address Details
@@ -208,7 +207,6 @@
 																	<div class="row">
 																		<div class="col-md-6">
 																			<div class="form-group mx-4">
-																					<!-- <button class="btn btn-primary add_item_btn" id="adddoc">Add More</button> -->
 																					<input type="submit" class="btn btn-primary" value="Submit">
 																			</div>
 																										
@@ -337,337 +335,170 @@
 												<div class="text-center">
 													<button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
 												</div>	
-																					</form>
-											
+											</form>
 										</div>
 									</div>
 								</div>
-								<div class="main-content-body  tab-pane border-top-0" id="timeline">
-									<div class="border-0">
-										<div class="main-content-body main-content-body-profile">
-											<div class="main-profile-body p-0">
-												<div class="row row-sm">
-													<div class="col-12">
-														<div class="card mg-b-20 border">
-															<div class="card-header p-4">
-																<div class="media">
-																	<div class="media-user me-2">
-																		<div class="main-img-user avatar-md"><img alt=""
-																				class="rounded-circle"
-																				src="{{asset('assets/img/faces/6.jpg')}}"></div>
-																	</div>
-																	<div class="media-body">
-																		<h6 class="mb-0 mg-t-2 ms-2">Mintrona Pechon
-																			Pechon</h6><span
-																			class="text-primary ms-2">just now</span>
-																	</div>
-																	<div class="ms-auto">
-																		<div class="dropdown show main-contact-star"> <a
-																				class="new option-dots2"
-																				data-bs-toggle="dropdown"
-																				href="JavaScript:void(0);"><i
-																					class="fe fe-more-vertical  tx-18"></i></a>
-																			<div class="dropdown-menu shadow"> <a
-																					class="dropdown-item"
-																					href="javascript:void(0);">Edit
-																					Post</a> <a class="dropdown-item"
-																					href="javascript:void(0);">Delete
-																					Post</a> <a class="dropdown-item"
-																					href="javascript:void(0);">Personal
-																					Settings</a> </div>
-																		</div>
-																	</div>
-																</div>
-															</div>
-															<div class="card-body">
-																<p class="mg-t-0">There are many variations of passages
-																	of Lorem Ipsum available, but the majority have
-																	suffered alteration in some form, by injected
-																	humour, or randomised words which don't look even
-																	slightly believable.</p>
-																<div class="row row-sm">
-																	<div class="col">
-																		<a href="{{url('gallery')}}"><img alt="img" class="wd-200 br-5 mb-2 mt-2 me-4"
-																			src="{{asset('assets/img/media/1.jpg')}}"></a>
-																		<a href="{{url('gallery')}}"><img alt="img" class="wd-200 br-5"
-																			src="{{asset('assets/img/media/2.jpg')}}"></a>
-																	</div>
-																</div>
-																<div class="media mg-t-15 profile-footer">
-																	<div class="media-user me-2">
-																		<div class="demo-avatar-group">
-																			<div
-																				class="demo-avatar-group main-avatar-list-stacked">
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/12.jpg')}}">
-																				</div>
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/12.jpg')}}">
-																				</div>
-																				<div class="main-img-user online"><img
-																						alt="" class="rounded-circle"
-																						src="{{asset('assets/img/faces/5.jpg')}}">
-																				</div>
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/6.jpg')}}">
-																				</div>
-																				<div class="main-avatar"> +23 </div>
-																			</div>
-																			<!-- demo-avatar-group -->
-																		</div>
-																		<!-- demo-avatar-group -->
-																	</div>
-																	<div class="media-body">
-																		<h6 class="mb-0 mg-t-10">28 people like your
-																			photo</h6>
-																	</div>
-
-																</div>
-															</div>
-														</div>
-														<div class="card mg-b-20 border">
-															<div class="card-header p-4">
-																<div class="media">
-																	<div class="media-user me-2">
-																		<div class="main-img-user avatar-md">
-																			<img alt="" class="rounded-circle"
-																				src="{{asset('assets/img/faces/6.jpg')}}">
-																		</div>
-																	</div>
-																	<div class="media-body">
-																		<h6 class="mb-0 ms-2 mg-t-3">Mintrona Pechon
-																			Pechon</h6><span class="text-muted ms-2">Sep
-																			26 2019, 10:14am</span>
-																	</div>
-																	<div class="ms-auto">
-																		<div class="dropdown show main-contact-star"> <a
-																				class="new option-dots2"
-																				data-bs-toggle="dropdown"
-																				href="JavaScript:void(0);"><i
-																					class="fe fe-more-vertical  tx-18"></i></a>
-																			<div class="dropdown-menu shadow"> <a
-																					class="dropdown-item"
-																					href="javascript:void(0);">Edit
-																					Post</a> <a class="dropdown-item"
-																					href="javascript:void(0);">Delete
-																					Post</a> <a class="dropdown-item"
-																					href="javascript:void(0);">Personal
-																					Settings</a> </div>
-																		</div>
-																	</div>
-																</div>
-															</div>
-															<div class="card-body h-100">
-																<p class="mg-t-0">There are many variations of passages
-																	of Lorem Ipsum available, but the majority have
-																	suffered alteration in some form, by injected
-																	humour, or randomised words which don't look even
-																	slightly believable.</p>
-																<div class="row row-sm">
-																	<div class="col">
-																		<a href="{{url('gallery')}}"><img alt="img" class="wd-200 br-5 mb-2 mt-2 me-4"
-																			src="{{asset('assets/img/media/4.jpg')}}"></a>
-																		<a href="{{url('gallery')}}"><img alt="img" class="wd-200 br-5 mb-2 mt-2"
-																			src="{{asset('assets/img/media/1.jpg')}}"></a>
-																	</div>
-																</div>
-																<div class="media mg-t-15 profile-footer">
-																	<div class="media-user me-2">
-																		<div class="demo-avatar-group">
-																			<div
-																				class="demo-avatar-group main-avatar-list-stacked">
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/12.jpg')}}">
-																				</div>
-																				<div class="main-img-user online"><img
-																						alt="" class="rounded-circle"
-																						src="{{asset('assets/img/faces/7.jpg')}}">
-																				</div>
-																				<div class="main-img-user online"><img
-																						alt="" class="rounded-circle"
-																						src="{{asset('assets/img/faces/5.jpg')}}">
-																				</div>
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/6.jpg')}}">
-																				</div>
-																				<div class="main-avatar"> +23 </div>
-																			</div>
-																			<!-- demo-avatar-group -->
-																		</div>
-																		<!-- demo-avatar-group -->
-																	</div>
-																	<div class="media-body">
-																		<h6 class="mb-0 mg-t-10">28 people like your
-																			photo</h6>
-																	</div>
-
-																</div>
-															</div>
-														</div>
-														<div class="card mg-b-20 border">
-															<div class="card-header p-4">
-																<div class="media">
-																	<div class="media-user me-2">
-																		<div class="main-img-user avatar-md"><img alt=""
-																				class="rounded-circle"
-																				src="{{asset('assets/img/faces/6.jpg')}}"></div>
-																	</div>
-																	<div class="media-body">
-																		<h6 class="mb-0 ms-2 mg-t-3">Mintrona Pechon
-																			Pechon</h6><span class="text-muted ms-2">Sep
-																			26 2019, 10:14am</span>
-																	</div>
-																	<div class="ms-auto">
-																		<div class="dropdown show main-contact-star"> <a
-																				class="new option-dots2"
-																				data-bs-toggle="dropdown"
-																				href="JavaScript:void(0);"><i
-																					class="fe fe-more-vertical  tx-18"></i></a>
-																			<div class="dropdown-menu shadow"> <a
-																					class="dropdown-item"
-																					href="javascript:void(0);">Edit
-																					Post</a> <a class="dropdown-item"
-																					href="javascript:void(0);">Delete
-																					Post</a> <a class="dropdown-item"
-																					href="javascript:void(0);">Personal
-																					Settings</a> </div>
-																		</div>
-																	</div>
-																</div>
-															</div>
-															<div class="card-body h-100">
-																<p class="mg-t-0">There are many variations of passages
-																	of Lorem Ipsum available, but the majority have
-																	suffered alteration in some form, by injected
-																	humour, or randomised words which don't look even
-																	slightly believable.</p>
-																<div class="media mg-t-15 profile-footer">
-																	<div class="media-user me-2">
-																		<div class="demo-avatar-group">
-																			<div
-																				class="demo-avatar-group main-avatar-list-stacked">
-																				<div class="main-img-user online"><img
-																						alt="" class="rounded-circle"
-																						src="{{asset('assets/img/faces/12.jpg')}}">
-																				</div>
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/3.jpg')}}">
-																				</div>
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/4.jpg')}}">
-																				</div>
-																				<div class="main-img-user online"><img
-																						alt="" class="rounded-circle"
-																						src="{{asset('assets/img/faces/10.jpg')}}">
-																				</div>
-																				<div class="main-avatar"> +23 </div>
-																			</div>
-																			<!-- demo-avatar-group -->
-																		</div>
-																		<!-- demo-avatar-group -->
-																	</div>
-																	<div class="media-body">
-																		<h6 class="mb-0 mg-t-10">28 people like your
-																			photo</h6>
-																	</div>
-
-																</div>
-															</div>
-														</div>
-														<div class="card border">
-															<div class="card-header p-4">
-																<div class="media">
-																	<div class="media-user me-2">
-																		<div class="main-img-user avatar-md"><img alt=""
-																				class="rounded-circle"
-																				src="{{asset('assets/img/faces/2.jpg')}}"></div>
-																	</div>
-																	<div class="media-body">
-																		<h6 class="mb-0 ms-2 mg-t-3">Mintrona Pechon
-																			Pechon</h6><span class="text-muted ms-2">Sep
-																			26 2019, 10:14am</span>
-																	</div>
-																	<div class="ms-auto">
-																		<div class="dropdown show main-contact-star"> <a
-																				class="new option-dots2"
-																				data-bs-toggle="dropdown"
-																				href="JavaScript:void(0);"><i
-																					class="fe fe-more-vertical  tx-18"></i></a>
-																			<div class="dropdown-menu shadow"> <a
-																					class="dropdown-item"
-																					href="javascript:void(0);">Edit
-																					Post</a> <a class="dropdown-item"
-																					href="javascript:void(0);">Delete
-																					Post</a> <a class="dropdown-item"
-																					href="javascript:void(0);">Personal
-																					Settings</a> </div>
-																		</div>
-																	</div>
-																</div>
-															</div>
-															<div class="card-body h-100">
-																<p class="mg-t-0">There are many variations of passages
-																	of Lorem Ipsum available, but the majority have
-																	suffered alteration in some form, by injected
-																	humour, or randomised words which don't look even
-																	slightly believable.</p>
-																<div class="row row-sm">
-																	<div class="col">
-																		<a href="{{url('gallery')}}"><img alt="img" class="wd-200 br-5 mb-2 mt-2 me-3"
-																			src="{{asset('assets/img/media/4.jpg')}}"></a>
-																		<a href="{{url('gallery')}}"><img alt="img" class="wd-200 br-5 mb-2 mt-2"
-																			src="{{asset('assets/img/media/3.jpg')}}"></a>
-																	</div>
-																</div>
-																<div class="media mg-t-15 profile-footer">
-																	<div class="media-user me-2">
-																		<div class="demo-avatar-group">
-																			<div
-																				class="demo-avatar-group main-avatar-list-stacked">
-																				<div class="main-img-user online"><img
-																						alt="" class="rounded-circle"
-																						src="{{asset('assets/img/faces/11.jpg')}}">
-																				</div>
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/12.jpg')}}">
-																				</div>
-																				<div class="main-img-user"><img alt=""
-																						class="rounded-circle"
-																						src="{{asset('assets/img/faces/3.jpg')}}">
-																				</div>
-																				<div class="main-img-user online"><img
-																						alt="" class="rounded-circle"
-																						src="{{asset('assets/img/faces/5.jpg')}}">
-																				</div>
-																				<div class="main-avatar"> +23 </div>
-																			</div>
-																			<!-- demo-avatar-group -->
-																		</div>
-																		<!-- demo-avatar-group -->
-																	</div>
-																	<div class="media-body">
-																		<h6 class="mb-0 mg-t-10">28 people like your
-																			photo</h6>
-																	</div>
-
-																</div>
-															</div>
-														</div>
+								<div class="main-content-body tab-pane border-top-0" id="skill">
+									<div class="row mb-5">
+										<div class="col-lg-3 col-md-6 col-sm-12">
+											<div class="card p-3">
+												<div class="card-body">
+													<div class="mb-3 text-center about-team">
+														<!-- Wrap the image inside a label -->
+														<label for="checkbox1">
+															<img class="rounded-pill" src="{{asset('assets/img/jagannath.jpeg')}}" alt="Shree Jagannath">
+														</label>
+													</div>
+													<div class="tx-16 text-center font-weight-semibold">
+														Shree Jagannath
+													</div>
+													<div class="form-check mt-3 text-center">
+														<input class="form-check-input" type="checkbox" id="checkbox1">
 													</div>
 												</div>
 											</div>
-											<!-- main-profile-body -->
+										</div>
+										<!-- Repeat the structure for other images -->
+										<!-- Shree Ram -->
+										<div class="col-lg-3 col-md-6 col-sm-12">
+											<div class="card p-3">
+												<div class="card-body">
+													<div class="mb-3 text-center about-team">
+														<!-- Wrap the image inside a label -->
+														<label for="checkbox2">
+															<img class="rounded-pill" src="{{asset('assets/img/rams.jpeg')}}" alt="Shree Ram">
+														</label>
+													</div>
+													<div class="tx-16 text-center font-weight-semibold">
+														Shree Ram
+													</div>
+													<div class="form-check mt-3 text-center">
+														<input class="form-check-input" type="checkbox" id="checkbox2">
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Hanuman -->
+										<div class="col-lg-3 col-md-6 col-sm-12">
+											<div class="card p-3">
+												<div class="card-body">
+													<div class="mb-3 text-center about-team">
+														<!-- Wrap the image inside a label -->
+														<label for="checkbox3">
+															<img class="rounded-pill" src="{{asset('assets/img/hanuman1.jpeg')}}" alt="Hanuman" style="height: 100px;width: 100px;">
+														</label>
+													</div>
+													<div class="tx-16 text-center font-weight-semibold">
+														Hanuman
+													</div>
+													<div class="form-check mt-3 text-center">
+														<input class="form-check-input" type="checkbox" id="checkbox3">
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Shree Krishna -->
+										<div class="col-lg-3 col-md-6 col-sm-12">
+											<div class="card p-3">
+												<div class="card-body">
+													<div class="mb-3 text-center about-team">
+														<!-- Wrap the image inside a label -->
+														<label for="checkbox4">
+															<img class="rounded-pill" src="{{asset('assets/img/krishna1.jpeg')}}" alt="Shree Krishna" style="height: 100px;width: 100px;">
+														</label>
+													</div>
+													<div class="tx-16 text-center font-weight-semibold">
+														Shree Krishna
+													</div>
+													<div class="form-check mt-3 text-center">
+														<input class="form-check-input" type="checkbox" id="checkbox4">
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Lord Shiv -->
+										<div class="col-lg-3 col-md-6 col-sm-12">
+											<div class="card p-3">
+												<div class="card-body">
+													<div class="mb-3 text-center about-team">
+														<!-- Wrap the image inside a label -->
+														<label for="checkbox5">
+															<img class="rounded-pill" src="{{asset('assets/img/shiva.jpeg')}}" alt="Lord Shiv">
+														</label>
+													</div>
+													<div class="tx-16 text-center font-weight-semibold">
+														Lord Shiv
+													</div>
+													<div class="form-check mt-3 text-center">
+														<input class="form-check-input" type="checkbox" id="checkbox5">
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Maa Mangala -->
+										<div class="col-lg-3 col-md-6 col-sm-12">
+											<div class="card p-3">
+												<div class="card-body">
+													<div class="mb-3 text-center about-team">
+														<!-- Wrap the image inside a label -->
+														<label for="checkbox6">
+															<img class="rounded-pill" src="{{asset('assets/img/durga.jpeg')}}" alt="Maa Mangala" style="height: 100px;width: 100px;">
+														</label>
+													</div>
+													<div class="tx-16 text-center font-weight-semibold">
+														Maa Durga
+													</div>
+													<div class="form-check mt-3 text-center">
+														<input class="form-check-input" type="checkbox" id="checkbox6">
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="col-lg-3 col-md-6 col-sm-12">
+											<div class="card p-3">
+												<div class="card-body">
+													<div class="mb-3 text-center about-team">
+														<!-- Wrap the image inside a label -->
+														<label for="checkbox6">
+															<img class="rounded-pill" src="{{asset('assets/img/saraswati.jpeg')}}" alt="Maa Mangala" style="height: 100px;width: 100px;">
+														</label>
+													</div>
+													<div class="tx-16 text-center font-weight-semibold">
+												Maa Saraswati
+													</div>
+													<div class="form-check mt-3 text-center">
+														<input class="form-check-input" type="checkbox" id="checkbox6">
+													</div>
+												</div>
+											</div>
+										</div>
+										<!-- Shree Ganesh -->
+										<div class="col-lg-3 col-md-6 col-sm-12">
+											<div class="card p-3">
+												<div class="card-body">
+													<div class="mb-3 text-center about-team">
+														<!-- Wrap the image inside a label -->
+														<label for="checkbox7">
+															<img class="rounded-pill" src="{{asset('assets/img/ganeshs.jpeg')}}" alt="Shree Ganesh" >
+														</label>
+													</div>
+													<div class="tx-16 text-center font-weight-semibold">
+														Shree Ganesh
+													</div>
+													<div class="form-check mt-3 text-center">
+														<input class="form-check-input" type="checkbox" id="checkbox7">
+													</div>
+												</div>
+											</div>
+										</div>
+										<div class="text-center col-md-12">
+											<button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
 										</div>
 									</div>
 								</div>
+								
+
 								<div class="main-content-body  border tab-pane border-top-0" id="gallery">
 									<div class="card-body border">
 										<div class="masonry row">
