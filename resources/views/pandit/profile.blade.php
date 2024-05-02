@@ -63,7 +63,7 @@
 									<nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0	">
 										<a class="nav-link  mb-2 mt-2 active" data-bs-toggle="tab"
 											href="#about">Profile</a>
-										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#edit">Creer</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#edit">Career</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab"
 											href="#timeline">Skills & Expertise</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#gallery">Add Details of Puja</a>
