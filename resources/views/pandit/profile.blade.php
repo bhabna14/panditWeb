@@ -63,7 +63,7 @@
 									<nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0	">
 										<a class="nav-link  mb-2 mt-2 active" data-bs-toggle="tab"
 											href="#about">Profile</a>
-										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#edit">Creer</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career">Career</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab"
 											href="#timeline">Skills & Expertise</a>
 										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#gallery">Add Details of Puja</a>
@@ -237,202 +237,114 @@
 										</div>
 									</div>
 								</div>
-								<div class="main-content-body tab-pane border-top-0" id="edit">
+								<div class="main-content-body tab-pane border-top-0" id="career">
 									<div class="card">
 										<div class="card-body border-0">
 											<div class="mb-4 main-content-label">Personal Information</div>
 											<form class="form-horizontal">
-												<div class="mb-4 main-content-label">Name</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">User Name</label>
+												<div class="form-group">
+													<div class="row">
+														<div class="col-md-6">
+															<div class="form-group">
+																<label for="exampleInputEmail1">Highest Qualification</label>
+																<input type="text" class="form-control" name="qualification" id="qualification" placeholder="Enter Heighest Qualification">
+															</div>
 														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="User Name" value="Mack Adamia">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">First Name</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="First Name" value="Mack Adamia">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">last Name</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="Last Name" value="Mack Adamia">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Nick Name</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="Nick Name" value="Spruha">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Designation</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="Designation" value="Web Designer">
-														</div>
-													</div>
-												</div>
-												<div class="mb-4 main-content-label">Contact Info</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Email<i>(required)</i></label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control" placeholder="Email"
-																value="info@Spruha.in">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Website</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="Website" value="@spruko.w">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Phone</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="phone number" value="+245 354 654">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Address</label>
-														</div>
-														<div class="col-md-9">
-															<textarea class="form-control" name="example-textarea-input"
-																rows="2"
-																placeholder="Address">San Francisco, CA</textarea>
-														</div>
-													</div>
-												</div>
-												<div class="mb-4 main-content-label">Social Info</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Twitter</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="twitter" value="twitter.com/spruko.me">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Facebook</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="facebook"
-																value="https://www.facebook.com/Spruha">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Google+</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control" placeholder="google"
-																value="spruko.com">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Linked in</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control"
-																placeholder="linkedin" value="linkedin.com/in/spruko">
-														</div>
-													</div>
-												</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Github</label>
-														</div>
-														<div class="col-md-9">
-															<input type="text" class="form-control" placeholder="github"
-																value="github.com/sprukos">
-														</div>
-													</div>
-												</div>
-												<div class="mb-4 main-content-label">About Yourself</div>
-												<div class="form-group ">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Biographical Info</label>
-														</div>
-														<div class="col-md-9">
-															<textarea class="form-control" name="example-textarea-input"
-																rows="4"
-																placeholder="">pleasure rationally encounter but because pursue consequences that are extremely painful.occur in which toil and pain can procure him some great pleasure..</textarea>
-														</div>
-													</div>
-												</div>
-												<div class="mb-4 main-content-label">Email Preferences</div>
-												<div class="form-group mb-0">
-													<div class="row row-sm">
-														<div class="col-md-3">
-															<label class="form-label">Verified User</label>
-														</div>
-														<div class="col-md-9">
-															<div class="custom-controls-stacked">
-																<label class="ckbox mg-b-10-f"><input checked=""
-																		type="checkbox"><span> Accept to receive post or
-																		page notification emails</span></label>
-																<label class="ckbox"><input checked=""
-																		type="checkbox"><span> Accept to receive email
-																		sent to multiple recipients</span></label>
+														<div class="col-md-6">
+															<div class="form-group">
+																<label for="exampleInputPassword1">Total Experience</label>
+																<input type="text" class="form-control" name="experience" id="experience" placeholder="Total Experience">
 															</div>
 														</div>
 													</div>
 												</div>
-											</form>
+											
+												<div class="mb-4 main-content-label">Documentation</div>
+												<div class="row">
+													<div class="col-lg-12 col-md-12">
+														<div class="card custom-card">
+															<div class="card-body">
+																<div id="show_doc_item">
+																	<div class="row">
+																		<div class="col-md-6">
+																			<div class="form-group">
+																				<label for="exampleInputEmail1">Select ID Proof</label>
+																				<select name="idproof[]" class="form-control" id="">
+																					<option value="adhar">Adhar Card</option>
+																					<option value="voter">Voter Card</option>
+																					<option value="pan">Pan Card</option>
+																					<option value="DL">DL</option>
+																					<option value="health card">Health Card</option>
+																				</select>
+																			</div>
+																		</div>
+											
+																		<div class="col-md-6">
+																			<div class="form-group">
+																				<label for="exampleInputPassword1">Upload Document</label>
+																				<input type="file" class="form-control" name="uploadoc[]" id="exampleInputPassword1" placeholder="">
+																			</div>
+																		</div>
+																	</div>
+																</div>
+											
+																<div class="row">
+																	<div class="col-md-6">
+																		<div class="form-group">
+																			<button type="button" class="btn btn-success add_item_btn" onclick="addIdSection()">Add More</button>
+																		</div>
+																	</div>
+																</div>
+
+															</div>
+														</div>
+													</div>
+												</div>
+											
+												<div class="mb-4 main-content-label">Certification</div>
+												<div class="row">
+													<div class="col-lg-12 col-md-12">
+														<div class="card custom-card">
+															<div class="card-body">
+																<div id="show_edu_item">
+																	<div class="row">
+																		<div class="col-md-6">
+																			<div class="form-group">
+																				<label for="exampleInputEmail1">Select Educational Qualification</label>
+																				<select name="education[]" class="form-control" id="">
+																					<option value="10th">10th</option>
+																					<option value="+2">+2</option>
+																					<option value="+3">+3</option>
+																					<option value="Master Degree">Master Degree</option>
+																				</select>
+																			</div>
+																		</div>
+											
+																		<div class="col-md-6">
+																			<div class="form-group">
+																				<label for="exampleInputPassword1">Upload Document</label>
+																				<input type="file" class="form-control" name="uploadEducation[]" id="exampleInputPassword1" placeholder="">
+																			</div>
+																		</div>
+																	</div>
+																</div>
+											
+																<div class="row">
+																	<div class="col-md-6">
+																		<div class="form-group">
+																			<button type="button" class="btn btn-success add_item_btn" onclick="addEduSection()">Add More</button>
+																		</div>
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="text-center">
+													<button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
+												</div>	
+																					</form>
+											
 										</div>
 									</div>
 								</div>
@@ -1606,6 +1518,8 @@
         <!-- Internal Select2 js-->
         <script src="{{asset('assets/plugins/select2/js/select2.min.js')}}"></script>
         <script src="{{asset('assets/js/select2.js')}}"></script>
+		<script src="{{asset('assets/js/pandit-profile.js')}}"></script>
+
 
         <!-- smart photo master js -->
         <script src="{{asset('assets/plugins/SmartPhoto-master/smartphoto.js')}}"></script>
