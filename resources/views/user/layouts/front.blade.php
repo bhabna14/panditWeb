@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-		<meta charset="UTF-8">
-		<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=0'>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="Description" content="Nowa – Laravel Bootstrap 5 Admin & Dashboard Template">
-		<meta name="Author" content="Spruko Technologies Private Limited">
-		<meta name="Keywords" content="admin dashboard, admin dashboard laravel, admin panel template, blade template, blade template laravel, bootstrap template, dashboard laravel, laravel admin, laravel admin dashboard, laravel admin panel, laravel admin template, laravel bootstrap admin template, laravel bootstrap template, laravel template"/>
-
+    <!-- Google fonts -->
 		<!-- Title -->
 		<title> Pandit Web</title>
 
@@ -16,7 +13,22 @@
 
 	</head>
 
-	<body class="ltr main-body app sidebar-mini">
+	<body>
+
+
+        <div class="preloader js-preloader">
+          <div class="preloader__wrap">
+            <div class="preloader__icon">
+             <img src="{{asset('front-assets/img/icons/1.png')}}" alt="splash icon">
+            </div>
+          </div>
+      
+          <div class="preloader__title">33Crores</div>
+        </div>
+       
+        <main>
+      
+       
 
         @include('user.layouts.components.front-header')
 
@@ -26,7 +38,9 @@
         @include('user.layouts.components.front-footer')
 
 
-        @include('user.layouts.components.front-script')
+    </main>
+    @include('user.layouts.components.front-script')
+
 
     </body>
 </html>

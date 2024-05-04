@@ -1,27 +1,10 @@
-		<!-- FAVICON -->
-		<link rel="icon" href="{{asset('assets/img/brand/favicon.png')}}" type="image/x-icon"/>
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700;1,800;1,900&amp;display=swap" rel="stylesheet">
 
-		<!-- ICONS CSS -->
-		<link href="{{asset('assets/plugins/icons/icons.css')}}" rel="stylesheet">
+<!-- Stylesheets -->
+<link rel="stylesheet" href="{{asset('front-assets/css/vendors.css')}}">
+<link rel="stylesheet" href="{{asset('front-assets/css/main.css')}}">
+<!-- Favicon -->
 
-		<!-- BOOTSTRAP CSS -->
-		<link href="{{asset('assets/plugins/bootstrap/css/bootstrap.min.css')}}" rel="stylesheet" />
-
-		<!-- RIGHT-SIDEMENU CSS -->
-		<link href="{{asset('assets/plugins/sidebar/sidebar.css')}}" rel="stylesheet">
-
-		<!-- P-SCROLL BAR CSS -->
-		<link href="{{asset('assets/plugins/perfect-scrollbar/p-scrollbar.css')}}" rel="stylesheet" />
-
-        @yield('styles')
-
-		<!-- STYLES CSS -->
-		<link href="{{asset('assets/css/userstyle.css')}}" rel="stylesheet">
-		<link href="{{asset('assets/css/style-dark.css')}}" rel="stylesheet">
-		<link href="{{asset('assets/css/style-transparent.css')}}" rel="stylesheet">
-
-		<!-- SKIN-MODES CSS -->
-		<link href="{{asset('assets/css/skin-modes.css')}}" rel="stylesheet" />
-
-		<!-- ANIMATION CSS -->
-		<link href="{{asset('assets/css/animate.css')}}" rel="stylesheet">
+<link rel="shortcut icon" href="//cdn.shopify.com/s/files/1/0654/9789/1030/files/MicrosoftTeams-image_471_32x32.png?v=1660732431" type="image/png">
