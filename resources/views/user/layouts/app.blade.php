@@ -19,9 +19,9 @@
 	<body class="ltr main-body app sidebar-mini">
 
 		<!-- Loader -->
-		<div id="global-loader">
+		{{-- <div id="global-loader">
 			<img src="{{asset('assets/img/loader.svg')}}" class="loader-img" alt="Loader">
-		</div>
+		</div> --}}
 		<!-- /Loader -->
 
 		<!-- Page -->

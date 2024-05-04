@@ -6,8 +6,8 @@
       <div class="col-auto">
         <div class="d-flex items-center">
           <a href="index.html" class="header-logo mr-50" data-x="header-logo" data-x-toggle="is-logo-dark">
-            <img src="img/general/logo-dark.png" alt="logo icon">
-            <img src="img/general/logo-dark.png" alt="logo icon">
+            <img src="{{asset('front-assets/img/brand/logo.png')}}" alt="image" >
+            <img src="{{asset('front-assets/img/brand/logo.png')}}" alt="image" >
           </a>
 
 
@@ -29,18 +29,18 @@
 
                   <li>
                     <a data-barba href="temple.html">
-                      <span class="mr-10">Temples</span>
+                      <span class="mr-10">Book a Pandit</span>
                     </a>
                   </li>
                   
                    <li>
                     <a href="book-temple-sevayat-state.html">
-                       Book a Sebayat
+                       List Of Pandit
                     </a>
                   </li>
                      <li>
                     <a href="book-temple-sevayat-name.html">
-                       Search a Sebayat
+                       List Of Puja
                     </a>
                   </li>
                   
@@ -72,7 +72,9 @@
       <div class="col-auto">
         <div class="d-flex items-center">
           <div class="d-flex items-center ml-20 is-menu-opened-hide md:d-none">
-          
+            
+         
+           
           
         <div class="searchMenu-loc px-10 lg:py-20 lg:px-0 js-form-dd js-liverSearch">
 
@@ -98,11 +100,9 @@
                   </div>
                 </div>
               </div>
-          
-           <a href="#" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">+91-9776-88888-7</a>
-             <a href="#" style="background-color: #c80100 !important;" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">Pooja Products</a>
-            
-            
+        
+              <a href="#" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white"  style = 'width: 100px;'>Login</a>
+              <a href="#" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>Logout</a>
           </div>
 
           <div class="d-none xl:d-flex x-gap-20 items-center pl-30" data-x="header-mobile-icons" data-x-toggle="text-white">
