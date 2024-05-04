@@ -4,18 +4,24 @@ namespace App\Http\Controllers\Pandit;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\City;
 
 class PanditController extends Controller
 {
-    //
    
     public function panditlogin(){
         return view("panditlogin");
-        // dd("hi");
     }
 
+    
     public function panditprofile(){
- 
+        $countries = Country::all();
+        $citys = City::all(); 
+        $states = State::all(); 
+
+
         $locations = [
             "Acharya Vihar",
             "Jayadev Vihar",
@@ -38,26 +44,48 @@ class PanditController extends Controller
             "Unit 10",
             "Unit 11",
         ];
-        $Temples = [
-            "Lingaraj",
-            "Tarini",
-            "Iskcon",
-            "Ram Mandir",
+        $languages = [
+            'English','Odia','Hindi','Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 'Kashmiri',
+            'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi',
+            'Sanskrit', 'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
         ];
-
         $PujaLists = [
             "Ghee",
             "Chandan",
             "Sindur",
             "Flower",
         ];
+        $temples = [
+            "Ram Mandir",
+            "Lingaraj",
+            "Megheshwar",
+            "Tarini",
+        ];
+        $pujanames=[
+            "Ganesh Puja",
+            "Saraswati Puja",
+            "Bishwakarma",
+            "Rudrabhisekha",
+            "Satyanarayan",
+        ];
    
-        return view('/pandit/profile', compact('locations', 'Temples','PujaLists'));
+        return view('/pandit/profile', compact('languages','countries','locations','states','citys','PujaLists','temples','pujanames'));
+    
     }
+
+    public function getStates($countryId)
+    {
+        $states = State::where('country_id', $countryId)->get();
+        return response()->json($states);
+    }  
+
+public function getCity($stateId){
+    $city = City::where('state_id', $stateId)->get();
+        return response()->json($city);
+}
     
     public function panditdashboard(){
         return view("/pandit/dashboard");
-        // dd("hi");
     }
 
 }

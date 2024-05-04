@@ -20,8 +20,7 @@
 					<div class="justify-content-center mt-2">
 						<ol class="breadcrumb">
 							<li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Pages</a></li>
-							
-											<li class="breadcrumb-item active" aria-current="page">Profile</li>
+				              <li class="breadcrumb-item active" aria-current="page">Profile</li>
 						</ol>
 					</div>
 				</div>
@@ -61,17 +60,15 @@
 							</div> --}}
 							<div class="card-footer py-0">
 								<div class="profile-tab tab-menu-heading border-bottom-0">
-									<nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0	">
-										<a class="nav-link  mb-2 mt-2 active" data-bs-toggle="tab"
-											href="#profile">Profile</a>
-										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career">Career</a>
-										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#skill">Skills & Expertise</a>
-										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#addpuja">Add Details of Puja</a>
-										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#bank">Bank Details</a>
-										<a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#address">Address Details
-											</a>
-                                            <a class="nav-link  mb-2 mt-2" data-bs-toggle="tab" href="#area">Areas of Service
-											</a>
+									<nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
+										<a  class="nav-link mb-2 mt-2 active" data-bs-toggle="tab" href="#profile" onclick="changeColor(this)">Profile</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career" onclick="changeColor(this)">Career</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#skill" onclick="changeColor(this)">Skills & Expertise</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#addpuja" onclick="changeColor(this)">Add Details of Puja</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#pujalist" onclick="changeColor(this)">Puja List</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#bank" onclick="changeColor(this)">Bank Details</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#address" onclick="changeColor(this)">Address Details</a>
+										<a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#area" onclick="changeColor(this)">Areas of Service</a>
 									</nav>
 								</div>
 							</div>
@@ -106,101 +103,99 @@
 																	</div>
 																	<div class="row">
 																		<div class="col-md-4">
-																		
 																			<div class="form-group">
-																				<label for="exampleInputEmail1">Name</label>
-																				<input type="text" class="form-control" value="" id="exampleInputEmail1" name="first_name" placeholder="Enter First Name">
+																				<label for="exampleInputEmail1">Title</label>
+																				<input type="text" class="form-control" value="" id="title" name="title" placeholder="Enter Title">
 																			</div>
-																			
-																			<div class="form-group">
-																				<label for="exampleInputEmail1">Email address</label>
-																				<input type="email" class="form-control" value="" id="exampleInputEmail1" name="email" placeholder="Enter email">
-																			</div>
-																		
 																		</div>
 																		<div class="col-md-4">
-																			
-																			{{-- <div class="form-group">
+																			<div class="form-group">
+																				<label for="exampleInputEmail1">First Name</label>
+																				<input type="email" class="form-control" value="" id="exampleInputEmail1" name="email" placeholder="Enter First Name">
+																			</div>
+																		</div>
+																		<div class="col-md-4">
+																			<div class="form-group">
 																				<label for="exampleInputEmail1">Last Name</label>
-																				<input type="text" class="form-control" value="" id="exampleInputEmail1" name="last_name" placeholder="Enter Last Name">
-																			</div> --}}
-																			
-																			<div class="form-group">
-																				<label for="exampleInputPassword1">Phone Number</label>
-																				<input type="text" class="form-control" value="" id="exampleInputPassword1" name="phonenumber" placeholder="Phone Number">
-																			</div>
-																			<div class="form-group">
-																				<label for="exampleInputPassword1">DOB</label>
-																				<input type="date" class="form-control" value="" id="exampleInputPassword1" name="dob" placeholder="">
-																			</div>
-																		
-																	
-																		 </div>
-																		<div class="col-md-4">
-																			{{-- <div class="form-group">
-																				<label for="exampleInputPassword1">DOB</label>
-																				<input type="date" class="form-control" value="" id="exampleInputPassword1" name="dob" placeholder="">
-																			</div> --}}
-																			<div class="form-group">
-																				<label for="exampleInputPassword1">Whatsapp Number</label>
-																				<input type="text" class="form-control" value="" id="exampleInputPassword1" name="phonenumber" placeholder="Phone Number">
-																			</div>
-																		   
-																			<div class="form-group">
-																				<label for="exampleInputPassword1">Blood Group</label>
-																				<input type="text" class="form-control" value="" id="exampleInputPassword1" name="bloodgrp" placeholder="Enter Blood Group">
+																				<input type="email" class="form-control" value="" id="exampleInputEmail1" name="email" placeholder="Enter Last Name">
 																			</div>
 																		</div>
-							
-																			<div class="col-md-4">
-																				<div class="form-group">
-																					<label for="exampleInputEmail1">Community</label>
-																					<input type="text" class="form-control" value="" id="exampleInputEmail1" name="qualification" placeholder="Enter Community">
-																				</div>
-																				
-																			</div>
-																			<div class="col-md-4">
-																				<div class="form-group">
-																					<label for="exampleInputEmail1">Gotra</label>
-																					<input type="text" class="form-control" value="" id="exampleInputEmail1" name="qualification" placeholder="Enter Gotra">
-																				</div>
-																				
-																			</div>
+																		</div>
 																		
+																		<div class="row">
 																			<div class="col-md-4">
-																				
+																				<div class="form-group">
+																					<label for="exampleInputEmail1">Email address</label>
+																					<input type="email" class="form-control" value="" id="exampleInputEmail1" name="email" placeholder="Enter email">
+																				</div>
+																			</div>
+																			<div class="col-md-4">
+																				<div class="form-group">
+																					<label for="exampleInputPassword1">Phone Number</label>
+																					<input type="text" class="form-control" value="" id="exampleInputPassword1" name="phonenumber" placeholder="Phone Number">
+																				</div>
+																			 </div>
+																			<div class="col-md-4">
+																				<div class="form-group">
+																					<label for="exampleInputPassword1">Whatsapp Number</label>
+																					<input type="text" class="form-control" value="" id="exampleInputPassword1" name="phonenumber" placeholder="Phone Number">
+																				</div>
+																			</div>
+																		</div>
+																		
+																		<div class="row">
+																			<div class="col-md-4">
+																				<div class="form-group">
+																					<label for="exampleInputEmail1">Email address</label>
+																					<input type="email" class="form-control" value="" id="exampleInputEmail1" name="email" placeholder="Enter email">
+																				</div>
+																			</div>
+																			<div class="col-md-4">
+																				<div class="form-group">
+																					<label for="exampleInputPassword1">Phone Number</label>
+																					<input type="text" class="form-control" value="" id="exampleInputPassword1" name="phonenumber" placeholder="Phone Number">
+																				</div>
+																			 </div>
+																			<div class="col-md-4">
 																				<div class="form-group">
 																					<label for="exampleInputPassword1">Photo</label>
 																					<input type="file" name="userphoto" class="form-control" id="exampleInputPassword1" >
 																				</div>
-																				
 																			</div>
-																			
-																			
-																			<div class="col-md-2">
+																		</div>
+																		<div class="row">
+																			<div class="col-md-4">
+																				<div class="form-group">
+																					<label for="exampleInputPassword1">Blood Group</label>
+																					<input type="text" class="form-control" value="" id="exampleInputPassword1" name="bloodgrp" placeholder="Enter Blood Group">
+																				</div>
+																			</div>
+																			<div class="col-md-2" style="margin-top:35px">
 																				<div class="form-group">
 																					<label for="exampleInputEmail1">Marital Status</label>
 																				</div>
 																			</div>
-																			<div class="col-md-2">
+																			<div class="col-md-2"  style="margin-top:35px">
 																				<label class="rdiobox"><input name="marital" type="radio"> <span>Married </span></label>
-																				
 																			</div>
-																			<div class="col-lg-2">
+																			<div class="col-lg-2"  style="margin-top:35px">
 																				<label class="rdiobox"><input checked name="marital" type="radio"> <span>Unmarried </span></label>
 																			</div>
-
+																		</div>
+																		<div class="row">
 																			<div class="col-md-12">
 																				<div class="form-group">
-																					<label for="exampleInputPassword1">Languages Know</label>
-																					<textarea name="" id="" class="form-control" rows="3"></textarea>
-																					{{-- <input type="file" name="userphoto" class="form-control" id="exampleInputPassword1" > --}}
+																					<label for="language">Select Language:</label>
+																					<select class="form-control select2" id="language" name="language[]" multiple="multiple">
+																						@foreach($languages as $language)
+																							<option value="{{ $language }}">{{ $language }}</option>
+																						@endforeach
+																					</select>
 																				</div>
-																				
-																				
 																			</div>
-																			
 																		</div>
+																		
+																			
 							
 																		
 																	</div>
@@ -228,8 +223,9 @@
 									<div class="card">
 										<div class="card-body border-0">
 											<div class="mb-4 main-content-label">Personal Information</div>
-											<form class="form-horizontal">
+											<form class="form-horizontal" action="" method="post" enctype="multipart/form-data" >
 												<div class="form-group">
+													<input type="hidden" class="form-control" id="career_id" name="career_id" value="CR{{ rand(1000, 9999) }}" placeholder="">
 													<div class="row">
 														<div class="col-md-6">
 															<div class="form-group">
@@ -245,7 +241,6 @@
 														</div>
 													</div>
 												</div>
-											
 												<div class="mb-4 main-content-label">Documentation</div>
 												<div class="row">
 													<div class="col-lg-12 col-md-12">
@@ -269,7 +264,7 @@
 																		<div class="col-md-6">
 																			<div class="form-group">
 																				<label for="exampleInputPassword1">Upload Document</label>
-																				<input type="file" class="form-control" name="uploadoc[]" id="exampleInputPassword1" placeholder="">
+																				<input type="file" class="form-control" name="uploadDocument[]" id="uploadDocument" placeholder="">
 																			</div>
 																		</div>
 																	</div>
@@ -310,7 +305,7 @@
 																		<div class="col-md-6">
 																			<div class="form-group">
 																				<label for="exampleInputPassword1">Upload Document</label>
-																				<input type="file" class="form-control" name="uploadEducation[]" id="exampleInputPassword1" placeholder="">
+																				<input type="file" class="form-control" name="uploadEducation[]" id="uploadEducation" placeholder="">
 																			</div>
 																		</div>
 																	</div>
@@ -504,7 +499,6 @@
 															<th class="border-bottom-0">Puja Name</th>
 															<th class="border-bottom-0">Fee</th>
 															<th class="border-bottom-0">Duration</th>
-															<th class="border-bottom-0">Create Puja List</th>
 															<th class="border-bottom-0">Add Videos/Images</th>
 															
 														</tr>
@@ -528,13 +522,7 @@
 															
 														<td><input type="text" name="fee" class="form-control" id=""></td>
 														<td><input type="text" name="duration" class="form-control" id=""></td>
-														<td>
-															<select class="form-control select2" name="pujalist[]" id="pujalist" multiple="multiple">
-																@foreach($PujaLists as $PujaList)
-																	<option value="{{ $PujaList }}">{{ $PujaList }}</option>
-																@endforeach
-															</select>
-														</td>
+														
 														<td>
 															<input type="file" name="fee" class="form-control" id="">
 														</td>
@@ -549,6 +537,85 @@
 											<div class="text-center col-md-12">
 												<button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
 											</div>
+										</div>
+									</div>
+								</div>
+								<div class="main-content-body   tab-pane " id="pujalist">
+							        <div class="card">
+										<div class="card-body">
+											<form action="" method="post" enctype="multipart/form-data">
+												@csrf
+												@method('PUT')
+												<div class="row">
+													<div class="col-md-12">
+														<div class="card custom-card">
+															<div class="card-body">
+																	<input type="hidden" class="form-control" id="exampleInputEmail1" name="userid" value="" placeholder="Enter First Name">
+																	<div class="col-md-4 mx-auto">
+																		<div class="form-group text-center">
+																			<label for="country"><h3>TYPE OF PUJA</h3></label>
+																			<select class="form-control" name="pujaname" id="pujaname" >
+																				<option value=" ">Select Your Puja</option>
+																				@foreach($pujanames as $pujaname)
+																				<option value="{{ $pujaname }}">{{ $pujaname }}</option>
+																				@endforeach
+																			</select>
+																		</div>
+																	</div>
+
+																		<div id="show_puja_item">
+																			<div class="row">
+																				<div class="col-md-4">
+																					<div class="form-group">
+																						<label for="country">Puja List:</label>
+																						<select class="form-control" name="country" id="country">
+																							<option value=" ">Select Your Puja List</option>
+																							@foreach($PujaLists as $pujalist)
+																							<option value="{{ $pujalist }}">{{ $pujalist }}</option>
+																							@endforeach
+																						</select>
+																					</div>
+																				</div>
+																				<div class="col-md-3">
+																					<div class="form-group">
+																						<label for="quantity">Quantity:</label>
+																						<input type="number" class="form-control" name="quantity[]" value="" id="quantity" placeholder="Enter List Quatity">
+																					</div>
+																				</div>
+																				<div class="col-md-3">
+																					<div class="form-group">
+																						<label for="weight_unit">Select Weight Unit:</label>
+																						<select class="form-control" id="weight_unit" name="weight_unit">
+																							<option value=" ">Select Unit</option>
+																							<option value="kg">Kilogram (kg)</option>
+																							<option value="g">Gram (g)</option>
+																							<option value="mg">Milligram (mg)</option>
+																						</select>
+																					</div>
+																				</div>
+																				<div class="col-md-2">
+																					<div class="form-group" style="width: 200px;margin-top: 25px">
+																						<button type="button" class="btn btn-success add_item_btn" onclick="addPujaListSection()">Add More</button>
+																					</div>
+																				</div>
+																			</div>
+																		</div>
+
+																		
+
+																		<div class="row">
+																			<div class="col-md-12 mt-3 text-center">
+																				<div class="form-group">
+																					<input type="submit" class="btn btn-primary" value="Submit">
+																				</div>
+																			</div>
+																		</div>
+															</div>
+														</div>
+													</div>
+												</div>
+											   
+											</form>
 										</div>
 									</div>
 								</div>
@@ -775,35 +842,74 @@
                                                             <div class="row">
                                                                 <input type="hidden" class="form-control" id="exampleInputEmail1" name="userid" value="" placeholder="Enter First Name">
                                                                
-                                                                <div class="col-md-6">
+                                                                <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label for="locations">From which Location can we do puja</label>
-                                                                        <select class="form-control select2" name="locations[]" id="locations" multiple="multiple">
-                                                                            @foreach($locations as $location)
-                                                                                <option value="{{ $location }}">{{ $location }}</option>
-                                                                            @endforeach
+                                                                        <label for="country">Country Name</label>
+																		<select class="form-control" name="country" id="country" onchange="getStates(this.value)">
+																			<option value=" ">Select Your Country</option>
+                                                                            @foreach($countries as $country)
+																			<option value="{{ $country->id }}">{{ $country->name }}</option>
+																			@endforeach
                                                                         </select>
                                                                     </div>
                                                                 </div>
-                                                                <div class="col-md-6">
+																<div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label for="locations">Temple Associated With</label>
-                                                                        <select class="form-control select2" name="temple[]" id="temple" multiple="multiple">
-                                                                            @foreach($Temples as $temple)
-                                                                                <option value="{{ $temple }}">{{ $temple }}</option>
-                                                                            @endforeach
+                                                                        <label for="state">State Name</label>
+                                                                        <select class="form-control" name="state" id="state"  onchange="getCity(this.value)">
+																			<option value=" ">Select Your State</option>
+																			@foreach($states as $state)
+																			<option value="{{ $state->id }}">{{ $state->name }}</option>
+																			@endforeach
                                                                         </select>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label style="font-weight: bold;">
-                                                                            <input type="checkbox" name="across_bhubaneswar" value="1" style="width: 30px; height: 30px; vertical-align: middle;">
-                                                                            <span style="vertical-align: middle;">Across Bhubaneswar</span>
+                                                                        <label for="city">City Name</label>
+                                                                        <select class="form-control" name="city" id="city">
+																			<option value=" ">Select Your City</option>
+																			@foreach($citys as $city)
+																			<option value="{{ $city->id }}">{{ $city->city }}</option>
+																			@endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+																<div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label for="city">Location Name</label>
+                                                                        <select class="form-control select2" name="location[]" id="location" multiple="multiple">
+																			<option value=" ">Select Your Location</option>
+																			@foreach($locations as $location)
+																			<option value="{{ $location }}">{{ $location }}</option>
+																			@endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <div class="form-group">
+                                                                        <label style="font-weight: bold;margin-top: 30px">
+																			<input type="checkbox" id="across_bhubaneswar_checkbox" name="across_bhubaneswar" value="1" style="width: 30px; height: 30px; vertical-align: middle;" onchange="toggleLocationDropdown()">
+                                                                            <span style="vertical-align: middle;">Across This City</span>
                                                                         </label>
                                                                     </div>
                                                                 </div>
                                                             </div>
+															<div class="main-content-label mg-b-5 mt-10">
+																Temple Association
+														</div>
+														<hr>
+														<div class="col-md-4">
+															<div class="form-group">
+																<label for="city">Temple</label>
+																<select class="form-control select2" name="temple[]" id="temple" multiple="multiple">
+																	<option value=" ">Select Your Temple</option>
+																	@foreach($temples as $temple)
+																	<option value="{{ $temple }}">{{ $temple }}</option>
+																	@endforeach
+																</select>
+															</div>
+														</div>
                                                             <div class="row">
                                                                 <div class="col-md-12 mt-3">
                                                                     <div class="form-group">
@@ -831,6 +937,7 @@
     @section('scripts')
 
         <!-- Internal Select2 js-->
+		
 		
 <script> 
     function addressFunction() { 

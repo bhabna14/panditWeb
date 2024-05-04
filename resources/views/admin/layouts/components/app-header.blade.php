@@ -22,6 +22,9 @@
 								<input class="form-control" placeholder="Search..." type="search">
 								<button class="btn"><i class="fas fa-search"></i></button>
 							</div>
+							<li class="nav-item ps-1">
+								<span id="google_translate_element"></span>
+							</li>
 						</div>
 						<div class="main-header-right">
 							<button class="navbar-toggler navresponsive-toggler d-md-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
@@ -215,7 +218,7 @@
 												<svg xmlns="http://www.w3.org/2000/svg" class="header-icon-svgs" width="24" height="24" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm4 5h12v2H8zm5 5h7v2h-7z"/></svg>
 											</a>
 										</li>
-										<li class="nav-link search-icon d-lg-none d-block">
+										{{-- <li class="nav-link search-icon d-lg-none d-block">
 											<form class="navbar-form" role="search">
 												<div class="input-group">
 													<input type="text" class="form-control" placeholder="Search">
@@ -229,7 +232,8 @@
 													</span>
 												</div>
 											</form>
-										</li>
+										</li> --}}
+										
 										<li class="dropdown main-profile-menu nav nav-item nav-link ps-lg-2">
 											<a class="new nav-link profile-user d-flex" href="" data-bs-toggle="dropdown"><img alt="" src="{{asset('assets/img/faces/2.jpg')}}" class=""></a>
 											<div class="dropdown-menu">
@@ -242,13 +246,13 @@
 													</div>
 												</div>
 												<a class="dropdown-item" href="{{url('profile')}}"><i class="far fa-user-circle"></i>Profile</a>
-												<a class="dropdown-item" href="{{url('chat')}}"><i class="far fa-smile"></i> chat</a>
+												{{-- <a class="dropdown-item" href="{{url('chat')}}"><i class="far fa-smile"></i> chat</a>
 												<a class="dropdown-item" href="{{url('mail-read')}}"><i class="far fa-envelope "></i>Inbox</a>
-												<a class="dropdown-item" href="{{url('mail')}}"><i class="far fa-comment-dots"></i>Messages</a>
+												<a class="dropdown-item" href="{{url('mail')}}"><i class="far fa-comment-dots"></i>Messages</a> --}}
 												<a class="dropdown-item" href="{{url('mail-settings')}}"><i class="far fa-sun"></i>  Settings</a>
-												<form method="POST" action="{{ route('logout') }}">
+												<form method="POST" action="{{ url('admin/logout') }}">
 													@csrf
-													<button type="submit">Logout</button>
+													<button type="submit" class="dropdown-item"><i class="far  fa-arrow-alt-circle-left"></i> Logout</button>
 												</form>
 
 												<!-- <a class="dropdown-item" href="{{url('logout')}}"><i class="far fa-arrow-alt-circle-left"></i> Sign Out</a> -->

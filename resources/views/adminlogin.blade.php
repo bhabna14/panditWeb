@@ -18,12 +18,14 @@
                         <div class="col-xl-5 col-lg-6 col-md-8 col-sm-8 col-xs-10 card-sigin-main mx-auto my-auto py-45 justify-content-center">
                             <div class="card-sigin mt-5 mt-md-0">
                                 <!-- Demo content-->
+                                <h2 class="text-center login-heading"> Admin</h2>
                                 <div class="main-card-signin d-md-flex">
+                                 
                                     <div class="wd-100p"><div class="d-flex mb-4"><a href="#"><img src="{{asset('assets/img/brand/logo.png')}}" class="sign-favicon ht-40" alt="logo"></a></div>
                                         <div class="">
                                             <div class="main-signup-header">
-                                                <h2>Welcome Admin!</h2>
-                                                <h6 class="font-weight-semibold mb-4">Please sign in to continue.</h6>
+                                                
+                                                {{-- <h6 class="font-weight-semibold mb-4">Please sign in to continue.</h6> --}}
                                                 <div class="panel panel-primary">
                                                 <div class=" tab-menu-heading mb-2 border-bottom-0">
                                                     <div class="tabs-menu1">

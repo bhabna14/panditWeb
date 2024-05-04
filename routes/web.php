@@ -125,7 +125,11 @@ use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\User\userController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
 use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\PujaController;
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Pandit\PanditController;
+use App\Http\Controllers\GoogleTranslateController;
+
 
 
 
@@ -196,41 +200,27 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
     
     });
-    
-            Route::get('/sebayatregister', [sebayatregisterController::class, 'sebayatregister']);
-            Route::post('/saveregister', [sebayatregisterController::class, 'saveregister'])->name('saveregister');
-            Route::put('/reject/{id}', [sebayatregisterController::class, 'reject'])->name('reject');
-            Route::put('/approve/{id}', [sebayatregisterController::class, 'approve'])->name('approve');
-            Route::get('/sebayatlist', [sebayatregisterController::class, 'sebayatlist'])->name('sebayatlist');
-            Route::get('/editsebayat/{userid}', [sebayatregisterController::class, 'editsebayat'])->name('editsebayat');
-    
-            Route::get('/viewsebayat/{userid}', [sebayatregisterController::class, 'viewsebayat'])->name('viewsebayat');
-            Route::get('/dltsebayat/{userid}', [sebayatregisterController::class, 'dltsebayat'])->name('dltsebayat');
-    
-            // Route::put('/updateuserinfo/{id}', [sebayatregisterController::class, 'updateuserinfo']);
-            Route::put('/childupdate/{id}', [sebayatregisterController::class, 'childupdate']);
-    
-            Route::put('/updateuserinfo/{userid}', [sebayatregisterController::class, 'updateuserinfo'])->name('updateUserInfo');
-            Route::put('/updatefamilyinfo/{userid}', [sebayatregisterController::class, 'updateFamilyInfo'])->name('updateFamilyInfo');
-            Route::post('/updatechildInfo', [sebayatregisterController::class, 'updateChildInfo'])->name('updateChildInfo');
-           
-            Route::get('/updatechildstatus/{userid}', [sebayatregisterController::class, 'updatechildstatus'])->name('updatechildstatus');
+    Route::controller(PujaController::class)->group(function() {
+        Route::get('/manage-puja', 'managePuja')->name('managepuja');
+        Route::get('/add-puja', 'addpuja')->name('addpuja');
+        Route::get('/savepuja', 'savepuja')->name('savepuja');
+    });
+    Route::controller(LocationController::class)->group(function() {
+        Route::get('/manage-location', 'managelocation')->name('managelocation');
+        Route::get('/add-location', 'addlocation')->name('addlocation');
+        Route::get('/savelocation', 'savelocation')->name('savelocation');
+    });
 
-            Route::put('/updateidinfo/{userid}', [sebayatregisterController::class, 'updateIdInfo'])->name('updateIdInfo');
-
-            Route::get('/updateIdstatus/{userid}', [sebayatregisterController::class, 'updateIdstatus'])->name('updateIdstatus');
-    
-            Route::put('/updateAddressInfo/{userid}', [sebayatregisterController::class, 'updateAddressInfo'])->name('updateAddressInfo');
-            Route::put('/updateBankInfo/{userid}', [sebayatregisterController::class, 'updateBankInfo'])->name('updateBankInfo');
-
-            Route::put('/updatenewAddress', [sebayatregisterController::class, 'updatenewAddress'])->name('updatenewAddress');
-            Route::put('/updatenewBankInfo', [sebayatregisterController::class, 'updatenewBankInfo'])->name('updatenewBankInfo');
-
-            Route::put('/updateotherInfo/{userid}', [sebayatregisterController::class, 'updateotherInfo'])->name('updateOtherInfo');
-
+    Route::controller(LocationController::class)->group(function() {
+        Route::get('/manage-lang', 'managelang')->name('managelang');
+        // Route::get('/add-location', 'addlocation')->name('addlocation');
+        // Route::get('/savelocation', 'savelocation')->name('savelocation');
+    });
 
 });
 
+Route::get('google/translate',[GoogleTranslateController::class,'googleTranslate'])->name('google.translate');
+Route::get('google/translate/change',[GoogleTranslateController::class,'googleTranslateChange'])->name('google.translate.change');
 
 
 // user routes
@@ -271,15 +261,24 @@ Route::prefix('user')->middleware(['user'])->group(function () {
 
 /// pandit routes
 
-Route::controller(PanditController::class)->group(function() {
+// Route::controller(PanditController::class)->group(function() {
    
 
+//     Route::get('/panditlogin', 'panditlogin');
+//     Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
+//     Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
+  
+
+// });
+Route::controller(PanditController::class)->group(function() {
     Route::get('/panditlogin', 'panditlogin');
     Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
     Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
-  
+    Route::get('/get-states/{countryId}', 'getStates');
+    Route::get('/get-city/{stateId}', 'getCity');
 
 });
+
 
 
 Route::get('aboutus', Aboutus::class);

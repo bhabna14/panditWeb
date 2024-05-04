@@ -68,7 +68,7 @@ class AdminController extends Controller
         $rejecteduser = User::where('application_status', 'rejected')->count();
         $sebayatlists = User::where('status', 'active')
                                 ->where('role', 'user')->get();
-         return view('dashboard', compact('userCount','pendinguser','approuser','rejecteduser','sebayatlists'));
+         return view('admin/dashboard', compact('userCount','pendinguser','approuser','rejecteduser','sebayatlists'));
        
     } 
     public function adminlogout(Request $request)
@@ -81,4 +81,5 @@ class AdminController extends Controller
 
         return redirect('/admin');
     }
+   
 }

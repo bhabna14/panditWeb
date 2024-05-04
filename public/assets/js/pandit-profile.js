@@ -63,3 +63,92 @@ function addEduSection(){
 function removeEduSection(element) {
     $(element).closest('.input_edu_doc').remove();
 }
+function getStates(countryId){
+    $.ajax({
+        url: '/get-states/' + countryId, // This should be the endpoint that returns states for the given country ID
+        type: 'GET',
+        success: function(data) {
+            $('#state').empty();
+            $.each(data, function(index, state) {
+                $('#state').append('<option value="' + state.id + '">' + state.name + '</option>');
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error(error);
+        }
+    });
+}
+function getCity(stateId){
+    $.ajax({
+       url: '/get-city/' + stateId,
+       type:'GET',
+       success: function(data){
+        $('#city').empty();
+        $.each(data,function(index,city){
+           $('#city').append('<option value="' +  city.id +'">'+ city.city + '</option>');
+        });
+       },
+       error: function(xhr,status,error){
+        console.error(error);
+       }
+    });
+}
+function toggleLocationDropdown() {
+    var locationDropdown = document.getElementById('location');
+    locationDropdown.disabled = document.getElementById('across_bhubaneswar_checkbox').checked;
+}
+function changeColor(element) {
+    // Remove 'active' class from all nav links
+    var navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(function(navLink) {
+        navLink.classList.remove('active');
+    });
+
+    // Add 'active' class to the clicked nav link
+    element.classList.add('active');
+}
+function addPujaListSection(){
+    $("#show_puja_item").append(` 
+  
+    <div class="row remove_puja_item">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="country">Puja List</label>
+            <select class="form-control" name="country" id="country">
+                <option value=" ">Select Your Puja List</option>
+                @foreach($PujaLists as $pujalist)
+                <option value="{{ $pujalist }}">{{ $pujalist }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            <label for="quantity">Quantity</label>
+            <input type="number" class="form-control" name="quantity[]" value="" id="quantity" placeholder="Enter List Quatity">
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            <label for="weight_unit">Select Weight Unit:</label>
+            <select class="form-control" id="weight_unit" name="weight_unit">
+                <option value=" ">Select Unit</option>
+                <option value="kg">Kilogram (kg)</option>
+                <option value="g">Gram (g)</option>
+                <option value="mg">Milligram (mg)</option>
+            </select>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="form-group" style="width: 200px;margin-top: 25px">
+        <button type="button" class="btn btn-danger" onclick="removePujaListSection(this)">Remove</button>
+        </div>
+    </div>
+</div>
+       
+`);
+
+}
+function removePujaListSection(element) {
+    $(element).closest('.remove_puja_item').remove();
+}

@@ -26773,7 +26773,12 @@ html.fullscreen-button .app-content {
   position: relative;
   top: -2px;
 }
-
+.nav-link.active {
+  background-color: #b30000;
+  border-radius: 20px;
+  box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+  color: #fff !important;; /* Text color for active link */
+}
 .main-logo {
   display: flex;
   align-items: center;
@@ -26784,8 +26789,8 @@ html.fullscreen-button .app-content {
   /* text-align: center; */
   /* width: 100px; */
   /* height: 91px; */
-  width: 200px;
-      margin-top: -15px;
+  width: 171px;
+  margin-top: -22px;
 }
 .media-group {
   display: flex;
@@ -29426,7 +29431,7 @@ form[role=search].active input {
 
 .profile-tab.tab-menu-heading .main-nav-line .nav-link {
   position: relative;
-  padding: 4px 20px;
+  padding: 4px 18px;
 }
 
 .profile-tab .main-nav-line .nav-link {

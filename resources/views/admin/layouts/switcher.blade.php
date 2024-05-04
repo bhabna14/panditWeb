@@ -10,9 +10,9 @@
 		<meta name="Keywords" content="admin dashboard, admin dashboard laravel, admin panel template, blade template, blade template laravel, bootstrap template, dashboard laravel, laravel admin, laravel admin dashboard, laravel admin panel, laravel admin template, laravel bootstrap admin template, laravel bootstrap template, laravel template"/>
 
 		<!-- Title -->
-		<title> Nowa – Laravel Bootstrap 5 Admin & Dashboard Template </title>
+		<title> Pratihara Nijog Admin Dashboard </title>
 
-        @include('layouts.components.styles')
+        @include('admin.layouts.components.styles')
 
 	</head>
 
@@ -29,9 +29,9 @@
 
 			<div>
 
-                @include('layouts.components.app-header')
+                @include('admin.layouts.components.app-header')
 
-                @include('layouts.components.app-sidebar')
+                @include('admin.layouts.components.app-sidebar')
 
 			</div>
 
@@ -48,18 +48,18 @@
 			</div>
 			<!-- main-content closed -->
 
-            @include('layouts.components.sidebar-right')
+            @include('admin.layouts.components.sidebar-right')
 
-            @include('layouts.components.modal')
+            @include('admin.layouts.components.modal')
 
             @yield('modal')
 
-            @include('layouts.components.footer')
+            @include('admin.layouts.components.footer')
 
 		</div>
 		<!-- End Page -->
 
-        @include('layouts.components.scripts')
+        @include('admin.layouts.components.scripts')
 
     </body>
 </html>

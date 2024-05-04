@@ -24,4 +24,49 @@
 		<link href="{{asset('assets/css/skin-modes.css')}}" rel="stylesheet" />
 
 		<!-- ANIMATION CSS -->
+	
 		<link href="{{asset('assets/css/animate.css')}}" rel="stylesheet">
+
+
+		<style>
+			
+  /*google translate Dropdown */
+          
+   
+.VIpgJd-yAWNEb-VIpgJd-fmcmS-sn54Q{
+            background-color: transparent !important;
+            box-shadow: none !important;
+            }
+            .ps-1 {
+              padding-left: 0.25rem!important;
+            }
+            .VIpgJd-ZVi9od-ORHb{
+              display: none !important;
+            }
+            
+            /* body{
+              margin-top: -43px;
+            } */
+            body{
+              top:0 !important;
+            }
+            #google_translate_element select{
+              background:#fff;
+              color:#000;
+              border: solid 3px #ccc;
+              border-radius:3px;
+              padding:6px 8px;
+              margin-top: 16px;
+              }
+           
+             .VIpgJd-ZVi9od-ORHb-OEVmcd{
+              display: none !important;
+            }
+            .VIpgJd-ZVi9od-l4eHX-hSRGPd{
+              display: none !important;
+            }
+            
+            div.goog-te-gadget {
+            color: transparent !important;
+            }
+		</style>
