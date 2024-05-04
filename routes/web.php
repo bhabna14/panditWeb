@@ -128,7 +128,6 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Pandit\PanditController;
-use App\Http\Controllers\GoogleTranslateController;
 
 
 
@@ -151,8 +150,8 @@ use App\Http\Controllers\GoogleTranslateController;
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
     Route::post('store', 'store')->name('store');
-
-    Route::get('/', 'userlogin')->name('userlogin');
+    Route::get('/', 'userindex')->name('userindex');
+    Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
 
     Route::post('user/authenticate', 'userauthenticate')->name('userauthenticate');
@@ -219,42 +218,19 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
 });
 
-Route::get('google/translate',[GoogleTranslateController::class,'googleTranslate'])->name('google.translate');
-Route::get('google/translate/change',[GoogleTranslateController::class,'googleTranslateChange'])->name('google.translate.change');
 
 
 // user routes
 Route::prefix('user')->middleware(['user'])->group(function () {
-
-  
    
     Route::controller(userController::class)->group(function() {
         Route::get('/dashboard', 'dashboard')->name('user.dashboard');
-        Route::get('/sebayatregister', 'sebayatregister')->name('user.sebayatregister');
-        Route::get('/sebayatprofile', 'sebayatprofile')->name('user.sebayatprofile');
-
-        Route::get('/download-user-image', 'downloadUserImage')->name('download.user.image');
+       
 
 
         
     });
-    Route::put('/updateuserinfo/{userid}', [userController::class, 'updateuserinfo'])->name('updateUserInfo');
-    Route::put('/updatefamilyinfo/{userid}', [userController::class, 'updateFamilyInfo'])->name('updateFamilyInfo');
-    Route::post('/updatechildInfo', [userController::class, 'updateChildInfo'])->name('updateChildInfo');
-           
-    Route::get('/updatechildstatus/{userid}', [userController::class, 'updatechildstatus'])->name('updatechildstatus');
-
-    Route::put('/updateidinfo/{userid}', [userController::class, 'updateIdInfo'])->name('updateIdInfo');
-
-    Route::get('/updateIdstatus/{userid}', [userController::class, 'updateIdstatus'])->name('updateIdstatus');
-    
-    Route::put('/updateAddressInfo/{userid}', [userController::class, 'updateAddressInfo'])->name('updateAddressInfo');
-    Route::put('/updateBankInfo/{userid}', [userController::class, 'updateBankInfo'])->name('updateBankInfo');
-
-    Route::put('/updatenewAddress', [userController::class, 'updatenewAddress'])->name('updatenewAddress');
-    Route::put('/updatenewBankInfo', [userController::class, 'updatenewBankInfo'])->name('updatenewBankInfo');
-
-    Route::put('/updateotherInfo/{userid}', [userController::class, 'updateotherInfo'])->name('updateOtherInfo');
+ 
 
 });
 

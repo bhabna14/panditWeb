@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Hash;
 class userController extends Controller
 {
     //
+    public function userindex(){
+        return view("user/index");
+    }
 
     public function userlogin(){
         return view("login");

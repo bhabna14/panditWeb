@@ -22895,8 +22895,11 @@ ul.timeline:before {
   }
 
   .responsive-logo .mobile-logo {
-    margin-top: 3px !important;
+    margin-top: -12px !important;
   }
+  img.mobile-logo.logo-1 {
+    width: 180px;
+}
 }
 @media (min-width: 768px) {
   .mobile-header {
@@ -26789,8 +26792,8 @@ html.fullscreen-button .app-content {
   /* text-align: center; */
   /* width: 100px; */
   /* height: 91px; */
-  width: 171px;
-  margin-top: -22px;
+  width: 214px;
+  margin-top: -16px;
 }
 .media-group {
   display: flex;
