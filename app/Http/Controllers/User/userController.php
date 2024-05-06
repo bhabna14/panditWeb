@@ -395,5 +395,7 @@ class userController extends Controller
         // Return PDF as a downloadable response
         return $pdf->download('user_image.pdf');
     }
- 
+   public function bookpandit(){
+        return view('user/bookpandit');
+   }
 }

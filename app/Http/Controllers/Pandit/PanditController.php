@@ -79,13 +79,37 @@ class PanditController extends Controller
         return response()->json($states);
     }  
 
-public function getCity($stateId){
-    $city = City::where('state_id', $stateId)->get();
-        return response()->json($city);
-}
+    public function getCity($stateId){
+        $city = City::where('state_id', $stateId)->get();
+            return response()->json($city);
+    }
     
     public function panditdashboard(){
         return view("/pandit/dashboard");
     }
+
+    public function address(){
+        return view('/pandit/address');
+    }
+    public function storeMultipleLocations(Request $request)
+    {
+    // Retrieve addresses from the textarea input
+    $addressesInput = $request->input('addresses');
+    
+    // Split addresses by newline or comma, depending on your input format
+    $addressesArray = preg_split("/[\r\n,]+/", $addressesInput);
+    
+    // Loop through each address and store it in the database
+    foreach ($addressesArray as $address) {
+        // You may want to perform validation or other checks here
+        
+        // Store the address
+        Address::create([
+            'address' => $address,
+        ]);
+    }
+    
+    return redirect()->back()->with('success', 'Locations saved successfully.');
+}
 
 }

@@ -5,7 +5,7 @@
 
       <div class="col-auto">
         <div class="d-flex items-center">
-          <a href="index.html" class="header-logo mr-50" data-x="header-logo" data-x-toggle="is-logo-dark">
+          <a href="{{url('/')}}" class="header-logo mr-50" data-x="header-logo" data-x-toggle="is-logo-dark">
             <img src="{{asset('front-assets/img/brand/logo.png')}}" alt="image" >
             <img src="{{asset('front-assets/img/brand/logo.png')}}" alt="image" >
           </a>
@@ -21,14 +21,14 @@
                 <ul class="menu__nav text-dark-1 -is-active">
 
                   <li>
-                    <a data-barba href="index.html">
+                    <a data-barba href="{{url('/')}}">
                       <span class="mr-10">Home</span>
                     </a>
                   </li>
 
 
                   <li>
-                    <a data-barba href="temple.html">
+                    <a data-barba href="{{url('book-pandit')}}">
                       <span class="mr-10">Book a Pandit</span>
                     </a>
                   </li>

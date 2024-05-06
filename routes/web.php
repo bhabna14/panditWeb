@@ -153,6 +153,7 @@ Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');
+    Route::get('/book-pandit', 'bookpandit')->name('bookpandit');
     Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
 
@@ -230,9 +231,6 @@ Route::prefix('user')->middleware(['user'])->group(function () {
    
     Route::controller(userController::class)->group(function() {
         Route::get('/dashboard', 'dashboard')->name('user.dashboard');
-       
-
-
         
     });
  
@@ -242,21 +240,18 @@ Route::prefix('user')->middleware(['user'])->group(function () {
 
 /// pandit routes
 
-// Route::controller(PanditController::class)->group(function() {
-   
 
-//     Route::get('/panditlogin', 'panditlogin');
-//     Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
-//     Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
-  
-
-// });
 Route::controller(PanditController::class)->group(function() {
     Route::get('/panditlogin', 'panditlogin');
     Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
     Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
     Route::get('/get-states/{countryId}', 'getStates');
     Route::get('/get-city/{stateId}', 'getCity');
+
+    ## testing
+    Route::get('/pandit/address', 'address');
+    Route::get('/pandit/savea', 'storeMultipleLocations')->name('storeMultipleLocations');
+
 
 });
 
