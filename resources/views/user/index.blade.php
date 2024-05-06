@@ -531,14 +531,14 @@
             </div>
           </section>
       
-{{--        
+     
           <section class="layout-pt-md layout-pb-lg">
             <div data-anim-wrap class="container">
               <div class="tabs -pills-2 js-tabs">
                 <div data-anim-child="slide-up delay-1" class="row y-gap-20 justify-between items-end">
                   <div class="col-auto">
                     <div class="sectionTitle -md">
-                      <h2 class="sectionTitle__title">Famous Packages</h2>
+                      <h2 class="sectionTitle__title">Famous Pandits</h2>
                       <p class=" sectionTitle__text mt-5 sm:mt-0">Some predefined packages for your Thirt Yatra</p>
                     </div>
                   </div>
@@ -591,8 +591,8 @@
                             <div class="cardImage ratio ratio-1:1">
                               <div class="cardImage__content">
       
-                                <img class="rounded-4 col-12 js-lazy" src="#" data-src="img/hotels/1.png" alt="image">
-      
+                                <img class="rounded-4 col-12 js-lazy" src="#" data-src="{{asset('front-assets/img/avatars/11.png')}}" alt="image">
+                                {{-- <img src="" alt="image"> --}}
       
                               </div>
       
@@ -649,15 +649,15 @@
                                   <div class="swiper-wrapper">
       
                                     <div class="swiper-slide">
-                                      <img class="col-12 js-lazy" src="#" data-src="img/hotels/2.png" alt="image">
+                                      <img class="col-12 js-lazy" src="#" data-src="{{asset('front-assets/img/avatars/12.png')}}" alt="image">
                                     </div>
       
                                     <div class="swiper-slide">
-                                      <img class="col-12 js-lazy" src="#" data-src="img/hotels/1.png" alt="image">
+                                      <img class="col-12 js-lazy" src="#" data-src="{{asset('front-assets/img/avatars/12.png')}}" alt="image">
                                     </div>
       
                                     <div class="swiper-slide">
-                                      <img class="col-12 js-lazy" src="#" data-src="img/hotels/3.png" alt="image">
+                                      <img class="col-12 js-lazy" src="#" data-src="{{asset('front-assets/img/avatars/12.png')}}" alt="image">
                                     </div>
       
                                   </div>
@@ -721,7 +721,7 @@
                             <div class="cardImage ratio ratio-1:1">
                               <div class="cardImage__content">
       
-                                <img class="rounded-4 col-12 js-lazy" src="#" data-src="img/hotels/3.png" alt="image">
+                                <img class="rounded-4 col-12 js-lazy" src="#" data-src="{{asset('front-assets/img/avatars/15.png')}}" alt="image">
       
       
                               </div>
@@ -774,7 +774,7 @@
                             <div class="cardImage ratio ratio-1:1">
                               <div class="cardImage__content">
       
-                                <img class="rounded-4 col-12 js-lazy" src="#" data-src="img/hotels/4.png" alt="image">
+                                <img class="rounded-4 col-12 js-lazy" src="#" data-src="{{asset('front-assets/img/avatars/14.png')}}" alt="image">
       
       
                               </div>
@@ -824,7 +824,7 @@
                 </div>
               </div>
             </div>
-          </section> --}}
+          </section> 
       
           <section class="layout-pt-lg layout-pb-lg bg-dark-3">
             <div class="container">
@@ -962,7 +962,7 @@
             <div class="container">
               <div class="row ml-0 mr-0 items-center justify-between">
                 <div class="col-xl-5 px-0">
-                  <img class="col-12 h-400" src="img/newsletter/4.png" alt="image">
+                  <img class="col-12 h-400" src="{{asset('front-assets/img/newsletter/4.png')}}" alt="image">
                 </div>
       
                 <div class="col px-0">
@@ -1021,7 +1021,7 @@
                 </div>
       
                 <div data-anim-child="slide-up delay-3" class="col-lg-6">
-                  <img src="img/app/1.png" alt="image">
+                  <img src="{{asset('front-assets/img/app/1.png')}}" alt="image">
                 </div>
               </div>
             </div>
@@ -1036,7 +1036,7 @@
       
                   <div class="featureIcon -type-1 ">
                     <div class="d-flex justify-center">
-                      <img src="img/featureIcons/1/1.svg" alt="image">
+                      <img src="{{asset('front-assets/img/featureIcons/1/1.svg')}}" alt="image">
                     </div>
       
                     <div class="text-center mt-30">
@@ -1050,7 +1050,7 @@
       
                   <div class="featureIcon -type-1 ">
                     <div class="d-flex justify-center">
-                      <img src="img/featureIcons/1/2.svg" alt="image">
+                      <img src="{{asset('front-assets/img/featureIcons/1/2.svg')}}" alt="image">
                     </div>
       
                     <div class="text-center mt-30">
@@ -1065,7 +1065,7 @@
       
                   <div class="featureIcon -type-1 ">
                     <div class="d-flex justify-center">
-                      <img src="img/featureIcons/1/3.svg" alt="image">
+                      <img src="{{asset('front-assets/img/featureIcons/1/3.svg')}}" alt="image">
                     </div>
       
                     <div class="text-center mt-30">

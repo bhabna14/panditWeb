@@ -127,6 +127,8 @@ use App\Http\Controllers\Superadmin\SuperAdminController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\LanguageController;
+
 use App\Http\Controllers\Pandit\PanditController;
 
 
@@ -203,6 +205,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
         Route::get('/add-puja', 'addpuja')->name('addpuja');
         Route::get('/savepuja', 'savepuja')->name('savepuja');
+
+        Route::get('/manage-puja-list', 'managePujaList')->name('managePujaList');
+        Route::get('/add-puja-list', 'addpujalist')->name('addpujalist');
     });
     Route::controller(LocationController::class)->group(function() {
         Route::get('/manage-location', 'managelocation')->name('managelocation');
@@ -210,9 +215,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/savelocation', 'savelocation')->name('savelocation');
     });
 
-    Route::controller(LocationController::class)->group(function() {
+    Route::controller(LanguageController::class)->group(function() {
         Route::get('/manage-lang', 'managelang')->name('managelang');
-        // Route::get('/add-location', 'addlocation')->name('addlocation');
+        Route::get('/add-language', 'addlang')->name('addlang');
         // Route::get('/savelocation', 'savelocation')->name('savelocation');
     });
 

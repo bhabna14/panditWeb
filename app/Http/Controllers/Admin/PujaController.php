@@ -14,4 +14,10 @@ class PujaController extends Controller
     public function addpuja(){
         return view('admin/addpuja');
     }
+    public function managePujaList(){
+        return view('admin/managepujalist');
+    }
+    public function addpujalist(){
+        return view('admin/addpujalist');
+    }
 }
