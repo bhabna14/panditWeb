@@ -1401,6 +1401,15 @@ button:focus {
 .single-field.-w-410 input {
   width: 410px;
 }
+@media (max-width: 1400px) {
+  
+  /* h1.text-respn span {
+    font-size: 41.1px !important;
+} */
+h1.z-2.text-60.lg\:text-40.text-white.md\:text-30.pt-80.xl\:pt-0.text-respn.is-in-view {
+  font-size: 43px !important;
+}
+}
 
 @media (max-width: 991px) {
   .single-field.-w-410 input {

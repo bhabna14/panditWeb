@@ -16,7 +16,7 @@
                 <div class="row y-gap-40">
                     <div class="col-xl-5">
                         <h1 data-anim-child="slide-up delay-2"
-                            class="z-2 text-60 lg:text-40 text-white md:text-30 pt-80 xl:pt-0">
+                            class="z-2 text-60 lg:text-40 text-white md:text-30 pt-80 xl:pt-0 text-respn">
                             <span class="text-white-1"> At which location</span><br>
                             Did you call the Pandit??
                         </h1>
