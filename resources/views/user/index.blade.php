@@ -158,13 +158,15 @@
                             </div>
                         </div>
 
+                      
+
                         <div class="single-field -w-410 d-flex x-gap-10 flex-wrap y-gap-20 pt-30">
-                            <div class="col-auto">
-                                <a href="jagannath-temple-sevayat.html"
-                                    class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1" style="width:280px">Select
-                                    Pandit for
-                                    Krishna Puja</a>
-                            </div>
+             
+                          <div class="">
+                            <a href="lingaraj-temple-sevayat.html" class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1">Select
+                              Pandit for
+                              Krishna Puja</a>
+                          </div>
                         </div>
                     </div>
                 </div>
@@ -177,7 +179,7 @@
             <div class="row ml-0 mr-0 items-center justify-between">
 
 
-                <div class="col px-0" style="margin-right: 30px">
+                <div class="col px-0" >
                     <div class="d-flex justify-center flex-column h-400 px-80 py-40 md:px-30 bg-light-2">
 
                         <h2 class="text-30 sm:text-24 lh-15 mt-20">Ganesh Puja Starts from Here</h2>
@@ -207,9 +209,9 @@
                             </div>
                         </div>
                         <div class="single-field -w-410 d-flex x-gap-10 flex-wrap y-gap-20 pt-30">
-                            <div class="col-auto">
+                            <div class="">
                                 <a href="jagannath-temple-sevayat.html"
-                                    class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1" style="width:280px">Select
+                                    class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1">Select
                                     Pandit for
                                     Ganesh Puja</a>
                             </div>
@@ -268,9 +270,9 @@
                         </div>
                         <div class="resp">
                             <div class="single-field -w-410 d-flex x-gap-10 flex-wrap y-gap-20 pt-30">
-                                <div class="col-auto">
+                                <div class="">
                                     <a href="jagannath-temple-sevayat.html"
-                                        class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1" style="width:280px">Select
+                                        class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1" >Select
                                         Pandit for
                                         Durga Puja</a>
                                 </div>
