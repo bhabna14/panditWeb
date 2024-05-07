@@ -12031,9 +12031,9 @@ table.table-5 td {
 
 
 .card {
-  max-width: 340px;
-  margin: auto;
-  overflow-y: auto;
+  margin: 20px;
+  /* max-width: 340px; */
+  overflow-y: hidden;
   position: relative;
   z-index: 1;
   overflow-x: hidden;
@@ -12042,7 +12042,7 @@ table.table-5 td {
   transition: 0.3s;
   flex-direction: column;
   border-radius: 10px;
-  box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.2);
+  box-shadow: 3px 3px 3px 7px rgba(0, 0, 0, 0.1);
 }
 
 .card[data-state="#about"] {
@@ -12053,11 +12053,11 @@ table.table-5 td {
 }
 
 .card[data-state="#contact"] {
-  height: 430px;
+  height: 450px;
 }
 
 .card[data-state="#experience"] {
-  height: 550px;
+  height: 450px;
 }
 
 .card.is-active .card-header {
