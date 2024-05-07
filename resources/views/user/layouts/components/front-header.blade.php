@@ -45,12 +45,11 @@
                   </li>
                   
                   <li>
-                    <a href="https://rzp.io/l/sebayat">
-                       Offer Pooja
+                    <a data-barba href="{{url('/pandit/profile')}}">
+                      <span class="mr-10">Be a Pandit</span>
                     </a>
                   </li>
-            
-
+          
                   <li>
                     <a href="contact.html">Contact</a>
                   </li>

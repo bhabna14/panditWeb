@@ -5,6 +5,7 @@
 <!-- Stylesheets -->
 <link rel="stylesheet" href="{{asset('front-assets/css/vendors.css')}}">
 <link rel="stylesheet" href="{{asset('front-assets/css/main.css')}}">
+
 <!-- Favicon -->
 
 <link rel="shortcut icon" href="//cdn.shopify.com/s/files/1/0654/9789/1030/files/MicrosoftTeams-image_471_32x32.png?v=1660732431" type="image/png">

@@ -4,624 +4,85 @@
 @endsection
 
 @section('content')
-    <section class="pt-40 pb-40 bg-light-2">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="text-center">
-                        <h1 class="text-30 fw-600">Find Your Pandit By Location And Puja</h1>
-                        <br>
-                        <!-------------------------------Filter Code--------------------------------->
 
-                        <form>
-                            <div class="row text-center">
-                                <div class="form-group col-4  mb-3">
-                                    <select
-                                        class="form-control  form-input lh-1 text-18 text-center -outline-blue-1 h-50 ml-20"
-                                        id="inputState"
-                                        style=" border-color: var(--color-blue-1);border: 1px solid var(--color-border);
-      border-radius: 4px;
-      padding: 0;
-      min-height: 70px;
-      transition: all .2s cubic-bezier(.165,.84,.44,1);">
-                                        <option value="SelectState">Select Location</option>
-                                        {{-- <option value="Andra Pradesh">Andra Pradesh</option>
-                          <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-                          <option value="Assam">Assam</option>
-                          <option value="Bihar">Bihar</option>
-                          <option value="Chhattisgarh">Chhattisgarh</option>
-                          <option value="Goa">Goa</option>
-                          <option value="Gujarat">Gujarat</option>
-                          <option value="Haryana">Haryana</option>
-                          <option value="Himachal Pradesh">Himachal Pradesh</option>
-                          <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-                          <option value="Jharkhand">Jharkhand</option>
-                          <option value="Karnataka">Karnataka</option>
-                          <option value="Kerala">Kerala</option>
-                          <option value="Madya Pradesh">Madya Pradesh</option>
-                          <option value="Maharashtra">Maharashtra</option>
-                          <option value="Manipur">Manipur</option>
-                          <option value="Meghalaya">Meghalaya</option>
-                          <option value="Mizoram">Mizoram</option>
-                          <option value="Nagaland">Nagaland</option>
-                          <option value="Odisha">Odisha</option>
-                          <option value="Punjab">Punjab</option>
-                          <option value="Rajasthan">Rajasthan</option>
-                          <option value="Sikkim">Sikkim</option>
-                          <option value="Tamil Nadu">Tamil Nadu</option>
-                          <option value="Telangana">Telangana</option>
-                          <option value="Tripura">Tripura</option>
-                          <option value="Uttaranchal">Uttaranchal</option>
-                          <option value="Uttar Pradesh">Uttar Pradesh</option>
-                          <option value="West Bengal">West Bengal</option>
-                          <option disabled style="background-color:#aaa; color:#fff">UNION Territories</option>
-                          <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-                          <option value="Chandigarh">Chandigarh</option>
-                          <option value="Dadar and Nagar Haveli">Dadar and Nagar Haveli</option>
-                          <option value="Daman and Diu">Daman and Diu</option>
-                          <option value="Delhi">Delhi</option>
-                          <option value="Lakshadeep">Lakshadeep</option>
-                          <option value="Pondicherry">Pondicherry</option> --}}
-                                    </select>
-                                </div>
-                                <div class="form-group col-4  mb-3 form-input">
-                                    <select class="form-control lh-1 text-18 text-center -outline-blue-1 h-50 ml-20"
-                                        id="inputDistrict"
-                                        style=" border-color: var(--color-blue-1);border: 1px solid var(--color-border);
-      border-radius: 4px;
-      padding: 0;
-      min-height: 70px;
-      transition: all .2s cubic-bezier(.165,.84,.44,1);">
-                                        <option value="">--Select Pandit -- </option>
-                                        <option value=" Mettupalayam"> P.Bibhu ranjan Nanda</option>
-                                        <option value=" Mettupalayam"> P.Jyoti ranjan Dash</option>
-                                        <option value=" Mettupalayam"> P.Hare krushna Nanda</option>
-                                        <option value=" Mettupalayam"> P.Prabhakar</option>
-                                        <option value=" Mettupalayam"> P.Ullas</option>
-
-                                    </select>
-                                </div>
-                                <div class="form-group col-4  mb-3 form-input">
-                                    <select class="form-control lh-1 text-18 text-center -outline-blue-1 h-50 ml-20"
-                                        id="inputCity"
-                                        style=" border-color: var(--color-blue-1);border: 1px solid var(--color-border);
-      border-radius: 4px;
-      padding: 0;
-      min-height: 70px;
-      transition: all .2s cubic-bezier(.165,.84,.44,1);">
-                                        <option value="">--Select Puja -- </option>
-                                        <option value=" Mettupalayam"> Ganesh Puja</option>
-                                        <option value=" Mettupalayam"> Kali Puja</option>
-                                        <option value=" Mettupalayam"> Durga Puja</option>
-                                        <option value=" Mettupalayam"> Shiva Puja</option>
-                                        <option value=" Mettupalayam"> Saraswati Puja</option>
-                                        <option value=" Mettupalayam"> Hanuman Puja</option>
-
-
-
-                                    </select>
-                                </div>
-                            </div>
-                        </form>
-
-                        <!-------------------------------End---------------------------------------->
-
+<div class="card" data-state="#about">
+    <div class="card-header">
+        <img class="card-avatar" src="https://images.unsplash.com/photo-1549068106-b024baf5062d?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=934&q=80" alt="avatar">
+        <h1 class="card-fullname">William Rocheald</h1>
+        <h2 class="card-jobtitle">UI Developer</h2>
+    </div>
+    <div class="card-main">
+        <div class="card-section is-active" id="about">
+            <div class="card-content">
+                <div class="card-subtitle">ABOUT</div>
+                <p class="card-desc">Whatever tattooed stumptown art party sriracha gentrify hashtag intelligentsia readymade schlitz brooklyn disrupt.</p>
+            </div>
+            <div class="card-social">
+                <a href="#"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.997 3.985h2.191V.169C17.81.117 16.51 0 14.996 0c-3.159 0-5.323 1.987-5.323 5.639V9H6.187v4.266h3.486V24h4.274V13.267h3.345l.531-4.266h-3.877V6.062c.001-1.233.333-2.077 2.051-2.077z"/></svg></a>
+                <a href="#"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M512 97.248c-19.04 8.352-39.328 13.888-60.48 16.576 21.76-12.992 38.368-33.408 46.176-58.016-20.288 12.096-42.688 20.64-66.56 25.408C411.872 60.704 384.416 48 354.464 48c-58.112 0-104.896 47.168-104.896 104.992 0 8.32.704 16.32 2.432 23.936-87.264-4.256-164.48-46.08-216.352-109.792-9.056 15.712-14.368 33.696-14.368 53.056 0 36.352 18.72 68.576 46.624 87.232-16.864-.32-33.408-5.216-47.424-12.928v1.152c0 51.008 36.384 93.376 84.096 103.136-8.544 2.336-17.856 3.456-27.52 3.456-6.72 0-13.504-.384-19.872-1.792 13.6 41.568 52.192 72.128 98.08 73.12-35.712 27.936-81.056 44.768-130.144 44.768-8.608 0-16.864-.384-25.12-1.44C46.496 446.88 101.6 464 161.024 464c193.152 0 298.752-160 298.752-298.688 0-4.64-.16-9.12-.384-13.568 20.832-14.784 38.336-33.248 52.608-54.496z"/></svg></a>
+                <a href="#"><svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M301 256c0 24.852-20.148 45-45 45s-45-20.148-45-45 20.148-45 45-45 45 20.148 45 45zm0 0"/><path d="M332 120H180c-33.086 0-60 26.914-60 60v152c0 33.086 26.914 60 60 60h152c33.086 0 60-26.914 60-60V180c0-33.086-26.914-60-60-60zm-76 211c-41.355 0-75-33.645-75-75s33.645-75 75-75 75 33.645 75 75-33.645 75-75 75zm86-146c-8.285 0-15-6.715-15-15s6.715-15 15-15 15 6.715 15 15-6.715 15-15 15zm0 0"/></svg></a>
+                <a href="#"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.994 24v-.001H24v-8.802c0-4.306-.927-7.623-5.961-7.623-2.42 0-4.044 1.328-4.707 2.587h-.07V7.976H8.489v16.023h4.97v-7.934c0-2.089.396-4.109 2.983-4.109 2.549 0 2.587 2.384 2.587 4.243V24zM.396 7.977h4.976V24H.396zM2.882 0C1.291 0 0 1.291 0 2.882s1.291 2.909 2.882 2.909 2.882-1.318 2.882-2.909A2.884 2.884 0 002.882 0z"/></svg></a>
+            </div>
+        </div>
+        <div class="card-section" id="experience">
+            <div class="card-content">
+                <div class="card-subtitle">WORK EXPERIENCE</div>
+                <div class="card-timeline">
+                    <div class="card-item" data-year="2014">
+                        <div class="card-item-title">Front-end Developer at <span>JotForm</span></div>
+                        <div class="card-item-desc">Disrupt stumptown retro everyday carry unicorn.</div>
+                    </div>
+                    <div class="card-item" data-year="2016">
+                        <div class="card-item-title">UI Developer at <span>GitHub</span></div>
+                        <div class="card-item-desc">Developed new conversion funnels and disrupt.</div>
+                    </div>
+                    <div class="card-item" data-year="2018">
+                        <div class="card-item-title">Illustrator at <span>Google</span></div>
+                        <div class="card-item-desc">Onboarding illustrations for App.</div>
+                    </div>
+                    <div class="card-item" data-year="2020">
+                        <div class="card-item-title">Full-Stack Developer at <span>CodePen</span></div>
+                        <div class="card-item-desc">Responsible for the encomposing brand expreience.</div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-
-    <section class="layout-pt-md layout-pb-lg">
-        <div class="container">
-            <div class="row y-gap-30">
-
-                <div class="col-xl-12 col-lg-12">
-                    <div class="row y-gap-30">
-
-                        <div class="col-12">
-
-                            <div class="border-top-light pt-30">
-                                <div class="row x-gap-20 y-gap-20">
-                                    <div class="col-md-auto">
-
-                                        <div class="cardImage ratio ratio-1:1 w-250 md:w-1/1 rounded-4">
-                                            <div class="cardImage__content">
-
-                                                <img class="rounded-4 col-12 js-lazy" src="#"
-                                                    data-src="{{ asset('front-assets/img/avatars/pandit.jpeg') }}"
-                                                    alt="image">
-
-
-                                            </div>
-
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md">
-                                        <h3 class="text-18 lh-16 fw-500">
-                                            Krupasindhu<br class="lg:d-none"> Jagannatha Temple, Puri
-
-                                            <div class="d-inline-block ml-10">
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                            </div>
-                                        </h3>
-                                        <div class="text-14 text-green-2 lh-15 mt-10">
-                                            <div class="fw-500">Free cancellation</div>
-                                            <div class="">You can cancel later, so lock in this great price today.
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-auto text-right md:text-left">
-                                        <div class="row x-gap-10 y-gap-10 justify-end items-center md:justify-start">
-                                            <div class="col-auto">
-                                                <div class="text-14 lh-14 fw-500">Exceptional</div>
-                                                <div class="text-14 lh-14 text-light-1">3,014 reviews</div>
-                                            </div>
-                                            <div class="col-auto">
-                                                <div
-                                                    class="flex-center text-white fw-600 text-14 size-40 rounded-4 bg-blue-1">
-                                                    4.8</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="">
-                                            <div class="text-14 text-light-1 mt-50 md:mt-20"></div>
-                                            <div class="text-22 lh-12 fw-600 mt-5">INR 300</div>
-                                            <div class="text-14 text-light-1 mt-5"></div>
-
-
-                                            <a href="https://rzp.io/l/sebayat"
-                                                class="button -md -dark-1 bg-blue-1 text-white mt-24">
-                                                Book Now <div class="icon-arrow-top-right ml-15"></div>
-                                            </a>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-
-
-                        <div class="col-12">
-
-                            <div class="border-top-light pt-30">
-                                <div class="row x-gap-20 y-gap-20">
-                                    <div class="col-md-auto">
-
-                                        <div class="cardImage ratio ratio-1:1 w-250 md:w-1/1 rounded-4">
-                                            <div class="cardImage__content">
-
-                                                <img class="rounded-4 col-12 js-lazy" src="#"
-                                                    data-src="{{ asset('front-assets/img/avatars/pandit1.jpeg') }}"
-                                                    alt="image">
-
-
-                                            </div>
-
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md">
-                                        <h3 class="text-18 lh-16 fw-500">
-                                            Gangadhar Pratihari<br class="lg:d-none">Jagannatha Temple, Puri
-
-                                            <div class="d-inline-block ml-10">
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                            </div>
-                                        </h3>
-                                        <div class="text-14 text-green-2 lh-15 mt-10">
-                                            <div class="fw-500">Free cancellation</div>
-                                            <div class="">You can cancel later, so lock in this great price today.
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-auto text-right md:text-left">
-                                        <div class="row x-gap-10 y-gap-10 justify-end items-center md:justify-start">
-                                            <div class="col-auto">
-                                                <div class="text-14 lh-14 fw-500">Exceptional</div>
-                                                <div class="text-14 lh-14 text-light-1">3,014 reviews</div>
-                                            </div>
-                                            <div class="col-auto">
-                                                <div
-                                                    class="flex-center text-white fw-600 text-14 size-40 rounded-4 bg-blue-1">
-                                                    4.8</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="">
-                                            <div class="text-14 text-light-1 mt-50 md:mt-20"></div>
-                                            <div class="text-22 lh-12 fw-600 mt-5">INR 300</div>
-                                            <div class="text-14 text-light-1 mt-5"></div>
-
-
-                                            <a href="https://rzp.io/l/sebayat"
-                                                class="button -md -dark-1 bg-blue-1 text-white mt-24">
-                                                Book Now <div class="icon-arrow-top-right ml-15"></div>
-                                            </a>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="col-12">
-
-                            <div class="border-top-light pt-30">
-                                <div class="row x-gap-20 y-gap-20">
-                                    <div class="col-md-auto">
-
-                                        <div class="cardImage ratio ratio-1:1 w-250 md:w-1/1 rounded-4">
-                                            <div class="cardImage__content">
-
-
-                                                <div class=" rounded-4 overflow-hidden js-cardImage-slider">
-                                                    <div class="cardImage__content">
-
-                                                        <img class="rounded-4 col-12 js-lazy" src="#"
-                                                            data-src="{{ asset('front-assets/img/avatars/pandit2.jpeg') }}"
-                                                            alt="image">
-
-
-                                                    </div>
-
-                                                    <div class="cardImage-slider__pagination js-pagination"></div>
-
-                                                    <div class="cardImage-slider__nav -prev">
-                                                        <button
-                                                            class="button -blue-1 bg-white size-30 rounded-full shadow-2 js-prev">
-                                                            <i class="icon-chevron-left text-10"></i>
-                                                        </button>
-                                                    </div>
-
-                                                    <div class="cardImage-slider__nav -next">
-                                                        <button
-                                                            class="button -blue-1 bg-white size-30 rounded-full shadow-2 js-next">
-                                                            <i class="icon-chevron-right text-10"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md">
-                                        <h3 class="text-18 lh-16 fw-500">
-                                            Raju<br class="lg:d-none"> Lingaraj Temple, Bhubaneswar
-
-                                            <div class="d-inline-block ml-10">
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                            </div>
-                                        </h3>
-                                        <div class="text-14 text-green-2 lh-15 mt-10">
-                                            <div class="fw-500">Free cancellation</div>
-                                            <div class="">You can cancel later, so lock in this great price today.
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md-auto text-right md:text-left">
-                                        <div class="row x-gap-10 y-gap-10 justify-end items-center md:justify-start">
-                                            <div class="col-auto">
-                                                <div class="text-14 lh-14 fw-500">Exceptional</div>
-                                                <div class="text-14 lh-14 text-light-1">3,014 reviews</div>
-                                            </div>
-                                            <div class="col-auto">
-                                                <div
-                                                    class="flex-center text-white fw-600 text-14 size-40 rounded-4 bg-blue-1">
-                                                    4.8</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="">
-                                            <div class="text-14 text-light-1 mt-50 md:mt-20"></div>
-                                            <div class="text-22 lh-12 fw-600 mt-5">INR 300</div>
-                                            <div class="text-14 text-light-1 mt-5"></div>
-
-
-                                            <a href="https://rzp.io/l/sebayat"
-                                                class="button -md -dark-1 bg-blue-1 text-white mt-24">
-                                                Book Now <div class="icon-arrow-top-right ml-15"></div>
-                                            </a>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="col-12">
-
-                            <div class="border-top-light pt-30">
-                                <div class="row x-gap-20 y-gap-20">
-                                    <div class="col-md-auto">
-                                        <div class="cardImage ratio ratio-1:1 w-250 md:w-1/1 rounded-4">
-                                            <div class="cardImage__content">
-                                                <img class="rounded-4 col-12 js-lazy" src="#"
-                                                    data-src="{{ asset('front-assets/img/avatars/pandit4.jpeg') }}"
-                                                    alt="image">
-                                            </div>
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md">
-                                        <h3 class="text-18 lh-16 fw-500">
-                                            Subharaj Batu<br class="lg:d-none"> Lingaraj Temple, Bhubaneswar
-                                            <div class="d-inline-block ml-10">
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                            </div>
-                                        </h3>
-                                        <div class="text-14 text-green-2 lh-15 mt-10">
-                                            <div class="fw-500">Free cancellation</div>
-                                            <div class="">You can cancel later, so lock in this great price today.
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-auto text-right md:text-left">
-                                        <div class="row x-gap-10 y-gap-10 justify-end items-center md:justify-start">
-                                            <div class="col-auto">
-                                                <div class="text-14 lh-14 fw-500">Exceptional</div>
-                                                <div class="text-14 lh-14 text-light-1">3,014 reviews</div>
-                                            </div>
-                                            <div class="col-auto">
-                                                <div
-                                                    class="flex-center text-white fw-600 text-14 size-40 rounded-4 bg-blue-1">
-                                                    4.8</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="">
-                                            <div class="text-14 text-light-1 mt-50 md:mt-20"></div>
-                                            <div class="text-22 lh-12 fw-600 mt-5">INR 300</div>
-                                            <div class="text-14 text-light-1 mt-5"></div>
-
-                                            <a href="https://rzp.io/l/sebayat"
-                                                class="button -md -dark-1 bg-blue-1 text-white mt-24">
-                                                Book Now <div class="icon-arrow-top-right ml-15"></div>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12">
-                            <div class="border-top-light pt-30">
-                                <div class="row x-gap-20 y-gap-20">
-                                    <div class="col-md-auto">
-                                        <div class="cardImage ratio ratio-1:1 w-250 md:w-1/1 rounded-4">
-                                            <div class="cardImage__content">
-                                                <div class=" rounded-4 overflow-hidden js-cardImage-slider">
-                                                    <div class="cardImage__content">
-                                                        <img class="rounded-4 col-12 js-lazy" src="#"
-                                                            data-src="{{ asset('front-assets/img/avatars/pandit5.jpeg') }}"
-                                                            alt="image">
-                                                    </div>
-                                                    <div class="cardImage-slider__pagination js-pagination"></div>
-                                                    <div class="cardImage-slider__nav -prev">
-                                                        <button
-                                                            class="button -blue-1 bg-white size-30 rounded-full shadow-2 js-prev">
-                                                            <i class="icon-chevron-left text-10"></i>
-                                                        </button>
-                                                    </div>
-                                                    <div class="cardImage-slider__nav -next">
-                                                        <button
-                                                            class="button -blue-1 bg-white size-30 rounded-full shadow-2 js-next">
-                                                            <i class="icon-chevron-right text-10"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md">
-                                        <h3 class="text-18 lh-16 fw-500">
-                                            Raju<br class="lg:d-none"> Biraja Temple, Jajpur
-
-                                            <div class="d-inline-block ml-10">
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                                <i class="icon-star text-10 text-yellow-2"></i>
-                                            </div>
-                                        </h3>
-
-                                        <div class="text-14 text-green-2 lh-15 mt-10">
-                                            <div class="fw-500">Free cancellation</div>
-                                            <div class="">You can cancel later, so lock in this great price today.
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                                    <div class="col-md-auto text-right md:text-left">
-                                        <div class="row x-gap-10 y-gap-10 justify-end items-center md:justify-start">
-                                            <div class="col-auto">
-                                                <div class="text-14 lh-14 fw-500">Exceptional</div>
-                                                <div class="text-14 lh-14 text-light-1">3,014 reviews</div>
-                                            </div>
-                                            <div class="col-auto">
-                                                <div
-                                                    class="flex-center text-white fw-600 text-14 size-40 rounded-4 bg-blue-1">
-                                                    4.8</div>
-                                            </div>
-                                        </div>
-
-                                        <div class="">
-                                            <div class="text-14 text-light-1 mt-50 md:mt-20"></div>
-                                            <div class="text-22 lh-12 fw-600 mt-5">INR 300</div>
-                                            <div class="text-14 text-light-1 mt-5"></div>
-
-
-                                            <a href="https://rzp.io/l/sebayat"
-                                                class="button -md -dark-1 bg-blue-1 text-white mt-24">
-                                                Book Now <div class="icon-arrow-top-right ml-15"></div>
-                                            </a>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
+        <div class="card-section" id="contact">
+            <div class="card-content">
+                <div class="card-subtitle">CONTACT</div>
+                <div class="card-contact-wrapper">
+                    <div class="card-contact">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        Algonquin Rd, Three Oaks Vintage, MI, 49128
                     </div>
-
-                    <div class="border-top-light mt-30 pt-30">
-                        <div class="row x-gap-10 y-gap-20 justify-between md:justify-center">
-                            <div class="col-auto md:order-1">
-                                <button class="button -blue-1 size-40 rounded-full border-light">
-                                    <i class="icon-chevron-left text-12"></i>
-                                </button>
-                            </div>
-
-                            <div class="col-md-auto md:order-3">
-                                <div class="row x-gap-20 y-gap-20 items-center md:d-none">
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full">1</div>
-
-                                    </div>
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full bg-dark-1 text-white">2</div>
-
-                                    </div>
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full">3</div>
-
-                                    </div>
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full bg-light-2">4</div>
-
-                                    </div>
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full">5</div>
-
-                                    </div>
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full">...</div>
-
-                                    </div>
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full">20</div>
-
-                                    </div>
-
-                                </div>
-
-                                <div class="row x-gap-10 y-gap-20 justify-center items-center d-none md:d-flex">
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full">1</div>
-
-                                    </div>
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full bg-dark-1 text-white">2</div>
-
-                                    </div>
-
-                                    <div class="col-auto">
-
-                                        <div class="size-40 flex-center rounded-full">3</div>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            <div class="col-auto md:order-2">
-                                <button class="button -blue-1 size-40 rounded-full border-light">
-                                    <i class="icon-chevron-right text-12"></i>
-                                </button>
-                            </div>
-                        </div>
+                    <div class="card-contact">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+                        </svg>
+                        (269) 756-9809
                     </div>
+                    <div class="card-contact">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                            <path d="M22 6l-10 7L2 6" />
+                        </svg>
+                        william@rocheald.com
+                    </div>
+                    <button class="contact-me">WORK TOGETHER</button>
                 </div>
             </div>
         </div>
-    </section>
+        <div class="card-buttons">
+            <button data-section="#about" class="is-active">ABOUT</button>
+            <button data-section="#experience">EXPERIENCE</button>
+            <button data-section="#contact">CONTACT</button>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
