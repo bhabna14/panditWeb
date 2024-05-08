@@ -3,8 +3,10 @@ function addIdSection(){
     <div class="row input-wrapper_doc">
         <div class="col-md-6">
             <div class="form-group">
-                <label for="exampleInputEmail1">Select ID Proof</label>
+                <label for="exampleInputEmail1">ID Proof</label>
                 <select name="idproof[]" class="form-control" id="">
+                <option value="">Select..</option>
+                    <option value="adhar">Select..</option>
                     <option value="adhar">Adhar Card</option>
                     <option value="voter">Voter Card</option>
                     <option value="pan">Pan Card</option>
@@ -13,13 +15,13 @@ function addIdSection(){
                 </select>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 <label for="exampleInputPassword1">Upload Document</label>
                 <input type="file" name="uploadoc[]" class="form-control" id="exampleInputPassword1" placeholder="">
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2"  style="margin-top: 27px">
             <div class="form-group">
             <button type="button" class="btn btn-danger" onclick="removeIdSection(this)">Remove</button>
 
@@ -37,8 +39,9 @@ function addEduSection(){
     <div class="row input_edu_doc">
         <div class="col-md-6">
             <div class="form-group">
-            <label for="exampleInputEmail1">Select Educational Qualification</label>
+            <label for="exampleInputEmail1">Educational Qualification</label>
             <select name="education[]" class="form-control" id="">
+            <option value=" ">Select..</option>
                 <option value="10th">10th</option>
                 <option value="+2">+2</option>
                 <option value="+3">+3</option>
@@ -46,13 +49,13 @@ function addEduSection(){
             </select>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 <label for="exampleInputPassword1">Upload Document</label>
                 <input type="file" class="form-control" name="uploadEducation[]" id="exampleInputPassword1" placeholder="">
                 </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2" style="margin-top: 27px">
             <div class="form-group">
             <button type="button" class="btn btn-danger" onclick="removeEduSection(this)">Remove</button>
             </div>
@@ -62,6 +65,35 @@ function addEduSection(){
 }
 function removeEduSection(element) {
     $(element).closest('.input_edu_doc').remove();
+}
+function addVedicSection(){
+    $("#show_vedic_item").append(` 
+    <div class="row input_vedic_doc">
+        <div class="col-md-6">
+            <div class="form-group">
+            <label for="exampleInputEmail1">Vedic Certificate</label>
+            <select name="education[]" class="form-control" id="">
+                <option value="10th">Select..</option>
+                
+            </select>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+                <label for="exampleInputPassword1">Upload Document</label>
+                <input type="file" class="form-control" name="uploadEducation[]" id="exampleInputPassword1" placeholder="">
+                </div>
+        </div>
+        <div class="col-md-2" style="margin-top: 27px">
+            <div class="form-group">
+            <button type="button" class="btn btn-danger" onclick="removeVedicSection(this)">Remove</button>
+            </div>
+        </div>
+    </div>
+`);
+}
+function removeVedicSection(element) {
+    $(element).closest('.input_vedic_doc').remove();
 }
 function getStates(countryId){
     $.ajax({

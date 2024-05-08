@@ -9,13 +9,13 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">ADD PUJA ITEM</span>
+            <span class="main-content-title mg-b-0 mg-b-lg-1">ADD TITLE</span>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                <li class="breadcrumb-item tx-15"><a href="{{ url('admin/manage-puja-list') }}" class="btn btn-warning text-dark">Manage Puja Item</a></li>
+                <li class="breadcrumb-item tx-15"><a href="{{ url('admin/manage-title') }}" class="btn btn-warning text-dark">Manage Title</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active tx-15" aria-current="page">ADD PUJA ITEM</li>
+                <li class="breadcrumb-item active tx-15" aria-current="page">ADD TITLE</li>
             </ol>
         </div>
     </div>
@@ -55,23 +55,11 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="event_name">Puja Name</label>
-                                    {{-- <input type="text" class="form-control" id="puja_name" name="puja_name" placeholder="Enter Puja Name"> --}}
-                                    <select name="" class="form-control" id="">
-                                        <option value="">Ganesh Puja</option>
-                                    </select>
+                                    <label for="event_name">Title Name</label>
+                                    <input type="text" class="form-control" id="puja_name" name="puja_name" placeholder="Enter Title Name">
                                 </div>
                             </div>
-                           
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="event_name">Item Name</label>
-                                    <input type="text" class="form-control" id="puja_name" name="puja_name" placeholder="Enter Puja Name">
-                                </div>
-                            </div>
-                           
+                          
                         </div>
                         <div class="row">
                             <div class="col-md-12">

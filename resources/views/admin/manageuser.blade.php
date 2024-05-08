@@ -9,7 +9,9 @@
 
     <!-- INTERNAL Select2 css -->
     <link href="{{asset('assets/plugins/select2/css/select2.min.css')}}" rel="stylesheet" />
-
+<style>
+    
+</style>
 @endsection
 
 @section('content')
@@ -17,30 +19,20 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Puja List</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Users</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                            <a href="{{url('admin/add-puja-list')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Puja List</a>
+                            {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Puja List</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Users</li>
                         </ol>
                     </div>
                 </div>
                 <!-- /breadcrumb -->
 
                    
-                @if(session('success'))
-                <div id = 'Message' class="alert alert-success">
-                    {{ session('success') }}
-                </div>
-            @endif
-            
-            @if(session('danger'))
-                <div id = 'Message' class="alert alert-danger">
-                    {{ session('danger') }}
-                </div>
-            @endif
+
                   
 
                     <!-- Row -->
@@ -56,17 +48,51 @@
                                         <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
                                             <thead>
                                                 <tr>
-                                                    <th class="border-bottom-0">SlNo</th>
-                                                    <th class="border-bottom-0">Puja Name</th>
-                                                    <th class="border-bottom-0">Item Name</th>
-                                                    <th class="border-bottom-0">Description</th>
+                                                <th class="border-bottom-0">#</th>
+
+                                                    <th class="border-bottom-0">Name</th>
+                                                    <th class="border-bottom-0">Registered Date</th>
+                                                    <th class="border-bottom-0">Approved Date</th>
+                                                    <th class="border-bottom-0">Added By</th>
+                                                    <th class="border-bottom-0">Application Status</th>
                                                     
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                
-                                                
+                                           
+                                            
+                                                <tr>
+                                                    <td>1</td>
+                                                    <a href="{{url('admin/user-profile/')}}" class="title">
+                                                    <td class="tb-col">
+                                                        <div class="media-group">
+                                                            <div class="media media-md media-middle media-circle">
+                                                                    <img src="{{asset('assets/img/user.jpg') }}" alt="user">
+                                                            </div>
+                                                            <div class="media-text">
+                                                                <a href="{{url('admin/user-profile/')}}" class="title">demo demo</a>
+                                                                <span class="small text">demo@gmail.com</span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    </a>
+                                                    
+                                                   <td>14/05/2024</td>
+                                                   <td>20/05/2024</td>
+                                                   <td>User</td>
+                                                    <td>
+                                                            <span class="badge badge-success">Approved</span> 
+                                                       
+                                                    </td>
+                                                    
+                                                    <td>
+                                                        <a href="{{url('admin/pandit-profile/')}}"><i class="fas fa-eye"></i></a> | 
+                                                        <a href="{{url('admin/editsebayat/')}}"><i class="fa fa-edit"></i></a> | 
+                                                        <a href="{{url('admin/dltsebayat/')}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
+                                                </tr>
+                                             
+                                              
                                                 
                                             </tbody>
                                         </table>
@@ -98,9 +124,5 @@
 
     <!-- INTERNAL Select2 js -->
     <script src="{{asset('assets/plugins/select2/js/select2.full.min.js')}}"></script>
-    <script>
-        setTimeout(function(){
-            document.getElementById('Message').style.display = 'none';
-        }, 3000);
-    </script>
+
 @endsection

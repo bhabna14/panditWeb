@@ -10,6 +10,7 @@
 		<title> Pandit Web</title>
 
         @include('user.layouts.components.front-style')
+        
 
 	</head>
 

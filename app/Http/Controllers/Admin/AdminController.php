@@ -81,5 +81,19 @@ class AdminController extends Controller
 
         return redirect('/admin');
     }
+
+
+    public function managepandit(){
+        return view('admin/managepandit');
+    }
+    public function panditprofile(){
+        return view('admin/pandit-profile');
+    }
+    public function manageuser(){
+        return view('admin/manageuser');
+    }
+    public function userprofile(){
+        return view('admin/user-profile');
+    }
    
 }

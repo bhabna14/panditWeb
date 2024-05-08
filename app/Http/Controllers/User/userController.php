@@ -398,4 +398,7 @@ class userController extends Controller
    public function bookpandit(){
         return view('user/bookpandit');
    }
+   public function poojalist(){
+    return view('user/poojalist');
+}
 }

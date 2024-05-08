@@ -32,30 +32,25 @@
                       <span class="mr-10">Book a Pandit</span>
                     </a>
                   </li>
-                  
-                   <li>
-                    <a href="book-temple-sevayat-state.html">
-                       List Of Pandit
-                    </a>
-                  </li>
                      <li>
-                    <a href="book-temple-sevayat-name.html">
-                       List Of Puja
+                    <a data-barba href="{{url('pooja-list')}}">
+                       List of Pooja
                     </a>
                   </li>
-                  
                   <li>
-                    <a data-barba href="{{url('/pandit/profile')}}">
-                      <span class="mr-10">Be a Pandit</span>
+                    <a href="book-temple-sevayat-name.html">
+                       Panji
                     </a>
                   </li>
           
                   <li>
-                    <a href="contact.html">Contact</a>
+                    <a href="contact.html">About Us</a>
                   </li>
                   
+                  <li>
+                    <a href="contact.html">Contact</a>
+                  </li>
                 
-                  
                 </ul>
               </div>
 
@@ -101,7 +96,7 @@
               </div>
         
               <a href="{{url('/login')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white"  style = 'width: 100px;'>Login</a>
-              <a href="{{url('/register')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>Register</a>
+              <a href="{{url('/register')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>Pandit Login</a>
           </div>
 
           <div class="d-none xl:d-flex x-gap-20 items-center pl-30" data-x="header-mobile-icons" data-x-toggle="text-white">

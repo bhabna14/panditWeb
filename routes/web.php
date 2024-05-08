@@ -128,8 +128,11 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\LanguageController;
+use App\Http\Controllers\Admin\TitleController;
+use App\Http\Controllers\Admin\OrderController;
 
 use App\Http\Controllers\Pandit\PanditController;
+
 
 
 
@@ -154,6 +157,7 @@ Route::controller(userController::class)->group(function() {
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');
     Route::get('/book-pandit', 'bookpandit')->name('bookpandit');
+    Route::get('/pooja-list', 'poojalist')->name('poojalist');
     Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
 
@@ -200,6 +204,11 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/manage-pandits', 'managepandit')->name('managepandit');
+        Route::get('/pandit-profile', 'panditprofile')->name('panditprofile');
+        Route::get('/manage-users', 'manageuser')->name('manageuser');
+        Route::get('/user-profile', 'userprofile')->name('userprofile');
+
     
     });
     Route::controller(PujaController::class)->group(function() {
@@ -222,6 +231,17 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         // Route::get('/savelocation', 'savelocation')->name('savelocation');
     });
 
+    Route::controller(TitleController::class)->group(function() {
+        Route::get('/manage-title', 'managetitle')->name('managetitle');
+        Route::get('/add-title', 'addtitle')->name('addtitle');
+        // Route::get('/savelocation', 'savelocation')->name('savelocation');
+    });
+
+    Route::controller(OrderController::class)->group(function() {
+        Route::get('/manage-orders', 'manageorders')->name('manageorders');
+        // Route::get('/savelocation', 'savelocation')->name('savelocation');
+    });
+   
 });
 
 

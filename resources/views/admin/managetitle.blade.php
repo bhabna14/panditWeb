@@ -17,13 +17,13 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Puja List</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Title</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                            <a href="{{url('admin/add-puja-list')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Puja List</a>
+                            <a href="{{url('admin/add-title')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Title</a>
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Puja List</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Title</li>
                         </ol>
                     </div>
                 </div>
@@ -57,8 +57,7 @@
                                             <thead>
                                                 <tr>
                                                     <th class="border-bottom-0">SlNo</th>
-                                                    <th class="border-bottom-0">Puja Name</th>
-                                                    <th class="border-bottom-0">Item Name</th>
+                                                    <th class="border-bottom-0">Title</th>
                                                     <th class="border-bottom-0">Description</th>
                                                     
                                                     <th class="border-bottom-0">Action</th>

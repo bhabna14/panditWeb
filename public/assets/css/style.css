@@ -26785,15 +26785,17 @@ html.fullscreen-button .app-content {
 .main-logo {
   display: flex;
   align-items: center;
+  justify-content: center;
   position: relative;
   /* height: 2.5rem; */
   /* margin: 0 auto; */
   /* justify-content: center; */
   /* text-align: center; */
   /* width: 100px; */
-  /* height: 91px; */
-  width: 214px;
-  margin-top: -16px;
+  height: 76px;
+  width: 115px;
+  /* margin: 0 auto; */
+  margin-top: -17px;
 }
 .media-group {
   display: flex;
@@ -31655,8 +31657,11 @@ slide is-expanded side-menu__item {
   }
 }
 .main-sidebar-header {
-  height: 82px;
-  padding: 20px 20px;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  height: fit-content;
+  padding: 20px 16px 4px 16px;
   width: 240px;
   background: #fff;
   border-bottom: 1px solid #ededf5;
@@ -31669,7 +31674,6 @@ slide is-expanded side-menu__item {
   transition: left 320ms ease, width 320ms ease;
   outline: none;
 }
-
 .main-sidemenu {
   margin-top: 85px;
   height: 90%;
