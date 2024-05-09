@@ -306,10 +306,12 @@ License        :   Licensed under ThemeForest License
 .panel-heading1 {
   display: block;
   padding: 12px;
-  background: var(--primary02);
-  color: var(--primary-bg-color);
+  background: #b30000;
+  color: white;
 }
-
+panel-heading1:hover{
+  color: white !important;
+}
 .panel-title1 a {
   display: block;
   color: #fff;

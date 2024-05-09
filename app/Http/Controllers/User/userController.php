@@ -400,5 +400,14 @@ class userController extends Controller
    }
    public function poojalist(){
     return view('user/poojalist');
-}
+    }
+    public function poojadetails(){
+        return view('user/puja-details');
+    }
+    public function panditdetails(){
+        return view('user/pandit-details');
+    }
+    public function booknow(){
+        return view('user/booknow');
+    }
 }

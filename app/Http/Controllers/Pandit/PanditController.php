@@ -15,6 +15,13 @@ class PanditController extends Controller
         return view("panditlogin");
     }
 
+    public function poojarequest(){
+        return view("/pandit/poojarequest");
+    }
+
+    public function poojahistory(){
+        return view("/pandit/poojahistory");
+    }
     
     public function panditprofile(){
         $countries = Country::all();

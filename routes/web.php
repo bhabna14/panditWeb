@@ -158,6 +158,9 @@ Route::controller(userController::class)->group(function() {
     Route::get('/', 'userindex')->name('userindex');
     Route::get('/book-pandit', 'bookpandit')->name('bookpandit');
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
+    Route::get('/puja-details', 'poojadetails')->name('poojadetails');
+    Route::get('/pandit-details', 'panditdetails')->name('panditdetails');
+    Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
 
@@ -265,6 +268,8 @@ Route::controller(PanditController::class)->group(function() {
     Route::get('/panditlogin', 'panditlogin');
     Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
     Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
+    Route::get('/pandit/poojarequest', 'poojarequest')->name('poojarequest');
+    Route::get('/pandit/poojahistory', 'poojahistory')->name('poojahistory');
     Route::get('/get-states/{countryId}', 'getStates');
     Route::get('/get-city/{stateId}', 'getCity');
 

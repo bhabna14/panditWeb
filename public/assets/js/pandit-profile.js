@@ -141,43 +141,35 @@ function changeColor(element) {
 }
 function addPujaListSection(){
     $("#show_puja_item").append(` 
-  
-    <div class="row remove_puja_item">
-    <div class="col-md-4">
-        <div class="form-group">
-            <label for="country">Puja List</label>
-            <select class="form-control" name="country" id="country">
-                <option value=" ">Select Your Puja List</option>
-                @foreach($PujaLists as $pujalist)
-                <option value="{{ $pujalist }}">{{ $pujalist }}</option>
-                @endforeach
-            </select>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label for="quantity">Quantity</label>
-            <input type="number" class="form-control" name="quantity[]" value="" id="quantity" placeholder="Enter List Quatity">
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="form-group">
-            <label for="weight_unit">Select Weight Unit:</label>
-            <select class="form-control" id="weight_unit" name="weight_unit">
-                <option value=" ">Select Unit</option>
-                <option value="kg">Kilogram (kg)</option>
-                <option value="g">Gram (g)</option>
-                <option value="mg">Milligram (mg)</option>
-            </select>
-        </div>
-    </div>
-    <div class="col-md-2">
-        <div class="form-group" style="width: 200px;margin-top: 25px">
-        <button type="button" class="btn btn-danger" onclick="removePujaListSection(this)">Remove</button>
-        </div>
-    </div>
-</div>
+  <tr class="remove_puja_item">
+    <td colspan="2" class="tb-col">
        
+    </td>
+    <td><select class="form-control" name="country"
+            id="country">
+            <option value=" ">Select Your Puja List
+            </option>
+            @foreach ($PujaLists as $pujalist)
+                <option value="{{ $pujalist }}">
+                    {{ $pujalist }}</option>
+            @endforeach
+        </select></td>
+    <td><input type="number" class="form-control"
+            name="quantity[]" value="" id="quantity"
+            placeholder="Enter List Quatity"></td>
+    <td>
+        <select class="form-control" id="weight_unit"
+            name="weight_unit">
+            <option value=" ">Select Unit</option>
+            <option value="kg">Kilogram (kg)</option>
+            <option value="g">Gram (g)</option>
+            <option value="mg">Milligram (mg)</option>
+        </select>
+    </td>
+    
+   <td><button type="button" class="btn btn-danger" onclick="removePujaListSection(this)">Remove</button></td>
+   </tr>
+
 `);
 
 }
