@@ -161,6 +161,8 @@ Route::controller(userController::class)->group(function() {
     Route::get('/puja-details', 'poojadetails')->name('poojadetails');
     Route::get('/pandit-details', 'panditdetails')->name('panditdetails');
     Route::get('/book-now', 'booknow')->name('booknow');
+    Route::get('/about-us', 'aboutus')->name('aboutus');
+    Route::get('/contact', 'contact')->name('contact');
     Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
 

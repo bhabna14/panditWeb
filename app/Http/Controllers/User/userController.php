@@ -410,4 +410,10 @@ class userController extends Controller
     public function booknow(){
         return view('user/booknow');
     }
+    public function aboutus(){
+        return view('user/aboutus');
+    }
+    public function contact(){
+        return view('user/contact');
+    }
 }

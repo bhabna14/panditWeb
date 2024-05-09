@@ -58,8 +58,9 @@
        <img src="{{ asset('front-assets/img/general/hr.png')}}" alt="">
     </div>
     <div class = "row" data-aos="fade-up">
+        
         <div class="col-md-3 pandit-card">
-            
+            <a href="{{url('pandit-details')}}"> 
                 <div class="card" data-state="#about">
                     <div class="card-header">
                         <img class="card-avatar" src="{{ asset('front-assets/img/avatars/pandit.jpeg') }}" alt="image">
@@ -133,9 +134,10 @@
                         </div>
                     </div>
                 </div>
-            
+            </a>
         </div>
         <div class="col-md-3 pandit-card">
+            <a href="{{url('pandit-details')}}"> 
             <div class="card" data-state="#about">
                 <div class="card-header">
                     <img class="card-avatar" src="{{ asset('front-assets/img/avatars/pandit.jpeg') }}" alt="image">
@@ -209,8 +211,10 @@
                     </div>
                 </div>
             </div>
+            </a>
         </div>
         <div class="col-md-3 pandit-card">
+            <a href="{{url('pandit-details')}}"> 
             <div class="card" data-state="#about">
                 <div class="card-header">
                     <img class="card-avatar" src="{{ asset('front-assets/img/avatars/pandit.jpeg') }}" alt="image">
@@ -284,8 +288,10 @@
                     </div>
                 </div>
             </div>
+            </a>
         </div>
         <div class="col-md-3 pandit-card">
+            <a href="{{url('pandit-details')}}"> 
             <div class="card" data-state="#about">
                 <div class="card-header">
                     <img class="card-avatar" src="{{ asset('front-assets/img/avatars/pandit.jpeg') }}" alt="image">
@@ -359,6 +365,7 @@
                     </div>
                 </div>
             </div>
+            </a>
         </div>
     </div>
     <div class = "row" data-aos="fade-up">
