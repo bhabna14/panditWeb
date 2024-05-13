@@ -248,7 +248,7 @@
                                     <div class="row">
                                         <div class="col-lg-12 col-md-12">
                                             <div class="card custom-card">
-                                                <div class="card-body">
+                                                <div class="">
                                                     <div id="show_doc_item">
                                                         <div class="row">
                                                             <div class="col-md-6">
@@ -294,7 +294,7 @@
                                     <div class="row">
                                         <div class="col-lg-12 col-md-12">
                                             <div class="card custom-card">
-                                                <div class="card-body">
+                                                <div class="">
                                                     <div id="show_edu_item">
                                                         <div class="row">
                                                             <div class="col-md-6">
@@ -341,7 +341,7 @@
                                     <div class="row">
                                         <div class="col-lg-12 col-md-12">
                                             <div class="card custom-card">
-                                                <div class="card-body">
+                                                <div class="">
                                                     <div id="show_vedic_item">
                                                         <div class="row">
                                                             <div class="col-md-6">
