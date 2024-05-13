@@ -416,4 +416,13 @@ class userController extends Controller
     public function contact(){
         return view('user/contact');
     }
+    public function myprofile(){
+        return view('user/myprofile');
+    }
+    public function orderhistory(){
+        return view('user/orderhistory');
+    }
+    public function settings(){
+        return view('user/settings');
+    }
 }

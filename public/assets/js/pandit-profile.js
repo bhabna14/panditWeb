@@ -66,6 +66,11 @@ function addEduSection(){
 function removeEduSection(element) {
     $(element).closest('.input_edu_doc').remove();
 }
+document.getElementById("checkbox10").checked = true;
+document.getElementById("checkbox20").checked = true;
+document.getElementById("checkbox30").checked = true;
+
+
 function addVedicSection(){
     $("#show_vedic_item").append(` 
     <div class="row input_vedic_doc">

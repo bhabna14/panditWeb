@@ -97,7 +97,9 @@
         
               <a href="{{url('/login')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white"  style = 'width: 100px;'>Login</a>
               <a href="{{url('/register')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>Pandit Login</a>
-          </div>
+              <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a>
+              
+            </div>
 
           <div class="d-none xl:d-flex x-gap-20 items-center pl-30" data-x="header-mobile-icons" data-x-toggle="text-white">
             <div><a href="#"" class="d-flex items-center icon-user text-inherit text-22"></a></div>

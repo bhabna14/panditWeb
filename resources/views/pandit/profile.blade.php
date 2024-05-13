@@ -119,23 +119,12 @@
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <div class="form-group">
-                                                                    <label for="exampleInputEmail1">First Name</label>
+                                                                    <label for="exampleInputEmail1">Name</label>
                                                                     <input type="email" class="form-control"
                                                                         value="" id="exampleInputEmail1"
-                                                                        name="email" placeholder="Enter First Name">
+                                                                        name="email" placeholder="Enter Name">
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label for="exampleInputEmail1">Last Name</label>
-                                                                    <input type="email" class="form-control"
-                                                                        value="" id="exampleInputEmail1"
-                                                                        name="email" placeholder="Enter Last Name">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="row">
                                                             <div class="col-md-4">
                                                                 <div class="form-group">
                                                                     <label for="exampleInputEmail1">Email address</label>
@@ -144,6 +133,10 @@
                                                                         name="email" placeholder="Enter email">
                                                                 </div>
                                                             </div>
+                                                        </div>
+
+                                                        <div class="row">
+                                                          
                                                             <div class="col-md-4">
                                                                 <div class="form-group">
                                                                     <label for="exampleInputPassword1">Phone Number</label>
@@ -161,18 +154,7 @@
                                                                         name="phonenumber" placeholder="Phone Number">
                                                                 </div>
                                                             </div>
-                                                        </div>
-
-                                                        <div class="row">
-
-                                                            <div class="col-md-4">
-                                                                <div class="form-group">
-                                                                    <label for="exampleInputPassword1">Phone Number</label>
-                                                                    <input type="text" class="form-control"
-                                                                        value="" id="exampleInputPassword1"
-                                                                        name="phonenumber" placeholder="Phone Number">
-                                                                </div>
-                                                            </div>
+                                                            
                                                             <div class="col-md-4">
                                                                 <div class="form-group">
                                                                     <label for="exampleInputPassword1">Photo</label>
@@ -180,6 +162,11 @@
                                                                         class="form-control" id="exampleInputPassword1">
                                                                 </div>
                                                             </div>
+                                                        </div>
+
+                                                        <div class="row">
+
+                                                           
                                                             <div class="col-md-4">
                                                                 <div class="form-group">
                                                                     <label for="exampleInputPassword1">Blood Group</label>
@@ -188,28 +175,26 @@
                                                                         name="bloodgrp" placeholder="Enter Blood Group">
                                                                 </div>
                                                             </div>
-                                                        </div>
-
-                                                        <div class="row">
-
-                                                            <div class="col-md-2">
+                                                            <div class="col-md-2" style="margin-top: 38px">
                                                                 <div class="form-group">
                                                                     <label for="exampleInputEmail1">Marital Status</label>
                                                                 </div>
                                                             </div>
-                                                            <div class="col-md-2">
+                                                            <div class="col-md-2" style="margin-top: 38px">
                                                                 <label class="rdiobox"><input name="marital"
                                                                         type="radio"> <span>Married </span></label>
                                                             </div>
-                                                            <div class="col-lg-2">
+                                                            <div class="col-lg-2" style="margin-top: 38px">
                                                                 <label class="rdiobox"><input checked name="marital"
                                                                         type="radio"> <span>Unmarried </span></label>
                                                             </div>
                                                         </div>
+
+                                                      
                                                         <div class="row">
                                                             <div class="col-md-12">
                                                                 <div class="form-group">
-                                                                    <label for="language">Select Language:</label>
+                                                                    <label for="language">Select Language</label>
                                                                     <select class="form-control select2" id="language"
                                                                         name="language[]" multiple="multiple">
                                                                         @foreach ($languages as $language)
@@ -403,14 +388,36 @@
                         </div>
                     </div>
                     <div class="main-content-body tab-pane border-top-0" id="skill">
+
+                        <div class="row row-sm pt-4">
+                            <div class="col-lg-12">
+                                <div class="card custom-card overflow-hidden">
+                                    <div class="card-body">
+                                        <div class="card">
+                                            <div class="card-body p-2">
+                                                <div class="input-group">
+                                                    <input type="text" class="form-control" placeholder="Search ...">
+                                                    <span class="input-group-append">
+                                                        <button class="btn btn-primary" type="button">Search</button>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="row mb-5">
+
                             <div class="col-lg-3 col-md-6 col-sm-12">
+
                                 <div class="card p-3">
                                     <div class="card-body">
                                         <div class="mb-3 text-center about-team">
                                             <!-- Wrap the image inside a label -->
                                             <label for="checkbox1">
-                                                <img class="rounded-pill" src="{{ asset('assets/img/jagannath.jpeg') }}"
+                                                <img class="rounded-pill " src="{{ asset('assets/img/jagannath.jpeg') }}"
                                                     alt="Shree Jagannath">
                                             </label>
                                         </div>
@@ -418,7 +425,7 @@
                                             Shree Jagannath
                                         </div>
                                         <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkbox1">
+                                            <input class="form-check-input checks" type="checkbox" id="checkbox1">
                                         </div>
                                     </div>
                                 </div>
@@ -439,7 +446,7 @@
                                             Shree Ram
                                         </div>
                                         <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkbox2">
+                                            <input class="form-check-input checks" type="checkbox" id="checkbox2">
                                         </div>
                                     </div>
                                 </div>
@@ -459,7 +466,7 @@
                                             Hanuman
                                         </div>
                                         <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkbox3">
+                                            <input class="form-check-input checks" type="checkbox" id="checkbox3">
                                         </div>
                                     </div>
                                 </div>
@@ -479,7 +486,7 @@
                                             Shree Krishna
                                         </div>
                                         <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkbox4">
+                                            <input class="form-check-input checks" type="checkbox" id="checkbox4">
                                         </div>
                                     </div>
                                 </div>
@@ -499,7 +506,7 @@
                                             Lord Shiv
                                         </div>
                                         <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkbox5">
+                                            <input class="form-check-input checks" type="checkbox" id="checkbox5">
                                         </div>
                                     </div>
                                 </div>
@@ -519,7 +526,7 @@
                                             Maa Durga
                                         </div>
                                         <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkbox6">
+                                            <input class="form-check-input checks" type="checkbox" id="checkbox6">
                                         </div>
                                     </div>
                                 </div>
@@ -538,7 +545,7 @@
                                             Maa Saraswati
                                         </div>
                                         <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkbox7">
+                                            <input class="form-check-input checks" type="checkbox" id="checkbox7">
                                         </div>
                                     </div>
                                 </div>
@@ -558,7 +565,7 @@
                                             Shree Ganesh
                                         </div>
                                         <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input" type="checkbox" id="checkbox8">
+                                            <input class="form-check-input checks" type="checkbox" id="checkbox8">
                                         </div>
                                     </div>
                                 </div>
@@ -581,7 +588,9 @@
                                                 <th class="border-bottom-0">Puja Name</th>
                                                 <th class="border-bottom-0">Fee</th>
                                                 <th class="border-bottom-0">Duration</th>
-                                                <th class="border-bottom-0">Add Videos/Images</th>
+                                                <th class="border-bottom-0">Image</th>
+                                                <th class="border-bottom-0">Video</th>
+                                                <th class="border-bottom-0">How Many Pooja you have done</th>
 
                                             </tr>
                                         </thead>
@@ -609,6 +618,14 @@
 
                                                 <td>
                                                     <input type="file" name="fee" class="form-control"
+                                                        id="">
+                                                </td>
+                                                <td>
+                                                    <input type="file" name="fee" class="form-control"
+                                                        id="">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="fee" class="form-control"
                                                         id="">
                                                 </td>
 
@@ -650,7 +667,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody id="show_puja_item">
-                                                            <tr >
+                                                            <tr>
                                                                 <td>1</td>
                                                                 <td class="tb-col">
                                                                     <div class="media-group">
@@ -692,7 +709,7 @@
                                                                         onclick="addPujaListSection()">Add More</button>
                                                                 </td>
                                                             </tr>
-															
+
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -704,7 +721,7 @@
                                         </div>
                                     </div>
                                 </div>
-								
+
                             </div>
                         </div>
                     </div>

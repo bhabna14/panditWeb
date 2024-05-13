@@ -163,6 +163,9 @@ Route::controller(userController::class)->group(function() {
     Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/about-us', 'aboutus')->name('aboutus');
     Route::get('/contact', 'contact')->name('contact');
+    Route::get('/my-profile', 'myprofile')->name('myprofile');
+    Route::get('/order-history', 'orderhistory')->name('orderhistory');
+    Route::get('/settings', 'settings')->name('settings');
     Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
 
@@ -272,6 +275,9 @@ Route::controller(PanditController::class)->group(function() {
     Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
     Route::get('/pandit/poojarequest', 'poojarequest')->name('poojarequest');
     Route::get('/pandit/poojahistory', 'poojahistory')->name('poojahistory');
+    Route::get('/pandit/poojaexperties', 'poojaexperties')->name('poojaexperties');
+    Route::get('/pandit/poojadetails', 'poojadetails')->name('poojadetails');
+    Route::get('/pandit/poojalist', 'poojalist')->name('poojalist');
     Route::get('/get-states/{countryId}', 'getStates');
     Route::get('/get-city/{stateId}', 'getCity');
 
@@ -379,7 +385,7 @@ Route::get('rangeslider', Rangeslider::class);
 Route::get('rating', Rating::class);
 Route::get('reset', Reset::class);
 Route::get('search', Search::class);
-Route::get('settings', Settings::class);
+// Route::get('settings', Settings::class);
 Route::get('shop', Shop::class);
 // Route::get('signin', Signin::class);
 // Route::get('signup', Signup::class);
