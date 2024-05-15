@@ -165,6 +165,8 @@ Route::controller(userController::class)->group(function() {
     Route::get('/contact', 'contact')->name('contact');
     Route::get('/my-profile', 'myprofile')->name('myprofile');
     Route::get('/order-history', 'orderhistory')->name('orderhistory');
+    Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
+    Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
     Route::get('/settings', 'settings')->name('settings');
     Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
@@ -271,6 +273,7 @@ Route::prefix('user')->middleware(['user'])->group(function () {
 
 Route::controller(PanditController::class)->group(function() {
     Route::get('/panditlogin', 'panditlogin');
+    Route::get('/pandit/career', 'profilecareer')->name('profilecareer');
     Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
     Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
     Route::get('/pandit/poojarequest', 'poojarequest')->name('poojarequest');

@@ -7,3 +7,33 @@
 <script>
     AOS.init();
   </script>
+  <script>
+    let chunks = [];
+    let mediaRecorder;
+  
+    document.getElementById('startRecord').addEventListener('click', function() {
+      navigator.mediaDevices.getUserMedia({ audio: true })
+        .then(stream => {
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.ondataavailable = function(e) {
+            chunks.push(e.data);
+          };
+          mediaRecorder.onstop = function() {
+            let blob = new Blob(chunks, { type: 'audio/ogg; codecs=opus' });
+            chunks = [];
+            let audioURL = URL.createObjectURL(blob);
+            document.getElementById('recordedAudio').src = audioURL;
+          };
+          mediaRecorder.start();
+          document.getElementById('startRecord').disabled = true;
+          document.getElementById('stopRecord').disabled = false;
+        })
+        .catch(err => console.error('getUserMedia Error: ', err));
+    });
+  
+    document.getElementById('stopRecord').addEventListener('click', function() {
+      mediaRecorder.stop();
+      document.getElementById('startRecord').disabled = false;
+      document.getElementById('stopRecord').disabled = true;
+    });
+  </script>

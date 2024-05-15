@@ -4378,8 +4378,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .dashboard__content {
   width: 100%;
-  padding: 60px;
+  padding: 60px 60px 60px 40px;
   padding-bottom: 0;
+  /* height: 100vh; */
 }
 
 @media (max-width: 767px) {
@@ -12028,7 +12029,21 @@ table.table-5 td {
   height: 100%;
   max-height: 700px;
 }
-
+.order-card{
+    margin: 6px;
+    /* max-width: 340px; */
+    overflow-y: hidden;
+    position: relative;
+    z-index: 1;
+    overflow-x: hidden;
+    background-color: white;
+    display: flex;
+    transition: 0.3s;
+    flex-direction: column;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgb(169 184 223 / 40%);
+    cursor: pointer;
+}
 
 .card {
   margin: 6px;
@@ -12610,4 +12625,64 @@ span.rating {
   padding-top: 25px;
   min-height: 70px;
   transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* order history page */ 
+.order-img {
+  
+    margin: 20px 0px 0px 20px;
+}
+.order-img img{
+  border-radius: 5px;
+}
+.rating-container {
+  text-align: center;
+}
+.rating {
+  display: inline-block;
+  unicode-bidi: bidi-override;
+  direction: ltr;
+}
+
+.rating input {
+  display: none;
+}
+.rating label {
+  font-size: 30px;
+  color: #aaa;
+  float: right;
+}
+.rating label:before {
+  content: '★';
+  margin: 5px;
+}
+.rating input:checked ~ label {
+  color: #ffdd00;
+}
+.rating:not(:checked) > label:hover,
+.rating:not(:checked) > label:hover ~ label {
+  color: #ffdd00;
+}
+.rating input:checked + label:hover,
+.rating input:checked + label:hover ~ label,
+.rating input:checked ~ label:hover,
+.rating input:checked ~ label:hover ~ label,
+.rating label:hover ~ input:checked ~ label {
+  color: #ffdd00;
+}
+button.rating-submit {
+  /* width: 100px; */
+  background: #163c8c;
+  padding: 7px 32px;
+  font-size: 18px;
+  color: #fff;
+  border-radius: 5px;
+}
+.map-img img {
+  width: 34%;
+}
+.map-icon {
+  color: red;
+  font-size: 17px !important;
+  margin-right: 9px;
 }

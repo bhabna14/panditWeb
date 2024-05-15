@@ -9,3 +9,4 @@
 <!-- Favicon -->
 
 <link rel="shortcut icon" href="//cdn.shopify.com/s/files/1/0654/9789/1030/files/MicrosoftTeams-image_471_32x32.png?v=1660732431" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">

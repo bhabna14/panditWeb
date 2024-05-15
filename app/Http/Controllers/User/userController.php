@@ -425,4 +425,10 @@ class userController extends Controller
     public function settings(){
         return view('user/settings');
     }
+    public function ratepooja(){
+        return view('user/ratepooja');
+    }
+    public function viewdetails(){
+        return view('user/view-pooja-details');
+    }
 }
