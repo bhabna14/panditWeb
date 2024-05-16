@@ -44,7 +44,7 @@
                                                                     </ul>
                                                                 </div>
                                                             @endif
-                                                            <form id="loginForm" action="{{ url('/pandit/career') }}">
+                                                            <form id="loginForm" action="{{ url('/pandit/profiles') }}">
                                                                 {{-- @csrf --}}
 
                                                                 <div id="step1">

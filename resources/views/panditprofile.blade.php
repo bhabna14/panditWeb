@@ -24,17 +24,10 @@
                                     <div class="">
                                         <div class="main-signup-header">
                                             <div class="panel panel-primary">
-                                                <div class=" tab-menu-heading mb-2 border-bottom-0">
-                                                    <div class="tabs-menu1">
-                                                        <ul class="nav panel-tabs"
-                                                            style="display: flex;justify-content: space-between">
-                                                            <li><a href="#profile" data-bs-toggle="tab"
-                                                                class="active" >Profile</a></li>
-                                                            <li><a href="#career" data-bs-toggle="tab"
-                                                                    class="">Career</a></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
+                                               <div style="text-align: center;border-bottom: 1px solid black">
+                                                <h2>PROFILE INFORMATION</h2>
+                                                
+                                               </div>
                                                 <div class="panel-body tabs-menu-body border-0 p-3">
                                                     <div class="tab-content">
                                                         <div class="tab-pane active" id="profile">
@@ -130,149 +123,9 @@
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            
-                                                          
-                                                        </div>
-                                                        <div class="tab-pane" id="career">
-                                                            <div class="row">
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="exampleInputEmail1">Highest
-                                                                            Qualification</label>
-                                                                        <input type="text" class="form-control"
-                                                                            name="qualification" id="qualification"
-                                                                            placeholder="Enter Heighest Qualification">
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-md-6">
-                                                                    <div class="form-group">
-                                                                        <label for="exampleInputPassword1">Total
-                                                                            Experience</label>
-                                                                        <input type="text" class="form-control"
-                                                                            name="experience" id="experience"
-                                                                            placeholder="Total Experience">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div id="show_doc_item">
-                                                                <div class="row">
-                                                                    <div class="col-md-6">
-                                                                        <div class="form-group">
-                                                                            <label for="exampleInputEmail1">ID
-                                                                                Proof</label>
-                                                                            <select name="idproof[]" class="form-control"
-                                                                                id="">
-                                                                                <option value=" ">Select...</option>
-                                                                                <option value="adhar">Adhar Card</option>
-                                                                                <option value="voter">Voter Card</option>
-                                                                                <option value="pan">Pan Card</option>
-                                                                                <option value="DL">DL</option>
-                                                                                <option value="health card">Health Card
-                                                                                </option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-md-4">
-                                                                        <div class="form-group">
-                                                                            <label for="exampleInputPassword1">Upload
-                                                                            </label>
-                                                                            <input type="file" class="form-control"
-                                                                                name="uploadDocument[]"
-                                                                                id="uploadDocument" placeholder="">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-2" style="margin-top: 27px">
-                                                                        <div class="form-group">
-                                                                            <button type="button"
-                                                                                class="btn btn-success add_item_btn"
-                                                                                onclick="addIdSection()">+</button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <div id="show_edu_item">
-                                                                <div class="row">
-                                                                    <div class="col-md-6">
-                                                                        <div class="form-group">
-                                                                            <label for="exampleInputEmail1">
-                                                                                Qualification</label>
-                                                                            <select name="education[]"
-                                                                                class="form-control" id="">
-                                                                                <option value=" ">Select..</option>
-                                                                                <option value="10th">10th</option>
-                                                                                <option value="+2">+2</option>
-                                                                                <option value="+3">+3</option>
-                                                                                <option value="Master Degree">Master Degree
-                                                                                </option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-md-4">
-                                                                        <div class="form-group">
-                                                                            <label for="exampleInputPassword1">Upload
-                                                                            </label>
-                                                                            <input type="file" class="form-control"
-                                                                                name="uploadEducation[]"
-                                                                                id="uploadEducation" placeholder="">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-2" style="margin-top: 27px">
-                                                                        <div class="form-group">
-                                                                            <button type="button"
-                                                                                class="btn btn-success add_item_btn"
-                                                                                onclick="addEduSection()">+</button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                            <div id="show_vedic_item">
-                                                                <div class="row">
-                                                                    <div class="col-md-6">
-                                                                        <div class="form-group">
-                                                                            <label for="exampleInputEmail1">Vedic Type
-                                                                            </label>
-                                                                            <select name="idproof[]" class="form-control"
-                                                                                id="">
-                                                                                <option value=" ">Select..</option>
-
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-md-4">
-                                                                        <div class="form-group">
-                                                                            <label for="exampleInputPassword1">Upload
-                                                                            </label>
-                                                                            <input type="file" class="form-control"
-                                                                                name="uploadDocument[]"
-                                                                                id="uploadDocument" placeholder="">
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-2" style="margin-top: 27px">
-                                                                        <div class="form-group">
-                                                                            <button type="button"
-                                                                                class="btn btn-success add_item_btn"
-                                                                                onclick="addVedicSection()">+</button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
                                                             <div class="text-center col-md-12">
-                                                                <a href="{{ url('/pandit/dashboard') }}" class="btn btn-primary" style="width: 150px;">Submit</a>
-                                                            </div>
-                                                        </div>
-                                                        <div class=" tab-menu-heading mb-2 border-bottom-0">
-                                                            <div class="tabs-menu1">
-                                                                <ul class="nav panel-tabs"
-                                                                    style="display: flex;justify-content: space-between">
-                                                                    <li style="background-color: rgb(97, 211, 243);color: black;border-radius:15px"><a href="#profile" data-bs-toggle="tab"
-                                                                        class="active" >Prev</a></li>
-                                                                    <li style="background-color:  rgb(97, 211, 243);color: black;border-radius:15px"><a href="#career" data-bs-toggle="tab"
-                                                                            class="">Next</a></li>
-                                                                </ul>
+
+                                                                <a href="{{ url('/pandit/career') }}" class="btn btn-primary" style="width: 150px;">Submit</a>
                                                             </div>
                                                         </div>
                                                     </div>

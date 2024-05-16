@@ -38,9 +38,11 @@ class PanditController extends Controller
         return view("profile");
     }
     public function profilecareer(){
+        return view("panditcareer");
+    }
+    public function panditprofiles(){
         return view("panditprofile");
     }
-    
     public function panditprofile(){
         $countries = Country::all();
         $citys = City::all(); 

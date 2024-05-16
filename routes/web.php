@@ -274,6 +274,7 @@ Route::prefix('user')->middleware(['user'])->group(function () {
 Route::controller(PanditController::class)->group(function() {
     Route::get('/panditlogin', 'panditlogin');
     Route::get('/pandit/career', 'profilecareer')->name('profilecareer');
+    Route::get('/pandit/profiles', 'panditprofiles')->name('panditprofiles');
     Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
     Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
     Route::get('/pandit/poojarequest', 'poojarequest')->name('poojarequest');
