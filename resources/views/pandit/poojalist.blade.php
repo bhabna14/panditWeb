@@ -12,8 +12,9 @@
     <div class="col-lg-12">
         <div class="card">
             <div class="card-body">
-                <h3>Manage Pooja List</h3>
-                <hr>
+                <div style="border-bottom:1px solid rgb(219, 30, 30);text-align:center;margin: 20px">
+                    <h3>POOJA LIST</h3>
+                </div>
                 <div class="panel-group1" id="accordion11" role="tablist">
                     <div class="card overflow-hidden">
                         <a class="accordion-toggle panel-heading1 collapsed " data-bs-toggle="collapse"

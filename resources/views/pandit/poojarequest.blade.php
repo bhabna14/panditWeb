@@ -10,30 +10,15 @@
 
 @section('content')
 
-                <!-- breadcrumb -->
-                <div class="breadcrumb-header justify-content-between">
-                    <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Pandits</span>
-                    </div>
-                    <div class="justify-content-center mt-2">
-                        <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                            {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
-                            <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Pandits</li>
-                        </ol>
-                    </div>
-                </div>
-                <!-- /breadcrumb -->
-
-                   
-
-                  
-
                     <!-- Row -->
                     <div class="row row-sm">
-                        <div class="col-lg-12">
+                        <div class="col-lg-12 mt-4">
                             <div class="card custom-card overflow-hidden">
+                                <div style="border-bottom:1px solid rgb(219, 30, 30);text-align:center;margin: 15px">
+                                    <h3>POOJA REQUEST</h3>
+                                </div> 
                                 <div class="card-body">
+                                    
                                     <!-- <div>
                                         <h6 class="main-content-label mb-1">File export Datatables</h6>
                                         <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>

@@ -13,8 +13,9 @@
         <div class="card">
             <div class="card-body">
                 <div class="table-responsive  export-table">
-                    <h3>Manage Pooja Details</h3>
-                    <hr>
+                    <div style="border-bottom:1px solid rgb(219, 30, 30);text-align:center;margin: 20px">
+                        <h3>POOJA DETAILS</h3>
+                    </div>
                     <table id="file-datatable"
                         class="table table-bordered text-nowrap key-buttons border-bottom">
                         <thead>

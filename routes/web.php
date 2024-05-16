@@ -282,11 +282,11 @@ Route::controller(PanditController::class)->group(function() {
     Route::get('/pandit/poojaexperties', 'poojaexperties')->name('poojaexperties');
     Route::get('/pandit/poojadetails', 'poojadetails')->name('poojadetails');
     Route::get('/pandit/poojalist', 'poojalist')->name('poojalist');
+    Route::get('/pandit/bank', 'bank')->name('bank');
+    Route::get('/pandit/address', 'panditaddress')->name('panditaddress');
     Route::get('/get-states/{countryId}', 'getStates');
     Route::get('/get-city/{stateId}', 'getCity');
-
     ## testing
-    Route::get('/pandit/address', 'address');
     Route::get('/pandit/savea', 'storeMultipleLocations')->name('storeMultipleLocations');
 
 

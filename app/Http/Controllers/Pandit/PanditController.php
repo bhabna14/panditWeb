@@ -43,6 +43,12 @@ class PanditController extends Controller
     public function panditprofiles(){
         return view("panditprofile");
     }
+    public function bank(){
+        return view("/pandit/panditbank");
+    }
+    public function panditaddress(){
+        return view("/pandit/panditaddress");
+    }
     public function panditprofile(){
         $countries = Country::all();
         $citys = City::all(); 
