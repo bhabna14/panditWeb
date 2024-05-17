@@ -11,7 +11,12 @@
 
         @include('user.layouts.components.front-style')
         
-
+<style>
+  .active {
+    /* Your active link styles */
+    background-color: #f0f0f0;
+}
+</style>
 	</head>
 
 	<body>
@@ -41,7 +46,7 @@
               <div class="sidebar -dashboard">
         
                 <div class="sidebar__item">
-                  <div class="sidebar__button -is-active">
+                  <div class="sidebar__button {{ Request::is('my-profile') ? 'active' : '' }}">
                     <a href="{{url('my-profile')}}" class="d-flex items-center text-15 lh-1 fw-500">
                       <img src="{{ asset('front-assets/img/dashboard/sidebar/compass.svg')}}" alt="image" class="mr-15">
                       Dashboard
@@ -50,7 +55,7 @@
                 </div>
         
                 <div class="sidebar__item">
-                  <div class="sidebar__button ">
+                  <div class="sidebar__button {{ Request::is('order-history') ? 'active' : '' }}">
                     <a href="{{url('order-history')}}" class="d-flex items-center text-15 lh-1 fw-500">
                       <img src="{{ asset('front-assets/img/dashboard/sidebar/booking.svg')}}" alt="image" class="mr-15">
                       Order History
@@ -61,10 +66,19 @@
                
         
                 <div class="sidebar__item">
-                  <div class="sidebar__button ">
-                    <a href="{{url('settings')}}" class="d-flex items-center text-15 lh-1 fw-500">
+                  <div class="sidebar__button {{ Request::is('userprofile') ? 'active' : '' }}">
+                    <a href="{{url('userprofile')}}" class="d-flex items-center text-15 lh-1 fw-500">
                       <img src="{{ asset('front-assets/img/dashboard/sidebar/gear.svg')}}" alt="image" class="mr-15">
-                      Settings
+                      Profile
+                    </a>
+                  </div>
+                </div>
+
+                <div class="sidebar__item">
+                  <div class="sidebar__button {{ Request::is('manage-address') ? 'active' : '' }}">
+                    <a href="{{url('manage-address')}}" class="d-flex items-center text-15 lh-1 fw-500">
+                      <img src="{{ asset('front-assets/img/dashboard/sidebar/gear.svg')}}" alt="image" class="mr-15">
+                      Manage Address
                     </a>
                   </div>
                 </div>

@@ -1,3 +1,4 @@
+
 @extends('user.layouts.front-dashboard')
 
 @section('styles')

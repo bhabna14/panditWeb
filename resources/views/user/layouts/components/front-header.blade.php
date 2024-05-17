@@ -19,7 +19,7 @@
 
               <div class="menu js-navList">
                 <ul class="menu__nav text-dark-1 -is-active">
-
+                 
                   <li>
                     <a data-barba href="{{url('/')}}">
                       <span class="mr-10">Home</span>
@@ -50,6 +50,33 @@
                   <li>
                     <a href="{{url('contact')}}">Contact</a>
                   </li>
+                  <li class="menu-item-has-children">
+                    <a data-barba href="#">
+                      <i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i>
+                      Bhabna
+                      <i class="icon icon-chevron-sm-down" style="margin-left: 7px;"></i>
+                    </a>
+
+                    <ul class="subnav">
+                      <li class="subnav__backBtn js-nav-list-back">
+                        <a href="#"><i class="icon icon-chevron-sm-down"></i></a>
+                      </li>
+
+                      <li><a href="{{url('my-profile')}}">My profile</a> </li>
+
+                      <li><a href="home-2.html">Manage Address</a></li>
+
+                      <li><a href="home-3.html">Orders</a></li>
+
+                      <li><a href="home-4.html">Coupons</a></li>
+
+                      <li><a href="home-5.html">Logout</a></li>
+
+                      
+
+                    </ul>
+
+                  </li>
                 
                 </ul>
               </div>
@@ -68,9 +95,11 @@
           <div class="d-flex items-center ml-20 is-menu-opened-hide md:d-none">
             
          
-           
+            <a href="{{url('/register')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>Pandit Login</a>
+              {{-- <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a> --}}
+              
           
-        <div class="searchMenu-loc px-10 lg:py-20 lg:px-0 js-form-dd js-liverSearch">
+            <div class="searchMenu-loc px-10 lg:py-20 lg:px-0 js-form-dd js-liverSearch">
 
                 <div data-x-dd-click="searchMenu-loc">
                  <div class="button px-10 fw-400 text-14 -outline-blue-1 h-50 ml-20">
@@ -95,14 +124,12 @@
                 </div>
               </div>
         
-              <a href="{{url('/login')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white"  style = 'width: 100px;'>Login</a>
-              <a href="{{url('/register')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>Pandit Login</a>
-              <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a>
-              
+              {{-- <a href="{{url('/login')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white"  style = 'width: 100px;'>Login</a> --}}
+             
             </div>
 
           <div class="d-none xl:d-flex x-gap-20 items-center pl-30" data-x="header-mobile-icons" data-x-toggle="text-white">
-            <div><a href="#"" class="d-flex items-center icon-user text-inherit text-22"></a></div>
+            <div><a href="#" class="d-flex items-center icon-user text-inherit text-22"></a></div>
             <div><button class="d-flex items-center icon-menu text-inherit text-20" data-x-click="header, header-logo, header-mobile-icons, mobile-menu"></button></div>
           </div>
         </div>

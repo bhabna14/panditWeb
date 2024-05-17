@@ -417,7 +417,7 @@ class userController extends Controller
         return view('user/contact');
     }
     public function myprofile(){
-        return view('user/myprofile');
+        return view('user/my-profile');
     }
     public function orderhistory(){
         return view('user/orderhistory');
@@ -430,5 +430,11 @@ class userController extends Controller
     }
     public function viewdetails(){
         return view('user/view-pooja-details');
+    }
+    public function mngaddress(){
+        return view('user/mngaddress');
+    }
+    public function addaddress(){
+        return view('user/add-address');
     }
 }

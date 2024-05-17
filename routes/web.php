@@ -27,10 +27,12 @@ Route::controller(userController::class)->group(function() {
     Route::get('/about-us', 'aboutus')->name('aboutus');
     Route::get('/contact', 'contact')->name('contact');
     Route::get('/my-profile', 'myprofile')->name('myprofile');
+    Route::get('/manage-address', 'mngaddress')->name('mngaddress');
+    Route::get('/add-address', 'addaddress')->name('addaddress');
     Route::get('/order-history', 'orderhistory')->name('orderhistory');
     Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
     Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
-    Route::get('/settings', 'settings')->name('settings');
+    Route::get('/userprofile', 'settings')->name('settings');
     Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
 
