@@ -130,21 +130,25 @@ Route::prefix('user')->middleware(['user'])->group(function () {
     });
 });
 /// pandit routes
-Route::controller(PanditController::class)->group(function() {
-    Route::get('/panditlogin', 'panditlogin');
-    Route::get('/pandit/career', 'profilecareer')->name('profilecareer');
-    Route::get('/pandit/profiles', 'panditprofiles')->name('panditprofiles');
-    Route::get('/pandit/profile', 'panditprofile')->name('panditprofile');
-    Route::get('/pandit/dashboard', 'panditdashboard')->name('panditdashboard');
-    Route::get('/pandit/poojarequest', 'poojarequest')->name('poojarequest');
-    Route::get('/pandit/poojahistory', 'poojahistory')->name('poojahistory');
-    Route::get('/pandit/poojaexperties', 'poojaexperties')->name('poojaexperties');
-    Route::get('/pandit/poojadetails', 'poojadetails')->name('poojadetails');
-    Route::get('/pandit/poojalist', 'poojalist')->name('poojalist');
-    Route::get('/pandit/bank', 'bank')->name('bank');
-    Route::get('/pandit/address', 'panditaddress')->name('panditaddress');
-    Route::get('/get-states/{countryId}', 'getStates');
-    Route::get('/get-city/{stateId}', 'getCity');
-    ## testing
-    Route::get('/pandit/savea', 'storeMultipleLocations')->name('storeMultipleLocations');
+Route::group(['prefix' => 'pandit'], function () {
+// Route::controller(PanditController::class)->group(function() {
+    Route::controller(PanditController::class)->group(function() {
+        Route::get('/panditlogin', 'panditlogin');
+        Route::get('/career', 'profilecareer')->name('profilecareer');
+        Route::get('/profiles', 'panditprofiles')->name('panditprofiles');
+    
+        Route::get('/profile', 'panditprofile')->name('panditprofile');
+        Route::get('/dashboard', 'panditdashboard')->name('panditdashboard');
+        Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
+        Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
+        Route::get('/poojaexperties', 'poojaexperties')->name('poojaexperties');
+        Route::get('/poojadetails', 'poojadetails')->name('poojadetails');
+        Route::get('/poojalist', 'poojalist')->name('poojalist');
+        Route::get('/bank', 'bank')->name('bank');
+        Route::get('/address', 'panditaddress')->name('panditaddress');
+        Route::get('/get-states/{countryId}', 'getStates');
+        Route::get('/get-city/{stateId}', 'getCity');
+        ## testing
+        Route::get('/savea', 'storeMultipleLocations')->name('storeMultipleLocations');
+    });
 });

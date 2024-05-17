@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\City;
+use Illuminate\Support\Facades\Http;
 
 class PanditController extends Controller
 {
@@ -148,6 +149,7 @@ class PanditController extends Controller
     }
     
     return redirect()->back()->with('success', 'Locations saved successfully.');
-}
+    }
+  
 
 }

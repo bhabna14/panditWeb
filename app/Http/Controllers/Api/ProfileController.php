@@ -9,16 +9,17 @@ class ProfileController extends Controller
 {
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string',
-            'name' => 'required|string',
-            'email' => 'required|email|unique:profiles,email',
-            'whatsappno' => 'nullable|string|max:20',
-            'bloodgroup' => 'nullable|string|max:10',
-            'maritalstatus' => 'nullable|string|max:255',
-            'language' => 'nullable|string|max:255',
-            'profile_photo' => 'nullable|image|max:2048', // Ensure it's an image file
-        ]);
+        // dd("hi");
+        // $request->validate([
+        //     'title' => 'required|string',
+        //     'name' => 'required|string',
+        //     'email' => 'required|email|unique:profiles,email',
+        //     'whatsappno' => 'nullable|string|max:20',
+        //     'bloodgroup' => 'nullable|string|max:10',
+        //     'maritalstatus' => 'nullable|string|max:255',
+        //     'language' => 'nullable|string|max:255',
+        //     'profile_photo' => 'nullable|image|max:2048', // Ensure it's an image file
+        // ]);
 
         $profile = new Profile();
 
@@ -27,8 +28,13 @@ class ProfileController extends Controller
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
-        $profile->maritalstatus = $request->maritalstatus;
-        $profile->language = $request->language;
+        $profile->maritalstatus = $request->marital;
+        // $profile->language = $request->language;
+
+        $pandilang = $request->input('language');
+ 
+            $langString = implode(',', $pandilang);
+            $profile->language = $langString;
 
         // Handle profile photo upload if provided
         if ($request->hasFile('profile_photo')) {
@@ -41,5 +47,6 @@ class ProfileController extends Controller
         $profile->save();
 
         return response()->json(['message' => 'Profile created successfully', 'user' => $profile], 201);
+        
     }
 }
