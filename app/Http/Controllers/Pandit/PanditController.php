@@ -41,7 +41,12 @@ class PanditController extends Controller
         return view("panditcareer");
     }
     public function panditprofiles(){
-        return view("panditprofile");
+        $languages = [
+            'English','Odia','Hindi','Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 'Kashmiri',
+            'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi',
+            'Sanskrit', 'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
+        ];
+        return view("panditprofile", compact('languages'));
     }
     public function bank(){
         return view("/pandit/panditbank");
