@@ -3,8 +3,8 @@ function addIdSection(){
     <div class="row input-wrapper_doc">
         <div class="col-md-6">
             <div class="form-group">
-                <label for="exampleInputEmail1">ID Proof</label>
-                <select name="idproof[]" class="form-control" id="">
+                <label for="id_proof">ID Proof</label>
+                <select name="id_proof[]" class="form-control" id="id_proof">
                 <option value="">Select..</option>
                     <option value="adhar">Select..</option>
                     <option value="adhar">Adhar Card</option>
@@ -17,14 +17,13 @@ function addIdSection(){
         </div>
         <div class="col-md-4">
             <div class="form-group">
-                <label for="exampleInputPassword1">Upload Document</label>
-                <input type="file" name="uploadoc[]" class="form-control" id="exampleInputPassword1" placeholder="">
+                <label for="upload_id">Upload Document</label>
+                <input type="file" name="upload_id[]" class="form-control" id="upload_id" placeholder="">
             </div>
         </div>
         <div class="col-md-2"  style="margin-top: 27px">
             <div class="form-group">
             <button type="button" class="btn btn-danger" onclick="removeIdSection(this)">Remove</button>
-
             </div>
         </div>
     </div>
@@ -39,8 +38,8 @@ function addEduSection(){
     <div class="row input_edu_doc">
         <div class="col-md-6">
             <div class="form-group">
-            <label for="exampleInputEmail1">Educational Qualification</label>
-            <select name="education[]" class="form-control" id="">
+            <label for="education">Educational Qualification</label>
+            <select name="education[]" class="form-control" id="education">
             <option value=" ">Select..</option>
                 <option value="10th">10th</option>
                 <option value="+2">+2</option>
@@ -51,8 +50,8 @@ function addEduSection(){
         </div>
         <div class="col-md-4">
             <div class="form-group">
-                <label for="exampleInputPassword1">Upload Document</label>
-                <input type="file" class="form-control" name="uploadEducation[]" id="exampleInputPassword1" placeholder="">
+                <label for="upload_edu">Upload Document</label>
+                <input type="file" class="form-control" name="upload_edu[]" id="upload_edu" placeholder="">
                 </div>
         </div>
         <div class="col-md-2" style="margin-top: 27px">
@@ -76,17 +75,14 @@ function addVedicSection(){
     <div class="row input_vedic_doc">
         <div class="col-md-6">
             <div class="form-group">
-            <label for="exampleInputEmail1">Vedic Certificate</label>
-            <select name="education[]" class="form-control" id="">
-                <option value="10th">Select..</option>
-                
-            </select>
+            <label for="vedic_type">Vedic Certificate</label>
+            <input type="text" class="form-control" name="vedic_type" id="vedic_type" placeholder="Enter Vedic">
             </div>
         </div>
         <div class="col-md-4">
             <div class="form-group">
-                <label for="exampleInputPassword1">Upload Document</label>
-                <input type="file" class="form-control" name="uploadEducation[]" id="exampleInputPassword1" placeholder="">
+                <label for="upload_vedic">Upload</label>
+                <input type="file" class="form-control" name="upload_vedic[]" id="upload_vedic" placeholder="">
                 </div>
         </div>
         <div class="col-md-2" style="margin-top: 27px">

@@ -14,7 +14,6 @@ class Career extends Model
         'career_id',
         'qualification',
         'experience',
-        'id_proof',
-        'education',
+       
     ];
 }

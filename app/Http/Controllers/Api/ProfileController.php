@@ -9,17 +9,15 @@ class ProfileController extends Controller
 {
     public function store(Request $request)
     {
-        // dd("hi");
-        // $request->validate([
-        //     'title' => 'required|string',
-        //     'name' => 'required|string',
-        //     'email' => 'required|email|unique:profiles,email',
-        //     'whatsappno' => 'nullable|string|max:20',
-        //     'bloodgroup' => 'nullable|string|max:10',
-        //     'maritalstatus' => 'nullable|string|max:255',
-        //     'language' => 'nullable|string|max:255',
-        //     'profile_photo' => 'nullable|image|max:2048', // Ensure it's an image file
-        // ]);
+        $request->validate([
+            'title' => 'required|string',
+            'name' => 'required|string',
+            'email' => 'required|email|unique:profiles,email',
+            'whatsappno' => 'nullable|string|max:20',
+            'bloodgroup' => 'nullable|string|max:10',
+            'maritalstatus' => 'nullable|string|max:255',
+            'profile_photo' => 'nullable|image|max:2048', // Ensure it's an image file
+        ]);
 
         $profile = new Profile();
 

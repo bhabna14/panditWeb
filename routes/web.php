@@ -131,12 +131,10 @@ Route::prefix('user')->middleware(['user'])->group(function () {
 });
 /// pandit routes
 Route::group(['prefix' => 'pandit'], function () {
-// Route::controller(PanditController::class)->group(function() {
     Route::controller(PanditController::class)->group(function() {
         Route::get('/panditlogin', 'panditlogin');
         Route::get('/career', 'profilecareer')->name('profilecareer');
         Route::get('/profiles', 'panditprofiles')->name('panditprofiles');
-    
         Route::get('/profile', 'panditprofile')->name('panditprofile');
         Route::get('/dashboard', 'panditdashboard')->name('panditdashboard');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
@@ -148,7 +146,19 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/address', 'panditaddress')->name('panditaddress');
         Route::get('/get-states/{countryId}', 'getStates');
         Route::get('/get-city/{stateId}', 'getCity');
-        ## testing
         Route::get('/savea', 'storeMultipleLocations')->name('storeMultipleLocations');
+    });
+});
+// pandit profile crud operation
+
+Route::group(['prefix' => 'pandit'], function () {
+    Route::controller(PanditController::class)->group(function() {
+        Route::post('/save-profile', 'saveprofile');
+    });
+});
+// pandit career crud operation
+Route::group(['prefix' => 'pandit'], function () {
+    Route::controller(PanditController::class)->group(function() {
+        Route::post('/save-career', 'savecareer');
     });
 });

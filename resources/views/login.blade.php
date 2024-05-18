@@ -133,6 +133,8 @@
 
 		<!-- generate-otp js -->
 		<script src="{{asset('assets/js/generate-otp.js')}}"></script>
+        <script src="{{asset('assets/js/pandit-career.js')}}"></script>
+
         <script>
             document.getElementById('nextBtn').addEventListener('click', function() {
                 document.getElementById('step1').style.display = 'none';
