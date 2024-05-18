@@ -82,6 +82,15 @@
                     </a>
                   </div>
                 </div>
+
+                <div class="sidebar__item">
+                  <div class="sidebar__button {{ Request::is('coupons') ? 'active' : '' }}">
+                    <a href="{{url('coupons')}}" class="d-flex items-center text-15 lh-1 fw-500">
+                      <img src="{{ asset('front-assets/img/dashboard/sidebar/gear.svg')}}" alt="image" class="mr-15">
+                      Manage Coupons
+                    </a>
+                  </div>
+                </div>
         
                 <div class="sidebar__item">
                   <div class="sidebar__button ">

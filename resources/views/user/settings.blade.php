@@ -7,12 +7,11 @@
 
 <div class="dashboard__main">
     <div class="dashboard__content bg-light-2">
-      <div class="row y-gap-20 justify-between items-end pb-30 mt-30 lg:pb-40 md:pb-32">
+      <div class="row y-gap-20 justify-between items-end pb-10 mt-30 lg:pb-10 md:pb-32">
         <div class="col-auto">
 
-          <h1 class="text-30 lh-14 fw-600">Settings</h1>
-          <div class="text-15 text-light-1">Lorem ipsum dolor sit amet, consectetur.</div>
-
+          <h1 class="text-30 lh-14 fw-600">Profile</h1>
+         
         </div>
 
         <div class="col-auto">
@@ -29,13 +28,7 @@
               <button class="tabs__button text-18 lg:text-16 text-light-1 fw-500 pb-5 lg:pb-0 js-tabs-button is-tab-el-active" data-tab-target=".-tab-item-1">Personal Information</button>
             </div>
 
-            <div class="col-auto">
-              <button class="tabs__button text-18 lg:text-16 text-light-1 fw-500 pb-5 lg:pb-0 js-tabs-button " data-tab-target=".-tab-item-2">Location Information</button>
-            </div>
-
-            {{-- <div class="col-auto">
-              <button class="tabs__button text-18 lg:text-16 text-light-1 fw-500 pb-5 lg:pb-0 js-tabs-button " data-tab-target=".-tab-item-3">Change Password</button>
-            </div> --}}
+           
 
           </div>
 
@@ -69,79 +62,51 @@
 
               <div class="border-top-light mt-30 mb-30"></div>
 
-              <div class="col-xl-9">
+              <div class="col-xl-12">
                 <div class="row x-gap-20 y-gap-20">
-                  <div class="col-12">
+                  
 
-                    <div class="form-input ">
-                      <input type="text" required>
-                      <label class="lh-1 text-16 text-light-1">Business Name</label>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Full name (First and Last name)</label>
+                        <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Name">
+                      </div>
                     </div>
-
+                    <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="exampleInputEmail1">Mobile number</label>
+                      <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Mobile number">
+                    </div>
+                    </div>
                   </div>
 
-                  <div class="col-12">
-
-                    <div class="form-input ">
-                      <input type="text" required>
-                      <label class="lh-1 text-16 text-light-1">User Name</label>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Email</label>
+                        <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Email">
+                      </div>
                     </div>
-
+                    <div class="col-md-6">
+                    <div class="form-group">
+                      <label for="exampleInputEmail1">Date of Birth</label>
+                      <input type="date" class="form-control" id="exampleInputEmail1" value="" name="name" >
+                    </div>
+                    </div>
                   </div>
 
-                  <div class="col-md-6">
-
-                    <div class="form-input ">
-                      <input type="text" required>
-                      <label class="lh-1 text-16 text-light-1">First Name</label>
+                  
+                  <div class="row">
+                    <div class="col-md-12">
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">About Yourself</label>
+                        <textarea name="" class="form-control" id=""  rows="10"></textarea>
+                      </div>
                     </div>
-
                   </div>
 
-                  <div class="col-md-6">
-
-                    <div class="form-input ">
-                      <input type="text" required>
-                      <label class="lh-1 text-16 text-light-1">Last Name</label>
-                    </div>
-
-                  </div>
-
-                  <div class="col-md-6">
-
-                    <div class="form-input ">
-                      <input type="text" required>
-                      <label class="lh-1 text-16 text-light-1">Email</label>
-                    </div>
-
-                  </div>
-
-                  <div class="col-md-6">
-
-                    <div class="form-input ">
-                      <input type="text" required>
-                      <label class="lh-1 text-16 text-light-1">Phone Number</label>
-                    </div>
-
-                  </div>
-
-                  <div class="col-12">
-
-                    <div class="form-input ">
-                      <input type="text" required>
-                      <label class="lh-1 text-16 text-light-1">Birthday</label>
-                    </div>
-
-                  </div>
-
-                  <div class="col-12">
-
-                    <div class="form-input ">
-                      <textarea required rows="5"></textarea>
-                      <label class="lh-1 text-16 text-light-1">About Yourself</label>
-                    </div>
-
-                  </div>
+                  
                 </div>
               </div>
 

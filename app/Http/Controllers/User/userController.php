@@ -437,4 +437,7 @@ class userController extends Controller
     public function addaddress(){
         return view('user/add-address');
     }
+    public function coupons(){
+        return view('user/coupons');
+    }
 }

@@ -64,13 +64,13 @@
 
                       <li><a href="{{url('my-profile')}}">My profile</a> </li>
 
-                      <li><a href="home-2.html">Manage Address</a></li>
+                      <li><a href="{{url('order-history')}}">Manage Address</a></li>
 
-                      <li><a href="home-3.html">Orders</a></li>
+                      <li><a href="{{url('manage-address')}}">Orders</a></li>
 
-                      <li><a href="home-4.html">Coupons</a></li>
+                      <li><a href="{{url('coupons')}}">Coupons</a></li>
 
-                      <li><a href="home-5.html">Logout</a></li>
+                      <li><a href="#">Logout</a></li>
 
                       
 
