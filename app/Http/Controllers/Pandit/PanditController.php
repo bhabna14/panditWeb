@@ -97,7 +97,7 @@ class PanditController extends Controller
         $career->qualification = $request->qualification;
         $career->total_experience = $request->experience;
 
-// Pandit Career Photo Upload
+         // Pandit Career Photo Upload
 
          foreach ($request->id_type as $key => $id_type) {
             $file = $request->file('upload_id')[$key];
@@ -112,7 +112,7 @@ class PanditController extends Controller
             $iddata->save();
         }
 
-//Pandit Education Photo Upload
+        //Pandit Education Photo Upload
 
         foreach ($request->education_type as $key => $education_type) {
             $file = $request->file('upload_edu')[$key];

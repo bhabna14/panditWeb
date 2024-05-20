@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\CareerController;
+// use App\Http\Controllers\Api\CareerController;
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -14,6 +14,6 @@ Route::controller(ProfileController::class)->group(function() {
     Route::post('save-profile', 'store');
 });
 
-Route::controller(CareerController::class)->group(function() {
+Route::controller(ProfileController::class)->group(function() {
     Route::post('save-career', 'savecareer');
 });
