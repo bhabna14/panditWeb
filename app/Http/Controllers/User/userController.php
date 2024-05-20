@@ -422,8 +422,8 @@ class userController extends Controller
     public function orderhistory(){
         return view('user/orderhistory');
     }
-    public function settings(){
-        return view('user/settings');
+    public function userprofile(){
+        return view('user/userprofile');
     }
     public function ratepooja(){
         return view('user/ratepooja');

@@ -32,7 +32,7 @@
        
 
         @include('user.layouts.components.front-header')
-
+        </main>
 		<!-- Page -->
         @yield('content')
 		<!-- End Page -->

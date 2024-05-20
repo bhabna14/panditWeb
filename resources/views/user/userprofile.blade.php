@@ -40,7 +40,7 @@
                     <img src="{{ asset('front-assets/img/misc/avatar-1.png')}}" alt="image" class="img-ratio rounded-4">
 
                     <div class="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
-                      <div class="size-40 bg-white rounded-4">
+                      <div class="size-30 bg-white rounded-4 text-center">
                         <i class="icon-trash text-16"></i>
                       </div>
                     </div>

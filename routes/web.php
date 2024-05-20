@@ -32,7 +32,7 @@ Route::controller(userController::class)->group(function() {
     Route::get('/order-history', 'orderhistory')->name('orderhistory');
     Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
     Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
-    Route::get('/userprofile', 'settings')->name('settings');
+    Route::get('/userprofile', 'userprofile')->name('userprofile');
     Route::get('/coupons', 'coupons')->name('coupons');
     Route::get('/login', 'userlogin')->name('userlogin');
     // Route::get('/demo', 'demo')->name('demo');
