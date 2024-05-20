@@ -120,8 +120,6 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
    
 });
 
-
-
 // user routes
 Route::prefix('user')->middleware(['user'])->group(function () {
    
