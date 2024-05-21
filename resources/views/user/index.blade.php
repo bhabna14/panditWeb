@@ -120,6 +120,116 @@
             </div>
         </div>
     </section>
+
+    <section>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <h2 class="sectionTitle__title">Upcoming Poojas</h2>
+                </div>
+            </div>
+        </div>
+        <div class="container-fluid">
+           
+            <div class="row">
+              <div class="col-md-12">
+                <div id="news-slider" class="owl-carousel">
+                  <div class="post-slide">
+                    
+                    <div class="post-content">
+                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+
+                      <h3 class="post-title">
+                        <a href="#">Janmastami Pooja</a>
+                      </h3>
+                     
+                    </div>
+                  </div>
+                  <div class="post-slide">
+                    
+                    <div class="post-content">
+                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+
+                      <h3 class="post-title">
+                        <a href="#">Janmastami Pooja</a>
+                      </h3>
+                     
+                    </div>
+                  </div>
+                  <div class="post-slide">
+                    
+                    <div class="post-content">
+                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+
+                      <h3 class="post-title">
+                        <a href="#">Janmastami Pooja</a>
+                      </h3>
+                     
+                    </div>
+                  </div>
+                  <div class="post-slide">
+                    
+                    <div class="post-content">
+                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+
+                      <h3 class="post-title">
+                        <a href="#">Janmastami Pooja</a>
+                      </h3>
+                     
+                    </div>
+                  </div>
+                  <div class="post-slide">
+                    
+                    <div class="post-content">
+                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+
+                      <h3 class="post-title">
+                        <a href="#">Janmastami Pooja</a>
+                      </h3>
+                     
+                    </div>
+                  </div>
+                  <div class="post-slide">
+                    
+                    <div class="post-content">
+                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+
+                      <h3 class="post-title">
+                        <a href="#">Janmastami Pooja</a>
+                      </h3>
+                     
+                    </div>
+                  </div>
+                  <div class="post-slide">
+                    
+                    <div class="post-content">
+                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+
+                      <h3 class="post-title">
+                        <a href="#">Janmastami Pooja</a>
+                      </h3>
+                     
+                    </div>
+                  </div>
+                  <div class="post-slide">
+                    
+                    <div class="post-content">
+                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+
+                      <h3 class="post-title">
+                        <a href="#">Janmastami Pooja</a>
+                      </h3>
+                     
+                    </div>
+                  </div>
+          
+                  
+                </div>
+              </div>
+            </div>
+          </div>
+    </section>
+
     <section>
         <div class="container-fluid">
             <div class="row">
@@ -139,7 +249,7 @@
                       <a href="#" class="read-more">read more</a>
                     </div>
                   </div>
-                  
+          
                   <div class="post-slide">
                     <div class="post-img">
                       <img src="https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=303&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=503" alt="">
@@ -154,7 +264,7 @@
                       <a href="#" class="read-more">read more</a>
                     </div>
                   </div>
-                  
+          
                   <div class="post-slide">
                     <div class="post-img">
                       <img src="https://images.unsplash.com/photo-1564979268369-42032c5ca998?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=500" alt="">
@@ -169,7 +279,7 @@
                       <a href="#" class="read-more">read more</a>
                     </div>
                   </div>
-                  
+          
                   <div class="post-slide">
                     <div class="post-img">
                       <img src="https://images.unsplash.com/photo-1576659531892-0f4991fca82b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=301&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=501" alt="">
@@ -184,7 +294,7 @@
                       <a href="#" class="read-more">read more</a>
                     </div>
                   </div>
-                  
+          
                   <div class="post-slide">
                     <div class="post-img">
                       <img src="https://images.unsplash.com/photo-1586083702768-190ae093d34d?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=305&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=505" alt="">
@@ -218,8 +328,9 @@
               </div>
             </div>
           </div>
-          
     </section>
+
+   
 
     <section data-anim="slide-up delay-1" class="layout-pt-md layout-pb-md">
         <div class="container">
@@ -494,7 +605,7 @@
         </div>
     </section>
 
-    <section class="layout-pt-md layout-pb-md">
+    {{-- <section class="layout-pt-md layout-pb-md">
         <div class="container">
             <div data-anim="slide-up delay-1" class="row y-gap-20 justify-between items-end">
                 <div class="col-auto">
@@ -674,7 +785,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
 
 
     <section class="layout-pt-md layout-pb-lg">

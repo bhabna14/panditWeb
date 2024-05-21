@@ -4,8 +4,10 @@
 <script src="{{asset('front-assets/js/vendors.js')}}"></script>
 <script src="{{asset('front-assets/js/main.js')}}"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-{{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.js"></script> --}}
-{{-- <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script> --}}
+
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.js"></script>
+
 <script>
     AOS.init();
   </script>
@@ -55,18 +57,18 @@
     }
     
     </script>
-
-    <script>
-      $(document).ready(function() {
-    $("#news-slider").owlCarousel({
-        items : 3,
-        itemsDesktop:[1199,3],
-        itemsDesktopSmall:[980,2],
-        itemsMobile : [600,1],
-        navigation:true,
-        navigationText:["",""],
-        pagination:true,
-        autoPlay:true
-    });
+<script>
+  $(document).ready(function () {
+  $("#news-slider").owlCarousel({
+    items: 6,
+    itemsDesktop: [1199, 3],
+    itemsDesktopSmall: [980, 2],
+    itemsMobile: [600, 1],
+    navigation: falses,
+    navigationText: ["", ""],
+    pagination: true,
+    autoPlay: false
+  });
 });
-    </script>
+
+</script>
