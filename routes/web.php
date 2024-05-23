@@ -1,18 +1,22 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\LoginRegisterController;
-use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\User\userController;
-use App\Http\Controllers\Superadmin\SuperAdminController;
-use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\PujaController;
-use App\Http\Controllers\Admin\LocationController;
-use App\Http\Controllers\Admin\LanguageController;
-use App\Http\Controllers\Admin\TitleController;
+use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
-
+use App\Http\Controllers\Admin\TitleController;
+use App\Http\Controllers\Pandit\CareerController;
 use App\Http\Controllers\Pandit\PanditController;
+use App\Http\Controllers\Admin\LanguageController;
+use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Pandit\ProfileController;
+
+use App\Http\Controllers\sebayatregisterController;
+use App\Http\Controllers\Auth\LoginRegisterController;
+use App\Http\Controllers\Superadmin\SuperAdminController;
+use App\Http\Controllers\pandit\SkillController;
+
 
 ## user login
 Route::controller(userController::class)->group(function() {
@@ -132,8 +136,6 @@ Route::prefix('user')->middleware(['user'])->group(function () {
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
         Route::get('/panditlogin', 'panditlogin');
-        Route::get('/career', 'profilecareer')->name('profilecareer');
-        Route::get('/profiles', 'panditprofiles')->name('panditprofiles');
         Route::get('/profile', 'panditprofile')->name('panditprofile');
         Route::get('/dashboard', 'panditdashboard')->name('panditdashboard');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
@@ -148,16 +150,33 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/savea', 'storeMultipleLocations')->name('storeMultipleLocations');
     });
 });
-// pandit profile crud operation
 
+// pandit profile crud operation
 Route::group(['prefix' => 'pandit'], function () {
-    Route::controller(PanditController::class)->group(function() {
+    Route::controller(ProfileController::class)->group(function() {
+        Route::get('/profiles', 'panditprofiles')->name('panditprofiles');
         Route::post('/save-profile', 'saveprofile');
+        Route::get('/manageprofile', 'manageprofile')->name('manageprofile');
+        Route::put('/updateProfile/{id}','updateProfile')->name('updateProfile');
+
     });
 });
+
 // pandit career crud operation
 Route::group(['prefix' => 'pandit'], function () {
-    Route::controller(PanditController::class)->group(function() {
+    Route::controller(CareerController::class)->group(function() {
+        Route::get('/career', 'profilecareer')->name('profilecareer');
         Route::post('/save-career', 'savecareer');
+        Route::get('/deletIdproof/{id}', 'deletIdproof')->name('deletIdproof');
+        Route::get('/deletEducation/{id}', 'deletEducation')->name('deletEducation');
+        Route::get('/deletVedic/{id}', 'deletVedic')->name('deletVedic');
+        Route::put('/updateCareer/{id}', 'updateCareer')->name('updateCareer');
+    });
+
+    });
+
+Route::group(['prefix' => 'pandit'], function () {
+    Route::controller(SkillController::class)->group(function() {
+        Route::post('/save-skillpooja', 'saveSkillPooja');
     });
 });

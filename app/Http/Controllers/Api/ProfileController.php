@@ -13,7 +13,6 @@ class ProfileController extends Controller
 {
     public function store(Request $request)
     {
-        // dd("hi");
         // $request->validate([
         //     'title' => 'required|string',
         //     'name' => 'required|string',

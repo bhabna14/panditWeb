@@ -26,35 +26,7 @@
     <div class="row">
         <div class="col-lg-12 col-md-12">
             <div class="card custom-card">
-                {{-- <div class="card-body d-md-flex">
-								<div class="">
-									<span class="profile-image pos-relative">
-										<img class="br-5" alt="" src="{{asset('assets/img/faces/profile.jpg')}}">
-										<span class="bg-success text-white wd-1 ht-1 rounded-pill profile-online"></span>
-									</span>
-								</div>
-								<div class="my-md-auto mt-4 prof-details">
-									<h4 class="font-weight-semibold ms-md-4 ms-0 mb-1 pb-0">Sonya Taylor</h4>
-									<p class="tx-13 text-muted ms-md-4 ms-0 mb-2 pb-2 ">
-										<span class="me-3"><i class="far fa-address-card me-2"></i>Ui/Ux
-											Developer</span>
-										<span class="me-3"><i class="fa fa-taxi me-2"></i>West fransisco,Alabama</span>
-										<span><i class="far fa-flag me-2"></i>New Jersey</span>
-									</p>
-									<p class="text-muted ms-md-4 ms-0 mb-2"><span><i
-												class="fa fa-phone me-2"></i></span><span
-											class="font-weight-semibold me-2">Phone:</span><span>+94 12345 6789</span>
-									</p>
-									<p class="text-muted ms-md-4 ms-0 mb-2"><span><i
-												class="fa fa-envelope me-2"></i></span><span
-											class="font-weight-semibold me-2">Email:</span><span>spruko.space@gmail.com</span>
-									</p>
-									<p class="text-muted ms-md-4 ms-0 mb-2"><span><i
-												class="fa fa-globe me-2"></i></span><span
-											class="font-weight-semibold me-2">Website</span><span>sprukotechnologies</span>
-									</p>
-								</div>
-							</div> --}}
+               
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
@@ -79,189 +51,66 @@
             <div class="custom-card main-content-body-profile">
                 <div class="tab-content">
                     <div class="main-content-body tab-pane border-top-0 active" id="skill">
-                        <div class="row row-sm pt-4">
-                            <div class="col-lg-12">
-                                <div class="card custom-card overflow-hidden">
-                                    <div class="card-body">
-                                        <div class="card">
-                                            <div class="card-body p-2">
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control" placeholder="Search ...">
-                                                    <span class="input-group-append">
-                                                        <button class="btn btn-primary" type="button">Search</button>
-                                                    </span>
+                        @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (session()->has('success'))
+                        <div class="alert alert-success" id="Message">
+                            {{ session()->get('success') }}
+                        </div>
+                    @endif
+
+                    @if ($errors->has('danger'))
+                        <div class="alert alert-danger" id="Message">
+                            {{ $errors->first('danger') }}
+                        </div>
+                    @endif
+
+                        <form action="{{ url('/pandit/save-skillpooja') }}" method="post" enctype="multipart/form-data">
+                            <div class="row mb-5">
+                                @csrf
+                                @foreach ($Poojanames as $pooja)
+                                    <div class="col-lg-3 col-md-6 col-sm-12">
+                                      
+                                        <div class="card p-3">
+                                            <div class="card-body">
+                                                <div class="mb-3 text-center about-team">
+                                                    <!-- Wrap the image inside a label -->
+                                                    <label for="checkbox{{ $pooja->id }}">
+                                                        <img class="rounded-pill"
+                                                            src="{{ asset('assets/img/' . $pooja->pooja_photo) }}"
+                                                            alt="{{ $pooja->pooja_name }}">
+                                                    </label>
+                                                </div>
+                                                <div class="tx-16 text-center font-weight-semibold">
+                                                    {{ $pooja->pooja_name }}
+                                                </div>
+                                                <div class="form-check mt-3 text-center">
+                                                    <input class="form-check-input checks" type="checkbox"
+                                                        id="checkbox{{ $pooja->id }}"
+                                                        name="poojas[{{ $pooja->id }}][id]" value="{{ $pooja->id }}">
+                                                    <input type="hidden" name="poojas[{{ $pooja->id }}][name]"
+                                                        value="{{ $pooja->pooja_name }}">
+                                                        <input type="hidden" name="poojas[{{ $pooja->id }}][image]"
+                                                        value="{{ $pooja->pooja_photo }}">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
+                                @endforeach
 
-                        <div class="row mb-5">
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="card p-3">
-                                    <div class="card-body">
-                                        <div class="mb-3 text-center about-team">
-                                            <!-- Wrap the image inside a label -->
-                                            <label for="checkbox1">
-                                                <img class="rounded-pill " src="{{ asset('assets/img/jagannath.jpeg') }}"
-                                                    alt="Shree Jagannath">
-                                            </label>
-                                        </div>
-                                        <div class="tx-16 text-center font-weight-semibold">
-                                            Shree Jagannath
-                                        </div>
-                                        <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input checks" type="checkbox" id="checkbox1">
-                                        </div>
-                                    </div>
+                                <div class="text-center col-md-12">
+                                    <button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
                                 </div>
                             </div>
-                            <!-- Repeat the structure for other images -->
-                            <!-- Shree Ram -->
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="card p-3">
-                                    <div class="card-body">
-                                        <div class="mb-3 text-center about-team">
-                                            <!-- Wrap the image inside a label -->
-                                            <label for="checkbox2">
-                                                <img class="rounded-pill" src="{{ asset('assets/img/rams.jpeg') }}"
-                                                    alt="Shree Ram">
-                                            </label>
-                                        </div>
-                                        <div class="tx-16 text-center font-weight-semibold">
-                                            Shree Ram
-                                        </div>
-                                        <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input checks" type="checkbox" id="checkbox2">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Hanuman -->
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="card p-3">
-                                    <div class="card-body">
-                                        <div class="mb-3 text-center about-team">
-                                            <!-- Wrap the image inside a label -->
-                                            <label for="checkbox3">
-                                                <img class="rounded-pill" src="{{ asset('assets/img/hanuman1.jpeg') }}"
-                                                    alt="Hanuman" style="height: 100px;width: 100px;">
-                                            </label>
-                                        </div>
-                                        <div class="tx-16 text-center font-weight-semibold">
-                                            Hanuman
-                                        </div>
-                                        <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input checks" type="checkbox" id="checkbox3">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Shree Krishna -->
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="card p-3">
-                                    <div class="card-body">
-                                        <div class="mb-3 text-center about-team">
-                                            <!-- Wrap the image inside a label -->
-                                            <label for="checkbox4">
-                                                <img class="rounded-pill" src="{{ asset('assets/img/krishna1.jpeg') }}"
-                                                    alt="Shree Krishna" style="height: 100px;width: 100px;">
-                                            </label>
-                                        </div>
-                                        <div class="tx-16 text-center font-weight-semibold">
-                                            Shree Krishna
-                                        </div>
-                                        <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input checks" type="checkbox" id="checkbox4">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Lord Shiv -->
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="card p-3">
-                                    <div class="card-body">
-                                        <div class="mb-3 text-center about-team">
-                                            <!-- Wrap the image inside a label -->
-                                            <label for="checkbox5">
-                                                <img class="rounded-pill" src="{{ asset('assets/img/shiva.jpeg') }}"
-                                                    alt="Lord Shiv">
-                                            </label>
-                                        </div>
-                                        <div class="tx-16 text-center font-weight-semibold">
-                                            Lord Shiv
-                                        </div>
-                                        <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input checks" type="checkbox" id="checkbox5">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Maa Mangala -->
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="card p-3">
-                                    <div class="card-body">
-                                        <div class="mb-3 text-center about-team">
-                                            <!-- Wrap the image inside a label -->
-                                            <label for="checkbox6">
-                                                <img class="rounded-pill" src="{{ asset('assets/img/durga.jpeg') }}"
-                                                    alt="Maa Mangala" style="height: 100px;width: 100px;">
-                                            </label>
-                                        </div>
-                                        <div class="tx-16 text-center font-weight-semibold">
-                                            Maa Durga
-                                        </div>
-                                        <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input checks" type="checkbox" id="checkbox6">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="card p-3">
-                                    <div class="card-body">
-                                        <div class="mb-3 text-center about-team">
-                                            <!-- Wrap the image inside a label -->
-                                            <label for="checkbox7">
-                                                <img class="rounded-pill" src="{{ asset('assets/img/saraswati.jpeg') }}"
-                                                    alt="Maa Mangala" style="height: 100px;width: 100px;">
-                                            </label>
-                                        </div>
-                                        <div class="tx-16 text-center font-weight-semibold">
-                                            Maa Saraswati
-                                        </div>
-                                        <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input checks" type="checkbox" id="checkbox7">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Shree Ganesh -->
-                            <div class="col-lg-3 col-md-6 col-sm-12">
-                                <div class="card p-3">
-                                    <div class="card-body">
-                                        <div class="mb-3 text-center about-team">
-                                            <!-- Wrap the image inside a label -->
-                                            <label for="checkbox8">
-                                                <img class="rounded-pill" src="{{ asset('assets/img/ganeshs.jpeg') }}"
-                                                    alt="Shree Ganesh">
-                                            </label>
-                                        </div>
-                                        <div class="tx-16 text-center font-weight-semibold">
-                                            Shree Ganesh
-                                        </div>
-                                        <div class="form-check mt-3 text-center">
-                                            <input class="form-check-input checks" type="checkbox" id="checkbox8">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="text-center col-md-12">
-                                <button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
-                            </div>
-                        </div>
+                        </form>
                     </div>
                     <div class="main-content-body   tab-pane " id="addpuja">
                         <div class="card">
@@ -284,42 +133,36 @@
                                         </thead>
                                         <tbody>
 
+                                            @foreach ($Poojaskills as $index => $poojaSkill)
                                             <tr>
-                                                <td>1</td>
+                                                <td>{{ $index + 1 }}</td>
                                                 <td class="tb-col">
                                                     <div class="media-group">
                                                         <div class="media media-md media-middle media-circle">
-                                                            <img src="{{ asset('assets/img/user.jpg') }}" alt="user">
-
+                                                            <img src="{{ asset('assets/img/' . $poojaSkill->pooja_photo) }}" alt="{{ $poojaSkill->pooja_name }}">
                                                         </div>
                                                         <div class="media-text">
-                                                            <a href="" class="title">Ganesh Puja</a>
-
+                                                            <a href="" class="title">{{ $poojaSkill->pooja_name }}</a>
                                                         </div>
                                                     </div>
                                                 </td>
-
-                                                <td><input type="text" name="fee" class="form-control"
-                                                        id=""></td>
-                                                <td><input type="text" name="duration" class="form-control"
-                                                        id=""></td>
-
                                                 <td>
-                                                    <input type="file" name="fee" class="form-control"
-                                                        id="">
+                                                    <input type="text" name="fee[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('fee.' . $poojaSkill->id) }}">
                                                 </td>
                                                 <td>
-                                                    <input type="file" name="fee" class="form-control"
-                                                        id="">
+                                                    <input type="text" name="duration[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('duration.' . $poojaSkill->id) }}">
                                                 </td>
                                                 <td>
-                                                    <input type="text" name="fee" class="form-control"
-                                                        id="">
+                                                    <input type="file" name="image[{{ $poojaSkill->id }}]" class="form-control">
                                                 </td>
-
-
+                                                <td>
+                                                    <input type="file" name="video[{{ $poojaSkill->id }}]" class="form-control">
+                                                </td>
+                                                <td>
+                                                    <input type="text" name="done_count[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('done_count.' . $poojaSkill->id) }}">
+                                                </td>
                                             </tr>
-
+                                            @endforeach
 
                                         </tbody>
                                     </table>
@@ -538,34 +381,13 @@
 
 @section('scripts')
     <!-- Internal Select2 js-->
-
-
-    <script>
-        function addressFunction() {
-            if (document.getElementById("same").checked) {
-                document.getElementById("peraddress").value = document.getElementById("preaddress").value;
-                document.getElementById("perpost").value = document.getElementById("prepost").value;
-                document.getElementById("perdistri").value = document.getElementById("predistrict").value;
-                document.getElementById("perstate").value = document.getElementById("prestate").value;
-                document.getElementById("percountry").value = document.getElementById("precountry").value;
-                document.getElementById("perpincode").value = document.getElementById("prepincode").value;
-                document.getElementById("perlandmark").value = document.getElementById("prelandmark").value;
-
-            } else {
-                document.getElementById("peraddress").value = "";
-                document.getElementById("perpost").value = "";
-                document.getElementById("perdistri").value = "";
-                document.getElementById("perstate").value = "";
-                document.getElementById("percountry").value = "";
-                document.getElementById("perpincode").value = "";
-                document.getElementById("perlandmark").value = "";
-            }
-        }
-    </script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
-    <script src="{{ asset('assets/js/pandit-profile.js') }}"></script>
-
+    <script>
+        setTimeout(function(){
+            document.getElementById('Message').style.display = 'none';
+        }, 3000);
+    </script>
 
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>

@@ -23,7 +23,6 @@ class CareerController extends Controller
         //     'upload_vedic.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
         // ]);
 
-        dd("hi");
 
         $career = new Career();
         $career->career_id = $request->career_id;
