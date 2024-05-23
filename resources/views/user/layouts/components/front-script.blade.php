@@ -5,8 +5,8 @@
 <script src="{{asset('front-assets/js/main.js')}}"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
-<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.js"></script>
+{{-- <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.js"></script> --}}
 
 <script>
     AOS.init();

@@ -1,6 +1,7 @@
 @extends('user.layouts.front')
 
 @section('styles')
+
 @endsection
 
 @section('content')
@@ -121,382 +122,635 @@
         </div>
     </section>
 
-    <section>
+  
+    <section class="layout-pt-md layout-pb-md upcoming-pooja" style="overflow-y: hidden;overflow-x: hidden">
         <div class="container">
-            <div class="row">
-                <div class="col-md-8">
-                    <h2 class="sectionTitle__title">Upcoming Poojas</h2>
+            <div data-anim="slide-up delay-1" class="row y-gap-20 justify-between items-end">
+                <div class="col-auto">
+                    <div class="sectionTitle -md">
+                        <h2 class="sectionTitle__title">Upcoming Pooja</h2>
+                        <p class=" sectionTitle__text mt-5 sm:mt-0">These are few upcoming Pooja for you to do</p>
+                    </div>
+                </div>
+
+                {{-- <div class="col-auto md:d-none">
+
+                    <a href="#" class="button -md -blue-1 bg-blue-1-05 text-blue-1">
+                        View All Pooja <div class="icon-arrow-top-right ml-15"></div>
+                    </a>
+
+                </div> --}}
+            </div>
+
+            <div class="relative pt-40 sm:pt-20 js-section-slider" data-gap="30" data-scrollbar
+                data-slider-cols="base-2 xl-4 lg-3 md-2 sm-2 base-1" data-anim="" data-aos="fade-up" data-aos-delay="500">
+                <div class="swiper-wrapper">
+
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+
+
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+
+
+
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+
+
+                    <div class="swiper-slide">
+
+                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
+                            <div class="citiesCard__image ratio ratio-3:2">
+                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
+                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                    class="js-lazy">
+
+                            </div>
+
+                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
+                                <div class="citiesCard__bg"></div>
+
+                                <div class="citiesCard__top">
+                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
+                                </div>
+
+                              
+                            </div> --}}
+                        </a>
+                        <div class="citiesCard__bottom">
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                        </div>
+
+                    </div>
+                  
+
+                </div>
+
+
+                <button
+                    class="section-slider-nav -prev flex-center button -blue-1 bg-white shadow-1 size-40 rounded-full sm:d-none js-prev">
+                    <i class="icon icon-chevron-left text-12"></i>
+                </button>
+
+                <button
+                    class="section-slider-nav -next flex-center button -blue-1 bg-white shadow-1 size-40 rounded-full sm:d-none js-next">
+                    <i class="icon icon-chevron-right text-12"></i>
+                </button>
+
+
+                <div class="slider-scrollbar bg-light-2 mt-40 sm:d-none js-scrollbar"></div>
+
+                <div class="row pt-20 d-none md:d-block">
+                    <div class="col-auto">
+                        <div class="d-inline-block">
+
+                            <a href="{{ url('pooja-list')}}" class="button -md -blue-1 bg-blue-1-05 text-blue-1">
+                                View All Temples <div class="icon-arrow-top-right ml-15"></div>
+                            </a>
+
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="container-fluid">
-           
-            <div class="row">
-              <div class="col-md-12">
-                <div id="news-slider" class="owl-carousel">
-                  <div class="post-slide">
-                    
-                    <div class="post-content">
-                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+    </section> 
 
-                      <h3 class="post-title">
-                        <a href="#">Janmastami Pooja</a>
-                      </h3>
-                     
+    <section class="special-pooja-bg layout-pt-md layout-pb-md">
+        <div class="container">
+            <div data-anim="" data-aos="fade-up" data-aos-delay="500" class="row y-gap-20 justify-between items-end">
+                <div class="col-auto">
+                    <div class="sectionTitle -md">
+                        <h2 class="sectionTitle__title">Special Pooja</h2>
+                        <p class=" sectionTitle__text mt-5 sm:mt-0">These are few upcoming Pooja for you to do</p>
                     </div>
-                  </div>
-                  <div class="post-slide">
-                    
-                    <div class="post-content">
-                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+                </div>
 
-                      <h3 class="post-title">
-                        <a href="#">Janmastami Pooja</a>
-                      </h3>
-                     
-                    </div>
-                  </div>
-                  <div class="post-slide">
-                    
-                    <div class="post-content">
-                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+                <div class="col-auto md:d-none">
 
-                      <h3 class="post-title">
-                        <a href="#">Janmastami Pooja</a>
-                      </h3>
-                     
-                    </div>
-                  </div>
-                  <div class="post-slide">
-                    
-                    <div class="post-content">
-                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+                    <a href="{{ url('pooja-list')}}" class="button -md -blue-1 bg-blue-1-05 text-blue-1">
+                        View All Pooja <div class="icon-arrow-top-right ml-15"></div>
+                    </a>
 
-                      <h3 class="post-title">
-                        <a href="#">Janmastami Pooja</a>
-                      </h3>
-                     
-                    </div>
-                  </div>
-                  <div class="post-slide">
-                    
-                    <div class="post-content">
-                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+                </div>
+            </div>
 
-                      <h3 class="post-title">
-                        <a href="#">Janmastami Pooja</a>
-                      </h3>
-                     
+            <div class = "row" data-aos="fade-up" data-aos-delay="500">
+                <div class="col-md-3 pandit-card">
+                    <div class="card" data-state="#pooja">
+                        <div class="card-header">
+                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image">
+                        </div>
+                        <div class="pooja-head">
+                            <h5>Baladevjew Pooja</h5>
+                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <div style="text-align: center">
+                                {{-- <h6>(12-03-2024)</h6> --}}
+                            </div>
+                            {{-- <button class="contact-me">Book Now</button> --}}
+                        </div>
                     </div>
-                  </div>
-                  <div class="post-slide">
-                    
-                    <div class="post-content">
-                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+                </div>
+                <div class="col-md-3 pandit-card">
+                    <div class="card" data-state="#pooja">
+                        <div class="card-header">
+                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="image">
+                        </div>
+                        <div class="pooja-head">
+                            <h5>Janmasthami Pooja</h5>
+                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <div style="text-align: center">
+                                {{-- <h6>(12-03-2024)</h6> --}}
+                            </div>
+                            {{-- <button class="contact-me">Book Now</button> --}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 pandit-card">
+                    <div class="card" data-state="#pooja">
+                        <div class="card-header">
+                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
+                        </div>
+                        <div class="pooja-head">
+                            <h5>Ganesh Pooja</h5>
+                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <div style="text-align: center">
+                                {{-- <h6>(12-03-2024)</h6> --}}
+                            </div>
+                            {{-- <button class="contact-me">Book Now</button> --}}
+                        </div>
+                    </div>
+                </div>
+                  <div class="col-md-3 pandit-card">
+                    <div class="card" data-state="#pooja">
+                        <div class="card-header">
+                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
+                        </div>
+                        <div class="pooja-head">
+                            <h5>Ganesh Pooja</h5>
+                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <div style="text-align: center">
+                                {{-- <h6>(12-03-2024)</h6> --}}
+                            </div>
+                            {{-- <button class="contact-me">Book Now</button> --}}
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
 
-                      <h3 class="post-title">
-                        <a href="#">Janmastami Pooja</a>
-                      </h3>
-                     
+            <div class = "row" data-aos="fade-up" data-aos-delay="500">
+                <div class="col-md-3 pandit-card">
+                    <div class="card" data-state="#pooja">
+                        <div class="card-header">
+                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image">
+                        </div>
+                        <div class="pooja-head">
+                            <h5>Baladevjew Pooja</h5>
+                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <div style="text-align: center">
+                                {{-- <h6>(12-03-2024)</h6> --}}
+                            </div>
+                            {{-- <button class="contact-me">Book Now</button> --}}
+                        </div>
                     </div>
-                  </div>
-                  <div class="post-slide">
-                    
-                    <div class="post-content">
-                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+                </div>
+                <div class="col-md-3 pandit-card">
+                    <div class="card" data-state="#pooja">
+                        <div class="card-header">
+                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="image">
+                        </div>
+                        <div class="pooja-head">
+                            <h5>Janmasthami Pooja</h5>
+                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <div style="text-align: center">
+                                {{-- <h6>(12-03-2024)</h6> --}}
+                            </div>
+                            {{-- <button class="contact-me">Book Now</button> --}}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 pandit-card">
+                    <div class="card" data-state="#pooja">
+                        <div class="card-header">
+                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
+                        </div>
+                        <div class="pooja-head">
+                            <h5>Ganesh Pooja</h5>
+                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <div style="text-align: center">
+                                {{-- <h6>(12-03-2024)</h6> --}}
+                            </div>
+                            {{-- <button class="contact-me">Book Now</button> --}}
+                        </div>
+                    </div>
+                </div>
+                  <div class="col-md-3 pandit-card">
+                    <div class="card" data-state="#pooja">
+                        <div class="card-header">
+                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
+                        </div>
+                        <div class="pooja-head">
+                            <h5>Ganesh Pooja</h5>
+                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <div style="text-align: center">
+                                {{-- <h6>(12-03-2024)</h6> --}}
+                            </div>
+                            {{-- <button class="contact-me">Book Now</button> --}}
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </section>
 
-                      <h3 class="post-title">
-                        <a href="#">Janmastami Pooja</a>
-                      </h3>
-                     
+    <section class="layout-pt-md layout-pb-md">
+        <div class="container">
+            <div data-anim="" data-aos="fade-up" class="row y-gap-20 mb-30 justify-between items-end">
+                <div class="col-auto">
+                    <div class="sectionTitle -md">
+                        <h2 class="sectionTitle__title">Famous Pandits</h2>
+                        <p class=" sectionTitle__text mt-5 sm:mt-0">These are few upcoming Pooja for you to do</p>
                     </div>
-                  </div>
-                  <div class="post-slide">
-                    
-                    <div class="post-content">
-                      <img src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="">
+                </div>
 
-                      <h3 class="post-title">
-                        <a href="#">Janmastami Pooja</a>
-                      </h3>
-                     
-                    </div>
-                  </div>
-          
+                <div class="col-auto md:d-none">
+
+                    <a href="{{ url('book-pandit')}}" class="button -md -blue-1 bg-blue-1-05 text-blue-1">
+                        View All Pandits <div class="icon-arrow-top-right ml-15"></div>
+                    </a>
+
+                </div>
+            </div>
+
+            <div class="row mb-30" data-aos="fade-up" data-aos-delay="500">
+                <div class="col-md-4">
+                   <div class="row">
+                     <div class="col-md-4">
+                        <div class="pandit-front-sec-img">
+                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                        </div>
+                       
+                     </div>
+                     <div class="col-md-8">
+                        <div class="pandit-front-sec-text">
+                            <h3>P.Bibhu Panda</h3>
+                            <span>4.8</span> Exceptional
+                        </div>
+                     </div>
+                   </div>
                   
                 </div>
-              </div>
+                <div class="col-md-4">
+                    <div class="row">
+                      <div class="col-md-4">
+                         <div class="pandit-front-sec-img">
+                           <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                         </div>
+                        
+                      </div>
+                      <div class="col-md-8">
+                         <div class="pandit-front-sec-text">
+                             <h3>P.Bibhu Panda</h3>
+                             <span>4.8</span> Exceptional
+                         </div>
+                      </div>
+                    </div>
+                   
+                 </div>
+                 <div class="col-md-4">
+                    <div class="row">
+                      <div class="col-md-4">
+                         <div class="pandit-front-sec-img">
+                           <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                         </div>
+                        
+                      </div>
+                      <div class="col-md-8">
+                         <div class="pandit-front-sec-text">
+                             <h3>P.Bibhu Panda</h3>
+                             <span>4.8</span> Exceptional
+                         </div>
+                      </div>
+                    </div>
+                   
+                 </div>
+
+               
             </div>
-          </div>
-    </section>
-
-    <section>
-        <div class="container-fluid">
-            <div class="row">
-              <div class="col-md-12">
-                <div id="news-slider" class="owl-carousel">
-                  <div class="post-slide">
-                    <div class="post-img">
-                      <img src="https://images.unsplash.com/photo-1596265371388-43edbaadab94?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=301&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=501" alt="">
-                      <a href="#" class="over-layer"><i class="fa fa-link"></i></a>
-                    </div>
-                    <div class="post-content">
-                      <h3 class="post-title">
-                        <a href="#">Lorem ipsum dolor sit amet.</a>
-                      </h3>
-                      <p class="post-description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam consectetur cumque dolorum, ex incidunt ipsa laudantium necessitatibus neque quae tempora......</p>
-                      <span class="post-date"><i class="fa fa-clock-o"></i>Out 27, 2019</span>
-                      <a href="#" class="read-more">read more</a>
-                    </div>
-                  </div>
-          
-                  <div class="post-slide">
-                    <div class="post-img">
-                      <img src="https://images.unsplash.com/photo-1533227268428-f9ed0900fb3b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=303&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=503" alt="">
-                      <a href="#" class="over-layer"><i class="fa fa-link"></i></a>
-                    </div>
-                    <div class="post-content">
-                      <h3 class="post-title">
-                        <a href="#">Lorem ipsum dolor sit amet.</a>
-                      </h3>
-                      <p class="post-description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam consectetur cumque dolorum, ex incidunt ipsa laudantium necessitatibus neque quae tempora......</p>
-                      <span class="post-date"><i class="fa fa-clock-o"></i>Out 27, 2019</span>
-                      <a href="#" class="read-more">read more</a>
-                    </div>
-                  </div>
-          
-                  <div class="post-slide">
-                    <div class="post-img">
-                      <img src="https://images.unsplash.com/photo-1564979268369-42032c5ca998?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=300&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=500" alt="">
-                      <a href="#" class="over-layer"><i class="fa fa-link"></i></a>
-                    </div>
-                    <div class="post-content">
-                      <h3 class="post-title">
-                        <a href="#">Lorem ipsum dolor sit amet.</a>
-                      </h3>
-                      <p class="post-description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam consectetur cumque dolorum, ex incidunt ipsa laudantium necessitatibus neque quae tempora......</p>
-                      <span class="post-date"><i class="fa fa-clock-o"></i>Out 27, 2019</span>
-                      <a href="#" class="read-more">read more</a>
-                    </div>
-                  </div>
-          
-                  <div class="post-slide">
-                    <div class="post-img">
-                      <img src="https://images.unsplash.com/photo-1576659531892-0f4991fca82b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=301&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=501" alt="">
-                      <a href="#" class="over-layer"><i class="fa fa-link"></i></a>
-                    </div>
-                    <div class="post-content">
-                      <h3 class="post-title">
-                        <a href="#">Lorem ipsum dolor sit amet.</a>
-                      </h3>
-                      <p class="post-description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam consectetur cumque dolorum, ex incidunt ipsa laudantium necessitatibus neque quae tempora......</p>
-                      <span class="post-date"><i class="fa fa-clock-o"></i>Out 27, 2019</span>
-                      <a href="#" class="read-more">read more</a>
-                    </div>
-                  </div>
-          
-                  <div class="post-slide">
-                    <div class="post-img">
-                      <img src="https://images.unsplash.com/photo-1586083702768-190ae093d34d?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=305&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=505" alt="">
-                      <a href="#" class="over-layer"><i class="fa fa-link"></i></a>
-                    </div>
-                    <div class="post-content">
-                      <h3 class="post-title">
-                        <a href="#">Lorem ipsum dolor sit amet.</a>
-                      </h3>
-                      <p class="post-description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam consectetur cumque dolorum, ex incidunt ipsa laudantium necessitatibus neque quae tempora......</p>
-                      <span class="post-date"><i class="fa fa-clock-o"></i>Out 27, 2019</span>
-                      <a href="#" class="read-more">read more</a>
-                    </div>
-                  </div>
-          
-                  <div class="post-slide">
-                    <div class="post-img">
-                      <img src="https://images.unsplash.com/photo-1484656551321-a1161420a2a0?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&h=306&ixid=eyJhcHBfaWQiOjF9&ixlib=rb-1.2.1&q=80&w=506" alt="">
-                      <a href="#" class="over-layer"><i class="fa fa-link"></i></a>
-                    </div>
-                    <div class="post-content">
-                      <h3 class="post-title">
-                        <a href="#">Lorem ipsum dolor sit amet.</a>
-                      </h3>
-                      <p class="post-description">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aperiam consectetur cumque dolorum, ex incidunt ipsa laudantium necessitatibus neque quae tempora......</p>
-                      <span class="post-date"><i class="fa fa-clock-o"></i>Out 27, 2019</span>
-                      <a href="#" class="read-more">read more</a>
-                    </div>
-                  </div>
+            <div class="row mb-30" data-aos="fade-up" data-aos-delay="500">
+                <div class="col-md-4">
+                   <div class="row">
+                     <div class="col-md-4">
+                        <div class="pandit-front-sec-img">
+                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                        </div>
+                       
+                     </div>
+                     <div class="col-md-8">
+                        <div class="pandit-front-sec-text">
+                            <h3>P.Bibhu Panda</h3>
+                            <span>4.8</span> Exceptional
+                        </div>
+                     </div>
+                   </div>
+                  
                 </div>
-              </div>
+                <div class="col-md-4">
+                    <div class="row">
+                      <div class="col-md-4">
+                         <div class="pandit-front-sec-img">
+                           <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                         </div>
+                        
+                      </div>
+                      <div class="col-md-8">
+                         <div class="pandit-front-sec-text">
+                             <h3>P.Bibhu Panda</h3>
+                             <span>4.8</span> Exceptional
+                         </div>
+                      </div>
+                    </div>
+                   
+                 </div>
+                 <div class="col-md-4">
+                    <div class="row">
+                      <div class="col-md-4">
+                         <div class="pandit-front-sec-img">
+                           <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                         </div>
+                        
+                      </div>
+                      <div class="col-md-8">
+                         <div class="pandit-front-sec-text">
+                             <h3>P.Bibhu Panda</h3>
+                             <span>4.8</span> Exceptional
+                         </div>
+                      </div>
+                    </div>
+                   
+                 </div>
+
+               
             </div>
-          </div>
-    </section>
-
-   
-
-    <section data-anim="slide-up delay-1" class="layout-pt-md layout-pb-md">
-        <div class="container">
-            <div class="row ml-0 mr-0 items-center justify-between">
-                <div class="col-xl-3 px-0" style= "margin-right: 30px">
-                    <img class="col-12 h-400" src="{{ asset('front-assets/img/masthead/2/krishna.jpeg') }}" alt="image">
+            <div class="row mb-30" data-aos="fade-up" data-aos-delay="500">
+                <div class="col-md-4">
+                   <div class="row">
+                     <div class="col-md-4">
+                        <div class="pandit-front-sec-img">
+                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                        </div>
+                       
+                     </div>
+                     <div class="col-md-8">
+                        <div class="pandit-front-sec-text">
+                            <h3>P.Bibhu Panda</h3>
+                            <span>4.8</span> Exceptional
+                        </div>
+                     </div>
+                   </div>
+                  
                 </div>
-
-                <div class="col px-0">
-                    <div class="d-flex justify-center flex-column h-400 px-80 py-40 md:px-30 bg-light-2"
-                        style="padding-left: 20px;"> <!-- Added padding-left -->
-                        <h2 class="text-30 sm:text-24 lh-15 mt-20">Janmastami Puja Starts from Here</h2>
-                        <p class="text-dark-1 mt-5">Select your Pandit who will be with you from start to end of your Puja
-                        </p>
-
-                        <div class="row mt-20">
-                            <div class="col-2">
-                                <a href=""><img src="{{ asset('front-assets/img/avatars/11.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""><img src="{{ asset('front-assets/img/avatars/12.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""><img src="{{ asset('front-assets/img/avatars/13.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""><img src="{{ asset('front-assets/img/avatars/14.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""><img src="{{ asset('front-assets/img/avatars/15.png') }}"
-                                        alt="image"></a>
-                            </div>
-                        </div>
-
-                      
-
-                        <div class="single-field -w-410 d-flex x-gap-10 flex-wrap y-gap-20 pt-30">
-             
-                          <div class="">
-                            <a href="lingaraj-temple-sevayat.html" class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1">Select
-                              Pandit for
-                              Krishna Puja</a>
-                          </div>
-                        </div>
+                <div class="col-md-4">
+                    <div class="row">
+                      <div class="col-md-4">
+                         <div class="pandit-front-sec-img">
+                           <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                         </div>
+                        
+                      </div>
+                      <div class="col-md-8">
+                         <div class="pandit-front-sec-text">
+                             <h3>P.Bibhu Panda</h3>
+                             <span>4.8</span> Exceptional
+                         </div>
+                      </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section data-anim="slide-up delay-1" class="layout-pt-md layout-pb-md">
-        <div class="container">
-            <div class="row ml-0 mr-0 items-center justify-between">
-
-
-                <div class="col px-0" >
-                    <div class="d-flex justify-center flex-column h-400 px-80 py-40 md:px-30 bg-light-2">
-
-                        <h2 class="text-30 sm:text-24 lh-15 mt-20">Ganesh Puja Starts from Here</h2>
-                        <p class="text-dark-1 mt-5">Select your Pandit who will be with you from start to end of your Puja
-                        </p>
-
-                        <div class="row mt-20">
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/11.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/12.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/13.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/14.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/15.png') }}"
-                                        alt="image"></a>
-                            </div>
-                        </div>
-                        <div class="single-field -w-410 d-flex x-gap-10 flex-wrap y-gap-20 pt-30">
-                            <div class="">
-                                <a href="jagannath-temple-sevayat.html"
-                                    class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1">Select
-                                    Pandit for
-                                    Ganesh Puja</a>
-                            </div>
-                        </div>
-
-
+                   
+                 </div>
+                 <div class="col-md-4">
+                    <div class="row">
+                      <div class="col-md-4">
+                         <div class="pandit-front-sec-img">
+                           <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                         </div>
+                        
+                      </div>
+                      <div class="col-md-8">
+                         <div class="pandit-front-sec-text">
+                             <h3>P.Bibhu Panda</h3>
+                             <span>4.8</span> Exceptional
+                         </div>
+                      </div>
                     </div>
-                </div>
+                   
+                 </div>
 
-                <div class="col-xl-3 px-0">
-                    <img class="col-12 h-400" src="{{ asset('front-assets/img/masthead/2/ganesh2.webp') }}"
-                        alt="image">
-                </div>
-
+               
             </div>
-        </div>
-    </section>
 
-    <section data-anim="slide-up delay-1" class="layout-pt-md layout-pb-md">
-        <div class="container">
-            <div class="row ml-0 mr-0 items-center justify-between">
-                <div class="col-xl-3 px-0" style = "margin-right: 30px">
-                    <img class="col-12 h-400" src="{{ asset('front-assets/img/masthead/2/durga1.webp') }}"
-                        alt="image">
-                </div>
-
-                <div class="col px-0">
-                    <div class="d-flex justify-center flex-column h-400 px-80 py-40 md:px-30 bg-light-2">
-
-                        <h2 class="text-30 sm:text-24 lh-15 mt-20">Durga Puja Starts from Here</h2>
-                        <p class="text-dark-1 mt-5">Select your Pandit who will be with you from start to end of your Puja
-                        </p>
-
-
-                        <div class="row mt-20">
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/11.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/12.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/13.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/14.png') }}"
-                                        alt="image"></a>
-                            </div>
-                            <div class="col-2">
-                                <a href=""> <img src="{{ asset('front-assets/img/avatars/15.png') }}"
-                                        alt="image"></a>
-                            </div>
-                        </div>
-                        <div class="resp">
-                            <div class="single-field -w-410 d-flex x-gap-10 flex-wrap y-gap-20 pt-30">
-                                <div class="">
-                                    <a href="jagannath-temple-sevayat.html"
-                                        class="button -md h-60 -blue-1 bg-yellow-1 text-dark-1" >Select
-                                        Pandit for
-                                        Durga Puja</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                </div>
-
-
-
-            </div>
         </div>
     </section>
 
@@ -610,8 +864,8 @@
             <div data-anim="slide-up delay-1" class="row y-gap-20 justify-between items-end">
                 <div class="col-auto">
                     <div class="sectionTitle -md">
-                        <h2 class="sectionTitle__title">Famous Puja</h2>
-                        <p class=" sectionTitle__text mt-5 sm:mt-0">These are few famous puja for you to do</p>
+                        <h2 class="sectionTitle__title">Famous Pooja</h2>
+                        <p class=" sectionTitle__text mt-5 sm:mt-0">These are few famous Pooja for you to do</p>
                     </div>
                 </div>
 
@@ -647,7 +901,7 @@
                                 </div>
 
                                 <div class="citiesCard__bottom">
-                                    <h4 class="text-26 md:text-20 lh-13 text-white mb-20">Balaram Puja</h4>
+                                    <h4 class="text-26 md:text-20 lh-13 text-white mb-20">Balaram Pooja</h4>
                                     <button class="button col-12 h-60 -blue-1 bg-white text-dark-1">Explore Online</button>
                                 </div>
                             </div>
@@ -659,7 +913,7 @@
 
                         <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
                             <div class="citiesCard__image ratio ratio-3:4">
-                                <img src="#" data-src="{{ asset('front-assets/img/masthead/2/puja11.jpeg') }}"
+                                <img src="#" data-src="{{ asset('front-assets/img/masthead/2/Pooja11.jpeg') }}"
                                     alt="image" class="js-lazy">
                             </div>
 
@@ -672,7 +926,7 @@
                                 </div>
 
                                 <div class="citiesCard__bottom">
-                                    <h4 class="text-26 md:text-20 lh-13 text-white mb-20">Rudrabhisek Puja</h4>
+                                    <h4 class="text-26 md:text-20 lh-13 text-white mb-20">Rudrabhisek Pooja</h4>
                                     <button class="button col-12 h-60 -blue-1 bg-white text-dark-1">Explore Online</button>
                                 </div>
                             </div>
@@ -684,7 +938,7 @@
 
                         <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
                             <div class="citiesCard__image ratio ratio-3:4">
-                                <img src="#" data-src="{{ asset('front-assets/img/masthead/2/puja12.jpeg') }}"
+                                <img src="#" data-src="{{ asset('front-assets/img/masthead/2/Pooja12.jpeg') }}"
                                     alt="image" class="js-lazy">
                             </div>
 
@@ -698,7 +952,7 @@
                                 </div>
 
                                 <div class="citiesCard__bottom">
-                                    <h4 class="text-26 md:text-20 lh-13 text-white mb-20">Janmastami Puja</h4>
+                                    <h4 class="text-26 md:text-20 lh-13 text-white mb-20">Janmastami Pooja</h4>
                                     <button class="button col-12 h-60 -blue-1 bg-white text-dark-1">Explore Online</button>
                                 </div>
                             </div>
@@ -710,7 +964,7 @@
 
                         <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
                             <div class="citiesCard__image ratio ratio-3:4">
-                                <img src="#" data-src="{{ asset('front-assets/img/masthead/2/puja14.jpeg') }}"
+                                <img src="#" data-src="{{ asset('front-assets/img/masthead/2/Pooja14.jpeg') }}"
                                     alt="image" class="js-lazy">
                             </div>
 
@@ -723,7 +977,7 @@
                                 </div>
 
                                 <div class="citiesCard__bottom">
-                                    <h4 class="text-26 md:text-20 lh-13 text-white mb-20">Jagannath Puja</h4>
+                                    <h4 class="text-26 md:text-20 lh-13 text-white mb-20">Jagannath Pooja</h4>
                                     <button class="button col-12 h-60 -blue-1 bg-white text-dark-1">Explore Online</button>
                                 </div>
                             </div>
@@ -735,7 +989,7 @@
 
                         <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
                             <div class="citiesCard__image ratio ratio-3:4">
-                                <img src="#" data-src="{{ asset('front-assets/img/masthead/2/puja15.webp') }}"
+                                <img src="#" data-src="{{ asset('front-assets/img/masthead/2/Pooja15.webp') }}"
                                     alt="image" class="js-lazy">
                             </div>
 
@@ -788,336 +1042,7 @@
     </section> --}}
 
 
-    <section class="layout-pt-md layout-pb-lg">
-        <div data-anim-wrap class="container">
-            <div class="tabs -pills-2 js-tabs">
-                <div data-anim-child="slide-up delay-1" class="row y-gap-20 justify-between items-end">
-                    <div class="col-auto">
-                        <div class="sectionTitle -md">
-                            <h2 class="sectionTitle__title">Famous Pandits</h2>
-                            <p class=" sectionTitle__text mt-5 sm:mt-0">Some predefined packages for your Thirt Yatra</p>
-                        </div>
-                    </div>
-
-                    <div class="col-auto">
-                        <div class="tabs__controls row x-gap-10 justify-center js-tabs-controls">
-
-                            <div class="col-auto">
-                                <button
-                                    class="tabs__button text-14 fw-500 px-20 py-10 rounded-4 bg-light-2 js-tabs-button is-tab-el-active"
-                                    data-tab-target=".-tab-item-1">Shiva Temple</button>
-                            </div>
-
-                            <div class="col-auto">
-                                <button
-                                    class="tabs__button text-14 fw-500 px-20 py-10 rounded-4 bg-light-2 js-tabs-button "
-                                    data-tab-target=".-tab-item-2">Maa Durga</button>
-                            </div>
-
-                            <div class="col-auto">
-                                <button
-                                    class="tabs__button text-14 fw-500 px-20 py-10 rounded-4 bg-light-2 js-tabs-button "
-                                    data-tab-target=".-tab-item-3">Vishnu Bhagwan</button>
-                            </div>
-
-                            <div class="col-auto">
-                                <button
-                                    class="tabs__button text-14 fw-500 px-20 py-10 rounded-4 bg-light-2 js-tabs-button "
-                                    data-tab-target=".-tab-item-4">Surya Devta</button>
-                            </div>
-
-                            <div class="col-auto">
-                                <button
-                                    class="tabs__button text-14 fw-500 px-20 py-10 rounded-4 bg-light-2 js-tabs-button "
-                                    data-tab-target=".-tab-item-5">Ganesh </button>
-                            </div>
-
-                            <div class="col-auto">
-                                <button
-                                    class="tabs__button text-14 fw-500 px-20 py-10 rounded-4 bg-light-2 js-tabs-button "
-                                    data-tab-target=".-tab-item-6">Kartikayen</button>
-                            </div>
-
-                            <div class="col-auto">
-                                <button
-                                    class="tabs__button text-14 fw-500 px-20 py-10 rounded-4 bg-light-2 js-tabs-button "
-                                    data-tab-target=".-tab-item-7">Hanuman</button>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tabs__content pt-40 js-tabs-content">
-
-                    <div class="tabs__pane -tab-item-1 is-tab-el-active">
-                        <div class="row y-gap-30">
-
-                            <div data-anim-child="slide-left delay-4" class="col-xl-3 col-lg-3 col-sm-6">
-
-                                <a href="#" class="hotelsCard -type-1 ">
-                                    <div class="hotelsCard__image">
-
-                                        <div class="cardImage ratio ratio-1:1">
-                                            <div class="cardImage__content">
-
-                                                <img class="rounded-4 col-12 js-lazy" src="#"
-                                                    data-src="{{ asset('front-assets/img/avatars/11.png') }}"
-                                                    alt="image">
-                                                {{-- <img src="" alt="image"> --}}
-
-                                            </div>
-
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-
-
-                                            <div class="cardImage__leftBadge">
-                                                <div
-                                                    class="py-5 px-15 rounded-right-4 text-12 lh-16 fw-500 uppercase bg-dark-1 text-white">
-                                                    Bhog included
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="hotelsCard__content mt-10">
-                                        <h4 class="hotelsCard__title text-dark-1 text-18 lh-16 fw-500">
-                                            <span>Maa Sarala Temple</span>
-                                        </h4>
-
-                                        <p class="text-light-1 lh-14 text-14 mt-5">Jhankada, Jagatsinghpur</p>
-
-                                        <div class="d-flex items-center mt-20">
-                                            <div class="flex-center bg-blue-1 rounded-4 size-30 text-12 fw-600 text-white">
-                                                4.8</div>
-                                            <div class="text-14 text-dark-1 fw-500 ml-10">Exceptional</div>
-                                            <div class="text-14 text-light-1 ml-10">3,014 reviews</div>
-                                        </div>
-
-                                        <div class="mt-5">
-                                            <div class="fw-500">
-                                                Starting from <span class="text-blue-1">INR 250</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-
-                            </div>
-
-                            <div data-anim-child="slide-left delay-5" class="col-xl-3 col-lg-3 col-sm-6">
-
-                                <a href="#" class="hotelsCard -type-1 ">
-                                    <div class="hotelsCard__image">
-
-                                        <div class="cardImage ratio ratio-1:1">
-                                            <div class="cardImage__content">
-
-
-                                                <div
-                                                    class="cardImage-slider rounded-4 overflow-hidden js-cardImage-slider">
-                                                    <div class="swiper-wrapper">
-
-                                                        <div class="swiper-slide">
-                                                            <img class="col-12 js-lazy" src="#"
-                                                                data-src="{{ asset('front-assets/img/avatars/12.png') }}"
-                                                                alt="image">
-                                                        </div>
-
-                                                        <div class="swiper-slide">
-                                                            <img class="col-12 js-lazy" src="#"
-                                                                data-src="{{ asset('front-assets/img/avatars/12.png') }}"
-                                                                alt="image">
-                                                        </div>
-
-                                                        <div class="swiper-slide">
-                                                            <img class="col-12 js-lazy" src="#"
-                                                                data-src="{{ asset('front-assets/img/avatars/12.png') }}"
-                                                                alt="image">
-                                                        </div>
-
-                                                    </div>
-
-                                                    <div class="cardImage-slider__pagination js-pagination"></div>
-
-                                                    <div class="cardImage-slider__nav -prev">
-                                                        <button
-                                                            class="button -blue-1 bg-white size-30 rounded-full shadow-2 js-prev">
-                                                            <i class="icon-chevron-left text-10"></i>
-                                                        </button>
-                                                    </div>
-
-                                                    <div class="cardImage-slider__nav -next">
-                                                        <button
-                                                            class="button -blue-1 bg-white size-30 rounded-full shadow-2 js-next">
-                                                            <i class="icon-chevron-right text-10"></i>
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="hotelsCard__content mt-10">
-                                        <h4 class="hotelsCard__title text-dark-1 text-18 lh-16 fw-500">
-                                            <span>AkhandalaMani</span>
-                                        </h4>
-
-                                        <p class="text-light-1 lh-14 text-14 mt-5">Bhadrak, Odisha</p>
-
-                                        <div class="d-flex items-center mt-20">
-                                            <div class="flex-center bg-blue-1 rounded-4 size-30 text-12 fw-600 text-white">
-                                                4.8</div>
-                                            <div class="text-14 text-dark-1 fw-500 ml-10">Exceptional</div>
-                                            <div class="text-14 text-light-1 ml-10">3,014 reviews</div>
-                                        </div>
-
-                                        <div class="mt-5">
-                                            <div class="fw-500">
-                                                Starting from <span class="text-blue-1">INR 200</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-
-                            </div>
-
-                            <div data-anim-child="slide-left delay-6" class="col-xl-3 col-lg-3 col-sm-6">
-
-                                <a href="#" class="hotelsCard -type-1 ">
-                                    <div class="hotelsCard__image">
-
-                                        <div class="cardImage ratio ratio-1:1">
-                                            <div class="cardImage__content">
-
-                                                <img class="rounded-4 col-12 js-lazy" src="#"
-                                                    data-src="{{ asset('front-assets/img/avatars/15.png') }}"
-                                                    alt="image">
-
-
-                                            </div>
-
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-
-
-                                            <div class="cardImage__leftBadge">
-                                                <div
-                                                    class="py-5 px-15 rounded-right-4 text-12 lh-16 fw-500 uppercase bg-blue-1 text-white">
-                                                    Famous for Coconut Bhog
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="hotelsCard__content mt-10">
-                                        <h4 class="hotelsCard__title text-dark-1 text-18 lh-16 fw-500">
-                                            <span>Maa Tarini Temple</span>
-                                        </h4>
-
-                                        <p class="text-light-1 lh-14 text-14 mt-5">Ghata Gaan, Keonjhar</p>
-
-                                        <div class="d-flex items-center mt-20">
-                                            <div class="flex-center bg-blue-1 rounded-4 size-30 text-12 fw-600 text-white">
-                                                4.8</div>
-                                            <div class="text-14 text-dark-1 fw-500 ml-10">Exceptional</div>
-                                            <div class="text-14 text-light-1 ml-10">3,014 reviews</div>
-                                        </div>
-
-                                        <div class="mt-5">
-                                            <div class="fw-500">
-                                                Starting from <span class="text-blue-1">INR 700</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-
-                            </div>
-
-                            <div data-anim-child="slide-left delay-7" class="col-xl-3 col-lg-3 col-sm-6">
-
-                                <a href="#" class="hotelsCard -type-1 ">
-                                    <div class="hotelsCard__image">
-
-                                        <div class="cardImage ratio ratio-1:1">
-                                            <div class="cardImage__content">
-
-                                                <img class="rounded-4 col-12 js-lazy" src="#"
-                                                    data-src="{{ asset('front-assets/img/avatars/14.png') }}"
-                                                    alt="image">
-
-
-                                            </div>
-
-                                            <div class="cardImage__wishlist">
-                                                <button class="button -blue-1 bg-white size-30 rounded-full shadow-2">
-                                                    <i class="icon-heart text-12"></i>
-                                                </button>
-                                            </div>
-
-
-                                            <div class="cardImage__leftBadge">
-                                                <div
-                                                    class="py-5 px-15 rounded-right-4 text-12 lh-16 fw-500 uppercase bg-yellow-1 text-dark-1">
-                                                    Hill and Island View
-                                                </div>
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                    <div class="hotelsCard__content mt-10">
-                                        <h4 class="hotelsCard__title text-dark-1 text-18 lh-16 fw-500">
-                                            <span>Baba Dhabaleswar Shiva</span>
-                                        </h4>
-
-                                        <p class="text-light-1 lh-14 text-14 mt-5">Dhabaleswar, Athagarh</p>
-
-                                        <div class="d-flex items-center mt-20">
-                                            <div class="flex-center bg-blue-1 rounded-4 size-30 text-12 fw-600 text-white">
-                                                4.8</div>
-                                            <div class="text-14 text-dark-1 fw-500 ml-10">Exceptional</div>
-                                            <div class="text-14 text-light-1 ml-10">3,014 reviews</div>
-                                        </div>
-
-                                        <div class="mt-5">
-                                            <div class="fw-500">
-                                                Starting from <span class="text-blue-1">INR 350</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </a>
-
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
+  
     <section class="layout-pt-lg layout-pb-lg bg-dark-3">
         <div class="container">
             <div class="row y-gap-60">
@@ -1387,4 +1312,5 @@
 @endsection
 
 @section('scripts')
+
 @endsection

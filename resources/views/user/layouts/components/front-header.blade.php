@@ -1,6 +1,6 @@
 <div class="header-margin"></div>
 <header data-add-bg="" class="header bg-white shadow-3 js-header" data-x="header" data-x-toggle="is-menu-opened">
-  <div data-anim="fade" class="header__container header__container-1500 mx-auto px-30 sm:px-20">
+  <div data-anim="" class="header__container header__container-1500 mx-auto px-30 sm:px-20">
     <div class="row justify-between items-center">
 
       <div class="col-auto">
