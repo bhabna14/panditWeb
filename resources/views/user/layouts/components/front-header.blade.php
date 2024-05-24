@@ -53,7 +53,7 @@
                   <li class="menu-item-has-children">
                     <a data-barba href="#">
                       <i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i>
-                      Bhabna
+                      Dashboard
                       <i class="icon icon-chevron-sm-down" style="margin-left: 7px;"></i>
                     </a>
 
@@ -75,10 +75,13 @@
                       
 
                     </ul>
+                    
 
                   </li>
-                
+
+                 
                 </ul>
+
               </div>
 
               <div class="mobile-footer px-20 py-20 border-top-light js-mobile-footer">
@@ -86,24 +89,28 @@
             </div>
           </div>
 
+          
+
+
+
         </div>
       </div>
 
 
-      <div class="col-auto">
+      <div class="col-auto" >
         <div class="d-flex items-center">
           <div class="d-flex items-center ml-20 is-menu-opened-hide md:d-none">
             
-         
-            <a href="{{url('/register')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>Pandit Login</a>
               {{-- <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a> --}}
-              
+              <a href="http://127.0.0.1:8000/login" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-left: 20px;width: 100px;background-color: #c80100 !important;justify-content: left;align-items: left;/* align-items: end; */"><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Login</a>
+                <a href="http://127.0.0.1:8000/panditlogin" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-left: 20px;width: 100px;background-color: #c80100 !important;justify-content: left;align-items: left;/* align-items: end; */"><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
+                  
           
             <div class="searchMenu-loc px-10 lg:py-20 lg:px-0 js-form-dd js-liverSearch">
-
+                
                 <div data-x-dd-click="searchMenu-loc">
-                 <div class="button px-10 fw-400 text-14 -outline-blue-1 h-50 ml-20">
-                  <h4 class="text-15 fw-500 ls-2 lh-16">Select Language</h4><i class="icon-chevron-sm-down text-7 ml-15"></i>
+                  <div class="button px-10 fw-400 text-14 -outline-blue-1 h-50 ml-20">
+                    <h4 class="text-15 fw-500 ls-2 lh-16">Select Language</h4><i class="icon-chevron-sm-down text-7 ml-15"></i>
                   </div>
                 </div>
                 <div class="searchMenu-loc__field shadow-2 js-popup-window" data-x-dd="searchMenu-loc" data-x-dd-toggle="-is-active">
@@ -124,12 +131,21 @@
                 </div>
               </div>
         
-              {{-- <a href="{{url('/login')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white"  style = 'width: 100px;'>Login</a> --}}
              
             </div>
 
           <div class="d-none xl:d-flex x-gap-20 items-center pl-30" data-x="header-mobile-icons" data-x-toggle="text-white">
-            <div><a href="#" class="d-flex items-center icon-user text-inherit text-22"></a></div>
+            <div>
+              
+              <div class="dropdown">
+                <button class="dropbtn"><a href="#" class="d-flex items-center icon-user text-inherit text-22"></a></button>
+                <div class="dropdown-content">
+                  <a href="#">Link 1</a>
+                  <a href="#">Link 2</a>
+                  <a href="#">Link 3</a>
+                </div>
+              </div>
+            </div>
             <div><button class="d-flex items-center icon-menu text-inherit text-20" data-x-click="header, header-logo, header-mobile-icons, mobile-menu"></button></div>
           </div>
         </div>
