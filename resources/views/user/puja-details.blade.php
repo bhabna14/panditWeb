@@ -4,63 +4,10 @@
 @endsection
 
 @section('content')
-<section class="puja-details-slider">
-    <div class="container">
-      <div class="relative d-flex justify-center js-section-slider" data-gap="10" data-slider-cols="xl-2 lg-2 base-1" data-nav-prev="js-img-prev" data-nav-next="js-img-next" data-loop>
-        <div class="swiper-wrapper">
 
-          <div class="swiper-slide">
-            <div class="ratio ratio-64:45">
-              <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image" class="rounded-4 img-ratio">
-            </div>
-          </div>
-
-          <div class="swiper-slide">
-            <div class="ratio ratio-64:45">
-              <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image" class="rounded-4 img-ratio">
-            </div>
-          </div>
-
-          <div class="swiper-slide">
-            <div class="ratio ratio-64:45">
-              <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image" class="rounded-4 img-ratio">
-            </div>
-          </div>
-
-          <div class="swiper-slide">
-            <div class="ratio ratio-64:45">
-              <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image" class="rounded-4 img-ratio">
-            </div>
-          </div>
-
-        </div>
-
-        <div class="absolute h-full col-11">
-
-          <button class="section-slider-nav -prev flex-center button -blue-1 bg-white shadow-1 size-40 rounded-full sm:d-none js-img-prev">
-            <i class="icon icon-chevron-left text-12"></i>
-          </button>
-
-          <button class="section-slider-nav -next flex-center button -blue-1 bg-white shadow-1 size-40 rounded-full sm:d-none js-img-next">
-            <i class="icon icon-chevron-right text-12"></i>
-          </button>
-
-        </div>
-
-        <div class="absolute h-full col-12 px-20 py-20 d-flex justify-end items-end">
-          <a href="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" class="button -blue-1 px-24 py-15 bg-white text-dark-1 z-2 js-gallery" data-gallery="gallery2">
-            See All Photos
-          </a>
-          <a href="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" class="js-gallery" data-gallery="gallery2"></a>
-          <a href="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" class="js-gallery" data-gallery="gallery2"></a>
-          <a href="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" class="js-gallery" data-gallery="gallery2"></a>
-        </div>
-      </div>
-    </div>
-  </section>
 <section class="puja-details-sec">
     <div class="container">
-        {{-- <div class="row">
+        <div class="row">
             <div class="col-md-8">
                 <div class="puja-images">
                     <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="">
@@ -72,7 +19,7 @@
                     <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="" class="mt-20">
                 </div>
             </div>
-        </div> --}}
+        </div>
         <div class="row">
             <div class="puja-heading-sec">
                 <h5>Baladevjew Pooja</h5>
