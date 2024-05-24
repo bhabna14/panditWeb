@@ -13142,3 +13142,8 @@ h3.post-title {
 /* Show the dropdown menu on hover */
 .dropdown:hover .dropdown-content {display: block;}
 
+
+.icon-menu:before {
+  content: "\e90a";
+  color: #000 !important;
+}
