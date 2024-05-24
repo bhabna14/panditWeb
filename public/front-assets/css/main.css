@@ -1,5 +1,11 @@
-.ratio {
+.upcoming-pooja .ratio {
   height: 133px;
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+.ratio {
+  /* height: 133px; */
   position: relative;
   display: block;
   overflow: hidden;
@@ -3878,7 +3884,7 @@ h1, h2, h3, h4, h5, h6 {
   height: 100%;
   -o-object-fit: cover;
      object-fit: cover;
-  border-radius: 100%;
+  /* border-radius: 100%; */
 }
 
 .cardImage .cardImage-slider .swiper-wrapper {
@@ -10623,8 +10629,15 @@ div[data-slider] > input[type=range]::-ms-tooltip {
   left: 0;
   width: 100%;
 }
-
 .section-slider-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  background: #c80100 !important;
+  color: #fff;
+}
+.puja-details-slider .section-slider-nav {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -12637,11 +12650,11 @@ table.table-5 td {
 }
 
 /* puja details page */ 
-.puja-details-sec {
+/* .puja-details-sec {
   padding-top: 30px;
  
   margin: 30px 0px 20px 0px;
-}
+} */
 span.rating {
   background-color: green;
   color: #fff;

@@ -1045,147 +1045,99 @@
   
     <section class="layout-pt-lg layout-pb-lg bg-dark-3">
         <div class="container">
-            <div class="row y-gap-60">
-                <div class="col-xl-5 col-lg-6">
-                    <h2 class="text-30 text-white">What is our service</h2>
-                    <p class="text-white mt-20">We are using Technology to revive the hundreds of years old method of
-                        having a peaceful and happy darshan for the religious travellers .</p>
-
-                    <h2 class="text-30 text-white">What is our service</h2>
-
-                    <div class="row y-gap-30 text-white pt-60 lg:pt-40">
-                        <div class="col-sm-5 col-6">
-                            <div class="text-30 lh-15 fw-600">100000</div>
-                            <div class="lh-15">Happy Spiritual Tourist</div>
-                        </div>
-
-                        <div class="col-sm-5 col-6">
-                            <div class="text-30 lh-15 fw-600">4.88</div>
-                            <div class="lh-15">Overall rating</div>
-
-                            <div class="d-flex x-gap-5 items-center pt-10">
-
-                                <div class="icon-star text-white text-10"></div>
-
-                                <div class="icon-star text-white text-10"></div>
-
-                                <div class="icon-star text-white text-10"></div>
-
-                                <div class="icon-star text-white text-10"></div>
-
-                                <div class="icon-star text-white text-10"></div>
-
-                            </div>
-                        </div>
-                    </div>
+          <div class="row y-gap-40 justify-between text-white">
+            <div class="col-xl-5 col-lg-6">
+              <h2 class="text-30">What our customers are<br> saying us?</h2>
+              <p class="text-white mt-20">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas varius tortor nibh, sit amet tempor nibh finibus et. Aenean eu enim justo.</p>
+  
+              <div class="row y-gap-30 pt-60 lg:pt-40">
+                <div class="col-sm-5 col-6">
+                  <div class="text-30 lh-15 fw-600">13m+</div>
+                  <div class="lh-15">Happy People</div>
                 </div>
-
-                <div class="col-xl-4 offset-xl-2 col-lg-5 offset-lg-1 col-md-10">
-
-
-                    <div class="testimonials-slider-2 js-testimonials-slider-2">
-                        <div class="swiper-wrapper">
-
-                            <div class="swiper-slide">
-                                <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40 shadow-2">
-                                    <div class="">
-                                        <h4 class="text-16 fw-500 text-blue-1 mb-20">Traveller from Karnataka</h4>
-                                        <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;Our family was
-                                            traveling to Odisha and we had no idea of getting a good visit to Puri. Then we
-                                            came across 33Crores. They made the visit so easy and the religious trip was
-                                            fantastic.&quot;</p>
-
-                                        <div class="pt-20 mt-28 border-top-light">
-                                            <div class="row x-gap-20 y-gap-20 items-center">
-                                                <div class="col-auto">
-                                                </div>
-
-                                                <div class="col-auto">
-                                                    <div class="text-15 fw-500 lh-14">Venky A</div>
-                                                    <div class="text-14 lh-14 text-light-1 mt-5">Software Engineer</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="swiper-slide">
-                                <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40 shadow-2">
-                                    <div class="">
-                                        <h4 class="text-16 fw-500 text-blue-1 mb-20">Assamese Traveller</h4>
-                                        <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;We wanted to have a
-                                            visit to Puri Temple, some one told us about 33Crores. It was really magical to
-                                            know that we had a dedicated Sebayat for our city, who took all of us around the
-                                            temple and we were delighted to see our ancestors visits to the Devine
-                                            place&quot;</p>
-
-                                        <div class="pt-20 mt-28 border-top-light">
-                                            <div class="row x-gap-20 y-gap-20 items-center">
-                                                <div class="col-auto">
-                                                </div>
-
-                                                <div class="col-auto">
-                                                    <div class="text-15 fw-500 lh-14">Milan Kumar</div>
-                                                    <div class="text-14 lh-14 text-light-1 mt-5">Business Man</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="swiper-slide">
-                                <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40 shadow-2">
-                                    <div class="">
-                                        <h4 class="text-16 fw-500 text-blue-1 mb-20">Tarveller from Madurai</h4>
-                                        <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;We reached Lingaraj
-                                            Temple a Priest was ready to guide us and showed us the temple. We had heard
-                                            priest of Odisha were harsh but its not true. We felt as if we were the part of
-                                            the Culture. Infact the online service of 33 Crores is the best and should be
-                                            implemeted in all temples across India &quot;</p>
-
-                                        <div class="pt-20 mt-28 border-top-light">
-                                            <div class="row x-gap-20 y-gap-20 items-center">
-                                                <div class="col-auto">
-                                                </div>
-
-                                                <div class="col-auto">
-                                                    <div class="text-15 fw-500 lh-14">R Swamy</div>
-                                                    <div class="text-14 lh-14 text-light-1 mt-5">Hotel Owner</div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-
-                        <div class="d-flex x-gap-15 items-center justify-center pt-30">
-                            <div class="col-auto">
-                                <button class="d-flex items-center text-24 arrow-left-hover text-white js-prev">
-                                    <i class="icon icon-arrow-left"></i>
-                                </button>
-                            </div>
-
-                            <div class="col-auto">
-                                <div class="pagination -dots text-white-50 js-pagination"></div>
-                            </div>
-
-                            <div class="col-auto">
-                                <button class="d-flex items-center text-24 arrow-right-hover text-white js-next">
-                                    <i class="icon icon-arrow-right"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                    </div>
+  
+                <div class="col-sm-5 col-6">
+                  <div class="text-30 lh-15 fw-600">4.88</div>
+                  <div class="lh-15">Overall rating</div>
+  
+                  <div class="d-flex x-gap-5 items-center pt-10">
+  
+                    <div class="icon-star text-white text-10"></div>
+  
+                    <div class="icon-star text-white text-10"></div>
+  
+                    <div class="icon-star text-white text-10"></div>
+  
+                    <div class="icon-star text-white text-10"></div>
+  
+                    <div class="icon-star text-white text-10"></div>
+  
+                  </div>
                 </div>
+              </div>
             </div>
+  
+            <div data-anim="slide-up delay-2" class="col-lg-6">
+              <div class="overflow-hidden js-testimonials-slider-3" data-scrollbar>
+                <div class="swiper-wrapper">
+  
+                  <div class="swiper-slide">
+                    <div class="row items-center x-gap-30 y-gap-20">
+                      <div class="col-auto">
+                        <img src="img/avatars/1.png" alt="image">
+                      </div>
+  
+                      <div class="col-auto">
+                        <h5 class="text-16 text-white fw-500">Annette Black</h5>
+                        <div class="text-15 text-white lh-15">UX / UI Designer</div>
+                      </div>
+                    </div>
+  
+                    <p class="text-18 fw-500 text-white mt-30 sm:mt-20">The place is in a great location in Gumbet. The area is safe and beautiful. The apartment was comfortable and the host was kind and responsive to our requests.</p>
+                  </div>
+  
+                  <div class="swiper-slide">
+                    <div class="row items-center x-gap-30 y-gap-20">
+                      <div class="col-auto">
+                        <img src="img/avatars/1.png" alt="image">
+                      </div>
+  
+                      <div class="col-auto">
+                        <h5 class="text-16 text-white fw-500">Annette Black</h5>
+                        <div class="text-15 text-white lh-15">UX / UI Designer</div>
+                      </div>
+                    </div>
+  
+                    <p class="text-18 fw-500 text-white mt-30 sm:mt-20">The place is in a great location in Gumbet. The area is safe and beautiful. The apartment was comfortable and the host was kind and responsive to our requests.</p>
+                  </div>
+  
+                  <div class="swiper-slide">
+                    <div class="row items-center x-gap-30 y-gap-20">
+                      <div class="col-auto">
+                        <img src="img/avatars/1.png" alt="image">
+                      </div>
+  
+                      <div class="col-auto">
+                        <h5 class="text-16 text-white fw-500">Annette Black</h5>
+                        <div class="text-15 text-white lh-15">UX / UI Designer</div>
+                      </div>
+                    </div>
+  
+                    <p class="text-18 fw-500 text-white mt-30 sm:mt-20">The place is in a great location in Gumbet. The area is safe and beautiful. The apartment was comfortable and the host was kind and responsive to our requests.</p>
+                  </div>
+  
+                </div>
+  
+                <div class="d-flex items-center mt-60 sm:mt-20 js-testimonials-slider-pag">
+                  <div class="text-white fw-500 js-current">01</div>
+                  <div class="slider-scrollbar -light bg-white-10 ml-20 mr-20 w-max-300 js-scrollbar"></div>
+                  <div class="text-white fw-500 js-all">05</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-    </section>
+      </section>
 
     <section data-anim="slide-up delay-1" class="layout-pt-md layout-pb-md">
         <div class="container">

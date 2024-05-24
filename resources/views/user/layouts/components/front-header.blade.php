@@ -50,7 +50,7 @@
                   <li>
                     <a href="{{url('contact')}}">Contact</a>
                   </li>
-                  <li class="menu-item-has-children">
+                  {{-- <li class="menu-item-has-children">
                     <a data-barba href="#">
                       <i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i>
                       Dashboard
@@ -77,7 +77,7 @@
                     </ul>
                     
 
-                  </li>
+                  </li> --}}
 
                  
                 </ul>
