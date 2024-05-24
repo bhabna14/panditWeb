@@ -6,16 +6,18 @@ use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TitleController;
+use App\Http\Controllers\pandit\SkillController;
 use App\Http\Controllers\Pandit\CareerController;
 use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
-use App\Http\Controllers\Pandit\ProfileController;
 
+use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
+use App\Http\Controllers\pandit\PoojaDetailsController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
-use App\Http\Controllers\pandit\SkillController;
+
 
 
 ## user login
@@ -178,5 +180,13 @@ Route::group(['prefix' => 'pandit'], function () {
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(SkillController::class)->group(function() {
         Route::post('/save-skillpooja', 'saveSkillPooja');
+        Route::put('/update-skillpooja', 'updateSkillPooja')->name('updateSkillPooja');
+
+    });
+});
+
+Route::group(['prefix' => 'pandit'], function () {
+    Route::controller(PoojaDetailsController::class)->group(function() {
+        Route::post('/save-poojadetails', 'savePoojadetails');
     });
 });

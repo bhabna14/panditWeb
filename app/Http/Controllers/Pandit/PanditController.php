@@ -36,7 +36,21 @@ class PanditController extends Controller
     }
 
     public function poojaexperties(){
-        return view("/pandit/poojaexperties");
+
+        $Poojanames = Poojalist::where('status', 'active')->get();
+
+        $profile = Profile::where('status', 'active')->first();
+
+        if (!$profile) {
+            return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
+        }
+
+        $profileId = $profile->profile_id;
+        // Fetch previously selected poojas
+        $selectedPoojas = Poojaskill::where('pandit_id', $profileId)->pluck('pooja_id')->toArray();
+
+        // Pass the data to the view
+        return view('/pandit/poojaexperties', compact('Poojanames', 'selectedPoojas'));
     }
 
     public function poojadetails(){

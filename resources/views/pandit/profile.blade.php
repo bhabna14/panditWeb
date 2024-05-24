@@ -26,7 +26,7 @@
     <div class="row">
         <div class="col-lg-12 col-md-12">
             <div class="card custom-card">
-               
+
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
@@ -52,33 +52,33 @@
                 <div class="tab-content">
                     <div class="main-content-body tab-pane border-top-0 active" id="skill">
                         @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-                    @if (session()->has('success'))
-                        <div class="alert alert-success" id="Message">
-                            {{ session()->get('success') }}
-                        </div>
-                    @endif
+                        @if (session()->has('success'))
+                            <div class="alert alert-success" id="Message">
+                                {{ session()->get('success') }}
+                            </div>
+                        @endif
 
-                    @if ($errors->has('danger'))
-                        <div class="alert alert-danger" id="Message">
-                            {{ $errors->first('danger') }}
-                        </div>
-                    @endif
+                        @if ($errors->has('danger'))
+                            <div class="alert alert-danger" id="Message">
+                                {{ $errors->first('danger') }}
+                            </div>
+                        @endif
 
                         <form action="{{ url('/pandit/save-skillpooja') }}" method="post" enctype="multipart/form-data">
                             <div class="row mb-5">
                                 @csrf
                                 @foreach ($Poojanames as $pooja)
                                     <div class="col-lg-3 col-md-6 col-sm-12">
-                                      
+
                                         <div class="card p-3">
                                             <div class="card-body">
                                                 <div class="mb-3 text-center about-team">
@@ -95,10 +95,11 @@
                                                 <div class="form-check mt-3 text-center">
                                                     <input class="form-check-input checks" type="checkbox"
                                                         id="checkbox{{ $pooja->id }}"
-                                                        name="poojas[{{ $pooja->id }}][id]" value="{{ $pooja->id }}">
+                                                        name="poojas[{{ $pooja->id }}][id]"
+                                                        value="{{ $pooja->id }}">
                                                     <input type="hidden" name="poojas[{{ $pooja->id }}][name]"
                                                         value="{{ $pooja->pooja_name }}">
-                                                        <input type="hidden" name="poojas[{{ $pooja->id }}][image]"
+                                                    <input type="hidden" name="poojas[{{ $pooja->id }}][image]"
                                                         value="{{ $pooja->pooja_photo }}">
                                                 </div>
                                             </div>
@@ -116,12 +117,14 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="table-responsive  export-table">
+                                    <form action="{{ url('/pandit/save-poojadetails') }}" method="post" enctype="multipart/form-data">
+                                        @csrf
+
                                     <table id="file-datatable"
                                         class="table table-bordered text-nowrap key-buttons border-bottom">
                                         <thead>
                                             <tr>
-                                                <th class="border-bottom-0">#</th>
-
+                                                <th class="border-bottom-0">Slno</th>
                                                 <th class="border-bottom-0">Puja Name</th>
                                                 <th class="border-bottom-0">Fee</th>
                                                 <th class="border-bottom-0">Duration</th>
@@ -132,44 +135,65 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-
-                                            @foreach ($Poojaskills as $index => $poojaSkill)
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td class="tb-col">
-                                                    <div class="media-group">
-                                                        <div class="media media-md media-middle media-circle">
-                                                            <img src="{{ asset('assets/img/' . $poojaSkill->pooja_photo) }}" alt="{{ $poojaSkill->pooja_name }}">
-                                                        </div>
-                                                        <div class="media-text">
-                                                            <a href="" class="title">{{ $poojaSkill->pooja_name }}</a>
-                                                        </div>
+                                               
+                                                @foreach ($Poojaskills as $index => $poojaSkill)
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td class="tb-col">
+                                                            <div class="media-group">
+                                                                <div class="media media-md media-middle media-circle">
+                                                                    <img src="{{ asset('assets/img/' . $poojaSkill->pooja_photo) }}"
+                                                                        alt="{{ $poojaSkill->pooja_name }}">
+                                                                </div>
+                                                                <div class="media-text">
+                                                                    <a href=""
+                                                                        class="title">{{ $poojaSkill->pooja_name }}</a>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" name="fee[{{ $poojaSkill->id }}]"
+                                                                class="form-control"
+                                                                value="{{ old('fee.' . $poojaSkill->id) }}">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text" name="duration[{{ $poojaSkill->id }}]"
+                                                                class="form-control"
+                                                                value="{{ old('duration.' . $poojaSkill->id) }}">
+                                                        </td>
+                                                        <td>
+                                                            <input type="file" name="image[{{ $poojaSkill->id }}]"
+                                                                class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="file" name="video[{{ $poojaSkill->id }}]"
+                                                                class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="text"
+                                                                name="done_count[{{ $poojaSkill->id }}]"
+                                                                class="form-control"
+                                                                value="{{ old('done_count.' . $poojaSkill->id) }}">
+                                                        </td>
+                                                        <input type="hidden" name="pooja_id[{{ $poojaSkill->id }}]"
+                                                            value="{{ $poojaSkill->pooja_id }}">
+                                                        <input type="hidden" name="pooja_name[{{ $poojaSkill->id }}]"
+                                                            value="{{ $poojaSkill->pooja_name }}">
+                                                             <div class="text-center col-md-12">
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    <input type="text" name="fee[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('fee.' . $poojaSkill->id) }}">
-                                                </td>
-                                                <td>
-                                                    <input type="text" name="duration[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('duration.' . $poojaSkill->id) }}">
-                                                </td>
-                                                <td>
-                                                    <input type="file" name="image[{{ $poojaSkill->id }}]" class="form-control">
-                                                </td>
-                                                <td>
-                                                    <input type="file" name="video[{{ $poojaSkill->id }}]" class="form-control">
-                                                </td>
-                                                <td>
-                                                    <input type="text" name="done_count[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('done_count.' . $poojaSkill->id) }}">
-                                                </td>
-                                            </tr>
-                                            @endforeach
-
+                                                    </tr>
+                                                @endforeach
+                                               
+                                                  
                                         </tbody>
                                     </table>
+                                        <div class="text-center col-md-12">
+                                            <button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
+                                        </div>
+                                </form>
+
                                 </div>
-                                <div class="text-center col-md-12">
-                                    <button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
-                                </div>
+                             
                             </div>
                         </div>
                     </div>
@@ -383,8 +407,10 @@
     <!-- Internal Select2 js-->
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
+    <script src="{{ asset('assets/js/pandit-profile.js') }}"></script>
+
     <script>
-        setTimeout(function(){
+        setTimeout(function() {
             document.getElementById('Message').style.display = 'none';
         }, 3000);
     </script>

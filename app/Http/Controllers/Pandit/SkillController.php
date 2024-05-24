@@ -48,4 +48,44 @@ class SkillController extends Controller
             return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
         }
     }
+    public function updateSkillPooja(Request $request)
+    {
+        // Get the active profile
+        $profile = Profile::where('status', 'active')->first();
+
+        if (!$profile) {
+            return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
+        }
+
+        $profileId = $profile->profile_id;
+
+        // Delete existing entries for the pandit
+        Poojaskill::where('pandit_id', $profileId)->delete();
+
+        $allSaved = true;
+
+        foreach ($request->input('poojas', []) as $pooja) {
+            if (!isset($pooja['id'])) {
+                continue;
+            }
+
+            $poojaSkill = new Poojaskill([
+                'pandit_id' => $profileId,
+                'pooja_id' => $pooja['id'],
+                'pooja_name' => $pooja['name'],
+                'pooja_photo' => $pooja['image'],
+            ]);
+
+            if (!$poojaSkill->save()) {
+                $allSaved = false;
+                break;
+            }
+        }
+
+        if ($allSaved) {
+            return redirect()->back()->with('success', 'Poojas have been updated successfully.');
+        } else {
+            return redirect()->back()->withErrors(['danger' => 'Failed to update data.']);
+        }
+    }
 }
