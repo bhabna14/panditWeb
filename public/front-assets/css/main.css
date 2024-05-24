@@ -13117,7 +13117,7 @@ h3.post-title {
 
 /* Dropdown Content (Hidden by Default) */
 .dropdown-content {
-  display: block;
+  display: none;
   position: absolute;
   background-color: #ffff;
   min-width: 160px;
