@@ -5,87 +5,123 @@ namespace App\Http\Controllers\pandit;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Poojaskill;
+use App\Models\Poojalist;
+use App\Models\Poojadetails;
+
 use App\Models\Profile;
 
 use DB;
 
 class SkillController extends Controller
 {
+    
+    public function poojaskill(){
 
-    public function saveSkillPooja(Request $request)
-    {
-     
-        $allSaved = true;
+        $Poojanames = Poojalist::where('status', 'active')->get();
+
+        
+        $profile = Profile::where('status', 'active')->first();
+
+        if (!$profile) {
+            return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
+        }
+
+        $profileId = $profile->profile_id;
+        // Fetch previously selected poojas
+        $selectedPoojas = Poojaskill::where('pandit_id', $profileId)->where('status','active')->pluck('pooja_id')->toArray();
+
+        return view('/pandit/poojaskill', compact('Poojanames','selectedPoojas'));
+    }
+    public function managepoojaskill(){
+
+        $Poojanames = Poojalist::where('status', 'active')->get();
 
         $profile = Profile::where('status', 'active')->first();
 
         if (!$profile) {
             return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
         }
+
         $profileId = $profile->profile_id;
+        // Fetch previously selected poojas
+        $selectedPoojas = Poojaskill::where('pandit_id', $profileId)->where('status','active')->pluck('pooja_id')->toArray();
 
-        foreach ($request->input('poojas', []) as $pooja) {
-
-            if (!isset($pooja['id'])) {
-                continue;
-            }
-            $poojaSkill = new Poojaskill([
-                'pandit_id' => $profileId,
-                'pooja_id' => $pooja['id'],
-                'pooja_name' => $pooja['name'],
-                'pooja_photo' => $pooja['image'] ?? null,
-            ]);
-
-            if (!$poojaSkill->save()) {
-                $allSaved = false;
-                break; 
-            }
-        }
-
-        if ($allSaved) {
-            return redirect()->back()->with('success', 'Poojas have been saved successfully.');
-        } else {
-            return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
-        }
+        // Pass the data to the view
+        return view('/pandit/managepoojaskill', compact('Poojanames', 'selectedPoojas'));
     }
-    public function updateSkillPooja(Request $request)
+   
+
+   
+    public function saveSkillPooja(Request $request)
     {
         // Get the active profile
         $profile = Profile::where('status', 'active')->first();
-
+    
         if (!$profile) {
             return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
         }
-
+    
         $profileId = $profile->profile_id;
-
-        // Delete existing entries for the pandit
-        Poojaskill::where('pandit_id', $profileId)->delete();
-
+    
+        // Get all submitted pooja IDs
+        $submittedPoojaIds = array_column($request->input('poojas', []), 'id');
+    
+        // Update status to 'delet' for Poojadetails entries not in the submitted pooja IDs
+        Poojadetails::where('pandit_id', $profileId)
+                    ->whereNotIn('pooja_id', $submittedPoojaIds)
+                    ->update(['status' => 'delet']);
+    
+        // Update pooja_status to 'hide' and status to 'delet' for existing Poojaskill entries not in submitted pooja IDs
+        Poojaskill::where('pandit_id', $profileId)
+                  ->whereNotIn('pooja_id', $submittedPoojaIds)
+                  ->update(['status' => 'delet', 'pooja_status' => 'hide']);
+    
         $allSaved = true;
-
+    
         foreach ($request->input('poojas', []) as $pooja) {
             if (!isset($pooja['id'])) {
                 continue;
             }
-
-            $poojaSkill = new Poojaskill([
-                'pandit_id' => $profileId,
-                'pooja_id' => $pooja['id'],
-                'pooja_name' => $pooja['name'],
-                'pooja_photo' => $pooja['image'],
-            ]);
-
+    
+            // Check if the pooja already exists in Poojaskill
+            $poojaSkill = Poojaskill::where('pandit_id', $profileId)
+                                    ->where('pooja_id', $pooja['id'])
+                                    ->first();
+    
+            if ($poojaSkill) {
+                // Update the existing entry's pooja_status to 'show' and status to 'active'
+                $poojaSkill->pooja_status = 'show';
+                $poojaSkill->status = 'active';
+            } else {
+                // Create a new Poojaskill entry
+                $poojaSkill = new Poojaskill([
+                    'pandit_id' => $profileId,
+                    'pooja_id' => $pooja['id'],
+                    'pooja_name' => $pooja['name'],
+                    'pooja_photo' => $pooja['image'],
+                    'pooja_status' => 'show',
+                    'status' => 'active'
+                ]);
+            }
+    
+            // Save the Poojaskill entry
             if (!$poojaSkill->save()) {
                 $allSaved = false;
                 break;
             }
+    
+            // Find the Poojadetails entry with the same pooja_id
+            $poojaDetails = Poojadetails::where('pooja_id', $pooja['id'])
+                                        ->first();
+    
+       
         }
-
+    
         if ($allSaved) {
-            return redirect()->back()->with('success', 'Poojas have been updated successfully.');
+            return redirect()->back()->with('success', 'Pooja skills have been updated successfully.');
         } else {
-            return redirect()->back()->withErrors(['danger' => 'Failed to update data.']);
+            return redirect()->back()->withErrors(['danger' => 'Failed to update some pooja skills.']);
         }
     }
+
 }
