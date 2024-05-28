@@ -64,6 +64,8 @@ Route::controller(SuperAdminController::class)->group(function() {
     Route::post('superadmin/authenticate', 'authenticate')->name('authenticate');
     Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
     Route::post('superadmin/logout', 'sulogout')->name('sulogout');
+    Route::post('superadmin/logout', 'sulogout')->name('sulogout');
+
 });
 
 
@@ -79,7 +81,6 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::post('/update/{id}', [SuperAdminController::class, 'update'])->name('update');
     Route::get('/dltadmin/{id}', [SuperAdminController::class, 'dltadmin'])->name('dltadmin');
 
-    Route::get('/adminlist', [SuperAdminController::class, 'adminlist']);
 });
 
 ## admin routes
@@ -134,22 +135,13 @@ Route::prefix('user')->middleware(['user'])->group(function () {
         
     });
 });
+
 /// pandit routes
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
         Route::get('/panditlogin', 'panditlogin');
-        Route::get('/profile', 'panditprofile')->name('panditprofile');
-        Route::get('/dashboard', 'panditdashboard')->name('panditdashboard');
-        Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
-        Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
-        Route::get('/poojaexperties', 'poojaexperties')->name('poojaexperties');
-        Route::get('/poojadetails', 'poojadetails')->name('poojadetails');
-        Route::get('/poojalist', 'poojalist')->name('poojalist');
-        Route::get('/bank', 'bank')->name('bank');
-        Route::get('/address', 'panditaddress')->name('panditaddress');
-        Route::get('/get-states/{countryId}', 'getStates');
-        Route::get('/get-city/{stateId}', 'getCity');
-        Route::get('/savea', 'storeMultipleLocations')->name('storeMultipleLocations');
+        Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
+        Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
     });
 });
 
@@ -160,7 +152,6 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::post('/save-profile', 'saveprofile');
         Route::get('/manageprofile', 'manageprofile')->name('manageprofile');
         Route::put('/updateProfile/{id}','updateProfile')->name('updateProfile');
-
     });
 });
 
@@ -168,6 +159,7 @@ Route::group(['prefix' => 'pandit'], function () {
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(CareerController::class)->group(function() {
         Route::get('/career', 'profilecareer')->name('profilecareer');
+        Route::get('/managecareer', 'managecareer')->name('managecareer');
         Route::post('/save-career', 'savecareer');
         Route::get('/deletIdproof/{id}', 'deletIdproof')->name('deletIdproof');
         Route::get('/deletEducation/{id}', 'deletEducation')->name('deletEducation');
@@ -176,17 +168,24 @@ Route::group(['prefix' => 'pandit'], function () {
     });
 
     });
-
+// pandit skill crud operation
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(SkillController::class)->group(function() {
         Route::post('/save-skillpooja', 'saveSkillPooja');
         Route::put('/update-skillpooja', 'updateSkillPooja')->name('updateSkillPooja');
-
+        Route::get('/poojaskill', 'poojaskill')->name('poojaskill');
+        Route::get('/managepoojaskill', 'managepoojaskill')->name('managepoojaskill');
     });
 });
+// pandit pooja details crud operation
 
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaDetailsController::class)->group(function() {
+        Route::get('/poojadetails', 'poojadetails')->name('poojadetails');
         Route::post('/save-poojadetails', 'savePoojadetails');
+        Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
+        Route::put('/update-poojadetails', 'updatePoojadetails')->name('updatePoojadetails');
+        Route::get('/pandit/poojadetails',  'poojadetails')->name('pandit.poojadetails');
     });
 });
+
