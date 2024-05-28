@@ -49,25 +49,25 @@
                 <div class="tabs__content pt-20 js-tabs-content">
   
                   <div class="tabs__pane -tab-item-1 is-tab-el-active">
-                    <p class="text-15 text-dark-1">
+                    <p class="text-15 text-dark-1 mb-30">
                       Pharetra nulla ullamcorper sit lectus. Fermentum mauris pellentesque nec nibh sed et, vel diam, massa. Placerat quis vel fames interdum urna lobortis sagittis sed pretium. Morbi sed arcu proin quis tortor non risus.
-                      <br><br>
+                      <br>
                       Elementum lectus a porta commodo suspendisse arcu, aliquam lectus faucibus.
                     </p>
                   </div>
   
-                  <div class="tabs__pane -tab-item-2 ">
+                  <div class="tabs__pane -tab-item-2 mb-30">
                     <p class="text-15 text-dark-1">
                       Pharetra nulla ullamcorper sit lectus. Fermentum mauris pellentesque nec nibh sed et, vel diam, massa. Placerat quis vel fames interdum urna lobortis sagittis sed pretium. Morbi sed arcu proin quis tortor non risus.
-                      <br><br>
+                      <br>
                       Elementum lectus a porta commodo suspendisse arcu, aliquam lectus faucibus.
                     </p>
                   </div>
   
-                  <div class="tabs__pane -tab-item-3 ">
+                  <div class="tabs__pane -tab-item-3 mb-30">
                     <p class="text-15 text-dark-1">
                       Pharetra nulla ullamcorper sit lectus. Fermentum mauris pellentesque nec nibh sed et, vel diam, massa. Placerat quis vel fames interdum urna lobortis sagittis sed pretium. Morbi sed arcu proin quis tortor non risus.
-                      <br><br>
+                      <br>
                       Elementum lectus a porta commodo suspendisse arcu, aliquam lectus faucibus.
                     </p>
                   </div>

@@ -7,7 +7,7 @@
         </a>
       </div>
 
-      <div class="row justify-between items-center pl-60 lg:pl-20">
+      <div class="row justify-between items-center  lg:pl-20">
         <div class="col-auto">
           <div class="d-flex items-center">
             <button data-x-click="dashboard">

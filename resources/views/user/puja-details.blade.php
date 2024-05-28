@@ -8,12 +8,12 @@
 <section class="puja-details-sec">
     <div class="container">
         <div class="row">
-            <div class="col-md-8">
+            <div class="col-md-8 col-8">
                 <div class="puja-images">
                     <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="">
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4 col-4">
                 <div class="puja-images">
                     <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="">
                     <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="" class="mt-20">
@@ -55,11 +55,11 @@
                                         <img class="card-pooja" src="{{ asset('front-assets/img/avatars/pandit4.jpeg') }}" alt="image">
                                     </div>
                                     <div class="pooja-head row">
-                                        <div class="col-md-8">
+                                        <div class="col-md-8 col-7">
                                             <h5>P.Bibhu Panda</h5>
                                             <p>Lorem ipsum dolor sit amet consectetur.</p>
                                         </div>
-                                        <div class="col-md-4 text-right">
+                                        <div class="col-md-4 col-5 text-right">
                                             <span class="rating">4.4</span>
                                             <p>₹3000</p>
                                             <p>2 hrs</p>
@@ -76,11 +76,11 @@
                                         <img class="card-pooja" src="{{ asset('front-assets/img/avatars/pandit4.jpeg') }}" alt="image">
                                     </div>
                                     <div class="pooja-head row">
-                                        <div class="col-md-8">
+                                        <div class="col-md-8 col-7">
                                             <h5>P.Bibhu Panda</h5>
                                             <p>Lorem ipsum dolor sit amet consectetur.</p>
                                         </div>
-                                        <div class="col-md-4 text-right">
+                                        <div class="col-md-4 col-5 text-right">
                                             <span class="rating">4.4</span>
                                             <p>₹3000</p>
                                             <p>2 hrs</p>
@@ -97,11 +97,11 @@
                                         <img class="card-pooja" src="{{ asset('front-assets/img/avatars/pandit4.jpeg') }}" alt="image">
                                     </div>
                                     <div class="pooja-head row">
-                                        <div class="col-md-8">
+                                        <div class="col-md-8 col-7">
                                             <h5>P.Bibhu Panda</h5>
                                             <p>Lorem ipsum dolor sit amet consectetur.</p>
                                         </div>
-                                        <div class="col-md-4 text-right">
+                                        <div class="col-md-4 col-5 text-right">
                                             <span class="rating">4.4</span>
                                             <p>₹3000</p>
                                             <p>2 hrs</p>

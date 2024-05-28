@@ -11,7 +11,6 @@ use App\Http\Controllers\Pandit\CareerController;
 use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
-
 use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
@@ -123,6 +122,10 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::controller(OrderController::class)->group(function() {
         Route::get('/manage-orders', 'manageorders')->name('manageorders');
         // Route::get('/savelocation', 'savelocation')->name('savelocation');
+    });
+
+    Route::controller(PodcastController::class)->group(function() {
+        Route::get('/manage-podcast', 'managepodcast')->name('managepodcast');
     });
    
 });

@@ -6,7 +6,7 @@
 
 @section('content')
     <!-- Main Section -->
-    <section data-anim-wrap class="masthead -type-2 js-mouse-move-container">
+    <section data-anim-wrap class="masthead -type-2 js-mouse-move-container" style="margin-top: -17px;">
         <div class="masthead__bg bg-dark-3">
             <img src="{{ asset('front-assets/img/masthead/2/mayura1.jpg') }}" alt="image">
         </div>
