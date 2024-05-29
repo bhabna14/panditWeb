@@ -56,7 +56,7 @@ class PodcastController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'music' => 'nullable|mimes:mp3,wav|max:1000000'
+            'music' => 'nullable|mimes:mp3,WAV|max:100000000'
         ]);
 
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
