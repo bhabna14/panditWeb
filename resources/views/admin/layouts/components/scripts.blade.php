@@ -54,3 +54,9 @@
     }
 
 		</script>
+
+<script>
+	setTimeout(function(){
+		document.getElementById('Message').style.display = 'none';
+	}, 3000);
+</script>

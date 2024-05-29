@@ -13,9 +13,13 @@
         <div class="custom-card main-content-body-profile">
             <div class="main-content-body tab-pane border-top-0" id="bank">
                 <!-- row -->
-               
-                <form action="" method="post" enctype="multipart/form-data">
-                    {{-- @csrf --}}
+                @if(session('success'))
+                    <div style="color: green;">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                <form action="{{ url('pandit/savebankdetails')}}" method="post" enctype="multipart/form-data">
+                    @csrf
                     {{-- @method('PUT') --}}
                     <div class="row">
                         <div class="col-lg-12 col-md-12">
@@ -27,14 +31,13 @@
                                    
                                     <!-- <p class="mg-b-20">A form control layout using basic layout.</p> -->
                                     <div class="row">
-                                        <input type="hidden" class="form-control" id="exampleInputEmail1"
-                                            name="userid" value="" placeholder="Enter First Name">
+                                       
 
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="exampleInputEmail1">Bank Name</label>
                                                 <input type="text" class="form-control" name="bankname"
-                                                    value="" id="exampleInputEmail1"
+                                                    value="{{$bankdata->bankname}}" id="exampleInputEmail1"
                                                     placeholder="Enter Bank Name">
                                             </div>
                                         </div>
@@ -42,7 +45,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">Branch Name</label>
                                                 <input type="text" class="form-control" name="branchname"
-                                                    value="" id="exampleInputPassword1"
+                                                    value="{{$bankdata->branchname}}" id="exampleInputPassword1"
                                                     placeholder="Enter Branch Name">
                                             </div>
                                         </div>
@@ -50,7 +53,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">IFSC Code</label>
                                                 <input type="text" class="form-control" name="ifsccode"
-                                                    value="" id="exampleInputPassword1"
+                                                    value="{{$bankdata->ifsccode}}" id="exampleInputPassword1"
                                                     placeholder="Enter IFSC Code">
                                             </div>
                                         </div>
@@ -58,7 +61,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputEmail1">Account Holder Name</label>
                                                 <input type="text" class="form-control" name="accname"
-                                                    value="" id="exampleInputEmail1"
+                                                    value="{{$bankdata->accname}}" id="exampleInputEmail1"
                                                     placeholder="Enter Account Holder Name">
                                             </div>
                                         </div>
@@ -67,7 +70,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">Account Number</label>
                                                 <input type="text" class="form-control" name="accnumber"
-                                                    value="" id="exampleInputPassword1"
+                                                    value="{{$bankdata->accnumber}}" id="exampleInputPassword1"
                                                     placeholder="Enter Account Number">
                                             </div>
                                         </div>
@@ -75,8 +78,8 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">UPI Number/ID</label>
-                                                <input type="text" class="form-control" name="accnumber"
-                                                    value="" id="exampleInputPassword1"
+                                                <input type="text" class="form-control" name="upi_number"
+                                                    value="{{$bankdata->upi_number}}" id="exampleInputPassword1"
                                                     placeholder="Enter Account Number">
                                             </div>
                                         </div>

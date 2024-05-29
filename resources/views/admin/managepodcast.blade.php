@@ -19,20 +19,30 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Orders</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Podcast</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                            {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
+                            <a href="{{url('admin/add-podcast')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Podcast</a>
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Pandits</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Podcast</li>
                         </ol>
                     </div>
                 </div>
                 <!-- /breadcrumb -->
 
                    
-
+                @if(session()->has('success'))
+                <div class="alert alert-success" id="Message">
+                    {{ session()->get('success') }}
+                </div>
+                @endif
+            
+                @if ($errors->has('danger'))
+                    <div class="alert alert-danger" id="Message">
+                        {{ $errors->first('danger') }}
+                    </div>
+                @endif
                   
 
                     <!-- Row -->
@@ -48,49 +58,47 @@
                                         <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
                                             <thead>
                                                 <tr>
-                                                <th class="border-bottom-0">#</th>
-
-                                                    <th class="border-bottom-0">Pandit Name</th>
-                                                    <th class="border-bottom-0">Booking Date</th>
-                                                    <th class="border-bottom-0">Total Payment</th>
-                                                    <th class="border-bottom-0">Approved By</th>
-                                                    <th class="border-bottom-0">Application Status</th>
-                                                    
+                                                
+                                                    <th class="border-bottom-0">Sl No.</th>
+                                                    <th class="border-bottom-0">Podcast Name</th>
+                                                    {{-- <th class="border-bottom-0">Description</th> --}}
+                                                   
+                                                    <th class="border-bottom-0">View Image</th>
+                                                   
+                                                    <th class="border-bottom-0">View Audio</th>
                                                     <th class="border-bottom-0">Action</th>
+
                                                 </tr>
                                             </thead>
                                             <tbody>
                                            
                                             
+                                                @foreach ($podcasts as $index => $podcast)
                                                 <tr>
-                                                    <td>1</td>
-                                                    <a href="{{url('admin/pandit-profile/')}}" class="title">
-                                                    <td class="tb-col">
-                                                        <div class="media-group">
-                                                            <div class="media media-md media-middle media-circle">
-                                                                    <img src="{{asset('assets/img/user.jpg') }}" alt="user">
-                                                            </div>
-                                                            <div class="media-text">
-                                                                <a href="{{url('admin/pandit-profile/')}}" class="title">demo demo</a>
-                                                                <span class="small text">demo@gmail.com</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    </a>
-                                                    
-                                                   <td>14/05/2024</td>
-                                                   <td>2000</td>
-                                                   <td>Pandit</td>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td class="border-bottom-0">{{ $podcast->name }}</td>
                                                     <td>
-                                                            <span class="badge badge-success">Approved</span> 
-                                                       
+
+                                                        <a href="{{ asset('storage/' . $podcast->image) }}" target="_blank"
+                                                            class="btn btn-success">
+                                                            View Image
+                                                        </a>
                                                     </td>
-                                                    
                                                     <td>
-                                                        <a href="{{url('admin/pandit-profile/')}}"><i class="fas fa-eye"></i></a> | 
-                                                        <a href="{{url('admin/editsebayat/')}}"><i class="fa fa-edit"></i></a> | 
-                                                        <a href="{{url('admin/dltsebayat/')}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
+
+                                                        <a href="{{ asset('storage/' . $podcast->music) }}" target="_blank"
+                                                            class="btn btn-success">
+                                                            View Audio
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                      
+                                                        <a href="{{url('admin/editpodcast/'.$podcast->id)}}"><i class="fa fa-edit"></i></a> | 
+                                                        <a href="{{url('admin/dltpodcast/'.$podcast->id)}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                                    </td>
+                                                    {{-- <td class="border-bottom-0">{{ $podcast->description }}</td> --}}
                                                 </tr>
+                                                @endforeach
                                              
                                               
                                                 

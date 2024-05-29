@@ -6,15 +6,22 @@ use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TitleController;
+use App\Http\Controllers\Admin\LanguageController;
+use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\PodcastController;
+
 use App\Http\Controllers\pandit\SkillController;
 use App\Http\Controllers\Pandit\CareerController;
 use App\Http\Controllers\Pandit\PanditController;
-use App\Http\Controllers\Admin\LanguageController;
-use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Pandit\ProfileController;
+use App\Http\Controllers\pandit\PoojaDetailsController;
+use App\Http\Controllers\pandit\BankController;
+
+
 use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
-use App\Http\Controllers\pandit\PoojaDetailsController;
+
+
 use App\Http\Controllers\Superadmin\SuperAdminController;
 
 
@@ -126,6 +133,11 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
     Route::controller(PodcastController::class)->group(function() {
         Route::get('/manage-podcast', 'managepodcast')->name('managepodcast');
+        Route::get('/add-podcast', 'addpodcast')->name('addpodcast');
+        Route::post('/savepodcast', 'savepodcast')->name('savepodcast');
+        Route::get('/editpodcast/{podcast}', 'editpodcast')->name('editpodcast');
+        Route::post('/updatepodcast/{podcast}', 'updatepodcast')->name('updatepodcast');
+        Route::get('/dltpodcast/{podcast}', 'destroy')->name('destroy');
     });
    
 });
@@ -189,6 +201,16 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
         Route::put('/update-poojadetails', 'updatePoojadetails')->name('updatePoojadetails');
         Route::get('/pandit/poojadetails',  'poojadetails')->name('pandit.poojadetails');
+    });
+});
+
+// pandit bank details
+Route::group(['prefix' => 'pandit'], function () {
+    Route::controller(BankController::class)->group(function() {
+        Route::get('/bankdetails', 'bankdetails')->name('bankdetails');
+        Route::post('/savebankdetails', 'savebankdetails');
+        // Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
+       
     });
 });
 
