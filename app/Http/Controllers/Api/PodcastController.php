@@ -20,6 +20,9 @@ class PodcastController extends Controller
             $podcast->image_url = asset('storage/' . $podcast->image);
             $podcast->music_url = asset('storage/' . $podcast->music);
         }
+        if ($podcasts->isEmpty()) {
+            return response()->json(['message' => 'No data found'], 404);
+        }
         return response()->json($podcasts);
     }
 
