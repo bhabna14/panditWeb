@@ -10,12 +10,12 @@ use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\PodcastController;
 
-use App\Http\Controllers\pandit\SkillController;
+use App\Http\Controllers\Pandit\SkillController;
 use App\Http\Controllers\Pandit\CareerController;
 use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Pandit\ProfileController;
-use App\Http\Controllers\pandit\PoojaDetailsController;
-use App\Http\Controllers\pandit\BankController;
+use App\Http\Controllers\Pandit\PoojaDetailsController;
+use App\Http\Controllers\Pandit\BankController;
 
 
 use App\Http\Controllers\sebayatregisterController;
