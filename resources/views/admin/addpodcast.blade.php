@@ -54,7 +54,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="event_name">Podcast Name</label>
-                                    <input type="text" class="form-control" id="puja_name" name="name" placeholder="Enter Podcast Name">
+                                    <input type="text" class="form-control" id="puja_name" name="name" placeholder="Enter Podcast Name" required>
                                 </div>
                             </div>
                            
@@ -63,13 +63,14 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Podcast Imgae</label>
-                                    <input type="file" class="form-control" id="puja_img" name="image" >
+                                    <input type="file" class="form-control" id="puja_img" name="image" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="event_name">Podcast Music</label>
-                                    <input type="file" class="form-control" id="puja_img" name="music" >
+                                    <label for="event_name">Podcast Music <span class="max-text">(maximum file size 30mb)</span></label>
+                                    <input type="file" class="form-control" id="puja_img" name="music" required>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -77,7 +78,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="special_niti">Description</label>
-                                    <textarea class="form-control" id="description" name="description" placeholder="Enter Description"></textarea>
+                                    <textarea class="form-control" id="description" name="description" placeholder="Enter Description" required></textarea>
                                 </div>
                             </div>
                         </div>

@@ -3458,6 +3458,10 @@ input[type=submit].btn-block, input[type=reset].btn-block, input[type=button].bt
   background: #fff;
   color: #fff !important;
 }
+.max-text {
+  font-size: 12px;
+  color: #4b4f49;
+}
 
 /* Thumb Carousel */
 .carousel-slider #carousel {
