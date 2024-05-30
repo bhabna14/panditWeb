@@ -107,12 +107,12 @@
                                                         <td>
                                                             <input type="text" name="fee[{{ $poojaSkill->id }}]"
                                                                 class="form-control"
-                                                                value="{{ old('fee.' . $poojaSkill->id) }}">
+                                                                value="{{ old('fee.' . $poojaSkill->id) }}" required>
                                                         </td>
                                                         <td>
                                                             <input type="text" name="duration[{{ $poojaSkill->id }}]"
                                                                 class="form-control"
-                                                                value="{{ old('duration.' . $poojaSkill->id) }}">
+                                                                value="{{ old('duration.' . $poojaSkill->id) }}" required>
                                                         </td>
                                                         <td>
                                                             <input type="file" name="image[{{ $poojaSkill->id }}]"

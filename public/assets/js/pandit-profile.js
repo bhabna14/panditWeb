@@ -140,40 +140,4 @@ function changeColor(element) {
     // Add 'active' class to the clicked nav link
     element.classList.add('active');
 }
-function addPujaListSection(){
-    $("#show_puja_item").append(` 
-  <tr class="remove_puja_item">
-    <td colspan="2" class="tb-col">
-       
-    </td>
-    <td><select class="form-control" name="country"
-            id="country">
-            <option value=" ">Select Your Puja List
-            </option>
-            @foreach ($PujaLists as $pujalist)
-                <option value="{{ $pujalist }}">
-                    {{ $pujalist }}</option>
-            @endforeach
-        </select></td>
-    <td><input type="number" class="form-control"
-            name="quantity[]" value="" id="quantity"
-            placeholder="Enter List Quatity"></td>
-    <td>
-        <select class="form-control" id="weight_unit"
-            name="weight_unit">
-            <option value=" ">Select Unit</option>
-            <option value="kg">Kilogram (kg)</option>
-            <option value="g">Gram (g)</option>
-            <option value="mg">Milligram (mg)</option>
-        </select>
-    </td>
-    
-   <td><button type="button" class="btn btn-danger" onclick="removePujaListSection(this)">Remove</button></td>
-   </tr>
 
-`);
-
-}
-function removePujaListSection(element) {
-    $(element).closest('.remove_puja_item').remove();
-}

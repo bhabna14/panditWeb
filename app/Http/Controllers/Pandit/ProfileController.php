@@ -115,8 +115,7 @@ class ProfileController extends Controller
     }
 
         if ($profile->save()) {
-          
-            return redirect()->back()->with('success', 'Data updated successfully.');
+            return redirect()->route('/pandit/poojaitemlist')->with('success', 'Data updated successfully.');
         } else {
             return redirect()->back()->with('error', 'Failed to update data.');
         } 

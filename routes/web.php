@@ -22,9 +22,8 @@ use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
 
 
+use App\Http\Controllers\Pandit\PoojaListController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
-
-
 
 ## user login
 Route::controller(userController::class)->group(function() {
@@ -56,31 +55,27 @@ Route::controller(userController::class)->group(function() {
 
 ## admin login
 Route::controller(AdminController::class)->group(function() {
-        
     Route::get('/admin', 'adminlogin')->name('adminlogin');
     Route::post('admin/authenticate', 'authenticate')->name('adminauthenticate');
     Route::post('admin/logout', 'adminlogout')->name('adminlogout');
-
 });
 
 ## super admin login
 Route::controller(SuperAdminController::class)->group(function() {
-        
     Route::get('superadmin/', 'superadminlogin')->name('login');
     Route::post('superadmin/authenticate', 'authenticate')->name('authenticate');
     Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
     Route::post('superadmin/logout', 'sulogout')->name('sulogout');
     Route::post('superadmin/logout', 'sulogout')->name('sulogout');
-
 });
 
 
 ##super admin routes
 Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::controller(SuperAdminController::class)->group(function() {
-        
         Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
     });
+
     Route::get('/addadmin', [SuperAdminController::class, 'addadmin']);
     Route::post('/saveadmin', [SuperAdminController::class, 'saveadmin']);
     Route::get('/editadmin/{id}', [SuperAdminController::class, 'editadmin'])->name('editadmin');
@@ -139,18 +134,17 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::post('/updatepodcast/{podcast}', 'updatepodcast')->name('updatepodcast');
         Route::get('/dltpodcast/{podcast}', 'destroy')->name('destroy');
     });
-   
+
 });
 
 // user routes
 Route::prefix('user')->middleware(['user'])->group(function () {
-   
+
     Route::controller(userController::class)->group(function() {
         Route::get('/dashboard', 'dashboard')->name('user.dashboard');
         
     });
 });
-
 /// pandit routes
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
@@ -210,7 +204,16 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/bankdetails', 'bankdetails')->name('bankdetails');
         Route::post('/savebankdetails', 'savebankdetails');
         // Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
-       
+
     });
 });
 
+Route::group(['prefix' => 'pandit'], function () {
+    Route::controller(PoojaListController::class)->group(function() {
+        Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
+        Route::get('/poojaitem', 'poojaitem')->name('poojaitem');
+        Route::post('/save-poojaitemlist', 'savePoojaItemList');
+        Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
+        Route::get('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
+    });
+});

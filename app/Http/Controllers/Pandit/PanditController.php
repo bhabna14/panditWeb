@@ -13,8 +13,8 @@ use App\Models\IdcardDetail;
 use App\Models\Career;
 use App\Models\EduDetail;
 use App\Models\VedicDetail;
-use App\Models\Poojalist;
 use App\Models\Poojaskill;
+use App\Models\Poojaitemlist;
 
 
  
@@ -56,10 +56,7 @@ class PanditController extends Controller
     public function poojadetails(){
         return view("/pandit/poojadetails");
     }
-    
-    public function poojalist(){
-        return view("/pandit/poojalist");
-    }
+     
     public function panditsprofile(){
         return view("profile");
     }
@@ -131,7 +128,7 @@ class PanditController extends Controller
         return view('/pandit/profile', compact('languages','countries','locations','states','citys','PujaLists','temples','pujanames','Poojanames','Poojaskills'));
     
     }
-
+   
     public function getStates($countryId)
     {
         $states = State::where('country_id', $countryId)->get();

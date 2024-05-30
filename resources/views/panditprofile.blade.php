@@ -68,9 +68,8 @@
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
                                                                             <label for="exampleInputEmail1">Title</label>
-                                                                            <input type="text" class="form-control"
-                                                                                id="title" name="title"
-                                                                                placeholder="Enter Title">
+                                                                            <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title" required>
+
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-6">
@@ -78,7 +77,7 @@
                                                                             <label for="exampleInputEmail1">Name</label>
                                                                             <input type="text" class="form-control"
                                                                                 id="name" name="name"
-                                                                                placeholder="Enter Name">
+                                                                                placeholder="Enter Name" required>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -98,7 +97,7 @@
                                                                                 Number</label>
                                                                             <input type="number" class="form-control"
                                                                                 id="whatsappno" name="whatsappno"
-                                                                                placeholder="Whatsapp Number">
+                                                                                placeholder="Whatsapp Number" required>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -152,7 +151,7 @@
                                                                             <label for="language">Select Language</label>
                                                                             <select class="form-control select2"
                                                                                 id="language" name="language[]"
-                                                                                multiple="multiple">
+                                                                                multiple="multiple" required>
                                                                                 @foreach ($languages as $language)
                                                                                     <option value="{{ $language }}">
                                                                                         {{ $language }}</option>
