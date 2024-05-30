@@ -41,97 +41,41 @@
     </div>
 
     <!-- Row -->
-    <div class="row row-sm">
-        <div class="col-lg-12 col-md-12">
-            <div class="custom-card main-content-body-profile">
-                <div class="tab-content">
-                    <div class="main-content-body   tab-pane active" id="poojaitemlist">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="panel-group1" id="accordion11" role="tablist">
-                                    <div class="card overflow-hidden">
-                                        <a class="accordion-toggle panel-heading1 collapsed " data-bs-toggle="collapse"
-                                            data-bs-parent="#accordion11" href="#collapseFour1"
-                                            aria-expanded="false">Ganesh Pooja</a>
-                                        <div id="collapseFour1" class="panel-collapse collapse" role="tabpanel"
-                                            aria-expanded="false">
-                                            <div class="panel-body">
-                                                <div class="table-responsive  export-table">
-                                                    <table id="file-datatable"
-                                                        class="table table-bordered text-nowrap key-buttons border-bottom">
-                                                        <thead>
-                                                            <tr>
-                                                                <th class="border-bottom-0">#</th>
-                                                                <th class="border-bottom-0">Puja Name</th>
-                                                                <th class="border-bottom-0">List Name</th>
-                                                                <th class="border-bottom-0">Quantity</th>
-                                                                <th class="border-bottom-0">Unit</th>
-                                                                <th class="border-bottom-0">Action</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="show_puja_item">
-                                                            <tr>
-                                                                <td>1</td>
-                                                                <td class="tb-col">
-                                                                    <div class="media-group">
-                                                                        <div
-                                                                            class="media media-md media-middle media-circle">
-                                                                            <img src="{{ asset('assets/img/user.jpg') }}"
-                                                                                alt="user">
-                                                                        </div>
-                                                                        <div class="media-text">
-                                                                            <a href="" class="title">Ganesh
-                                                                                Puja</a>
-                                                                        </div>
-                                                                    </div>
-                                                                </td>
-                                                                <td><select class="form-control" name="country"
-                                                                        id="country">
-                                                                        <option value=" ">Select Your Puja List
-                                                                        </option>
-                                                                        @foreach ($PujaLists as $pujalist)
-                                                                            <option value="{{ $pujalist }}">
-                                                                                {{ $pujalist }}</option>
-                                                                        @endforeach
-                                                                    </select></td>
-                                                                <td><input type="number" class="form-control"
-                                                                        name="quantity[]" value="" id="quantity"
-                                                                        placeholder="Enter List Quatity"></td>
-                                                                <td>
-                                                                    <select class="form-control" id="weight_unit"
-                                                                        name="weight_unit">
-                                                                        <option value=" ">Select Unit</option>
-                                                                        <option value="kg">Kilogram (kg)</option>
-                                                                        <option value="g">Gram (g)</option>
-                                                                        <option value="mg">Milligram (mg)</option>
-                                                                    </select>
-                                                                </td>
-                                                                <td>
-                                                                    <button type="button"
-                                                                        class="btn btn-success add_item_btn"
-                                                                        onclick="addPujaListSection()">Add More</button>
-                                                                </td>
-                                                            </tr>
-
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <div class="text-center col-md-12">
-                                                    <button type="submit" class="btn btn-primary"
-                                                        style="width: 150px;">Submit</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
+    @if(session()->has('success'))
+                <div class="alert alert-success" id="Message">
+                    {{ session()->get('success') }}
+                </div>
+                @endif
+            
+                @if ($errors->has('danger'))
+                    <div class="alert alert-danger" id="Message">
+                        {{ $errors->first('danger') }}
+                    </div>
+                @endif
+                  
+    <div class="row mb-5">
+        @foreach ($Poojaskills as $pooja)
+        <div class="col-lg-3 col-md-6 col-sm-12">
+            <div class="card p-3">
+                <div class="card-body">
+                    <div class="mb-3 text-center about-team">
+                        <!-- Wrap the image inside a label -->
+                        <label for="checkbox{{ $pooja->id }}">
+                            <img class="rounded-pill" src="{{ asset('assets/img/' . $pooja->pooja_photo) }}" alt="{{ $pooja->pooja_name }}">
+                        </label>
+                    </div>
+                    <div class="tx-16 text-center font-weight-semibold">
+                        {{$pooja->pooja_name}}
+                    </div>
+                    <div class="form-check mt-3 text-center">
+                        <a href="{{ url('pandit/poojaitem?pooja_id=' . $pooja->id) }}" class="btn btn-primary" data-toggle="tooltip" title="Add Pooja List">+</a>
+                        <a href="{{ url('pandit/managepoojaitem?pooja_id=' . $pooja->pooja_id) }}" class="btn btn-success"  data-toggle="tooltip" title="Manage Pooja List"><i class="fas fa-eye"></i></a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    @endforeach
+          </div>
     <!-- row closed -->
 @endsection
 
@@ -146,7 +90,11 @@
             document.getElementById('Message').style.display = 'none';
         }, 3000);
     </script>
-
+<script>
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();   
+    });
+       </script>
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>

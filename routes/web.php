@@ -10,12 +10,15 @@ use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\PodcastController;
 
+
 use App\Http\Controllers\Pandit\SkillController;
 use App\Http\Controllers\Pandit\CareerController;
 use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\BankController;
+use App\Http\Controllers\Pandit\AddressController;
+
 
 
 use App\Http\Controllers\sebayatregisterController;
@@ -151,6 +154,9 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/panditlogin', 'panditlogin');
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
         Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
+        Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
+        Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
+        Route::get('/dashboard', 'dashboard')->name('dashboard');
     });
 });
 
@@ -204,7 +210,16 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/bankdetails', 'bankdetails')->name('bankdetails');
         Route::post('/savebankdetails', 'savebankdetails');
         // Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
+       
+    });
+});
 
+// pandit Address details
+Route::group(['prefix' => 'pandit'], function () {
+    Route::controller(AddressController::class)->group(function() {
+        Route::get('/address', 'address')->name('address');
+        Route::post('/saveaddress', 'saveaddress');
+       
     });
 });
 

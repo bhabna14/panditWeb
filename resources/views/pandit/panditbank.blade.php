@@ -13,10 +13,18 @@
         <div class="custom-card main-content-body-profile">
             <div class="main-content-body tab-pane border-top-0" id="bank">
                 <!-- row -->
+                @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
                 @if(session('success'))
                     <div style="color: green;">
                         {{ session('success') }}
                     </div>
+                @endif
+                @if ($errors->has('danger'))
+                <div class="alert alert-danger" id="Message">
+                    {{ $errors->first('danger') }}
+                </div>
                 @endif
                 <form action="{{ url('pandit/savebankdetails')}}" method="post" enctype="multipart/form-data">
                     @csrf
@@ -37,7 +45,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputEmail1">Bank Name</label>
                                                 <input type="text" class="form-control" name="bankname"
-                                                    value="{{$bankdata->bankname}}" id="exampleInputEmail1"
+                                                    value="{{$bankdata->bankname ?? ''}}" id="exampleInputEmail1"
                                                     placeholder="Enter Bank Name">
                                             </div>
                                         </div>
@@ -45,7 +53,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">Branch Name</label>
                                                 <input type="text" class="form-control" name="branchname"
-                                                    value="{{$bankdata->branchname}}" id="exampleInputPassword1"
+                                                    value="{{$bankdata->branchname ?? ''}}" id="exampleInputPassword1"
                                                     placeholder="Enter Branch Name">
                                             </div>
                                         </div>
@@ -53,7 +61,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">IFSC Code</label>
                                                 <input type="text" class="form-control" name="ifsccode"
-                                                    value="{{$bankdata->ifsccode}}" id="exampleInputPassword1"
+                                                    value="{{$bankdata->ifsccode ?? ''}}" id="exampleInputPassword1"
                                                     placeholder="Enter IFSC Code">
                                             </div>
                                         </div>
@@ -61,7 +69,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputEmail1">Account Holder Name</label>
                                                 <input type="text" class="form-control" name="accname"
-                                                    value="{{$bankdata->accname}}" id="exampleInputEmail1"
+                                                    value="{{$bankdata->accname ?? ''}}" id="exampleInputEmail1"
                                                     placeholder="Enter Account Holder Name">
                                             </div>
                                         </div>
@@ -70,7 +78,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">Account Number</label>
                                                 <input type="text" class="form-control" name="accnumber"
-                                                    value="{{$bankdata->accnumber}}" id="exampleInputPassword1"
+                                                    value="{{$bankdata->accnumber ?? ''}}" id="exampleInputPassword1"
                                                     placeholder="Enter Account Number">
                                             </div>
                                         </div>
@@ -79,7 +87,7 @@
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">UPI Number/ID</label>
                                                 <input type="text" class="form-control" name="upi_number"
-                                                    value="{{$bankdata->upi_number}}" id="exampleInputPassword1"
+                                                    value="{{$bankdata->upi_number ?? ''}}" id="exampleInputPassword1"
                                                     placeholder="Enter Account Number">
                                             </div>
                                         </div>

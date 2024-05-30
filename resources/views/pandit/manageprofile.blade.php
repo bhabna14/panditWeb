@@ -46,9 +46,8 @@
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0	">
-                            <a class="nav-link mb-2 mt-2 active" data-bs-toggle="tab" href="#edit">Edit Profile</a>
-                            <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career">Edit Career</a>
-
+                            <a class="nav-link mb-2 mt-2 active" href="{{url('pandit/manageprofile')}}">Edit Profile</a>
+                            <a class="nav-link mb-2 mt-2 "  href="{{url('pandit/managecareer')}}">Edit Career</a>
                         </nav>
                     </div>
                 </div>

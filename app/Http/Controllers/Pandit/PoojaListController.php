@@ -14,8 +14,8 @@ class PoojaListController extends Controller
     public function poojaitemlist(){
 
         $Poojaskills = Poojaskill::where('status', 'active')->get();
-
-        return view('/pandit/poojaitemlist', compact('Poojaskills'));
+        $PujaLists = Poojaitemlists::all();
+        return view('/pandit/poojaitemlist', compact('Poojaskills','PujaLists'));
     }
     public function poojaitem(Request $request)
     {

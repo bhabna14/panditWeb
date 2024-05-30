@@ -10,6 +10,10 @@ use App\Models\EduDetail;
 use App\Models\VedicDetail;
 use App\Models\PanditEducation;
 use App\Models\PanditVedic;
+use App\Models\PanditIdCard;
+use App\Models\Profile;
+
+
 
 
 class CareerController extends Controller
@@ -19,6 +23,14 @@ class CareerController extends Controller
     public function profilecareer(){
         return view("panditcareer");
     }
+    public function managecareer(){
+        $pandit_profile = Profile::latest()->first();
+        $pandit_career = Career::latest()->first();
+        $pandit_idcards = PanditIdCard::where('status', 'active')->get();
+        $pandit_educations = PanditEducation::where('status', 'active')->get();
+        $pandit_vedics = PanditVedic::where('status', 'active')->get();
+
+        return view('pandit/managecareer', compact('pandit_profile','pandit_career','pandit_idcards','pandit_educations','pandit_vedics'));    }
 
     public function savecareer(Request $request)
     {

@@ -9,7 +9,7 @@ class Bankdetail extends Model
 {
     use HasFactory;
     protected $table = 'bankdetails';
-    protected $fillable = ['bankname','branchname','ifsccode','accname','accnumber','upi_number']; 
+    protected $fillable = ['pandit_id','bankname','branchname','ifsccode','accname','accnumber','upi_number']; 
 
  
 }

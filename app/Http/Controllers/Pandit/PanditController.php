@@ -20,7 +20,9 @@ use App\Models\Poojaitemlist;
  
 class PanditController extends Controller
 {
-   
+    public function dashboard(){
+        return view("/pandit/dashboard");
+    }
 
     public function panditlogin(){
         return view("panditlogin");
@@ -67,45 +69,20 @@ class PanditController extends Controller
     public function panditaddress(){
         return view("/pandit/panditaddress");
     }
+  
     public function panditprofile(){
         $countries = Country::all();
         $citys = City::all(); 
         $states = State::all(); 
 
 
-        $locations = [
-            "Acharya Vihar",
-            "Jayadev Vihar",
-            "Khandagiri",
-            "Saheed Nagar",
-            "Nayapalli",
-            "Patia",
-            "Rasulgarh",
-            "Chandrasekharpur",
-            "Old Town",
-            "Unit 1",
-            "Unit 2",
-            "Unit 3",
-            "Unit 4",
-            "Unit 5",
-            "Unit 6",
-            "Unit 7",
-            "Unit 8",
-            "Unit 9",
-            "Unit 10",
-            "Unit 11",
-        ];
+     
         $languages = [
             'English','Odia','Hindi','Sanskrit','Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 'Kashmiri',
             'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi',
              'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
         ];
-        $PujaLists = [
-            "Ghee",
-            "Chandan",
-            "Sindur",
-            "Flower",
-        ];
+        $PujaLists = Poojaitemlists::all();
         $temples = [
             "Ram Mandir",
             "Lingaraj",

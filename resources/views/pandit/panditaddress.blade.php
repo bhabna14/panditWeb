@@ -12,179 +12,194 @@
         <div class="col-lg-12 col-md-12 mt-4">
             <div class="custom-card main-content-body-profile">
                 <div class="main-content-body tab-pane  border-0" id="address">
-                    <div class="card">
+                    <div style="border-bottom:1px solid red;text-align:center;margin: 20px">
+                        <h3>ADDRESS INFORMATION</h3>
+                    </div>
+                    <form action="{{url('pandit/saveaddress')}}" method="post" enctype="multipart/form-data">
+                         @csrf
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card">
                       
-                        <div class="border-0" data-select2-id="12">
-                            <div style="border-bottom:1px solid red;text-align:center;margin: 20px">
-                                <h3>ADDRESS INFORMATION</h3>
-                            </div>
-                            <form action="" method="post" enctype="multipart/form-data">
-                                {{-- @csrf --}}
-                                {{-- @method('PUT') --}}
-                                <div class="row">
-                                    <div class="col-lg-12 col-md-12">
-                                        <div class="card custom-card">
-                                            <div class="card-body">
-                                               
-                                                <!-- <p class="mg-b-20">A form control layout using basic layout.</p> -->
-                                                <div class="row">
-                                                    <input type="hidden" class="form-control" id="exampleInputEmail1"
-                                                        name="userid" value="" placeholder="Enter First Name">
-
-                                                    <div class="col-md-6">
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label for="preaddress">Present Address</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="preaddress" value="" id="preaddress"
-                                                                        placeholder="Enter Address">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="prepost">Post</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="prepost" value="" id="prepost"
-                                                                        placeholder="Enter Post">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="predistrict">District</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="predistrict" value="" id="predistrict"
-                                                                        placeholder="Enter District">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="prestate">State</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="prestate" value="Odisha" id="prestate"
-                                                                        placeholder="Enter State">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="precountry">Country</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="precountry" value="India" id="precountry"
-                                                                        placeholder="Enter Country">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label for="prepincode">Pincode</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="prepincode" value="" id="prepincode"
-                                                                        placeholder="Enter Pincode">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label for="prelandmark">Landmark</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="prelandmark" value="" id="prelandmark"
-                                                                        placeholder="Enter Landmark">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <label class="ckbox"><input type="checkbox" id="same"
-                                                                onchange="addressFunction()"> <span class="mg-b-10">Same
-                                                                as Present Address</span></label>
-                                                    </div>
-                                                    <div class="col-md-6">
-
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label for="peraddress">Permanent Address</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="peraddress" value="" id="peraddress"
-                                                                        placeholder="Enter Address">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="perpost">Post</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="perpost" value="" id="perpost"
-                                                                        placeholder="Enter Post">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="perdistri">District</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="perdistri" value="" id="perdistri"
-                                                                        placeholder="Enter District">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="row">
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="perstate">State</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="perstate" value="" id="perstate"
-                                                                        placeholder="Enter State">
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <div class="form-group">
-                                                                    <label for="percountry">Country</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="percountry" value="" id="percountry"
-                                                                        placeholder="Enter Country">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label for="perpincode">Pincode</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="perpincode" value="" id="perpincode"
-                                                                        placeholder="Enter Pincode">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div class="row">
-                                                            <div class="col-md-12">
-                                                                <div class="form-group">
-                                                                    <label for="perlandmark">Landmark</label>
-                                                                    <input type="text" class="form-control"
-                                                                        name="perlandmark" value=""
-                                                                        id="perlandmark" placeholder="Enter Landmark">
-                                                                </div>
-                                                            </div>
+                                    <div class="border-0" data-select2-id="12">
+                                           
+                                            
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12">
+                                                    <div class="card custom-card">
+                                                        <div class="card-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <div class="form-group">
+                                                                                <label for="preaddress">Present Address</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    name="preaddress" value="{{$addressdata->preaddress ?? ''}}" id="preaddress"
+                                                                                    placeholder="Enter Address">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label for="prepost">Post</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    name="prepost" value="{{$addressdata->prepost ?? ''}}" id="prepost"
+                                                                                    placeholder="Enter Post">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label for="predistrict">District</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    name="predistrict" value="{{$addressdata->predistrict ?? ''}}" id="predistrict"
+                                                                                    placeholder="Enter District">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+            
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label for="prestate">State</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    name="prestate" value="Odisha" id="prestate"
+                                                                                    placeholder="Enter State">
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <div class="form-group">
+                                                                                <label for="precountry">Country</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    name="precountry" value="India" id="precountry"
+                                                                                    placeholder="Enter Country">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <div class="form-group">
+                                                                                <label for="prepincode">Pincode</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    name="prepincode" value="{{$addressdata->prepincode ?? ''}}" id="prepincode"
+                                                                                    placeholder="Enter Pincode">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="row">
+                                                                        <div class="col-md-12">
+                                                                            <div class="form-group">
+                                                                                <label for="prelandmark">Landmark</label>
+                                                                                <input type="text" class="form-control"
+                                                                                    name="prelandmark" value="{{$addressdata->prelandmark ?? ''}}" id="prelandmark"
+                                                                                    placeholder="Enter Landmark">
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="text-center col-md-12">
-                                                    <button type="submit" class="btn btn-primary"
-                                                        style="width: 150px;">Submit</button>
                                                 </div>
                                             </div>
-                                        </div>
+                                        
                                     </div>
                                 </div>
-                            </form>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                      
+                                    <div class="border-0" data-select2-id="12">
+                                            {{-- @csrf --}}
+                                            
+                                            <div class="row">
+                                                <div class="col-lg-12 col-md-12">
+                                                    <div class="card custom-card">
+                                                        <div class="card-body">
+                                                            <label class="ckbox" style="margin-bottom: 13px;"><input type="checkbox" id="same"
+                                                                onchange="addressFunction()"> <span class="mg-b-10">Same
+                                                                as Present Address</span></label>
+
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label for="peraddress">Permanent Address</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="peraddress" value="{{$addressdata->peraddress ?? ''}}" id="peraddress"
+                                                                                placeholder="Enter Address">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="perpost">Post</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="perpost" value="{{$addressdata->perpost ?? ''}}" id="perpost"
+                                                                                placeholder="Enter Post">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="perdistri">District</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="perdistri" value="{{$addressdata->perdistri ?? ''}}" id="perdistri"
+                                                                                placeholder="Enter District">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+        
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="perstate">State</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="perstate" value="" id="perstate"
+                                                                                placeholder="Enter State">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="percountry">Country</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="percountry" value="" id="percountry"
+                                                                                placeholder="Enter Country">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label for="perpincode">Pincode</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="perpincode" value="" id="perpincode"
+                                                                                placeholder="Enter Pincode">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label for="perlandmark">Landmark</label>
+                                                                            <input type="text" class="form-control"
+                                                                                name="perlandmark" value=""
+                                                                                id="perlandmark" placeholder="Enter Landmark">
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                        <div class="text-center col-md-12">
+                            <button type="submit" class="btn btn-primary"
+                                style="width: 150px; margin-bottom:20px;">Submit</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
