@@ -44,7 +44,7 @@
                                             @endif
                                                 <form action="{{ url('/pandit/save-poojaitemlist') }}" method="post" enctype="multipart/form-data">
                                                     @csrf
-                                                    <input type="hidden" name="pooja_id" value="{{ $poojaname->id }}">
+                                                    <input type="hidden" name="pooja_id" value="{{ $poojaname->pooja_id }}">
                                                     <input type="hidden" name="pooja_name" value="{{ $poojaname->pooja_name }}">
 
                                                     <table id="file-datatable-{{ $poojaname->id }}" class="table table-bordered text-nowrap key-buttons border-bottom">

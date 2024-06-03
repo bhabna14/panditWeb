@@ -86,6 +86,7 @@ class AdminController extends Controller
     public function managepandit(){
         return view('admin/managepandit');
     }
+    
     public function panditprofile(){
         return view('admin/pandit-profile');
     }

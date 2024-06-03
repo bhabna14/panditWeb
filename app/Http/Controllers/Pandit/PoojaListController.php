@@ -35,14 +35,13 @@ class PoojaListController extends Controller
         $pooja_id = $request->query('pooja_id');
 
         $poojaname = Poojaskill::where('pooja_id', $pooja_id)->first();
-
+        
         $poojaItems = PoojaItems::where('pooja_id', $pooja_id)->where('status', 'active')->get();
 
         if (!$poojaItems) {
             return redirect()->back()->with('error', 'Pooja not found.');
         }
 
-        // Assuming you want to pass the pooja to a view
         return view('/pandit/managepoojaitem', compact('poojaItems','poojaname'));
     }
     public function savePoojaItemList(Request $request)
