@@ -134,8 +134,10 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
     Route::controller(TitleController::class)->group(function() {
         Route::get('/manage-title', 'managetitle')->name('managetitle');
-        Route::get('/add-title', 'addtitle')->name('addtitle');
-        // Route::get('/savelocation', 'savelocation')->name('savelocation');
+        Route::post('/savetitle', 'savetitle')->name('savetitle');
+        Route::get('/edittitle/{title}', 'edittitle')->name('edittitle');
+        Route::put('/updatetitle', 'updatetitle')->name('updatetitle');
+        Route::get('/dlttitle/{title}', 'dlttitle')->name('dlttitle');
     });
 
     Route::controller(OrderController::class)->group(function() {
