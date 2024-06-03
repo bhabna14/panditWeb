@@ -25,6 +25,9 @@ Route::controller(PodcastController::class)->group(function() {
 });
 
 
+
+
 Route::controller(PujaController::class)->group(function() {
     Route::get('poojalists', 'poojalists');
+    Route::get('upcomingpoojalists', 'upcomingpoojalists'); 
 });
