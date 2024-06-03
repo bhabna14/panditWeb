@@ -22,4 +22,21 @@ class PujaController extends Controller
         }
         return response()->json($poojalists);
     }
+    public function upcomingpoojalists(){
+        $upcomingPoojas = Poojalist::where('status', 'active')
+                        ->where('pooja_date', '>=', now())
+                        ->orderBy('pooja_date', 'asc')
+                        ->take(8)
+                        ->get();
+
+        foreach ($upcomingPoojas as $upcomingPooja) {
+            $upcomingPooja->pooja_img_url = asset('assets/img/' . $upcomingPooja->pooja_photo);
+                            // dd($poojalist->image_url);
+                           
+            }
+        if ($upcomingPoojas->isEmpty()) {
+                return response()->json(['message' => 'No data found'], 404);
+             }
+        return response()->json($upcomingPoojas);
+    }
 }
