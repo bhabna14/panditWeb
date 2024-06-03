@@ -21,9 +21,18 @@ class PodcastController extends Controller
             $podcast->music_url = asset('storage/' . $podcast->music);
         }
         if ($podcasts->isEmpty()) {
-            return response()->json(['message' => 'No data found'], 404);
+            return response()->json([
+                'status' => 404,
+                'message' => 'No data found',
+                'data' => []
+            ], 404);
         }
-        return response()->json($podcasts);
+        // return response()->json($podcasts);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data retrieved successfully',
+            'data' => $podcasts
+        ], 200);
     }
 
     /**

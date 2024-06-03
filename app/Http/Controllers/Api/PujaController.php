@@ -18,9 +18,18 @@ class PujaController extends Controller
            
         }
         if ($poojalists->isEmpty()) {
-            return response()->json(['message' => 'No data found'], 404);
+            return response()->json([
+                'status' => 404,
+                'message' => 'No data found',
+                'data' => []
+            ], 404);
         }
-        return response()->json($poojalists);
+        // return response()->json($poojalists);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data retrieved successfully',
+            'data' => $poojalists
+        ], 200);
     }
     public function upcomingpoojalists(){
         $upcomingPoojas = Poojalist::where('status', 'active')
@@ -35,8 +44,16 @@ class PujaController extends Controller
                            
             }
         if ($upcomingPoojas->isEmpty()) {
-                return response()->json(['message' => 'No data found'], 404);
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'No data found',
+                    'data' => []
+                ], 404);
              }
-        return response()->json($upcomingPoojas);
+             return response()->json([
+                'status' => 200,
+                'message' => 'Data retrieved successfully',
+                'data' => $upcomingPoojas
+            ], 200);
     }
 }
