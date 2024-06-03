@@ -10,6 +10,8 @@ use App\Models\Bankdetail;
 use App\Models\Childrendetail;
 use App\Models\Addressdetail;
 use App\Models\IdcardDetail;
+use App\Models\Poojalist;
+
 use PDF;
 use DB;
 use Illuminate\Support\Facades\Hash;
@@ -19,7 +21,18 @@ class userController extends Controller
 {
     //
     public function userindex(){
-        return view("user/index");
+        $upcomingPoojas = Poojalist::where('status', 'active')
+                        ->where('pooja_date', '>=', now())
+                        ->orderBy('pooja_date', 'asc')
+                        ->take(8)
+                        ->get();
+        $otherpoojas = Poojalist::where('status', 'active')
+                        ->where(function($query) {
+                            $query->whereNull('pooja_date');
+                         })
+                        ->take(8)
+                        ->get();
+        return view("user/index" , compact('upcomingPoojas','otherpoojas'));
     }
 
     public function userlogin(){
@@ -399,7 +412,10 @@ class userController extends Controller
         return view('user/bookpandit');
    }
    public function poojalist(){
-    return view('user/poojalist');
+     $allpoojas = Poojalist::where('status', 'active')
+                        ->orderBy('pooja_date', 'asc')
+                        ->paginate(6);
+    return view('user/poojalist', compact('allpoojas'));
     }
     public function poojadetails(){
         return view('user/puja-details');

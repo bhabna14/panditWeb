@@ -101,10 +101,24 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
         Route::get('/add-puja', 'addpuja')->name('addpuja');
-        Route::get('/savepuja', 'savepuja')->name('savepuja');
+        Route::post('/savepuja', 'savepuja')->name('savepuja');
+        Route::get('/editpooja/{pooja}', 'editpooja')->name('editpooja');
+        Route::post('/updatepooja/{pooja}', 'updatepooja')->name('updatepooja');
+        Route::get('/dltpooja/{pooja}', 'dltpooja')->name('dltpooja');
 
         Route::get('/manage-puja-list', 'managePujaList')->name('managePujaList');
-        Route::get('/add-puja-list', 'addpujalist')->name('addpujalist');
+        Route::post('/saveitem', 'saveitem')->name('saveitem');
+        Route::get('/edititem/{item}', 'edititem')->name('edititem');
+        Route::put('/updateitem', 'updateitem')->name('updateitem');
+        Route::get('/dltitem/{item}', 'dltitem')->name('dltitem');
+        
+        // Route::get('/add-puja-list', 'addpujalist')->name('addpujalist');
+
+        Route::get('/manage-puja-unit', 'manageunit')->name('manageunit');
+        Route::post('/saveunit', 'saveunit')->name('saveunit');
+        Route::get('/editunit/{unit}', 'editunit')->name('editunit');
+        Route::put('/updateunit', 'updateunit')->name('updateunit');
+        Route::get('/dltunit/{unit}', 'dltunit')->name('dltunit');
     });
     Route::controller(LocationController::class)->group(function() {
         Route::get('/manage-location', 'managelocation')->name('managelocation');

@@ -110,7 +110,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
 
     <!-- smart photo master js -->
-    <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
+    {{-- <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script> --}}
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
        
 

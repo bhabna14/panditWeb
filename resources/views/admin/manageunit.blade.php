@@ -17,14 +17,14 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Puja List</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Pooja Units</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
-							<a class="btn ripple btn-primary me-3" data-bs-target="#modaldemo1" data-bs-toggle="modal" href="">Add Puja List</a>
+							<a class="btn ripple btn-primary me-3" data-bs-target="#modaldemo1" data-bs-toggle="modal" href="">Add Units</a>
 
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Puja List</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Puja Units</li>
                         </ol>
                     </div>
                 </div>
@@ -47,17 +47,17 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content modal-content-demo">
                             <div class="modal-header">
-                                <h6 class="modal-title">Add Pooja List</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+                                <h6 class="modal-title">Add Pooja Unit</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
                             </div>
-                            <form action="{{url('admin/saveitem')}}" method="post">
+                            <form action="{{url('admin/saveunit')}}" method="post">
                              @csrf
 
                             <div class="modal-body">
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="form-group">
-                                            <label for="event_name">Item Name</label>
-                                            <input type="text" class="form-control" id="puja_name" name="item_name" placeholder="Enter Pooja Item Name">
+                                            <label for="event_name">Units</label>
+                                            <input type="text" class="form-control" id="unit_name" name="unit_name" placeholder="Enter Pooja Units">
                                         </div>
                                     </div>
                                    
@@ -70,7 +70,7 @@
                             </form>
                         </div>
                     </div>
-                </div>
+                    </div>
                 <!-- End Basic modal -->
 
                     <!-- Row -->
@@ -88,23 +88,24 @@
                                                 <tr>
                                                     <th class="border-bottom-0">SlNo</th>
                                                    
-                                                    <th class="border-bottom-0">Item Name</th>
+                                                    <th class="border-bottom-0">Unit Name</th>
                                                     
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 
-                                                @foreach ($poojaitems as $index => $poojaitem)
+                                                @foreach ($poojaunits as $index => $poojaunit)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $poojaitem->item_name}}</td>
+                                                    <td>{{ $poojaunit->unit_name}}</td>
                                                     <td>
-                                                        <a class="btn ripple btn-primary me-3 edit-item" href="javascript:void(0);" data-id="{{ $poojaitem->id }}" data-name="{{ $poojaitem->item_name }}">
+                                                        <a class="btn ripple btn-primary me-3 edit-item" href="javascript:void(0);" data-id="{{ $poojaunit->id }}" data-name="{{ $poojaunit->unit_name }}">
                                                             <i class="fa fa-edit"></i>
                                                         </a>
-                                                        {{-- <a href="{{url('admin/editpooja/'.$poojaitem->id)}}"><i class="fa fa-edit"></i></a> |  --}}
-                                                        <a class="btn ripple btn-primary" href="{{url('admin/dltitem/'.$poojaitem->id)}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                                        <a class="btn ripple btn-primary" href="{{ url('admin/dltunit/'.$poojaunit->id) }}" onClick="return confirm('Are you sure to delete ?');">
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                                        </a>
                                                     </td>
                                                 <tr>
                                                 @endforeach
@@ -118,39 +119,39 @@
                     </div>
                     <!-- End Row -->
 
-                   <!-- update the items modal -->
-                    <div class="modal fade" id="modaldemo2">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content modal-content-demo">
-                                <div class="modal-header">
-                                    <h6 class="modal-title">Edit Pooja Item</h6>
-                                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <form id="editItemForm" action="{{url('admin/updateitem')}}" method="post">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" id="itemId" name="id">
-                                    <div class="modal-body">
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label for="item_name">Item Name</label>
-                                                    <input type="text" class="form-control" id="itemName" name="item_name" placeholder="Enter Pooja Item Name">
-                                                </div>
+                  <!-- update the items modal -->
+                <div class="modal fade" id="modaldemo2">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content modal-content-demo">
+                            <div class="modal-header">
+                                <h6 class="modal-title">Edit Pooja Unit</h6>
+                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form id="editItemForm" action="{{url('admin/updateunit')}}" method="post">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" id="itemId" name="id">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="unit_name">Unit Name</label>
+                                                <input type="text" class="form-control" id="unitName" name="unit_name" placeholder="Enter Unit Name">
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn ripple btn-primary">Save</button>
-                                        <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
-                                    </div>
-                                </form>
-                            </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn ripple btn-primary">Save</button>
+                                    <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    <!-- End Basic modal -->
+                </div>
+                <!-- End Basic modal -->
 
 @endsection
 
@@ -184,13 +185,14 @@
         $(document).ready(function(){
             $('.edit-item').on('click', function() {
                 var itemId = $(this).data('id');
-                var itemName = $(this).data('name');
+                var unitName = $(this).data('name'); // Updated to data-name
                 
                 $('#itemId').val(itemId);
-                $('#itemName').val(itemName);
+                $('#unitName').val(unitName); // Updated to unitName
                 
                 $('#modaldemo2').modal('show');
             });
         });
     </script>
+    
 @endsection

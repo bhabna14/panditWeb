@@ -145,13 +145,13 @@
             <div class="relative pt-40 sm:pt-20 js-section-slider" data-gap="30" data-scrollbar
                 data-slider-cols="base-2 xl-4 lg-3 md-2 sm-2 base-1" data-anim="" data-aos="fade-up" data-aos-delay="500">
                 <div class="swiper-wrapper">
-
+                    @foreach ($upcomingPoojas as $upcomingPooja)
                     <div class="swiper-slide">
 
                         <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
                             <div class="citiesCard__image ratio ratio-3:2">
                                 <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
+                                <img src="{{ asset('assets/img/'.$upcomingPooja->pooja_photo) }}" alt="image"
                                     class="js-lazy">
 
                             </div>
@@ -167,223 +167,13 @@
                             </div> --}}
                         </a>
                         <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
+                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">{{$upcomingPooja->pooja_name}}</h4>
                         </div>
 
                     </div>
+                    @endforeach
 
-                    <div class="swiper-slide">
-
-                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
-                            <div class="citiesCard__image ratio ratio-3:2">
-                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
-                                    class="js-lazy">
-
-                            </div>
-
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
-                        </a>
-                        <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
-                        </div>
-
-                    </div>
-                    <div class="swiper-slide">
-
-                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
-                            <div class="citiesCard__image ratio ratio-3:2">
-                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
-                                    class="js-lazy">
-
-                            </div>
-
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
-                        </a>
-                        <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
-                        </div>
-
-                    </div>
-
-                    <div class="swiper-slide">
-
-                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
-                            <div class="citiesCard__image ratio ratio-3:2">
-                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
-                                    class="js-lazy">
-
-                            </div>
-
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
-                        </a>
-                        <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
-                        </div>
-
-                    </div>
-
-                    <div class="swiper-slide">
-
-                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
-                            <div class="citiesCard__image ratio ratio-3:2">
-                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
-                                    class="js-lazy">
-
-                            </div>
-
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
-                        </a>
-                        <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
-                        </div>
-
-                    </div>
-
-
-                    <div class="swiper-slide">
-
-                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
-                            <div class="citiesCard__image ratio ratio-3:2">
-                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
-                                    class="js-lazy">
-
-                            </div>
-
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
-                        </a>
-                        <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="swiper-slide">
-
-                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
-                            <div class="citiesCard__image ratio ratio-3:2">
-                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
-                                    class="js-lazy">
-
-                            </div>
-
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
-                        </a>
-                        <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
-                        </div>
-
-                    </div>
-
-
-
-                    <div class="swiper-slide">
-
-                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
-                            <div class="citiesCard__image ratio ratio-3:2">
-                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
-                                    class="js-lazy">
-
-                            </div>
-
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
-                        </a>
-                        <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
-                        </div>
-
-                    </div>
-
-
-                    <div class="swiper-slide">
-
-                        <a href="#" class="citiesCard -type-1 d-block rounded-4 ">
-                            <div class="citiesCard__image ratio ratio-3:2">
-                                <img src="#" data-src="img/destinations/1/1.png" alt="image" class="js-lazy">
-                                <img src="{{ asset('front-assets/img/masthead/2/puja10.jpeg') }}" alt="image"
-                                    class="js-lazy">
-
-                            </div>
-
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
-                        </a>
-                        <div class="citiesCard__bottom">
-                            <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">Balaram Pooja</h4>
-                        </div>
-
-                    </div>
+                
                   
 
                 </div>
@@ -437,13 +227,14 @@
             </div>
 
             <div class = "row" data-aos="fade-up" data-aos-delay="500">
+                @foreach ($otherpoojas as $otherpooja)
                 <div class="col-md-3 pandit-card">
                     <div class="card" data-state="#pooja">
                         <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image">
+                            <img class="card-pooja" src="{{ asset('assets/img/'.$otherpooja->pooja_photo) }}" alt="image">
                         </div>
                         <div class="pooja-head">
-                            <h5>Baladevjew Pooja</h5>
+                            <h5>{{$otherpooja->pooja_name}}</h5>
                             <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
                             <div style="text-align: center">
                                 {{-- <h6>(12-03-2024)</h6> --}}
@@ -452,117 +243,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3 pandit-card">
-                    <div class="card" data-state="#pooja">
-                        <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="image">
-                        </div>
-                        <div class="pooja-head">
-                            <h5>Janmasthami Pooja</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                            <div style="text-align: center">
-                                {{-- <h6>(12-03-2024)</h6> --}}
-                            </div>
-                            {{-- <button class="contact-me">Book Now</button> --}}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 pandit-card">
-                    <div class="card" data-state="#pooja">
-                        <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
-                        </div>
-                        <div class="pooja-head">
-                            <h5>Ganesh Pooja</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                            <div style="text-align: center">
-                                {{-- <h6>(12-03-2024)</h6> --}}
-                            </div>
-                            {{-- <button class="contact-me">Book Now</button> --}}
-                        </div>
-                    </div>
-                </div>
-                  <div class="col-md-3 pandit-card">
-                    <div class="card" data-state="#pooja">
-                        <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
-                        </div>
-                        <div class="pooja-head">
-                            <h5>Ganesh Pooja</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                            <div style="text-align: center">
-                                {{-- <h6>(12-03-2024)</h6> --}}
-                            </div>
-                            {{-- <button class="contact-me">Book Now</button> --}}
-                        </div>
-                    </div>
-                </div>
+                @endforeach
                 
             </div>
 
-            <div class = "row" data-aos="fade-up" data-aos-delay="500">
-                <div class="col-md-3 pandit-card">
-                    <div class="card" data-state="#pooja">
-                        <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image">
-                        </div>
-                        <div class="pooja-head">
-                            <h5>Baladevjew Pooja</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                            <div style="text-align: center">
-                                {{-- <h6>(12-03-2024)</h6> --}}
-                            </div>
-                            {{-- <button class="contact-me">Book Now</button> --}}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 pandit-card">
-                    <div class="card" data-state="#pooja">
-                        <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="image">
-                        </div>
-                        <div class="pooja-head">
-                            <h5>Janmasthami Pooja</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                            <div style="text-align: center">
-                                {{-- <h6>(12-03-2024)</h6> --}}
-                            </div>
-                            {{-- <button class="contact-me">Book Now</button> --}}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 pandit-card">
-                    <div class="card" data-state="#pooja">
-                        <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
-                        </div>
-                        <div class="pooja-head">
-                            <h5>Ganesh Pooja</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                            <div style="text-align: center">
-                                {{-- <h6>(12-03-2024)</h6> --}}
-                            </div>
-                            {{-- <button class="contact-me">Book Now</button> --}}
-                        </div>
-                    </div>
-                </div>
-                  <div class="col-md-3 pandit-card">
-                    <div class="card" data-state="#pooja">
-                        <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
-                        </div>
-                        <div class="pooja-head">
-                            <h5>Ganesh Pooja</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                            <div style="text-align: center">
-                                {{-- <h6>(12-03-2024)</h6> --}}
-                            </div>
-                            {{-- <button class="contact-me">Book Now</button> --}}
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
+           
         </div>
     </section>
 

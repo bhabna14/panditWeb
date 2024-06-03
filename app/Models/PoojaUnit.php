@@ -5,9 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Poojalist extends Model
+class PoojaUnit extends Model
 {
     use HasFactory;
-    protected $table = "pooja_list";
-    protected $fillable = ['pooja_name','pooja_photo','short_description'];
 }

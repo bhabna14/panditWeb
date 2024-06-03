@@ -13285,3 +13285,26 @@ h3.post-title {
 .circle-icon i {
   line-height: 2.4 !important;
 }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding: 0;
+}
+.pagination li {
+  margin: 0 5px;
+}
+.pagination a {
+  text-decoration: none;
+  color: #007bff;
+}
+.pagination a:hover {
+  text-decoration: underline;
+}
+.pagination .active {
+  font-weight: bold;
+}
+span.relative.z-0.inline-flex.shadow-sm.rounded-md {
+  display: none;
+}

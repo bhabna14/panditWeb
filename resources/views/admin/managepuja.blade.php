@@ -57,13 +57,34 @@
                                             <thead>
                                                 <tr>
                                                     <th class="border-bottom-0">SlNo</th>
-                                                    <th class="border-bottom-0">Puja Name</th>
-                                                    <th class="border-bottom-0">Description</th>
+                                                    <th class="border-bottom-0">Pooja Name</th>
+                                                    <th class="border-bottom-0">Pooja Image</th>
+                                                    <th class="border-bottom-0">Short Description</th>
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                
+                                                @foreach ($poojalists as $index => $poojalist)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td class="border-bottom-0">{{ $poojalist->pooja_name }}</td>
+                                                    <td>
+
+                                                        <a href="{{ asset('assets/img/' . $poojalist->pooja_photo) }}" target="_blank"
+                                                            class="btn btn-success">
+                                                            View Image
+                                                        </a>
+                                                    </td>
+                                                    <td class="border-bottom-0">{{ $poojalist->short_description }}</td>
+                                                    
+                                                    <td>
+                                                      
+                                                        <a href="{{url('admin/editpooja/'.$poojalist->id)}}"><i class="fa fa-edit"></i></a> | 
+                                                        <a href="{{url('admin/dltpooja/'.$poojalist->id)}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                                    </td>
+                                                    {{-- <td class="border-bottom-0">{{ $podcast->description }}</td> --}}
+                                                </tr>
+                                                @endforeach
                                                 
                                                 
                                             </tbody>

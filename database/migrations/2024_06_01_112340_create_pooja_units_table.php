@@ -13,12 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('podcasts', function (Blueprint $table) {
+        Schema::create('pooja_units', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description');
-            $table->string('image');
-            $table->string('music');
+            $table->string('unit_name');
+            $table->string('status');
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('podcasts');
+        Schema::dropIfExists('pooja_units');
     }
 };

@@ -44,14 +44,15 @@
             <img src="{{ asset('front-assets/img/general/hr.png')}}" alt="">
         </div>
         <div class = "row" data-aos="fade-up">
+            @foreach ($allpoojas as $allpooja)
             <div class="col-md-4 pandit-card">
                 <a href="{{url('puja-details')}}"> 
                     <div class="card" data-state="#pooja">
                         <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image">
+                            <img class="card-pooja" src="{{ asset('assets/img/'.$allpooja->pooja_photo) }}" alt="image">
                         </div>
                         <div class="pooja-head">
-                            <h5>Baladevjew Pooja</h5>
+                            <h5>{{$allpooja->pooja_name}}</h5>
                             <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
                             <div style="text-align: center">
                                 {{-- <h6>(12-03-2024)</h6> --}}
@@ -61,153 +62,16 @@
                     </div>
                 </a>
             </div>
-            <div class="col-md-4 pandit-card">
-                <div class="card" data-state="#pooja">
-                    <div class="card-header">
-                        <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="image">
-                    </div>
-                    <div class="pooja-head">
-                        <h5>Janmasthami Pooja</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                        <div style="text-align: center">
-                            {{-- <h6>(12-03-2024)</h6> --}}
-                        </div>
-                        {{-- <button class="contact-me">Book Now</button> --}}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 pandit-card">
-                <div class="card" data-state="#pooja">
-                    <div class="card-header">
-                        <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
-                    </div>
-                    <div class="pooja-head">
-                        <h5>Ganesh Pooja</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                        <div style="text-align: center">
-                            {{-- <h6>(12-03-2024)</h6> --}}
-                        </div>
-                        {{-- <button class="contact-me">Book Now</button> --}}
-                    </div>
-                </div>
-            </div>
-            
+            @endforeach
+          
         </div>
-        <div class = "row" data-aos="fade-up">
-            <div class="col-md-4 pandit-card">
-                <div class="card" data-state="#pooja">
-                    <div class="card-header">
-                        <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image">
-                    </div>
-                    <div class="pooja-head">
-                        <h5>Baladevjew Pooja</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                        <div style="text-align: center">
-                            {{-- <h6>(12-03-2024)</h6> --}}
-                        </div>
-                        {{-- <button class="contact-me">Book Now</button> --}}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 pandit-card">
-                <div class="card" data-state="#pooja">
-                    <div class="card-header">
-                        <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="image">
-                    </div>
-                    <div class="pooja-head">
-                        <h5>Janmasthami Pooja</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                        <div style="text-align: center">
-                            {{-- <h6>(12-03-2024)</h6> --}}
-                        </div>
-                        {{-- <button class="contact-me">Book Now</button> --}}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 pandit-card">
-                <div class="card" data-state="#pooja">
-                    <div class="card-header">
-                        <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
-                    </div>
-                    <div class="pooja-head">
-                        <h5>Ganesh Pooja</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                        <div style="text-align: center">
-                            {{-- <h6>(12-03-2024)</h6> --}}
-                        </div>
-                        {{-- <button class="contact-me">Book Now</button> --}}
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-        <div class = "row" data-aos="fade-up">
-            <div class="col-md-4 pandit-card">
-                <div class="card" data-state="#pooja">
-                    <div class="card-header">
-                        <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="image">
-                    </div>
-                    <div class="pooja-head">
-                        <h5>Baladevjew Pooja</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                        <div style="text-align: center">
-                            {{-- <h6>(12-03-2024)</h6> --}}
-                        </div>
-                        {{-- <button class="contact-me">Book Now</button> --}}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 pandit-card">
-                <div class="card" data-state="#pooja">
-                    <div class="card-header">
-                        <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/Janmashtami.jpg') }}" alt="image">
-                    </div>
-                    <div class="pooja-head">
-                        <h5>Janmasthami Pooja</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                        <div style="text-align: center">
-                            {{-- <h6>(12-03-2024)</h6> --}}
-                        </div>
-                        {{-- <button class="contact-me">Book Now</button> --}}
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 pandit-card">
-                <div class="card" data-state="#pooja">
-                    <div class="card-header">
-                        <img class="card-pooja" src="{{ asset('front-assets/img/masthead/2/ganeshpuja.jpg') }}" alt="image">
-                    </div>
-                    <div class="pooja-head">
-                        <h5>Ganesh Pooja</h5>
-                        <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                        <div style="text-align: center">
-                            {{-- <h6>(12-03-2024)</h6> --}}
-                        </div>
-                        {{-- <button class="contact-me">Book Now</button> --}}
-                    </div>
-                </div>
-            </div>
-            
-        </div>
+       
     </div>
-
-    <nav data-pagination class="pagination-custom">
-        <a href=# disabled><i class=ion-chevron-left></i></a>
-        <ul>
-            <li class=current><a href=#1>1</a>
-            <li><a href=#2>2</a>
-            <li><a href=#3>3</a>
-            <li><a href=#4>4</a>
-            <li><a href=#5>5</a>
-            <li><a href=#6>6</a>
-            <li><a href=#7>7</a>
-            <li><a href=#8>8</a>
-            <li><a href=#9>9</a>
-            <li><a href=#10>…</a>
-            <li><a href=#41>41</a>
-        </ul>
-        <a href=#2><i class=ion-chevron-right></i></a>
-    </nav>
+    <div class="pagination">
+        {{ $allpoojas->links() }}
+        {{-- {{ $allpoojas->appends(['search' => request('search')])->links() }} --}}
+    </div>
+   
 @endsection
 
 @section('scripts')

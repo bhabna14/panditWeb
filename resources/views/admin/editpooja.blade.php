@@ -43,7 +43,7 @@
         </div>
     @endif
 
-    <form action="{{ route('savepuja') }}" method="post" enctype="multipart/form-data">
+    <form action="{{ url('admin/updatepooja/'.$pooja->id) }}" method="post" enctype="multipart/form-data">
         @csrf
         <div class="row">
             <div class="col-lg-12 col-md-">
@@ -54,13 +54,18 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Pooja Name</label>
-                                    <input type="text" class="form-control" id="pooja_name" name="pooja_name" placeholder="Enter Puja Name" required>
+                                    <input type="text" class="form-control" value="{{$pooja->pooja_name}}" id="pooja_name" name="pooja_name" placeholder="Enter Puja Name" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Pooja Imgae</label>
-                                    <input type="file" class="form-control" id="pooja_img" name="pooja_photo" required>
+                                    <input type="file" class="form-control" id="pooja_img" name="pooja_photo"  {{ isset($pooja) ? '' : 'required' }}>
+                                    {{-- <img src="{{ asset('assets/img/' . $pooja->pooja_photo) }}" alt="{{ $pooja->pooja_name }} Image" width="100"> --}}
+                                    @if(isset($pooja->pooja_photo))
+                                    <img src="{{ asset('assets/img/' . $pooja->pooja_photo) }}" alt="{{ $pooja->pooja_name }} Image" width="100">
+                                @endif
+
                                 </div>
                             </div>
                         </div>
@@ -69,14 +74,14 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Short Description</label>
-                                    <textarea class="form-control" id="description" name="short_description" placeholder="Enter Short Description" required></textarea>
+                                    <textarea class="form-control" id="description" name="short_description" placeholder="Enter Short Description" required>{{ $pooja->short_description }}</textarea>
 
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Pooja Date</label>
-                                    <input type="date" class="form-control" id="pooja_date" name="pooja_date" >
+                                    <input type="date" class="form-control" id="pooja_date" name="pooja_date" value="{{ $pooja->pooja_date }}">
                                 </div>
                             </div>
                         </div>
@@ -84,7 +89,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="special_niti">Description</label>
-                                    <textarea class="form-control" id="description" name="description" placeholder="Enter Description"></textarea>
+                                    <textarea class="form-control" id="description" name="description" placeholder="Enter Description">{{ $pooja->description }}</textarea>
                                 </div>
                             </div>
                         </div>
