@@ -55,9 +55,9 @@ class PoojaListController extends Controller
             'quantity.*' => 'required|integer',
             'unit.*' => 'required|string',
         ]);
-
+    
         $profile = Profile::where('status', 'active')->first();
-
+    
         if (!$profile) {
             return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
         }
@@ -70,27 +70,55 @@ class PoojaListController extends Controller
         $listNames = $validatedData['list_name'];
         $quantities = $validatedData['quantity'];
         $units = $validatedData['unit'];
-
+    
+        $duplicates = [];
+        $savedItems = [];
+        $processedNames = [];
+    
         // Process each item in the list
         foreach ($listNames as $key => $listName) {
-            // Save each item to the database or perform your action
-            $poojaItem = new Poojaitems();
+            // Skip if this pooja_name is already processed within this request
+            if (in_array($listName, $processedNames)) {
+                $duplicates[] = $listName;
+                continue;
+            }
+    
+            // Check if the pooja_name already exists for the given pooja_id and pandit_id in the database
+            $existingItem = PoojaItems::where([
+                ['pandit_id', '=', $profileId],
+                ['pooja_id', '=', $poojaId],
+                ['pooja_name', '=', $poojaName],
+                ['pooja_list', '=', $listName]
+            ])->first();
+    
+            if ($existingItem) {
+                $duplicates[] = $listName;
+                continue; // Skip saving this item and move to the next one
+            }
+    
+            // Save each item to the database
+            $poojaItem = new PoojaItems();
             $poojaItem->pandit_id = $profileId;
             $poojaItem->pooja_id = $poojaId;
             $poojaItem->pooja_name = $poojaName;
             $poojaItem->pooja_list = $listName;
             $poojaItem->list_quantity = $quantities[$key];
             $poojaItem->list_unit = $units[$key];
-           
+    
+            if ($poojaItem->save()) {
+                $savedItems[] = $listName;
+                $processedNames[] = $listName;
+            }
         }
-        if ($poojaItem->save()) {
-          
-            return redirect()->route('poojaitemlist')->with('success', 'Pooja items saved successfully.');
+    
+      
+        if (!empty($savedItems)) {
+            return redirect()->route('poojaitemlist')->with('success', 'Pooja items saved successfully: ' . implode(', ', $savedItems));
         } else {
-            return redirect()->back()->with('error', 'Failed to Save data.');
-        } 
-     
+            return redirect()->back()->with('error', 'Failed to save any data.');
+        }
     }
+    
     public function deletePoojaItem($id)
     {
         $poojaItem = PoojaItems::findOrFail($id);

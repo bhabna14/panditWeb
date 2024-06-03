@@ -17,10 +17,13 @@ function addPujaListSection(poojaId) {
             </td>
             <td>
                 <select class="form-control" name="unit[]">
-                    <option value="">Select Unit</option>
-                    <option value="kg">Kilogram (kg)</option>
-                    <option value="g">Gram (g)</option>
-                    <option value="mg">Milligram (mg)</option>
+                <option value=" ">Select Unit</option>
+                <option value="kg">Kilogram (kg)</option>
+                <option value="gm">Gram (gm)</option>
+                <option value="mg">Milligram (mg)</option>
+                <option value="psc">Piece (psc)</option>
+                <option value="ltr">Liter (ltr)</option>
+                <option value="ml">Mili Liter (ml)</option>
                 </select>
             </td>
             <td>

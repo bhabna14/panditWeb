@@ -21,6 +21,27 @@
                                     <div id="collapse{{ $poojaname->id }}" class="panel-collapse collapse show" role="tabpanel" aria-expanded="true">
                                         <div class="panel-body">
                                             <div class="table-responsive export-table">
+                                                @if ($errors->any())
+                                                <div class="alert alert-danger">
+                                                    <ul>
+                                                        @foreach ($errors->all() as $error)
+                                                            <li>{{ $error }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                </div>
+                                            @endif
+                                            
+                                            @if (session()->has('success'))
+                                                <div class="alert alert-success" id="Message">
+                                                    {{ session()->get('success') }}
+                                                </div>
+                                            @endif
+                                            
+                                            @if ($errors->has('danger'))
+                                                <div class="alert alert-danger" id="Message">
+                                                    {{ $errors->first('danger') }}
+                                                </div>
+                                            @endif
                                                 <form action="{{ url('/pandit/save-poojaitemlist') }}" method="post" enctype="multipart/form-data">
                                                     @csrf
                                                     <input type="hidden" name="pooja_id" value="{{ $poojaname->id }}">
@@ -63,13 +84,13 @@
                                                                 </td>
                                                                 <td>
                                                                     <select class="form-control" id="weight_unit" name="unit[]" required>
-                                                                        <option value="">Select Unit</option>
+                                                                        <option value=" ">Select Unit</option>
                                                                         <option value="kg">Kilogram (kg)</option>
                                                                         <option value="gm">Gram (gm)</option>
                                                                         <option value="mg">Milligram (mg)</option>
-                                                                        <option value="mg">Piece (psc)</option>
-                                                                        <option value="mg">Liter (ltr)</option>
-                                                                        <option value="mg">Mili Liter (ml)</option>
+                                                                        <option value="psc">Piece (psc)</option>
+                                                                        <option value="ltr">Liter (ltr)</option>
+                                                                        <option value="ml">Mili Liter (ml)</option>
                                                                     </select>
                                                                 </td>
                                                                 <td>
@@ -86,7 +107,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                
                             </div>
                         </div>
                     </div>
@@ -108,10 +128,12 @@
     </script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
-
+  <script>
+    setTimeout(function(){
+        document.getElementById('Message').style.display = 'none';
+    }, 3000);
+</script>
     <!-- smart photo master js -->
-    {{-- <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script> --}}
+    <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
-       
-
 @endsection
