@@ -31,3 +31,9 @@ Route::controller(PujaController::class)->group(function() {
     Route::get('poojalists', 'poojalists');
     Route::get('upcomingpoojalists', 'upcomingpoojalists'); 
 });
+
+Route::controller(PujaController::class)->group(function() {
+    Route::get('poojalists', 'poojalists');
+    Route::get('upcomingpoojalists', 'upcomingpoojalists'); 
+});
+
