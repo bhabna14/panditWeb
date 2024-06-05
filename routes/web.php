@@ -37,13 +37,15 @@ Route::controller(userController::class)->group(function() {
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
     Route::get('/puja-details', 'poojadetails')->name('poojadetails');
     Route::get('/pandit-details', 'panditdetails')->name('panditdetails');
-    Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
+    
     Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/about-us', 'aboutus')->name('aboutus');
     Route::get('/contact', 'contact')->name('contact');
     Route::get('/my-profile', 'myprofile')->name('myprofile');
     Route::get('/manage-address', 'mngaddress')->name('mngaddress');
     Route::get('/add-address', 'addaddress')->name('addaddress');
+    Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
+
     Route::get('/order-history', 'orderhistory')->name('orderhistory');
     Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
     Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
@@ -256,7 +258,7 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/poojaitem', 'poojaitem')->name('poojaitem');
         Route::post('/save-poojaitemlist', 'savePoojaItemList');
         Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
-        Route::get('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
+        Route::delete('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
         Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
     });
 });

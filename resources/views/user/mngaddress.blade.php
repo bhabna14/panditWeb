@@ -36,27 +36,28 @@
             </div>
 
          
-
+          @foreach ($addressdata as $index => $addressdata)
           <div class="col-xl-4 col-md-6 ">
             <div class="single-address">
                 <div class=" rounded-4 bg-white shadow-3">
-                    <div class="fw-500 lh-14 address-single-heading">Home</div>
+                    <div class="fw-500 lh-14 address-single-heading">{{$addressdata->address_type}}</div>
                     <div class="address-details">
-                        <p>Bhabna samantara</p>
-                        <p>Near bhagabati temple</p>
-                        <p>Dasarathipur</p>
-                        <p>BANAPUR, ODISHA 752031</p>
-                        <p>India</p>
-                        <p>Phone number: 9040112795</p>
+                        <p>{{$addressdata->fullname}}</p>
+                        <p>Near {{$addressdata->landmark}}</p>
+                        <p>{{$addressdata->city}}</p>
+                        <p>{{$addressdata->state}} {{$addressdata->pincode}}</p>
+                        <p>{{$addressdata->country}}</p>
+                        <p>Phone number: {{$addressdata->number}}</p>
                     </div>
                     <div class="action-btns">
-                        <a href="">Edit</a> | <a href=""> Remove</a>
+                        <a href="{{url('editaddress/'.$addressdata->id)}}">Edit</a> | <a href=""> Remove</a>
                     </div>
                 </div>
             </div>
           </div>
+          @endforeach
 
-          <div class="col-xl-4 col-md-6 ">
+          {{-- <div class="col-xl-4 col-md-6 ">
             <div class="single-address">
                 <div class=" rounded-4 bg-white shadow-3">
                     <div class="fw-500 lh-14 address-single-heading">Work</div>
@@ -73,7 +74,7 @@
                     </div>
                 </div>
             </div>
-          </div>
+          </div> --}}
 
         </div>
         

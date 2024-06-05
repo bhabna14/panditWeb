@@ -26,7 +26,27 @@
 
           <div class="tabs__content pt-10 js-tabs-content">
             <div class="tabs__pane -tab-item-1 is-tab-el-active">
-             
+                  @if ($errors->any())
+                  <div class="alert alert-danger">
+                      <ul>
+                          @foreach ($errors->all() as $error)
+                              <li>{{ $error }}</li>
+                          @endforeach
+                      </ul>
+                  </div>
+                  @endif
+              
+                  @if(session()->has('success'))
+                      <div class="alert alert-success" id="Message">
+                          {{ session()->get('success') }}
+                      </div>
+                  @endif
+              
+                  @if ($errors->has('danger'))
+                      <div class="alert alert-danger" id="Message">
+                          {{ $errors->first('danger') }}
+                      </div>
+                  @endif
               
                   <form action="{{ route('saveaddress') }}" method="post" enctype="multipart/form-data">
                     @csrf
@@ -49,7 +69,7 @@
                           <div class="form-group">
                             <label for="exampleInputEmail1">Country</label>
                             <select name="country" class="form-control" id="">
-                              <option value="">India</option>
+                              <option value="India">India</option>
                             </select>
                           </div>
                         </div>
@@ -57,7 +77,7 @@
                         <div class="form-group">
                           <label for="exampleInputEmail1">State</label>
                           <select name="state" class="form-control" id="">
-                            <option value="">Odisha</option>
+                            <option value="Odisha">Odisha</option>
                           </select>
                         </div>
                         </div>
@@ -95,7 +115,7 @@
                         <div class="col-md-12">
                           <div class="form-group">
                             <label for="exampleInputEmail1">Landmark</label>
-                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="E.g. near apollo hospital">
+                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="landmark" placeholder="E.g. near apollo hospital">
                           </div>
                         </div>
                        
