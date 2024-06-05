@@ -12,9 +12,20 @@
         <div class="col-lg-12 col-md-12 mt-4">
             <div class="custom-card main-content-body-profile">
                 <div class="main-content-body tab-pane  border-0" id="address">
-                    <div style="border-bottom:1px solid red;text-align:center;margin: 20px">
+                    <div style="border-bottom:1px solid rgb(24, 22, 22);margin: 20px 0">
                         <h3>ADDRESS INFORMATION</h3>
                     </div>
+                    @if (session()->has('success'))
+                    <div class="alert alert-success" id="Message">
+                        {{ session()->get('success') }}
+                    </div>
+                @endif
+
+                @if ($errors->has('danger'))
+                    <div class="alert alert-danger" id="Message">
+                        {{ $errors->first('danger') }}
+                    </div>
+                @endif
                     <form action="{{url('pandit/saveaddress')}}" method="post" enctype="multipart/form-data">
                          @csrf
                         <div class="row">

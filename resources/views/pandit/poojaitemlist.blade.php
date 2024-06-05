@@ -75,9 +75,10 @@
                         <div class="form-check mt-3 text-center">
                             <a href="{{ url('pandit/poojaitem?pooja_id=' . $pooja->id) }}" class="btn btn-primary"
                                 data-toggle="tooltip" title="Add Pooja List">+</a>
-                            <a href="{{ url('pandit/managepoojaitem?pooja_id=' . $pooja->pooja_id) }}"
-                                class="btn btn-success" data-toggle="tooltip" title="Manage Pooja List"><i
-                                    class="fas fa-eye"></i></a>
+                            <a style="color: white" class="btn ripple btn-success" data-bs-target="#modaldemo6" data-bs-toggle="modal"
+                                data-pooja-id="{{ $pooja->pooja_id }}">
+                                <i class="fas fa-eye"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -85,6 +86,43 @@
         @endforeach
     </div>
     <!-- row closed -->
+
+    {{-- modal start --}}
+    <div class="modal fade" id="modaldemo6">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content modal-content-demo">
+                <div class="modal-header">
+                    <h6 class="modal-title">Pooja Item List</h6>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive export-table">
+                        <table id="file-datatable"
+                            class="table table-bordered text-nowrap key-buttons border-bottom table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="border-bottom-0">Slno</th>
+                                    <th class="border-bottom-0">Puja Name</th>
+                                    <th class="border-bottom-0">List Name</th>
+                                    <th class="border-bottom-0">Quantity</th>
+                                    <th class="border-bottom-0">Unit</th>
+                                    <th class="border-bottom-0">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- This will be dynamically filled with AJAX -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -92,17 +130,103 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="{{ asset('assets/js/pandit-profile.js') }}"></script>
-
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var modaldemo6 = document.getElementById('modaldemo6');
+
+            modaldemo6.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget; // Button that triggered the modal
+                var poojaId = button.getAttribute('data-pooja-id'); // Extract info from data-* attributes
+
+                // Perform AJAX request to get the data based on poojaId
+                fetch('/pandit/get-poojadetails/' + poojaId)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Update the modal content with the fetched data
+                        var tableBody = modaldemo6.querySelector('tbody');
+                        tableBody.innerHTML = ''; // Clear existing table rows
+
+                        if (data.error) {
+                            tableBody.innerHTML =
+                                `<tr><td colspan="6" class="text-center">${data.error}</td></tr>`;
+                        } else {
+                            data.poojaItems.forEach((item, index) => {
+                                var row = `<tr>
+                                    <td>${index + 1}</td>
+                                    <td>${item.pooja_name}</td>
+                                    <td>${item.pooja_list}</td>
+                                    <td>${item.list_quantity}</td>
+                                    <td>${item.list_unit}</td>
+                                    <td>
+                                <button class="btn btn-md btn-danger"
+                                    onclick="deletePoojaItem(${item.id});">
+                                    Delete
+                                </button>
+                            </td>
+                                </tr>`;
+                                tableBody.insertAdjacentHTML('beforeend', row);
+                            });
+
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching pooja details:', error);
+                        var tableBody = modaldemo6.querySelector('tbody');
+                        tableBody.innerHTML =
+                            `<tr><td colspan="6" class="text-center">Error loading data</td></tr>`;
+                    });
+            });
+
+
+        });
+
+        function deletePoojaItem(itemId) {
+            fetch(`/pandit/delete-poojaitem/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert(data.success); // Show success message
+
+                        // Remove the deleted row from the table
+                        var deletedRow = document.getElementById('row-' + itemId);
+                        if (deletedRow) {
+                            deletedRow.remove();
+                        } else {
+                            console.error('Row not found in table.');
+                        }
+                    } else {
+                        throw new Error('Failed to delete item.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting item:', error);
+                    alert('Failed to delete item. Please try again.'); // Show error message
+                });
+        }
+
+
+
         setTimeout(function() {
             document.getElementById('Message').style.display = 'none';
         }, 3000);
-    </script>
-    <script>
+
         $(document).ready(function() {
             $('[data-toggle="tooltip"]').tooltip();
         });
     </script>
+
+
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>

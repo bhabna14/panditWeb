@@ -29,7 +29,7 @@
                     <div class="">
                         <span class="profile-image pos-relative">
                             <img class="br-5" alt=""
-                                src="{{ asset('uploads/profile_photo/' . $pandit_profile->profile_photo) }}" alt="profile">
+                                src="{{ asset($pandit_profile->profile_photo) }}" alt="profile">
                             <span class="bg-success text-white wd-1 ht-1 rounded-pill profile-online"></span>
                         </span>
                     </div>

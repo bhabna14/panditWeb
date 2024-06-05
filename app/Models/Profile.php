@@ -9,7 +9,7 @@ class Profile extends Model
 {
     use HasFactory;
 
-    protected $table = "profiles";
+    protected $table = "pandit_profile";
 
     protected $fillable = [
         'profile_id',

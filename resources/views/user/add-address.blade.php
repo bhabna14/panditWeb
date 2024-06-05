@@ -28,18 +28,19 @@
             <div class="tabs__pane -tab-item-1 is-tab-el-active">
              
               
-                    <form action="">
+                  <form action="{{ route('saveaddress') }}" method="post" enctype="multipart/form-data">
+                    @csrf
                       <div class="row">
                         <div class="col-md-6">
                           <div class="form-group">
                             <label for="exampleInputEmail1">Full name (First and Last name)</label>
-                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Name">
+                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="fullname" placeholder="Enter Name">
                           </div>
                         </div>
                         <div class="col-md-6">
                         <div class="form-group">
                           <label for="exampleInputEmail1">Mobile number</label>
-                          <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Mobile number">
+                          <input type="text" class="form-control" id="exampleInputEmail1" value="" name="number" placeholder="Enter Mobile number">
                         </div>
                         </div>
                       </div>
@@ -47,7 +48,7 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label for="exampleInputEmail1">Country</label>
-                            <select name="" class="form-control" id="">
+                            <select name="country" class="form-control" id="">
                               <option value="">India</option>
                             </select>
                           </div>
@@ -55,7 +56,7 @@
                         <div class="col-md-6">
                         <div class="form-group">
                           <label for="exampleInputEmail1">State</label>
-                          <select name="" class="form-control" id="">
+                          <select name="state" class="form-control" id="">
                             <option value="">Odisha</option>
                           </select>
                         </div>
@@ -65,13 +66,13 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label for="exampleInputEmail1">Town/City   </label>
-                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Town/City">
+                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="city" placeholder="Enter Town/City">
                           </div>
                         </div>
                         <div class="col-md-6">
                         <div class="form-group">
                           <label for="exampleInputEmail1">Pincode</label>
-                          <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Pincode">
+                          <input type="text" class="form-control" id="exampleInputEmail1" value="" name="pincode" placeholder="Enter Pincode">
                         </div>
                         </div>
                       </div>
@@ -80,13 +81,13 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             <label for="exampleInputEmail1">Flat, House no., Building</label>
-                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Flat, House no., Building">
+                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="flatno" placeholder="Enter Flat, House no., Building">
                           </div>
                         </div>
                         <div class="col-md-6">
                         <div class="form-group">
                           <label for="exampleInputEmail1">Area, Street, Sector, Village</label>
-                          <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Area, Street, Sector, Village">
+                          <input type="text" class="form-control" id="exampleInputEmail1" value="" name="area" placeholder="Enter Area, Street, Sector, Village">
                         </div>
                         </div>
                       </div>
@@ -107,26 +108,29 @@
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="rdiobox"><input name="marital" type="radio" value="Married"> <span>Home</span></label>
+                            <label class="rdiobox"><input name="address_type" type="radio" value="Home"> <span>Home</span></label>
                         </div>
                         <div class="col-lg-2">
-                            <label class="rdiobox"><input checked name="marital" type="radio" value="Unmarried"> <span>Work</span></label>
+                            <label class="rdiobox"><input name="address_type" type="radio" value="Work"> <span>Work</span></label>
                         </div>
+                        <div class="col-lg-2">
+                          <label class="rdiobox"><input checked name="address_type" type="radio" value="Other"> <span>Other</span></label>
+                      </div>
                     </div>
-                    </form>
+                   
                   
                 </div>
               </div>
 
               <div class="d-inline-block pt-30">
 
-                <a href="#" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
+                <button type="submit" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
                   Save Address<div class="icon-arrow-top-right ml-15"></div>
-                </a>
+                </button>
 
               </div>
             
-          
+            </form>
           </div>
         </div>
       </div>

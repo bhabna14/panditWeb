@@ -25,12 +25,7 @@ class ProfileController extends Controller
     public function saveprofile(Request $request)
     {
         $request->validate([
-            'title' => 'required|string',
-            'name' => 'required|string',
-            'email' => 'required|email|unique:profiles,email',
-            'whatsappno' => 'nullable|string|max:20',
-            'bloodgroup' => 'nullable|string|max:10',
-            'maritalstatus' => 'nullable|string|max:255',
+   
             'profile_photo' => 'nullable|image|max:2048', // Ensure it's an image file
         ]);
 
@@ -52,9 +47,10 @@ class ProfileController extends Controller
         // Handle profile photo upload if provided
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
-            $filename = time().'.'.$file->getClientOriginalExtension();
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $filePath = 'uploads/profile_photo/' . $filename;
             $file->move(public_path('uploads/profile_photo'), $filename);
-            $profile->profile_photo = $filename;
+            $profile->profile_photo = $filePath;
         }
 
         if ($profile->save()) {

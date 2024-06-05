@@ -37,6 +37,7 @@ Route::controller(userController::class)->group(function() {
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
     Route::get('/puja-details', 'poojadetails')->name('poojadetails');
     Route::get('/pandit-details', 'panditdetails')->name('panditdetails');
+    Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
     Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/about-us', 'aboutus')->name('aboutus');
     Route::get('/contact', 'contact')->name('contact');
@@ -96,7 +97,17 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/manage-users', 'manageuser')->name('manageuser');
         Route::get('/user-profile', 'userprofile')->name('userprofile');
 
-    
+        Route::post('admin/pandit/accept/{id}', 'acceptPandit')->name('acceptPandit');
+        Route::post('admin/pandit/reject/{id}', 'rejectPandit')->name('rejectPandit');
+        Route::get('pandit-profile/{id}',  'showProfile')->name('panditProfile');
+
+        Route::get('/deletIdproofs/{id}', 'deletIdproof')->name('deletIdproof');
+        Route::get('/deletEducations/{id}', 'deletEducation')->name('deletEducation');
+        Route::get('/deletVedics/{id}', 'deletVedic')->name('deletVedic');
+        Route::get('/add-panditProfile', 'addProfile')->name('addProfile');
+        Route::get('/add-panditCareer', 'addCareer')->name('addCareer');
+        Route::post('/save-profile', 'saveprofile');
+        Route::post('/save-career', 'savecareer');
     });
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
@@ -246,5 +257,6 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::post('/save-poojaitemlist', 'savePoojaItemList');
         Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
         Route::get('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
+        Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
     });
 });

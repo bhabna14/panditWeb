@@ -30,20 +30,19 @@ class PoojaListController extends Controller
         // Assuming you want to pass the pooja to a view
         return view('/pandit/poojaitems', compact('poojaname','Poojaitemlist'));
     }
-    public function managepoojaitem(Request $request)
+    public function getPoojaDetails($pooja_id)
     {
-        $pooja_id = $request->query('pooja_id');
-
-        $poojaname = Poojaskill::where('pooja_id', $pooja_id)->first();
-        
         $poojaItems = PoojaItems::where('pooja_id', $pooja_id)->where('status', 'active')->get();
-
-        if (!$poojaItems) {
-            return redirect()->back()->with('error', 'Pooja not found.');
+    
+        if ($poojaItems->isEmpty()) {
+            return response()->json(['error' => 'Pooja not found.'], 404);
         }
-
-        return view('/pandit/managepoojaitem', compact('poojaItems','poojaname'));
+    
+        return response()->json([
+            'poojaItems' => $poojaItems
+        ]);
     }
+    
     public function savePoojaItemList(Request $request)
     {
         // Validate the incoming request data
@@ -117,17 +116,21 @@ class PoojaListController extends Controller
             return redirect()->back()->with('error', 'Failed to save any data.');
         }
     }
-    
     public function deletePoojaItem($id)
     {
-        $poojaItem = PoojaItems::findOrFail($id);
-
-        $poojaItem->status = 'deleted'; // Assuming there's a 'status' column in your table
-        
-        if ($poojaItem->save()) {
-            return redirect()->back()->with('success', 'Pooja item status updated to deleted.');
-        } else {
-            return redirect()->back()->with('error', 'Failed to Delet data.');
-        } 
+        try {
+            $poojaItem = PoojaItems::findOrFail($id);
+            $poojaItem->status = 'deleted'; // Update the status field
+    
+            if ($poojaItem->save()) {
+                return response()->json(['success' => 'Pooja item deleted successfully.']);
+            } else {
+                return response()->json(['error' => 'Delet not success.'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Pooja item not found.'], 404);
+        }
     }
+    
+  
 }

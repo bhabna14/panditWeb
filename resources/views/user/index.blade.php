@@ -7,7 +7,7 @@
 @section('content')
     <!-- Main Section -->
     <section data-anim-wrap class="masthead -type-2 js-mouse-move-container" style="margin-top: -17px;">
-        <div class="masthead__bg bg-dark-3">
+        <div class="masthead__bg">
             <img src="{{ asset('front-assets/img/masthead/2/mayura1.jpg') }}" alt="image">
         </div>
 
@@ -282,7 +282,7 @@
                      <div class="col-md-8 col-8">
                         <div class="pandit-front-sec-text">
                             <h3>P.Bibhu Panda</h3>
-                            <span>4.8</span> Exceptional
+                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                         </div>
                      </div>
                    </div>
@@ -299,7 +299,7 @@
                       <div class="col-md-8 col-8">
                          <div class="pandit-front-sec-text">
                              <h3>P.Bibhu Panda</h3>
-                             <span>4.8</span> Exceptional
+                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                          </div>
                       </div>
                     </div>
@@ -316,7 +316,7 @@
                       <div class="col-md-8 col-8">
                          <div class="pandit-front-sec-text">
                              <h3>P.Bibhu Panda</h3>
-                             <span>4.8</span> Exceptional
+                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                          </div>
                       </div>
                     </div>
@@ -337,7 +337,7 @@
                      <div class="col-md-8 col-8">
                         <div class="pandit-front-sec-text">
                             <h3>P.Bibhu Panda</h3>
-                            <span>4.8</span> Exceptional
+                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                         </div>
                      </div>
                    </div>
@@ -354,7 +354,7 @@
                       <div class="col-md-8 col-8">
                          <div class="pandit-front-sec-text">
                              <h3>P.Bibhu Panda</h3>
-                             <span>4.8</span> Exceptional
+                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                          </div>
                       </div>
                     </div>
@@ -371,7 +371,7 @@
                       <div class="col-md-8 col-8">
                          <div class="pandit-front-sec-text">
                              <h3>P.Bibhu Panda</h3>
-                             <span>4.8</span> Exceptional
+                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                          </div>
                       </div>
                     </div>
@@ -392,7 +392,7 @@
                      <div class="col-md-8 col-8">
                         <div class="pandit-front-sec-text">
                             <h3>P.Bibhu Panda</h3>
-                            <span>4.8</span> Exceptional
+                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                         </div>
                      </div>
                    </div>
@@ -409,7 +409,7 @@
                       <div class="col-md-8 col-8">
                          <div class="pandit-front-sec-text">
                              <h3>P.Bibhu Panda</h3>
-                             <span>4.8</span> Exceptional
+                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                          </div>
                       </div>
                     </div>
@@ -426,7 +426,7 @@
                       <div class="col-md-8 col-8">
                          <div class="pandit-front-sec-text">
                              <h3>P.Bibhu Panda</h3>
-                             <span>4.8</span> Exceptional
+                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                          </div>
                       </div>
                     </div>

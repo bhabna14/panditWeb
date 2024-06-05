@@ -16,15 +16,16 @@
                 @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
                     @endforeach
-                @if(session('success'))
-                    <div style="color: green;">
-                        {{ session('success') }}
+                    @if (session()->has('success'))
+                    <div class="alert alert-success" id="Message">
+                        {{ session()->get('success') }}
                     </div>
                 @endif
+
                 @if ($errors->has('danger'))
-                <div class="alert alert-danger" id="Message">
-                    {{ $errors->first('danger') }}
-                </div>
+                    <div class="alert alert-danger" id="Message">
+                        {{ $errors->first('danger') }}
+                    </div>
                 @endif
                 <form action="{{ url('pandit/savebankdetails')}}" method="post" enctype="multipart/form-data">
                     @csrf
@@ -32,15 +33,11 @@
                     <div class="row">
                         <div class="col-lg-12 col-md-12">
                             <div class="card custom-card">
-                                <div style="border-bottom:1px solid red;text-align:center;margin: 20px">
-                                    <h3>BANK INFORMATION</h3>
-                                </div>
+                                    <h3 style="margin: 20px">BANK INFORMATION</h3>
                                 <div class="card-body">
-                                   
                                     <!-- <p class="mg-b-20">A form control layout using basic layout.</p> -->
                                     <div class="row">
                                        
-
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="exampleInputEmail1">Bank Name</label>
@@ -114,28 +111,7 @@
 
 @section('scripts')
     <!-- Internal Select2 js-->
-    <script>
-        function addressFunction() {
-            if (document.getElementById("same").checked) {
-                document.getElementById("peraddress").value = document.getElementById("preaddress").value;
-                document.getElementById("perpost").value = document.getElementById("prepost").value;
-                document.getElementById("perdistri").value = document.getElementById("predistrict").value;
-                document.getElementById("perstate").value = document.getElementById("prestate").value;
-                document.getElementById("percountry").value = document.getElementById("precountry").value;
-                document.getElementById("perpincode").value = document.getElementById("prepincode").value;
-                document.getElementById("perlandmark").value = document.getElementById("prelandmark").value;
-
-            } else {
-                document.getElementById("peraddress").value = "";
-                document.getElementById("perpost").value = "";
-                document.getElementById("perdistri").value = "";
-                document.getElementById("perstate").value = "";
-                document.getElementById("percountry").value = "";
-                document.getElementById("perpincode").value = "";
-                document.getElementById("perlandmark").value = "";
-            }
-        }
-    </script>
+   
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="{{ asset('assets/js/pandit-profile.js') }}"></script>

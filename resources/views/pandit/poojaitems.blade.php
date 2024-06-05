@@ -56,7 +56,7 @@
                                                                 <th class="border-bottom-0">Quantity</th>
                                                                 <th class="border-bottom-0">Unit</th>
                                                                 <th class="border-bottom-0">Action</th>
-                                                            </tr>
+                                                            </tr> 
                                                         </thead>
                                                         <tbody id="show_puja_item_{{ $poojaname->id }}">
                                                             <tr>

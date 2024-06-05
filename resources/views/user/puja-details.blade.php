@@ -4,22 +4,11 @@
 @endsection
 
 @section('content')
-
+<section class="pt-40 pb-40 single-pooja">
+</section>
 <section class="puja-details-sec">
     <div class="container">
-        <div class="row">
-            <div class="col-md-8 col-8">
-                <div class="puja-images">
-                    <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="">
-                </div>
-            </div>
-            <div class="col-md-4 col-4">
-                <div class="puja-images">
-                    <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="">
-                    <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg') }}" alt="" class="mt-20">
-                </div>
-            </div>
-        </div>
+      
         <div class="row">
             <div class="puja-heading-sec">
                 <h5>Baladevjew Pooja</h5>
