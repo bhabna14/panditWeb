@@ -52,13 +52,13 @@ class AdminController extends Controller
     }
     public function dashboard()
     {
-        $userCount = User::where('role', 'user')->count();
-        $pendinguser = User::where('application_status', 'pending')->count();
-        $approuser = User::where('application_status', 'approved')->count();
-        $rejecteduser = User::where('application_status', 'rejected')->count();
-        $sebayatlists = User::where('status', 'active')->where('role', 'user')->get();
-                                
-         return view('admin/dashboard', compact('userCount','pendinguser','approuser','rejecteduser','sebayatlists'));
+        // $userCount = User::where('role', 'user')->count();
+        // $pendinguser = User::where('application_status', 'pending')->count();
+        // $approuser = User::where('application_status', 'approved')->count();
+        // $rejecteduser = User::where('application_status', 'rejected')->count();
+        $sebayatlists = User::where('status', 'active')->get();
+        $pandit_profiles = Profile::all(); // Fetch all profiles                  
+         return view('admin/dashboard', compact('sebayatlists','pandit_profiles'));
     } 
     public function adminlogout(Request $request)
     {
@@ -81,13 +81,13 @@ class AdminController extends Controller
         $pandit_profile = Profile::find($id);
         $pandtId = $pandit_profile->profile_id;
 
-        $pandit_career = Career::where('pandit_id', $pandtId)->where('status','active')->get();
+        $pandit_careers = Career::where('pandit_id', $pandtId)->where('status','active')->get();
         $pandit_idcards = PanditIdCard::where('pandit_id', $pandtId)->where('status','active')->get();
         $pandit_vedics = PanditVedic::where('pandit_id', $pandtId)->where('status','active')->get();
         $pandit_educations = PanditEducation::where('pandit_id', $pandtId)->where('status','active')->get();
 
 
-        return view('admin/pandit-profile', compact('pandit_profile','pandit_career','pandit_idcards','pandit_vedics','pandit_educations'));
+        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations'));
 
     }
 

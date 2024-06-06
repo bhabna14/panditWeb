@@ -160,26 +160,28 @@
                             <div class="card-body border-0">
                                 <div class="mb-4 main-content-label">Personal Information</div>
                                 <form class="form-horizontal">
-                                    <div class="form-group ">
+                                    @foreach($pandit_careers as $pandit_career)
+                                    <div class="form-group">
                                         <div class="row row-sm">
                                             <div class="col-md-3">
                                                 <label class="form-label">Qualification</label>
                                             </div>
                                             <div class="col-md-9">
-                                                {{-- {{ $pandit_career->qualification}} --}}
+                                                {{ $pandit_career->qualification }}
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="form-group ">
+                                    <div class="form-group">
                                         <div class="row row-sm">
                                             <div class="col-md-3">
                                                 <label class="form-label">Total Experience</label>
                                             </div>
                                             <div class="col-md-9">
-                                                {{-- {{ $pandit_career->total_experience}} --}}
+                                                {{ $pandit_career->total_experience }}
                                             </div>
                                         </div>
                                     </div>
+                                @endforeach
                                     <div class="mb-4 main-content-label">Id Info</div>
                                     
                                     <div class="card-body">

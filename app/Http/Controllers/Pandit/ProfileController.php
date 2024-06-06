@@ -102,16 +102,15 @@ class ProfileController extends Controller
         $langString = implode(',', $pandilang);
         $profile->language = $langString;
 
-    // Handle profile photo upload if provided
     if ($request->hasFile('profile_photo')) {
         $file = $request->file('profile_photo');
-        $filename = time().'.'.$file->getClientOriginalExtension();
+        $filename = time() . '.' . $file->getClientOriginalExtension();
+        $filePath = 'uploads/profile_photo/' . $filename;
         $file->move(public_path('uploads/profile_photo'), $filename);
-        $profile->profile_photo = $filename;
+        $profile->profile_photo = $filePath;
     }
-
         if ($profile->save()) {
-            return redirect()->route('/pandit/poojaitemlist')->with('success', 'Data updated successfully.');
+            return redirect()->back()->with('success', 'Data updated successfully.');
         } else {
             return redirect()->back()->with('error', 'Failed to update data.');
         } 

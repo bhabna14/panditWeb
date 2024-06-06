@@ -164,7 +164,10 @@ class userController extends Controller
         return view('user/pandit-details');
     }
     public function booknow(){
-        return view('user/booknow');
+        $user = User::where('status', 'active')->first();
+        $user_id = $user->user_id;
+        $addressdata = UserAddress::where('user_id', $user_id)->get();
+        return view('user/booknow', compact('addressdata'));
     }
     public function aboutus(){
         return view('user/aboutus');

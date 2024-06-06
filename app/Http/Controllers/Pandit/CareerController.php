@@ -156,8 +156,11 @@ class CareerController extends Controller
         ]);
 
         $career = Career::findOrFail($id);
+        $latestProfile = Profile::latest()->first();
 
         // Update the scalar fields
+        $career->pandit_id = $latestProfile->profile_id;
+        $career->career_id = $request->career_id;
         $career->qualification = $request->qualification;
         $career->total_experience = $request->experience;
 
@@ -171,7 +174,7 @@ class CareerController extends Controller
 
             // Save form data to the database
             $iddata = new IdcardDetail();
-            $iddata->career_id = $request->career_id;
+            $iddata->pandit_id = $latestProfile->profile_id;
             $iddata->id_type =  $id_type;
             $iddata->upload_id = $fileName; // Save file path in the database
             $iddata->save();
@@ -188,7 +191,7 @@ class CareerController extends Controller
 
             // Save form data to the database
             $edudata = new EduDetail();
-            $edudata->career_id = $request->career_id;
+            $edudata->pandit_id = $latestProfile->profile_id;
             $edudata->education_type = $education_type;
             $edudata->upload_education = $fileName; // Save file path in the database
             $edudata->save();
@@ -206,7 +209,7 @@ class CareerController extends Controller
 
             // Save form data to the database
             $vedicdata = new VedicDetail();
-            $vedicdata->career_id = $request->career_id;
+            $vedicdata->pandit_id = $latestProfile->profile_id;
             $vedicdata->vedic_type = $vedic_type;
             $vedicdata->upload_vedic = $fileName; // Save file path in the database
             $vedicdata->save();

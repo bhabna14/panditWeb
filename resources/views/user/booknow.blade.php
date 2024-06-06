@@ -23,22 +23,19 @@
             <h4 class="mb-20">Book Now</h4>
             <div class="col-md-7">
                 <form action="">
-                    <div class="form-input ">
-                        <input type="text" required class="form-control">
-                        <label class="lh-1 text-16 text-light-1">Full Name</label>
+                    <div class="row">
+                      <div class="col-md-12">
+                        @foreach ($addressdata as $index => $addressdata)
+                        <div class="your-address">
+                          <input type="radio" name="address" id=""><span class="text-blod">{{$addressdata->fullname}}</span>,{{$addressdata->landmark}},{{$addressdata->city}},{{$addressdata->state}},{{$addressdata->country}},{{$addressdata->pincode}},<br>Mbile Number: {{$addressdata->number}}
+                        </div>
+                        @endforeach
+                      </div>
                     </div>
-                    <div class="form-input mt-20">
-                        <input type="text" required class="form-control">
-                        <label class="lh-1 text-16 text-light-1">Email</label>
-                    </div>
-                    <div class="form-input mt-20">
-                        <input type="text" required class="form-control">
-                        <label class="lh-1 text-16 text-light-1">Phone Number</label>
-                    </div>
-                    <div class="form-input mt-20">
-                        {{-- <input type="text" required class="form-control"> --}}
-                        <textarea name="" id=""  class="form-control" cols="30" ></textarea>
-                        <label class="lh-1 text-16 text-light-1">Address</label>
+                    <div class="row" style="margin-top:20px">
+                      <div class="col-md-4">
+                        <a href="#" class="add-address-btn"><i class="fa fa-plus"></i>Add Address</a>
+                      </div>
                     </div>
                     <div class="row">
                         <div class="form-input mt-20 col-md-6">
@@ -111,6 +108,7 @@
                             <div class="text-14">3,014 reviews</div>
                           </div>
                         </div>
+                        <div class="text-16 lh-15 mt-5 fw-600">₹ 300</div>
                       </div>
                     </div>
                     </div>
