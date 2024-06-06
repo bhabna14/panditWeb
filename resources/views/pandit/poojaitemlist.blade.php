@@ -75,8 +75,8 @@
                         <div class="form-check mt-3 text-center">
                             <a href="{{ url('pandit/poojaitem?pooja_id=' . $pooja->id) }}" class="btn btn-primary"
                                 data-toggle="tooltip" title="Add Pooja List">+</a>
-                            <a style="color: white" class="btn ripple btn-success" data-bs-target="#modaldemo6" data-bs-toggle="modal"
-                                data-pooja-id="{{ $pooja->pooja_id }}">
+                            <a style="color: white" class="btn ripple btn-success" data-bs-target="#modaldemo6"
+                                data-bs-toggle="modal" data-pooja-id="{{ $pooja->pooja_id }}">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </div>
@@ -101,7 +101,7 @@
                     <div class="table-responsive export-table">
                         <table id="file-datatable"
                             class="table table-bordered text-nowrap key-buttons border-bottom table-hover">
-                            <thead>
+                            <thead style= "background-color: gray">
                                 <tr>
                                     <th class="border-bottom-0">Slno</th>
                                     <th class="border-bottom-0">Puja Name</th>
@@ -148,40 +148,34 @@
 
                         if (data.error) {
                             tableBody.innerHTML =
-                                `<tr><td colspan="6" class="text-center">${data.error}</td></tr>`;
+                                <tr><td colspan="6" class="text-center">${data.error}</td></tr>;
                         } else {
                             data.poojaItems.forEach((item, index) => {
-                                var row = `<tr>
+                                var row = `<tr id="row-${item.id}">
                                     <td>${index + 1}</td>
                                     <td>${item.pooja_name}</td>
                                     <td>${item.pooja_list}</td>
                                     <td>${item.list_quantity}</td>
                                     <td>${item.list_unit}</td>
                                     <td>
-                                <button class="btn btn-md btn-danger"
-                                    onclick="deletePoojaItem(${item.id});">
-                                    Delete
-                                </button>
-                            </td>
+                                        <button class="btn btn-md btn-danger" onclick="deletePoojaItem(${item.id});">Delete</button>
+                                    </td>
                                 </tr>`;
                                 tableBody.insertAdjacentHTML('beforeend', row);
                             });
-
                         }
                     })
                     .catch(error => {
                         console.error('Error fetching pooja details:', error);
                         var tableBody = modaldemo6.querySelector('tbody');
                         tableBody.innerHTML =
-                            `<tr><td colspan="6" class="text-center">Error loading data</td></tr>`;
+                            <tr><td colspan="6" class="text-center">Error loading data</td></tr>;
                     });
             });
-
-
         });
 
         function deletePoojaItem(itemId) {
-            fetch(`/pandit/delete-poojaitem/${itemId}`, {
+            fetch(/pandit/delete-poojaitem/${itemId}, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
@@ -214,17 +208,17 @@
                     alert('Failed to delete item. Please try again.'); // Show error message
                 });
         }
+    </script> 
+    <script>
+         setTimeout(function() {
+    document.getElementById('Message').style.display = 'none';
+    }, 3000);
 
-
-
-        setTimeout(function() {
-            document.getElementById('Message').style.display = 'none';
-        }, 3000);
-
-        $(document).ready(function() {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
+    $(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+    });
     </script>
+   
 
 
     <!-- smart photo master js -->
