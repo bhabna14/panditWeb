@@ -6,25 +6,112 @@
 
 @section('content')
     <!-- Main Section -->
+    {{-- <section data-anim-wrap class="masthead -type-7" style="margin-top: -104px;">
+        <div class="masthead-slider js-masthead-slider-7">
+          <div class="swiper-wrapper">
+  
+            <div class="swiper-slide">
+              <div class="row justify-center text-center">
+                <div class="col-auto">
+                  <div class="masthead__content">
+                    <div class="masthead__bg">
+                      <img src="{{url('front-assets/img/masthead/banner1.png')}}" alt="image">
+                    </div>
+  
+                    <div data-anim-child="slide-up delay-1" class="text-white">
+                        Experienced Pandits for Every Occasion, Just a Click Away
+                    </div>
+  
+                    <h1 data-anim-child="slide-up delay-2" class="text-60 lg:text-40 md:text-30 text-white">
+                        Find the Perfect Pandit for<br class="lg:d-none"> Your Spiritual Journey 
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+            <div class="swiper-slide">
+              <div class="row justify-center text-center">
+                <div class="col-auto">
+                  <div class="masthead__content">
+                    <div class="masthead__bg">
+                      <img src="{{url('front-assets/img/masthead/banner2.png')}}" alt="image">
+                    </div>
+  
+                    <div data-anim-child="slide-up delay-1" class="text-white">
+                        Bringing Traditional Expertise to Your Doorstep
+
+                    </div>
+  
+                    <h1 data-anim-child="slide-up delay-2" class="text-60 lg:text-40 md:text-30 text-white">
+                        Convenient and Reliable <br class="lg:d-none"> Online Pandit
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+            <div class="swiper-slide">
+              <div class="row justify-center text-center">
+                <div class="col-auto">
+                  <div class="masthead__content">
+                    <div class="masthead__bg">
+                      <img src="{{url('front-assets/img/masthead/banner3.png')}}" alt="image">
+                    </div>
+  
+                    <div data-anim-child="slide-up delay-1" class="text-white">
+                        Reliable Pandit Booking for Every Religious Event
+                    </div>
+  
+                    <h1 data-anim-child="slide-up delay-2" class="text-60 lg:text-40 md:text-30 text-white">
+                        Effortless Booking, Expert Guidance, <br class="lg:d-none"> Memorable Rituals
+                    </h1>
+                  </div>
+                </div>
+              </div>
+            </div>
+  
+          </div>
+  
+          <div class="masthead-slider__nav -prev js-prev">
+            <button class="button -outline-white text-white size-50 rounded-full">
+              <i class="icon-arrow-left"></i>
+            </button>
+          </div>
+  
+          <div class="masthead-slider__nav -next js-next">
+            <button class="button -outline-white text-white size-50 rounded-full">
+              <i class="icon-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+  
+       
+    </section> --}}
     <section data-anim-wrap class="masthead -type-2 js-mouse-move-container" style="margin-top: -17px;">
         <div class="masthead__bg">
-            <img src="{{ asset('front-assets/img/masthead/2/mayura1.jpg') }}" alt="image">
+            <img src="{{ asset('front-assets/img/masthead/home.png') }}" alt="image">
         </div>
 
         <div class="container">
 
             <div class="masthead__content">
                 <div class="row y-gap-40">
-                    <div class="col-xl-5">
+                    <div class="col-xl-5" style="margin-top: 33px;">
                         <h1 data-anim-child="slide-up delay-2"
-                            class="z-2 text-60 lg:text-40 text-white md:text-30 pt-80 xl:pt-0 text-respn">
-                            <span class="text-white-1"> At which location</span><br>
-                            Did you call the Pandit??
+                            class="z-2 lg:text-40 text-dark md:text-30  xl:pt-0 text-respn" style="    font-size: 44px; line-height:49px !important">
+                            <span class="" style="color: #c80100;font-size: 72px;">N</span>EW <span class="" style="color:#c80100">O</span>FFERS: <br> <span class="" style="color:#c80100"> B</span>OOK <span class="" style="color:#c80100">P</span>ANDIT <span class="" style="color:#c80100">O</span>NLINE<br>
+                           
                         </h1>
+                        <p style="
+                            font-size: 23px;
+                            color: #000;
+                            font-weight: 500;
+                            margin-top: 20px;
+                        ">Up to 100% discount on your first booking and flat 50% off in all Pooja Packages.</p>
+                        {{-- <p data-anim-child="slide-up delay-3" class="z-2 text-white mt-20">Search Location Here!!</p> --}}
 
-                        <p data-anim-child="slide-up delay-3" class="z-2 text-white mt-20">Search Location Here!!</p>
-
-                        <div data-anim-child="slide-up delay-4"
+                        {{-- <div data-anim-child="slide-up delay-4"
                             class="mainSearch z-2 bg-white pr-10 py-10 lg:px-20 lg:pt-5 lg:pb-20 rounded-4 shadow-1">
                             <div class="button-grid items-center">
 
@@ -104,17 +191,17 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> --}}
                     </div>
 
                     <div class="col-xl-7">
                         <div class="masthead__images">
                             <div data-anim-child="slide-up delay-6"><img
-                                    src="{{ asset('front-assets/img/masthead/2/alati.webp') }}" alt="image"></div>
+                                    src="{{ asset('front-assets/img/masthead/home1.png') }}" alt="image"></div>
                             <div data-anim-child="slide-up delay-7"><img
-                                    src="{{ asset('front-assets/img/masthead/2/puja2.jpeg') }}" alt="image"></div>
+                                    src="{{ asset('front-assets/img/masthead/home2.png') }}" alt="image"></div>
                             <div data-anim-child="slide-up delay-8"><img
-                                    src="{{ asset('front-assets/img/masthead/2/puja3.jpeg') }}" alt="image"></div>
+                                    src="{{ asset('front-assets/img/masthead/home3.png') }}" alt="image"></div>
                         </div>
                     </div>
                 </div>

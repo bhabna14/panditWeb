@@ -18,7 +18,7 @@
                             <!-- Demo content-->
                             <div class="main-card-signin d-md-flex">
                                 <div class="wd-100p">
-                                    <div class="d-flex mb-4">
+                                    <div class="d-flex mb-4" style="justify-content: center;">
                                         <a href="#"><img src="{{ asset('assets/img/brand/logo.png') }}"
                                                 class="sign-favicon ht-40" alt="logo"></a>
                                     </div>

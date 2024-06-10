@@ -15,7 +15,9 @@ class PoojaListController extends Controller
 
         $Poojaskills = Poojaskill::where('status', 'active')->get();
         $PujaLists = Poojaitemlists::all();
-        return view('/pandit/poojaitemlist', compact('Poojaskills','PujaLists'));
+        $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
+
+        return view('/pandit/poojaitemlist', compact('Poojaskills','PujaLists','Poojaitemlist'));
     }
     public function poojaitem(Request $request)
     {
@@ -131,6 +133,27 @@ class PoojaListController extends Controller
             return response()->json(['error' => 'Pooja item not found.'], 404);
         }
     }
-    
-  
+
+    public function updatePoojalist(Request $request)
+{
+    $validatedData = $request->validate([
+        'id' => 'required|integer',
+        'list_name' => 'required|string|max:255',
+        'list_quantity' => 'required|string|max:255',
+        'unit' => 'required|string|max:255',
+    ]);
+
+    $poojaItem = PoojaItems::find($validatedData['id']);
+    if ($poojaItem) {
+        $poojaItem->pooja_list = $validatedData['list_name'];
+        $poojaItem->list_quantity = $validatedData['list_quantity'];
+        $poojaItem->list_unit = $validatedData['unit'];
+        $poojaItem->save();
+
+        return response()->json(['success' => 'Pooja item updated successfully.']);
+    } else {
+        return response()->json(['error' => 'Pooja item not found.'], 404);
+    }
+}
+
 }

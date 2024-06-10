@@ -260,5 +260,6 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
         Route::delete('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
         Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
+        Route::put('/updatepoojalist', 'updatePoojalist');
     });
 });
