@@ -167,6 +167,13 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/dltpodcast/{podcast}', 'destroy')->name('destroy');
     });
 
+
+    Route::controller(BannerController::class)->group(function() {
+        Route::get('/manage-app-banner', 'manageappbanner')->name('manageappbanner');
+     
+    });
+
+
 });
 
 // user routes
