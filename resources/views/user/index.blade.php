@@ -103,12 +103,12 @@
                             <span class="" style="color: #c80100;font-size: 72px;">N</span>EW <span class="" style="color:#c80100">O</span>FFERS: <br> <span class="" style="color:#c80100"> B</span>OOK <span class="" style="color:#c80100">P</span>ANDIT <span class="" style="color:#c80100">O</span>NLINE<br>
                            
                         </h1>
-                        <p style="
+                        {{-- <p style="
                             font-size: 23px;
                             color: #000;
                             font-weight: 500;
                             margin-top: 20px;
-                        ">Up to 100% discount on your first booking and flat 50% off in all Pooja Packages.</p>
+                        ">Up to 100% discount on your first booking and flat 50% off in all Pooja Packages.</p> --}}
                         {{-- <p data-anim-child="slide-up delay-3" class="z-2 text-white mt-20">Search Location Here!!</p> --}}
 
                         {{-- <div data-anim-child="slide-up delay-4"
@@ -199,11 +199,43 @@
                             <div data-anim-child="slide-up delay-6"><img
                                     src="{{ asset('front-assets/img/masthead/home1.png') }}" alt="image"></div>
                             <div data-anim-child="slide-up delay-7"><img
-                                    src="{{ asset('front-assets/img/masthead/home2.png') }}" alt="image"></div>
+                                    src="{{ asset('front-assets/img/masthead/b2.jpeg') }}" alt="image"></div>
                             <div data-anim-child="slide-up delay-8"><img
-                                    src="{{ asset('front-assets/img/masthead/home3.png') }}" alt="image"></div>
+                                    src="{{ asset('front-assets/img/masthead/b1.jpeg') }}" alt="image"></div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="container">
+            <div class="row" style="margin-top:60px">
+                <div class="col-md-6">
+                    
+                    <div class="img-group">
+                        <div class="img-group-inner">
+                          <img src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/about-group1/1.jpg" alt="about">
+                          <span></span>
+                          <span></span>
+                        </div>
+                        <img src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/about-group1/2.jpg" alt="about">
+                        <img src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/about-group1/3.jpg" alt="about">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="section-title mb-0 text-start">
+                        <p class="subtitle">EDUCATION FOR ALL RURAL CHILDREN</p>
+                        <h4 class="title">We are a Hindu that believe in Ram</h4>
+                    </div>
+                    <ul class="sigma_list list-2 mb-0">
+                        <li>Peace of Mind</li>
+                        <li>Set For Pastor</li>
+                        <li>100% Satisfaction</li>
+                        <li>Trusted Company</li>
+                    </ul>
+                    <p class="blockquote bg-transparent"> We are a Hindu that belives in Lord Rama and Vishnu Deva the followers and We are a Hindu that belives in Lord Rama and Vishnu Deva. </p>
                 </div>
             </div>
         </div>

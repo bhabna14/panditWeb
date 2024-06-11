@@ -143,7 +143,10 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::controller(LanguageController::class)->group(function() {
         Route::get('/manage-lang', 'managelang')->name('managelang');
         Route::get('/add-language', 'addlang')->name('addlang');
-        // Route::get('/savelocation', 'savelocation')->name('savelocation');
+        Route::post('/savelang', 'savelang')->name('savelang');
+        Route::get('/editlang/{lang}', 'editlang')->name('editlang');
+        Route::put('/updatelang', 'updatelang')->name('updatelang');
+        Route::get('/dltlang/{lang}', 'dltlang')->name('dltlang');
     });
 
     Route::controller(TitleController::class)->group(function() {

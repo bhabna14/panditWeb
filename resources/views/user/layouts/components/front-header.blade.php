@@ -103,8 +103,8 @@
             <div class="searchMenu-loc js-form-dd js-liverSearch">
                 
               <div data-x-dd-click="searchMenu-loc">
-                <div class="button px-10 fw-300 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-left: 20px;width: 103px;background-color: #c80100 !important;justify-content: left;cursor: pointer;align-items: left;/* align-items: end; */">
-                  <i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i><h4 class="text-15 fw-400 ls-2 lh-16">Login</h4><i class="icon-chevron-sm-down text-7 ml-10"></i>
+                <div class="button px-10 fw-300 -blue-1 h-50 text-dark" style="font-size: 21px;">
+                  <i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i>Login<i class="icon-chevron-sm-down text-7 ml-10"></i>
                 </div>
               </div>
               <div class="searchMenu-loc__field shadow-2 js-popup-window" data-x-dd="searchMenu-loc" data-x-dd-toggle="-is-active">
@@ -129,7 +129,7 @@
             </div> 
               {{-- <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a> --}}
               {{-- <a href="http://127.0.0.1:8000/login" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-left: 20px;width: 100px;background-color: #c80100 !important;justify-content: left;align-items: left;/* align-items: end; */"><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Login</a> --}}
-              <a href="http://127.0.0.1:8000/panditlogin" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-left: 20px;width: 133px;background-color: #c80100 !important;justify-content: left;align-items: left;/* align-items: end; */"><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
+              <a href="http://127.0.0.1:8000/panditlogin" class="button px-10 fw-300 -blue-1 h-50 text-dark" style="font-size: 21px;" ><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
           
               <div class="searchMenu-loc px-10 lg:py-20 lg:px-0 js-form-dd js-liverSearch">
                 

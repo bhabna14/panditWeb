@@ -49,14 +49,12 @@
             <div class="col-lg-12 col-md-">
                 <div class="card custom-card">
                     <div class="card-body">
-                        <div class="row">
-                            <input type="hidden" class="form-control" id="puja_id" name="puja_id" value="PUJA{{ rand(1000, 9999) }}" placeholder="">
-                        </div>
+                       
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="event_name">Language Name</label>
-                                    <input type="text" class="form-control" id="puja_name" name="puja_name" placeholder="Enter Language Name">
+                                    <input type="text" class="form-control" id="puja_name" name="lang_name" placeholder="Enter Language Name" required>
                                 </div>
                             </div>
                           

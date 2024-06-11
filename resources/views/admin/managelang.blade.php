@@ -17,13 +17,14 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Language</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Languages</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                            <a href="{{url('admin/add-language')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Language</a>
+							<a class="btn ripple btn-primary me-3" data-bs-target="#modaldemo1" data-bs-toggle="modal" href="">Add Language</a>
+
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Language</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Languages</li>
                         </ol>
                     </div>
                 </div>
@@ -41,7 +42,36 @@
                     {{ session('danger') }}
                 </div>
             @endif
-                  
+                   <!-- Basic modal -->
+                   <div class="modal fade" id="modaldemo1">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content modal-content-demo">
+                            <div class="modal-header">
+                                <h6 class="modal-title">Add Language</h6><button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+                            </div>
+                            <form action="{{url('admin/savelang')}}" method="post">
+                             @csrf
+
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label for="event_name">Language</label>
+                                            <input type="text" class="form-control" id="lang_name" name="lang_name" placeholder="Enter Language">
+                                        </div>
+                                    </div>
+                                   
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn ripple btn-primary" type="button">Save</button>
+                                <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                            </div>
+                            </form>
+                        </div>
+                    </div>
+                    </div>
+                <!-- End Basic modal -->
 
                     <!-- Row -->
                     <div class="row row-sm">
@@ -57,15 +87,28 @@
                                             <thead>
                                                 <tr>
                                                     <th class="border-bottom-0">SlNo</th>
+                                                   
                                                     <th class="border-bottom-0">Language Name</th>
-                                                    <th class="border-bottom-0">Description</th>
                                                     
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 
-                                                
+                                                @foreach ($languages as $index => $language)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>{{ $language->lang_name}}</td>
+                                                    <td>
+                                                        <a class="btn ripple btn-primary me-3 edit-item" href="javascript:void(0);" data-id="{{ $language->id }}" data-name="{{ $language->lang_name }}">
+                                                            <i class="fa fa-edit"></i>
+                                                        </a>
+                                                        <a class="btn ripple btn-primary" href="{{ url('admin/dltlang/'.$language->id) }}" onClick="return confirm('Are you sure to delete ?');">
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                                        </a>
+                                                    </td>
+                                                <tr>
+                                                @endforeach
                                                 
                                             </tbody>
                                         </table>
@@ -75,6 +118,40 @@
                         </div>
                     </div>
                     <!-- End Row -->
+
+                  <!-- update the items modal -->
+                <div class="modal fade" id="modaldemo2">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content modal-content-demo">
+                            <div class="modal-header">
+                                <h6 class="modal-title">Edit Language</h6>
+                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <form id="editItemForm" action="{{url('admin/updatelang')}}" method="post">
+                                @csrf
+                                @method('PUT')
+                                <input type="hidden" id="itemId" name="id">
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="pandit_title">Language</label>
+                                                <input type="text" class="form-control" id="panditTitle" name="lang_name" placeholder="Enter Language">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn ripple btn-primary">Save</button>
+                                    <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <!-- End Basic modal -->
 
 @endsection
 
@@ -102,4 +179,20 @@
             document.getElementById('Message').style.display = 'none';
         }, 3000);
     </script>
+    
+
+    <script>
+        $(document).ready(function(){
+            $('.edit-item').on('click', function() {
+                var itemId = $(this).data('id');
+                var panditTitle = $(this).data('name'); // Updated to data-name
+                
+                $('#itemId').val(itemId);
+                $('#panditTitle').val(panditTitle); // Updated to unitName
+                
+                $('#modaldemo2').modal('show');
+            });
+        });
+    </script>
+    
 @endsection
