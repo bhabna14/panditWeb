@@ -182,6 +182,7 @@ class AdminController extends Controller
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
+        $profile->about_pandit = $request->about_pandit;
 
         $pandilang = $request->input('language');
  

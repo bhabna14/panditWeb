@@ -5,11 +5,72 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Poojalist;
+use App\Models\AppBanner;
+use App\Models\Profile;
 
 
 class PujaController extends Controller
 {
-    //
+    //Homepage 
+
+    public function homepage() {
+
+        // Get  all banners 
+        $banners = AppBanner::all();
+        foreach ($banners as $banner) {
+            $banner->banner_img_url = asset('uploads/banner' . $banner->banner_img);
+        }
+        // Get all active poojas
+        $poojalists = Poojalist::where('status', 'active')->get();
+        foreach ($poojalists as $poojalist) {
+            $poojalist->pooja_img_url = asset('assets/img/' . $poojalist->pooja_photo);
+        }
+    
+        // Get upcoming poojas
+        $upcomingPoojas = Poojalist::where('status', 'active')
+                        ->where('pooja_date', '>=', now())
+                        ->orderBy('pooja_date', 'asc')
+                        ->take(8)
+                        ->get();
+    
+        foreach ($upcomingPoojas as $upcomingPooja) {
+            $upcomingPooja->pooja_img_url = asset('assets/img/' . $upcomingPooja->pooja_photo);
+        }
+
+        //Get 9 pandits 
+        $pandits = Profile::where('pandit_status', 'accepted')->take(9)->get();
+        foreach ($pandits as $pandit) {
+            $pandit->profile_photo = asset($pandit->profile_photo);
+        }
+    
+        // Check if both lists are empty
+        if ($poojalists->isEmpty() && $upcomingPoojas->isEmpty() && $banners->isEmpty() && $pandits->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'No data found',
+                'data' => []
+            ], 404);
+        }
+    
+        // Prepare the combined data
+        $data = [
+            'banner' => $banners,
+            'all_poojas' => $poojalists,
+            'upcoming_poojas' => $upcomingPoojas,
+            'pandits' => $pandits
+            
+        ];
+    
+        // Return the combined response
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data retrieved successfully',
+            'data' => $data
+        ], 200);
+    }
+
+
+
     public function poojalists(){
         $poojalists = Poojalist::where('status', 'active')->get();
         foreach ($poojalists as $poojalist) {
@@ -57,45 +118,6 @@ class PujaController extends Controller
             ], 200);
     }
 
-    public function homepage() {
-        // Get all active poojas
-        $poojalists = Poojalist::where('status', 'active')->get();
-        foreach ($poojalists as $poojalist) {
-            $poojalist->pooja_img_url = asset('assets/img/' . $poojalist->pooja_photo);
-        }
-    
-        // Get upcoming poojas
-        $upcomingPoojas = Poojalist::where('status', 'active')
-                        ->where('pooja_date', '>=', now())
-                        ->orderBy('pooja_date', 'asc')
-                        ->take(8)
-                        ->get();
-    
-        foreach ($upcomingPoojas as $upcomingPooja) {
-            $upcomingPooja->pooja_img_url = asset('assets/img/' . $upcomingPooja->pooja_photo);
-        }
-    
-        // Check if both lists are empty
-        if ($poojalists->isEmpty() && $upcomingPoojas->isEmpty()) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'No data found',
-                'data' => []
-            ], 404);
-        }
-    
-        // Prepare the combined data
-        $data = [
-            'all_active_poojas' => $poojalists,
-            'upcoming_poojas' => $upcomingPoojas
-        ];
-    
-        // Return the combined response
-        return response()->json([
-            'status' => 200,
-            'message' => 'Data retrieved successfully',
-            'data' => $data
-        ], 200);
-    }
+ 
     
 }

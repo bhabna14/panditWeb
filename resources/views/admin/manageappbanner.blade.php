@@ -17,13 +17,13 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Puja</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage App Banner</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                            <a href="{{url('admin/add-puja')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Puja</a>
+                            <a href="{{url('admin/add-app-banner')}}" class="breadcrumb-item tx-15 btn btn-warning">Add App Banner</a>
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Puja</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage App Banner</li>
                         </ol>
                     </div>
                 </div>
@@ -57,36 +57,36 @@
                                             <thead>
                                                 <tr>
                                                     <th class="border-bottom-0">SlNo</th>
-                                                    <th class="border-bottom-0">Pooja Name</th>
-                                                    <th class="border-bottom-0">Pooja Image</th>
-                                                    <th class="border-bottom-0">Short Description</th>
+                                                    <th class="border-bottom-0">Title Text</th>
+                                                    <th class="border-bottom-0">Banner Image</th>
+                                                    
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach ($poojalists as $index => $poojalist)
+                                             
+                                                
+                                                @foreach ($banners as $index => $banner)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td class="border-bottom-0">{{ $poojalist->pooja_name }}</td>
+                                                    <td class="border-bottom-0">{{ $banner->title_text }}</td>
                                                     <td>
 
-                                                        <a href="{{ asset('assets/img/' . $poojalist->pooja_photo) }}" target="_blank"
+                                                        <a href="{{ asset('uploads/banner/' . $banner->banner_img) }}" target="_blank"
                                                             class="btn btn-success">
                                                             View Image
                                                         </a>
                                                     </td>
-                                                    <td class="border-bottom-0">{{ $poojalist->short_description }}</td>
+                                                   
                                                     
                                                     <td>
                                                       
-                                                        <a href="{{url('admin/editpooja/'.$poojalist->id)}}"><i class="fa fa-edit"></i></a> | 
-                                                        <a href="{{url('admin/dltpooja/'.$poojalist->id)}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                                        <a href="{{url('admin/editbanner/'.$banner->id)}}"><i class="fa fa-edit"></i></a> | 
+                                                        <a href="{{url('admin/deletebanner/'.$banner->id)}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                                     </td>
                                                     {{-- <td class="border-bottom-0">{{ $podcast->description }}</td> --}}
                                                 </tr>
                                                 @endforeach
-                                                
-                                                
                                             </tbody>
                                         </table>
                                     </div>

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\TitleController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\PodcastController;
+use App\Http\Controllers\Admin\BannerController;
 
 
 use App\Http\Controllers\Pandit\SkillController;
@@ -170,7 +171,11 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
     Route::controller(BannerController::class)->group(function() {
         Route::get('/manage-app-banner', 'manageappbanner')->name('manageappbanner');
-     
+        Route::get('/add-app-banner', 'addbanner')->name('addbanner');
+        Route::post('/savebanner', 'savebanner')->name('savebanner');
+        Route::get('/editbanner/{banner}', 'editbanner')->name('editbanner');
+        Route::post('/updatebanner/{id}', 'updatebanner')->name('updatebanner');
+        Route::get('/deletebanner/{id}', 'deletebanner')->name('deletebanner');
     });
 
 
