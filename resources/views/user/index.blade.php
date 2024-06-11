@@ -99,7 +99,10 @@
                 <div class="row y-gap-40">
                     <div class="col-xl-5" style="margin-top: 33px;">
                         <h1 data-anim-child="slide-up delay-2"
-                            class="z-2 lg:text-40 text-dark md:text-30  xl:pt-0 text-respn" style="    font-size: 44px; line-height:49px !important">
+                            class="z-2 lg:text-40 text-dark md:text-30  xl:pt-0 text-respn" style="        font-size: 44px;
+    line-height: 49px !important;
+    margin-left: 96px;
+    margin-top: 20px;">
                             <span class="" style="color: #c80100;font-size: 72px;">N</span>EW <span class="" style="color:#c80100">O</span>FFERS: <br> <span class="" style="color:#c80100"> B</span>OOK <span class="" style="color:#c80100">P</span>ANDIT <span class="" style="color:#c80100">O</span>NLINE<br>
                            
                         </h1>
