@@ -1,5 +1,5 @@
 <div class="header-margin"></div>
-<header data-add-bg="" class="header bg-white shadow-3 js-header" data-x="header" data-x-toggle="is-menu-opened">
+<header data-add-bg="" class="header shadow-3 js-header" data-x="header" data-x-toggle="is-menu-opened" style="    background-color: #f9ba73 !important;">
   <div data-anim="" class="header__container header__container-1500 mx-auto px-30 sm:px-20">
     <div class="row justify-between items-center">
 
@@ -18,7 +18,7 @@
               <div class="mobile-bg js-mobile-bg"></div>
 
               <div class="menu js-navList">
-                <ul class="menu__nav text-dark-1 -is-active">
+                <ul class="menu__nav -is-active" style="color:#fff">
                  
                   <li>
                     <a data-barba href="{{url('/')}}">
@@ -29,27 +29,27 @@
 
                   <li>
                     <a data-barba href="{{url('book-pandit')}}">
-                      <span class="mr-10">Book a Pandit</span>
+                      <span class="mr-10">Book Pandit</span>
                     </a>
                   </li>
                      <li>
                     <a data-barba href="{{url('pooja-list')}}">
-                       List of Pooja
+                       Pooja List
                     </a>
                   </li>
-                  <li>
+                  {{-- <li>
                     <a href="book-temple-sevayat-name.html">
                        Panji
                     </a>
-                  </li>
+                  </li> --}}
           
-                  <li>
+                  {{-- <li>
                     <a href="{{url('about-us')}}">About Us</a>
                   </li>
                   
                   <li>
                     <a href="{{url('contact')}}">Contact</a>
-                  </li>
+                  </li> --}}
                   {{-- <li class="menu-item-has-children">
                     <a data-barba href="#">
                       <i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i>
@@ -103,7 +103,7 @@
             <div class="searchMenu-loc js-form-dd js-liverSearch">
                 
               <div data-x-dd-click="searchMenu-loc">
-                <div class="button px-10 fw-300 -blue-1 h-50 text-dark" style="font-size: 21px;">
+                <div class="button px-10 fw-300 -blue-1 h-50 " style="       font-size: 24px; color:#fff">
                   <i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i>Login<i class="icon-chevron-sm-down text-7 ml-10"></i>
                 </div>
               </div>
@@ -129,15 +129,15 @@
             </div> 
               {{-- <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a> --}}
               {{-- <a href="http://127.0.0.1:8000/login" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-left: 20px;width: 100px;background-color: #c80100 !important;justify-content: left;align-items: left;/* align-items: end; */"><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Login</a> --}}
-              <a href="http://127.0.0.1:8000/panditlogin" class="button px-10 fw-300 -blue-1 h-50 text-dark" style="font-size: 21px;" ><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
+              <a href="http://127.0.0.1:8000/panditlogin" class="button px-10 fw-300 -blue-1 h-50 " style="     font-size: 24px;  color:#fff" ><i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
           
               <div class="searchMenu-loc px-10 lg:py-20 lg:px-0 js-form-dd js-liverSearch">
                 
-                <div data-x-dd-click="searchMenu-loc">
-                  <div class="button px-10 fw-400 text-14 -outline-blue-1 h-50 ml-20">
-                    <h4 class="text-15 fw-500 ls-2 lh-16">Select Language</h4><i class="icon-chevron-sm-down text-7 ml-15"></i>
+                {{-- <div data-x-dd-click="searchMenu-loc">
+                  <div class="button px-10  h-50 ml-20">
+                    <h4 class=" ls-2 lh-16" style=" font-size: 25px;  color:#fff"> Language</h4><i class="icon-chevron-sm-down text-7 ml-15"></i>
                   </div>
-                </div>
+                </div> --}}
                 <div class="searchMenu-loc__field shadow-2 js-popup-window" data-x-dd="searchMenu-loc" data-x-dd-toggle="-is-active">
                   <div class="bg-white sm:px-0 sm:py-15 rounded-4 text-center">
                     <div class="y-gap-5 js-results">

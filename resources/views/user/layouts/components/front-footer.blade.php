@@ -1,4 +1,4 @@
-<footer class="footer -type-1 text-white bg-dark-2">
+<footer class="footer -type-1 text-white">
     <div class="container">
       <div class="pt-60 pb-60">
         <div class="row y-gap-40 justify-between xl:justify-start">
@@ -6,18 +6,14 @@
             <h5 class="text-16 fw-500 mb-30">Our Address</h5>
 
             <div class="mt-30">
-            <p>  33Crores Pooja Products Pvt Ltd ,<br> 403, 4th Floor, O-Hub<br>
+            <p style="color:#fff">  33Crores Pooja Products Pvt Ltd ,<br> 403, 4th Floor, O-Hub<br>
 IDCO Sez Infocity,<br>
 Bhubaneswar 751024,<br>
 Odisha , Bharat<br>
 <br></p>
             </div>
 
-            <div class="mt-35">
-              <div class="text-14 mt-30">Need live support?</div>
-              <a href="#" class="text-14 fw-500 mt-5">Text: (91)-9776-88888-7</a>
-              <a href="mailto:contact@33crores.com">contact@33crores.com</a>
-            </div>
+           
           </div>
 
           <div class="col-xl-2 col-lg-4 col-sm-6">

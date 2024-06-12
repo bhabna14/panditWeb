@@ -1144,9 +1144,9 @@ function sectionSlider() {
       nextNavElement = document.querySelector(`.${el.getAttribute('data-nav-next')}`)
     
     let gap = 0;
-    let loop = false;
+    let loop = true;
     let centered = false;
-    let pagination = false;
+    let pagination = true;
     let scrollbar = false;
 
     if (el.getAttribute('data-gap'))    gap = el.getAttribute('data-gap');
