@@ -15,7 +15,6 @@ use Illuminate\Http\Request;
 use App\Models\PanditEducation;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Language;
 
 
 
@@ -149,8 +148,11 @@ class AdminController extends Controller
 
         public function addProfile()
         {
-            $languages = Language::where('status', 'active')->get();
-            $languages = Language::where('status', 'active')->get();
+            $languages = [
+                'English','Odia','Hindi','Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 'Kashmiri',
+                'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi',
+                'Sanskrit', 'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
+            ];
             return view('admin/add-profile',compact('languages'));
         }
 
@@ -180,7 +182,6 @@ class AdminController extends Controller
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
-        $profile->about_pandit = $request->about_pandit;
 
         $pandilang = $request->input('language');
  

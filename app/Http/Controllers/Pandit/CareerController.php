@@ -48,7 +48,6 @@ class CareerController extends Controller
         $latestProfile = Profile::latest()->first();
 
         $career->pandit_id = $latestProfile->profile_id;
-        $career->career_id = $request->career_id;
         $career->qualification = $request->qualification;
         $career->total_experience = $request->experience;
 
@@ -160,7 +159,6 @@ class CareerController extends Controller
 
         // Update the scalar fields
         $career->pandit_id = $latestProfile->profile_id;
-        $career->career_id = $request->career_id;
         $career->qualification = $request->qualification;
         $career->total_experience = $request->experience;
 

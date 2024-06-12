@@ -1,7 +1,6 @@
 @extends('user.layouts.front')
 
 @section('styles')
-
 @endsection
 
 @section('content')
@@ -99,11 +98,12 @@
                 <div class="row y-gap-40">
                     <div class="col-xl-5" style="margin-top: 33px;">
                         <h1 data-anim-child="slide-up delay-2"
-                            class="z-2 lg:text-40 text-dark md:text-30  xl:pt-0 text-respn" style="        font-size: 44px;
-    line-height: 49px !important;
-    margin-left: 96px;
-    margin-top: 20px;">
-                            <span class="" style="color: #c80100;font-size: 72px;">N</span>EW <span class="" style="color:#c80100">O</span>FFERS: <br> <span class="" style="color:#c80100"> B</span>OOK <span class="" style="color:#c80100">P</span>ANDIT <span class="" style="color:#c80100">O</span>NLINE<br>
+                            class="z-2 lg:text-40 text-dark md:text-30  xl:pt-0 text-respn" style="font-size: 31px;
+                line-height: 49px !important;
+                margin-left: 73px;
+                margin-top: 20px;
+">
+                            <span class="" style="color: #c80100;font-size: 51px;"> B</span>OOK <span class="" style="color:#c80100">P</span>ANDIT <span class="" style="color:#c80100">O</span>NLINE FOR YOUR POOJA AT<br> <div class="text-write"></div>
                            
                         </h1>
                         {{-- <p style="
@@ -212,6 +212,104 @@
         </div>
     </section>
 
+    <section class="upcoming-bg">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="upcoming-main-heading">
+                        <h1>Upcoming Events</h1>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="upcoming-event">
+                        <div class="row">
+                            <div class="col-md-3">
+                               
+                                <div class="upcoming-event-img">
+                                    <img src="{{asset('front-assets/img/masthead/post-11-copyright-520x424.jpg')}}" alt="Avatar" class="image">
+                                    {{-- <div class="overlay">
+                                        <a href="#" class="icon" title="User Profile">
+                                            <i class="fa fa-user"></i>
+                                        </a>
+                                    </div> --}}
+                                </div>
+                            </div>
+                          
+                            <div class="col-md-7">
+                               <div class="event-text">
+                                    <h4>Kundalini Yoga Practice Againts Bad Habits</h4>
+                                    <h6>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas consectetur necessitatibus perferendis iusto culpa nemo rem dolorum optio tempore!</h6>
+                                    <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>12/06/2024</p>
+                               </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="event-info">
+                                    <a href="">Info</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="upcoming-event">
+                        <div class="row">
+                            <div class="col-md-3">
+                               
+                                <div class="upcoming-event-img">
+                                    <img src="https://vihara.themerex.net/wp-content/uploads/2018/12/post-15-copyright-520x424.jpg" alt="Avatar" class="image">
+                                    {{-- <div class="overlay">
+                                        <a href="#" class="icon" title="User Profile">
+                                            <i class="fa fa-user"></i>
+                                        </a>
+                                    </div> --}}
+                                </div>
+                            </div>
+                          
+                            <div class="col-md-7">
+                               <div class="event-text">
+                                    <h4>Kundalini Yoga Practice Againts Bad Habits</h4>
+                                    <h6>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas consectetur necessitatibus perferendis iusto culpa nemo rem dolorum optio tempore!</h6>
+                                    <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>12/06/2024</p>
+                               </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="event-info">
+                                    <a href="">Info</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="upcoming-event">
+                        <div class="row">
+                            <div class="col-md-3">
+                               
+                                <div class="upcoming-event-img">
+                                    <img src="{{asset('front-assets/img/masthead/post-11-copyright-520x424.jpg')}}" alt="Avatar" class="image">
+                                    {{-- <div class="overlay">
+                                        <a href="#" class="icon" title="User Profile">
+                                            <i class="fa fa-user"></i>
+                                        </a>
+                                    </div> --}}
+                                </div>
+                            </div>
+                          
+                            <div class="col-md-7">
+                               <div class="event-text">
+                                    <h4>Kundalini Yoga Practice Againts Bad Habits</h4>
+                                    <h6>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas consectetur necessitatibus perferendis iusto culpa nemo rem dolorum optio tempore!</h6>
+                                    <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>12/06/2024</p>
+                               </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="event-info">
+                                    <a href="">Info</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section>
         <div class="container">
             <div class="row" style="margin-top:60px">
@@ -245,7 +343,7 @@
     </section>
 
   
-    <section class="layout-pt-md layout-pb-md upcoming-pooja" style="overflow-y: hidden;overflow-x: hidden">
+    {{-- <section class="layout-pt-md layout-pb-md upcoming-pooja" style="overflow-y: hidden;overflow-x: hidden">
         <div class="container">
             <div data-anim="slide-up delay-1" class="row y-gap-20 justify-between items-end">
                 <div class="col-auto">
@@ -255,13 +353,7 @@
                     </div>
                 </div>
 
-                {{-- <div class="col-auto md:d-none">
-
-                    <a href="#" class="button -md -blue-1 bg-blue-1-05 text-blue-1">
-                        View All Pooja <div class="icon-arrow-top-right ml-15"></div>
-                    </a>
-
-                </div> --}}
+               
             </div>
 
             <div class="relative pt-40 sm:pt-20 js-section-slider" data-gap="30" data-scrollbar
@@ -278,15 +370,7 @@
 
                             </div>
 
-                            {{-- <div class="citiesCard__content d-flex flex-column justify-between text-center pt-30 pb-20 px-20">
-                                <div class="citiesCard__bg"></div>
-
-                                <div class="citiesCard__top">
-                                    <div class="text-14 text-white">Opening Time 6AM , Closing Time 8PM</div>
-                                </div>
-
-                              
-                            </div> --}}
+                           
                         </a>
                         <div class="citiesCard__bottom">
                             <h4 class="text-18 md:text-20 lh-13 text-center text-dark mb-10 mt-10">{{$upcomingPooja->pooja_name}}</h4>
@@ -327,7 +411,7 @@
                 </div>
             </div>
         </div>
-    </section> 
+    </section>  --}}
 
     <section class="special-pooja-bg layout-pt-md layout-pb-md">
         <div class="container">
@@ -341,7 +425,7 @@
 
                 <div class="col-auto md:d-none">
 
-                    <a href="{{ url('pooja-list')}}" class="button -md -blue-1 bg-blue-1-05 text-blue-1">
+                    <a href="{{ url('pooja-list')}}" class="button -md -blue-1 all-ppja-btn">
                         View All Pooja <div class="icon-arrow-top-right ml-15"></div>
                     </a>
 
@@ -350,23 +434,25 @@
 
             <div class = "row" data-aos="fade-up" data-aos-delay="500">
                 @foreach ($otherpoojas as $otherpooja)
-                <div class="col-md-3 pandit-card">
-                    <div class="card" data-state="#pooja">
-                        <div class="card-header">
-                            <img class="card-pooja" src="{{ asset('assets/img/'.$otherpooja->pooja_photo) }}" alt="image">
-                        </div>
-                        <div class="pooja-head">
-                            <h5>{{$otherpooja->pooja_name}}</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
-                            <div style="text-align: center">
-                                {{-- <h6>(12-03-2024)</h6> --}}
+                <div class="col-md-4 pandit-card">
+                    <a href="{{url('puja-details')}}"> 
+                        <div class="card" data-state="#pooja">
+                            <div class="card-header">
+                                <img class="card-pooja" src="{{ asset('assets/img/'.$otherpooja->pooja_photo) }}" alt="image">
                             </div>
-                            {{-- <button class="contact-me">Book Now</button> --}}
+                            <div class="pooja-head">
+                                <h5>{{$otherpooja->pooja_name}}</h5>
+                                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                                <div style="text-align: center">
+                                    {{-- <h6>(12-03-2024)</h6> --}}
+                                </div>
+                                {{-- <button class="contact-me">Book Now</button> --}}
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
                 @endforeach
-                
+              
             </div>
 
            
@@ -502,68 +588,14 @@
 
                
             </div>
-            <div class="row mb-30" data-aos="fade-up" data-aos-delay="500">
-                <div class="col-md-4 col-12 mb-20">
-                   <div class="row">
-                     <div class="col-md-4 col-4">
-                        <div class="pandit-front-sec-img">
-                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
-                        </div>
-                       
-                     </div>
-                     <div class="col-md-8 col-8">
-                        <div class="pandit-front-sec-text">
-                            <h3>P.Bibhu Panda</h3>
-                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
-                        </div>
-                     </div>
-                   </div>
-                  
-                </div>
-                <div class="col-md-4 col-12 mb-20">
-                    <div class="row">
-                      <div class="col-md-4 col-4">
-                         <div class="pandit-front-sec-img">
-                           <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
-                         </div>
-                        
-                      </div>
-                      <div class="col-md-8 col-8">
-                         <div class="pandit-front-sec-text">
-                             <h3>P.Bibhu Panda</h3>
-                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
-                         </div>
-                      </div>
-                    </div>
-                   
-                 </div>
-                 <div class="col-md-4 col-12 mb-20">
-                    <div class="row">
-                      <div class="col-md-4 col-4">
-                         <div class="pandit-front-sec-img">
-                           <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
-                         </div>
-                        
-                      </div>
-                      <div class="col-md-8 col-8">
-                         <div class="pandit-front-sec-text">
-                             <h3>P.Bibhu Panda</h3>
-                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
-                         </div>
-                      </div>
-                    </div>
-                   
-                 </div>
-
-               
-            </div>
+         
 
         </div>
     </section>
 
 
 
-    <section class="layout-pt-lg layout-pb-lg bg-blue-2">
+    {{-- <section class="layout-pt-lg layout-pb-lg bg-blue-2">
         <div class="container">
             <div class="row y-gap-20 justify-center text-center">
                 <div class="col-auto">
@@ -664,7 +696,7 @@
 
             </div>
         </div>
-    </section>
+    </section> --}}
 
     {{-- <section class="layout-pt-md layout-pb-md">
         <div class="container">
@@ -946,7 +978,7 @@
         </div>
       </section>
 
-    <section data-anim="slide-up delay-1" class="layout-pt-md layout-pb-md">
+    {{-- <section data-anim="slide-up delay-1" class="layout-pt-md layout-pb-md">
         <div class="container">
             <div class="row ml-0 mr-0 items-center justify-between">
                 <div class="col-xl-5 px-0">
@@ -972,7 +1004,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
 
     <section data-anim-wrap class="section-bg pt-80 pb-80 md:pt-40 md:pb-40">
 
@@ -1019,7 +1051,7 @@
     </section>
 
 
-    <section class="layout-pt-md layout-pb-md bg-blue-2">
+    {{-- <section class="layout-pt-md layout-pb-md bg-blue-2">
         <div class="container">
             <div class="row justify-between">
 
@@ -1067,7 +1099,7 @@
 
             </div>
         </div>
-    </section>
+    </section> --}}
 @endsection
 
 @section('scripts')

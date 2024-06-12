@@ -4,6 +4,8 @@
 <script src="{{asset('front-assets/js/vendors.js')}}"></script>
 <script src="{{asset('front-assets/js/main.js')}}"></script>
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.11/typed.min.js" integrity="sha512-BdHyGtczsUoFcEma+MfXc71KJLv/cd+sUsUaYYf2mXpfG/PtBjNXsPo78+rxWjscxUYN2Qr2+DbeGGiJx81ifg==" crossorigin="anonymous"></script>
+
 
 {{-- <script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/owl-carousel/1.3.3/owl.carousel.min.js"></script> --}}
@@ -71,4 +73,13 @@
   });
 });
 
+</script>
+
+<script>
+  var typing=new Typed(".text-write", {
+      strings: ["", "Office...","Home...", "College...", "School..."],
+      typeSpeed: 100,
+      backSpeed: 40,
+      loop: true,
+  });
 </script>

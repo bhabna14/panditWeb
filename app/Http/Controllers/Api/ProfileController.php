@@ -11,21 +11,12 @@ use App\Models\VedicDetail;
  
 class ProfileController extends Controller
 {
-    public function store(Request $request)
+  
+    public function saveProfile(Request $request)
     {
-        // $request->validate([
-        //     'title' => 'required|string',
-        //     'name' => 'required|string',
-        //     'email' => 'required|email|unique:profiles,email',
-        //     'whatsappno' => 'nullable|string|max:20',
-        //     'bloodgroup' => 'nullable|string|max:10',
-        //     'maritalstatus' => 'nullable|string|max:255',
-        //     'language' => 'nullable|string|max:255',
-        //     'profile_photo' => 'nullable|image|max:2048', // Ensure it's an image file
-        // ]);
- 
+       
         $profile = new Profile();
- 
+        $profile->profile_id = $request->profile_id;
         $profile->title = $request->title;
         $profile->name = $request->name;
         $profile->email = $request->email;
@@ -42,9 +33,10 @@ class ProfileController extends Controller
         // Handle profile photo upload if provided
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
-            $filename = time().'.'.$file->getClientOriginalExtension();
+            $filename = time() . '.' . $file->getClientOriginalExtension();
+            $filePath = 'uploads/profile_photo/' . $filename;
             $file->move(public_path('uploads/profile_photo'), $filename);
-            $profile->profile_photo = $filename;
+            $profile->profile_photo = $filePath;
         }
  
         $profile->save();
@@ -54,68 +46,69 @@ class ProfileController extends Controller
     }
     public function saveCareer(Request $request)
     {
-        // Validate the request
-        // $request->validate([
-        //     'qualification' => 'required|string|max:255',
-        //     'experience' => 'required|integer|min:0',
-        //     'id_type.*' => 'required|string|in:adhar,voter,pan,DL,health card',
-        //     'upload_id.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-        //     'education_type.*' => 'required|string|in:10th,+2,+3,Master Degree',
-        //     'upload_edu.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-        //     'vedic_type.*' => 'required|string|max:255',
-        //     'upload_vedic.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-        // ]);
-
-        // dd("hi");
-
+        // Instead of validating, manually process the inputs
+        $data = $request->all();
+        
+        // Create a new Career instance
         $career = new Career();
-        $career->career_id = $request->career_id;
-        $career->qualification = $request->qualification;
-        $career->total_experience = $request->experience;
 
-        // Handle ID Proof Uploads
-        foreach ($request->id_type as $key => $id_type) {
-            $file = $request->file('upload_id')[$key];
-            $fileName = time().'_'.$file->getClientOriginalName();
-            $file->move(public_path('uploads/id_proof'), $fileName);
+        // Get the latest profile
+        $latestProfile = Profile::latest()->first();
 
-            $iddata = new IdcardDetail();
-            $iddata->career_id = $request->career_id;
-            $iddata->id_type =  $id_type;
-            $iddata->upload_id = $fileName;
-            $iddata->save();
-        }
+        $career->pandit_id = $latestProfile->profile_id;
+        $career->qualification = $data['qualification'] ?? null;
+        $career->total_experience = $data['experience'] ?? null;
 
-        // Handle Education Details Uploads
-        foreach ($request->education_type as $key => $education_type) {
-            $file = $request->file('upload_edu')[$key];
-            $fileName = time().'_'.$file->getClientOriginalName();
-            $file->move(public_path('uploads/edu_details'), $fileName);
+        // Handle ID card uploads
+            foreach ($data['id_type'] as $key => $id_type) {
+                if (isset($request->file('upload_id')[$key])) {
+                    $file = $request->file('upload_id')[$key];
+                    $fileName = time().'_'.$file->getClientOriginalName();
+                    $file->move(public_path('uploads/id_proof'), $fileName);
 
-            $edudata = new EduDetail();
-            $edudata->career_id = $request->career_id;
-            $edudata->education_type = $education_type;
-            $edudata->upload_education = $fileName;
-            $edudata->save();
-        }
+                    $iddata = new IdcardDetail();
+                    $iddata->pandit_id = $latestProfile->profile_id;
+                    $iddata->id_type = $id_type;
+                    $iddata->upload_id = $fileName;
+                    $iddata->save();
+                }
+            }
+        
 
-        // Handle Vedic Details Uploads
-        foreach ($request->vedic_type as $key => $vedic_type) {
-            $file = $request->file('upload_vedic')[$key];
-            $fileName = time().'_'.$file->getClientOriginalName();
-            $file->move(public_path('uploads/vedic_details'), $fileName);
+        // Handle Education uploads
+            foreach ($data['education_type'] as $key => $education_type) {
+                if (isset($request->file('upload_edu')[$key])) {
+                    $file = $request->file('upload_edu')[$key];
+                    $fileName = time().'_'.$file->getClientOriginalName();
+                    $file->move(public_path('uploads/edu_details'), $fileName);
 
-            $vedicdata = new VedicDetail();
-            $vedicdata->career_id = $request->career_id;
-            $vedicdata->vedic_type = $vedic_type;
-            $vedicdata->upload_vedic = $fileName;
-            $vedicdata->save();
-        }
+                    $edudata = new EduDetail();
+                    $edudata->pandit_id = $latestProfile->profile_id;
+                    $edudata->education_type = $education_type;
+                    $edudata->upload_education = $fileName;
+                    $edudata->save();
+                }
+            }
+        
 
-        if ($career->save()) {
-            return response()->json(['message' => 'Data saved successfully.'], 201);
-        } else {
-            return response()->json(['message' => 'Failed to save data.'], 500);
-        }
-    }
+        // Handle Vedic uploads
+            foreach ($data['vedic_type'] as $key => $vedic_type) {
+                if (isset($request->file('upload_vedic')[$key])) {
+                    $file = $request->file('upload_vedic')[$key];
+                    $fileName = time().'_'.$file->getClientOriginalName();
+                    $file->move(public_path('uploads/vedic_details'), $fileName);
+
+                    $vedicdata = new VedicDetail();
+                    $vedicdata->pandit_id = $latestProfile->profile_id;
+                    $vedicdata->vedic_type = $vedic_type;
+                    $vedicdata->upload_vedic = $fileName;
+                    $vedicdata->save();
+                }
+            }
+            if ($career->save()) {
+                return response()->json(['message' => 'Data saved successfully.'], 201);
+            } else {
+                return response()->json(['message' => 'Failed to save data.'], 500);
+            }
+            }
 }

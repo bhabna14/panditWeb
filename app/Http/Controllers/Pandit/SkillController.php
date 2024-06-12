@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Models\Poojaskill;
 use App\Models\Poojalist;
 use App\Models\Poojadetails;
-
 use App\Models\Profile;
 
 use DB;
@@ -19,7 +18,6 @@ class SkillController extends Controller
 
         $Poojanames = Poojalist::where('status', 'active')->get();
 
-        
         $profile = Profile::where('status', 'active')->first();
 
         if (!$profile) {
@@ -27,11 +25,12 @@ class SkillController extends Controller
         }
 
         $profileId = $profile->profile_id;
-        // Fetch previously selected poojas
+
         $selectedPoojas = Poojaskill::where('pandit_id', $profileId)->where('status','active')->pluck('pooja_id')->toArray();
 
         return view('/pandit/poojaskill', compact('Poojanames','selectedPoojas'));
     }
+    
     public function managepoojaskill(){
 
         $Poojanames = Poojalist::where('status', 'active')->get();
@@ -49,9 +48,7 @@ class SkillController extends Controller
         // Pass the data to the view
         return view('/pandit/managepoojaskill', compact('Poojanames', 'selectedPoojas'));
     }
-   
 
-   
     public function saveSkillPooja(Request $request)
 {
     // Get the active profile
