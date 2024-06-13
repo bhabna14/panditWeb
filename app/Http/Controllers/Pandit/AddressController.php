@@ -49,7 +49,7 @@ class AddressController extends Controller
             $request->all()
         );
 
-        return redirect()->back()->with('success', 'Bank details saved successfully!');
+        return redirect()->back()->with('success', 'Address details saved successfully!');
     }
 
 

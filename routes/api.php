@@ -3,12 +3,14 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ProfileController;
-use App\Http\Controllers\Api\CareerController;
+use App\Http\Controllers\Api\CareersController;
 use App\Http\Controllers\Api\PodcastController;
 use App\Http\Controllers\Api\PujaController;
 use App\Http\Controllers\Api\PoojaSkillController;
 use App\Http\Controllers\Api\PoojaDetailsController;
 use App\Http\Controllers\Api\PoojaListController;
+use App\Http\Controllers\Api\BankController;
+use App\Http\Controllers\Api\AddressController;
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -17,10 +19,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/save', 'saveProfile');
-    Route::post('/career/save', 'saveCareer');
+    Route::post('/profile/update/{id}','updateProfile');
+
 });
-Route::controller(CareerController::class)->group(function() {
-    Route::post('/savecareer', 'saveCareer');
+Route::controller(CareersController::class)->group(function() {
+    Route::post('/career/save', 'saveCareer');
 
 });
 
@@ -45,6 +48,14 @@ Route::controller(PoojaListController::class)->group(function() {
 
 });
 
+Route::controller(BankController::class)->group(function() {
+    Route::post('/pandit/savebankdetails', 'saveBankDetails');
+});
+
+Route::controller(AddressController::class)->group(function() {
+    Route::post('/pandit/saveaddress', 'saveAddress');
+});
+
 Route::controller(PodcastController::class)->group(function() {
     Route::get('podcasts', 'podcasts');
 });
@@ -53,5 +64,4 @@ Route::controller(PujaController::class)->group(function() {
     Route::get('poojalists', 'poojalists');
     Route::get('upcomingpoojalists', 'upcomingpoojalists'); 
     Route::get('homepage', 'homepage'); 
-
 });
