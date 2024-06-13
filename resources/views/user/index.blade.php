@@ -92,7 +92,7 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12 text-center">
-          <img src="{{asset('front-assets/img/masthead/om.png')}}" alt="" class="omm-img">
+          {{-- <img src="{{asset('front-assets/img/masthead/om.png')}}" alt="" class="omm-img">
           <h1 
           class="z-2 lg:text-40  md:text-30  xl:pt-0 text-respn" style="
     font-size: 55px;
@@ -105,7 +105,7 @@
 ">
           <span class="" > B</span>OOK <span class="">P</span>ANDIT <span class="">O</span>NLINE FOR YOUR <br>POOJA AT <span class="text-write text-center"></span>
          
-      </h1>
+      </h1> --}}
         </div>
       </div>
     </div>
