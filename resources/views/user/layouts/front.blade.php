@@ -17,7 +17,7 @@
 	<body>
 
 
-        <div class="preloader js-preloader">
+        {{-- <div class="preloader js-preloader">
           <div class="preloader__wrap">
             <div class="preloader__icon">
              <img src="{{asset('front-assets/img/icons/1.png')}}" alt="splash icon">
@@ -25,7 +25,7 @@
           </div>
       
           <div class="preloader__title">33Crores</div>
-        </div>
+        </div> --}}
        
         <main>
       

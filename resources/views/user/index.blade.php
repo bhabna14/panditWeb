@@ -92,6 +92,9 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12 text-center">
+          <h1>Reliable Pandit Booking For Every <br> Religious Event</h1>
+          <p>Experienced Pandits For Every Occasion, Just a Click Away</p>
+          <a href="" class="book-now-btn">Book Now</a>
           {{-- <img src="{{asset('front-assets/img/masthead/om.png')}}" alt="" class="omm-img">
           <h1 
           class="z-2 lg:text-40  md:text-30  xl:pt-0 text-respn" style="
@@ -783,7 +786,7 @@
 
     <section class="testimonial-bg">
         <div data-anim-wrap class="container">
-          <div data-anim-child="slide-up delay-1" class="row justify-center text-center">
+          <div  class="row justify-center text-center">
             <div class="col-auto">
               <div class="sectionTitle text-white">
                 <h2 class="sectionTitle__title">Customer Reviews</h2>
@@ -792,7 +795,7 @@
             </div>
           </div>
   
-          <div data-anim-child="slide-up delay-2" class="overflow-hidden pt-60 lg:pt-40 sm:pt-30 js-section-slider" data-gap="30" data-slider-cols="xl-3 lg-3 md-2 sm-1 base-1">
+          <div  class="overflow-hidden pt-60 lg:pt-40 sm:pt-30 js-section-slider" data-gap="30" data-slider-cols="xl-3 lg-3 md-2 sm-1 base-1">
             <div class="swiper-wrapper">
   
               <div class="swiper-slide">
@@ -914,7 +917,7 @@
             <div class="col-md-6">
               <div class="sigma_cta primary-bg">
                 <img class="" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/1.png" alt="cta">
-                <div class="sigma_cta-content" style="padding: 40px 40px 40px 95px;">
+                <div class="sigma_cta-content" style="    padding: 40px 40px 40px 120px;">
                  
                   <h4 class="text-white">+91 9776888887</h4>
                 </div>
@@ -1085,12 +1088,12 @@
         </div>
       </div>
     </section>
-    <section data-anim-wrap class="section-bg pt-80 pb-80 md:pt-40 md:pb-40">
+    <section class="section-bg pt-80 pb-80 md:pt-40 md:pb-40">
 
 
         <div class="container">
             <div class="row y-gap-30 items-center justify-between">
-                <div data-anim-child="slide-up delay-2" class="col-xl-5 col-lg-6">
+                <div  class="col-xl-5 col-lg-6">
                     <h2 class="text-30 lh-15">Download the App</h2>
                     <p class="text-dark-1 pr-40 lg:pr-0 mt-15 sm:mt-5">Book in advance or last-minute with 33Crores.
                         Receive instant confirmation. Access your booking info offline.</p>
@@ -1122,7 +1125,7 @@
                     </div>
                 </div>
 
-                <div data-anim-child="slide-up delay-3" class="col-lg-6">
+                <div  class="col-lg-6">
                     <img src="{{ asset('front-assets/img/app/1.png') }}" alt="image">
                 </div>
             </div>
