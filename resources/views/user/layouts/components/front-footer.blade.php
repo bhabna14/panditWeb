@@ -7,10 +7,10 @@
 
             <div class="mt-30">
             <p style="color:#fff">  33Crores Pooja Products Pvt Ltd ,<br> 403, 4th Floor, O-Hub<br>
-IDCO Sez Infocity,<br>
-Bhubaneswar 751024,<br>
-Odisha , Bharat<br>
-<br></p>
+            IDCO Sez Infocity,<br>
+            Bhubaneswar 751024,<br>
+            Odisha , Bharat<br>
+            <br></p>
             </div>
 
            
@@ -55,7 +55,7 @@ Odisha , Bharat<br>
         </div>
       </div>
 
-      <div class="py-20 border-top-white-15">
+      {{-- <div class="py-20 border-top-white-15">
         <div class="row justify-between items-center y-gap-10">
           <div class="col-auto">
             <div class="row x-gap-30 y-gap-10">
@@ -70,6 +70,6 @@ Odisha , Bharat<br>
             </div>
           </div>
         </div>
-      </div>
+      </div> --}}
     </div>
   </footer>

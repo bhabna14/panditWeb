@@ -13767,12 +13767,12 @@ p.blockquote:after {
 
 }
 .footer{
- /* background-color: #B90B0B; */
- background-image: url('../../front-assets/img/footer.png');
- /* background-repeat: no-repeat; */
- background-size: cover;
- background-position: center;
- /* height: 499px; */
+  background-image: url(../img/footer.png);
+  height: 431px;
+  /* background-repeat: no-repeat; */
+  /* background-size: cover; */
+  background-position: top left;
+  width: 100%;
 }
 .omm-img {
   height: 174px;
