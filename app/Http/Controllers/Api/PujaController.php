@@ -18,7 +18,7 @@ class PujaController extends Controller
         // Get  all banners 
         $banners = AppBanner::all();
         foreach ($banners as $banner) {
-            $banner->banner_img_url = asset('uploads/banner' . $banner->banner_img);
+            $banner->banner_img_url = asset('uploads/banner/' . $banner->banner_img);
         }
         // Get all active poojas
         $poojalists = Poojalist::where('status', 'active')->get();

@@ -92,9 +92,9 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12 text-center">
-          <h1>Reliable Pandit Booking For Every <br> Religious Event</h1>
-          <p>Experienced Pandits For Every Occasion, Just a Click Away</p>
-          <a href="" class="book-now-btn">Book Now</a>
+          <h1 data-aos="fade-left" data-aos-delay="500">Reliable Pandit Booking For Every <br> Religious Event</h1>
+          <p data-aos="fade-right" data-aos-delay="500">Experienced Pandits For Every Occasion, Just a Click Away</p>
+          <a href="" class="book-now-btn" data-aos="fade-up" data-aos-delay="500">Book Now</a>
           {{-- <img src="{{asset('front-assets/img/masthead/om.png')}}" alt="" class="omm-img">
           <h1 
           class="z-2 lg:text-40  md:text-30  xl:pt-0 text-respn" style="
@@ -116,7 +116,7 @@
  <section>
   <div class="container">
       <div class="row" style="margin-top:60px">
-          <div class="col-md-6">
+          <div class="col-md-6" data-aos="fade-right" data-aos-delay="500">
               
               <div class="img-group">
                   <div class="img-group-inner">
@@ -128,7 +128,7 @@
                   <img src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/about-group1/3.jpg" alt="about">
               </div>
           </div>
-          <div class="col-md-6">
+          <div class="col-md-6" data-aos="fade-left" data-aos-delay="500">
               <div class="section-title mb-0 text-start">
                   <p class="subtitle">EDUCATION FOR ALL RURAL CHILDREN</p>
                   <h4 class="title">We are a Hindu that believe in Ram</h4>
@@ -154,7 +154,7 @@
                     </div>
                 </div>
                 <div class="col-md-12">
-                    <div class="upcoming-event">
+                    <div class="upcoming-event" data-aos="fade-up" data-aos-delay="500">
                         <div class="row">
                             <div class="col-md-3">
                                
@@ -182,7 +182,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="upcoming-event">
+                    <div class="upcoming-event" data-aos="fade-up" data-aos-delay="500">
                         <div class="row">
                             <div class="col-md-3">
                                
@@ -210,7 +210,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="upcoming-event">
+                    <div class="upcoming-event" data-aos="fade-up" data-aos-delay="500">
                         <div class="row">
                             <div class="col-md-3">
                                
@@ -1065,12 +1065,12 @@
           <div class="row y-gap-30 justify-center text-center">
   
             <div class="col-xl-3 col-6">
-              <div class="text-40 lg:text-30 lh-13 fw-600">4,958</div>
-              <div class="text-14 lh-14 text-light-1 mt-5">Pandits</div>
+              <div class="text-40 lg:text-30 lh-13 fw-600 counter">4,958</div>
+              <div class="text-14 lh-14 text-light-1 mt-5 ">Pandits</div>
             </div>
   
             <div class="col-xl-3 col-6">
-              <div class="text-40 lg:text-30 lh-13 fw-600">2,869</div>
+              <div class="text-40 lg:text-30 lh-13 fw-600 counter">2,869</div>
               <div class="text-14 lh-14 text-light-1 mt-5">Total Pooja</div>
             </div>
   
@@ -1093,7 +1093,7 @@
 
         <div class="container">
             <div class="row y-gap-30 items-center justify-between">
-                <div  class="col-xl-5 col-lg-6">
+                <div  class="col-xl-5 col-lg-6" data-aos="fade-right" data-aos-delay="500">
                     <h2 class="text-30 lh-15">Download the App</h2>
                     <p class="text-dark-1 pr-40 lg:pr-0 mt-15 sm:mt-5">Book in advance or last-minute with 33Crores.
                         Receive instant confirmation. Access your booking info offline.</p>
@@ -1109,7 +1109,7 @@
                             </div>
                         </div>
 
-                        <div class="col-auto">
+                        <div class="col-auto" >
                             <a href="https://play.google.com/store/apps/details?id=com.croresadmin.shopifyapp"
                                 target="_blank"
                                 class="d-flex items-center px-20 py-10 rounded-8 border-white-15 text-white bg-dark-3">
@@ -1125,7 +1125,7 @@
                     </div>
                 </div>
 
-                <div  class="col-lg-6">
+                <div  class="col-lg-6" data-aos="fade-left" data-aos-delay="500">
                     <img src="{{ asset('front-assets/img/app/1.png') }}" alt="image">
                 </div>
             </div>
