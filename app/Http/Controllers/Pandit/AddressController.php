@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Pandit;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Auth;
 use App\Models\Addressdetail;
 use App\Models\Profile;
 
@@ -15,17 +15,23 @@ class AddressController extends Controller
     //
  
    
-    public function address(){
-      
-        $addressdata = Addressdetail::first();
-        return view('pandit/panditaddress', compact('addressdata'));
-    }
+    public function address()
+{
+    // Get the authenticated Pandit's pandit_id
+    $panditId = Auth::guard('pandits')->user()->pandit_id;
+
+    // Fetch the address details associated with the authenticated Pandit
+    $addressdata = Addressdetail::where('pandit_id', $panditId)->first();
+
+    // Return the view with the address data
+    return view('pandit.panditaddress', compact('addressdata'));
+}
+
     public function saveaddress(Request $request)
     {
         // $userId = Auth::id();
-        $profile = Profile::where('status', 'active')->first();
-         $profileId = $profile->profile_id;
-        
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+
         $request->validate([
             'preaddress' => '|required|string|max:255',
             'prepost' => '|required|string|max:255|',
@@ -45,7 +51,7 @@ class AddressController extends Controller
         ]);
 
         $addressdata = Addressdetail::updateOrCreate(
-            ['pandit_id' => $profileId],
+            ['pandit_id' => $panditId],
             $request->all()
         );
 

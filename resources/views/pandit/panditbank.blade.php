@@ -116,6 +116,11 @@
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="{{ asset('assets/js/pandit-profile.js') }}"></script>
 
+    <script>
+        setTimeout(function() {
+            document.getElementById('Message').style.display = 'none';
+        }, 3000);
+    </script>
 
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>

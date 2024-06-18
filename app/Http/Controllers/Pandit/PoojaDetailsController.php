@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Poojadetails;
 use App\Models\Poojaskill;
+use Illuminate\Support\Facades\Auth;
 
 use App\Models\Profile;
 
@@ -29,15 +30,7 @@ class PoojaDetailsController extends Controller
         'video.*' => 'file|mimes:mp4,mov,avi|max:20480', // Validate video as a file (mp4, mov, avi) with max size 20480 KB
     ]);
 
-    // Get the active profile
-    $profile = Profile::where('status', 'active')->first();
-
-    if (!$profile) {
-        return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
-    }
-
-    // Extract profile ID
-    $profileId = $profile->profile_id;
+    $profileId = Auth::guard('pandits')->user()->pandit_id;
 
     // Initialize a flag to track if at least one new record was saved
     $atLeastOneSaved = false;
@@ -103,15 +96,7 @@ public function updatePoojadetails(Request $request)
         'video.*' => 'file|mimes:mp4,mov,avi|max:20480', // Validate video as a file (mp4, mov, avi) with max size 20480 KB
     ]);
 
-    // Get the active profile
-    $profile = Profile::where('status', 'active')->first();
-
-    if (!$profile) {
-        return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
-    }
-
-    // Extract profile ID
-    $profileId = $profile->profile_id;
+    $profileId = Auth::guard('pandits')->user()->pandit_id;
 
     // Initialize a flag to track if at least one update was successful
     $atLeastOneUpdated = false;

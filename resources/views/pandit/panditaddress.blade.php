@@ -163,7 +163,7 @@
                                                                         <div class="form-group">
                                                                             <label for="perstate">State</label>
                                                                             <input type="text" class="form-control"
-                                                                                name="perstate" value="" id="perstate"
+                                                                                name="perstate" value="{{$addressdata->perstate ?? ''}}" id="perstate"
                                                                                 placeholder="Enter State">
                                                                         </div>
                                                                     </div>
@@ -171,7 +171,7 @@
                                                                         <div class="form-group">
                                                                             <label for="percountry">Country</label>
                                                                             <input type="text" class="form-control"
-                                                                                name="percountry" value="" id="percountry"
+                                                                                name="percountry" value="{{$addressdata->percountry ?? ''}}" id="percountry"
                                                                                 placeholder="Enter Country">
                                                                         </div>
                                                                     </div>
@@ -181,7 +181,7 @@
                                                                         <div class="form-group">
                                                                             <label for="perpincode">Pincode</label>
                                                                             <input type="text" class="form-control"
-                                                                                name="perpincode" value="" id="perpincode"
+                                                                                name="perpincode" value="{{$addressdata->perpincode ?? ''}}" id="perpincode"
                                                                                 placeholder="Enter Pincode">
                                                                         </div>
                                                                     </div>
@@ -191,7 +191,7 @@
                                                                         <div class="form-group">
                                                                             <label for="perlandmark">Landmark</label>
                                                                             <input type="text" class="form-control"
-                                                                                name="perlandmark" value=""
+                                                                                name="perlandmark" value="{{$addressdata->perlandmark ?? ''}}"
                                                                                 id="perlandmark" placeholder="Enter Landmark">
                                                                         </div>
                                                                     </div>
@@ -245,7 +245,11 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="{{ asset('assets/js/pandit-profile.js') }}"></script>
-
+    <script>
+        setTimeout(function(){
+            document.getElementById('Message').style.display = 'none';
+        }, 3000);
+    </script>
 
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>

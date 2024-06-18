@@ -9,6 +9,7 @@ use App\Models\Career;
 use App\Models\PanditIdCard;
 use App\Models\PanditEducation;
 use App\Models\PanditVedic;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -31,7 +32,8 @@ class ProfileController extends Controller
 
         $profile = new Profile();
 
-        $profile->profile_id = $request->profile_id;
+        $profile->pandit_id = Auth::guard('pandits')->user()->pandit_id;
+
         $profile->title = $request->title;
         $profile->name = $request->name;
         $profile->email = $request->email;
@@ -59,9 +61,13 @@ class ProfileController extends Controller
             return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
         }
     }
-    public function manageprofile(){
+       public function manageprofile()
+    {
+        // Get the authenticated user's pandit_id
+        $profileId = Auth::guard('pandits')->user()->pandit_id;
 
-        $pandit_profile = Profile::latest()->first();
+        // Fetch the profile of the authenticated Pandit
+        $pandit_profile = Profile::where('pandit_id', $profileId)->latest()->first();
 
         // Example array of languages
         $languages = [
@@ -69,15 +75,20 @@ class ProfileController extends Controller
             'Kashmiri', 'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi', 
             'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
         ];
-        
-        $pandit_profile->language = explode(',', $pandit_profile->language);
 
-        $pandit_career = Career::latest()->first();
-        $pandit_idcards = PanditIdCard::where('status', 'active')->get();
-        $pandit_educations = PanditEducation::where('status', 'active')->get();
-        $pandit_vedics = PanditVedic::where('status', 'active')->get();
+        // Explode languages if profile exists
+        if ($pandit_profile) {
+            $pandit_profile->language = explode(',', $pandit_profile->language);
+        }
 
-        return view('pandit/manageprofile', compact('pandit_profile', 'languages','pandit_career','pandit_idcards','pandit_educations','pandit_vedics'));
+        // Fetch related data
+        $pandit_career = Career::where('pandit_id', $profileId)->latest()->first();
+        $pandit_idcards = PanditIdCard::where('pandit_id', $profileId)->where('status', 'active')->get();
+        $pandit_educations = PanditEducation::where('pandit_id', $profileId)->where('status', 'active')->get();
+        $pandit_vedics = PanditVedic::where('pandit_id', $profileId)->where('status', 'active')->get();
+
+        // Return view with all data
+        return view('pandit.manageprofile', compact('pandit_profile', 'languages', 'pandit_career', 'pandit_idcards', 'pandit_educations', 'pandit_vedics'));
     }
 
     public function updateProfile(Request $request, $id)

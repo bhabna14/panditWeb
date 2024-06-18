@@ -198,7 +198,7 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
-        Route::get('/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/dashboard', 'index')->name('dashboard')->middleware('auth:pandits');
     });
 });
 
@@ -268,7 +268,7 @@ Route::group(['prefix' => 'pandit'], function () {
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaListController::class)->group(function() {
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
-        Route::get('/poojaitem', 'poojaitem')->name('poojaitem');
+        Route::get('/poojaitem', 'singlepoojaitem');
         Route::post('/save-poojaitemlist', 'savePoojaItemList');
         Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
         Route::delete('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');

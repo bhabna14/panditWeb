@@ -8,57 +8,51 @@ use App\Models\Poojaskill;
 use App\Models\Poojalist;
 use App\Models\Poojadetails;
 use App\Models\Profile;
+use Illuminate\Support\Facades\Auth;
 
 use DB;
 
 class SkillController extends Controller
 {
     
-    public function poojaskill(){
-
+    public function poojaskill()
+    {
         $Poojanames = Poojalist::where('status', 'active')->get();
 
-        $profile = Profile::where('status', 'active')->first();
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
 
-        if (!$profile) {
-            return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
+        $Profile = Profile::where('pandit_id', $panditId)->first();
+
+        if ($Profile) {
+            $profileId = $Profile->pandit_id;
+            $selectedPoojas = Poojaskill::where('pandit_id', $profileId)
+                                        ->where('status', 'active')
+                                        ->pluck('pooja_id')
+                                        ->toArray();
+        } else {
+            $selectedPoojas = [];
         }
 
-        $profileId = $profile->profile_id;
-
-        $selectedPoojas = Poojaskill::where('pandit_id', $profileId)->where('status','active')->pluck('pooja_id')->toArray();
-
-        return view('/pandit/poojaskill', compact('Poojanames','selectedPoojas'));
+        return view('/pandit/poojaskill', compact('Poojanames', 'selectedPoojas'));
     }
     
-    public function managepoojaskill(){
-
+    public function managepoojaskill()
+    {
         $Poojanames = Poojalist::where('status', 'active')->get();
 
-        $profile = Profile::where('status', 'active')->first();
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
 
-        if (!$profile) {
-            return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
-        }
+        $selectedPoojas = Poojaskill::where('pandit_id', $panditId)
+                                    ->where('status', 'active')
+                                    ->pluck('pooja_id')
+                                    ->toArray();
 
-        $profileId = $profile->profile_id;
-        // Fetch previously selected poojas
-        $selectedPoojas = Poojaskill::where('pandit_id', $profileId)->where('status','active')->pluck('pooja_id')->toArray();
-
-        // Pass the data to the view
-        return view('/pandit/managepoojaskill', compact('Poojanames', 'selectedPoojas'));
+        return view('pandit.managepoojaskill', compact('Poojanames', 'selectedPoojas'));
     }
-
     public function saveSkillPooja(Request $request)
 {
     // Get the active profile
-    $profile = Profile::where('status', 'active')->first();
-
-    if (!$profile) {
-        return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
-    }
-
-    $profileId = $profile->profile_id;
+    $profileId = Auth::guard('pandits')->user()->pandit_id;
 
     // Get all submitted pooja IDs
     $submittedPoojaIds = array_column($request->input('poojas', []), 'id');

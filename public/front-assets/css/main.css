@@ -1671,6 +1671,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 767px) {
+  .banner-bg h1 {
+    font-size: 52px;
+    font-weight: 500;
+    line-height: 60px;
+    margin-bottom: 10px;
+}
   .special-pooja-bg .card-header {
     position: relative;
     display: flex;
@@ -1739,6 +1745,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 575px) {
+  .banner-bg h1 {
+    font-size: 52px;
+    font-weight: 500;
+    line-height: 60px;
+    margin-bottom: 10px;
+}
   .special-pooja-bg .card-header {
     position: relative;
     display: flex;
@@ -1807,6 +1819,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 @media (max-width: 479px) {
+  .banner-bg h1 {
+    font-size: 52px;
+    font-weight: 500;
+    line-height: 60px;
+    margin-bottom: 10px;
+}
   .xs\:text-4 {
     font-size: var(--text-4) !important;
   }

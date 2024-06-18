@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Profile;
 use App\Models\Bankdetail;
+use Illuminate\Support\Facades\Auth;
 
 
 
@@ -15,30 +16,41 @@ class BankController extends Controller
   
     public function bankdetails()
     {
-        $bankdata = Bankdetail::first();
-        return view('pandit/panditbank', compact('bankdata'));
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+
+    $bankdata = Bankdetail::where('pandit_id', $panditId)->first();
+
+    if (!$bankdata) {
+        $bankdata = new Bankdetail();
+        $bankdata->pandit_id = $panditId;
+    }
+
+    return view('pandit.panditbank', compact('bankdata'));
     }
 
     public function savebankdetails(Request $request)
     {
-        // $userId = Auth::id();
-        $profile = Profile::where('status', 'active')->first();
-         $profileId = $profile->profile_id;
-        
+        // Get the authenticated Pandit's pandit_id
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+    
+        // Validate the incoming request data
         $request->validate([
-            'bankname' => '|required|string|max:255',
-            'branchname' => '|required|string|max:255|',
+            'bankname' => 'required|string|max:255',
+            'branchname' => 'required|string|max:255',
             'ifsccode' => 'required|string|size:10',
-            'accname' => '|required|string|max:255',
+            'accname' => 'required|string|max:255',
             'accnumber' => 'required|digits:12',
-            'upi_number' => 'required',
+            'upi_number' => 'required|string|max:255',
         ]);
-
+    
+        // Update or create the bank details for the authenticated Pandit
         $bankdata = BankDetail::updateOrCreate(
-            ['pandit_id' => $profileId],
+            ['pandit_id' => $panditId],
             $request->all()
         );
-
+    
+        // Redirect back with success message upon successful save
         return redirect()->back()->with('success', 'Bank details saved successfully!');
     }
+    
 }

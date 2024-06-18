@@ -8,6 +8,7 @@ use App\Models\Poojaskill;
 use Illuminate\Http\Request;
 use App\Models\Poojaitemlists;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class PoojaListController extends Controller
 {
@@ -56,14 +57,7 @@ class PoojaListController extends Controller
             'unit.*' => 'required|string',
         ]);
     
-        $profile = Profile::where('status', 'active')->first();
-    
-        if (!$profile) {
-            return redirect()->back()->withErrors(['danger' => 'No active profile found.']);
-        }
-    
-        $profileId = $profile->profile_id;
-    
+        $profileId = Auth::guard('pandits')->user()->pandit_id;
         // Extract data from the request
         $poojaId = $validatedData['pooja_id'];
         $poojaName = $validatedData['pooja_name'];

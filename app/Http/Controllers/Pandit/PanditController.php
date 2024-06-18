@@ -15,13 +15,19 @@ use App\Models\EduDetail;
 use App\Models\VedicDetail;
 use App\Models\Poojaskill;
 use App\Models\Poojaitemlist;
+use Illuminate\Support\Facades\Auth;
 
 
  
 class PanditController extends Controller
-{
-    public function dashboard(){
-        return view("/pandit/dashboard");
+{ 
+    public function index()
+    {
+        $user = Auth::guard('pandits')->user();
+        
+        $profile = Profile::where('pandit_id', $user->pandit_id)->first();
+
+        return view('pandit/dashboard', compact('user', 'profile'));
     }
 
     public function panditlogin(){

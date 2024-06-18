@@ -62,9 +62,7 @@
                                                                 enctype="multipart/form-data">
                                                                 @csrf
                                                                 <div class="row">
-                                                                    <input type="hidden" class="form-control"
-                                                                        id="profile_id" name="profile_id"
-                                                                        value="PRF{{ rand(1000, 9999) }}" placeholder="">
+                                                                    
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
                                                                             <label for="exampleInputEmail1">Title</label>

@@ -38,23 +38,33 @@
 											<div class="row">
 												<div class="col-xl-9 col-lg-7 col-md-6 col-sm-12">
 													<div class="text-justified align-items-center">
-														<h3 class="text-dark font-weight-semibold mb-2 mt-0">Hi, Welcome Back <span class="text-primary">Pandit!</span></h3>
-														<p class="text-dark tx-14 mb-3 lh-3"> If you want to get request of pooja then you will first complete all profile details</p>
+														<h3 class="text-dark font-weight-semibold mb-2 mt-0">
+															Hi, Welcome Back 
+															<span class="text-primary">
+																{{ $profile->name ?? 'Pandit' }}
+															</span>!
+														</h3>
+														<p class="text-dark tx-14 mb-3 lh-3">
+															If you want to get request of pooja then you will first complete all profile details
+														</p>
 														<button class="btn btn-primary shadow">Upgrade Now</button>
 													</div>
 												</div>
 												<div class="col-xl-3 col-lg-5 col-md-6 col-sm-12 d-flex align-items-center justify-content-center">
-													<div class="chart-circle float-md-end mt-4 mt-md-0" data-value="0.30" data-thickness="8" data-color=""><canvas width="100" height="100"></canvas>
-														<div class="chart-circle-value circle-style"><div class="tx-18 font-weight-semibold">35%</div></div>
+													<div class="chart-circle float-md-end mt-4 mt-md-0" data-value="0.30" data-thickness="8" data-color="">
+														<canvas width="100" height="100"></canvas>
+														<div class="chart-circle-value circle-style">
+															<div class="tx-18 font-weight-semibold">35%</div>
+														</div>
 													</div>
 												</div>
 											</div>
 										</div>
 									</div>
 								</div>
-								
 							</div>
 						</div>
+					</div>
 					
 						<!-- </div> -->
 					</div>
