@@ -21,7 +21,8 @@ class PujaController extends Controller
             $banner->banner_img_url = asset('uploads/banner/' . $banner->banner_img);
         }
         // Get all active poojas
-        $poojalists = Poojalist::where('status', 'active')->get();
+        $poojalists = Poojalist::where('status', 'active')
+                            ->whereNull('pooja_date')->get();
         foreach ($poojalists as $poojalist) {
             $poojalist->pooja_img_url = asset('assets/img/' . $poojalist->pooja_photo);
         }
