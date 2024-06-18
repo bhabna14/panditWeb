@@ -54,10 +54,26 @@ class PujaController extends Controller
     
         // Prepare the combined data
         $data = [
-            'banner' => $banners,
-            'all_poojas' => $poojalists,
-            'upcoming_poojas' => $upcomingPoojas,
-            'pandits' => $pandits
+            'section_01' => [
+                'name' => 'Banner',
+                'id' => 1,
+                'data' => $banners
+            ],
+            'section_02' => [
+                'name' => 'All Poojas',
+                'id' => 2,
+                'data' => $poojalists
+            ],
+            'section_03' => [
+                'name' => 'Upcoming Poojas',
+                'id' => 3,
+                'data' => $upcomingPoojas
+            ],
+            'section_04' => [
+                'name' => 'Pandits',
+                'id' => 4,
+                'data' => $pandits
+            ]
             
         ];
     
