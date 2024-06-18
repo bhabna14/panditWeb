@@ -51,13 +51,27 @@ class PujaController extends Controller
                 'data' => []
             ], 404);
         }
-    
+        // Prepare the formatted banner data
+        $bannerData = [];
+        foreach ($banners as $banner) {
+            $bannerData[] = [
+                'id' => $banner->id,
+                'banner_img_url' => $banner->banner_img_url,
+                'banner_img' => $banner->banner_img,
+                'title_text' => $banner->title_text,
+                'alt_text' => $banner->alt_text,
+                'created_at' => $banner->created_at,
+                'updated_at' => $banner->updated_at,
+                
+            ];
+        }
+        
         // Prepare the combined data
         $data = [
             'section_01' => [
                 'name' => 'Banner',
                 'id' => 1,
-                'data' => $banners
+                'data' => $bannerData
             ],
             'section_02' => [
                 'name' => 'All Poojas',
