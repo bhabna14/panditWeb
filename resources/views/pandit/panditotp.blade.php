@@ -44,23 +44,15 @@
                                                                     {{ session('error') }}
                                                                 </div>
                                                             @endif
-                                                            <form id="loginForm" action="{{ route('pandit.login') }}"
+                                                            <form id="loginForm" action="{{ route('check.otp') }}"
                                                                 method="POST">
                                                                 @csrf
-                                                                <input type="hidden" class="form-control" id="otp"
-                                                                    name="otp" value="{{ rand(1000, 9999) }}">
-                                                                <input type="hidden" class="form-control" id="pandit_id"
-                                                                    name="pandit_id" value="PANDIT{{ rand(9, 99999) }}">
                                                                 <div id="step1">
                                                                     <div class="form-group">
-                                                                        <label for="mobile_no">Phone Number</label>
-                                                                        <input type="text" class="form-control"
-                                                                            id="mobile_no" name="mobile_no"
-                                                                            placeholder="Enter your Phone Number"
-                                                                            value="+91">
+                                                                        <label for="mobile_no">OTP</label>
+                                                                        <input type="text" class="form-control"  id="otp" name="otp" placeholder="Enter your Otp">
                                                                     </div>
-                                                                    <input type="submit" class="btn btn-primary"
-                                                                        value="Generate OTP">
+                                                                    <input type="submit" class="btn btn-primary" value="Login">
                                                                 </div>
                                                             </form>
                                                         </div>

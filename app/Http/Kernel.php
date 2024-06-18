@@ -68,5 +68,7 @@ class Kernel extends HttpKernel
         'user' => \App\Http\Middleware\UserMiddleware::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'superadmin' => \App\Http\Middleware\SuperadminMiddleware::class,
+        'pandits' => \App\Http\Middleware\PanditMiddleware::class,
+
     ];
 }

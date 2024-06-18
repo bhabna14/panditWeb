@@ -12,7 +12,9 @@ class Profile extends Model
     protected $table = "pandit_profile";
 
     protected $fillable = [
-        'profile_id',
+         'pandit_id',
+        'otp',
+        'phonenumber',
         'title',
         'name',
         'email',

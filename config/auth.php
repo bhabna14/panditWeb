@@ -44,6 +44,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+       'pandits' => [
+        'driver' => 'session',
+        'provider' => 'pandits',
+        ],
         'superadmins' => [
             'driver' => 'session',
             'provider' => 'superadmins',
@@ -76,6 +80,7 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\User::class,
         ],
+       
         'superadmins' => [
             'driver' => 'eloquent',
             'model' => App\Models\Superadmin::class,
@@ -85,10 +90,12 @@ return [
             'model' => App\Models\Admin::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'pandits' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\PanditLogin::class,
+    ],
+
+    
     ],
 
     /*
