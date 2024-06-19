@@ -905,37 +905,35 @@
         </div>
     </section>
 
-    {{--cta---}}
-    <div class="section-cta-custom pt-0">
-        <div class="container">
-          <div class="section-title text-center">
+  {{--cta---}}
+  <div class="section-cta-custom pt-0">
+    <div class="container">
+        <div class="section-title text-center">
             <p class="subtitle">WAYS WE CAN HELP</p>
             <h4 class="title">Pandits Ready To Help</h4>
-          </div>
-    
-          <div class="row align-items-center position-relative">
-            <div class="col-md-6">
-              <div class="sigma_cta primary-bg">
-                <img class="" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/1.png" alt="cta">
-                <div class="sigma_cta-content" style="    padding: 40px 40px 40px 120px;">
-                 
-                  <h4 class="text-white">+91 9776888887</h4>
+        </div>
+        <div class="row align-items-center position-relative">
+            <div class="col-md-6 col-12 mb-4">
+                <div class="sigma_cta primary-bg">
+                    <img class="cta-img-left" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/1.png" alt="cta">
+                    <div class="sigma_cta-content">
+                        <h4 class="text-white">+91 9776888887</h4>
+                    </div>
                 </div>
-              </div>
             </div>
             <span class="sigma_cta-sperator d-lg-flex">or</span>
-            <div class="col-md-6">
-              <div class="sigma_cta primary-bg">
-                <div class="sigma_cta-content" style="padding: 40px 40px 40px 95px;">
-                  <h4 class="text-white">contact@33crores.com</h4>
+            <div class="col-md-6 col-12">
+                <div class="sigma_cta primary-bg">
+                    <div class="sigma_cta-content">
+                        <h4 class="text-white">contact@33crores.com</h4>
+                    </div>
+                    <img class="cta-img-right" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/2.png" alt="cta">
                 </div>
-                <img class="" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/2.png" alt="cta">
-              </div>
             </div>
-          </div>
-    
         </div>
     </div>
+  </div>
+
     {{-- <section class="layout-pt-lg layout-pb-lg bg-dark-3">
         <div class="container">
           <div class="row y-gap-40 justify-between text-white">

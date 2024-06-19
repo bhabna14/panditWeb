@@ -484,8 +484,9 @@ span.relative.z-0.inline-flex.shadow-sm.rounded-md {
   position: relative;
   text-align: center;
   padding: 80px;
-  margin-top:50px;
+  margin-top: 50px;
 }
+
 .section-title.mb-0.text-start {
   margin-top: 100px;
 }
@@ -505,6 +506,7 @@ span.relative.z-0.inline-flex.shadow-sm.rounded-md {
   margin-bottom: 15px;
   font-weight: 700;
 }
+
 .sigma_list.list-2 {
   columns: 2;
   -webkit-columns: 2;
@@ -582,6 +584,32 @@ p.blockquote:before, p.blockquote:after {
 p.blockquote:after {
   left: 6px;
 }
+
+@media (max-width: 767.98px) {
+  .img-group {
+    padding: 20px;
+    margin-top: 20px;
+  }
+
+  .section-title.mb-0.text-start {
+    margin-top: 50px;
+  }
+
+  .section-title .title {
+    font-size: 30px;
+  }
+
+  .sigma_list.list-2 {
+    columns: 1;
+    -webkit-columns: 1;
+    -moz-columns: 1;
+  }
+
+  .blockquote, .blockquote.bg-transparent {
+    margin: 30px 0;
+  }
+}
+
 .bg-transparent {
   background-color: transparent!important;
 }
@@ -688,12 +716,13 @@ p.blockquote:after {
   color:#000;
 }
 
-/* cta */ 
+/* CTA Section */
 .section-cta-custom {
   position: relative;
   padding: 110px 0;
-  margin: 50px 0px 0px 0px;
+  margin: 50px 0 0 0;
 }
+
 .section-cta-custom .section-title .title {
   position: relative;
   margin: 0;
@@ -703,16 +732,20 @@ p.blockquote:after {
   font-weight: 700;
   color: #B90B0B;
 }
+
 .primary-bg {
   background-color: #B90B0B;
 }
+
 .sigma_cta {
-  
   display: flex;
   height: 100%;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  padding: 20px;
 }
+
 .sigma_cta-sperator {
   z-index: 1;
   position: absolute;
@@ -727,80 +760,18 @@ p.blockquote:after {
   border-radius: 10px;
   display: flex;
   align-items: center;
-  -webkit-box-shadow: 0 3px 12px -4px rgba(0, 0, 0, .1);
-  box-shadow: 0 3px 12px -4px rgba(0, 0, 0, .1);
+  box-shadow: 0 3px 12px -4px rgba(0, 0, 0, 0.1);
   justify-content: center;
 }
+
 .sigma_cta .sigma_cta-content {
-  padding-right: 100px;
+  padding: 40px 40px 40px 120px;
 }
-.sigma_search-adv-input {
-  position: relative;
-}
-.footer a:hover{
-  color:#fff !important;
-}
-/* .sigma_search-adv-input .form-control {
-  height: 60px;
-  padding: 8px 15px;
-  border-radius: 10px;
-  border: 2px solid #efefef;
-  width: 100%;
-  color: #6e6e6e;
-  background-color: #fff;
-  letter-spacing: 0.1px;
-  font-size: 14px;
-  appearance: auto;
-  -webkit-appearance: auto;
-} */
-.sigma_search-adv-input .form-control {
-  background-color: #a3596e !important;
-  border: 0 !important;
-  color: #fff !important;
-  box-shadow: none;
-  height: 60px;
-    padding: 8px 15px;
-    border-radius: 10px;
-   
-    width: 100%;
-   
-   
-    letter-spacing: 0.1px;
-    font-size: 14px;
-    appearance: auto;
-    -webkit-appearance: auto;
-}
-.sigma_search-adv-input button {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  border: 0;
-  padding: 0;
-  outline: none;
-  cursor: pointer;
-  width: 60px;
-  height: 60px;
-  border-radius: 0;
-  background-color: #5c3943;
-  color: #fff;
-  transition: .3s;
-}
-.custom-primary {
-  color: #7E4555 !important;
-}
-.sigma_cta img + .sigma_cta-content {
-  padding-left: 60px;
-  padding-right: 0;
-}
-.sigma_cta h4 {
-  margin: 0;
-  font-size: 36px;
-}
+
 .sigma_cta img {
   position: absolute;
   bottom: 0;
-  left: 0px;
+  left: 0;
   top: 36px;
 }
 
@@ -809,6 +780,57 @@ p.blockquote:after {
   right: 0;
   bottom: 0;
 }
+
+.sigma_cta h4 {
+  margin: 0;
+  font-size: 36px;
+}
+
+.cta-img-left {
+  left: 0;
+}
+
+.cta-img-right {
+  right: 0;
+}
+
+@media (max-width: 767.98px) {
+  .sigma_cta {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .sigma_cta .sigma_cta-content {
+    padding: 20px 0;
+  }
+
+  .sigma_cta img {
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin-bottom: 20px;
+  }
+
+  .sigma_cta-sperator {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    margin: 20px 0;
+  }
+
+  .sigma_cta h4 {
+    font-size: 24px;
+  }
+
+  .section-cta-custom .section-title .title {
+    font-size: 30px;
+  }
+}
+
 .banner-bg {
   background-image: url('../../front-assets/img/banner.png');
   background-repeat: no-repeat;
