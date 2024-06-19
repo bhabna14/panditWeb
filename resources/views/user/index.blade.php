@@ -113,7 +113,7 @@
       </div>
     </div>
  </section>
- <section>
+ {{-- <section>
   <div class="container">
       <div class="row" style="margin-top:60px">
           <div class="col-md-6" data-aos="fade-right" data-aos-delay="500">
@@ -143,7 +143,7 @@
           </div>
       </div>
   </div>
-</section>
+</section> --}}
 
     <section class="upcoming-bg">
         <div class="container">
@@ -906,7 +906,7 @@
     </section>
 
   {{--cta---}}
-  <div class="section-cta-custom pt-0">
+  {{-- <div class="section-cta-custom pt-0">
     <div class="container">
         <div class="section-title text-center">
             <p class="subtitle">WAYS WE CAN HELP</p>
@@ -932,7 +932,7 @@
             </div>
         </div>
     </div>
-  </div>
+  </div> --}}
 
     {{-- <section class="layout-pt-lg layout-pb-lg bg-dark-3">
         <div class="container">
