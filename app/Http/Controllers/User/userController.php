@@ -26,7 +26,7 @@ class userController extends Controller
         $upcomingPoojas = Poojalist::where('status', 'active')
                         ->where('pooja_date', '>=', now())
                         ->orderBy('pooja_date', 'asc')
-                        ->take(8)
+                        ->take(3)
                         ->get();
         $otherpoojas = Poojalist::where('status', 'active')
                         ->where(function($query) {

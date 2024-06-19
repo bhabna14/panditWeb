@@ -25,26 +25,26 @@
               
               <div class="img-group">
                   <div class="img-group-inner">
-                    <img src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/about-group1/1.jpg" alt="about">
+                    <img src="{{asset('front-assets/img/about/about1.png')}}" alt="about">
                     <span></span>
                     <span></span>
                   </div>
-                  <img src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/about-group1/2.jpg" alt="about">
-                  <img src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/about-group1/3.jpg" alt="about">
+                  <img src="{{asset('front-assets/img/about/about2.png')}}" alt="about">
+                  <img src="{{asset('front-assets/img/about/about3.png')}}" alt="about">
               </div>
           </div>
           <div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
               <div class="section-title mb-0 text-start">
-                  <p class="subtitle">EDUCATION FOR ALL RURAL CHILDREN</p>
-                  <h4 class="title">We are a Hindu that believe in Ram</h4>
+                  <p class="subtitle">Bringing Tradition to Your Doorstep with Ease                  </p>
+                  <h4 class="title">Your Trusted Source for Online Pandit Booking</h4>
               </div>
               <ul class="sigma_list list-2 mb-0">
-                  <li>Peace of Mind</li>
-                  <li>Set For Pastor</li>
-                  <li>100% Satisfaction</li>
-                  <li>Trusted Company</li>
+                  <li>Pooja At Home</li>
+                  <li>Special Poojas</li>
+                  <li>Experienced Pandits</li>
+                  <li>Pooja At Temple</li>
               </ul>
-              <p class="blockquote bg-transparent"> We are a Hindu that belives in Lord Rama and Vishnu Deva the followers and We are a Hindu that belives in Lord Rama and Vishnu Deva. </p>
+              <p class="blockquote bg-transparent"> Welcome to 33 Crores Pandit where we make it easy to book experienced and knowledgeable pandits for your spiritual and religious needs. Our mission is to connect you with trusted pandits who can perform rituals and ceremonies with the utmost authenticity and dedication. Whether it's a small puja or a grand celebration, we are here to ensure your religious events are conducted seamlessly and traditionally. Experience the convenience of online booking with the assurance of our commitment to quality and tradition.</p>
           </div>
       </div>
   </div>
@@ -59,21 +59,22 @@
                     </div>
                 </div>
                 <div class="col-md-12">
+                     @foreach ($upcomingPoojas as $upcomingPooja)
                     <div class="upcoming-event" data-aos="fade-up" data-aos-delay="500">
                         <div class="row">
                             <div class="col-md-3">
                                
                                 <div class="upcoming-event-img">
-                                    <img src="{{asset('front-assets/img/masthead/post-11-copyright-520x424.jpg')}}" alt="Avatar" class="image">
+                                    <img src="{{asset('assets/img/'.$upcomingPooja->pooja_photo)}}" alt="Avatar" class="image">
                                    
                                 </div>
                             </div>
                           
                             <div class="col-md-7">
                                <div class="event-text">
-                                    <h4>Kundalini Yoga Practice Againts Bad Habits</h4>
-                                    <h6>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas consectetur necessitatibus perferendis iusto culpa nemo rem dolorum optio tempore!</h6>
-                                    <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>12/06/2024</p>
+                                    <h4>{{$upcomingPooja->pooja_name}}</h4>
+                                    <h6>{{$upcomingPooja->short_description}}</h6>
+                                    <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>{{$upcomingPooja->pooja_date}}</p>
                                </div>
                             </div>
                             <div class="col-md-2">
@@ -83,62 +84,8 @@
                             </div>
                         </div>
                     </div>
-                    <div class="upcoming-event" data-aos="fade-up" data-aos-delay="500">
-                        <div class="row">
-                            <div class="col-md-3">
-                               
-                                <div class="upcoming-event-img">
-                                    <img src="https://vihara.themerex.net/wp-content/uploads/2018/12/post-15-copyright-520x424.jpg" alt="Avatar" class="image">
-                                    {{-- <div class="overlay">
-                                        <a href="#" class="icon" title="User Profile">
-                                            <i class="fa fa-user"></i>
-                                        </a>
-                                    </div> --}}
-                                </div>
-                            </div>
-                          
-                            <div class="col-md-7">
-                               <div class="event-text">
-                                    <h4>Kundalini Yoga Practice Againts Bad Habits</h4>
-                                    <h6>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas consectetur necessitatibus perferendis iusto culpa nemo rem dolorum optio tempore!</h6>
-                                    <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>12/06/2024</p>
-                               </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="event-info">
-                                    <a href="">Info</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="upcoming-event" data-aos="fade-up" data-aos-delay="500">
-                        <div class="row">
-                            <div class="col-md-3">
-                               
-                                <div class="upcoming-event-img">
-                                    <img src="{{asset('front-assets/img/masthead/post-11-copyright-520x424.jpg')}}" alt="Avatar" class="image">
-                                    {{-- <div class="overlay">
-                                        <a href="#" class="icon" title="User Profile">
-                                            <i class="fa fa-user"></i>
-                                        </a>
-                                    </div> --}}
-                                </div>
-                            </div>
-                          
-                            <div class="col-md-7">
-                               <div class="event-text">
-                                    <h4>Kundalini Yoga Practice Againts Bad Habits</h4>
-                                    <h6>Lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptas consectetur necessitatibus perferendis iusto culpa nemo rem dolorum optio tempore!</h6>
-                                    <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>12/06/2024</p>
-                               </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="event-info">
-                                    <a href="">Info</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
+                  
                 </div>
             </div>
         </div>
@@ -347,17 +294,17 @@
               <div class="swiper-slide">
                 <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40">
                   
-                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;Our family was traveling via bullet train between cities in Japan with our luggage - the location for this hotel made that so easy. Agoda price was fantastic.&quot;</p>
+                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;I recently used 33Crores Pandit to book a pandit for my housewarming ceremony, and the experience was fantastic. The booking process was smooth and hassle-free. The pandit was highly knowledgeable and performed the rituals with great devotion and precision. I appreciated the punctuality and professionalism. Highly recommend this service!&quot;</p>
   
                   <div class="pt-20 mt-28 border-top-light">
                     <div class="row x-gap-20 y-gap-20 items-center">
-                      <div class="col-auto">
+                      {{-- <div class="col-auto">
                         <img class="size-60" src="img/avatars/1.png" alt="image">
-                      </div>
+                      </div> --}}
   
                       <div class="col-auto">
                         <div class="text-15 fw-500 lh-14">Courtney Henry</div>
-                        <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div>
+                        {{-- <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div> --}}
                       </div>
                     </div>
                   </div>
@@ -367,17 +314,17 @@
               <div class="swiper-slide">
                 <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40">
                   
-                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;Our family was traveling via bullet train between cities in Japan with our luggage - the location for this hotel made that so easy. Agoda price was fantastic.&quot;</p>
+                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;Booking a pandit for my daughter’s wedding through 33Crores Pandit was one of the best decisions. The website is user-friendly, and the customer service team is very responsive. The pandit arrived on time and conducted the ceremony beautifully, explaining the significance of each ritual. It was a truly memorable experience. Five stars!&quot;</p>
   
                   <div class="pt-20 mt-28 border-top-light">
                     <div class="row x-gap-20 y-gap-20 items-center">
-                      <div class="col-auto">
+                      {{-- <div class="col-auto">
                         <img class="size-60" src="img/avatars/1.png" alt="image">
-                      </div>
+                      </div> --}}
   
                       <div class="col-auto">
                         <div class="text-15 fw-500 lh-14">Courtney Henry</div>
-                        <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div>
+                        {{-- <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div> --}}
                       </div>
                     </div>
                   </div>
@@ -387,62 +334,24 @@
               <div class="swiper-slide">
                 <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40">
                   
-                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;Our family was traveling via bullet train between cities in Japan with our luggage - the location for this hotel made that so easy. Agoda price was fantastic.&quot;</p>
+                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;I used 33Crores Pandit to arrange a Navgraha Puja, and I couldn't be more satisfied. The whole process, from booking to the actual puja, was seamless. The pandit was extremely knowledgeable and performed the puja with utmost dedication. It was a great convenience to book online and have everything taken care of professionally.&quot;</p>
   
                   <div class="pt-20 mt-28 border-top-light">
                     <div class="row x-gap-20 y-gap-20 items-center">
-                      <div class="col-auto">
+                      {{-- <div class="col-auto">
                         <img class="size-60" src="img/avatars/1.png" alt="image">
-                      </div>
+                      </div> --}}
   
                       <div class="col-auto">
                         <div class="text-15 fw-500 lh-14">Courtney Henry</div>
-                        <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div>
+                        {{-- <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div> --}}
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
   
-              <div class="swiper-slide">
-                <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40">
-                  
-                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;Our family was traveling via bullet train between cities in Japan with our luggage - the location for this hotel made that so easy. Agoda price was fantastic.&quot;</p>
-  
-                  <div class="pt-20 mt-28 border-top-light">
-                    <div class="row x-gap-20 y-gap-20 items-center">
-                      <div class="col-auto">
-                        <img class="size-60" src="img/avatars/1.png" alt="image">
-                      </div>
-  
-                      <div class="col-auto">
-                        <div class="text-15 fw-500 lh-14">Courtney Henry</div>
-                        <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-  
-              <div class="swiper-slide">
-                <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40">
-                  
-                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;Our family was traveling via bullet train between cities in Japan with our luggage - the location for this hotel made that so easy. Agoda price was fantastic.&quot;</p>
-  
-                  <div class="pt-20 mt-28 border-top-light">
-                    <div class="row x-gap-20 y-gap-20 items-center">
-                      <div class="col-auto">
-                        <img class="size-60" src="img/avatars/1.png" alt="image">
-                      </div>
-  
-                      <div class="col-auto">
-                        <div class="text-15 fw-500 lh-14">Courtney Henry</div>
-                        <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            
   
             </div>
           </div>
@@ -520,8 +429,7 @@
             <div class="row y-gap-30 items-center justify-between">
                 <div  class="col-xl-5 col-lg-6" data-aos="fade-up" data-aos-delay="500">
                     <h2 class="text-30 lh-15">Download the App</h2>
-                    <p class="text-dark-1 pr-40 lg:pr-0 mt-15 sm:mt-5">Book in advance or last-minute with 33Crores.
-                        Receive instant confirmation. Access your booking info offline.</p>
+                    <p class="text-dark-1 pr-40 lg:pr-0 mt-15 sm:mt-5">Stay connected and make your spiritual journey easier with our app. Book pandits, schedule pujas, and get updates on upcoming events all at your fingertips. Download now for a seamless and convenient experience!</p>
 
                     <div class="row y-gap-20 items-center pt-30 sm:pt-10">
                         <div class="col-auto">

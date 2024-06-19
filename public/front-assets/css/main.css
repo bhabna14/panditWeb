@@ -470,15 +470,19 @@ span.relative.z-0.inline-flex.shadow-sm.rounded-md {
 }
 
 .img-group img:nth-child(2) {
+  width: 201px;
+  height: 201px;
   position: absolute;
-  top: 0;
-  left: 0;
+  top: -20px;
+  left: -10px;
   z-index: -1;
 }
 .img-group img:nth-child(3) {
+  width: 200px;
+  height: 234px;
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: 1px;
+  right: -11px;
   z-index: -1;
 }
 .img-group {
@@ -569,19 +573,10 @@ p.blockquote:before, p.blockquote:after {
   top: 50%;
   transform: translateY(-50%);
   width: 2px;
-  height: 30px;
+  height: 141px;
   background-color: #7E4555;
 }
-p.blockquote:before, p.blockquote:after {
-  content: "";
-  position: absolute;
-  left: -9px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 2px;
-  height: 30px;
-  background-color: #7E4555;
-}
+
 p.blockquote:after {
   left: 6px;
 }
