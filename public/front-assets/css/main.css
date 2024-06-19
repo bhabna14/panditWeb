@@ -288,6 +288,7 @@
   min-width: 160px;
   /* box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); */
   z-index: 1;
+  top: 225%;
   right: -188%;
   border-radius: 5px;
   box-shadow: 5px 5px 10px rgb(169 184 223 / 40%);
@@ -771,14 +772,15 @@ p.blockquote:after {
 .sigma_cta img {
   position: absolute;
   bottom: 0;
-  left: 0;
-  top: 36px;
+  left: -86px;
+  top: -37px;
 }
 
 .sigma_cta .sigma_cta-content + img {
   left: auto;
-  right: 0;
+  right: -75px;
   bottom: 0;
+  top: -52px;
 }
 
 .sigma_cta h4 {
@@ -803,7 +805,7 @@ p.blockquote:after {
   }
 
   .sigma_cta .sigma_cta-content {
-    padding: 20px 0;
+    padding: 0px !important;
   }
 
   .sigma_cta img {
@@ -829,6 +831,12 @@ p.blockquote:after {
   .section-cta-custom .section-title .title {
     font-size: 30px;
   }
+  .sigma_cta .sigma_cta-content + img {
+    left: auto;
+    right: 0px;
+    bottom: 0;
+    top: 0px;
+}
 }
 
 .banner-bg {

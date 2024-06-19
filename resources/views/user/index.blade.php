@@ -454,62 +454,65 @@
   {{--cta---}}
   <div class="section-cta-custom pt-0">
     <div class="container">
-        <div class="section-title text-center">
-            <p class="subtitle">WAYS WE CAN HELP</p>
-            <h4 class="title">Pandits Ready To Help</h4>
-        </div>
-        <div class="row align-items-center position-relative">
-            <div class="col-md-6 col-12 mb-4">
-                <div class="sigma_cta primary-bg">
-                    <img class="cta-img-left" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/1.png" alt="cta">
-                    <div class="sigma_cta-content">
-                        <h4 class="text-white">+91 9776888887</h4>
-                    </div>
-                </div>
-            </div>
-            <span class="sigma_cta-sperator d-lg-flex">or</span>
-            <div class="col-md-6 col-12">
-                <div class="sigma_cta primary-bg">
-                    <div class="sigma_cta-content">
-                        <h4 class="text-white">contact@33crores.com</h4>
-                    </div>
-                    <img class="cta-img-right" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/2.png" alt="cta">
-                </div>
-            </div>
-        </div>
+    <div class="section-title text-center">
+    <p class="subtitle">WAYS WE CAN HELP</p>
+    <h4 class="title">Pandits Ready To Help</h4>
     </div>
-  </div>
-
-  
-    <section class="pt-60 custmer-count">
-      <div class="container">
-        <div class="border-bottom-light pb-40">
-          <div class="row y-gap-30 justify-center text-center">
-  
-            <div class="col-xl-3 col-6">
-              <div class="text-40 lg:text-30 lh-13 fw-600 counter">4,958</div>
-              <div class="text-14 lh-14 text-light-1 mt-5 ">Pandits</div>
-            </div>
-  
-            <div class="col-xl-3 col-6">
-              <div class="text-40 lg:text-30 lh-13 fw-600 counter">2,869</div>
-              <div class="text-14 lh-14 text-light-1 mt-5">Total Pooja</div>
-            </div>
-  
-            <div class="col-xl-3 col-6">
-              <div class="text-40 lg:text-30 lh-13 fw-600">2M</div>
-              <div class="text-14 lh-14 text-light-1 mt-5">Happy customers</div>
-            </div>
-  
-            <div class="col-xl-3 col-6">
-              <div class="text-40 lg:text-30 lh-13 fw-600">574,974</div>
-              <div class="text-14 lh-14 text-light-1 mt-5">Our Volunteers</div>
-            </div>
-  
+    <div class="row align-items-center position-relative">
+      <div class="col-md-6">
+        <div class="sigma_cta primary-bg">
+          <img class="" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/1.png" alt="cta">
+          <div class="sigma_cta-content" style="    padding: 40px 40px 40px 120px;">
+           
+            <h4 class="text-white">+91 9776888887</h4>
           </div>
         </div>
       </div>
-    </section>
+      <span class="sigma_cta-sperator d-lg-flex">or</span>
+      <div class="col-md-6">
+        <div class="sigma_cta primary-bg">
+          <div class="sigma_cta-content" style="padding: 40px 40px 40px 95px;">
+            <h4 class="text-white">contact@33crores.com</h4>
+          </div>
+          <img class="" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/2.png" alt="cta">
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+  
+  <section class="pt-60 custmer-count">
+    <div class="container">
+        <div class="border-bottom-light pb-40">
+            <div class="row y-gap-30 justify-center text-center">
+
+                <div class="col-xl-3 col-6">
+                    <div class="text-40 lg:text-30 lh-13 fw-600 counter">4,958</div>
+                    <div class="text-14 lh-14 text-light-1 mt-5 ">Pandits</div>
+                </div>
+
+                <div class="col-xl-3 col-6">
+                    <div class="text-40 lg:text-30 lh-13 fw-600 counter">2,869</div>
+                    <div class="text-14 lh-14 text-light-1 mt-5">Total Pooja</div>
+                </div>
+
+                <div class="col-xl-3 col-6">
+                    <div class="text-40 lg:text-30 lh-13 fw-600 counter">2M</div>
+                    <div class="text-14 lh-14 text-light-1 mt-5">Happy customers</div>
+                </div>
+
+                <div class="col-xl-3 col-6">
+                    <div class="text-40 lg:text-30 lh-13 fw-600 counter">574,974</div>
+                    <div class="text-14 lh-14 text-light-1 mt-5">Our Volunteers</div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
     <section class="section-bg pt-80 pb-80 md:pt-40 md:pb-40">
 
 
@@ -559,5 +562,14 @@
 @endsection
 
 @section('scripts')
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/counterup2@1.0.4/dist/index.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('.counter').counterUp({
+            delay: 20, // increased delay
+            time: 2000 // increased time
+        });
+    });
+</script>
 @endsection
