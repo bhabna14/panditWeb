@@ -14,16 +14,24 @@ class PoojaListController extends Controller
 {
     public function poojaitemlist(){
 
-        $Poojaskills = Poojaskill::where('status', 'active')->get();
-        $PujaLists = Poojaitemlists::all();
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+
+        $Poojaskills = Poojaskill::where('status', 'active')->where('pandit_id',$panditId)->get();
+
         $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
 
-        return view('/pandit/poojaitemlist', compact('Poojaskills','PujaLists','Poojaitemlist'));
+        return view('/pandit/poojaitemlist', compact('Poojaskills','Poojaitemlist'));
     }
+
+
     public function singlepoojaitem(Request $request)
     {
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+
         $pooja_id = $request->query('pooja_id');
-        $poojaname = Poojaskill::where('id', $pooja_id)->first();
+        
+        $poojaname = Poojaskill::where('id', $pooja_id)->where('pandit_id',$panditId)->first();
+
         $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
 
         if (!$poojaname) {
@@ -33,9 +41,13 @@ class PoojaListController extends Controller
         // Assuming you want to pass the pooja to a view
         return view('/pandit/poojaitems', compact('poojaname','Poojaitemlist'));
     }
+
+
     public function getPoojaDetails($pooja_id)
     {
-        $poojaItems = PoojaItems::where('pooja_id', $pooja_id)->where('status', 'active')->get();
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+
+        $poojaItems = PoojaItems::where('pooja_id', $pooja_id)->where('status', 'active')->where('pandit_id',$panditId)->get();
     
         if ($poojaItems->isEmpty()) {
             return response()->json(['error' => 'Pooja not found.'], 404);

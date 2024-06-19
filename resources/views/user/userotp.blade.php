@@ -1,10 +1,13 @@
-@extends('pandit.layouts.custom-app')
+@extends('layouts.custom-app')
 
-@section('styles')
-@endsection
+    @section('styles')
 
-@section('class')
-    <div class="bg-primary">
+    @endsection
+
+    @section('class')
+
+	    <div class="bg-primary">
+
     @endsection
 
     @section('content')
@@ -44,7 +47,7 @@
                                                                     {{ session('error') }}
                                                                 </div>
                                                             @endif
-                                                            <form id="loginForm" action="{{ route('check.otp') }}"
+                                                            <form id="loginForm" action="{{ route('check.userotp') }}"
                                                                 method="POST">
                                                                 @csrf
                                                                 <div id="step1">
@@ -71,13 +74,16 @@
     @endsection
 
     @section('scripts')
-        <!-- generate-otp js -->
-        <script src="{{ asset('assets/js/generate-otp.js') }}"></script>
-        <script src="{{ asset('assets/js/login.js') }}"></script>
 
-        <script>
-            setTimeout(function() {
-                document.getElementById('Message').style.display = 'none';
-            }, 3000);
-        </script>
-    @endsection
+    <!-- generate-otp js -->
+    <script src="{{asset('assets/js/generate-otp.js')}}"></script>
+    <script src="{{asset('assets/js/pandit-career.js')}}"></script>
+
+    <script>
+        document.getElementById('nextBtn').addEventListener('click', function() {
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        });
+    </script>
+
+@endsection

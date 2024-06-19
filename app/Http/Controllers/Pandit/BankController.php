@@ -16,7 +16,7 @@ class BankController extends Controller
   
     public function bankdetails()
     {
-        $panditId = Auth::guard('pandits')->user()->pandit_id;
+    $panditId = Auth::guard('pandits')->user()->pandit_id;
 
     $bankdata = Bankdetail::where('pandit_id', $panditId)->first();
 

@@ -10,8 +10,6 @@ use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\PodcastController;
 use App\Http\Controllers\Admin\BannerController;
-
-
 use App\Http\Controllers\Pandit\SkillController;
 use App\Http\Controllers\Pandit\CareerController;
 use App\Http\Controllers\Pandit\PanditController;
@@ -19,16 +17,11 @@ use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\BankController;
 use App\Http\Controllers\Pandit\AddressController;
-
-
-
 use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
-
-
 use App\Http\Controllers\Pandit\PoojaListController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
-
+use App\Http\Controllers\Pandit\PanditLoginController;
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
@@ -38,7 +31,6 @@ Route::controller(userController::class)->group(function() {
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
     Route::get('/puja-details', 'poojadetails')->name('poojadetails');
     Route::get('/pandit-details', 'panditdetails')->name('panditdetails');
-    
     Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/about-us', 'aboutus')->name('aboutus');
     Route::get('/contact', 'contact')->name('contact');
@@ -46,14 +38,19 @@ Route::controller(userController::class)->group(function() {
     Route::get('/manage-address', 'mngaddress')->name('mngaddress');
     Route::get('/add-address', 'addaddress')->name('addaddress');
     Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
-
     Route::get('/order-history', 'orderhistory')->name('orderhistory');
     Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
     Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
     Route::get('/userprofile', 'userprofile')->name('userprofile');
     Route::get('/coupons', 'coupons')->name('coupons');
     Route::get('/login', 'userlogin')->name('userlogin');
-    // Route::get('/demo', 'demo')->name('demo');
+   
+        Route::post('/save-userlogin', 'storeloginData')->name('user.login');
+        Route::get('/userotp','showOtpForm')->name('user.otp');
+        Route::post('/check-otp', 'checkOtp')->name('check.userotp');
+        // Route::post('/user/store-login-data',  'storeLoginData')->name('user.store-login-data');
+        // Route::get('/user/otp',  'showOtpForm')->name('user.otp');
+        // Route::post('/user/check-otp',  'checkOtp')->name('user.check-otp');
 
     Route::post('user/authenticate', 'userauthenticate')->name('userauthenticate');
     Route::post('user/logout', 'userlogout')->name('userlogout');
@@ -192,6 +189,13 @@ Route::prefix('user')->middleware(['user'])->group(function () {
         
     });
 });
+
+Route::controller(PanditLoginController::class)->group(function() {
+    Route::post('/pandit/save-panditlogin', 'storeLoginData')->name('pandit.login');
+    Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
+    Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
+});
+
 /// pandit routes
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
@@ -200,14 +204,14 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
-        Route::get('/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/dashboard', 'index')->name('dashboard')->middleware('auth:pandits');
     });
 });
 
 // pandit profile crud operation
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(ProfileController::class)->group(function() {
-        Route::get('/profiles', 'panditprofiles')->name('panditprofiles');
+        Route::get('/profile', 'panditprofiles')->name('pandit.profile');
         Route::post('/save-profile', 'saveprofile');
         Route::get('/manageprofile', 'manageprofile')->name('manageprofile');
         Route::put('/updateProfile/{id}','updateProfile')->name('updateProfile');
@@ -270,7 +274,7 @@ Route::group(['prefix' => 'pandit'], function () {
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaListController::class)->group(function() {
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
-        Route::get('/poojaitem', 'poojaitem')->name('poojaitem');
+        Route::get('/poojaitem', 'singlepoojaitem');
         Route::post('/save-poojaitemlist', 'savePoojaItemList');
         Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
         Route::delete('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');

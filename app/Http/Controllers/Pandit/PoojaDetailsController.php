@@ -12,13 +12,17 @@ use App\Models\Profile;
 class PoojaDetailsController extends Controller
 {
     public function poojadetails(){
-        $Poojaskills = Poojaskill::where('pooja_status', 'show')->where('status','active')->get();
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+
+        $Poojaskills = Poojaskill::where('pooja_status', 'show')->where('status','active')->where('pandit_id',$panditId)->get();
 
         return view('/pandit/poojadetail', compact('Poojaskills'));
     } 
     public function managepoojadetails(){
 
-        $poojaDetails = Poojadetails::where('status', 'active')->get();
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+
+        $poojaDetails = Poojadetails::where('status', 'active')->where('pandit_id',$panditId)->get();
 
         return view('pandit/managepoojadetails',compact('poojaDetails'));
     }
@@ -84,7 +88,7 @@ class PoojaDetailsController extends Controller
 
     // Redirect based on the save success
     if ($atLeastOneSaved) {
-        return redirect()->back()->with('success', 'Poojas have been updated successfully.');
+        return redirect()->route('poojaitemlist')->with('success', 'Poojas have been updated successfully.');
     } else {
         return redirect()->back()->withErrors(['danger' => 'No new poojas were added.']);
     }

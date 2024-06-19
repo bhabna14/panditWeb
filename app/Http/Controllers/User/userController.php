@@ -103,50 +103,98 @@ class userController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'first_name' => 'required|string|max:250',
-            'last_name' => 'required|string|max:250',
-            'phonenumber' => 'required',
-            'password' => 'required|min:8'
-        ]);
+    // public function store(Request $request)
+    // {
+    //     $request->validate([
+    //         'first_name' => 'required|string|max:250',
+    //         'last_name' => 'required|string|max:250',
+    //         'phonenumber' => 'required',
+    //         'password' => 'required|min:8'
+    //     ]);
 
 
 
-        $user = new User();
-        $mobileNumberExists = User::where('phonenumber', $request->phonenumber)->exists();
-        if($mobileNumberExists){
-            return redirect()->back()->withInput()->withErrors(['login_error' => 'Phone Number is already exist.']);
+    //     $user = new User();
+    //     $mobileNumberExists = User::where('phonenumber', $request->phonenumber)->exists();
+    //     if($mobileNumberExists){
+    //         return redirect()->back()->withInput()->withErrors(['login_error' => 'Phone Number is already exist.']);
 
-        }else{
-            if ($request->has('first_name')) {
-                $user->first_name = $request->first_name;
-            }
-            $user->user_id = $request->userid;
-            $user->name = $request->first_name;
-            $user->last_name = $request->last_name;
+    //     }else{
+    //         if ($request->has('first_name')) {
+    //             $user->first_name = $request->first_name;
+    //         }
+    //         $user->user_id = $request->userid;
+    //         $user->name = $request->first_name;
+    //         $user->last_name = $request->last_name;
 
-            $user->phonenumber = $request->phonenumber;
-            $user->email = $request->phonenumber;
-            $user->password = Hash::make($request->password);
-            $user->role = 'user';
-            $user->status = 'active';
-            $user->application_status = 'pending';
-            $user->added_by = 'user';
-            $user->otp = '234234';
+    //         $user->phonenumber = $request->phonenumber;
+    //         $user->email = $request->phonenumber;
+    //         $user->password = Hash::make($request->password);
+    //         $user->role = 'user';
+    //         $user->status = 'active';
+    //         $user->application_status = 'pending';
+    //         $user->added_by = 'user';
+    //         $user->otp = '234234';
 
-            // Save the user
-            $user->save();
+    //         // Save the user
+    //         $user->save();
 
         
-            return redirect('/')->with('success', 'Registered successfully.');
-        }
+    //         return redirect('/')->with('success', 'Registered successfully.');
+    //     }
 
       
+    // }
+    public function storeLoginData(Request $request)
+    {
+        $data = $request->validate([
+            'userid' => 'required|string',
+            'phonenumber' => 'required|string',
+            'otp' => 'required|integer'  // Ensure OTP is required
+        ]);
+        $user = new User();
+        $user->userid = $request->userid;
+        $user->phonenumber =$request->country_code . $request->phonenumber;
+        $user->otp = $request->otp;
+        $user->save();
+    
+        // Attempt to save the OTP data
+        if ($user->save()) {
+            return redirect()->route('user.otp')->with('success', 'OTP generated successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Failed to save OTP.');
+        }
     }
-
-  
+    public function showOtpForm()
+    {
+        return view('/user/userotp');
+    }
+    
+    public function checkOtp(Request $request)
+    {
+        $request->validate([
+            'otp' => 'required|integer',
+        ]);
+        
+    
+        $inputOtp = $request->input('otp');
+        $user = User::where('otp', $inputOtp)->first();
+    
+        // Check if user exists and the OTP matches
+        if ($user) {
+            // Log the user in
+            Auth::guard('users')->login($user);
+            // Clear the OTP after successful validation
+            $user->otp = null;
+            $user->save();
+    
+            return redirect()->route('myprofile')->with('success', 'Login successful.');
+        } else {
+            // OTP is invalid, redirect back with an error message
+            return redirect()->route('pandit.otp')->with('error', 'Invalid OTP.');
+        }
+    }
+    
    
    public function bookpandit(){
         return view('user/bookpandit');

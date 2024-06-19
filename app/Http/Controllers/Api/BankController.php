@@ -6,17 +6,15 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Profile;
 use App\Models\BankDetail;
+use Illuminate\Support\Facades\Auth;
 
 class BankController extends Controller
 {
     public function saveBankDetails(Request $request)
     {
         // Get the active profile
-        $profile = Profile::where('status', 'active')->first();
-        if (!$profile) {
-            return response()->json(['error' => 'No active profile found.'], 404);
-        }
-        $profileId = $profile->profile_id;
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+
 
         // Validate the request data
         $request->validate([
@@ -30,7 +28,7 @@ class BankController extends Controller
 
         // Update or create the bank details
         $bankdata = BankDetail::updateOrCreate(
-            ['pandit_id' => $profileId],
+            ['pandit_id' => $panditId],
             $request->all()
         );
 

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Poojalist;
 use App\Models\AppBanner;
 use App\Models\Profile;
+use Illuminate\Support\Facades\Auth;
 
 
 class PujaController extends Controller

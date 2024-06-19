@@ -44,7 +44,13 @@ Route::controller(userController::class)->group(function() {
     Route::get('/userprofile', 'userprofile')->name('userprofile');
     Route::get('/coupons', 'coupons')->name('coupons');
     Route::get('/login', 'userlogin')->name('userlogin');
-    // Route::get('/demo', 'demo')->name('demo');
+   
+        Route::post('/save-userlogin', 'storeloginData')->name('user.login');
+        Route::get('/userotp','showOtpForm')->name('user.otp');
+        Route::post('/check-otp', 'checkOtp')->name('check.userotp');
+        // Route::post('/user/store-login-data',  'storeLoginData')->name('user.store-login-data');
+        // Route::get('/user/otp',  'showOtpForm')->name('user.otp');
+        // Route::post('/user/check-otp',  'checkOtp')->name('user.check-otp');
 
     Route::post('user/authenticate', 'userauthenticate')->name('userauthenticate');
     Route::post('user/logout', 'userlogout')->name('userlogout');
@@ -198,7 +204,7 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
-        Route::get('/dashboard', 'index')->name('dashboard')->middleware('auth:pandits');
+        Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');
     });
 });
 

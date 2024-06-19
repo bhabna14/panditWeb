@@ -22,6 +22,7 @@ Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/update/{id}','updateProfile');
 
 });
+
 Route::controller(CareersController::class)->group(function() {
     Route::post('/career/save', 'saveCareer');
 

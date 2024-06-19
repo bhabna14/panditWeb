@@ -79,7 +79,7 @@
                                                 <div class="mb-3 text-center about-team">
                                                     <!-- Wrap the image inside a label -->
                                                     <label for="checkbox{{ $pooja->id }}">
-                                                        <img class="rounded-pill"
+                                                        <img style="border-radius: 10%"
                                                             src="{{ asset('assets/img/' . $pooja->pooja_photo) }}"
                                                             alt="{{ $pooja->pooja_name }}">
                                                     </label>

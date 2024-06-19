@@ -14,6 +14,8 @@ class PanditLogin extends Authenticatable
     protected $fillable = [
         'otp', 'pandit_id', 'mobile_no',
     ];
-
+    protected $hidden = [
+        'otp',
+    ];
     // Add any other model-specific logic here
 }

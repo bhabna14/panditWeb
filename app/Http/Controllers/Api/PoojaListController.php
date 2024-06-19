@@ -8,6 +8,7 @@ use App\Models\Poojaskill;
 use App\Models\Poojaitemlists;
 use App\Models\PoojaItems;
 use App\Models\Profile;
+use Illuminate\Support\Facades\Auth;
 
 
 class PoojaListController extends Controller
@@ -50,26 +51,25 @@ class PoojaListController extends Controller
             'quantity.*' => 'required|integer',
             'unit.*' => 'required|string',
         ]);
-
-        $profile = Profile::where('status', 'active')->first();
-
-        if (!$profile) {
-            return response()->json(['error' => 'No active profile found.'], 404);
+    
+        // Get the authenticated Pandit's ID
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+    
+        if (!$panditId) {
+            return response()->json(['error' => 'No authenticated pandit found.'], 404);
         }
-
-        $profileId = $profile->profile_id;
-
+    
         // Extract data from the request
         $poojaId = $validatedData['pooja_id'];
         $poojaName = $validatedData['pooja_name'];
         $listNames = $validatedData['list_name'];
         $quantities = $validatedData['quantity'];
         $units = $validatedData['unit'];
-
+    
         $duplicates = [];
         $savedItems = [];
         $processedNames = [];
-
+    
         // Process each item in the list
         foreach ($listNames as $key => $listName) {
             // Skip if this pooja_name is already processed within this request
@@ -77,41 +77,42 @@ class PoojaListController extends Controller
                 $duplicates[] = $listName;
                 continue;
             }
-
+    
             // Check if the pooja_name already exists for the given pooja_id and pandit_id in the database
             $existingItem = PoojaItems::where([
-                ['pandit_id', '=', $profileId],
+                ['pandit_id', '=', $panditId],
                 ['pooja_id', '=', $poojaId],
                 ['pooja_name', '=', $poojaName],
                 ['pooja_list', '=', $listName]
             ])->first();
-
+    
             if ($existingItem) {
                 $duplicates[] = $listName;
                 continue; // Skip saving this item and move to the next one
             }
-
+    
             // Save each item to the database
             $poojaItem = new PoojaItems();
-            $poojaItem->pandit_id = $profileId;
+            $poojaItem->pandit_id = $panditId;
             $poojaItem->pooja_id = $poojaId;
             $poojaItem->pooja_name = $poojaName;
             $poojaItem->pooja_list = $listName;
             $poojaItem->list_quantity = $quantities[$key];
             $poojaItem->list_unit = $units[$key];
-
+    
             if ($poojaItem->save()) {
                 $savedItems[] = $listName;
                 $processedNames[] = $listName;
             }
         }
-
+    
         if (!empty($savedItems)) {
             return response()->json(['success' => 'Pooja items saved successfully.', 'saved_items' => $savedItems]);
         } else {
             return response()->json(['error' => 'Failed to save any data.'], 500);
         }
     }
+    
 
     public function deletePoojaItem($id)
     {
@@ -131,23 +132,34 @@ class PoojaListController extends Controller
 
     public function updatePoojaitem(Request $request, $id)
     {
+        // Validate the incoming request data
         $validatedData = $request->validate([
             'list_name' => 'required|string|max:255',
             'list_quantity' => 'required|string|max:255',
             'unit' => 'required|string|max:255',
         ]);
-
-        $poojaItem = PoojaItems::find($id);
+    
+        // Get the authenticated Pandit's ID
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
+    
+        if (!$panditId) {
+            return response()->json(['error' => 'No authenticated pandit found.'], 404);
+        }
+    
+        // Find the Pooja item by ID and ensure it belongs to the authenticated Pandit
+        $poojaItem = PoojaItems::where('pandit_id', $panditId)->find($id);
+    
         if ($poojaItem) {
             $poojaItem->pooja_list = $validatedData['list_name'];
             $poojaItem->list_quantity = $validatedData['list_quantity'];
             $poojaItem->list_unit = $validatedData['unit'];
             $poojaItem->save();
-
+    
             return response()->json(['success' => 'Pooja item updated successfully.']);
         } else {
-            return response()->json(['error' => 'Pooja item not found.'], 404);
+            return response()->json(['error' => 'Pooja item not found or does not belong to the authenticated pandit.'], 404);
         }
     }
+    
 
 }

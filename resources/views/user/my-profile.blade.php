@@ -29,7 +29,7 @@
                     <div class="row">
                       <div class="col-xl-9 col-lg-7 col-md-6 col-sm-12">
                         <div class="text-justified align-items-center">
-                          <h3 class="text-dark font-weight-semibold mb-2 mt-0">Hi, Welcome Back <span class="text-primary">User!</span></h3>
+                          <h3 class="text-dark font-weight-semibold mb-2 mt-0">Hi, Welcome Back <span class="text-primary">{{ Auth::guard('users')->user()->phonenumber}}!</span></h3>
                           {{-- <p class="text-dark tx-14 mb-3 lh-3"> You have used the 85% of free plan storage. Please upgrade your plan to get unlimited storage.</p>
                           <button class="btn btn-primary shadow">Upgrade Now</button> --}}
                         </div>

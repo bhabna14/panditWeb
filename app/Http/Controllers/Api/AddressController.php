@@ -4,19 +4,15 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Profile;
 use App\Models\Addressdetail;
+use Illuminate\Support\Facades\Auth;
 
 class AddressController extends Controller
 {
     public function saveAddress(Request $request)
     {
-        // Get the active profile
-        $profile = Profile::where('status', 'active')->first();
-        if (!$profile) {
-            return response()->json(['error' => 'No active profile found.'], 404);
-        }
-        $profileId = $profile->profile_id;
+        // Get the authenticated pandit_id
+        $panditId = Auth::guard('pandits')->user()->pandit_id;
 
         // Validate the request data
         $request->validate([
@@ -26,24 +22,46 @@ class AddressController extends Controller
             'prestate' => 'required|string|max:255',
             'precountry' => 'required|string|max:255',
             'prepincode' => 'required|string|max:10',
-            'prelandmark' => 'required|string|max:255',
+            'prelandmark' => 'nullable|string|max:255', // Changed to nullable
 
             'peraddress' => 'required|string|max:255',
             'perpost' => 'required|string|max:255',
-            'perdistri' => 'required|string|max:255',
+            'perdistrict' => 'required|string|max:255',
             'perstate' => 'required|string|max:255',
             'percountry' => 'required|string|max:255',
             'perpincode' => 'required|string|max:10',
-            'perlandmark' => 'required|string|max:255',
+            'perlandmark' => 'nullable|string|max:255', // Changed to nullable
         ]);
 
+        // Prepare data for update or create
+        $addressData = [
+            'preaddress' => $request->preaddress,
+            'prepost' => $request->prepost,
+            'predistrict' => $request->predistrict,
+            'prestate' => $request->prestate,
+            'precountry' => $request->precountry,
+            'prepincode' => $request->prepincode,
+            'prelandmark' => $request->prelandmark,
+
+            'peraddress' => $request->peraddress,
+            'perpost' => $request->perpost,
+            'perdistrict' => $request->perdistrict,
+            'perstate' => $request->perstate,
+            'percountry' => $request->percountry,
+            'perpincode' => $request->perpincode,
+            'perlandmark' => $request->perlandmark,
+        ];
+
         // Update or create the address details
-        $addressdata = Addressdetail::updateOrCreate(
-            ['pandit_id' => $profileId],
-            $request->all()
+        $addressDetail = Addressdetail::updateOrCreate(
+            ['pandit_id' => $panditId],
+            $addressData
         );
 
         // Return a JSON response
-        return response()->json(['success' => 'Address details saved successfully!', 'data' => $addressdata], 200);
+        return response()->json([
+            'success' => 'Address details saved successfully!',
+            'data' => $addressDetail
+        ], 200);
     }
 }

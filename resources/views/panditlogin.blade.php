@@ -84,9 +84,8 @@
         <script src="{{ asset('assets/js/login.js') }}"></script>
 
         <script>
-            document.getElementById('nextBtn').addEventListener('click', function() {
-                document.getElementById('step1').style.display = 'none';
-                document.getElementById('step2').style.display = 'block';
-            });
+            setTimeout(function() {
+                document.getElementById('Message').style.display = 'none';
+            }, 3000);
         </script>
     @endsection

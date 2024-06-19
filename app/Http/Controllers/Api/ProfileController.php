@@ -8,28 +8,35 @@ use App\Models\Career;
 use App\Models\IdcardDetail;
 use App\Models\EduDetail;
 use App\Models\VedicDetail;
- 
+use Illuminate\Support\Facades\Auth;
+
 class ProfileController extends Controller
 {
   
     public function saveProfile(Request $request)
     {
-       
+        // Retrieve the authenticated user
+        $user = Auth::guard('pandits')->user();
+    
+        if (!$user) {
+            return response()->json(['error' => 'No authenticated user found.'], 401);
+        }
+    
+        // Create a new Profile instance
         $profile = new Profile();
-        $profile->profile_id = $request->profile_id;
+        $profile->pandit_id = $user->pandit_id; // Use the authenticated user's ID
         $profile->title = $request->title;
         $profile->name = $request->name;
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
-        // $profile->language = $request->language;
- 
+    
+        // Handle the language input
         $pandilang = $request->input('language');
- 
-            $langString = implode(',', $pandilang);
-            $profile->language = $langString;
- 
+        $langString = implode(',', $pandilang);
+        $profile->language = $langString;
+    
         // Handle profile photo upload if provided
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
@@ -38,15 +45,24 @@ class ProfileController extends Controller
             $file->move(public_path('uploads/profile_photo'), $filename);
             $profile->profile_photo = $filePath;
         }
- 
+    
+        // Save the profile
         $profile->save();
- 
+    
+        // Return a success response
         return response()->json(['message' => 'Profile created successfully', 'user' => $profile], 201);
-       
     }
+    
 
-    public function updateProfile(Request $request, $id)
+    public function updateProfile(Request $request)
     {
+        // Retrieve the authenticated user
+        $user = Auth::guard('pandits')->user();
+    
+        if (!$user) {
+            return response()->json(['error' => 'No authenticated user found.'], 401);
+        }
+    
         // Validate the request data
         $request->validate([
             'title' => 'required|string|max:255',
@@ -56,9 +72,14 @@ class ProfileController extends Controller
             'language.*' => 'string',
             'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-
-        $profile = Profile::findOrFail($id);
-
+    
+        // Find the profile belonging to the authenticated user
+        $profile = Profile::where('pandit_id', $user->id)->first();
+    
+        if (!$profile) {
+            return response()->json(['error' => 'Profile not found.'], 404);
+        }
+    
         // Update the scalar fields
         $profile->title = $request->title;
         $profile->name = $request->name;
@@ -66,7 +87,7 @@ class ProfileController extends Controller
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
-
+    
         $pandilang = $request->input('language', []);
         if (is_array($pandilang)) {
             $langString = implode(',', $pandilang);
@@ -74,7 +95,7 @@ class ProfileController extends Controller
             $langString = '';
         }
         $profile->language = $langString;
-
+    
         if ($request->hasFile('profile_photo')) {
             $file = $request->file('profile_photo');
             $filename = time() . '.' . $file->getClientOriginalExtension();
@@ -82,11 +103,12 @@ class ProfileController extends Controller
             $file->move(public_path('uploads/profile_photo'), $filename);
             $profile->profile_photo = $filePath;
         }
-
+    
         if ($profile->save()) {
             return response()->json(['success' => true, 'message' => 'Data updated successfully.'], 200);
         } else {
             return response()->json(['success' => false, 'message' => 'Failed to update data.'], 500);
         }
     }
+     
 }
