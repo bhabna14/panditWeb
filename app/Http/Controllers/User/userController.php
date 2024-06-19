@@ -147,18 +147,31 @@ class userController extends Controller
     // }
     public function storeLoginData(Request $request)
     {
+        // Validate incoming request data
         $data = $request->validate([
             'userid' => 'required|string',
             'phonenumber' => 'required|string',
-            'otp' => 'required|integer'  // Ensure OTP is required
+            'otp' => 'required|integer'
         ]);
-        $user = new User();
-        $user->userid = $request->userid;
-        $user->phonenumber =$request->country_code . $request->phonenumber;
-        $user->otp = $request->otp;
-        $user->save();
-    
-        // Attempt to save the OTP data
+
+        // Concatenate country code with phone number if applicable
+        $phonenumber = $request->input('country_code') . $request->input('phonenumber');
+
+        // Check if a user with this phone number already exists
+        $user = User::where('phonenumber', $phonenumber)->first();
+
+        if ($user) {
+            // User exists, update the OTP
+            $user->otp = $request->input('otp');
+        } else {
+            // User doesn't exist, create a new one
+            $user = new User();
+            $user->userid = $request->input('userid');
+            $user->phonenumber = $phonenumber;
+            $user->otp = $request->input('otp');
+        }
+
+        // Save the user (either update or create)
         if ($user->save()) {
             return redirect()->route('user.otp')->with('success', 'OTP generated successfully.');
         } else {
@@ -178,6 +191,7 @@ class userController extends Controller
         
     
         $inputOtp = $request->input('otp');
+        
         $user = User::where('otp', $inputOtp)->first();
     
         // Check if user exists and the OTP matches
@@ -191,10 +205,41 @@ class userController extends Controller
             return redirect()->route('myprofile')->with('success', 'Login successful.');
         } else {
             // OTP is invalid, redirect back with an error message
-            return redirect()->route('pandit.otp')->with('error', 'Invalid OTP.');
+            return redirect()->route('user.otp')->with('error', 'Invalid OTP.');
         }
     }
     
+    // public function checkOtp(Request $request)
+    // {
+    //     $request->validate([
+    //         'otp' => 'required|integer',
+    //     ]);
+    
+    //     $user = Auth::guard('users')->user();
+    
+    //     // Check if the user is authenticated
+    //     if (!$user) {
+    //         return redirect()->route('user.login')->with('error', 'You must be logged in to verify OTP.');
+    //     }
+    
+    //     $userid = $user->userid;
+    //     $inputOtp = $request->input('otp');
+    
+        
+    
+    //     // If profile exists, validate OTP
+    //     if ($user->otp == $inputOtp) {
+    //         // Clear the OTP after successful validation
+    //         $user->otp = null;
+    //         $user->save();
+    
+    //         // Redirect to dashboard
+    //         return redirect()->route('myprofile')->with('success', 'Login successful.');
+    //     } else {
+    //         // OTP is invalid, redirect back with an error message
+    //         return redirect()->route('user.otp')->with('error', 'Invalid OTP.');
+    //     }
+    // }
    
    public function bookpandit(){
         return view('user/bookpandit');

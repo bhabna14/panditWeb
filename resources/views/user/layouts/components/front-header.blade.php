@@ -101,42 +101,44 @@
         <div class="d-flex items-center">
           <div class="d-flex items-center ml-20 is-menu-opened-hide md:d-none">
             <div class="searchMenu-loc js-form-dd js-liverSearch">
-              @auth
-                  <div data-x-dd-click="searchMenu-loc">
-                      <div class="button px-10 fw-300 -blue-1 h-50" style="font-size: 15px; color: #000; text-transform: uppercase;">
-                          <i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i>
-                          {{ Auth::user()->name }} <i class="icon-chevron-sm-down text-7 ml-10"></i>
-                      </div>
+              @authguard('users')
+              <div data-x-dd-click="searchMenu-loc">
+                  <div class="button px-10 fw-300 -blue-1 h-50" style="font-size: 15px; color: #000; text-transform: uppercase;">
+                      <i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i>
+                      {{ Auth::guard('users')->user()->phonenumber }} <i class="icon-chevron-sm-down text-7 ml-10"></i>
                   </div>
-                  <div class="searchMenu-loc__field shadow-2 js-popup-window" data-x-dd="searchMenu-loc" data-x-dd-toggle="-is-active">
-                      <div class="bg-white sm:px-0 sm:py-15 rounded-4 text-center">
-                          <div class="y-gap-5 js-results">
-                              <div class="text-center js-search-option">
-                                  <a href="{{ url('my-profile') }}">My Profile</a>
-                              </div>
-                              <div class="text-center js-search-option">
-                                  <a href="{{ url('manage-address') }}">Manage Address</a>
-                              </div>
-                              <div class="text-center js-search-option">
-                                  <a href="{{ url('order-history') }}">Orders</a>
-                              </div>
-                              <div class="text-center js-search-option">
-                                  <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
-                                  <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                                      @csrf
-                                  </form>
-                              </div>
+              </div>
+              <div class="searchMenu-loc__field shadow-2 js-popup-window" data-x-dd="searchMenu-loc" data-x-dd-toggle="-is-active">
+                  <div class="bg-white sm:px-0 sm:py-15 rounded-4 text-center">
+                      <div class="y-gap-5 js-results">
+                          <div class="text-center js-search-option">
+                              <a href="{{ url('my-profile') }}">My Profile</a>
+                          </div>
+                          <div class="text-center js-search-option">
+                              <a href="{{ url('manage-address') }}">Manage Address</a>
+                          </div>
+                          <div class="text-center js-search-option">
+                              <a href="{{ url('order-history') }}">Orders</a>
+                          </div>
+                          <div class="text-center js-search-option">
+                              <a href="{{ route('userlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                              <form id="logout-form" action="{{ route('userlogout') }}" method="POST" style="display: none;">
+                                  @csrf
+                              </form>
                           </div>
                       </div>
                   </div>
+              </div>
               @else
-                  <div data-x-dd-click="searchMenu-loc">
-                      <a href="{{ route('userlogin') }}"><div class="button px-10 fw-300 -blue-1 h-50" style="font-size: 15px; color: #000; text-transform: uppercase;">
+              <div data-x-dd-click="searchMenu-loc">
+                  <a href="{{ route('userlogin') }}">
+                      <div class="button px-10 fw-300 -blue-1 h-50" style="font-size: 15px; color: #000; text-transform: uppercase;">
                           <i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i>Login
-                      </div></a>
-                  </div>
-                 
-              @endauth
+                      </div>
+                  </a>
+              </div>
+              @endauthguard
+
           </div>
           
               {{-- <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a> --}}
