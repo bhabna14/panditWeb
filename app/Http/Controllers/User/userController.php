@@ -13,6 +13,8 @@ use App\Models\IdcardDetail;
 use App\Models\Poojalist;
 use App\Models\UserAddress;
 use App\Models\Profile;
+use App\Models\Poojadetails;
+
 
 use PDF;
 use DB;
@@ -256,7 +258,13 @@ class userController extends Controller
     public function poojadetails($slug)
     {
         $pooja = Poojalist::where('slug', $slug)->firstOrFail();
-        return view('user/puja-details', compact('pooja'));
+
+        // Fetch the related Poojadetails items along with the ProfileInfo
+        $pandit_pujas = Poojadetails::with('profile')
+            ->where('pooja_id', $pooja->id)
+            ->get();
+
+        return view('user.puja-details', compact('pooja', 'pandit_pujas'));
     }
     // public function poojadetails(){
     //     return view('user/puja-details');

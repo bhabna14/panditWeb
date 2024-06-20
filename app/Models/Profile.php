@@ -25,4 +25,8 @@ class Profile extends Model
         'language',
         // Add more fillable fields as needed
     ];
+    public function poojadetails()
+    {
+        return $this->hasMany(Poojadetails::class, 'pandit_id');
+    }
 }

@@ -10,5 +10,13 @@ class Poojadetails extends Model
     use HasFactory;
     protected $table = "pandit_poojadetails";
     protected $fillable = ['pandit_id', 'pooja_id', 'pooja_name','pooja_photo','pooja_fee','pooja_video','pooja_duration','pooja_done'];
+    public function poojalist()
+    {
+        return $this->belongsTo(Poojalist::class, 'pooja_id');
+    }
 
+    public function profile()
+    {
+        return $this->belongsTo(Profile::class, 'pandit_id');
+    }
 }

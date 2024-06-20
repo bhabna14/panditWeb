@@ -143,7 +143,7 @@
           
               {{-- <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a> --}}
               {{-- <a href="http://127.0.0.1:8000/login" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-left: 20px;width: 100px;background-color: #c80100 !important;justify-content: left;align-items: left;/* align-items: end; */"><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Login</a> --}}
-              <a href="http://127.0.0.1:8000/panditlogin" class="button px-10 fw-300 -blue-1 h-50 " style="   font-size: 15px;
+              <a href="{{url('pandit/panditlogin')}}" class="button px-10 fw-300 -blue-1 h-50 " style="   font-size: 15px;
     color: #000;
     text-transform: uppercase;" ><i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
           
