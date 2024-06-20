@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Poojalist;
 use App\Models\Poojaitemlists;
 use App\Models\PoojaUnit;
+use Illuminate\Support\Str;
 
 
 class PujaController extends Controller
@@ -35,6 +36,7 @@ class PujaController extends Controller
           
        
         $pujadata->pooja_name = $request->pooja_name;
+        $pujadata->slug = Str::slug($request->pooja_name, '-');
         $pujadata->short_description = $request->short_description;
         $pujadata->pooja_date = $request->pooja_date;
         $pujadata->description  = $request->description ;
@@ -66,6 +68,7 @@ class PujaController extends Controller
           }
 
           $pujadata->pooja_name = $request->pooja_name;
+          $pujadata->slug = Str::slug($request->pooja_name, '-');
           $pujadata->short_description = $request->short_description;
           $pujadata->pooja_date = $request->pooja_date;
           $pujadata->description  = $request->description ;
