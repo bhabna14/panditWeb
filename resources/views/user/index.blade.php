@@ -55,7 +55,9 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="upcoming-main-heading">
-                        <h1>Upcoming Events</h1>
+                        <h1>Upcoming Pooja Calendar</h1>
+                        <p class="text-white">Discover and book upcoming pujas effortlessly with our online pandit booking service. Join us for spiritual ceremonies and secure your pandit today for a seamless experience.
+                        </p>
                     </div>
                 </div>
                 <div class="col-md-12">
