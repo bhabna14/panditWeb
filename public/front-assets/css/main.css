@@ -4124,11 +4124,11 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .tabs.-underline-2 .tabs__controls .tabs__button:hover {
-  color: var(--color-blue-1) !important;
+  color: #B90B0B !important;
 }
 
 .tabs.-underline-2 .tabs__controls .tabs__button.is-tab-el-active {
-  color: var(--color-blue-1) !important;
+  color: #B90B0B !important;
 }
 
 .tabs.-underline-2 .tabs__controls .tabs__button.is-tab-el-active::after {
@@ -13558,9 +13558,11 @@ span.rating {
 .puja-heading-sec i {
   color: #B90B0B;
   margin-right: 10px;
+  font-weight: bold;
 }
 .puja-heading-sec span{
   color:#B90B0B;
+  font-weight: bold;
 }
 .pandit-profile img {
   width: 100%;

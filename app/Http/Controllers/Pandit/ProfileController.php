@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Pandit;
 
 use App\Models\Career;
 use App\Models\Profile;
-use App\Models\Pandititle;
+use App\Models\PanditTitle;
 use App\Models\PanditVedic;
 use App\Models\PanditIdCard;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ class ProfileController extends Controller
      //Pandit Profile section
      public function panditprofiles(){
         // Fetch the profile of the authenticated Pandit
-        $pandititle = Pandititle::where('status', 'active')->pluck('pandit_title');
+        $pandititle = PanditTitle::where('status', 'active')->pluck('pandit_title');
 
         $languages = [
             'English','Odia','Hindi','Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 'Kashmiri',

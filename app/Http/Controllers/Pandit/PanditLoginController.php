@@ -4,7 +4,6 @@ namespace App\Http\Controllers\pandit;
 
 use App\Models\PanditLogin;
 use App\Models\Profile;
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +16,7 @@ class PanditLoginController extends Controller
     {
         // Validate the input data
         $data = $request->validate([
-            'mobile_no' => 'required|string|regex:/^\d{13}$/',
+            'mobile_no' => 'required|string|regex:/^\d{10}$/',
         ], [
             'mobile_no.regex' => 'Mobile number must be exactly 10 digits.',
         ]);
