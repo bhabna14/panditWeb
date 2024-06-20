@@ -19,7 +19,7 @@
             <div class="puja-heading-sec">
                 <h5>{{ $pooja->pooja_name }}</h5>
                 <p>{{$pooja->short_description}}</p>
-                <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>{{$pooja->pooja_date}}</p>
+                <span><i class="fa fa-calendar-check-o" aria-hidden="true"></i>{{$pooja->pooja_date}}</span>
 
             </div>
            </div>

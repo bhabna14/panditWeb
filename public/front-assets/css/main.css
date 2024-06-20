@@ -669,7 +669,7 @@ p.blockquote:after {
 }
 .poja-details-img img{
     /* width: 62%; */
-    margin-top: 39px;
+    margin-top: 13px;
 }
 /* 
 .overlay {
@@ -13550,6 +13550,17 @@ span.rating {
 } */
 .puja-heading-sec {
   margin-top: 20px;
+}
+.puja-heading-sec h5 {
+  color: #B90B0B;
+  text-transform: capitalize;
+}
+.puja-heading-sec i {
+  color: #B90B0B;
+  margin-right: 10px;
+}
+.puja-heading-sec span{
+  color:#B90B0B;
 }
 .pandit-profile img {
   width: 100%;
