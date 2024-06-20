@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\BankController;
 use App\Http\Controllers\Api\PujaController;
-use App\Http\Controllers\api\LoginController;
+use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\CareersController;
 use App\Http\Controllers\Api\PodcastController;
