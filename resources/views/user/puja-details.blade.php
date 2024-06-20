@@ -4,8 +4,8 @@
 @endsection
 
 @section('content')
-<section class="pt-40 pb-40 single-pooja">
-</section>
+{{-- <section class="pt-40 pb-40 single-pooja">
+</section> --}}
 <section class="puja-details-sec">
     <div class="container">
       
