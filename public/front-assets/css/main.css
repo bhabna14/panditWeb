@@ -653,6 +653,9 @@ p.blockquote:after {
   border-radius: 26px;
   letter-spacing: 1px;
 }
+.event-info a:hover{
+  color:#fff !important;
+}
 .upcoming-event:hover{
   box-shadow: 0 15px 25px rgba(253, 143, 143, 0.4);
   cursor: pointer;

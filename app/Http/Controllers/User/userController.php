@@ -251,11 +251,16 @@ class userController extends Controller
      $allpoojas = Poojalist::where('status', 'active')
                         ->orderBy('pooja_date', 'asc')
                         ->paginate(6);
-    return view('user/poojalist', compact('allpoojas'));
+        return view('user/poojalist', compact('allpoojas'));
     }
-    public function poojadetails(){
-        return view('user/puja-details');
+    public function poojadetails($slug)
+    {
+        $pooja = Poojalist::where('slug', $slug)->firstOrFail();
+        return view('user/puja-details', compact('pooja'));
     }
+    // public function poojadetails(){
+    //     return view('user/puja-details');
+    // }
     public function panditdetails(){
         return view('user/pandit-details');
     }

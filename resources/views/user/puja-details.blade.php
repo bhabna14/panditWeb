@@ -10,10 +10,19 @@
     <div class="container">
       
         <div class="row">
+           <div class="col-md-6">
+              <div class="ppoja-details-img">
+                <img src="{{asset('assets/img/'.$pooja->pooja_photo)}}" alt="">
+              </div>
+           </div>
+           <div class="col-md-6">
             <div class="puja-heading-sec">
-                <h5>Baladevjew Pooja</h5>
-                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellat cum reiciendis ab ipsum omnis non repudiandae quo sequi unde dicta accusantium impedit praesentium, sint doloremque? Sit reprehenderit sequi nihil in.</p>
+                <h5>{{ $pooja->pooja_name }}</h5>
+                <p>{{$pooja->short_description}}</p>
+                <p><i class="fa fa-calendar-check-o" aria-hidden="true"></i>{{$pooja->pooja_date}}</p>
+
             </div>
+           </div>
         </div>
         <div class="row">
             <div class="tabs -underline-2 pt-20 lg:pt-40 sm:pt-30 js-tabs">
