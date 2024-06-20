@@ -50,11 +50,10 @@
                                                               
                                                                 <div id="step1">
                                                                     <div class="form-group">
-                                                                        <label for="mobile_no">Phone Number</label>
-                                                                        <input type="text" class="form-control"
-                                                                            id="mobile_no" name="mobile_no"
-                                                                            placeholder="Enter your Phone Number"
-                                                                            value="+91">
+                                                                       <div style="display: flex; align-items: center;">
+                                                                            <input type="text" class="form-control" id="" name="" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;">
+                                                                            <input type="number" class="form-control" id="mobile_no" name="mobile_no" placeholder="Enter your phone number" style="margin-left: 5px; flex: 1;">
+                                                                        </div>
                                                                     </div>
                                                                     <input type="submit" class="btn btn-primary"
                                                                         value="Generate OTP">
