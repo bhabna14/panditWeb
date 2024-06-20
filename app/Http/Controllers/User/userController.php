@@ -259,7 +259,7 @@ class userController extends Controller
     {
         $pooja = Poojalist::where('slug', $slug)->firstOrFail();
 
-        // Fetch the related Poojadetails items along with the ProfileInfo
+        // Fetch the related Poojadetails items along with the Profile
         $pandit_pujas = Poojadetails::with('profile')
             ->where('pooja_id', $pooja->id)
             ->get();

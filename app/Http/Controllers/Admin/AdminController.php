@@ -178,6 +178,7 @@ class AdminController extends Controller
         $profile->profile_id = $request->profile_id;
         $profile->title = $request->title;
         $profile->name = $request->name;
+        $profile->slug = Str::slug($request->name, '-');
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;

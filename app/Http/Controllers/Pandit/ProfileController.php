@@ -40,6 +40,7 @@ class ProfileController extends Controller
 
         $profile->title = $request->title;
         $profile->name = $request->name;
+        $profile->slug = Str::slug($request->name, '-');
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
@@ -108,6 +109,7 @@ class ProfileController extends Controller
         // Update the scalar fields
         $profile->title = $request->title;
         $profile->name = $request->name;
+        $profile->slug = Str::slug($request->name, '-');
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;

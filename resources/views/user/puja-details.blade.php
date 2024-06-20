@@ -16,6 +16,7 @@
             <div class="puja-heading-sec">
                 <h5>{{ $pooja->pooja_name }}</h5>
                 <p>{{ $pooja->short_description }}</p>
+               
                 <span><i class="fa fa-calendar-check-o" aria-hidden="true"></i>{{ $pooja->pooja_date }}</span>
             </div>
            </div>
@@ -34,33 +35,33 @@
                   <div class="tabs__pane -tab-item-1 is-tab-el-active">
                     <div class="row" data-aos="fade-up">
                         @foreach ($pandit_pujas as $pandit_puja)
-                            @if($pandit_puja->pandit_id)
-                                <div class="col-md-4 pandit-card">
-                                    <a href="{{ url('pandit-details') }}">
-                                        <div class="card" data-state="#pooja">
-                                            <div class="card-header">
-                                                <img class="card-pooja" src="{{ asset('front-assets/img/avatars/pandit4.jpeg') }}" alt="image">
+                        @if($pandit_puja->profile)
+                            <div class="col-md-4 pandit-card">
+                                <a href="{{ url('pandit-details') }}">
+                                    <div class="card" data-state="#pooja">
+                                        <div class="card-header">
+                                            <img class="card-pooja" src="{{asset($pandit_puja->profile->profile_photo)}}" alt="image">
+                                        </div>
+                                        <div class="pooja-head row">
+                                            <div class="col-md-8 col-7">
+                                                <h5>{{ $pandit_puja->profile->name }}</h5>
+                                                
                                             </div>
-                                            <div class="pooja-head row">
-                                                <div class="col-md-8 col-7">
-                                                    <h5>{{ $pandit_puja->pandit_id }}</h5>
-                                                    <p>Lorem ipsum dolor sit amet consectetur.</p>
-                                                </div>
-                                                <div class="col-md-4 col-5 text-right">
-                                                    <span class="rating">4.4</span>
-                                                    <p>₹3000</p>
-                                                    <p>2 hrs</p>
-                                                </div>
+                                            <div class="col-md-4 col-5 text-right">
+                                                <span class="rating">4.4</span>
+                                                <p>₹{{ $pandit_puja->pooja_fee }}</p>
+                                                <p>{{ $pandit_puja->pooja_duration }} hrs</p>
                                             </div>
                                         </div>
-                                    </a>
-                                </div>
-                            @else
-                                <div class="col-md-4 pandit-card">
-                                    <p>No profile info available for this pandit.</p>
-                                </div>
-                            @endif
-                        @endforeach
+                                    </div>
+                                </a>
+                            </div>
+                        @else
+                            <div class="col-md-4 pandit-card">
+                                <p>No profile info available for this pandit.</p>
+                            </div>
+                        @endif
+                    @endforeach
                     </div>
                   </div>
                   <div class="tabs__pane -tab-item-2">
