@@ -65,9 +65,12 @@
                                                                     
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
-                                                                            <label for="exampleInputEmail1">Title</label>
-                                                                            <input type="text" class="form-control" id="title" name="title" placeholder="Enter Title" required>
-
+                                                                            <label for="title">Title</label>
+                                                                            <select class="form-control" id="title" name="title" required>
+                                                                                @foreach ($pandititle as $title)
+                                                                                    <option value="{{ $title }}">{{ $title }}</option>
+                                                                                @endforeach
+                                                                            </select>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-md-6">

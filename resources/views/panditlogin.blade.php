@@ -47,10 +47,7 @@
                                                             <form id="loginForm" action="{{ route('pandit.login') }}"
                                                                 method="POST">
                                                                 @csrf
-                                                                <input type="hidden" class="form-control" id="otp"
-                                                                    name="otp" value="{{ rand(1000, 9999) }}">
-                                                                <input type="hidden" class="form-control" id="pandit_id"
-                                                                    name="pandit_id" value="PANDIT{{ rand(9, 99999) }}">
+                                                              
                                                                 <div id="step1">
                                                                     <div class="form-group">
                                                                         <label for="mobile_no">Phone Number</label>

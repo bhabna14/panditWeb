@@ -2,20 +2,26 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\BankController;
+use App\Http\Controllers\Api\PujaController;
+use App\Http\Controllers\api\LoginController;
+use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\CareersController;
 use App\Http\Controllers\Api\PodcastController;
-use App\Http\Controllers\Api\PujaController;
+use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\PoojaListController;
 use App\Http\Controllers\Api\PoojaSkillController;
 use App\Http\Controllers\Api\PoojaDetailsController;
-use App\Http\Controllers\Api\PoojaListController;
-use App\Http\Controllers\Api\BankController;
-use App\Http\Controllers\Api\AddressController;
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::controller(LoginController::class)->group(function() {
+    Route::post('/store-login-data','storeLoginData');
+    Route::post('/check-otp','checkOtp');
+});
+
 
 Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/save', 'saveProfile');

@@ -2,25 +2,29 @@
 
 namespace App\Http\Controllers\Pandit;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Profile;
 use App\Models\Career;
-use App\Models\PanditIdCard;
-use App\Models\PanditEducation;
+use App\Models\Profile;
+use App\Models\Pandititle;
 use App\Models\PanditVedic;
+use App\Models\PanditIdCard;
+use Illuminate\Http\Request;
+use App\Models\PanditEducation;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
      //Pandit Profile section
      public function panditprofiles(){
+        // Fetch the profile of the authenticated Pandit
+        $pandititle = Pandititle::where('status', 'active')->pluck('pandit_title');
+
         $languages = [
             'English','Odia','Hindi','Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 'Kashmiri',
             'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi',
             'Sanskrit', 'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
         ];
-        return view("panditprofile", compact('languages'));
+        return view("panditprofile", compact('languages','pandititle'));
     }
 
     public function saveprofile(Request $request)
@@ -61,6 +65,7 @@ class ProfileController extends Controller
             return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
         }
     }
+
        public function manageprofile()
     {
         // Get the authenticated user's pandit_id

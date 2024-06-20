@@ -13,39 +13,50 @@ use App\Http\Controllers\Controller;
 class PanditLoginController extends Controller
 {
     
-        public function storeLoginData(Request $request)
-        {
-            $data = $request->validate([
-                'otp' => 'required|integer',
-                'pandit_id' => 'required|string',
-                'mobile_no' => 'required|string',
-            ]);
+    public function storeLoginData(Request $request)
+    {
+        // Validate the input data
+        $data = $request->validate([
+            'mobile_no' => 'required|string|regex:/^\d{13}$/',
+        ], [
+            'mobile_no.regex' => 'Mobile number must be exactly 10 digits.',
+        ]);
     
-            // Check if the mobile number already exists
-            $user = PanditLogin::where('mobile_no', $data['mobile_no'])->first();
+        // Retrieve the user by mobile number
+        $user = PanditLogin::where('mobile_no', $data['mobile_no'])->first();
     
-            if ($user) {
-                // Mobile number exists, update OTP only
-                $user->otp = $data['otp'];
-                if ($user->save()) {
-                    // Authenticate the user
-                    Auth::guard('pandits')->login($user);
-                    return redirect()->route('pandit.otp')->with('success', 'OTP updated successfully.');
-                } else {
-                    return redirect()->back()->with('error', 'Failed to update OTP.');
-                }
+        // Generate a new OTP and pandit_id
+        $otp = rand(1000, 9999);
+        $panditId = 'PANDIT' . rand(10000, 99999);
+    
+        if ($user) {
+            // Update the existing user's OTP and pandit_id
+            $user->otp = $otp;
+            $user->pandit_id = $panditId;
+    
+            // Save the user and handle potential save errors
+            if ($user->save()) {
+                Auth::guard('pandits')->login($user);
+                return redirect()->route('pandit.otp')->with('success', 'OTP updated successfully.');
             } else {
-                // Mobile number does not exist, create new record
-                $user = PanditLogin::create($data);
-                if ($user) {
-                    // Authenticate the user
-                    Auth::guard('pandits')->login($user);
-                    return redirect()->route('pandit.otp')->with('success', 'OTP generated successfully.');
-                } else {
-                    return redirect()->back()->with('error', 'Failed to save OTP.');
-                }
+                return redirect()->back()->with('error', 'Failed to update OTP.');
+            }
+        } else {
+            // Create a new user with the provided data, OTP, and pandit_id
+            $data['otp'] = $otp;
+            $data['pandit_id'] = $panditId;
+    
+            $user = PanditLogin::create($data);
+    
+            // Save the user and handle potential save errors
+            if ($user) {
+                Auth::guard('pandits')->login($user);
+                return redirect()->route('pandit.otp')->with('success', 'OTP generated successfully.');
+            } else {
+                return redirect()->back()->with('error', 'Failed to save OTP.');
             }
         }
+    }
     
         public function checkOtp(Request $request)
         {
