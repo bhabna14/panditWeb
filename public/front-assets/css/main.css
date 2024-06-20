@@ -667,7 +667,10 @@ p.blockquote:after {
   color: #fff;
   letter-spacing: 1px;
 }
-
+.poja-details-img img{
+    width: 62%;
+    margin-top: 39px;
+}
 /* 
 .overlay {
   position: absolute;

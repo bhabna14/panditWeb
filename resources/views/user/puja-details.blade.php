@@ -11,7 +11,7 @@
       
         <div class="row">
            <div class="col-md-6">
-              <div class="ppoja-details-img">
+              <div class="poja-details-img text-center">
                 <img src="{{asset('assets/img/'.$pooja->pooja_photo)}}" alt="">
               </div>
            </div>
