@@ -242,8 +242,10 @@
   border-radius: 5px;
 }
 .pandit-front-sec-text h3 {
-  font-size: 21px;
-  margin-top: 13px;
+  font-size: 20px;
+  margin-top: 1px;
+  text-transform: capitalize !important;
+  /* text-align: -webkit-left; */
 }
 .pandit-front-sec-text span {
   background-color: #B90B0B;

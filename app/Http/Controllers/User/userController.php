@@ -12,7 +12,7 @@ use App\Models\Addressdetail;
 use App\Models\IdcardDetail;
 use App\Models\Poojalist;
 use App\Models\UserAddress;
-
+use App\Models\Profile;
 
 use PDF;
 use DB;
@@ -34,7 +34,10 @@ class userController extends Controller
                          })
                         ->take(8)
                         ->get();
-        return view("user/index" , compact('upcomingPoojas','otherpoojas'));
+        $pandits = Profile::where('pandit_status', 'accepted')
+                        ->take(6)
+                        ->get();
+        return view("user/index" , compact('upcomingPoojas','otherpoojas','pandits'));
     }
 
     public function userlogin(){

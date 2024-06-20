@@ -116,115 +116,30 @@
             </div>
 
             <div class="row mb-30" data-aos="fade-up" data-aos-delay="500">
+              @foreach ($pandits as $pandit)
                 <div class="col-md-4 col-12 mb-20">
                   <div class="row">
                     <div class="col-md-4 col-4">
                         <div class="pandit-front-sec-img">
-                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
+                          <img class="rounded-lg" src="{{asset($pandit->profile_photo)}}" alt="">
                         </div>
                       
                     </div>
                     <div class="col-md-8 col-8">
                         <div class="pandit-front-sec-text">
-                            <h3>P.Bibhu Panda</h3>
+                            <h3>{{$pandit->name}}</h3>
                             <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
                         </div>
                     </div>
                   </div>
                   
                 </div>
-                <div class="col-md-4 col-12 mb-20">
-                    <div class="row">
-                      <div class="col-md-4 col-4">
-                        <div class="pandit-front-sec-img">
-                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
-                        </div>
-                        
-                      </div>
-                      <div class="col-md-8 col-8">
-                        <div class="pandit-front-sec-text">
-                            <h3>P.Bibhu Panda</h3>
-                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
-                        </div>
-                      </div>
-                    </div>
-                  
-                </div>
-                <div class="col-md-4 col-12 mb-20">
-                    <div class="row">
-                      <div class="col-md-4 col-4">
-                        <div class="pandit-front-sec-img">
-                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
-                        </div>
-                        
-                      </div>
-                      <div class="col-md-8 col-8">
-                        <div class="pandit-front-sec-text">
-                            <h3>P.Bibhu Panda</h3>
-                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
-                        </div>
-                      </div>
-                    </div>
-                  
-                </div>
+              @endforeach
+              
 
               
             </div>
-            <div class="row mb-30" data-aos="fade-up" data-aos-delay="500">
-                <div class="col-md-4 col-12 mb-20">
-                  <div class="row">
-                    <div class="col-md-4 col-4">
-                        <div class="pandit-front-sec-img">
-                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
-                        </div>
-                      
-                    </div>
-                    <div class="col-md-8 col-8">
-                        <div class="pandit-front-sec-text">
-                            <h3>P.Bibhu Panda</h3>
-                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
-                        </div>
-                    </div>
-                  </div>
-                  
-                </div>
-                <div class="col-md-4 col-12 mb-20">
-                    <div class="row">
-                      <div class="col-md-4 col-4">
-                        <div class="pandit-front-sec-img">
-                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
-                        </div>
-                        
-                      </div>
-                      <div class="col-md-8 col-8">
-                        <div class="pandit-front-sec-text">
-                            <h3>P.Bibhu Panda</h3>
-                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
-                        </div>
-                      </div>
-                    </div>
-                  
-                </div>
-                <div class="col-md-4 col-12 mb-20">
-                    <div class="row">
-                      <div class="col-md-4 col-4">
-                        <div class="pandit-front-sec-img">
-                          <img class="rounded-lg" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=facearea&facepad=2&w=900&h=900&q=80" alt="">
-                        </div>
-                        
-                      </div>
-                      <div class="col-md-8 col-8">
-                        <div class="pandit-front-sec-text">
-                            <h3>P.Bibhu Panda</h3>
-                            <span><i class="fa fa-star-o" aria-hidden="true"></i>4.8</span> Exceptional
-                        </div>
-                      </div>
-                    </div>
-                  
-                </div>
-
-              
-            </div>
+         
         
 
         </div>
