@@ -31,7 +31,8 @@ Route::controller(userController::class)->group(function() {
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
     Route::get('/pooja/{slug}', 'poojadetails')->name('pooja.show');
     // Route::get('/puja-details', 'poojadetails')->name('poojadetails');
-    Route::get('/pandit-details', 'panditdetails')->name('panditdetails');
+    Route::get('/{poojaSlug}/{panditSlug}', 'panditDetails')->name('pandit.details');
+    Route::get('/pandit-details', 'panditetails')->name('panditdetails');
     Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/about-us', 'aboutus')->name('aboutus');
     Route::get('/contact', 'contact')->name('contact');

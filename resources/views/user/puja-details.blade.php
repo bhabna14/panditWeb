@@ -37,7 +37,7 @@
                         @foreach ($pandit_pujas as $pandit_puja)
                         @if($pandit_puja->profile)
                             <div class="col-md-4 pandit-card">
-                                <a href="{{ url('pandit-details') }}">
+                                <a href="{{ route('pandit.details', ['poojaSlug' => $pooja->slug, 'panditSlug' => $pandit_puja->profile->slug]) }}">
                                     <div class="card" data-state="#pooja">
                                         <div class="card-header">
                                             <img class="card-pooja" src="{{asset($pandit_puja->profile->profile_photo)}}" alt="image">

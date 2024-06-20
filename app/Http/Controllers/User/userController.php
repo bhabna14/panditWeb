@@ -14,6 +14,7 @@ use App\Models\Poojalist;
 use App\Models\UserAddress;
 use App\Models\Profile;
 use App\Models\Poojadetails;
+use Illuminate\Support\Facades\Log;
 
 
 use PDF;
@@ -266,10 +267,35 @@ class userController extends Controller
 
         return view('user.puja-details', compact('pooja', 'pandit_pujas'));
     }
+    public function panditDetails($poojaSlug, $panditSlug)
+    {
+        $pooja = Poojalist::where('slug', $poojaSlug)->firstOrFail();
+        $pandit = Profile::where('slug', $panditSlug)->firstOrFail();
+    
+        // Log the fetched pooja and pandit details
+        Log::info("Fetched Pooja details", ['pooja' => $pooja]);
+        Log::info("Fetched Pandit details", ['pandit' => $pandit]);
+    
+        $poojaDetail = Poojadetails::where('pandit_id', $pandit->pandit_id)
+            ->where('pooja_id', $pooja->id)
+            ->first();
+    
+        // Log the fetched pooja detail
+        Log::info("Fetched PoojaDetail", ['poojaDetail' => $poojaDetail]);
+    
+        if (!$poojaDetail) {
+            return abort(404, 'Pooja details not found.');
+        }
+    
+        return view('user.pandit-details', compact('pooja', 'pandit', 'poojaDetail'));
+    }
+    
+
+    
     // public function poojadetails(){
     //     return view('user/puja-details');
     // }
-    public function panditdetails(){
+    public function panditetails(){
         return view('user/pandit-details');
     }
     public function booknow(){
