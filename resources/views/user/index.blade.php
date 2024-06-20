@@ -236,7 +236,7 @@
                 <div class="col-auto">
                     <div class="sectionTitle -md">
                         <h2 class="sectionTitle__title">Special Pooja</h2>
-                        <p class=" sectionTitle__text mt-5 sm:mt-0">These are few upcoming Pooja for you to do</p>
+                        <p class=" sectionTitle__text mt-5 sm:mt-0 text-white">These are few upcoming Pooja for you to do</p>
                     </div>
                 </div>
 

@@ -32,7 +32,7 @@ class PujaController extends Controller
         $upcomingPoojas = Poojalist::where('status', 'active')
                         ->where('pooja_date', '>=', now())
                         ->orderBy('pooja_date', 'asc')
-                        ->take(8)
+                        ->take(4)
                         ->get();
     
         foreach ($upcomingPoojas as $upcomingPooja) {
