@@ -51,11 +51,13 @@ class AdminMiddleware
 
     public function handle(Request $request, Closure $next)
     {
+        // Check if the user is authenticated with the 'admins' guard
         if (!Auth::guard('admins')->check()) {
-            // If not a superadmin, redirect or return forbidden response
-            return redirect()->route('adminlogin'); // Example: Redirect to login page
+            // If not authenticated, redirect to the login page
+            return redirect()->route('adminlogin');
         }
-
+    
+        // Proceed with the request if authenticated
         return $next($request);
     }
 }

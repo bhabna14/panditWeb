@@ -21,8 +21,9 @@ use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Pandit\PoojaListController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
-use App\Http\Controllers\Pandit\PanditLoginController;
+use App\Http\Controllers\Pandit\PanditLoginController; 
 ## user login
+// Route::get('/pandit/{poojaSlug}/{panditSlug}', [userController::class, 'panditDetails'])->name('pandit.details');
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
     Route::post('store', 'store')->name('store');
@@ -31,7 +32,7 @@ Route::controller(userController::class)->group(function() {
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
     Route::get('/pooja/{slug}', 'poojadetails')->name('pooja.show');
     // Route::get('/puja-details', 'poojadetails')->name('poojadetails');
-    Route::get('/{poojaSlug}/{panditSlug}', 'panditDetails')->name('pandit.details');
+    Route::get('/pooja/{poojaSlug}/{panditSlug}', 'panditDetails')->name('pandit.details');
     Route::get('/pandit-details', 'panditetails')->name('panditdetails');
     Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/about-us', 'aboutus')->name('aboutus');
