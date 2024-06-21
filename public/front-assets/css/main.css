@@ -618,7 +618,10 @@ p.blockquote:after {
   box-shadow: 5px 5px 10px rgb(169 184 223 / 40%);
 }
 .upcoming-bg {
-  background-color: #B90B0B;
+  /* background-color: #B90B0B; */
+  background-image: url('../img/UPCOMING PUJA BACKGROUND SECTION.png');
+  background-position: center;
+  background-size: cover;
   padding: 42px 0px 63px 0px;
   margin-top: 60px;
 }
