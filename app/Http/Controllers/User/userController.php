@@ -252,7 +252,9 @@ class userController extends Controller
    }
    public function poojalist(){
      $allpoojas = Poojalist::where('status', 'active')
-                        ->orderBy('pooja_date', 'asc')
+                            ->where(function($query) {
+                                $query->whereNull('pooja_date');
+                            })
                         ->paginate(6);
         return view('user/poojalist', compact('allpoojas'));
     }
