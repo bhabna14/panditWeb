@@ -56,6 +56,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Bankdetail::class);
     }
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'user_id');
+    }
 
     public static function boot()
     {

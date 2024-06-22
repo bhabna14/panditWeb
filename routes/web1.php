@@ -21,40 +21,49 @@ use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Pandit\PoojaListController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
-use App\Http\Controllers\Pandit\PanditLoginController;
+use App\Http\Controllers\Pandit\PanditLoginController; 
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');
-    Route::get('/book-pandit', 'bookpandit')->name('bookpandit');
+    Route::get('/pandit-list', 'panditlist')->name('panditlist');
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
-    Route::get('/puja-details', 'poojadetails')->name('poojadetails');
-    Route::get('/pandit-details', 'panditdetails')->name('panditdetails');
-    Route::get('/book-now', 'booknow')->name('booknow');
+    Route::get('/pooja/{slug}', 'poojadetails')->name('pooja.show');
+    Route::get('/pooja/{poojaSlug}/{panditSlug}', 'panditDetails')->name('pandit.details');
+
+    Route::get('/pandit/{slug}', 'singlepanditDetails')->name('pandit.show');
+    Route::get('/book-now/{panditSlug}/{poojaSlug}/{poojaFee}', 'bookNow')->name('book.now');
+    Route::post('/booking/confirm',  'confirmBooking')->name('booking.confirm');
+    Route::get('/booking/success',  'bookingSuccess')->name('booking.success');
+    // Route::get('/pandit-details', 'panditetails')->name('panditdetails');
+    // Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/about-us', 'aboutus')->name('aboutus');
     Route::get('/contact', 'contact')->name('contact');
-    Route::get('/my-profile', 'myprofile')->name('myprofile');
-    Route::get('/manage-address', 'mngaddress')->name('mngaddress');
-    Route::get('/add-address', 'addaddress')->name('addaddress');
-    Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
-    Route::get('/order-history', 'orderhistory')->name('orderhistory');
-    Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
-    Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
-    Route::get('/userprofile', 'userprofile')->name('userprofile');
-    Route::get('/coupons', 'coupons')->name('coupons');
-    Route::get('/login', 'userlogin')->name('userlogin');
    
-        Route::post('/save-userlogin', 'storeloginData')->name('user.login');
-        Route::get('/userotp','showOtpForm')->name('user.otp');
-        Route::post('/check-otp', 'checkOtp')->name('check.userotp');
-        // Route::post('/user/store-login-data',  'storeLoginData')->name('user.store-login-data');
-        // Route::get('/user/otp',  'showOtpForm')->name('user.otp');
-        // Route::post('/user/check-otp',  'checkOtp')->name('user.check-otp');
-
+    Route::get('/login', 'userlogin')->name('userlogin');
+    Route::post('/save-userlogin', 'storeloginData')->name('user.login');
+    Route::get('/userotp','showOtpForm')->name('user.otp');
+    Route::post('/check-otp', 'checkOtp')->name('check.userotp');
     Route::post('user/authenticate', 'userauthenticate')->name('userauthenticate');
     Route::post('user/logout', 'userlogout')->name('userlogout');
 
+});
+//user middleware routes
+Route::middleware(['user'])->group(function () {
+        Route::controller(userController::class)->group(function() {
+
+        Route::get('/my-profile', 'myprofile')->name('myprofile');
+        Route::get('/manage-address', 'mngaddress')->name('mngaddress');
+        Route::get('/addaddress', 'addfrontaddress')->name('addfrontaddress');
+        Route::get('/add-address', 'addaddress')->name('addaddress');
+        Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
+        Route::get('/order-history', 'orderhistory')->name('orderhistory');
+        Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
+        Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
+        Route::get('/userprofile', 'userprofile')->name('userprofile');
+        Route::get('/coupons', 'coupons')->name('coupons');
+    });
 });
 
 ## admin login
@@ -69,7 +78,6 @@ Route::controller(SuperAdminController::class)->group(function() {
     Route::get('superadmin/', 'superadminlogin')->name('login');
     Route::post('superadmin/authenticate', 'authenticate')->name('authenticate');
     Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
-    Route::post('superadmin/logout', 'sulogout')->name('sulogout');
     Route::post('superadmin/logout', 'sulogout')->name('sulogout');
 });
 
@@ -181,30 +189,23 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
 });
 
-// user routes
-Route::prefix('user')->middleware(['user'])->group(function () {
 
-    Route::controller(userController::class)->group(function() {
-        Route::get('/dashboard', 'dashboard')->name('user.dashboard');
-        
-    });
-});
-
+/// pandit routes
 Route::controller(PanditLoginController::class)->group(function() {
+    Route::get('/pandit/login', 'panditlogin')->name('panditlogin');
     Route::post('/pandit/save-panditlogin', 'storeLoginData')->name('pandit.login');
     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
     Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
 });
 
-/// pandit routes
-Route::group(['prefix' => 'pandit'], function () {
+Route::prefix('pandit')->middleware(['pandits'])->group(function () {
     Route::controller(PanditController::class)->group(function() {
-        Route::get('/panditlogin', 'panditlogin');
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
         Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
-        Route::get('/dashboard', 'index')->name('dashboard')->middleware('auth:pandits');
+        Route::get('/dashboard', 'index')->name('pandit.dashboard');
+        Route::post('/logout', 'panditlogout')->name('panditlogout');
     });
 });
 

@@ -246,9 +246,9 @@
 												<a class="dropdown-item" href="{{url('mail-read')}}"><i class="far fa-envelope "></i>Inbox</a>
 												<a class="dropdown-item" href="{{url('mail')}}"><i class="far fa-comment-dots"></i>Messages</a>
 												<a class="dropdown-item" href="{{url('mail-settings')}}"><i class="far fa-sun"></i>  Settings</a>
-												<form method="POST" action="{{ url('admin/logout') }}">
+												<form method="POST" action="{{ url('pandit/logout') }}">
 													@csrf
-													<button type="submit">Logout</button>
+													<button type="submit" class="dropdown-item"><i class="far  fa-arrow-alt-circle-left"></i> Logout</button>
 												</form>
 
 												<!-- <a class="dropdown-item" href="{{url('logout')}}"><i class="far fa-arrow-alt-circle-left"></i> Sign Out</a> -->

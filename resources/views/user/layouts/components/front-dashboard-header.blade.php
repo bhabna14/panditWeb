@@ -1,5 +1,5 @@
 <header data-add-bg="" class="header -dashboard bg-white js-header" data-x="header" data-x-toggle="is-menu-opened">
-    <div data-anim="fade" class="header__container px-30 sm:px-20">
+    <div  class="header__container px-30 sm:px-20">
       <div class="-left-side">
         <a href="{{url('/')}}" class="header-logo" data-x="header-logo" data-x-toggle="is-logo-dark">
           <img src="{{ asset('front-assets/img/brand/logo.png')}}" alt="logo icon">

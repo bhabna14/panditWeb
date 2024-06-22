@@ -53,7 +53,7 @@
                         </div>
                         <div class="pooja-head">
                             <h5>{{$allpooja->pooja_name}}</h5>
-                            <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                            <p>{{$allpooja->short_description}}</p>
                             <div style="text-align: center">
                                 {{-- <h6>(12-03-2024)</h6> --}}
                             </div>

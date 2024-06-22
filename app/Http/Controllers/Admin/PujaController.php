@@ -14,8 +14,17 @@ class PujaController extends Controller
 {
     //
     public function managePuja(){
-        $poojalists = Poojalist::where('status', 'active')->get();
+        $poojalists = Poojalist::where('status', 'active')
+        ->where('pooja_date', '>=', now())
+        ->orderBy('pooja_date', 'asc')->get();
         return view('admin/managepuja', compact('poojalists'));
+    }
+    public function manageSpecialPuja(){
+        $poojalists = Poojalist::where('status', 'active')
+        ->where(function($query) {
+            $query->whereNull('pooja_date');
+         })->get();
+        return view('admin/managespecialpuja', compact('poojalists'));
     }
     public function addpuja(){
         return view('admin/addpuja');
