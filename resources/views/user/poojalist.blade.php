@@ -46,7 +46,7 @@
         <div class = "row" data-aos="fade-up">
             @foreach ($allpoojas as $allpooja)
             <div class="col-md-4 pandit-card">
-                <a href="{{url('puja-details')}}"> 
+                <a href="{{ route('pooja.show', $allpooja->slug) }}"> 
                     <div class="card" data-state="#pooja">
                         <div class="card-header">
                             <img class="card-pooja" src="{{ asset('assets/img/'.$allpooja->pooja_photo) }}" alt="image">

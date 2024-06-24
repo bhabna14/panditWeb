@@ -56,7 +56,7 @@
                                                 
                                             </div>
                                             <div class="col-md-12 col-12">
-                                              <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $pandit_puja->profile->slug, 'poojaSlug' => $pooja->slug, 'poojaFee' => $advancefee]) : route('userlogin') }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
+                                              <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $pandit_puja->profile->slug, 'poojaSlug' => $pooja->slug, 'poojaFee' => $pandit_puja->pooja_fee]) : route('userlogin') }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
                                                 {{ Auth::guard('users')->check() ? 'Book Now' : 'Login to Book' }}
                                                </a>
                                             </div>

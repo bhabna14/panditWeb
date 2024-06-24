@@ -12,7 +12,6 @@ use App\Http\Controllers\Controller;
 class PanditLoginController extends Controller
 {
     
-    
     public function storeLoginData(Request $request)
     {
         // Validate the input data
@@ -25,14 +24,19 @@ class PanditLoginController extends Controller
         // Retrieve the user by mobile number
         $user = PanditLogin::where('mobile_no', $data['mobile_no'])->first();
     
-        // Generate a new OTP and pandit_id
+        // Generate a new OTP
         $otp = rand(1000, 9999);
-        $panditId = 'PANDIT' . rand(10000, 99999);
     
         if ($user) {
-            // Update the existing user's OTP and pandit_id
+            // Check if the user already has a pandit_id
+            if (empty($user->pandit_id)) {
+                // Generate a new pandit_id if it does not exist
+                $panditId = 'PANDIT' . rand(10000, 99999);
+                $user->pandit_id = $panditId;
+            }
+    
+            // Update the existing user's OTP
             $user->otp = $otp;
-            $user->pandit_id = $panditId;
     
             // Save the user and handle potential save errors
             if ($user->save()) {
@@ -42,6 +46,9 @@ class PanditLoginController extends Controller
                 return redirect()->back()->with('error', 'Failed to update OTP.');
             }
         } else {
+            // Generate a new pandit_id for a new user
+            $panditId = 'PANDIT' . rand(10000, 99999);
+    
             // Create a new user with the provided data, OTP, and pandit_id
             $data['otp'] = $otp;
             $data['pandit_id'] = $panditId;
@@ -57,6 +64,7 @@ class PanditLoginController extends Controller
             }
         }
     }
+    
     
         public function checkOtp(Request $request)
         {
@@ -105,7 +113,6 @@ class PanditLoginController extends Controller
                 return redirect()->route('pandit.otp')->with('error', 'Invalid OTP.');
             }
         }
-        
         
     
         public function showOtpForm()

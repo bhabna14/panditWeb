@@ -10,9 +10,12 @@
                       <i class="icon-check text-30 text-white"></i>
                     </div>
 
-                    <div class="text-30 lh-1 fw-600 mt-20">Booking confirmed successfully!</div>
+                    <div class="text-30 lh-1 fw-600 mt-20"> {{ session()->get('success') }}</div>
                 </div>
-
+               
+            
+              
+                 
                 <div class="border-type-1 rounded-8 px-50 py-35 mt-40">
                     <div class="row">
                         <div class="col-lg-3 col-md-6">
@@ -24,17 +27,17 @@
                             <div class="text-15 lh-12">Date</div>
                             <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->booking_date }},{{ $booking->booking_time }}</div>
                         </div>
-                        <div class="col-lg-1 col-md-6">
-                            <div class="text-15 lh-12">Paid</div>
-                            <div class="text-15 lh-12 fw-500 text-blue-1">0</div>
+                        <div class="col-lg-2 col-md-6">
+                            <div class="text-15 lh-12">Paid Amount</div>
+                            <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->paid/ 100 }}</div>
                         </div>
 
                         <div class="col-lg-2 col-md-6">
-                            <div class="text-15 lh-12">Advance Fee</div>
+                            <div class="text-15 lh-12">Total Amount</div>
                             <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->pooja_fee }}</div>
                         </div>
 
-                        <div class="col-lg-3 col-md-6">
+                        <div class="col-lg-2 col-md-6">
                             <div class="text-15 lh-12">Status</div>
                             <div class="text-15 lh-12 fw-500 text-blue-1">{{ ucfirst($booking->status) }}</div>
                         </div>

@@ -21,9 +21,9 @@
 
 
         <div class="row dashboard-row">
-          <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12">
+          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <div class="row">
-              <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                 <div class="card">
                   <div class="card-body">
                     <div class="row">
@@ -43,7 +43,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
                 <div class="card sales-card">
                   <div class="row">
                     <div class="col-8">
@@ -69,7 +69,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
                 <div class="card sales-card">
                   <div class="row">
                     <div class="col-8">
@@ -95,7 +95,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
                 <div class="card sales-card">
                   <div class="row">
                     <div class="col-8">
@@ -121,7 +121,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
                 <div class="card sales-card">
                   <div class="row">
                     <div class="col-8">
@@ -150,7 +150,7 @@
              
             </div>
           </div>
-          <div class="col-xl-8 col-lg-12 col-md-12 col-sm-12">
+          <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <div class="card custom-card overflow-hidden">
                 <div>
                     <div>
@@ -166,10 +166,13 @@
                                 <th>#</th>
                                 <th>Booking Id</th>
                                 <th>Pooja Name</th>
+                                <th>Pandit Name</th>
                                 <th>Total</th>
+                                <th>advance fee</th>
                                 <th>Paid</th>
                                 <th>Status</th>
                                 <th>Pooja Time</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -178,8 +181,10 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $booking->booking_id }}</td>
                                 <td>{{ $booking->pooja->pooja_name }}</td>
+                                <td>{{ $booking->pandit->name }}</td>
                                 <td class="fw-500">₹ {{ $booking->pooja_fee }}</td>
-                                <td>₹ 0</td>
+                                <td class="fw-500">₹ {{ $booking->advance_fee }}</td>
+                                <td>₹ {{ $booking->paid }}</td>
                                 <td>
                                     <div class="rounded-100 py-4 text-center col-12 text-14 fw-500
                                         @if ($booking->status == 'pending')
@@ -189,18 +194,29 @@
                                         @elseif ($booking->status == 'rejected')
                                             bg-red-4 text-red-3
                                         @endif
+                                        
                                     ">
                                         {{ ucfirst($booking->status) }}
                                     </div>
                                 </td>
                                 <td>{{ $booking->booking_date }}, {{$booking->booking_time}}</td>
+                                <td>
+                                  @if ($booking->application_status == 'approved'  && !$booking->status == 'paid')
+                                      <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="btn btn-success">Pay</a>
+
+                                  @elseif ($booking->application_status == 'approved' && $booking->status == 'paid')
+                                      <span class="text-success">Already Paid</span>
+                                  @else
+                                      <span class="text-muted">Waiting for approval</span>
+                                  @endif
+                              </td>
                             </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
             </div>
-        </div>
+          </div>
           <!-- </div> -->
         </div>
 

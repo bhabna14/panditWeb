@@ -12,6 +12,7 @@
         "laravel/sanctum": "^2.14",
         "laravel/tinker": "^2.7",
         "livewire/livewire": "^2.10",
+        "razorpay/razorpay": "^2.9",
         "stichoza/google-translate-php": "^5.1"
     },
     "require-dev": {

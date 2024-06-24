@@ -316,6 +316,7 @@ public function confirmBooking(Request $request)
             'pandit_id' => 'required|exists:pandit_profile,id',
             'pooja_id' => 'required|exists:pandit_poojadetails,id',
             'pooja_fee' => 'required|numeric',
+            'advance_fee' => 'required|numeric',
             'booking_date' => 'required|date',
             'booking_time' => 'required|string',
             'address_id' => 'required',
@@ -324,6 +325,7 @@ public function confirmBooking(Request $request)
 
         // Assign the authenticated user's ID to the booking
         $validatedData['user_id'] = Auth::guard('users')->user()->userid;
+        $validatedData['application_status'] = 'pending';
         $validatedData['status'] = 'pending';
         // Create a new booking record
         $booking = Booking::create($validatedData);
@@ -380,7 +382,7 @@ public function bookingSuccess($id)
         $user = Auth::guard('users')->user();
     
         // Fetch recent bookings for the user
-        $bookings = Booking::with('pooja') // Load relationship to get pooja details
+        $bookings = Booking::with('pooja','pandit') // Load relationship to get pooja details
                            ->where('user_id', $user->userid)
                            ->orderByDesc('created_at')
                            ->take(10) // Limit to 10 recent bookings (adjust as needed)

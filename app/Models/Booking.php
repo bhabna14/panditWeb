@@ -16,9 +16,11 @@ class Booking extends Model
         'pooja_id',
         'address_id',
         'pooja_fee',
+        'advance_fee',
         'booking_date',
         'booking_time',
         'status',
+        'application_status'
     ];
 
     public static function boot()
@@ -32,12 +34,12 @@ class Booking extends Model
 
     public function pandit()
     {
-        return $this->belongsTo(Profile::class, 'pandit_id', 'pandit_id');
+        return $this->belongsTo(Profile::class, 'pandit_id', 'id');
     }
 
     public function pooja()
     {
-        return $this->belongsTo(Poojadetails::class, 'pooja_id');
+        return $this->belongsTo(Poojadetails::class, 'pooja_id','id');
     }
 
     public function address()
