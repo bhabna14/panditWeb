@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\userController;
+use App\Http\Controllers\User\PaymentController;
+
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
@@ -66,6 +68,11 @@ Route::middleware(['user'])->group(function () {
         Route::get('/userprofile', 'userprofile')->name('userprofile');
         Route::get('/coupons', 'coupons')->name('coupons');
     });
+});
+Route::middleware(['user'])->group(function () {
+    Route::get('/payment/{booking_id}', [PaymentController::class, 'showPaymentPage'])->name('payment.page');
+    Route::post('/payment/process/{booking_id}', [PaymentController::class, 'processPayment'])->name('payment.process');
+
 });
 
 ## admin login
@@ -216,6 +223,8 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
+        Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
+        Route::post('/booking/reject/{id}', 'rejectBooking')->name('pandit.booking.reject');
         Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');
     });
 });
@@ -260,7 +269,7 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::post('/save-poojadetails', 'savePoojadetails');
         Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
         Route::put('/update-poojadetails', 'updatePoojadetails')->name('updatePoojadetails');
-        Route::get('/pandit/poojadetails',  'poojadetails')->name('pandit.poojadetails');
+        Route::get('/poojadetails',  'poojadetails')->name('pandit.poojadetails');
     });
 });
 

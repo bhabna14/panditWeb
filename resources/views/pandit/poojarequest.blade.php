@@ -24,34 +24,46 @@
                                 <tr>
                                     <th class="border-bottom-0">Sl</th>
                                     <th class="border-bottom-0">Name</th>
+                                    <th class="border-bottom-0">Pooja Name</th>
                                     <th class="border-bottom-0">Mobile No.</th>
-                                    <th class="border-bottom-0">Adv. Price</th>
+                                    <th class="border-bottom-0">Total Price</th>
+                                    <th class="border-bottom-0">Total Paid</th>
                                     <th class="border-bottom-0">Location</th>
-                                    <th class="border-bottom-0">Date</th>
-                                    <th class="border-bottom-0">Time</th>
+                                    <th class="border-bottom-0">Date & Time</th>
                                     <th class="border-bottom-0">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($bookings as $booking)
-                                    <tr>
-                                        <td>{{ $loop->iteration }}</td>
-                                        {{-- <td>{{ $booking->user->name }}</td> --}}
-                                        {{-- <td>{{ $booking->user->phonenumber }}</td> --}}
-                                        <td>{{ $booking->pooja_fee }}</td>
-                                        {{-- <td>{{ $booking->user->address }}</td> --}}
-                                        <td>{{ $booking->booking_date }}</td>
-                                        <td>{{ $booking->booking_time }}</td>
-                                        <td>
-                                            @if ($booking->status == 'approved')
-                                                <span class="badge badge-success">Approved</span>
-                                            @elseif ($booking->status == 'rejected')
-                                                <span class="badge badge-danger">Rejected</span>
-                                            @else
-                                                <span class="badge badge-secondary">Pending</span>
-                                            @endif
-                                        </td>
-                                    </tr>
+                                @foreach ($bookings as $index => $booking)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $booking->address->fullname }}</td>
+                                    <td>{{ $booking->pooja->pooja_name }}</td>
+                                    <td>{{ $booking->address->number }}</td>
+                                    <td>₹ {{ $booking->pooja->pooja_fee }}</td>
+                                    <td>₹ {{ $booking->paid }}</td>
+                                    <td> {{ $booking->address->area ?? 'N/A' }},{{ $booking->address->city ?? 'N/A' }},{{ $booking->address->state ?? 'N/A' }}
+                                        {{ $booking->address->country ?? 'N/A' }}<br>
+                                        Pincode : {{ $booking->address->pincode ?? 'N/A' }}<br>
+                                        Landmark : {{ $booking->address->landmark ?? 'N/A' }}</td>
+                                    <td>{{ $booking->booking_date }} {{ $booking->booking_time }}</td>
+                                    <td>
+                                        @if($booking->application_status === 'pending')
+                                        <form action="{{ route('pandit.booking.approve', $booking->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-success">Approve</button>
+                                        </form>
+                                        <form action="{{ route('pandit.booking.reject', $booking->id) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            <button type="submit" class="btn btn-danger">Reject</button>
+                                        </form>
+                                        @elseif($booking->application_status === 'approved')
+                                        <span class="badge badge-success">Approved</span>
+                                        @elseif($booking->application_status === 'rejected')
+                                        <span class="badge badge-danger">Rejected</span>
+                                        @endif
+                                    </td>
+                                </tr>
                                 @endforeach
                             </tbody>
                         </table>

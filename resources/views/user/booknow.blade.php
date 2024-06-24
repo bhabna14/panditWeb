@@ -26,6 +26,7 @@
                   <input type="hidden" name="pandit_id" value="{{ $pandit->id }}">
                   <input type="hidden" name="pooja_id" value="{{ $pooja->id }}">
                   <input type="hidden" name="pooja_fee" value="{{ $poojaFee }}">
+                  <input type="hidden" class="form-control" name="advance_fee" value="{{ $poojaFee * 20 / 100 }}">
                   <div class="row">
                       <div class="col-md-12">
                           @foreach ($addresses as $address)
@@ -75,7 +76,9 @@
                               <div class="lh-17 fw-500">{{ $pandit->name }}</div>
                               <input type="hidden" class="form-control" name="pandit_id" value="{{ $pandit->pandit_id }}">
                               <div class="text-14 lh-15 mt-5">{{ $pooja->poojalist->pooja_name }}</div>
-                              <div class="text-16 lh-15 mt-5 fw-600">₹ {{ $poojaFee }}</div>
+                              {{-- <div class="text-16 lh-15 mt-5 fw-600">₹ {{ $pooja->poojalist->pooja_fee }}</div> --}}
+                              <div class="text-16 lh-15 mt-5 fw-600">Total Fee: ₹{{ $poojaFee }}</div>
+                              <div class="text-16 lh-15 mt-5 fw-600">Advance Fee: ₹{{ $poojaFee * 20/100 }}</div>
                           </div>
                       </div>
                   </div>

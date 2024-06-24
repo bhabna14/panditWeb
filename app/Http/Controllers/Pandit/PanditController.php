@@ -33,14 +33,42 @@ class PanditController extends Controller
     }
 
   
-    public function poojarequest(){
-        $pandit =  Auth::guard('pandits')->user();
-        $bookings = Booking::where('pandit_id',$pandit->id)
-        ->orderBy('created_at', 'desc') // Example order by created_at descending
-        ->get();
-        return view("/pandit/poojarequest", compact('bookings'));
+    public function poojarequest()
+    {
+        $pandit = Auth::guard('pandits')->user();
+    
+        // Debugging: Check the authenticated pandit's pandit_id
+        \Log::info('Authenticated pandit id:', ['pandit_id' => $pandit->pandit_id]);
+    
+        // Fetch bookings for the authenticated pandit
+        $bookings = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
+                           ->where('pandit_id', $pandit->id)
+                           ->orderBy('created_at', 'desc')
+                           ->get();
+    
+        // Debugging: Log the bookings fetched
+        \Log::info('Bookings fetched:', ['bookings' => $bookings]);
+    
+        return view('/pandit/poojarequest', compact('bookings'));
     }
+    
+        public function approveBooking($id)
+        {
+            $booking = Booking::findOrFail($id);
+            $booking->application_status = 'approved';
+            $booking->save();
 
+            return redirect()->back()->with('success', 'Booking approved successfully!');
+        }
+
+        public function rejectBooking($id)
+        {
+            $booking = Booking::findOrFail($id);
+            $booking->application_status = 'rejected';
+            $booking->save();
+
+            return redirect()->back()->with('success', 'Booking rejected successfully!');
+        }
 
     public function poojahistory(){
         return view("/pandit/poojahistory");

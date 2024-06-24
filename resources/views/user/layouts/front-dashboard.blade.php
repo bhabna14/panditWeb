@@ -103,6 +103,6 @@
     </main>
     @include('user.layouts.components.front-script')
 
-
+    @yield('scripts')
     </body>
 </html>
