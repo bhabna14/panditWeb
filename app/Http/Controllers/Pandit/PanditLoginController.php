@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 class PanditLoginController extends Controller
 {
     
+    
     public function storeLoginData(Request $request)
     {
         // Validate the input data

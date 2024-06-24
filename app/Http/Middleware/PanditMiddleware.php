@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PanditMiddleware
 {
@@ -16,10 +17,10 @@ class PanditMiddleware
      */
     public function handle($request, Closure $next)
     {
-        if (Auth::guard('pandits')->check()) {
-            return $next($request);
+        if (!Auth::guard('pandits')->check()) {
+            return redirect()->route('panditlogin');  // Redirect to OTP page if not authenticated
         }
 
-        return redirect('pandit.otp');  // Redirect to home or login page if not super admin
+        return $next($request);
     }
 }

@@ -15,6 +15,8 @@ use App\Models\EduDetail;
 use App\Models\VedicDetail;
 use App\Models\Poojaskill;
 use App\Models\Poojaitemlist;
+use App\Models\Booking;
+
 use Illuminate\Support\Facades\Auth;
 
 
@@ -30,12 +32,13 @@ class PanditController extends Controller
         return view('pandit/dashboard', compact('user', 'profile'));
     }
 
-    public function panditlogin(){
-        return view("panditlogin");
-    }
-
+  
     public function poojarequest(){
-        return view("/pandit/poojarequest");
+        $pandit =  Auth::guard('pandits')->user();
+        $bookings = Booking::where('pandit_id',$pandit->id)
+        ->orderBy('created_at', 'desc') // Example order by created_at descending
+        ->get();
+        return view("/pandit/poojarequest", compact('bookings'));
     }
 
 
@@ -111,7 +114,11 @@ class PanditController extends Controller
         return view('/pandit/profile', compact('languages','countries','locations','states','citys','PujaLists','temples','pujanames','Poojanames','Poojaskills'));
     
     }
-   
+    public function panditlogin(){
+        // dd("hi");
+        return view("panditlogin");
+    }
+
     public function getStates($countryId)
     {
         $states = State::where('country_id', $countryId)->get();
@@ -149,6 +156,16 @@ class PanditController extends Controller
     }
     
     return redirect()->back()->with('success', 'Locations saved successfully.');
+    }
+    public function panditlogout(Request $request)
+    {
+        Auth::logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/pandit/login');
     }
   
 

@@ -20,7 +20,7 @@
  </section>
  <section>
   <div class="container">
-      <div class="row" style="margin-top:60px">
+      <div class="row" style="margin-top:60px;    margin-bottom: 140px;">
           <div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
               
               <div class="img-group">
@@ -117,7 +117,9 @@
 
             <div class="row mb-30" data-aos="fade-up" data-aos-delay="500">
               @foreach ($pandits as $pandit)
+             
                 <div class="col-md-4 col-12 mb-20">
+                  <a href="{{ route('pandit.show', $pandit->slug) }}">
                   <div class="row">
                     <div class="col-md-4 col-4">
                         <div class="pandit-front-sec-img">
@@ -132,8 +134,9 @@
                         </div>
                     </div>
                   </div>
-                  
+                </a>
                 </div>
+              
               @endforeach
               
 
@@ -167,14 +170,14 @@
             <div class = "row" data-aos="fade-up" data-aos-delay="500">
                 @foreach ($otherpoojas as $otherpooja)
                 <div class="col-md-4 pandit-card">
-                    <a href="{{url('puja-details')}}"> 
+                    <a href="{{ route('pooja.show', $otherpooja->slug) }}"> 
                         <div class="card" data-state="#pooja">
                             <div class="card-header">
                                 <img class="card-pooja" src="{{ asset('assets/img/'.$otherpooja->pooja_photo) }}" alt="image">
                             </div>
                             <div class="pooja-head">
                                 <h5>{{$otherpooja->pooja_name}}</h5>
-                                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit.</p>
+                                <p>{{$otherpooja->short_description}}</p>
                                 <div style="text-align: center">
                                     {{-- <h6>(12-03-2024)</h6> --}}
                                 </div>
@@ -220,7 +223,7 @@
                       </div> --}}
   
                       <div class="col-auto">
-                        <div class="text-15 fw-500 lh-14">Courtney Henry</div>
+                        <div class="text-15 fw-500 lh-14">Sidhant Rout</div>
                         {{-- <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div> --}}
                       </div>
                     </div>
@@ -240,7 +243,7 @@
                       </div> --}}
   
                       <div class="col-auto">
-                        <div class="text-15 fw-500 lh-14">Courtney Henry</div>
+                        <div class="text-15 fw-500 lh-14">Soumya Puhan</div>
                         {{-- <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div> --}}
                       </div>
                     </div>
@@ -260,7 +263,7 @@
                       </div> --}}
   
                       <div class="col-auto">
-                        <div class="text-15 fw-500 lh-14">Courtney Henry</div>
+                        <div class="text-15 fw-500 lh-14">Barsa Das</div>
                         {{-- <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div> --}}
                       </div>
                     </div>
@@ -287,8 +290,8 @@
     <div class="row align-items-center position-relative">
       <div class="col-md-6">
         <div class="sigma_cta primary-bg">
-          <img class="" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/1.png" alt="cta">
-          <div class="sigma_cta-content" style="    padding: 40px 40px 40px 120px;">
+          <img class="cta-left-img" src="{{ asset('front-assets/img/4ebcc66a-bcc1-429f-8ef1-6040ae9f369d-removebg-preview.png')}}" alt="cta">
+          <div class="sigma_cta-content" style="    padding: 40px 40px 40px 148px;">
            
             <h4 class="text-white">+91 9776888887</h4>
           </div>
@@ -297,10 +300,11 @@
       <span class="sigma_cta-sperator d-lg-flex">or</span>
       <div class="col-md-6">
         <div class="sigma_cta primary-bg">
-          <div class="sigma_cta-content" style="padding: 40px 40px 40px 95px;">
+          <div class="sigma_cta-content" style="padding: 40px 40px 40px 50px;">
             <h4 class="text-white">contact@33crores.com</h4>
           </div>
-          <img class="" src="https://metropolitanhost.com/themes/themeforest/html/maharatri/assets/img/cta/2.png" alt="cta">
+          <img class="cta-left-img" src="{{ asset('front-assets/img/4ebcc66a-bcc1-429f-8ef1-6040ae9f369d-removebg-preview.png')}}" alt="cta">
+
         </div>
       </div>
     </div>
@@ -316,23 +320,27 @@
             <div class="row y-gap-30 justify-center text-center">
 
                 <div class="col-xl-3 col-6">
+                    <img src="{{ asset('front-assets/img/919f2cab-3b5c-46df-8121-1dbbea546f1e.png') }}" alt="image" width="50%">
                     <div class="text-40 lg:text-30 lh-13 fw-600 counter">4,958</div>
-                    <div class="text-14 lh-14 text-light-1 mt-5 ">Pandits</div>
+                    <div class="text-14 lh-14 text-light-1 mt-5 ">Type of Pooja Listed</div>
                 </div>
 
                 <div class="col-xl-3 col-6">
+                  <img src="{{ asset('front-assets/img/customer.png') }}" alt="image" width="50%">
                     <div class="text-40 lg:text-30 lh-13 fw-600 counter">2,869</div>
-                    <div class="text-14 lh-14 text-light-1 mt-5">Total Pooja</div>
-                </div>
-
-                <div class="col-xl-3 col-6">
-                    <div class="text-40 lg:text-30 lh-13 fw-600 counter">2M</div>
                     <div class="text-14 lh-14 text-light-1 mt-5">Happy customers</div>
                 </div>
 
                 <div class="col-xl-3 col-6">
-                    <div class="text-40 lg:text-30 lh-13 fw-600 counter">574,974</div>
-                    <div class="text-14 lh-14 text-light-1 mt-5">Our Volunteers</div>
+                  <img src="{{ asset('front-assets/img/customer.png') }}" alt="image" width="50%">
+                    <div class="text-40 lg:text-30 lh-13 fw-600 counter">2M</div>
+                    <div class="text-14 lh-14 text-light-1 mt-5">Pandti Jee Listed</div>
+                </div>
+
+                <div class="col-xl-3 col-6">
+                  <img src="{{ asset('front-assets/img/PANDIT_JEE_LISTED-removebg-preview.png') }}" alt="image" width="50%">
+                    <div class="text-40 lg:text-30 lh-13 fw-600 counter">5,749</div>
+                    <div class="text-14 lh-14 text-light-1 mt-5">Pooja performed</div>
                 </div>
 
             </div>

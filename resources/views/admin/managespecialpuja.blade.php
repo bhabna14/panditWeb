@@ -34,9 +34,9 @@
                             <div class="card-footer py-0">
                                 <div class="profile-tab tab-menu-heading border-bottom-0">
                                     <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
-                                        <a class="nav-link mb-2 mt-2 {{ Request::is('admin/manage-puja') ? 'active' : '' }}" href="{{ route('managepuja') }}"
+                                        <a class="nav-link mb-2 mt-2" href="{{ route('managepuja') }}"
                                             onclick="changeColor(this)">Upcoming Pooja</a>
-                                        <a class="nav-link mb-2 mt-2" href="{{ route('manageSpecialPuja') }}"
+                                        <a class="nav-link mb-2 mt-2  {{ Request::is('admin/manage-special-puja') ? 'active' : '' }}" href="{{ route('manageSpecialPuja') }}"
                                             onclick="changeColor(this)">Special Pooja</a>
                                        
                                     </nav>

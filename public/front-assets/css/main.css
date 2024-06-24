@@ -618,12 +618,12 @@ p.blockquote:after {
   box-shadow: 5px 5px 10px rgb(169 184 223 / 40%);
 }
 .upcoming-bg {
-  /* background-color: #B90B0B; */
-  background-image: url('../img/UPCOMING PUJA BACKGROUND SECTION.png');
+  background-color: #B90B0B;
+  /* background-image: url('../img/UPCOMING\ PUJA\ BACKGROUND\ SECTION.png');
   background-position: center;
-  background-size: cover;
+  background-size: cover; */
   padding: 42px 0px 63px 0px;
-  margin-top: 60px;
+  /* margin-top: 60px !important; */
 }
 .upcoming-event {
   background-color: #fff;
@@ -774,7 +774,11 @@ p.blockquote:after {
 .sigma_cta .sigma_cta-content {
   padding: 40px 40px 40px 120px;
 }
-
+.sigma_cta .cta-left-img{
+ 
+    width: 39%;
+    
+}
 .sigma_cta img {
   position: absolute;
   bottom: 0;
@@ -786,7 +790,7 @@ p.blockquote:after {
   left: auto;
   right: -75px;
   bottom: 0;
-  top: -52px;
+  top: -30px;
 }
 
 .sigma_cta h4 {
@@ -885,7 +889,7 @@ p.blockquote:after {
   background-position: center;
   background-size: cover;
   color: #fff;
-  background-image: linear-gradient(rgb(175 1 0) 0%, rgb(249 186 115 / 51%) 100%), url(../../front-assets/img/masthead/2.jpg);
+  background-image: linear-gradient(rgb(249 186 115 / 51%) 0%,rgb(175 1 0)  100%), url(../../front-assets/img/masthead/2.jpg);
 }
 [data-anim^='slide-'],
 [data-anim-child^='slide-'] {
@@ -1624,12 +1628,14 @@ button:focus {
   border-color: transparent;
   color: white !important;
 }
-
 .button.-blue-1:hover {
-  border-color: #ffffff;
+  border-color: #bc1823;
   background-color: #fff !important;
   color: #B90B0B !important;
   cursor: pointer;
+}
+p.short-desc {
+  font-weight: 500;
 }
 .button.-outline-blue-1 {
   border-color: var(--color-blue-1);
@@ -13101,9 +13107,9 @@ table.table-5 td {
   bottom: 0;
   left: 50%;
 } */
-.pooja-head{
+.pooja-head {
   /* text-align: center; */
-  padding: 15px;
+  padding: 22px;
 }
 .pooja-head h5{
   color:#000;
@@ -13111,12 +13117,12 @@ table.table-5 td {
 .card-fullname {
   position: absolute;
   bottom: 0;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   text-align: left !important;
   white-space: nowrap;
   transform: translateY(-3px) translateX(-29%);
-  left: 38%;
+  left: 35%;
   /* margin-top: 40px; */
 }
 

@@ -21,7 +21,7 @@
 
 
         <div class="row dashboard-row">
-          <div class="col-xl-5 col-lg-12 col-md-12 col-sm-12">
+          <div class="col-xl-4 col-lg-12 col-md-12 col-sm-12">
             <div class="row">
               <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
                 <div class="card">
@@ -150,60 +150,57 @@
              
             </div>
           </div>
-          <div class="col-xl-7 col-lg-12 col-md-12 col-sm-12">
+          <div class="col-xl-8 col-lg-12 col-md-12 col-sm-12">
             <div class="card custom-card overflow-hidden">
-              <div class="">
                 <div>
-                  <h2 class="text-18 lh-1 fw-500 ps-4 pt-4">
-                    Recent Bookings
-                  </h2>
+                    <div>
+                        <h2 class="text-18 lh-1 fw-500 ps-4 pt-4">
+                            Recent Bookings
+                        </h2>
+                    </div>
                 </div>
-              </div>
-              <div class="card-body">
-                <table class="table-2 col-12">
-                  <thead class="">
-                    <tr>
-                      <th>#</th>
-                      <th>Item</th>
-                      <th>Total</th>
-                      <th>Paid</th>
-                      <th>Status</th>
-                      <th>Created At</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-
-                    <tr>
-                      <td>#1</td>
-                      <td>P.Bibhu Panda<br> Baladevjew Pooja                      </td>
-                      <td class="fw-500">0</td>
-                      <td>300</td>
-                      <td>
-                        <div class="rounded-100 py-4 text-center col-12 text-14 fw-500 bg-yellow-4 text-yellow-3">Pending</div>
-                        <div class="rounded-100 py-4 text-center col-12 text-14 fw-500 bg-green-2 mt-10 text-green-2">Pay</div>
-                      </td>
-                      <td>04/04/2022<br>08:16</td>
-                    </tr>
-
-
-                    <tr>
-                      <td>#5</td>
-                      <td>P.Bibhu Panda<br> Baladevjew Pooja                      </td>
-                      <td class="fw-500">1300</td>
-                      <td>1300</td>
-                      <td>
-                        <div class="rounded-100 py-4 text-center col-12 text-14 fw-500 bg-blue-1-05 text-blue-1">Confirmed</div>
-                        {{-- <div class="rounded-100 py-4 text-center col-12 text-14 fw-500 bg-blue-1-05 text-blue-1">Pay</div> --}}
-                      </td>
-                      <td>04/04/2022<br>08:16</td>
-                    </tr>
-
-                  </tbody>
-                </table>
-              </div>
+                <div class="card-body">
+                    <table class="table-2 col-12">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Booking Id</th>
+                                <th>Pooja Name</th>
+                                <th>Total</th>
+                                <th>Paid</th>
+                                <th>Status</th>
+                                <th>Pooja Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($bookings as $index => $booking)
+                            <tr>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $booking->booking_id }}</td>
+                                <td>{{ $booking->pooja->pooja_name }}</td>
+                                <td class="fw-500">₹ {{ $booking->pooja_fee }}</td>
+                                <td>₹ 0</td>
+                                <td>
+                                    <div class="rounded-100 py-4 text-center col-12 text-14 fw-500
+                                        @if ($booking->status == 'pending')
+                                            bg-yellow-4 text-yellow-3
+                                        @elseif ($booking->status == 'approved')
+                                            bg-green-4 text-green-3
+                                        @elseif ($booking->status == 'rejected')
+                                            bg-red-4 text-red-3
+                                        @endif
+                                    ">
+                                        {{ ucfirst($booking->status) }}
+                                    </div>
+                                </td>
+                                <td>{{ $booking->booking_date }}, {{$booking->booking_time}}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
             </div>
-           
-          </div>
+        </div>
           <!-- </div> -->
         </div>
 

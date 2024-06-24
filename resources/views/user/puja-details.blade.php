@@ -37,7 +37,7 @@
                         @foreach ($pandit_pujas as $pandit_puja)
                         @if($pandit_puja->profile)
                             <div class="col-md-4 pandit-card">
-                                <a href="{{ route('pandit.details', ['poojaSlug' => $pooja->slug, 'panditSlug' => $pandit_puja->profile->slug]) }}">
+                                {{-- <a href="{{ route('pandit.details', ['poojaSlug' => $pooja->slug, 'panditSlug' => $pandit_puja->profile->slug]) }}"> --}}
                                     <div class="card" data-state="#pooja">
                                         <div class="card-header">
                                             <img class="card-pooja" src="{{asset($pandit_puja->profile->profile_photo)}}" alt="image">
@@ -45,16 +45,24 @@
                                         <div class="pooja-head row">
                                             <div class="col-md-8 col-7">
                                                 <h5>{{ $pandit_puja->profile->name }}</h5>
+                                                <p class="total-fee">Total Fee : ₹{{ $pandit_puja->pooja_fee }}</p>
+                                                 <p class="total-fee">Advance Fee : ₹{{ $advancefee = $pandit_puja->pooja_fee * 20/100 }}</p>
+ 
+                                                 <p>Total Time : {{ $pandit_puja->pooja_duration }} hrs</p>
                                                 
                                             </div>
                                             <div class="col-md-4 col-5 text-right">
                                                 <span class="rating">4.4</span>
-                                                <p>₹{{ $pandit_puja->pooja_fee }}</p>
-                                                <p>{{ $pandit_puja->pooja_duration }} hrs</p>
+                                                
+                                            </div>
+                                            <div class="col-md-12 col-12">
+                                              <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $pandit_puja->profile->slug, 'poojaSlug' => $pooja->slug, 'poojaFee' => $advancefee]) : route('userlogin') }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
+                                                {{ Auth::guard('users')->check() ? 'Book Now' : 'Login to Book' }}
+                                               </a>
                                             </div>
                                         </div>
                                     </div>
-                                </a>
+                                {{-- </a> --}}
                             </div>
                         @else
                             <div class="col-md-4 pandit-card">
