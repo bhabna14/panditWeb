@@ -2,11 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\userController;
+use App\Http\Controllers\User\PaymentController;
+
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TitleController;
-use App\Http\Controllers\pandit\AreaController;
+use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Pandit\SkillController;
