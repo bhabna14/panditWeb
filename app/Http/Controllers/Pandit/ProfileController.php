@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use App\Models\PanditEducation;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
 
 class ProfileController extends Controller
 {
