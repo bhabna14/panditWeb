@@ -57,7 +57,8 @@ class PanditController extends Controller
             $booking = Booking::findOrFail($id);
             $booking->application_status = 'approved';
             $booking->save();
-
+        // Broadcast the event
+        event(new BookingApproved($booking));
             return redirect()->back()->with('success', 'Booking approved successfully!');
         }
 

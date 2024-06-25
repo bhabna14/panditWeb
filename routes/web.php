@@ -19,6 +19,9 @@ use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\BankController;
 use App\Http\Controllers\Pandit\AddressController;
+use App\Http\Controllers\Pandit\AreaController;
+
+
 use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Pandit\PoojaListController;
@@ -200,21 +203,20 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
 });
 
-// user routes
-Route::prefix('user')->middleware(['user'])->group(function () {
 
-    Route::controller(userController::class)->group(function() {
-        Route::get('/dashboard', 'dashboard')->name('user.dashboard');
-        
-    });
-});
 
 Route::controller(PanditLoginController::class)->group(function() {
     Route::post('/pandit/save-panditlogin', 'storeLoginData')->name('pandit.login');
     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
     Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
 });
-
+Route::controller(AreaController::class)->group(function() {
+    Route::get('pandit/poojaarea', 'poojaArea')->name('poojaarea');
+    Route::get('pandit/get-district/{stateCode}', 'getDistrict');
+    Route::get('pandit/get-subdistrict/{districtCode}', 'getSubdistrict'); 
+    Route::get('pandit/get-village/{subdistrictCode}', 'getVillage'); 
+    Route::post('pandit/save-form', 'saveForm')->name('save.form');
+});
 /// pandit routes
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
