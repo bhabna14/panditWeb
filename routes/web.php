@@ -267,7 +267,7 @@ Route::group(['prefix' => 'pandit'], function () {
 
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaDetailsController::class)->group(function() {
-        Route::get('/poojadetails', 'poojadetails')->name('poojadetails');
+        Route::get('/poojadetails', 'poojadetails')->name('poojadetail');
         Route::post('/save-poojadetails', 'savePoojadetails');
         Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
         Route::put('/update-poojadetails', 'updatePoojadetails')->name('updatePoojadetails');
