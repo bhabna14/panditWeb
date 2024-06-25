@@ -222,7 +222,7 @@ Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
         Route::get('/panditlogin', 'panditlogin');
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
-        Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
+        // Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
         Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
