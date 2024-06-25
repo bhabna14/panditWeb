@@ -2,31 +2,27 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\userController;
-use App\Http\Controllers\User\PaymentController;
-
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TitleController;
-use App\Http\Controllers\Admin\LanguageController;
-use App\Http\Controllers\Admin\LocationController;
-use App\Http\Controllers\Admin\PodcastController;
+use App\Http\Controllers\pandit\AreaController;
+use App\Http\Controllers\Pandit\BankController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Pandit\SkillController;
+use App\Http\Controllers\Admin\PodcastController;
 use App\Http\Controllers\Pandit\CareerController;
 use App\Http\Controllers\Pandit\PanditController;
-use App\Http\Controllers\Pandit\ProfileController;
-use App\Http\Controllers\Pandit\PoojaDetailsController;
-use App\Http\Controllers\Pandit\BankController;
+use App\Http\Controllers\Admin\LanguageController;
+use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Pandit\AddressController;
-use App\Http\Controllers\Pandit\AreaController;
-
-
+use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\sebayatregisterController;
-use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Pandit\PoojaListController;
-use App\Http\Controllers\Superadmin\SuperAdminController;
+use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Pandit\PanditLoginController; 
+use App\Http\Controllers\Pandit\PoojaDetailsController;
+use App\Http\Controllers\Superadmin\SuperAdminController;
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
@@ -132,7 +128,6 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     });
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
-        Route::get('/manage-special-puja', 'manageSpecialPuja')->name('manageSpecialPuja');
         Route::get('/add-puja', 'addpuja')->name('addpuja');
         Route::post('/savepuja', 'savepuja')->name('savepuja');
         Route::get('/editpooja/{pooja}', 'editpooja')->name('editpooja');
@@ -203,30 +198,28 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
 });
 
+// user routes
+Route::prefix('user')->middleware(['user'])->group(function () {
 
+    Route::controller(userController::class)->group(function() {
+        Route::get('/dashboard', 'dashboard')->name('user.dashboard');
+        
+    });
+});
 
 Route::controller(PanditLoginController::class)->group(function() {
     Route::post('/pandit/save-panditlogin', 'storeLoginData')->name('pandit.login');
     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
     Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
 });
-Route::controller(AreaController::class)->group(function() {
-    Route::get('pandit/poojaarea', 'poojaArea')->name('poojaarea');
-    Route::get('pandit/get-district/{stateCode}', 'getDistrict');
-    Route::get('pandit/get-subdistrict/{districtCode}', 'getSubdistrict'); 
-    Route::get('pandit/get-village/{subdistrictCode}', 'getVillage'); 
-    Route::post('pandit/save-form', 'saveForm')->name('save.form');
-});
+
 /// pandit routes
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
         Route::get('/panditlogin', 'panditlogin');
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
-        // Route::get('/poojaarea', 'poojaarea')->name('poojaarea');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
-        Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
-        Route::post('/booking/reject/{id}', 'rejectBooking')->name('pandit.booking.reject');
         Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');
     });
 });
@@ -250,7 +243,7 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/deletIdproof/{id}', 'deletIdproof')->name('deletIdproof');
         Route::get('/deletEducation/{id}', 'deletEducation')->name('deletEducation');
         Route::get('/deletVedic/{id}', 'deletVedic')->name('deletVedic');
-        Route::put('/updateCareer/{id}', 'updateCareer')->name('updateCareer');
+        Route::put('/updateCareer/{pandit_id}', 'updateCareer')->name('updateCareer');
     });
 
     });
@@ -267,12 +260,20 @@ Route::group(['prefix' => 'pandit'], function () {
 
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaDetailsController::class)->group(function() {
-        Route::get('/poojadetails', 'poojadetails')->name('poojadetail');
+        Route::get('/poojadetails', 'poojadetails')->name('poojadetails');
         Route::post('/save-poojadetails', 'savePoojadetails');
         Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
         Route::put('/update-poojadetails', 'updatePoojadetails')->name('updatePoojadetails');
-        Route::get('/poojadetails',  'poojadetails')->name('pandit.poojadetails');
+        Route::get('/pandit/poojadetails',  'poojadetails')->name('pandit.poojadetails');
     });
+});
+
+Route::controller(AreaController::class)->group(function() {
+    Route::get('pandit/poojaarea', 'poojaArea')->name('poojaarea');
+    Route::get('pandit/get-district/{stateCode}', 'getDistrict');
+    Route::get('pandit/get-subdistrict/{districtCode}', 'getSubdistrict'); 
+    Route::get('pandit/get-village/{subdistrictCode}', 'getVillage'); 
+    Route::post('pandit/save-form', 'saveForm')->name('save.form');
 });
 
 // pandit bank details

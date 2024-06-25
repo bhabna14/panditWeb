@@ -117,7 +117,7 @@ class SkillController extends Controller
     }
 
     if ($allSaved) {
-        return redirect()->route('poojadetail')->with('success', 'Pooja skills have been saved successfully.');
+        return redirect()->route('poojadetails')->with('success', 'Pooja skills have been saved successfully.');
     } else {
         return redirect()->back()->withErrors(['danger' => 'Failed to saved some pooja skills.']);
     }
