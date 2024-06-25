@@ -67,13 +67,11 @@
                                 {{ $errors->first('danger') }}
                             </div>
                         @endif
-
                         <form action="{{ url('/pandit/save-skillpooja') }}" method="post" enctype="multipart/form-data">
                             <div class="row mb-5">
                                 @csrf
                                 @foreach ($Poojanames as $pooja)
                                     <div class="col-lg-3 col-md-6 col-sm-12">
-
                                         <div class="card p-3">
                                             <div class="card-body">
                                                 <div class="mb-3 text-center about-team">
