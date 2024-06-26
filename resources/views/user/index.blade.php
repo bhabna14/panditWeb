@@ -56,7 +56,7 @@
                 <div class="col-md-12">
                     <div class="upcoming-main-heading">
                         <h1>Upcoming Pooja Calendar</h1>
-                        <p class="text-white">Discover and book upcoming pujas effortlessly with our online pandit booking service. Join us for spiritual ceremonies and secure your pandit today for a seamless experience.
+                        <p class="text-dark">Discover and book upcoming pujas effortlessly with our online pandit booking service. Join us for spiritual ceremonies and secure your pandit today for a seamless experience.
                         </p>
                     </div>
                 </div>
@@ -300,8 +300,8 @@
       </div>
       <span class="sigma_cta-sperator d-lg-flex">or</span>
       <div class="col-md-6">
-        <div class="sigma_cta primary-bg">
-          <div class="sigma_cta-content" style="padding: 40px 40px 40px 50px;">
+        <div class="sigma_cta primary-bg1">
+          <div class="sigma_cta-content" style="padding: 40px 40px 40px 90px;">
             <h4 class="text-white">contact@33crores.com</h4>
           </div>
           <img class="cta-left-img" src="{{ asset('front-assets/img/4ebcc66a-bcc1-429f-8ef1-6040ae9f369d-removebg-preview.png')}}" alt="cta">

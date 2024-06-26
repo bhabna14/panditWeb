@@ -667,8 +667,11 @@ p.blockquote:after {
 .upcoming-main-heading {
   text-align: center;
   margin-bottom: 38px;
-  color: #fff;
+  color: #000;
   letter-spacing: 1px;
+}
+.upcoming-main-heading  p {
+  font-weight: 600;
 }
 .poja-details-img img{
     /* width: 62%; */
@@ -740,17 +743,25 @@ p.blockquote:after {
   color: #B90B0B;
 }
 
-.primary-bg {
-  background-color: #B90B0B;
+.primary-bg1 {
+  background-position: center;
+  /* background-color: #B90B0B; */
+  background-image: url('../img/Satyanarayan Pooja.png');
+  background-size: contain;
 }
-
+.primary-bg {
+  background-position: center;
+  /* background-color: #B90B0B; */
+  background-image: url('../img/Special Poojas.png');
+  background-size: contain;
+}
 .sigma_cta {
   display: flex;
   height: 100%;
   flex-direction: column;
   justify-content: center;
   position: relative;
-  padding: 20px;
+  padding: 6px;
 }
 
 .sigma_cta-sperator {
