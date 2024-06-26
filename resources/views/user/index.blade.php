@@ -101,8 +101,9 @@
             <div data-anim="" data-aos="fade-up" class="row y-gap-20 mb-30 justify-between items-end">
                 <div class="col-auto">
                     <div class="sectionTitle -md">
-                        <h2 class="sectionTitle__title">Famous Pandits</h2>
-                        <p class=" sectionTitle__text mt-5 sm:mt-0">These are few upcoming Pooja for you to do</p>
+                        <h2 class="sectionTitle__title"> Expert Pandits                        </h2>
+                        <p class=" sectionTitle__text mt-5 sm:mt-0">Connect with our top-rated pandits, celebrated for their wisdom and skill. Enhance your spiritual practices with their guidance.
+                        </p>
                     </div>
                 </div>
 
@@ -153,8 +154,8 @@
             <div data-anim="" data-aos="fade-up" data-aos-delay="500" class="row y-gap-20 justify-between items-end">
                 <div class="col-auto">
                     <div class="sectionTitle -md">
-                        <h2 class="sectionTitle__title">Special Pooja</h2>
-                        <p class=" sectionTitle__text mt-5 sm:mt-0 text-white">These are few upcoming Pooja for you to do</p>
+                        <h2 class="sectionTitle__title">Customized Pujas</h2>
+                        <p class=" sectionTitle__text mt-5 sm:mt-0 text-white">Elevate your spiritual journey with our special pujas, conducted by experienced pandits for auspicious occasions.</p>
                     </div>
                 </div>
 
@@ -202,8 +203,8 @@
           <div  class="row justify-center text-center">
             <div class="col-auto">
               <div class="sectionTitle text-white">
-                <h2 class="sectionTitle__title">Customer Reviews</h2>
-                <p class=" sectionTitle__text mt-5 sm:mt-0">These popular destinations have a lot to offer</p>
+                <h2 class="sectionTitle__title">Blessed Reviews</h2>
+                <p class=" sectionTitle__text mt-5 sm:mt-0">Hear how our expert pandits have enhanced spiritual experiences for our valued customers. Read their stories and feel the divine connection.</p>
               </div>
             </div>
           </div>
@@ -284,8 +285,8 @@
   <div class="section-cta-custom pt-0">
     <div class="container">
     <div class="section-title text-center">
-    <p class="subtitle">WAYS WE CAN HELP</p>
-    <h4 class="title">Pandits Ready To Help</h4>
+    <p class="subtitle">How We Can Assist</p>
+    <h4 class="title">Expert Pandits Ready to Assist    </h4>
     </div>
     <div class="row align-items-center position-relative">
       <div class="col-md-6">
