@@ -291,7 +291,7 @@
     <div class="row align-items-center position-relative">
       <div class="col-md-6">
         <div class="sigma_cta primary-bg">
-          <img class="cta-left-img" src="{{ asset('front-assets/img/4ebcc66a-bcc1-429f-8ef1-6040ae9f369d-removebg-preview.png')}}" alt="cta">
+          {{-- <img class="cta-left-img" src="{{ asset('front-assets/img/4ebcc66a-bcc1-429f-8ef1-6040ae9f369d-removebg-preview.png')}}" alt="cta"> --}}
           <div class="sigma_cta-content" style="    padding: 40px 40px 40px 148px;">
            
             <h4 class="text-white">+91 9776888887</h4>
@@ -304,7 +304,7 @@
           <div class="sigma_cta-content" style="padding: 40px 40px 40px 90px;">
             <h4 class="text-white">contact@33crores.com</h4>
           </div>
-          <img class="cta-left-img" src="{{ asset('front-assets/img/4ebcc66a-bcc1-429f-8ef1-6040ae9f369d-removebg-preview.png')}}" alt="cta">
+          {{-- <img class="cta-left-img" src="{{ asset('front-assets/img/4ebcc66a-bcc1-429f-8ef1-6040ae9f369d-removebg-preview.png')}}" alt="cta"> --}}
 
         </div>
       </div>

@@ -743,13 +743,13 @@ p.blockquote:after {
   color: #B90B0B;
 }
 
-.primary-bg1 {
+.primary-bg {
   background-position: center;
   /* background-color: #B90B0B; */
   background-image: url('../img/Satyanarayan Pooja.png');
   background-size: contain;
 }
-.primary-bg {
+.primary-bg1 {
   background-position: center;
   /* background-color: #B90B0B; */
   background-image: url('../img/Special Poojas.png');
@@ -900,7 +900,7 @@ p.blockquote:after {
   background-position: center;
   background-size: cover;
   color: #fff;
-  background-image: linear-gradient(rgb(249 186 115 / 51%) 0%,rgb(175 1 0)  100%), url(../../front-assets/img/masthead/2.jpg);
+  background-image: url('../../front-assets/img/pooja_count1.png');
 }
 [data-anim^='slide-'],
 [data-anim-child^='slide-'] {
