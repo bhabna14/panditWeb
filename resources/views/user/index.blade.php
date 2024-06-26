@@ -385,7 +385,7 @@
                 </div>
 
                 <div  class="col-lg-6" data-aos="fade-up" data-aos-delay="500">
-                    <img src="{{ asset('front-assets/img/app/1.png') }}" alt="image">
+                    <img src="{{ asset('front-assets/img/Beige &amp; White Special Offer Discount Instagram Post.png') }}" alt="image">
                 </div>
             </div>
         </div>
