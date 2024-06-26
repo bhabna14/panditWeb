@@ -333,13 +333,13 @@
                 </div>
 
                 <div class="col-xl-3 col-6">
-                  <img src="{{ asset('front-assets/img/customer.png') }}" alt="image" width="50%">
+                  <img src="{{ asset('front-assets/img/PANDIT_JEE_LISTED-removebg-preview.png') }}" alt="image" width="50%">
                     <div class="text-40 lg:text-30 lh-13 fw-600 counter">2M</div>
                     <div class="text-14 lh-14 text-light-1 mt-5">Pandti Jee Listed</div>
                 </div>
 
                 <div class="col-xl-3 col-6">
-                  <img src="{{ asset('front-assets/img/PANDIT_JEE_LISTED-removebg-preview.png') }}" alt="image" width="50%">
+                  <img src="{{ asset('front-assets/img/POOJA PERFORMED.png') }}" alt="image" width="50%">
                     <div class="text-40 lg:text-30 lh-13 fw-600 counter">5,749</div>
                     <div class="text-14 lh-14 text-light-1 mt-5">Pooja performed</div>
                 </div>
