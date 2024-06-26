@@ -222,6 +222,8 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
+        Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
+        Route::post('/booking/reject/{id}', 'rejectBooking')->name('pandit.booking.reject');
         Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');
     });
 });

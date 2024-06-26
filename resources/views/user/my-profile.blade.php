@@ -168,8 +168,8 @@
                                 <th>Pooja Name</th>
                                 <th>Pandit Name</th>
                                 <th>Total</th>
-                                <th>advance fee</th>
-                                <th>Paid</th>
+                               
+                                <th>Total Paid</th>
                                 <th>Status</th>
                                 <th>Pooja Time</th>
                                 <th>Action</th>
@@ -183,8 +183,8 @@
                                 <td>{{ $booking->pooja->pooja_name }}</td>
                                 <td>{{ $booking->pandit->name }}</td>
                                 <td class="fw-500">₹ {{ $booking->pooja_fee }}</td>
-                                <td class="fw-500">₹ {{ $booking->advance_fee }}</td>
-                                <td>₹ {{ $booking->paid }}</td>
+                              
+                                <td>₹ {{ $booking->paid ? $booking->paid : '0' }}</td>
                                 <td>
                                     <div class="rounded-100 py-4 text-center col-12 text-14 fw-500
                                         @if ($booking->status == 'pending')
@@ -201,7 +201,7 @@
                                 </td>
                                 <td>{{ $booking->booking_date }}, {{$booking->booking_time}}</td>
                                 <td>
-                                  @if ($booking->application_status == 'approved'  && !$booking->status == 'paid')
+                                  @if ($booking->application_status == 'approved'  && $booking->status == 'pending')
                                       <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="btn btn-success">Pay</a>
 
                                   @elseif ($booking->application_status == 'approved' && $booking->status == 'paid')

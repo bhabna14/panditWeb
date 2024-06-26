@@ -16,7 +16,7 @@ use App\Models\VedicDetail;
 use App\Models\Poojaskill;
 use App\Models\Poojaitemlist;
 use App\Models\Booking;
-
+use App\Events\BookingApproved;
 use Illuminate\Support\Facades\Auth;
 
 
