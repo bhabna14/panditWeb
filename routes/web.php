@@ -130,6 +130,8 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     });
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
+        Route::get('/manage-special-puja', 'manageSpecialPuja')->name('manageSpecialPuja');
+
         Route::get('/add-puja', 'addpuja')->name('addpuja');
         Route::post('/savepuja', 'savepuja')->name('savepuja');
         Route::get('/editpooja/{pooja}', 'editpooja')->name('editpooja');
