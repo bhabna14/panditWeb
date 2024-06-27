@@ -25,6 +25,27 @@ use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Pandit\PanditLoginController; 
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
+use Twilio\Rest\Client;
+
+Route::post('/whatsapp/reply', function (Request $request) {
+    $body = $request->input('Body');
+    $from = $request->input('From');
+
+    // Your logic to generate auto-reply message
+    $replyMessage = "Hello! Thank you for your message. We'll get back to you soon.";
+
+    // Send auto-reply
+    $twilio = new Client(config('services.twilio.sid'), config('services.twilio.token'));
+    $twilio->messages->create(
+        $from,
+        [
+            'from' => config('services.twilio.whatsapp_from'),
+            'body' => $replyMessage,
+        ]
+    );
+
+    return response('Auto-reply sent');
+});
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
