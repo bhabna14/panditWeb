@@ -27,6 +27,7 @@ use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
 use Twilio\Rest\Client;
 
+
 Route::post('/whatsapp/reply', function (Request $request) {
     $body = $request->input('Body');
     $from = $request->input('From');
