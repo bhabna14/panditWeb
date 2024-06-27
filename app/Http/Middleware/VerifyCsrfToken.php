@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        '/whatsapp/reply', // Example route to exclude from CSRF protection
     ];
+
 }
