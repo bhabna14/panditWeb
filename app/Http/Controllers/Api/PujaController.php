@@ -104,7 +104,9 @@ class PujaController extends Controller
 
 
     public function poojalists(){
-        $poojalists = Poojalist::where('status', 'active')->get();
+        $poojalists = Poojalist::where('status', 'active')->where(function($query) {
+            $query->whereNull('pooja_date');
+        })->get();
         foreach ($poojalists as $poojalist) {
             $poojalist->pooja_img_url = asset('assets/img/' . $poojalist->pooja_photo);
             // dd($poojalist->image_url);
@@ -124,6 +126,29 @@ class PujaController extends Controller
             'data' => $poojalists
         ], 200);
     }
+    public function panditlist(){
+        $pandits = Profile::where('pandit_status', 'accepted')
+                            ->get();
+        foreach ($pandits as $pandit) {
+                $pandit->pandit_img_url = asset($pandit->profile_photo);
+                                // dd($pandit->image_url);
+                               
+        }
+                            if ($pandits->isEmpty()) {
+                                return response()->json([
+                                    'status' => 404,
+                                    'message' => 'No data found',
+                                    'data' => []
+                                ], 404);
+                            }
+                            // return response()->json($pandits);
+                            return response()->json([
+                                'status' => 200,
+                                'message' => 'Data retrieved successfully',
+                                'data' => $pandits
+                            ], 200);
+       
+     }
     public function upcomingpoojalists(){
         $upcomingPoojas = Poojalist::where('status', 'active')
                         ->where('pooja_date', '>=', now())

@@ -54,7 +54,7 @@ class userController extends Controller
     }
     public function userauthenticate(Request $request)
     {
-// dd($request);
+
         $request->validate([
             'phonenumber' => 'required|string',
             'otp' => 'required',
