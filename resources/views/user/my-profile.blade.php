@@ -202,7 +202,7 @@
                                 <td>{{ $booking->booking_date }}, {{$booking->booking_time}}</td>
                                 <td>
                                   @if ($booking->application_status == 'approved'  && $booking->status == 'pending')
-                                      <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="btn btn-success">Pay</a>
+                                      <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="btn btn-success pay-btn">Pay</a>
 
                                   @elseif ($booking->application_status == 'approved' && $booking->status == 'paid')
                                       <span class="text-success">Already Paid</span>

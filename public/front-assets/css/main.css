@@ -542,6 +542,16 @@ span.relative.z-0.inline-flex.shadow-sm.rounded-md {
   color: #7E4555;
   background-color: #e6e8e7;
 }
+.pay-btn{
+ 
+    background-color: green;
+    color: #fff;
+    padding: 10px 25px 12px 25px;
+    /* margin-top: 24px; */
+    border-radius: 4px;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
 .sigma_list li {
   margin: 0;
   display: flex;
