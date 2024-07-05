@@ -22,7 +22,10 @@
     <div class="row">
         
         <div class="col-md-12">
-            <p><i class="fa fa-map-pin map-icon"></i>4th floor, o-hub, sez road, chandaka industrial estate, bhubaneswar, odisha 751024</p>
+            <p><i class="fa fa-map-pin map-icon"></i>{{ $booking->address->area ?? 'N/A' }},{{ $booking->address->city ?? 'N/A' }},{{ $booking->address->state ?? 'N/A' }}
+              {{ $booking->address->country ?? 'N/A' }}<br>
+              Pincode : {{ $booking->address->pincode ?? 'N/A' }}<br>
+              Landmark : {{ $booking->address->landmark ?? 'N/A' }}</p>
         </div>
       <div class="col-md-12">
         <div class="">
@@ -31,12 +34,13 @@
               <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg')}}" alt="">
             </div>
             <div class="col-md-6 mt-15">
-              <h6>Baladevjew Pooja</h6>
-              <p>P.Bibhu Panda</p>
-              <p>Duration: 3hr</p>
-              <p>Date : 14/05/2024</p>
-              <p>Advance Payment: 600</p>
-              <p>Total Payment: 3000</p>
+              <h6>{{ $booking->pooja->pooja_name }}</h6>
+              <p>{{ $booking->pandit->name }}</p>
+              <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
+              <p>Date : {{ $booking->booking_date }}</p>
+             
+              <p>Total Payment: {{ $booking->pooja_fee }}</p>
+              <p>Paid: {{ $booking->paid }}</p>
             </div>
           </div>
         
