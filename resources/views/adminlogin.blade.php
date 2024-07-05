@@ -1,7 +1,7 @@
 @extends('layouts.custom-app')
 
     @section('styles')
-
+    <title> Admin Login</title>
     @endsection
 
     @section('class')

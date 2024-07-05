@@ -26,7 +26,8 @@
         <div class="order-card">
           <div class="row">
             <div class="col-md-5 order-img">
-              <img src="{{ asset('assets/img/'.$booking->pooja->pooja_photo)}}" alt="">
+              {{-- <img src="{{ asset('assets/img/'.$booking->pooja->pooja_photo)}}" alt=""> --}}
+              <img src="{{ asset('assets/img/'.$booking->pooja->poojalist->pooja_photo) }}" alt="">
             </div>
             <div class="col-md-6 mt-15">
               <h6>{{ $booking->pooja->pooja_name }}</h6>

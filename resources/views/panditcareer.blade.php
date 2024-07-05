@@ -1,6 +1,8 @@
 @extends('pandit.layouts.custom-app')
 
 @section('styles')
+<title> Pandit Login</title>
+
 @endsection
 
 @section('class')
