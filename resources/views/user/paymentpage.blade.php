@@ -16,7 +16,7 @@
     <h3>Choose a payment option:</h3>
     <form id="payment-form" action="{{ route('payment.process', ['booking_id' => $booking->id]) }}" method="POST">
         @csrf
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom: 15px;">
             <div class="form-check">
                 <input class="form-check-input" type="radio" name="payment_option" id="full_payment" value="full" required>
                 <label class="form-check-label" for="full_payment">
