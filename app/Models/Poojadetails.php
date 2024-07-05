@@ -13,12 +13,13 @@ class Poojadetails extends Model
 
     public function poojalist()
     {
-        return $this->belongsTo(Poojalist::class, 'pooja_id');
+        return $this->belongsTo(Poojalist::class, 'pooja_id','id');
     }
 
     public function profile()
     {
         return $this->belongsTo(Profile::class, 'pandit_id', 'pandit_id');
     }
+   
 }
 

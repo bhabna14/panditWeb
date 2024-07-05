@@ -395,7 +395,7 @@ public function bookingSuccess($id)
         $user = Auth::guard('users')->user();
     
         // Fetch recent bookings for the user
-        $bookings = Booking::with('pooja','pandit','address') // Load relationship to get pooja details
+        $bookings = Booking::with('pooja.poojalist','pandit','address') // Load relationship to get pooja details
                            ->where('user_id', $user->userid)
                            ->orderByDesc('created_at')
                            ->take(10) // Limit to 10 recent bookings (adjust as needed)
