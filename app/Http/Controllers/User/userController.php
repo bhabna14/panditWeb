@@ -414,7 +414,7 @@ public function bookingSuccess($id)
 
     public function viewdetails($id)
 {
-    $booking = Booking::with(['pooja', 'pandit'])->findOrFail($id);
+    $booking = Booking::with(['pooja.poojalist', 'pandit'])->findOrFail($id);
     return view('user/view-pooja-details', compact('booking'));
 }
 

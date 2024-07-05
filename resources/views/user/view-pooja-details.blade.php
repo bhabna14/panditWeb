@@ -31,7 +31,7 @@
         <div class="">
           <div class="row">
             <div class="col-md-3 mt-15">
-              <img src="{{ asset('front-assets/img/masthead/2/baldev.jpg')}}" alt="">
+              <img src="{{ asset('assets/img/'.$booking->pooja->poojalist->pooja_photo) }}" alt="">
             </div>
             <div class="col-md-6 mt-15">
               <h6>{{ $booking->pooja->pooja_name }}</h6>
