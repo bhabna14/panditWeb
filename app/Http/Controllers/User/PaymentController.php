@@ -45,10 +45,11 @@ public function processPayment(Request $request, $booking_id)
         if ($payment->status != 'captured') {
             return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
         }
+        $paidAmountInRupees = $payment->amount / 100;
 
         // Update booking with payment details
         $booking->status = 'paid';
-        $booking->paid =  $payment->amount;
+        $booking->paid =  $paidAmountInRupees;
         $booking->payment_id = $request->razorpay_payment_id;
         $booking->save();
 
