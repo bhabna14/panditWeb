@@ -28,7 +28,9 @@ use App\Http\Controllers\Superadmin\SuperAdminController;
 use Twilio\Rest\Client;
 
 
-
+Route::fallback(function () {
+    abort(404);
+});
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
@@ -69,7 +71,9 @@ Route::middleware(['user'])->group(function () {
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
         Route::get('/order-history', 'orderhistory')->name('orderhistory');
         Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
-        Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
+        Route::get('/view-ordered-pooja-details/{id}', [UserController::class, 'viewdetails'])->name('viewdetails');
+
+        // Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
         Route::get('/userprofile', 'userprofile')->name('userprofile');
         Route::get('/coupons', 'coupons')->name('coupons');
     });

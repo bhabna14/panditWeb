@@ -392,7 +392,15 @@ public function bookingSuccess($id)
     }
     
     public function orderhistory(){
-        return view('user/orderhistory');
+        $user = Auth::guard('users')->user();
+    
+        // Fetch recent bookings for the user
+        $bookings = Booking::with('pooja','pandit','address') // Load relationship to get pooja details
+                           ->where('user_id', $user->userid)
+                           ->orderByDesc('created_at')
+                           ->take(10) // Limit to 10 recent bookings (adjust as needed)
+                           ->get();
+        return view('user/orderhistory', compact('bookings'));
     }
     public function userprofile(){
         return view('user/userprofile');
@@ -400,9 +408,16 @@ public function bookingSuccess($id)
     public function ratepooja(){
         return view('user/ratepooja');
     }
-    public function viewdetails(){
-        return view('user/view-pooja-details');
-    }
+    // public function viewdetails(){
+    //     return view('user/view-pooja-details');
+    // }
+
+    public function viewdetails($id)
+{
+    $booking = Booking::with(['pooja', 'pandit'])->findOrFail($id);
+    return view('user/view-pooja-details', compact('booking'));
+}
+
     public function mngaddress(){
         $user = Auth::guard('users')->user();
         $addressdata = UserAddress::where('user_id', $user->userid)->get();
