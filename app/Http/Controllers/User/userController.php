@@ -112,48 +112,7 @@ class userController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    // public function store(Request $request)
-    // {
-    //     $request->validate([
-    //         'first_name' => 'required|string|max:250',
-    //         'last_name' => 'required|string|max:250',
-    //         'phonenumber' => 'required',
-    //         'password' => 'required|min:8'
-    //     ]);
 
-
-
-    //     $user = new User();
-    //     $mobileNumberExists = User::where('phonenumber', $request->phonenumber)->exists();
-    //     if($mobileNumberExists){
-    //         return redirect()->back()->withInput()->withErrors(['login_error' => 'Phone Number is already exist.']);
-
-    //     }else{
-    //         if ($request->has('first_name')) {
-    //             $user->first_name = $request->first_name;
-    //         }
-    //         $user->user_id = $request->userid;
-    //         $user->name = $request->first_name;
-    //         $user->last_name = $request->last_name;
-
-    //         $user->phonenumber = $request->phonenumber;
-    //         $user->email = $request->phonenumber;
-    //         $user->password = Hash::make($request->password);
-    //         $user->role = 'user';
-    //         $user->status = 'active';
-    //         $user->application_status = 'pending';
-    //         $user->added_by = 'user';
-    //         $user->otp = '234234';
-
-    //         // Save the user
-    //         $user->save();
-
-        
-    //         return redirect('/')->with('success', 'Registered successfully.');
-    //     }
-
-      
-    // }
     public function storeLoginData(Request $request)
     {
         // Validate incoming request data
