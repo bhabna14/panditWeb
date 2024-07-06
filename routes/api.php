@@ -12,6 +12,8 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PoojaListController;
 use App\Http\Controllers\Api\PoojaSkillController;
 use App\Http\Controllers\Api\PoojaDetailsController;
+use App\Http\Controllers\Api\PanditController;
+
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
@@ -67,9 +69,14 @@ Route::controller(PodcastController::class)->group(function() {
     Route::get('podcasts', 'podcasts');
 });
 
+///home page apis
 Route::controller(PujaController::class)->group(function() {
     Route::get('poojalists', 'poojalists');
     Route::get('upcomingpoojalists', 'upcomingpoojalists'); 
     Route::get('homepage', 'homepage'); 
     Route::get('panditlists', 'panditlist'); 
 });
+
+// single page apis
+Route::get('/our-pandit/{slug}', [PanditController::class, 'singlePanditDetails']);
+Route::get('/pooja/{slug}', [PanditController::class, 'poojadetails']);
