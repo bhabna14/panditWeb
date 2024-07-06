@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\PoojaListController;
 use App\Http\Controllers\Api\PoojaSkillController;
 use App\Http\Controllers\Api\PoojaDetailsController;
 use App\Http\Controllers\Api\PanditController;
+use App\Http\Controllers\Api\UserLoginController;
+
 
 
 
@@ -80,3 +82,9 @@ Route::controller(PujaController::class)->group(function() {
 // single page apis
 Route::get('/our-pandit/{slug}', [PanditController::class, 'singlePanditDetails']);
 Route::get('/pooja/{slug}', [PanditController::class, 'poojadetails']);
+
+//user login api
+Route::controller(UserLoginController::class)->group(function() {
+    Route::post('/login','storeLoginData');
+    Route::post('/verify-otp','checkUserOtp');
+});
