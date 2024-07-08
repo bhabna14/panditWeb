@@ -264,9 +264,9 @@ class userController extends Controller
         ]);
     }
     public function addfrontaddress()
-{
+    {
     return view('user.addfrontaddress');
-}
+    }
 public function confirmBooking(Request $request)
 {
     try {
