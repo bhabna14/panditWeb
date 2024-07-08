@@ -18,11 +18,11 @@ class UserLoginController extends Controller
         ]);
 
         // Concatenate country code with phone number
-        $phonenumber = '+91'. $data['phonenumber'];
-        // dd($phonenumber);
+        $phonenumber = '+91' . $data['phonenumber'];
+
         // Check if a user with this phone number already exists
         $user = User::where('phonenumber', $phonenumber)->first();
-        // dd($user);
+
         $otp = rand(1000, 9999);
         $userid = 'USER' . rand(10000, 99999);
         if ($user) {
@@ -30,9 +30,8 @@ class UserLoginController extends Controller
             $user->otp = $otp;
         } else {
             // User doesn't exist, create a new one
-           
             $user = new User();
-            $user->userid =  $userid;
+            $user->userid = $userid;
             $user->phonenumber = $phonenumber;
             $user->otp = $otp;
         }
@@ -46,7 +45,7 @@ class UserLoginController extends Controller
         } else {
             return response()->json([
                 'success' => 400,
-                'message' => 'OTP generated successfully.',
+                'message' => 'Failed to generate OTP.',
             ], 400);
         }
     }
@@ -58,18 +57,27 @@ class UserLoginController extends Controller
         ]);
 
         $inputOtp = $request->input('otp');
-        
+
         $user = User::where('otp', $inputOtp)->first();
 
         // Check if user exists and the OTP matches
         if ($user) {
             // Log the user in
             Auth::guard('users')->login($user);
+
             // Clear the OTP after successful validation
             $user->otp = null;
             $user->save();
 
-            return response()->json(['message' => 'Login successful.', 'user' => $user], 200);
+            // Generate a new token
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login successful.',
+                'user' => $user,
+                'access_token' => $token,
+                'token_type' => 'Bearer'
+            ], 200);
         } else {
             // OTP is invalid, return error response
             return response()->json(['message' => 'Invalid OTP.'], 401);
