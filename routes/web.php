@@ -76,6 +76,8 @@ Route::middleware(['user'])->group(function () {
         // Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
         Route::get('/userprofile', 'userprofile')->name('userprofile');
         Route::get('/coupons', 'coupons')->name('coupons');
+
+        Route::put('/profile',  'updateProfile')->name('user.updateProfile');
     });
 });
 Route::middleware(['user'])->group(function () {

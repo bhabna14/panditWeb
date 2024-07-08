@@ -31,95 +31,87 @@
            
 
           </div>
-
           <div class="tabs__content pt-30 js-tabs-content">
+          <form action="{{ route('user.updateProfile') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PUT')
             <div class="tabs__pane -tab-item-1 is-tab-el-active">
               <div class="row y-gap-30 items-center">
-                <div class="col-auto">
-                  <div class="d-flex ratio ratio-1:1 w-200">
-                    <img src="{{ asset('front-assets/img/misc/avatar-1.png')}}" alt="image" class="img-ratio rounded-4">
-
-                    <div class="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
-                      <div class="size-30 bg-white rounded-4 text-center">
-                        <i class="icon-trash text-16"></i>
+                  <div class="col-auto">
+                      <div class="d-flex ratio ratio-1:1 w-200">
+                          <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('front-assets/img/misc/avatar-1.png') }}" alt="image" class="img-ratio rounded-4">
+  
+                          <div class="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
+                              <div class="size-30 bg-white rounded-4 text-center">
+                                  <i class="icon-trash text-16"></i>
+                              </div>
+                          </div>
                       </div>
-                    </div>
                   </div>
-                </div>
-
-                <div class="col-auto">
-                  <h4 class="text-16 fw-500">Your avatar</h4>
-                  <div class="text-14 mt-5">PNG or JPG no bigger than 800px wide and tall.</div>
-
-                  <div class="d-inline-block mt-15">
-                    <button class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
-                      <i class="icon-upload-file text-20 mr-10"></i>
-                      Browse
-                    </button>
+  
+                  <div class="col-auto">
+                      <h4 class="text-16 fw-500">Your avatar</h4>
+                      <div class="text-14 mt-5">PNG or JPG no bigger than 800px wide and tall.</div>
+  
+                      <div class="d-inline-block mt-15">
+                          <input type="file" name="avatar" class="form-control">
+                      </div>
                   </div>
-                </div>
               </div>
-
+  
               <div class="border-top-light mt-30 mb-30"></div>
-
+  
               <div class="col-xl-12">
-                <div class="row x-gap-20 y-gap-20">
-                  
-
-                  <div class="row">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="exampleInputEmail1">Full name (First and Last name)</label>
-                        <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Name">
+                  <div class="row x-gap-20 y-gap-20">
+                      <div class="row">
+                          <div class="col-md-6">
+                              <div class="form-group">
+                                  <label for="full_name">Full name (First and Last name)</label>
+                                  <input type="text" class="form-control" id="full_name" name="name" value="{{ Auth::user()->name }}" placeholder="Enter Name">
+                              </div>
+                          </div>
+                          <div class="col-md-6">
+                              <div class="form-group">
+                                  <label for="mobile_number">Mobile number</label>
+                                  <input type="text" class="form-control" id="mobile_number" name="phonenumber" value="{{ Auth::user()->phonenumber }}" placeholder="Enter Mobile number">
+                              </div>
+                          </div>
                       </div>
-                    </div>
-                    <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="exampleInputEmail1">Mobile number</label>
-                      <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Mobile number">
-                    </div>
-                    </div>
-                  </div>
-
-                  <div class="row">
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <label for="exampleInputEmail1">Email</label>
-                        <input type="text" class="form-control" id="exampleInputEmail1" value="" name="name" placeholder="Enter Email">
+  
+                      <div class="row">
+                          <div class="col-md-6">
+                              <div class="form-group">
+                                  <label for="email">Email</label>
+                                  <input type="text" class="form-control" id="email" name="email" value="{{ Auth::user()->email }}" placeholder="Enter Email">
+                              </div>
+                          </div>
+                          <div class="col-md-6">
+                              <div class="form-group">
+                                  <label for="date_of_birth">Date of Birth</label>
+                                  <input type="date" class="form-control" id="date_of_birth" name="dob" value="{{ Auth::user()->dob }}">
+                              </div>
+                          </div>
                       </div>
-                    </div>
-                    <div class="col-md-6">
-                    <div class="form-group">
-                      <label for="exampleInputEmail1">Date of Birth</label>
-                      <input type="date" class="form-control" id="exampleInputEmail1" value="" name="name" >
-                    </div>
-                    </div>
-                  </div>
-
-                  
-                  <div class="row">
-                    <div class="col-md-12">
-                      <div class="form-group">
-                        <label for="exampleInputEmail1">About Yourself</label>
-                        <textarea name="" class="form-control" id=""  rows="10"></textarea>
+  
+                      <div class="row">
+                          <div class="col-md-12">
+                              <div class="form-group">
+                                  <label for="about_yourself">About Yourself</label>
+                                  <textarea name="about" class="form-control" id="about_yourself" rows="10">{{ Auth::user()->about }}</textarea>
+                              </div>
+                          </div>
                       </div>
-                    </div>
                   </div>
-
-                  
-                </div>
               </div>
-
+  
               <div class="d-inline-block pt-30">
-
-                <a href="#" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
-                  Save Changes <div class="icon-arrow-top-right ml-15"></div>
-                </a>
-
+                  <button type="submit" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
+                      Save Changes <div class="icon-arrow-top-right ml-15"></div>
+                  </button>
               </div>
-            </div>
-
-            <div class="tabs__pane -tab-item-2">
+          </div>
+          </form>
+            {{-- <div class="tabs__pane -tab-item-2">
               <div class="col-xl-9">
                 <div class="row x-gap-20 y-gap-20">
                   <div class="col-12">
@@ -187,9 +179,9 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> --}}
 
-            <div class="tabs__pane -tab-item-3">
+            {{-- <div class="tabs__pane -tab-item-3">
               <div class="col-xl-9">
                 <div class="row x-gap-20 y-gap-20">
                   <div class="col-12">
@@ -236,8 +228,9 @@
                   </div>
                 </div>
               </div>
-            </div>
+            </div> --}}
           </div>
+          
         </div>
       </div>
 

@@ -15,6 +15,9 @@ use App\Http\Controllers\Api\PoojaDetailsController;
 use App\Http\Controllers\Api\PanditController;
 use App\Http\Controllers\Api\UserLoginController;
 
+use App\Http\Controllers\Api\UserProfileController;
+
+
 
 
 
@@ -88,3 +91,5 @@ Route::controller(UserLoginController::class)->group(function() {
     Route::post('/login','storeLoginData');
     Route::post('/verify-otp','checkUserOtp');
 });
+
+Route::middleware('auth:sanctum')->get('/order-history', [UserProfileController::class, 'orderHistory']);
