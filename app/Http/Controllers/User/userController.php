@@ -362,6 +362,7 @@ public function bookingSuccess($id)
         return view('user/orderhistory', compact('bookings'));
     }
     public function userprofile(){
+        $user = Auth::guard('users')->user();
         return view('user/userprofile');
     }
     public function ratepooja(){
