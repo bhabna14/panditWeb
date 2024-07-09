@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\UserLoginController;
 use App\Http\Controllers\Api\UserProfileController;
 
 
+use App\Http\Controllers\Api\BookingController;
+
 
 
 
@@ -93,3 +95,6 @@ Route::controller(UserLoginController::class)->group(function() {
 });
 
 Route::middleware('auth:sanctum')->get('/order-history', [UserProfileController::class, 'orderHistory']);
+
+//Booking confirm
+Route::middleware('auth:sanctum')->post('/booking/confirm', [BookingController::class, 'confirmBooking']);
