@@ -74,9 +74,9 @@ Route::middleware(['user'])->group(function () {
         Route::get('/view-ordered-pooja-details/{id}', [UserController::class, 'viewdetails'])->name('viewdetails');
 
         // Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
-        Route::get('/userprofile', 'userprofile')->name('userprofile');
+        Route::get('/userprofile', 'userprofile')->name('user.userprofile');
         Route::get('/coupons', 'coupons')->name('coupons');
-
+        Route::delete('/profile/photo', 'deletePhoto')->name('user.deletePhoto');
         Route::put('/profile',  'updateProfile')->name('user.updateProfile');
     });
 });

@@ -11,7 +11,7 @@
 
         @include('user.layouts.components.front-style')
         
-
+        @yield('styles')
 	</head>
 
 	<body>
