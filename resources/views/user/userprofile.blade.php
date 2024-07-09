@@ -1,6 +1,7 @@
 @extends('user.layouts.front-dashboard')
 
 @section('styles')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @endsection
 
 @section('content')
@@ -32,18 +33,39 @@
 
           </div>
           <div class="tabs__content pt-30 js-tabs-content">
+            @if(session()->has('success'))
+            <div class="alert alert-success" id="Message">
+                {{ session()->get('success') }}
+            </div>
+            @endif
+        
+            @if ($errors->has('danger'))
+                <div class="alert alert-danger" id="Message">
+                    {{ $errors->first('danger') }}
+                </div>
+            @endif
+            @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+           @endif
           <form action="{{ route('user.updateProfile') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
+          
             <div class="tabs__pane -tab-item-1 is-tab-el-active">
               <div class="row y-gap-30 items-center">
                   <div class="col-auto">
                       <div class="d-flex ratio ratio-1:1 w-200">
-                          <img src="{{ Auth::user()->avatar ? asset('storage/' . Auth::user()->avatar) : asset('front-assets/img/misc/avatar-1.png') }}" alt="image" class="img-ratio rounded-4">
+                          <img src="{{ Auth::guard('users')->user()->userphoto ? asset('storage/' . Auth::guard('users')->user()->userphoto) : asset('front-assets/img/misc/avatar-1.png') }}" alt="image" class="img-ratio rounded-4">
   
                           <div class="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
                               <div class="size-30 bg-white rounded-4 text-center">
-                                  <i class="icon-trash text-16"></i>
+                                <a href="#" id="delete-photo-btn"><i class="icon-trash text-16"></i></a>
                               </div>
                           </div>
                       </div>
@@ -67,13 +89,13 @@
                           <div class="col-md-6">
                               <div class="form-group">
                                   <label for="full_name">Full name (First and Last name)</label>
-                                  <input type="text" class="form-control" id="full_name" name="name" value="{{ Auth::user()->name }}" placeholder="Enter Name">
+                                  <input type="text" class="form-control" id="full_name" name="name" value="{{ Auth::guard('users')->user()->name }}" placeholder="Enter Name">
                               </div>
                           </div>
                           <div class="col-md-6">
                               <div class="form-group">
                                   <label for="mobile_number">Mobile number</label>
-                                  <input type="text" class="form-control" id="mobile_number" name="phonenumber" value="{{ Auth::user()->phonenumber }}" placeholder="Enter Mobile number">
+                                  <input type="text" class="form-control" id="mobile_number" name="phonenumber" value="{{ Auth::guard('users')->user()->phonenumber }}" placeholder="Enter Mobile number">
                               </div>
                           </div>
                       </div>
@@ -82,13 +104,13 @@
                           <div class="col-md-6">
                               <div class="form-group">
                                   <label for="email">Email</label>
-                                  <input type="text" class="form-control" id="email" name="email" value="{{ Auth::user()->email }}" placeholder="Enter Email">
+                                  <input type="text" class="form-control" id="email" name="email" value="{{ Auth::guard('users')->user()->email }}" placeholder="Enter Email">
                               </div>
                           </div>
                           <div class="col-md-6">
                               <div class="form-group">
                                   <label for="date_of_birth">Date of Birth</label>
-                                  <input type="date" class="form-control" id="date_of_birth" name="dob" value="{{ Auth::user()->dob }}">
+                                  <input type="date" class="form-control" id="date_of_birth" name="dob" value="{{ Auth::guard('users')->user()->dob }}">
                               </div>
                           </div>
                       </div>
@@ -97,7 +119,7 @@
                           <div class="col-md-12">
                               <div class="form-group">
                                   <label for="about_yourself">About Yourself</label>
-                                  <textarea name="about" class="form-control" id="about_yourself" rows="10">{{ Auth::user()->about }}</textarea>
+                                  <textarea name="about" class="form-control" id="about_yourself" rows="10">{{ Auth::guard('users')->user()->about }}</textarea>
                               </div>
                           </div>
                       </div>
@@ -242,4 +264,30 @@
 @endsection
 
 @section('scripts')
+<script>
+  document.getElementById('delete-photo-btn').addEventListener('click', function(event) {
+      event.preventDefault();
+      
+      if (confirm('Are you sure you want to delete your photo?')) {
+          fetch('{{ route('user.deletePhoto') }}', {
+              method: 'DELETE',
+              headers: {
+                  'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+              }
+          })
+          .then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  alert('Photo deleted successfully.');
+                  location.reload();
+              } else {
+                  alert('Failed to delete photo.');
+              }
+          })
+          .catch(error => console.error('Error:', error));
+      }
+  });
+</script>
 @endsection
