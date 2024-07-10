@@ -20,7 +20,12 @@ class Booking extends Model
         'booking_date',
         'booking_time',
         'status',
-        'application_status'
+        'application_status',
+        'canceled_at',
+        'cancel_reason',
+        'refund_method',
+       
+        'refund_amount',
     ];
 
     public static function boot()

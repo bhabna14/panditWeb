@@ -84,6 +84,9 @@ Route::middleware(['user'])->group(function () {
     Route::get('/payment/{booking_id}', [PaymentController::class, 'showPaymentPage'])->name('payment.page');
     Route::post('/payment/process/{booking_id}', [PaymentController::class, 'processPayment'])->name('payment.process');
 
+    Route::get('/cancel-pooja/{id}', [PaymentController::class, 'showCancelForm'])->name('cancelForm');
+    Route::post('/cancel-pooja/{id}', [PaymentController::class, 'cancelBooking'])->name('cancelBooking');
+
 });
 
 ## admin login

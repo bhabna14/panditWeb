@@ -1,6 +1,20 @@
 @extends('user.layouts.front')
 
 @section('styles')
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<style>
+    .ui-datepicker {
+        font-size: 16px;
+    }
+    .form-control {
+        cursor: pointer;
+    }
+    .ui-datepicker td a {
+        cursor: pointer;
+    }
+</style>
 @endsection
 
 @section('content')
@@ -46,10 +60,10 @@
                       </div>
                   </div>
                   <div class="row">
-                      <div class="form-input mt-20 col-md-6">
-                          <input type="date" name="booking_date" required class="form-control">
-                          <label class="lh-1 text-16 text-light-1">Date</label>
-                      </div>
+                        <div class="form-input mt-20 col-md-6">
+                            <input type="text" name="booking_date" required class="form-control" id="booking_date" readonly placeholder="Select a date">
+                            {{-- <label class="lh-1 text-16 text-light-1">Date</label> --}}
+                        </div>
                       <div class="form-input mt-20 col-md-6">
                           <select id="time" name="booking_time" class="nice-select-dropdown form-control">
                               <!-- Example time slots, adjust as needed -->
@@ -93,4 +107,25 @@
 @endsection
 
 @section('scripts')
+<script>
+    $(function() {
+        var today = new Date();
+        var twoMonthsFromNow = new Date();
+        twoMonthsFromNow.setMonth(today.getMonth() + 2);
+
+        $("#booking_date").datepicker({
+            minDate: today, // Start from today
+            maxDate: twoMonthsFromNow, // Up to two months from today
+            beforeShowDay: function(date) {
+                // Enable dates within the range and disable all other dates
+                if (date >= today && date <= twoMonthsFromNow) {
+                    return [true, "", ""];
+                } else {
+                    return [false, "", ""];
+                }
+            }
+        });
+    });
+</script>
+
 @endsection
