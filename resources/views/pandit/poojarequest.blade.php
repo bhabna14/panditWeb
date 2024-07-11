@@ -59,6 +59,9 @@
                                         </form>
                                         @elseif($booking->application_status === 'approved')
                                         <span class="badge badge-success">Approved</span>
+                                        @elseif($booking->application_status === 'paid')
+                                        <span class="badge badge-success">Paid</span>
+                                       
                                         @elseif($booking->application_status === 'rejected')
                                         <span class="badge badge-danger">Rejected</span>
                                         @endif

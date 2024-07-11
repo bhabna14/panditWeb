@@ -16,10 +16,10 @@ use App\Models\Profile;
 use App\Models\Poojadetails;
 use App\Models\Booking;
 use App\Models\Payment;
-
+use App\Models\Rating;
 use Illuminate\Support\Facades\Log;
 
-
+use Illuminate\Support\Facades\Storage;
 use PDF;
 use DB;
 use Illuminate\Support\Facades\Hash;
@@ -277,7 +277,7 @@ public function confirmBooking(Request $request)
             'pooja_fee' => 'required|numeric',
             'advance_fee' => 'required|numeric',
             'booking_date' => 'required|date',
-            'booking_time' => 'required|string',
+            
             'address_id' => 'required',
             
         ]);
@@ -344,6 +344,7 @@ public function bookingSuccess($id)
         $bookings = Booking::with('pooja','pandit') // Load relationship to get pooja details
                            ->where('user_id', $user->userid)
                            ->orderByDesc('created_at')
+                           ->where('application_status','!=', 'paid')
                            ->take(10) // Limit to 10 recent bookings (adjust as needed)
                            ->get();
     
@@ -357,7 +358,7 @@ public function bookingSuccess($id)
         $bookings = Booking::with('pooja.poojalist','pandit','address') // Load relationship to get pooja details
                            ->where('user_id', $user->userid)
                            ->orderByDesc('created_at')
-                           ->where('status','!=', 'pending')
+                           ->whereIn('application_status', ['paid', 'rejected'])
                            ->get();
         return view('user/orderhistory', compact('bookings'));
     }
@@ -397,20 +398,23 @@ public function bookingSuccess($id)
 
         return redirect()->route('user.userprofile')->with('success', 'Profile updated successfully.');
     }
-    public function deletePhoto()
+    // public function deletePhoto()
+    // {
+    //     $user = Auth::guard('users')->user();
+
+    //     if ($user->userphoto && Storage::exists('public/' . $user->userphoto)) {
+    //         Storage::delete('public/' . $user->userphoto);
+    //         $user->userphoto = null;
+    //         $user->save();
+    //     }
+
+    //     return response()->json(['success' => 'Photo deleted successfully.']);
+    // }
+    public function ratePooja($id)
     {
-        $user = Auth::guard('users')->user();
+        $booking = Booking::with('pooja', 'pandit')->findOrFail($id);
 
-        if ($user->userphoto && Storage::exists('public/' . $user->userphoto)) {
-            Storage::delete('public/' . $user->userphoto);
-            $user->userphoto = null;
-            $user->save();
-        }
-
-        return response()->json(['success' => 'Photo deleted successfully.']);
-    }
-    public function ratepooja(){
-        return view('user/ratepooja');
+        return view('user/ratepooja', compact('booking'));
     }
     // public function viewdetails(){
     //     return view('user/view-pooja-details');
@@ -457,5 +461,69 @@ public function bookingSuccess($id)
 
     public function coupons(){
         return view('user/coupons');
+    }
+
+
+    //saving rating
+    public function submitRating(Request $request)
+    {
+        $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'feedback_message' => 'required|string',
+            'audio_path' => 'nullable|file|mimes:audio/*',
+            'image_path' => 'nullable|file|mimes:jpeg,png,jpg,gif',
+        ]);
+
+        $rating = new Rating();
+        $rating->booking_id = $request->booking_id;
+        $rating->user_id =Auth::guard('users')->user()->userid;
+        $rating->rating = $request->rating;
+        $rating->feedback_message = $request->feedback_message;
+
+        if ($request->hasFile('audioFile')) {
+            $audioPath = $request->file('audioFile')->store('audio', 'public');
+            $rating->audio_path = $audioPath;
+        }
+
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('images', 'public');
+            $rating->image_path = $imagePath;
+        }
+
+        $rating->save();
+
+        return redirect()->route('orderhistory')->with('success', 'Rating submitted successfully!');
+    }
+
+    public function deletePhoto()
+    {
+        $user = Auth::guard('users')->user();
+        
+        // Log the user ID attempting to delete photo
+        Log::info('User ID ' . $user->id . ' is attempting to delete their photo.');
+
+        if ($user->userphoto) {
+            try {
+                // Delete the photo from storage
+                Storage::delete('public/' . $user->userphoto);
+
+                // Update user's photo column in the database (if necessary)
+                $user->update(['userphoto' => null]);
+
+                // Log success message
+                Log::info('Photo deleted successfully for User ID ' . $user->id);
+
+                return response()->json(['message' => 'Photo deleted successfully'], 200);
+            } catch (\Exception $e) {
+                // Log error if deletion fails
+                Log::error('Failed to delete photo for User ID ' . $user->id . ': ' . $e->getMessage());
+
+                return response()->json(['message' => 'Failed to delete photo'], 500);
+            }
+        }
+
+        // Log if no photo found for deletion
+        Log::info('No photo found for deletion for User ID ' . $user->id);
+        return response()->json(['message' => 'No photo found for deletion'], 404);
     }
 }

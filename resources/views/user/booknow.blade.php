@@ -2,6 +2,8 @@
 
 @section('styles')
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css">
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 <style>
@@ -34,6 +36,9 @@
   <div class="container">
       <div class="row">
           <h4 class="mb-20">Book Now</h4>
+          @foreach ($errors->all() as $error)
+          <li>{{ $error }}</li>
+            @endforeach
           <div class="col-md-7">
               <form action="{{ route('booking.confirm') }}" method="POST">
                   @csrf
@@ -45,7 +50,7 @@
                       <div class="col-md-12">
                           @foreach ($addresses as $address)
                               <div class="your-address">
-                                  <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}">
+                                  <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
                                   <label for="address{{ $address->id }}">
                                       {{ $address->fullname }}, {{ $address->landmark }}, {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}<br>
                                       Mobile Number: {{ $address->number }}
@@ -60,19 +65,11 @@
                       </div>
                   </div>
                   <div class="row">
-                        <div class="form-input mt-20 col-md-6">
-                            <input type="text" name="booking_date" required class="form-control" id="booking_date" readonly placeholder="Select a date">
+                        <div class="form-input mt-20 col-md-12">
+                            <input type="text" name="booking_date" required class="form-control" id="booking_date"  placeholder="Select a date and time">
                             {{-- <label class="lh-1 text-16 text-light-1">Date</label> --}}
                         </div>
-                      <div class="form-input mt-20 col-md-6">
-                          <select id="time" name="booking_time" class="nice-select-dropdown form-control">
-                              <!-- Example time slots, adjust as needed -->
-                              <option value="09:00">9:00 AM</option>
-                              <option value="10:00">10:00 AM</option>
-                              <option value="11:00">11:00 AM</option>
-                              <!-- Add more time slots as necessary -->
-                          </select>
-                      </div>
+                      
                   </div>
                   <button type="submit" class="button -md -blue-1 bg-dark-3 text-white mt-20">Confirm Booking</button>
               </form>
@@ -107,25 +104,24 @@
 @endsection
 
 @section('scripts')
+{{-- <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script> --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+
 <script>
     $(function() {
         var today = new Date();
-        var twoMonthsFromNow = new Date();
-        twoMonthsFromNow.setMonth(today.getMonth() + 2);
+        var maxDate = new Date();
+        maxDate.setMonth(today.getMonth() + 2);
 
-        $("#booking_date").datepicker({
-            minDate: today, // Start from today
-            maxDate: twoMonthsFromNow, // Up to two months from today
-            beforeShowDay: function(date) {
-                // Enable dates within the range and disable all other dates
-                if (date >= today && date <= twoMonthsFromNow) {
-                    return [true, "", ""];
-                } else {
-                    return [false, "", ""];
-                }
-            }
+        // Initialize the date-time picker with the desired format and restrictions
+        $("#booking_date").datetimepicker({
+            format: "Y-m-d H:i", // Format the date and time as YYYY-MM-DD HH:MM
+            step: 30, // Step time in minutes
+            minDate: today, // Disable past dates
+            maxDate: maxDate // Disable dates more than two months from today
         });
     });
 </script>
+
 
 @endsection

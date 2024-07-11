@@ -52,6 +52,7 @@ public function processPayment(Request $request, $booking_id)
         $paidAmountInRupees = $payment->amount / 100;
 
         // Update booking with payment details
+        $booking->application_status = 'paid';
         $booking->status = 'paid';
         $booking->paid =  $paidAmountInRupees;
         $booking->payment_id = $request->razorpay_payment_id;

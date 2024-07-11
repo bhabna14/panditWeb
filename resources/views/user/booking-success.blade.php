@@ -25,11 +25,11 @@
 
                         <div class="col-lg-3 col-md-6">
                             <div class="text-15 lh-12">Date</div>
-                            <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->booking_date }},{{ $booking->booking_time }}</div>
+                            <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->booking_date }}</div>
                         </div>
                         <div class="col-lg-2 col-md-6">
                             <div class="text-15 lh-12">Paid Amount</div>
-                            <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->paid/ 100 }}</div>
+                            <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->paid ? $booking->paid : 0 }} </div>
                         </div>
 
                         <div class="col-lg-2 col-md-6">

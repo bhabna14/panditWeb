@@ -12030,6 +12030,7 @@ div[data-slider] > input[type=range]::-ms-tooltip {
   position: relative;
   transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
   display: flex;
+  margin-bottom: 20px;
 }
 
 .form-input label {
@@ -13623,7 +13624,7 @@ span.rating {
   border-radius: 5px;
 }
 .rating-container {
-  text-align: center;
+  /* text-align: center; */
 }
 .rating {
   display: inline-block;
@@ -14001,7 +14002,39 @@ h3.post-title {
   z-index: 1;
 }
 .order-inner-details {
-  border: 1px solid #b4a5a5cc;
+  border: 1px solid #d5d9d9;
   border-radius: 10px;
   padding: 19px;
+}
+.text-red{
+  color: red;
+}
+
+button#startRecord {
+  position: relative;
+  /* margin-top: -604px !important; */
+  top: revert-layer;
+  top: -24px;
+  background-color: #163c8c;
+  color: #fff;
+  padding: 7px 10px;
+  border-radius: 6px;
+  margin-right: 18px;
+}
+button#stopRecord {
+  position: relative;
+  /* margin-top: -604px !important; */
+  top: revert-layer;
+  top: -24px;
+  background-color: #163c8c;
+  color: #fff;
+  padding: 7px 10px;
+  border-radius: 6px;
+  /* margin-right: 18px; */
+}
+
+.refund-deatils {
+  padding: 10px 20px;
+  border: 1px solid #dcdcdc;
+  margin: 20px;
 }
