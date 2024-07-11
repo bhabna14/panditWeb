@@ -10,7 +10,7 @@
 		<title> Pandit Web</title>
 
         @include('user.layouts.components.front-style')
-        
+        @yield('styles')
 
 	</head>
 
@@ -43,5 +43,12 @@
     @include('user.layouts.components.front-script')
 
     @yield('scripts')
+    <script>
+      function confirmLogout() {
+          if (confirm('Are you sure you want to log out?')) {
+              document.getElementById('logout-form').submit();
+          }
+      }
+    </script>
     </body>
 </html>

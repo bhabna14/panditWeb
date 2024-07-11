@@ -10,7 +10,7 @@
     <div class="row y-gap-20 justify-between items-end pb-30 mt-30 lg:pb-40 md:pb-32">
       <div class="col-auto">
 
-        <h1 class="text-30 lh-14 fw-600">Booking History</h1>
+        <h1 class="text-30 lh-14 fw-600">Booking Details</h1>
        
 
       </div>
@@ -20,32 +20,33 @@
       </div>
     </div>
     <div class="row">
-        
-        <div class="col-md-12">
-            <p><i class="fa fa-map-pin map-icon"></i>{{ $booking->address->area ?? 'N/A' }},{{ $booking->address->city ?? 'N/A' }},{{ $booking->address->state ?? 'N/A' }}
-              {{ $booking->address->country ?? 'N/A' }}<br>
-              Pincode : {{ $booking->address->pincode ?? 'N/A' }}<br>
-              Landmark : {{ $booking->address->landmark ?? 'N/A' }}</p>
-        </div>
-      <div class="col-md-12">
-        <div class="">
-          <div class="row">
-            <div class="col-md-3 mt-15">
-              <img src="{{ asset('assets/img/'.$booking->pooja->poojalist->pooja_photo) }}" alt="">
+       <div class="col-md-12">
+         <div class="order-inner-details">
+            <div class="row">
+               <div class="col-md-4">
+                 <h4>Address</h4>
+                 {{ $booking->address->fullname ?? 'N/A' }}<br>
+                 {{ $booking->address->area ?? 'N/A' }},{{ $booking->address->city ?? 'N/A' }},{{ $booking->address->state ?? 'N/A' }}
+                  {{ $booking->address->country ?? 'N/A' }}<br>
+                  Pincode : {{ $booking->address->pincode ?? 'N/A' }}<br>
+                  Landmark : {{ $booking->address->landmark ?? 'N/A' }}</p>
+               </div>
+               <div class="col-md-4">
+                 <h4>Payment Method</h4>
+                 {{ $booking->refund_method ?? 'N/A' }}<br>
+               </div>
+               <div class="col-md-4">
+                <h4>Booking Summary</h4>
+                Total Fee: ₹ {{ $booking->pooja_fee ?? 'N/A' }}<br>
+                Advance Fee: ₹ {{ $booking->advance_fee ?? 'N/A' }}<br>
+                Paid Amount: ₹ {{ $booking->paid ?? 'N/A' }}<br>
+                Refund Details: ₹{{ $booking->refund_amount ?? 'N/A' }}<br>
+               
+               </div>
             </div>
-            <div class="col-md-6 mt-15">
-              <h6>{{ $booking->pooja->pooja_name }}</h6>
-              <p>{{ $booking->pandit->name }}</p>
-              <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
-              <p>Date : {{ $booking->booking_date }}</p>
-             
-              <p>Total Payment: {{ $booking->pooja_fee }}</p>
-              <p>Paid: {{ $booking->paid }}</p>
-            </div>
-          </div>
-        
-        </div>
-      </div>
+         </div>
+       </div>
+      
  
     </div>
   

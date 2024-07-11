@@ -60,15 +60,20 @@
             <div class="tabs__pane -tab-item-1 is-tab-el-active">
               <div class="row y-gap-30 items-center">
                   <div class="col-auto">
-                      <div class="d-flex ratio ratio-1:1 w-200">
-                          <img src="{{ Auth::guard('users')->user()->userphoto ? asset('storage/' . Auth::guard('users')->user()->userphoto) : asset('front-assets/img/misc/avatar-1.png') }}" alt="image" class="img-ratio rounded-4">
-  
-                          <div class="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
-                              <div class="size-30 bg-white rounded-4 text-center">
+                    <div class="d-flex ratio ratio-1:1 w-200">
+                        @php
+                            $userPhoto = Auth::guard('users')->user()->userphoto;
+                            $photoUrl = $userPhoto ? asset('storage/' . $userPhoto) : asset('front-assets/img/images.jfif');
+                        @endphp
+                
+                        <img src="{{ $photoUrl }}" alt="image" class="img-ratio rounded-4">
+                
+                        <div class="d-flex justify-end px-10 py-10 h-100 w-1/1 absolute">
+                            <div class="size-30 bg-white rounded-4 text-center">
                                 <a href="#" id="delete-photo-btn"><i class="icon-trash text-16"></i></a>
-                              </div>
-                          </div>
-                      </div>
+                            </div>
+                        </div>
+                    </div>
                   </div>
   
                   <div class="col-auto">
@@ -264,30 +269,34 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
 <script>
-  document.getElementById('delete-photo-btn').addEventListener('click', function(event) {
-      event.preventDefault();
-      
-      if (confirm('Are you sure you want to delete your photo?')) {
-          fetch('{{ route('user.deletePhoto') }}', {
-              method: 'DELETE',
+
+  document.addEventListener('DOMContentLoaded', function () {
+      document.getElementById('delete-photo-btn').addEventListener('click', function (e) {
+          e.preventDefault();
+          if (confirm('Are you sure you want to delete your photo?')) {
+              deletePhoto();
+          }
+      });
+
+      function deletePhoto() {
+          axios.delete('{{ route('delete.user.photo') }}', {
               headers: {
-                  'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                  'Accept': 'application/json',
-                  'Content-Type': 'application/json'
+                  'X-CSRF-TOKEN': '{{ csrf_token() }}'
               }
           })
-          .then(response => response.json())
-          .then(data => {
-              if (data.success) {
-                  alert('Photo deleted successfully.');
-                  location.reload();
-              } else {
-                  alert('Failed to delete photo.');
-              }
+          .then(function (response) {
+              // Handle success, e.g., update UI, reload page, etc.
+              location.reload(); // Example: reload the page
           })
-          .catch(error => console.error('Error:', error));
+          .catch(function (error) {
+              // Handle error, e.g., show error message
+              console.error('Error deleting photo:', error);
+          });
       }
   });
 </script>
+
 @endsection

@@ -102,7 +102,13 @@
 
     </main>
     @include('user.layouts.components.front-script')
-
+    <script>
+      function confirmLogout() {
+          if (confirm('Are you sure you want to log out?')) {
+              document.getElementById('logout-form').submit();
+          }
+      }
+    </script>
     @yield('scripts')
     </body>
 </html>

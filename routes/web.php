@@ -70,19 +70,27 @@ Route::middleware(['user'])->group(function () {
         Route::get('/add-address', 'addaddress')->name('addaddress');
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
         Route::get('/order-history', 'orderhistory')->name('orderhistory');
-        Route::get('/rate-pooja', 'ratepooja')->name('ratepooja');
+        Route::get('/rate-pooja/{id}','ratePooja')->name('rate.pooja');
+        Route::post('submit-rating', 'submitRating')->name('submitRating');
+
         Route::get('/view-ordered-pooja-details/{id}', [UserController::class, 'viewdetails'])->name('viewdetails');
 
         // Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
         Route::get('/userprofile', 'userprofile')->name('user.userprofile');
         Route::get('/coupons', 'coupons')->name('coupons');
-        Route::delete('/profile/photo', 'deletePhoto')->name('user.deletePhoto');
+        // Route::delete('/profile/photo', 'deletePhoto')->name('user.deletePhoto');
         Route::put('/profile',  'updateProfile')->name('user.updateProfile');
+
+        Route::delete('/delete-user-photo', 'deletePhoto')->name('delete.user.photo');
+
     });
 });
 Route::middleware(['user'])->group(function () {
     Route::get('/payment/{booking_id}', [PaymentController::class, 'showPaymentPage'])->name('payment.page');
     Route::post('/payment/process/{booking_id}', [PaymentController::class, 'processPayment'])->name('payment.process');
+
+    Route::get('/cancel-pooja/{id}', [PaymentController::class, 'showCancelForm'])->name('cancelForm');
+    Route::post('/cancel-pooja/{id}', [PaymentController::class, 'cancelBooking'])->name('cancelBooking');
 
 });
 
@@ -230,7 +238,7 @@ Route::controller(PanditLoginController::class)->group(function() {
 /// pandit routes
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
-        Route::get('/panditlogin', 'panditlogin');
+        Route::get('/panditlogin', 'panditlogin')->name('panditlogin');
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
         Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');

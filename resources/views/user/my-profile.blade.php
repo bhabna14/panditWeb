@@ -167,10 +167,10 @@
                                 <th>Booking Id</th>
                                 <th>Pooja Name</th>
                                 <th>Pandit Name</th>
-                                <th>Total</th>
-                               
+                                <th>Total Fee</th>
                                 <th>Total Paid</th>
                                 <th>Status</th>
+                                <th>Refund Amount</th>
                                 <th>Pooja Time</th>
                                 <th>Action</th>
                             </tr>
@@ -187,25 +187,21 @@
                                 <td>₹ {{ $booking->paid ? $booking->paid : '0' }}</td>
                                 <td>
                                     <div class="rounded-100 py-4 text-center col-12 text-14 fw-500
-                                        @if ($booking->status == 'pending')
-                                            bg-yellow-4 text-yellow-3
-                                        @elseif ($booking->status == 'approved')
-                                            bg-green-4 text-green-3
-                                        @elseif ($booking->status == 'rejected')
-                                            bg-red-4 text-red-3
-                                        @endif
                                         
                                     ">
                                         {{ ucfirst($booking->status) }}
                                     </div>
                                 </td>
-                                <td>{{ $booking->booking_date }}, {{$booking->booking_time}}</td>
+                                <td>₹ {{ $booking->refund_amount ? $booking->refund_amount : '0' }}</td>
+                                <td>{{ $booking->booking_date }}</td>
                                 <td>
-                                  @if ($booking->application_status == 'approved'  && $booking->status == 'pending')
+                                  @if ($booking->application_status == 'approved')
                                       <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="btn btn-success pay-btn">Pay</a>
 
-                                  @elseif ($booking->application_status == 'approved' && $booking->status == 'paid')
+                                  @elseif ($booking->application_status == 'paid' )
                                       <span class="text-success">Already Paid</span>
+                                  @elseif ($booking->application_status == 'rejected' )
+                                      <span class="text-success">Rejected</span>
                                   @else
                                       <span class="text-muted">Waiting for approval</span>
                                   @endif

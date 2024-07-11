@@ -12030,6 +12030,7 @@ div[data-slider] > input[type=range]::-ms-tooltip {
   position: relative;
   transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
   display: flex;
+  margin-bottom: 20px;
 }
 
 .form-input label {
@@ -12042,16 +12043,14 @@ div[data-slider] > input[type=range]::-ms-tooltip {
   transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-.form-input textarea,
-.form-input input {
+.form-input textarea, .form-input input {
   border: 1px solid var(--color-border);
   border-radius: 4px;
   padding: 0 15px;
-  padding-top: 25px;
-  min-height: 70px;
+  /* padding-top: 25px; */
+  min-height: 51px;
   transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
-
 .form-input textarea:focus,
 .form-input input:focus {
   border: 2px solid #051036 !important;
@@ -13625,7 +13624,7 @@ span.rating {
   border-radius: 5px;
 }
 .rating-container {
-  text-align: center;
+  /* text-align: center; */
 }
 .rating {
   display: inline-block;
@@ -13945,4 +13944,97 @@ h3.post-title {
   .post-slide .post-content {
     padding: 0px 15px 25px 15px;
   }
+}
+
+
+.order-history-sec {
+  border: 1px solid #d5d9d9 ;
+  /* padding: 20px 10px; */
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 5px 5px 10px rgb(169 184 223 / 40%);
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+.order-details {
+  background-color: #f5f5f5;
+  padding: 14px 14px;
+  border-bottom: 1px solid #ccc;
+}
+.row.order-details-booking {
+  padding: 20px;
+}
+.cancel-dot{
+  color:red;
+  margin-right: 5px;
+}
+.comp-dot{
+  color:green;
+  margin-right: 5px;
+}
+.status-text{
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.order-history-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.order-history-sec {
+  position: relative;
+}
+
+.order-history-sec a.button {
+  position: relative;
+  z-index: 2;
+}
+
+.order-history-sec::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+.order-inner-details {
+  border: 1px solid #d5d9d9;
+  border-radius: 10px;
+  padding: 19px;
+}
+.text-red{
+  color: red;
+}
+
+button#startRecord {
+  position: relative;
+  /* margin-top: -604px !important; */
+  top: revert-layer;
+  top: -24px;
+  background-color: #163c8c;
+  color: #fff;
+  padding: 7px 10px;
+  border-radius: 6px;
+  margin-right: 18px;
+}
+button#stopRecord {
+  position: relative;
+  /* margin-top: -604px !important; */
+  top: revert-layer;
+  top: -24px;
+  background-color: #163c8c;
+  color: #fff;
+  padding: 7px 10px;
+  border-radius: 6px;
+  /* margin-right: 18px; */
+}
+
+.refund-deatils {
+  padding: 10px 20px;
+  border: 1px solid #dcdcdc;
+  margin: 20px;
 }
