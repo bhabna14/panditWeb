@@ -58,6 +58,15 @@ Route::controller(userController::class)->group(function() {
     Route::post('/check-otp', 'checkuserotp')->name('check.userotp');
     Route::post('user/authenticate', 'userauthenticate')->name('userauthenticate');
     Route::post('user/logout', 'userlogout')->name('userlogout');
+    // Route::get('/search',  'search')->name('pandit.search');
+    Route::get('/ajax-search',  'ajaxSearch')->name('pandit.ajaxSearch');
+    Route::get('/ajax-search-pooja', 'ajaxSearchPooja')->name('pooja.ajaxSearchPooja');
+
+
+
+    // routes/web.php
+Route::get('/poojas', 'fetchPoojas')->name('fetchPoojas');
+
 
 });
 //user middleware routes

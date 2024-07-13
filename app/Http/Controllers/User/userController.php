@@ -187,6 +187,13 @@ class userController extends Controller
                         ->paginate(6);
         return view('user/poojalist', compact('allpoojas'));
     }
+    public function ajaxSearchPooja(Request $request)
+    {
+        $searchTerm = $request->input('searchTerm');
+        $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')->get();
+
+        return response()->json($poojas);
+    }
     public function poojadetails($slug)
     {
         $pooja = Poojalist::where('slug', $slug)->firstOrFail();
@@ -227,6 +234,14 @@ class userController extends Controller
             return view('user/panditlist', compact('pandits'));
        
      }
+    
+    public function ajaxSearch(Request $request)
+    {
+        $searchTerm = $request->input('searchTerm');
+        $pandits = Profile::where('name', 'LIKE', '%' . $searchTerm . '%')->get();
+
+        return response()->json($pandits);
+    }
 
      public function singlePanditDetails($slug)
      {
@@ -525,5 +540,21 @@ public function bookingSuccess($id)
         // Log if no photo found for deletion
         Log::info('No photo found for deletion for User ID ' . $user->id);
         return response()->json(['message' => 'No photo found for deletion'], 404);
+    }
+
+    public function fetchPoojas(Request $request)
+    {
+        try {
+            $query = $request->input('query');
+
+            // Fetch poojas from database based on search query
+            $poojas = PoojaList::where('pooja_name', 'like', '%' . $query . '%')->limit(10)->get();
+
+            return response()->json($poojas);
+        } catch (\Exception $e) {
+            // Log the error for further investigation
+            \Log::error('Error fetching poojas: ' . $e->getMessage());
+            return response()->json(['error' => 'Internal Server Error'], 500);
+        }
     }
 }
