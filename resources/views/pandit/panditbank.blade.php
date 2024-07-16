@@ -8,8 +8,19 @@
     <link href="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.css') }}" rel="stylesheet">
 @endsection
 @section('content')
+<div class="breadcrumb-header justify-content-between">
+    <div class="left-content">
+        <span class="main-content-title mg-b-0 mg-b-lg-1">BANK INFORMATION</span>
+    </div>
+    <div class="justify-content-center mt-2">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Pages</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Profile</li>
+        </ol>
+    </div>
+</div>
 <div class="row row-sm">
-    <div class="col-lg-12 col-md-12 mt-4">
+    <div class="col-lg-12 col-md-12">
         <div class="custom-card main-content-body-profile">
             <div class="main-content-body tab-pane border-top-0" id="bank">
                 <!-- row -->
@@ -33,7 +44,6 @@
                     <div class="row">
                         <div class="col-lg-12 col-md-12">
                             <div class="card custom-card">
-                                    <h3 style="margin: 20px">BANK INFORMATION</h3>
                                 <div class="card-body">
                                     <!-- <p class="mg-b-20">A form control layout using basic layout.</p> -->
                                     <div class="row">

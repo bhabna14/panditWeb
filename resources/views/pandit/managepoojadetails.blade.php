@@ -8,14 +8,22 @@
     <link href="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.css') }}" rel="stylesheet">
 @endsection
 @section('content')
-    <div class="row row-sm pt-4">
+<div class="breadcrumb-header justify-content-between">
+    <div class="left-content">
+        <span class="main-content-title mg-b-0 mg-b-lg-1">MANAGE POOJA DETAILS</span>
+    </div>
+    <div class="justify-content-center mt-2">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Pages</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Profile</li>
+        </ol>
+    </div>
+</div>
+    <div class="row row-sm">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive  export-table">
-                        <div style="border-bottom:1px solid rgb(37, 29, 29);text-align:center;margin: 20px">
-                            <h3>POOJA DETAILS</h3>
-                        </div>
                         <form action="{{ url('/pandit/update-poojadetails') }}" method="post" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
@@ -31,17 +39,14 @@
                                         <th class="border-bottom-0">Upload Video</th>
                                         <th class="border-bottom-0">View</th>
                                         <th class="border-bottom-0">Completed Pooja</th>
-
                                     </tr>
                                 </thead>
                                 <tbody>
-
                                     @foreach ($poojaDetails as $index => $poojaDetail)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
                                             <td class="tb-col">
                                                 <div class="media-group">
-
                                                     <div class="media-text">
                                                         <a href="#" class="title">{{ $poojaDetail->pooja_name }}</a>
                                                     </div>
@@ -62,7 +67,6 @@
                                                     class="form-control">
                                             </td>
                                             <td>
-
                                                 <a href="{{ asset($poojaDetail->pooja_photo) }}" target="_blank"
                                                     class="btn btn-success">
                                                     View Image
@@ -92,8 +96,6 @@
                                                 value="{{ $poojaDetail->pooja_name }}">
                                         </tr>
                                     @endforeach
-
-
                                 </tbody>
                             </table>
                             <div class="text-center col-md-12">
@@ -108,39 +110,11 @@
         </div>
     </div>
 @endsection
-
-
 @section('scripts')
     <!-- Internal Select2 js-->
-
-
-    <script>
-        function addressFunction() {
-            if (document.getElementById("same").checked) {
-                document.getElementById("peraddress").value = document.getElementById("preaddress").value;
-                document.getElementById("perpost").value = document.getElementById("prepost").value;
-                document.getElementById("perdistri").value = document.getElementById("predistrict").value;
-                document.getElementById("perstate").value = document.getElementById("prestate").value;
-                document.getElementById("percountry").value = document.getElementById("precountry").value;
-                document.getElementById("perpincode").value = document.getElementById("prepincode").value;
-                document.getElementById("perlandmark").value = document.getElementById("prelandmark").value;
-
-            } else {
-                document.getElementById("peraddress").value = "";
-                document.getElementById("perpost").value = "";
-                document.getElementById("perdistri").value = "";
-                document.getElementById("perstate").value = "";
-                document.getElementById("percountry").value = "";
-                document.getElementById("perpincode").value = "";
-                document.getElementById("perlandmark").value = "";
-            }
-        }
-    </script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="{{ asset('assets/js/pandit-profile.js') }}"></script>
-
-
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>

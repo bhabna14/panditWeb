@@ -8,13 +8,22 @@
     <link href="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.css') }}" rel="stylesheet">
 @endsection
 @section('content')
+<div class="breadcrumb-header justify-content-between">
+    <div class="left-content">
+        <span class="main-content-title mg-b-0 mg-b-lg-1">MANAGE ADDRESS</span>
+    </div>
+    <div class="justify-content-center mt-2">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Pages</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Profile</li>
+        </ol>
+    </div>
+</div>
     <div class="row row-sm">
-        <div class="col-lg-12 col-md-12 mt-4">
+        <div class="col-lg-12 col-md-12">
             <div class="custom-card main-content-body-profile">
                 <div class="main-content-body tab-pane  border-0" id="address">
-                    <div style="border-bottom:1px solid rgb(24, 22, 22);margin: 20px 0">
-                        <h3>ADDRESS INFORMATION</h3>
-                    </div>
+                    
                     @if (session()->has('success'))
                     <div class="alert alert-success" id="Message">
                         {{ session()->get('success') }}

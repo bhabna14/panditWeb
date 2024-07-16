@@ -22,7 +22,6 @@ use App\Http\Controllers\Api\BookingController;
 
 
 
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -31,17 +30,25 @@ Route::controller(LoginController::class)->group(function() {
     Route::post('/check-otp','checkOtp');
 });
 
+Route::controller(AreaController::class)->group(function() {
+    Route::get('/get-districts/{stateCode}', 'getDistrict');
+    Route::get('/get-subdistricts/{districtCode}', 'getSubdistrict');
+    Route::get('/get-village/{subdistrictsCode}', 'getVillage');
+    Route::post('/save-poojaArea', 'saveForm');
+    Route::get('/manage-poojaArea', 'manageArea');
+});
 
 Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/save', 'saveProfile');
     Route::post('/profile/update/{id}','updateProfile');
-
 });
 
-Route::controller(CareersController::class)->group(function() {
-    Route::post('/career/save', 'saveCareer');
-
+Route::controller(CareerController::class)->group(function() {
+    Route::post('/career/save', 'savecareer');
 });
+
+Route::middleware('auth:api')->post('/career', [CareerController::class, 'savecareer']);
+
 
 Route::controller(PoojaSkillController::class)->group(function() {
     Route::get('/poojaskill',  'index');
@@ -75,6 +82,7 @@ Route::controller(AddressController::class)->group(function() {
 Route::controller(PodcastController::class)->group(function() {
     Route::get('podcasts', 'podcasts');
 });
+
 
 ///home page apis
 Route::controller(PujaController::class)->group(function() {

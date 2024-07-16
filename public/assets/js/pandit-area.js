@@ -16,6 +16,7 @@ function getDistrict(stateCode) {
         }
     });
 }
+
 function getSubdistrict(districtCode) {
     console.log("District Code: ", districtCode);
 
@@ -34,6 +35,7 @@ function getSubdistrict(districtCode) {
         }
     });
 }
+
 function getVillage(subdistrictCode) {
     console.log("Subdistrict Code: ", subdistrictCode);
 
@@ -44,7 +46,7 @@ function getVillage(subdistrictCode) {
             console.log("Villages received: ", data);
             $('#village').empty().append('<option value="">Select Village</option>');
             $.each(data, function(index, village) {
-                $('#village').append('<option value="' + village.villageCode + '">' + village.villageName + ' ' + village.pincode + '</option>');
+                $('#village').append('<option value="' + village.villageCode + '">' + village.villageName + '</option>');
             });
         },
         error: function(xhr, status, error) {
