@@ -303,11 +303,16 @@ Route::group(['prefix' => 'pandit'], function () {
 
 Route::controller(AreaController::class)->group(function() {
     Route::get('pandit/poojaarea', 'poojaArea')->name('poojaarea');
+    Route::get('pandit/managearea', 'manageArea')->name('managearea');
     Route::get('pandit/get-district/{stateCode}', 'getDistrict');
     Route::get('pandit/get-subdistrict/{districtCode}', 'getSubdistrict'); 
     Route::get('pandit/get-village/{subdistrictCode}', 'getVillage'); 
     Route::post('pandit/save-form', 'saveForm')->name('save.form');
+    Route::delete('/pandit/delete-poojaarea/{id}', 'deletePoojaArea')->name('delete.poojaarea');
+    Route::get('/pandit/edit-poojaarea/{id}', 'editPoojaArea')->name('edit.poojaarea');
+    Route::put('/pandit/update-poojaarea/{id}','updatePoojaArea')->name('update.poojaarea');
 });
+
 
 // pandit bank details
 Route::group(['prefix' => 'pandit'], function () {
