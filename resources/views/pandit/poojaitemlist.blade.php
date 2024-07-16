@@ -193,12 +193,16 @@
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     {{-- <script src="{{ asset('assets/js/pandit-poojalist.js') }}"></script> --}}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
+
+document.addEventListener('DOMContentLoaded', function() {
     var modaldemo6 = document.getElementById('modaldemo6');
 
     modaldemo6.addEventListener('show.bs.modal', function(event) {
         var button = event.relatedTarget; // Button that triggered the modal
         var poojaId = button.getAttribute('data-pooja-id'); // Extract info from data-* attributes
+
+        // Store poojaId in the modal element for later use
+        modaldemo6.setAttribute('data-pooja-id', poojaId);
 
         // Fetch and display pooja details in the modal
         fetchPoojaDetails(poojaId);
@@ -267,7 +271,9 @@ function openEditModal(id, poojaList, quantity, unit) {
 function submitEditForm() {
     var form = document.getElementById('editItemForm');
     var formData = new FormData(form);
-    var poojaId = document.querySelector('[data-bs-target="#modaldemo6"]').getAttribute('data-pooja-id');
+
+    // Get the poojaId from the modal element
+    var poojaId = document.getElementById('modaldemo6').getAttribute('data-pooja-id');
 
     fetch('/pandit/updatepoojalist', {
         method: 'POST',
@@ -304,6 +310,7 @@ function submitEditForm() {
 }
 
 function deletePoojaItem(itemId) {
+    var poojaId = document.getElementById('modaldemo6').getAttribute('data-pooja-id');
     fetch(`/pandit/delete-poojaitem/${itemId}`, {
             method: 'DELETE',
             headers: {
@@ -328,6 +335,9 @@ function deletePoojaItem(itemId) {
                 } else {
                     console.error('Row not found in table.');
                 }
+
+                // Re-fetch and display the pooja details
+                fetchPoojaDetails(poojaId);
             } else {
                 throw new Error('Failed to delete item.');
             }
@@ -337,13 +347,14 @@ function deletePoojaItem(itemId) {
             alert('Failed to delete item. Please try again.'); // Show error message
         });
 }
-        setTimeout(function() {
-            document.getElementById('Message').style.display = 'none';
-        }, 3000);
 
-        $(document).ready(function() {
-            $('[data-toggle="tooltip"]').tooltip();
-        });
+setTimeout(function() {
+    document.getElementById('Message').style.display = 'none';
+}, 3000);
+
+$(document).ready(function() {
+    $('[data-toggle="tooltip"]').tooltip();
+});
     </script>
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
