@@ -78,6 +78,12 @@ Route::middleware(['user'])->group(function () {
         Route::get('/addaddress', 'addfrontaddress')->name('addfrontaddress');
         Route::get('/add-address', 'addaddress')->name('addaddress');
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
+        Route::post('/savefrontaddress', 'savefrontaddress')->name('savefrontaddress');
+
+        Route::get('editaddress/{id}',  'editAddress')->name('editAddress');
+        Route::post('updateaddress', 'updateAddress')->name('updateaddress');
+        Route::get('removeaddress/{id}',  'removeAddress')->name('removeaddress');
+
         Route::get('/order-history', 'orderhistory')->name('orderhistory');
         Route::get('/rate-pooja/{id}','ratePooja')->name('rate.pooja');
         Route::post('submit-rating', 'submitRating')->name('submitRating');

@@ -141,7 +141,8 @@ class userController extends Controller
 
         // Save the user (either update or create)
         if ($user->save()) {
-            return redirect()->route('user.otp')->with('success', 'OTP generated successfully.');
+            // return redirect()->route('user.otp')->with('success', 'OTP generated successfully.');
+            return response()->json(['success' => true, 'message' => 'OTP generated successfully.']);
         } else {
             return redirect()->back()->with('error', 'Failed to save OTP.');
         }
@@ -170,7 +171,8 @@ class userController extends Controller
             $user->otp = null;
             $user->save();
     
-            return redirect()->route('myprofile')->with('success', 'Login successful.');
+            // return redirect()->route('myprofile')->with('success', 'Login successful.');
+            return response()->json(['success' => true, 'message' => 'OTP validated successfully.']);
         } else {
             // OTP is invalid, redirect back with an error message
             return redirect()->route('user.otp')->with('error', 'Invalid OTP.');
@@ -470,9 +472,66 @@ public function bookingSuccess($id)
         $addressdata->address_type = $request->address_type;
         $addressdata->save();
 
-        return redirect()->route('addaddress')->with('success', 'Address created successfully.');
+        return redirect()->route('mngaddress')->with('success', 'Address created successfully.');
     }
 
+    public function savefrontaddress(Request $request){
+        $addressdata = new UserAddress();
+        $user = Auth::guard('users')->user();
+        $userid = $user->userid;
+        $addressdata->user_id = $userid;
+        $addressdata->fullname = $request->fullname;
+        $addressdata->number = $request->number;
+        $addressdata->country = $request->country;
+
+        $addressdata->state = $request->state;
+        $addressdata->city = $request->city;
+        $addressdata->pincode = $request->pincode;
+
+        $addressdata->area = $request->area;
+        $addressdata->address_type = $request->address_type;
+        $addressdata->save();
+
+        return redirect()->back()->with('success', 'Address created successfully.');
+    }
+    public function removeAddress($id)
+    {
+        // Find the address by ID
+        $address = UserAddress::find($id);
+
+        if ($address) {
+            // Delete the address
+            $address->delete();
+            return redirect()->back()->with('success', 'Address removed successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Address not found.');
+        }
+    }
+    public function editAddress($id)
+    {
+        $address = UserAddress::find($id);
+        return view('user/edit_address', compact('address'));
+    }
+    public function updateAddress(Request $request)
+    {
+        $address = UserAddress::find($request->id);
+
+        if ($address) {
+            $address->fullname = $request->fullname;
+            $address->number = $request->number;
+            $address->country = $request->country;
+            $address->state = $request->state;
+            $address->city = $request->city;
+            $address->pincode = $request->pincode;
+            $address->area = $request->area;
+            $address->address_type = $request->address_type;
+            $address->save();
+
+            return redirect()->route('mngaddress')->with('success', 'Address updated successfully.');
+        } else {
+            return redirect()->back()->with('error', 'Address not found.');
+        }
+    }
 
     public function coupons(){
         return view('user/coupons');
