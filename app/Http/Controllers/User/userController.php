@@ -90,16 +90,25 @@ class userController extends Controller
     public function dashboard(){
         return view('user.dashboard');
     }
+    // public function userlogout(Request $request)
+    // {
+    //     Auth::logout();
+
+    //     $request->session()->invalidate();
+
+    //     $request->session()->regenerateToken();
+
+    //     return redirect('/');
+    // }
     public function userlogout(Request $request)
     {
-        Auth::logout();
-
+        Auth::guard('users')->logout();
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');
     }
+
 
     public function userregister()
     {

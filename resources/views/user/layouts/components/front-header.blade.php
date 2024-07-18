@@ -101,11 +101,11 @@
         <div class="d-flex items-center">
           <div class="d-flex items-center ml-20 is-menu-opened-hide md:d-none">
             <div class="searchMenu-loc js-form-dd js-liverSearch">
-              @authguard('users')
+              @auth('users')
               <div data-x-dd-click="searchMenu-loc">
                   <div class="button px-10 fw-300 -blue-1 h-50" style="font-size: 15px; color: #000; text-transform: uppercase;">
                       <i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i>
-                      {{ Auth::guard('users')->user()->phonenumber }} <i class="icon-chevron-sm-down text-7 ml-10"></i>
+                      {{ Auth::guard('users')->user()->mobile_number }} <i class="icon-chevron-sm-down text-7 ml-10"></i>
                   </div>
               </div>
               <div class="searchMenu-loc__field shadow-2 js-popup-window" data-x-dd="searchMenu-loc" data-x-dd-toggle="-is-active">
@@ -121,15 +121,15 @@
                               <a href="{{ url('order-history') }}">Orders</a>
                           </div>
                           <div class="text-center js-search-option">
-                            <a href="{{ route('userlogout') }}" onclick="event.preventDefault(); confirmLogout();">Logout</a>
-                            <form id="logout-form" action="{{ route('userlogout') }}" method="POST" style="display: none;">
-                                @csrf
-                            </form>
-                        </div>
+                              <a href="{{ route('userlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
+                              <form id="logout-form" action="{{ route('userlogout') }}" method="POST" style="display: none;">
+                                  @csrf
+                              </form>
+                          </div>
                       </div>
                   </div>
               </div>
-              @else
+          @else
               <div data-x-dd-click="searchMenu-loc">
                   <a href="{{ route('userlogin') }}">
                       <div class="button px-10 fw-300 -blue-1 h-50" style="font-size: 15px; color: #000; text-transform: uppercase;">
@@ -137,7 +137,8 @@
                       </div>
                   </a>
               </div>
-              @endauthguard
+          @endauth
+          
 
           </div>
           

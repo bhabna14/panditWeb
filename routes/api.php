@@ -19,8 +19,11 @@ use App\Http\Controllers\Api\UserProfileController;
 
 
 use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\OtpController;
 
 
+Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
+Route::post('/verify-otpless', [OtpController::class, 'verifyOtp'])->name('api.verify-otp');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

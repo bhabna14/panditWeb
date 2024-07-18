@@ -47,21 +47,59 @@
                                                                     {{ session('error') }}
                                                                 </div>
                                                             @endif
-                                                            <form id="loginForm" action="{{ route('user.login') }}" method="POST">
+                                                            @if (session('otp_sent'))
+                                                            {{-- <form action="/verify-otp" method="POST">
                                                                 @csrf
-                                                                <input type="hidden" class="form-control" id="otp" name="otp" value="{{ rand(1000, 9999) }}">
-                                                                <input type="hidden" class="form-control" id="userid" name="userid" value="USER{{ rand(9, 99999) }}">
+                                                                <input type="text" name="order_id" value="{{ session('otp_order_id') }}" required>
+                                                                <input type="text" name="otp" placeholder="Enter OTP" required>
+                                                                <input type="text" name="phone" value="{{ session('otp_phone') }}" placeholder="Enter your phone number" required>
+                                                                <button type="submit">Verify OTP</button>
+                                                            </form> --}}
+                                                            <form id="loginForm" action="/verify-otp" method="POST">
+                                                                @csrf
+                                                               
+                                                                <div id="step1">
+                                                                    <div class="form-group">
+                                                                        {{-- <label for="mobile_no">Orderid</label> --}}
+                                                                        <div style="display: flex; align-items: center;">
+                                                                            {{-- <input type="text" class="form-control" id="country_code" name="country_code" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;"> --}}
+                                                                            <input type="hidden" class="form-control" id="phone" value="{{ session('otp_order_id') }}" name="order_id" style="margin-left: 5px; flex: 1;" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label for="mobile_no">Enter OTP</label>
+                                                                        <div style="display: flex; align-items: center;">
+                                                                            {{-- <input type="text" class="form-control" id="country_code" name="country_code" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;"> --}}
+                                                                            <input type="text" class="form-control" id="phone" placeholder="Enter OTP" name="otp" style="margin-left: 5px; flex: 1;" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        {{-- <label for="mobile_no">Phone Number</label> --}}
+                                                                        <div style="display: flex; align-items: center;">
+                                                                            {{-- <input type="text" class="form-control" id="country_code" name="country_code" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;"> --}}
+                                                                            <input type="hidden" class="form-control" id="phone"  value="{{ session('otp_phone') }}" name="phone" style="margin-left: 5px; flex: 1;" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    {{-- <input type="submit" class="btn btn-primary" value="Generate OTP"> --}}
+                                                                    <button type="submit" class="btn btn-primary">Verify OTP</button>
+                                                                </div>
+                                                            </form>
+                                                            @else
+                                                            <form id="loginForm" action="/send-otp" method="POST">
+                                                                @csrf
+                                                               
                                                                 <div id="step1">
                                                                     <div class="form-group">
                                                                         <label for="mobile_no">Phone Number</label>
                                                                         <div style="display: flex; align-items: center;">
-                                                                            <input type="text" class="form-control" id="country_code" name="country_code" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;">
-                                                                            <input type="number" class="form-control" id="phonenumber" name="phonenumber" placeholder="Enter your phone number" style="margin-left: 5px; flex: 1;">
+                                                                            {{-- <input type="text" class="form-control" id="country_code" name="country_code" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;"> --}}
+                                                                            <input type="number" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" style="margin-left: 5px; flex: 1;">
                                                                         </div>
                                                                     </div>
                                                                     <input type="submit" class="btn btn-primary" value="Generate OTP">
                                                                 </div>
                                                             </form>
+                                                            @endif
                                                             
                                                         </div>
                                                     </div>

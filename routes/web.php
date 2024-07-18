@@ -26,11 +26,16 @@ use App\Http\Controllers\Pandit\PanditLoginController;
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
 use Twilio\Rest\Client;
+use App\Http\Controllers\OtplessLoginController;
 
 
 Route::fallback(function () {
     abort(404);
 });
+Route::get('/otplogin', [OtplessLoginController::class, 'otplogin'])->name('otplogin');
+Route::post('/send-otp', [OtplessLoginController::class, 'sendOtp']);
+Route::post('/verify-otp', [OtplessLoginController::class, 'verifyOtp']);
+
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
@@ -70,7 +75,7 @@ Route::get('/poojas', 'fetchPoojas')->name('fetchPoojas');
 
 });
 //user middleware routes
-Route::middleware(['user'])->group(function () {
+Route::group(['middleware' => ['auth:users']], function () {
         Route::controller(userController::class)->group(function() {
 
         Route::get('/my-profile', 'myprofile')->name('myprofile');

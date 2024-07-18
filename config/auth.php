@@ -35,28 +35,33 @@ return [
     |
     */
 
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-        'users' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-       'pandits' => [
+ 'guards' => [
+    'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+    'api' => [
+        'driver' => 'sanctum',
+        'provider' => 'users',
+    ],
+    'users' => [
+        'driver' => 'session',
+        'provider' => 'users',
+    ],
+    'pandits' => [
         'driver' => 'session',
         'provider' => 'pandits',
-        ],
-        'superadmins' => [
-            'driver' => 'session',
-            'provider' => 'superadmins',
-        ],
-        'admins' => [
-            'driver' => 'session',
-            'provider' => 'admins',
-        ],
     ],
+    'superadmins' => [
+        'driver' => 'session',
+        'provider' => 'superadmins',
+    ],
+    'admins' => [
+        'driver' => 'session',
+        'provider' => 'admins',
+    ],
+],
+
 
     /*
     |--------------------------------------------------------------------------
@@ -75,28 +80,28 @@ return [
     |
     */
 
-    'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\User::class,
-        ],
-       
-        'superadmins' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Superadmin::class,
-        ],
-        'admins' => [
-            'driver' => 'eloquent',
-            'model' => App\Models\Admin::class,
-        ],
-
-        'pandits' => [
+'providers' => [
+    'users' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\User::class,
+    ],
+    'superadmins' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Superadmin::class,
+    ],
+    'admins' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Admin::class,
+    ],
+    'pandits' => [
         'driver' => 'eloquent',
         'model' => App\Models\PanditLogin::class,
     ],
+],
+
 
     
-    ],
+
 
     /*
     |--------------------------------------------------------------------------
