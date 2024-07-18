@@ -17,6 +17,7 @@ class UserProfileController extends Controller
 
     public function updateProfile(Request $request)
     {
+        // Validate incoming request data
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'phonenumber' => 'required|string|max:15',
@@ -27,48 +28,53 @@ class UserProfileController extends Controller
             'userphoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
+        // Check if validation fails
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error',
                 'errors' => $validator->errors(),
             ], 422);
         }
 
-        try {
-            $user = Auth::guard('users')->user();
-            $user->name = $request->input('name');
-            $user->mobile_number = $request->input('phonenumber');
-            $user->email = $request->input('email');
-            $user->dob = $request->input('dob');
-            $user->about = $request->input('about');
-            $user->gender = $request->input('gender');
+        // Get the authenticated user
+        $user = Auth::guard('users')->user();
 
-            if ($request->hasFile('userphoto')) {
-                // Delete the old userphoto if it exists
-                if ($user->userphoto && Storage::exists('public/' . $user->userphoto)) {
-                    Storage::delete('public/' . $user->userphoto);
-                }
-
-                $avatarPath = $request->file('userphoto')->store('avatars', 'public');
-                $user->userphoto = $avatarPath;
-            }
-
-            $user->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Profile updated successfully.',
-                'user' => $user,
-            ], 200);
-
-        } catch (\Exception $e) {
+        // Check if user is authenticated
+        if (!$user) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update profile.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => 'User not authenticated.',
+            ], 401);
         }
+
+        // Update user profile
+        $user->name = $request->input('name');
+        $user->mobile_number = $request->input('phonenumber');
+        $user->email = $request->input('email');
+        $user->dob = $request->input('dob');
+        $user->about = $request->input('about');
+        $user->gender = $request->input('gender');
+
+        // Handle user photo upload
+        if ($request->hasFile('avatar')) {
+            // Delete the old avatar if it exists
+            if ($user->userphoto && Storage::exists($user->userphoto)) {
+                Storage::delete($user->userphoto);
+            }
+
+            // Store the new avatar
+            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $user->userphoto = $avatarPath;
+        }
+
+        // Save the updated user profile
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile updated successfully.',
+            'user' => $user,
+        ], 200);
     }
 
     public function orderHistory(Request $request)
