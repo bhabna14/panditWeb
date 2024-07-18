@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Validator;
 class UserProfileController extends Controller
 {
     //
-    public function getUserDetails()
+     public function getUserDetails()
     {
         // Get the authenticated user
         $user = Auth::guard('sanctum')->user();
@@ -22,7 +22,7 @@ class UserProfileController extends Controller
         if ($user) {
             // Generate the full URL for userphoto
             if ($user->userphoto) {
-                $user->userphoto = Storage::url($user->userphoto);
+                $user->userphoto = asset(Storage::url($user->userphoto));
             }
 
             return response()->json([
