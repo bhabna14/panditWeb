@@ -14,6 +14,28 @@ use Illuminate\Support\Facades\Validator;
 class UserProfileController extends Controller
 {
     //
+    public function getUserDetails()
+    {
+        // Get the authenticated user
+        $user = Auth::guard('sanctum')->user();
+
+        if ($user) {
+            // Generate the full URL for userphoto
+            if ($user->userphoto) {
+                $user->userphoto = Storage::url($user->userphoto);
+            }
+
+            return response()->json([
+                'success' => true,
+                'user' => $user
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.'
+            ], 404);
+        }
+    }
 
     public function updateProfile(Request $request)
     {

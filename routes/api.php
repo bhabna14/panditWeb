@@ -117,3 +117,5 @@ Route::middleware('auth:sanctum')->post('/saveaddress', [UserProfileController::
 Route::middleware('auth:sanctum')->post('/update-profile', [UserProfileController::class, 'updateProfile']);
 
 Route::delete('/user/address/{id}', [UserProfileController::class, 'removeAddress']);
+
+Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::class, 'getUserDetails']);

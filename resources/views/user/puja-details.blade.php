@@ -73,7 +73,10 @@
                     </div>
                   </div>
                   <div class="tabs__pane -tab-item-2">
-                    <p class="text-15 text-dark-1">
+                    <p class="text-15 text-dark-1" style="
+    margin-top: 22px;
+    font-size: 17px;
+">
                       {{ $pooja->description }}
                     </p>
                   </div>

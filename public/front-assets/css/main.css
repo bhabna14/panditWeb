@@ -1421,7 +1421,9 @@ img {
   max-width: 100%;
   height: auto;
 }
-
+.tabs__pane {
+  margin-bottom: 61px;
+}
 a {
   color: inherit;
   font-size: inherit;
