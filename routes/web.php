@@ -105,7 +105,7 @@ Route::group(['middleware' => ['auth:users']], function () {
 
     });
 });
-Route::middleware(['user'])->group(function () {
+Route::group(['middleware' => ['auth:users']], function () {
     Route::get('/payment/{booking_id}', [PaymentController::class, 'showPaymentPage'])->name('payment.page');
     Route::post('/payment/process/{booking_id}', [PaymentController::class, 'processPayment'])->name('payment.process');
 

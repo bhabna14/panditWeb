@@ -101,4 +101,18 @@ class User extends Authenticatable
     protected $casts = [
         'expiry' => 'datetime',
     ];
+
+    //    public function isAdmin()
+    // {
+    //     return $this->role === 'admin';
+    // }
+
+    public function bankdetail()
+    {
+        return $this->hasOne(Bankdetail::class);
+    }
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'user_id');
+    }
 }

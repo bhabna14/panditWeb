@@ -30,4 +30,17 @@ class UserProfileController extends Controller
             'bookings' => $bookings,
         ], 200);
     }
+    public function manageAddress(Request $request)
+    {
+        $user = Auth::guard('sanctum')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        // Fetch managed addresses for the user
+        $addressData = UserAddress::where('user_id', $user->userid)->get();
+
+        return response()->json(['addressData' => $addressData], 200);
+    }
 }

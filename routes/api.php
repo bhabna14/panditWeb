@@ -22,8 +22,7 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\OtpController;
 
 
-Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
-Route::post('/verify-otpless', [OtpController::class, 'verifyOtp'])->name('api.verify-otp');
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -100,12 +99,16 @@ Route::get('/our-pandit/{slug}', [PanditController::class, 'singlePanditDetails'
 Route::get('/pooja/{slug}', [PanditController::class, 'poojadetails']);
 
 //user login api
-Route::controller(UserLoginController::class)->group(function() {
-    Route::post('/login','storeLoginData');
-    Route::post('/verify-otp','checkUserOtp');
-});
+// Route::controller(UserLoginController::class)->group(function() {
+//     Route::post('/login','storeLoginData');
+//     Route::post('/verify-otp','checkUserOtp');
+// });
+
+Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
+Route::post('/verify-otpless', [OtpController::class, 'verifyOtp'])->name('api.verify-otp');
 
 Route::middleware('auth:sanctum')->get('/order-history', [UserProfileController::class, 'orderHistory']);
 
 //Booking confirm
 Route::middleware('auth:sanctum')->post('/booking/confirm', [BookingController::class, 'confirmBooking']);
+Route::middleware('auth:sanctum')->get('/mngaddress', [UserProfileController::class, 'manageAddress']);
