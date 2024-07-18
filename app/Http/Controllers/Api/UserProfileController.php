@@ -171,4 +171,25 @@ class UserProfileController extends Controller
             ]
             , 201);
     }
+
+    public function removeAddress($id)
+    {
+        // Find the address by ID
+        $address = UserAddress::find($id);
+
+        if ($address) {
+            // Delete the address
+            $address->delete();
+            return response()->json([
+                'success' => true,
+                'message' => 'Address removed successfully.'
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Address not found.'
+            ], 404);
+        }
+    }
+
 }
