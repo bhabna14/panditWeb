@@ -113,4 +113,4 @@ Route::middleware('auth:sanctum')->get('/order-history', [UserProfileController:
 Route::middleware('auth:sanctum')->post('/booking/confirm', [BookingController::class, 'confirmBooking']);
 Route::middleware('auth:sanctum')->get('/mngaddress', [UserProfileController::class, 'manageAddress']);
 
-Route::middleware('auth:sanctum')->post('/saveaddress', [AddressController::class, 'saveAddress']);
+Route::middleware('auth:sanctum')->post('/saveaddress', [UserProfileController::class, 'saveAddress']);
