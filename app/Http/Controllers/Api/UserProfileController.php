@@ -13,24 +13,43 @@ use App\Models\UserAddress;
 class UserProfileController extends Controller
 {
     //
+    use Illuminate\Support\Facades\Storage;
+
     public function orderHistory(Request $request)
     {
         // Get the authenticated user
         $user = Auth::guard('sanctum')->user();
-
+    
         // Fetch recent bookings for the user
         $bookings = Booking::with('pooja.poojalist', 'pandit', 'address') // Load relationships to get pooja details
                             ->where('user_id', $user->userid)
                             ->orderByDesc('created_at')
-                            ->take(10) // Limit to 10 recent bookings (adjust as needed)
+                            // ->take(10) // Limit to 10 recent bookings (adjust as needed)
                             ->get();
-
+    
+        // Append URLs for pooja_video, pooja_photo, and profile_photo
+        $bookings->each(function ($booking) {
+            // Append URLs for pooja_video
+            if ($booking->pooja && $booking->pooja->pooja_video) {
+                $booking->pooja->pooja_video_url = Storage::url($booking->pooja->pooja_video);
+            }
+    
+            // Append URLs for pooja_photo
+            if ($booking->pooja && $booking->pooja->pooja_photo) {
+                $booking->pooja->pooja_photo_url = Storage::url($booking->pooja->pooja_photo);
+            }
+    
+            // Append URL for profile_photo (assuming it's stored in the User model)
+            $booking->pandit->profile_photo_url = Storage::url($booking->pandit->profile_photo); // Adjust accordingly if profile_photo is stored elsewhere
+        });
+    
         return response()->json([
-            'success' => 200,
+            'success' => true,
             'message' => 'Order history fetched successfully.',
             'bookings' => $bookings,
         ], 200);
     }
+    
     public function manageAddress(Request $request)
     {
         $user = Auth::guard('sanctum')->user();

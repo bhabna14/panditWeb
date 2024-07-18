@@ -405,7 +405,7 @@ public function bookingSuccess($id)
 
         $user = Auth::guard('users')->user();
         $user->name = $request->input('name');
-        $user->phonenumber = $request->input('phonenumber');
+        $user->mobile_number = $request->input('phonenumber');
         $user->email = $request->input('email');
         $user->dob = $request->input('dob');
         $user->about = $request->input('about');

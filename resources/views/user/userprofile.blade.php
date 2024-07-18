@@ -100,7 +100,7 @@
                           <div class="col-md-6">
                               <div class="form-group">
                                   <label for="mobile_number">Mobile number</label>
-                                  <input type="text" class="form-control" id="mobile_number" name="phonenumber" value="{{ Auth::guard('users')->user()->phonenumber }}" placeholder="Enter Mobile number">
+                                  <input type="text" class="form-control" id="mobile_number" name="phonenumber" value="{{ Auth::guard('users')->user()->mobile_number }}" placeholder="Enter Mobile number">
                               </div>
                           </div>
                       </div>
@@ -119,6 +119,16 @@
                               </div>
                           </div>
                       </div>
+                      <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="email">Gender</label>
+                                <input type="radio" name="gender" id="" value="Female">
+                                <input type="text" class="form-control" id="email" name="email" value="{{ Auth::guard('users')->user()->email }}" placeholder="Enter Email">
+                            </div>
+                        </div>
+                       
+                    </div>
   
                       <div class="row">
                           <div class="col-md-12">
