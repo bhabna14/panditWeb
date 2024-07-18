@@ -92,7 +92,7 @@
                                                                     <div class="form-group">
                                                                         <label for="mobile_no">Phone Number</label>
                                                                         <div style="display: flex; align-items: center;">
-                                                                            {{-- <input type="text" class="form-control" id="country_code" name="country_code" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;"> --}}
+                                                                            <input type="text" class="form-control" id="country_code" name="country_code" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;">
                                                                             <input type="number" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" style="margin-left: 5px; flex: 1;">
                                                                         </div>
                                                                     </div>

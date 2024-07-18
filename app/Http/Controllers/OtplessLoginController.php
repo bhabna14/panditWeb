@@ -109,10 +109,13 @@ class OtplessLoginController extends Controller
     public function sendOtp(Request $request)
     {
         $phoneNumber = $request->input('phone');
+        $countryCode = $request->input('country_code');
+        $fullPhoneNumber = $countryCode . $phoneNumber;
+    
         $client = new Client();
-
+    
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
-
+    
         try {
             $response = $client->post($url, [
                 'headers' => [
@@ -121,27 +124,22 @@ class OtplessLoginController extends Controller
                     'clientSecret'  => $this->clientSecret,
                 ],
                 'json' => [
-                    'phoneNumber' => $phoneNumber,
+                    'phoneNumber' => $fullPhoneNumber,
                 ],
             ]);
-
+    
             $body = json_decode($response->getBody(), true);
-
+    
             // Debugging: Print the response body
             logger("Response Body: " . print_r($body, true));
-
+    
             if (isset($body['orderId'])) {
                 $orderId = $body['orderId'];
-                // $phoneNumber= $body['phoneNumber'];
-
+    
                 // Store $orderId in session or pass it along to OTP verification form
-                // For example, store it in session
                 session(['otp_order_id' => $orderId]);
-                // session(['phoneNumber' => $phoneNumber]);
-                session(['otp_phone' => $phoneNumber]);
-
-                // Redirect to OTP verification form with orderId as input value
-                // return redirect()->route('otp_sent')->with('message', 'OTP sent successfully');
+                session(['otp_phone' => $fullPhoneNumber]);
+    
                 return redirect()->back()->with('otp_sent', true)->with('message', 'OTP sent successfully');
             } else {
                 return redirect()->back()->with('message', 'Failed to send OTP. Please try again.');
@@ -152,12 +150,14 @@ class OtplessLoginController extends Controller
             return redirect()->back()->with('message', 'Failed to send OTP due to an error.');
         }
     }
-
+    
+    
     public function verifyOtp(Request $request)
     {
-        $orderId = $request->input('order_id');
+        $orderId = $request->session()->get('otp_order_id');
         $otp = $request->input('otp');
-        $phoneNumber = $request->input('phone');
+        $phoneNumber = $request->session()->get('otp_phone');
+    
         $client = new Client();
     
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
@@ -179,7 +179,7 @@ class OtplessLoginController extends Controller
             $body = json_decode($response->getBody(), true);
     
             // Debugging: Print the response body
-            // dd("Response Body: " . print_r($body, true));
+            logger("Response Body: " . print_r($body, true));
     
             if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
                 // Check if user already exists
@@ -209,6 +209,7 @@ class OtplessLoginController extends Controller
             return redirect()->back()->with('message', 'Failed to verify OTP due to an error.');
         }
     }
+    
     
 
     
