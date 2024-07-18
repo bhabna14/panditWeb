@@ -74,9 +74,7 @@
                   </div>
                   <div class="tabs__pane -tab-item-2">
                     <p class="text-15 text-dark-1">
-                      Pharetra nulla ullamcorper sit lectus. Fermentum mauris pellentesque nec nibh sed et, vel diam, massa. Placerat quis vel fames interdum urna lobortis sagittis sed pretium. Morbi sed arcu proin quis tortor non risus.
-                      <br><br>
-                      Elementum lectus a porta commodo suspendisse arcu, aliquam lectus faucibus.
+                      {{ $pooja->description }}
                     </p>
                   </div>
                 </div>
