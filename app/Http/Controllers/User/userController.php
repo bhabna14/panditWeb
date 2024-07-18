@@ -475,9 +475,9 @@ public function bookingSuccess($id)
         $addressdata->city = $request->city;
         $addressdata->pincode = $request->pincode;
 
-        $addressdata->flatno = $request->flatno;
+        // $addressdata->flatno = $request->flatno;
         $addressdata->area = $request->area;
-        $addressdata->landmark = $request->landmark;
+        // $addressdata->landmark = $request->landmark;
         $addressdata->address_type = $request->address_type;
         $addressdata->save();
 

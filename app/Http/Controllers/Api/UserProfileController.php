@@ -42,6 +42,51 @@ class UserProfileController extends Controller
         // Fetch managed addresses for the user
         $addressData = UserAddress::where('user_id', $user->userid)->get();
 
-        return response()->json(['addressData' => $addressData], 200);
+        return response()->json([
+            'success' => 200,
+            'message' => 'Address fetched successfully.',
+            'addressData' => $addressData
+        ], 200);
+    }
+    public function saveAddress(Request $request)
+    {
+        $user = Auth::guard('api')->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+
+        // Validate request data (optional but recommended)
+        $validatedData = $request->validate([
+            'fullname' => 'required|string|max:255',
+            'number' => 'required|string|max:20',
+            'country' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'pincode' => 'required|string|max:10',
+            'area' => 'required|string|max:255',
+            'address_type' => 'required|string|max:50',
+        ]);
+
+        // Create new UserAddress instance and populate data
+        $addressData = new UserAddress();
+        $addressData->user_id = $user->userid;
+        $addressData->fullname = $validatedData['fullname'];
+        $addressData->number = $validatedData['number'];
+        $addressData->country = $validatedData['country'];
+        $addressData->state = $validatedData['state'];
+        $addressData->city = $validatedData['city'];
+        $addressData->pincode = $validatedData['pincode'];
+        $addressData->area = $validatedData['area'];
+        $addressData->address_type = $validatedData['address_type'];
+
+        // Save the address
+        $addressData->save();
+
+        return response()->json([
+            'success' => 200,
+            'message' => 'Address created successfully'
+            ]
+            , 201);
     }
 }
