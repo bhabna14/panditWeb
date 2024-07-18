@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Storage; // Import Storage facade
 class UserProfileController extends Controller
 {
     //
-    use Illuminate\Support\Facades\Storage;
 
     public function orderHistory(Request $request)
     {
