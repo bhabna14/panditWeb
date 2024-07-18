@@ -121,12 +121,19 @@
                       </div>
                       <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="email">Gender</label>
-                                <input type="radio" name="gender" id="" value="Female">
-                                <input type="text" class="form-control" id="email" name="email" value="{{ Auth::guard('users')->user()->email }}" placeholder="Enter Email">
-                            </div>
-                        </div>
+                          <div class="form-group">
+                              <label for="gender">Gender</label><br>
+                              <input type="radio" name="gender" id="female" value="Female" {{ Auth::guard('users')->user()->gender == 'Female' ? 'checked' : '' }}>
+                              <label for="female">Female</label><br>
+                              
+                              <input type="radio" name="gender" id="male" value="Male" {{ Auth::guard('users')->user()->gender == 'Male' ? 'checked' : '' }}>
+                              <label for="male">Male</label><br>
+                              
+                              <input type="radio" name="gender" id="other" value="Other" {{ Auth::guard('users')->user()->gender == 'Other' ? 'checked' : '' }}>
+                              <label for="other">Other</label>
+                          </div>
+                      </div>
+                      
                        
                     </div>
   

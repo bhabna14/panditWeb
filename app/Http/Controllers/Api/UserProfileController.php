@@ -14,6 +14,62 @@ class UserProfileController extends Controller
 {
     //
 
+    public function updateProfile(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'phonenumber' => 'required|string|max:15',
+            'email' => 'required|email|max:255',
+            'dob' => 'nullable|date',
+            'about' => 'nullable|string',
+            'gender' => 'nullable|string',
+            'userphoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $user = Auth::guard('users')->user();
+            $user->name = $request->input('name');
+            $user->mobile_number = $request->input('phonenumber');
+            $user->email = $request->input('email');
+            $user->dob = $request->input('dob');
+            $user->about = $request->input('about');
+            $user->gender = $request->input('gender');
+
+            if ($request->hasFile('userphoto')) {
+                // Delete the old userphoto if it exists
+                if ($user->userphoto && Storage::exists('public/' . $user->userphoto)) {
+                    Storage::delete('public/' . $user->userphoto);
+                }
+
+                $avatarPath = $request->file('userphoto')->store('avatars', 'public');
+                $user->userphoto = $avatarPath;
+            }
+
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile updated successfully.',
+                'user' => $user,
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update profile.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function orderHistory(Request $request)
     {
         // Get the authenticated user

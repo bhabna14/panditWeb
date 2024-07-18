@@ -114,3 +114,4 @@ Route::middleware('auth:sanctum')->post('/booking/confirm', [BookingController::
 Route::middleware('auth:sanctum')->get('/mngaddress', [UserProfileController::class, 'manageAddress']);
 
 Route::middleware('auth:sanctum')->post('/saveaddress', [UserProfileController::class, 'saveAddress']);
+Route::middleware('auth:sanctum')->post('/update-profile', [UserProfileController::class, 'updateProfile']);

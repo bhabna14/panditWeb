@@ -400,6 +400,7 @@ public function bookingSuccess($id)
             'email' => 'required|email|max:255',
             'dob' => 'nullable|date',
             'about' => 'nullable|string',
+            'gender' => 'nullable|string',
             'userphoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -409,6 +410,7 @@ public function bookingSuccess($id)
         $user->email = $request->input('email');
         $user->dob = $request->input('dob');
         $user->about = $request->input('about');
+        $user->gender = $request->input('gender');
 
         if ($request->hasFile('avatar')) {
             // Delete the old avatar if it exists
