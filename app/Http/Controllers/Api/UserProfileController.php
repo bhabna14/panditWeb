@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\UserAddress;
 
 use Illuminate\Support\Facades\Storage; // Import Storage facade
+use Illuminate\Support\Facades\Validator;
 
 class UserProfileController extends Controller
 {
