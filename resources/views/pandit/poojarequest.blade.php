@@ -37,11 +37,11 @@
                                 @foreach ($bookings as $index => $booking)
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
-                                    <td>{{ $booking->address->fullname }}</td>
+                                    <td>{{ $booking->address->fullname ?? 'N/A' }}</td>
                                     <td>{{ $booking->pooja->pooja_name }}</td>
-                                    <td>{{ $booking->address->number }}</td>
-                                    <td>₹ {{ $booking->pooja->pooja_fee }}</td>
-                                    <td>₹ {{ $booking->paid }}</td>
+                                    <td>{{ $booking->address->number ?? 'N/A' }}</td>
+                                    <td>₹ {{ $booking->pooja->pooja_fee ?? 'N/A' }}</td>
+                                    <td>₹ {{ $booking->paid ?? 'N/A' }}</td>
                                     <td> {{ $booking->address->area ?? 'N/A' }},{{ $booking->address->city ?? 'N/A' }},{{ $booking->address->state ?? 'N/A' }}
                                         {{ $booking->address->country ?? 'N/A' }}<br>
                                         Pincode : {{ $booking->address->pincode ?? 'N/A' }}<br>

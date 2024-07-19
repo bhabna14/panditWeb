@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Facades\Validator;
+use GuzzleHttp\Exception\RequestException;
+
 
 class OtplessLoginController extends Controller
 {
@@ -108,6 +111,15 @@ class OtplessLoginController extends Controller
 
     public function sendOtp(Request $request)
     {
+        // Validate the phone number
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|digits:10', // Assuming phone numbers should be 10 digits
+        ]);
+    
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+    
         $phoneNumber = $request->input('phone');
         $countryCode = $request->input('country_code');
         $fullPhoneNumber = $countryCode . $phoneNumber;
@@ -130,9 +142,6 @@ class OtplessLoginController extends Controller
     
             $body = json_decode($response->getBody(), true);
     
-            // Debugging: Print the response body
-            logger("Response Body: " . print_r($body, true));
-    
             if (isset($body['orderId'])) {
                 $orderId = $body['orderId'];
     
@@ -142,18 +151,29 @@ class OtplessLoginController extends Controller
     
                 return redirect()->back()->with('otp_sent', true)->with('message', 'OTP sent successfully');
             } else {
-                return redirect()->back()->with('message', 'Failed to send OTP. Please try again.');
+                return redirect()->back()->with('error', 'Failed to send OTP. Please try again.');
             }
         } catch (RequestException $e) {
-            // Debugging: Print the error message
-            logger("Request Exception: " . $e->getMessage());
-            return redirect()->back()->with('message', 'Failed to send OTP due to an error.');
+            $response = $e->getResponse();
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+            $errorMessage = $responseBody['message'] ?? 'Failed to send OTP due to an error.';
+    
+            return redirect()->back()->with('error', $errorMessage);
         }
     }
     
     
     public function verifyOtp(Request $request)
     {
+        // Validate the OTP length
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required|digits:6', // Ensure OTP is exactly 6 digits
+        ]);
+    
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+    
         $orderId = $request->session()->get('otp_order_id');
         $otp = $request->input('otp');
         $phoneNumber = $request->session()->get('otp_phone');
@@ -200,8 +220,7 @@ class OtplessLoginController extends Controller
                 // Redirect to the intended page or home page
                 return redirect()->route('userindex')->with('success', 'User authenticated successfully.');
             } else {
-                $message = $body['message'] ?? 'Invalid OTP';
-                return redirect()->back()->with('message', $message);
+                return redirect()->back()->with('message', 'Wrong OTP. Please try again.');
             }
         } catch (RequestException $e) {
             // Debugging: Print the error message

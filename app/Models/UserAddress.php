@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class UserAddress extends Model
 {
     use HasFactory;
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'address_id', 'id');
+    }
 }
