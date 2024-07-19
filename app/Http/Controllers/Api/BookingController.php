@@ -36,12 +36,14 @@ class BookingController extends Controller
             // Log success message
             \Log::info('Booking created successfully.', ['data' => $validatedData]);
 
-            // Return a JSON response
+            $booking->load(['user', 'pandit', 'pooja', 'address']);
+
+            // Return a success response with the booking details
             return response()->json([
                 'success' => true,
                 'message' => 'Booking confirmed successfully!',
                 'booking' => $booking
-            ], 200);
+            ], 201);
         } catch (\Exception $e) {
             // Log the error
             \Log::error('Error creating booking: ' . $e->getMessage());
