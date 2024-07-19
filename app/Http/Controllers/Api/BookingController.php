@@ -21,7 +21,7 @@ class BookingController extends Controller
                 'pooja_fee' => 'required|numeric',
                 'advance_fee' => 'required|numeric',
                 'booking_date' => 'required|date',
-                'booking_time' => 'required|string',
+               
                 'address_id' => 'required',
             ]);
 
