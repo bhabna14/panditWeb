@@ -119,8 +119,8 @@ class UserProfileController extends Controller
             }
     
             // Append URLs for pooja_photo
-            if ($booking->pooja && $booking->pooja->pooja_photo) {
-                $booking->pooja->pooja_photo_url =asset('assets/img/'.$booking->pooja->pooja_photo);
+            if ($booking->pooja->poojalist->pooja_photo) {
+                $booking->pooja->poojalist->pooja_photo_url =asset('assets/img/'.$booking->pooja->poojalist->pooja_photo);
             }
             // $booking->pandit->pooja_photo_url = asset('assets/img/'.$booking->pooja->poojalist->pooja_photo); // Adjust accordingly if profile_photo is stored elsewhere
     
