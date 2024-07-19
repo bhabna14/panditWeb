@@ -14041,3 +14041,10 @@ button#stopRecord {
   border: 1px solid #dcdcdc;
   margin: 20px;
 }
+
+button#pay-now {
+  background: green;
+  color: #fff;
+  padding: 7px 18px;
+  border-radius: 6px;
+}
