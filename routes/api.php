@@ -15,7 +15,7 @@ use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PoojaListController;
 use App\Http\Controllers\Api\UserLoginController;
 use App\Http\Controllers\Api\PoojaSkillController;
-use App\Http\Controllers\api\YoutubeUrlController;
+use App\Http\Controllers\Api\YoutubeUrlController;
 use App\Http\Controllers\Api\PoojaDetailsController;
 
 /// controllers for frontend pages 
