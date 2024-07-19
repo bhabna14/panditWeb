@@ -16,7 +16,7 @@ class YoutubeController extends Controller
     {
         $request->validate([
             'title_name' => 'required|string|max:255',
-            'youtube_url' => 'required|url',
+            'youtube_url' => 'required',
             'description' => 'nullable|string',
         ]);
 
