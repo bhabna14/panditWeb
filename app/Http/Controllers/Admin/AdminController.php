@@ -58,7 +58,7 @@ class AdminController extends Controller
         // $rejecteduser = User::where('application_status', 'rejected')->count();
         // $sebayatlists = User::where('status', 'active')->get();
         $pandit_profiles = Profile::all(); // Fetch all profiles                  
-         return view('admin/dashboard', compact('sebayatlists','pandit_profiles'));
+         return view('admin/dashboard', compact('pandit_profiles'));
     } 
     public function adminlogout(Request $request)
     {
