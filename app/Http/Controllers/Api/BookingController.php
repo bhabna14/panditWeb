@@ -40,7 +40,7 @@ class BookingController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Booking confirmed successfully!',
-                'booking_id' => $booking->booking_id
+                'booking' => $booking
             ], 200);
         } catch (\Exception $e) {
             // Log the error

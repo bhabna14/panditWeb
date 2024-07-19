@@ -48,13 +48,7 @@
                                                                 </div>
                                                             @endif
                                                             @if (session('otp_sent'))
-                                                            {{-- <form action="/verify-otp" method="POST">
-                                                                @csrf
-                                                                <input type="text" name="order_id" value="{{ session('otp_order_id') }}" required>
-                                                                <input type="text" name="otp" placeholder="Enter OTP" required>
-                                                                <input type="text" name="phone" value="{{ session('otp_phone') }}" placeholder="Enter your phone number" required>
-                                                                <button type="submit">Verify OTP</button>
-                                                            </form> --}}
+                                                           
                                                             <form id="loginForm" action="/verify-otp" method="POST">
                                                                 @csrf
                                                                
@@ -63,7 +57,7 @@
                                                                         {{-- <label for="mobile_no">Orderid</label> --}}
                                                                         <div style="display: flex; align-items: center;">
                                                                             {{-- <input type="text" class="form-control" id="country_code" name="country_code" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;"> --}}
-                                                                            <input type="hidden" class="form-control" id="phone" value="{{ session('otp_order_id') }}" name="order_id" style="margin-left: 5px; flex: 1;" required>
+                                                                            <input type="hidden" class="form-control" id="order_id" value="{{ session('otp_order_id') }}" name="order_id" style="margin-left: 5px; flex: 1;" required>
                                                                         </div>
                                                                     </div>
                                                                     <div class="form-group">
