@@ -7,12 +7,12 @@
 <section class="puja-details-sec">
     <div class="container">
         <div class="row">
-           <div class="col-md-6">
+           <div class="col-md-4">
               <div class="poja-details-img text-center">
                 <img src="{{ asset('assets/img/' . $pooja->pooja_photo) }}" alt="">
               </div>
            </div>
-           <div class="col-md-6">
+           <div class="col-md-8">
             <div class="puja-heading-sec">
                 <h5>{{ $pooja->pooja_name }}</h5>
                 <p>{{ $pooja->short_description }}</p>
