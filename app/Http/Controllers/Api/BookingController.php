@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
-
+use Illuminate\Support\Facades\Storage;
 class BookingController extends Controller
 {
     //
@@ -37,6 +37,9 @@ class BookingController extends Controller
             \Log::info('Booking created successfully.', ['data' => $validatedData]);
 
             $booking->load(['user', 'pandit', 'pooja', 'address']);
+            $booking->pooja->pooja_photo =asset('assets/img/'.$booking->pooja->pooja_photo);
+            $booking->pandit->profile_photo = asset($booking->pandit->profile_photo);
+            $booking->user->userphoto = Storage::url($booking->user->userphoto);
 
             // Return a success response with the booking details
             return response()->json([
