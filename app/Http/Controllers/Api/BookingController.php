@@ -39,7 +39,7 @@ class BookingController extends Controller
             $booking->load(['user', 'pandit', 'pooja', 'address']);
             $booking->pooja->pooja_photo =asset('assets/img/'.$booking->pooja->pooja_photo);
             $booking->pandit->profile_photo = asset($booking->pandit->profile_photo);
-            $booking->user->userphoto = Storage::url($booking->user->userphoto);
+            $booking->user->userphoto = asset(Storage::url($booking->user->userphoto));
 
             // Return a success response with the booking details
             return response()->json([
