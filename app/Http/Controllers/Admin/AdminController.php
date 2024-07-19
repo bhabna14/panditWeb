@@ -56,7 +56,7 @@ class AdminController extends Controller
         // $pendinguser = User::where('application_status', 'pending')->count();
         // $approuser = User::where('application_status', 'approved')->count();
         // $rejecteduser = User::where('application_status', 'rejected')->count();
-        $sebayatlists = User::where('status', 'active')->get();
+        // $sebayatlists = User::where('status', 'active')->get();
         $pandit_profiles = Profile::all(); // Fetch all profiles                  
          return view('admin/dashboard', compact('sebayatlists','pandit_profiles'));
     } 
