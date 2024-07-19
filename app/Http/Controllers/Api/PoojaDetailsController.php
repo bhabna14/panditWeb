@@ -11,27 +11,31 @@ use Illuminate\Support\Facades\Auth;
 
 class PoojaDetailsController extends Controller
 {
-    public function getPoojaDetails()
+  
+    public function managePoojaDetails(Request $request)
     {
-        $Poojaskills = Poojaskill::where('pooja_status', 'show')
-                                  ->where('status', 'active')
-                                  ->get();
+        try {
+            $panditId = Auth::guard('sanctum')->user()->pandit_id;
 
-        return response()->json($Poojaskills);
-    }
-
-   
-        public function managePoojaDetails()
-        {
-            $poojaDetails = Poojadetails::where('status', 'active')->get();
-    
-            return response()->json($poojaDetails);
+            $poojaDetails = Poojadetails::where('status', 'active')->where('pandit_id', $panditId)->get();
+            
+            return response()->json([
+                'status' => 200,
+                'message' => 'Pooja details fetched successfully.',
+                'data' => $poojaDetails
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to fetch pooja details.',
+                'error' => $e->getMessage()
+            ], 500);
         }
+    }
     
         public function savePoojadetails(Request $request)
         {
-            $panditId = Auth::guard('pandits')->user()->pandit_id;
-    
+            $panditId = Auth::guard('sanctum')->user()->pandit_id;
             // Initialize a flag to track if at least one new record was saved
             $atLeastOneSaved = false;
     
@@ -91,7 +95,7 @@ class PoojaDetailsController extends Controller
     
         public function updatePoojadetails(Request $request)
         {
-            $panditId = Auth::guard('pandits')->user()->pandit_id;
+            $panditId = Auth::guard('sanctum')->user()->pandit_id;
     
             // Initialize a flag to track if at least one update was successful
             $atLeastOneUpdated = false;

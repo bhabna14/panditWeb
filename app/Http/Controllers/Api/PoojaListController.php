@@ -15,16 +15,29 @@ class PoojaListController extends Controller
 {
     public function poojaItemList()
     {
-        $Poojaskills = Poojaskill::where('status', 'active')->get();
-        $PujaLists = Poojaitemlists::all();
-        $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
-
-        return response()->json([
-            'Poojaskills' => $Poojaskills,
-            'PujaLists' => $PujaLists,
-            'Poojaitemlist' => $Poojaitemlist,
-        ]);
+        try {
+            $panditId = Auth::guard('sanctum')->user()->pandit_id;
+    
+            $poojaSkills = Poojaskill::where('status', 'active')->where('pandit_id', $panditId)->get();
+            $poojaItemList = Poojaitemlists::where('status', 'active')->pluck('item_name');
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Pooja item list fetched successfully.',
+                'data' => [
+                    'pooja_skills' => $poojaSkills,
+                    'pooja_item_list' => $poojaItemList,
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to fetch pooja item list.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+    
     public function singlePoojaItem(Request $request)
     {
         $pooja_id = $request->query('pooja_id');
@@ -53,7 +66,7 @@ class PoojaListController extends Controller
         ]);
     
         // Get the authenticated Pandit's ID
-        $panditId = Auth::guard('pandits')->user()->pandit_id;
+        $panditId = Auth::guard('sanctum')->user()->pandit_id;
     
         if (!$panditId) {
             return response()->json(['error' => 'No authenticated pandit found.'], 404);
@@ -140,7 +153,7 @@ class PoojaListController extends Controller
         ]);
     
         // Get the authenticated Pandit's ID
-        $panditId = Auth::guard('pandits')->user()->pandit_id;
+        $panditId = Auth::guard('sanctum')->user()->pandit_id;
     
         if (!$panditId) {
             return response()->json(['error' => 'No authenticated pandit found.'], 404);

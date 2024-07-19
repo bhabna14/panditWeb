@@ -9,5 +9,8 @@ class EduDetail extends Model
 {
     use HasFactory;
     protected $table = 'pandit_education';
+    protected $fillable = [
+        'pandit_id', 'mobile_no',
+    ];
 
 }

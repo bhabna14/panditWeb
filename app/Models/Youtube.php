@@ -5,12 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class VedicDetail extends Model
+class Youtube extends Model
 {
     use HasFactory;
-    protected $table = 'pandit_vedic';
-    protected $fillable = [
-        'otp', 'pandit_id', 'mobile_no',
-    ];
 
+    protected $table = 'youtube_url';
+
+    protected $fillable = [
+        'title',
+        'youtube_url',
+        'description',
+        'status',
+    ];
 }

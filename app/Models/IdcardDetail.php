@@ -9,5 +9,7 @@ class IdcardDetail extends Model
 {
     use HasFactory;
     protected $table = 'pandit_idcard';
-
+    protected $fillable = [
+        'id_type', 'upload_id',
+    ];
 }

@@ -2,31 +2,35 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+/// controllers for pandit dashboards
+use App\Http\Controllers\api\AreaController;
 use App\Http\Controllers\Api\BankController;
-use App\Http\Controllers\Api\PujaController;
 use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\CareerController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\CareersController;
 use App\Http\Controllers\Api\PodcastController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\PoojaListController;
-use App\Http\Controllers\Api\PoojaSkillController;
-use App\Http\Controllers\Api\PoojaDetailsController;
-use App\Http\Controllers\Api\PanditController;
 use App\Http\Controllers\Api\UserLoginController;
+use App\Http\Controllers\Api\PoojaSkillController;
+use App\Http\Controllers\api\YoutubeUrlController;
+use App\Http\Controllers\Api\PoojaDetailsController;
 
+/// controllers for frontend pages 
+use App\Http\Controllers\Api\PanditController;
+use App\Http\Controllers\Api\PujaController;
 use App\Http\Controllers\Api\UserProfileController;
-
-
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\OtpController;
-
 
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::controller(LoginController::class)->group(function() {
     Route::post('/store-login-data','storeLoginData');
     Route::post('/check-otp','checkOtp');
@@ -46,21 +50,19 @@ Route::controller(ProfileController::class)->group(function() {
 });
 
 Route::controller(CareerController::class)->group(function() {
-    Route::post('/career/save', 'savecareer');
+    Route::post('/career/save', 'saveCareer');
+    Route::get('/manage-career', 'manageCareer');
 });
 
-Route::middleware('auth:api')->post('/career', [CareerController::class, 'savecareer']);
-
-
 Route::controller(PoojaSkillController::class)->group(function() {
-    Route::get('/poojaskill',  'index');
+    Route::get('/managepoojaskill',  'manageSkill');
     Route::post('/poojaskill/save', 'saveSkillPooja');
 });
 
 Route::controller(PoojaDetailsController::class)->group(function() {
     Route::get('/poojadetails','getPoojaDetails');
     Route::post('/poojadetails/save', 'savePoojadetails');
-    Route::get('/managepoojadetails', 'managePoojaDetails');
+    Route::get('/managepoojadetails',  'managePoojaDetails');
     Route::post('/updatePoojadetails', 'updatePoojadetails');
 });
 
@@ -70,7 +72,6 @@ Route::controller(PoojaListController::class)->group(function() {
     Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');
     Route::post('/save-pooja-item-list',  'savePoojaItemList');
     Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
-
 });
 
 Route::controller(BankController::class)->group(function() {
@@ -83,6 +84,11 @@ Route::controller(AddressController::class)->group(function() {
 
 Route::controller(PodcastController::class)->group(function() {
     Route::get('podcasts', 'podcasts');
+});
+Route::controller(YoutubeUrlController::class)->group(function() {
+
+Route::get('/manage-youtube','manageYoutube')->name('api.manageYoutube');
+
 });
 
 

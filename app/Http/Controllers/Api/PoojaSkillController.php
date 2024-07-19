@@ -12,50 +12,46 @@ use Illuminate\Support\Facades\Auth;
 
 class PoojaSkillController extends Controller
 {
-  public function index()
-{
-    // Retrieve all active Pooja names
-    $Poojanames = Poojalist::where('status', 'active')->get();
-
-    // Retrieve the authenticated user's active profile
-    $user = Auth::guard('pandits')->user();
-
-    if (!$user) {
-        return response()->json(['error' => 'No authenticated user found.'], 401);
+    
+    public function manageSkill()
+    {
+        try {
+            $Poojanames = Poojalist::where('status', 'active')->get();
+    
+            $panditId = Auth::guard('sanctum')->user()->pandit_id;
+    
+            $profile = Profile::where('pandit_id', $panditId)->where('status', 'active')->first();
+    
+            if (!$profile) {
+                return response()->json(['error' => 'No active profile found.'], 404);
+            }
+    
+            $selectedPoojas = Poojaskill::where('pandit_id', $panditId)
+                                        ->where('status', 'active')
+                                        ->pluck('pooja_id')
+                                        ->toArray();
+    
+            return response()->json([
+                'Poojanames' => $Poojanames,
+                'selectedPoojas' => $selectedPoojas,
+            ], 200);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to fetch Pooja skills.',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
     }
-
-    // Assuming the authenticated user has a 'profile' relationship
-    $profile = $user->profile()->where('status', 'active')->first();
-
-    // Check if an active profile exists
-    if (!$profile) {
-        return response()->json(['error' => 'No active profile found.'], 404);
-    }
-
-    // Get the profile ID
-    $profileId = $profile->profile_id;
-
-    // Retrieve the selected Poojas for the authenticated user's profile
-    $selectedPoojas = Poojaskill::where('pandit_id', $profileId)
-                                ->where('status', 'active')
-                                ->pluck('pooja_id')
-                                ->toArray();
-
-    // Return the data as a JSON response
-    return response()->json([
-        'Poojanames' => $Poojanames,
-        'selectedPoojas' => $selectedPoojas,
-    ]);
-}
-
+    
 
     // pooja skill save 
     
     public function saveSkillPooja(Request $request)
     {
         // Retrieve the authenticated user
-        $user = Auth::guard('pandits')->user();
-    
+        $user = Auth::guard('sanctum')->user();
+
         if (!$user) {
             return response()->json(['error' => 'No authenticated user found.'], 401);
         }

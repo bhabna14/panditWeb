@@ -15,16 +15,16 @@ class ProfileController extends Controller
   
     public function saveProfile(Request $request)
     {
-        // Retrieve the authenticated user
-        $user = Auth::guard('pandits')->user();
+       
     
+        // Retrieve the authenticated user
+        $user = Auth::guard('sanctum')->user();
+
         if (!$user) {
             return response()->json(['error' => 'No authenticated user found.'], 401);
         }
-    
-        // Create a new Profile instance
         $profile = new Profile();
-        $profile->pandit_id = $user->pandit_id; // Use the authenticated user's ID
+        $profile->pandit_id = $user->pandit_id;
         $profile->title = $request->title;
         $profile->name = $request->name;
         $profile->email = $request->email;
@@ -34,7 +34,11 @@ class ProfileController extends Controller
     
         // Handle the language input
         $pandilang = $request->input('language');
-        $langString = implode(',', $pandilang);
+        if (is_array($pandilang)) {
+            $langString = implode(',', $pandilang);
+        } else {
+            $langString = $pandilang; // Assuming it's already a string if not an array
+        }
         $profile->language = $langString;
     
         // Handle profile photo upload if provided
@@ -46,19 +50,20 @@ class ProfileController extends Controller
             $profile->profile_photo = $filePath;
         }
     
-        // Save the profile
-        $profile->save();
-    
-        // Return a success response
-        return response()->json(['message' => 'Profile created successfully', 'user' => $profile], 201);
+        // Save the profile and return appropriate response
+        if ($profile->save()) {
+            return response()->json(['message' => 'Profile created successfully', 'user' => $profile], 201);
+        } else {
+            return response()->json(['error' => 'Failed to save data.'], 500);
+        }
     }
     
-
+    
     public function updateProfile(Request $request)
     {
         // Retrieve the authenticated user
-        $user = Auth::guard('pandits')->user();
-    
+        $user = Auth::guard('sanctum')->user();
+
         if (!$user) {
             return response()->json(['error' => 'No authenticated user found.'], 401);
         }

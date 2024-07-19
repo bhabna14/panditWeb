@@ -42,7 +42,6 @@ class ProfileController extends Controller
 
         $profile->title = $request->title;
         $profile->name = $request->name;
-        $profile->slug = Str::slug($request->name, '-');
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
@@ -68,7 +67,7 @@ class ProfileController extends Controller
             return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
         }
     }
-
+    
        public function manageprofile()
     {
         // Get the authenticated user's pandit_id

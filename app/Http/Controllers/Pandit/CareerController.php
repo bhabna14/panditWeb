@@ -108,6 +108,8 @@ class CareerController extends Controller
             return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
         }
     }
+
+    
     public function deletIdproof($id)
     {
             $affected = IdcardDetail::where('id', $id)->update(['status' => 'deleted']);

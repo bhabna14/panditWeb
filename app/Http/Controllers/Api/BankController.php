@@ -13,7 +13,7 @@ class BankController extends Controller
     public function saveBankDetails(Request $request)
     {
         // Get the active profile
-        $panditId = Auth::guard('pandits')->user()->pandit_id;
+        $panditId = Auth::guard('sanctum')->user()->pandit_id;
 
 
         // Validate the request data

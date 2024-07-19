@@ -3,30 +3,36 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\userController;
 use App\Http\Controllers\User\PaymentController;
+use App\Http\Controllers\OtplessLoginController;
+
 
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TitleController;
-use App\Http\Controllers\Pandit\AreaController;
-use App\Http\Controllers\Pandit\BankController;
 use App\Http\Controllers\Admin\BannerController;
-use App\Http\Controllers\Pandit\SkillController;
 use App\Http\Controllers\Admin\PodcastController;
-use App\Http\Controllers\Pandit\CareerController;
-use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
+use App\Http\Controllers\Admin\YoutubeController;
+
+
+use App\Http\Controllers\Pandit\AreaController;
+use App\Http\Controllers\Pandit\BankController;
+use App\Http\Controllers\Pandit\SkillController;
+use App\Http\Controllers\Pandit\CareerController;
+use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Pandit\AddressController;
 use App\Http\Controllers\Pandit\ProfileController;
-use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Pandit\PoojaListController;
-use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Pandit\PanditLoginController; 
 use App\Http\Controllers\Pandit\PoojaDetailsController;
+
+
+use App\Http\Controllers\sebayatregisterController;
+use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
 use Twilio\Rest\Client;
-use App\Http\Controllers\OtplessLoginController;
 
 
 Route::fallback(function () {
@@ -235,6 +241,14 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/editbanner/{banner}', 'editbanner')->name('editbanner');
         Route::post('/updatebanner/{id}', 'updatebanner')->name('updatebanner');
         Route::get('/deletebanner/{id}', 'deletebanner')->name('deletebanner');
+    });
+    Route::controller(YoutubeController::class)->group(function() {
+        Route::get('/youtube', 'youTube')->name('youTube');
+        Route::post('/save-youtube-url', 'store')->name('saveYoutubeUrl');
+        Route::get('/manage-youtube', 'manageYoutube')->name('manageYoutube');
+        Route::get('/delete-youtube/{id}', 'destroy')->name('deleteYoutube');
+        Route::get('/edit-youtube/{id}', 'edit')->name('editYoutube');
+        Route::post('/update-youtube/{id}',  'update')->name('updateYoutube');
     });
 
 

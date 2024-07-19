@@ -12,7 +12,7 @@ class AddressController extends Controller
     public function saveAddress(Request $request)
     {
         // Get the authenticated pandit_id
-        $panditId = Auth::guard('pandits')->user()->pandit_id;
+        $panditId = Auth::guard('sanctum')->user()->pandit_id;
 
         // Validate the request data
         $request->validate([
