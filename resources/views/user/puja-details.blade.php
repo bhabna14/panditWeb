@@ -17,7 +17,14 @@
                 <h5>{{ $pooja->pooja_name }}</h5>
                 <p>{{ $pooja->short_description }}</p>
                
-                <span><i class="fa fa-calendar-check-o" aria-hidden="true"></i>{{ $pooja->pooja_date }}</span>
+                <span>
+                  @if($pooja->pooja_date)
+                      <i class="fa fa-calendar-check-o" aria-hidden="true"></i> {{ $pooja->pooja_date }}
+                  @else
+                      &nbsp; <!-- Non-breaking space to keep layout consistent -->
+                  @endif
+                </span>
+              
             </div>
            </div>
         </div>
