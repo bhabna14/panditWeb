@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 class BookingController extends Controller
 {
     //
@@ -60,8 +61,12 @@ class BookingController extends Controller
     }
     public function processPayment(Request $request, $booking_id)
     {
-        $booking = Booking::findOrFail($booking_id);
-
+        // Log the booking ID received
+        Log::info('Booking ID received:', ['booking_id' => $booking_id]);
+    
+        // Log the request data received
+        Log::info('Request data:', $request->all());
+    
         try {
             // Validate incoming request data
             $validatedData = $request->validate([
@@ -70,17 +75,34 @@ class BookingController extends Controller
                 'status' => 'required|string',
                 'paid' => 'required|numeric',
             ]);
-
+    
+            // Log the validated data
+            Log::info('Validated data:', $validatedData);
+    
+            // Find the booking
+            $booking = Booking::where('booking_id', $booking_id)->first();
+    
+            // Check if booking exists
+            if (!$booking) {
+                Log::error('Booking not found:', ['booking_id' => $booking_id]);
+                return response()->json(['error' => 'Booking not found.'], 404);
+            }
+    
             // Update booking with payment details
             $booking->payment_id = $validatedData['payment_id'];
             $booking->application_status = $validatedData['application_status'];
             $booking->status = $validatedData['status'];
             $booking->paid = $validatedData['paid'];
             $booking->save();
-
+    
+            // Log the booking update
+            Log::info('Booking updated successfully:', ['booking' => $booking]);
+    
             return response()->json(['success' => 'Payment details saved successfully!', 'booking' => $booking], 200);
         } catch (\Exception $e) {
+            // Log the exception message
             Log::error('Failed to save payment details: ' . $e->getMessage());
+    
             return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
         }
     }
