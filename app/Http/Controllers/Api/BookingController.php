@@ -58,6 +58,31 @@ class BookingController extends Controller
             ], 500);
         }
     }
+    public function processPayment(Request $request, $booking_id)
+    {
+        $booking = Booking::findOrFail($booking_id);
 
+        try {
+            // Validate incoming request data
+            $validatedData = $request->validate([
+                'payment_id' => 'required|string',
+                'application_status' => 'required|string',
+                'status' => 'required|string',
+                'paid' => 'required|numeric',
+            ]);
+
+            // Update booking with payment details
+            $booking->payment_id = $validatedData['payment_id'];
+            $booking->application_status = $validatedData['application_status'];
+            $booking->status = $validatedData['status'];
+            $booking->paid = $validatedData['paid'];
+            $booking->save();
+
+            return response()->json(['success' => 'Payment details saved successfully!', 'booking' => $booking], 200);
+        } catch (\Exception $e) {
+            Log::error('Failed to save payment details: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
+        }
+    }
     
 }
