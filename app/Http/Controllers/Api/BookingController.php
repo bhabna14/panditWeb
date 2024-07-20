@@ -61,12 +61,6 @@ class BookingController extends Controller
     }
     public function processPayment(Request $request, $booking_id)
     {
-        // Log the booking ID received
-        Log::info('Booking ID received:', ['booking_id' => $booking_id]);
-    
-        // Log the request data received
-        Log::info('Request data:', $request->all());
-    
         try {
             // Validate incoming request data
             $validatedData = $request->validate([
@@ -76,15 +70,11 @@ class BookingController extends Controller
                 'paid' => 'required|numeric',
             ]);
     
-            // Log the validated data
-            Log::info('Validated data:', $validatedData);
-    
-            // Find the booking
+            // Find the booking by booking_id
             $booking = Booking::where('booking_id', $booking_id)->first();
     
             // Check if booking exists
             if (!$booking) {
-                Log::error('Booking not found:', ['booking_id' => $booking_id]);
                 return response()->json(['error' => 'Booking not found.'], 404);
             }
     
@@ -95,14 +85,8 @@ class BookingController extends Controller
             $booking->paid = $validatedData['paid'];
             $booking->save();
     
-            // Log the booking update
-            Log::info('Booking updated successfully:', ['booking' => $booking]);
-    
             return response()->json(['success' => 'Payment details saved successfully!', 'booking' => $booking], 200);
         } catch (\Exception $e) {
-            // Log the exception message
-            Log::error('Failed to save payment details: ' . $e->getMessage());
-    
             return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
         }
     }
