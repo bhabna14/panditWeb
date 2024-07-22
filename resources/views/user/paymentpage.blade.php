@@ -5,39 +5,38 @@
 
 @section('content')
 <div class="dashboard__main">
-<div class="dashboard__content" style="    margin-top: 40px;">
-<div class="container">
-    <h2>Payment for Booking: {{ $booking->booking_id }}</h2>
-    <p>Pandit: {{ $booking->pandit->name }}</p>
-    <p>Pooja: {{ $booking->pooja->pooja_name }}</p>
-    <p>Total Fee: ₹{{ $booking->pooja_fee }}</p>
-    <p>Advance Fee: ₹{{ $booking->advance_fee }}</p>
-    
-    <h3>Choose a payment option:</h3>
-    <form id="payment-form" action="{{ route('payment.process', ['booking_id' => $booking->id]) }}" method="POST">
-        @csrf
-        <div class="form-group" style="margin-bottom: 15px;">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="payment_option" id="full_payment" value="full" required>
-                <label class="form-check-label" for="full_payment">
-                    Pay Full Amount in Advance (5% discount): ₹{{ $booking->pooja_fee * 0.95 }}
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="payment_option" id="partial_payment" value="partial">
-                <label class="form-check-label" for="partial_payment">
-                    Pay Partial Amount (Advance Fee): ₹{{ $booking->advance_fee }}
-                </label>
-            </div>
+    <div class="dashboard__content" style="margin-top: 40px;">
+        <div class="container">
+            <h2>Payment for Booking: {{ $booking->booking_id }}</h2>
+            <p>Pandit: {{ $booking->pandit->name }}</p>
+            <p>Pooja: {{ $booking->pooja->pooja_name }}</p>
+            <p>Total Fee: ₹{{ $booking->pooja_fee }}</p>
+            <p>Advance Fee: ₹{{ $booking->advance_fee }}</p>
+            
+            <h3>Choose a payment option:</h3>
+            <form id="payment-form" action="{{ route('payment.process', ['booking_id' => $booking->id]) }}" method="POST">
+                @csrf
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment_option" id="full_payment" value="full" required>
+                        <label class="form-check-label" for="full_payment">
+                            Pay Full Amount in Advance (5% discount): ₹{{ $booking->pooja_fee * 0.95 }}
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="payment_option" id="partial_payment" value="advance">
+                        <label class="form-check-label" for="partial_payment">
+                            Pay Partial Amount (Advance Fee): ₹{{ $booking->advance_fee }}
+                        </label>
+                    </div>
+                </div>
+                <input type="hidden" name="payment_type" id="payment_type">
+                <input type="hidden" name="payment_method" value="razorpay">
+                <button type="button" id="pay-now" class="btn btn-primary">Pay Now</button>
+            </form>
         </div>
-        <button type="button" id="pay-now" class="btn btn-primary">Pay Now</button>
-    </form>
+    </div>
 </div>
-</div>
-</div>
-
-
-
 @endsection
 
 @section('scripts')
@@ -51,8 +50,10 @@ document.getElementById('pay-now').onclick = function(e){
     var amount;
     if (paymentOption === 'full') {
         amount = {{ $booking->pooja_fee * 0.95 * 100 }}; // Amount in paise
+        document.getElementById('payment_type').value = 'full';
     } else {
         amount = {{ $booking->advance_fee * 100 }}; // Amount in paise
+        document.getElementById('payment_type').value = 'partial';
     }
 
     var options = {
@@ -69,7 +70,6 @@ document.getElementById('pay-now').onclick = function(e){
         },
         "prefill": {
             "name": "{{ $booking->address->fullname }}",
-            
             "contact": "{{ $booking->address->number }}"
         },
         "theme": {

@@ -67,7 +67,7 @@
               <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
             </div>
             <div class="col-md-3">
-              @if (Carbon\Carbon::parse($booking->booking_date)->isPast())
+              @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status != "rejected")
               <span class="status-text"><i class="fa fa-circle comp-dot" aria-hidden="true"></i>Completed on {{ $booking->booking_date }}</span>
               @endif
               @if ($booking->status == "canceled")
@@ -76,7 +76,7 @@
               @if ($booking->status == "rejected")
               <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Rejected By {{ $booking->pandit->title }} {{ $booking->pandit->name }}</span>
               @endif
-              @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status !== 'canceled')
+              @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status !== 'canceled' && $booking->status != "rejected")
               <a href="{{ route('rate.pooja', ['id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;background-color: #c80100 !important;">Rate the Pooja</a>
               @endif
               @if (Carbon\Carbon::parse($booking->booking_date)->isFuture() && $booking->status !== 'canceled' && $booking->status !== 'rejected')

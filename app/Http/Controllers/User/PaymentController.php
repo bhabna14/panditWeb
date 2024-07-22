@@ -56,6 +56,8 @@ public function processPayment(Request $request, $booking_id)
         $booking->status = 'paid';
         $booking->paid =  $paidAmountInRupees;
         $booking->payment_id = $request->razorpay_payment_id;
+        $booking->payment_type = $request->payment_type;
+        $booking->payment_method = 'razorpay';
         $booking->save();
 
         return redirect()->route('booking.success', ['booking' => $booking_id])->with('success', 'Payment successful and booking confirmed!');
@@ -64,6 +66,7 @@ public function processPayment(Request $request, $booking_id)
         return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
     }
 }
+
 
 
     public function showCancelForm($id)

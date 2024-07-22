@@ -68,6 +68,8 @@ class BookingController extends Controller
                 'application_status' => 'required|string',
                 'status' => 'required|string',
                 'paid' => 'required|numeric',
+                'payment_type' => 'required|string', // Add payment_type validation
+                'payment_method' => 'required|string', // Add payment_method validation
             ]);
     
             // Find the booking by booking_id
@@ -83,6 +85,8 @@ class BookingController extends Controller
             $booking->application_status = $validatedData['application_status'];
             $booking->status = $validatedData['status'];
             $booking->paid = $validatedData['paid'];
+            $booking->payment_type = $validatedData['payment_type']; // Update payment_type
+            $booking->payment_method = $validatedData['payment_method']; // Update payment_method
             $booking->save();
     
             return response()->json(['success' => 'Payment details saved successfully!', 'booking' => $booking], 200);
@@ -90,5 +94,6 @@ class BookingController extends Controller
             return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
         }
     }
+    
     
 }

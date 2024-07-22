@@ -51,11 +51,11 @@
                         <input type="file" class="form-control" name="audioFile" id="audioFile" accept="audio/*">
                        
                     </div>
-                    <div class="col-md-6">
+                    {{-- <div class="col-md-6">
                         <audio id="recordedAudio" controls></audio>
                         <button type="button" id="startRecord" class="btn btn-secondary mt-2">Start Recording</button>
                         <button type="button" id="stopRecord" class="btn btn-secondary mt-2" disabled>Stop Recording</button>
-                    </div>
+                    </div> --}}
                 </div>
                 <div class="col-md-12">
                     <h6>Upload Image</h6>
