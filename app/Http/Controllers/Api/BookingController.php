@@ -152,7 +152,7 @@ class BookingController extends Controller
             'refund_amount' => $refundAmount
         ]);
 
-        return response()->json(['success' => 'Booking canceled successfully!', 'refund_amount' => $refundAmount], 200);
+        return response()->json(['success' => 'Booking canceled successfully!', 'booking' => $booking], 200);
     } catch (\Exception $e) {
         Log::error('Booking cancellation failed: ' . $e->getMessage());
         return response()->json(['error' => 'Failed to cancel booking. Please try again.'], 500);
