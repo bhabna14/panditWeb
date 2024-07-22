@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+
 class BookingController extends Controller
 {
     //
@@ -94,6 +98,65 @@ class BookingController extends Controller
             return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
         }
     }
+
+
+
+    public function cancelBooking(Request $request, $booking_id)
+{
+    try {
+        $booking = Booking::where('booking_id', $booking_id)->firstOrFail();
+        $today = Carbon::today();
+        $bookingDate = Carbon::parse($booking->booking_date);
+        $daysDifference = $bookingDate->diffInDays($today);
+
+        $validator = Validator::make($request->all(), [
+            'cancel_reason' => 'required|string|max:255',
+            'refund_method' => 'required|string|in:original',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $validatedData = $validator->validated();
+
+        // Log the booking details and cancellation request
+        Log::info('Booking cancellation requested', [
+            'booking_id' => $booking->id,
+            'booking_date' => $booking->booking_date,
+            'today' => $today,
+            'days_difference' => $daysDifference,
+            'cancel_reason' => $validatedData['cancel_reason'],
+            'refund_method' => $validatedData['refund_method']
+        ]);
+
+        if ($daysDifference > 20) {
+            $refundAmount = $booking->pooja_fee;
+        } elseif ($daysDifference > 1 && $daysDifference <= 20) {
+            $refundAmount = $booking->paid * 0.80; // 20% cancellation fee
+        } else {
+            $refundAmount = 0; // No refund
+        }
+
+        $booking->status = 'canceled';
+        $booking->canceled_at = now();
+        $booking->cancel_reason = $validatedData['cancel_reason'];
+        $booking->refund_method = $validatedData['refund_method'];
+        $booking->refund_amount = $refundAmount;
+        $booking->save();
+
+        // Log booking cancellation
+        Log::info('Booking canceled successfully', [
+            'booking_id' => $booking->id,
+            'refund_amount' => $refundAmount
+        ]);
+
+        return response()->json(['success' => 'Booking canceled successfully!', 'refund_amount' => $refundAmount], 200);
+    } catch (\Exception $e) {
+        Log::error('Booking cancellation failed: ' . $e->getMessage());
+        return response()->json(['error' => 'Failed to cancel booking. Please try again.'], 500);
+    }
+}
     
     
 }
