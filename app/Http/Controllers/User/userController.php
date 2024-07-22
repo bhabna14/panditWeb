@@ -396,7 +396,7 @@ public function bookingSuccess($id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'phonenumber' => 'required|string|max:15',
+            'mobile_number ' => 'required|string|max:15',
             'email' => 'required|email|max:255',
             'dob' => 'nullable|date',
             'about' => 'nullable|string',
@@ -550,35 +550,85 @@ public function bookingSuccess($id)
 
 
     //saving rating
-    public function submitRating(Request $request)
+    // public function submitRating(Request $request)
+    // {
+    //     $request->validate([
+    //         'rating' => 'required|integer|min:1|max:5',
+    //         'feedback_message' => 'required|string',
+    //         'audio_path' => 'nullable|file|mimes:audio/*',
+    //         'image_path' => 'nullable|file|mimes:jpeg,png,jpg,gif',
+    //     ]);
+
+    //     $rating = new Rating();
+    //     $rating->booking_id = $request->booking_id;
+    //     $rating->user_id =Auth::guard('users')->user()->userid;
+    //     $rating->rating = $request->rating;
+    //     $rating->feedback_message = $request->feedback_message;
+
+    //     if ($request->hasFile('audioFile')) {
+    //         $audioPath = $request->file('audioFile')->store('audio', 'public');
+    //         $rating->audio_path = $audioPath;
+    //     }
+
+    //     if ($request->hasFile('image')) {
+    //         $imagePath = $request->file('image')->store('images', 'public');
+    //         $rating->image_path = $imagePath;
+    //     }
+
+    //     $rating->save();
+
+    //     return redirect()->route('orderhistory')->with('success', 'Rating submitted successfully!');
+    // }
+
+    public function submitOrUpdateRating(Request $request)
     {
-        $request->validate([
-            'rating' => 'required|integer|min:1|max:5',
-            'feedback_message' => 'required|string',
-            'audio_path' => 'nullable|file|mimes:audio/*',
-            'image_path' => 'nullable|file|mimes:jpeg,png,jpg,gif',
+        // Validate incoming request data
+        $validatedData = $request->validate([
+            'booking_id' => 'required|exists:bookings,id',
+            'rating' => 'required|integer|between:1,5',
+            'feedback_message' => 'nullable|string',
+            'audioFile' => 'nullable|file|mimes:audio/mpeg,mpga,mp3,wav,aac',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
+            'rating_id' => 'nullable|exists:ratings,id', // For updating an existing rating
         ]);
-
-        $rating = new Rating();
-        $rating->booking_id = $request->booking_id;
-        $rating->user_id =Auth::guard('users')->user()->userid;
-        $rating->rating = $request->rating;
-        $rating->feedback_message = $request->feedback_message;
-
+    
+        // Determine if this is a new rating or an update
+        $rating = $request->has('rating_id') 
+            ? Rating::findOrFail($request->rating_id) 
+            : new Rating();
+    
+        // Fill rating details
+        $rating->user_id = Auth::id(); // Save the authenticated user's ID
+        $rating->booking_id = $validatedData['booking_id'];
+        $rating->rating = $validatedData['rating'];
+        $rating->feedback_message = $validatedData['feedback_message'];
+    
+        // Handle audio file upload
         if ($request->hasFile('audioFile')) {
+            // Delete old audio file if exists
+            if ($rating->audio_file) {
+                Storage::disk('public')->delete($rating->audio_file);
+            }
             $audioPath = $request->file('audioFile')->store('audio', 'public');
-            $rating->audio_path = $audioPath;
+            $rating->audio_file = $audioPath;
         }
-
+    
+        // Handle image upload
         if ($request->hasFile('image')) {
+            // Delete old image file if exists
+            if ($rating->image) {
+                Storage::disk('public')->delete($rating->image);
+            }
             $imagePath = $request->file('image')->store('images', 'public');
-            $rating->image_path = $imagePath;
+            $rating->image = $imagePath;
         }
-
+    
         $rating->save();
-
-        return redirect()->route('orderhistory')->with('success', 'Rating submitted successfully!');
+    
+        return redirect()->back()->with('success', isset($rating->id) ? 'Rating updated successfully!' : 'Rating submitted successfully!');
     }
+    
+    
 
     public function deletePhoto()
     {

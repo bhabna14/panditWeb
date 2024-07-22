@@ -23,48 +23,66 @@
                 </div>
               
             </div>
-            <form action="{{ route('submitRating') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('submitOrUpdateRating') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                @if(isset($rating))
+                    <input type="hidden" name="rating_id" value="{{ $rating->id }}">
+                @endif
                 <input type="hidden" name="booking_id" value="{{ $booking->id }}">
-                <!-- Your form fields here -->
+            
+                <!-- Rating Selection -->
                 <div class="rating-container mt-20">
                     <div class="rating">
-                        <input type="radio" id="star5" name="rating" value="5">
+                        <input type="radio" id="star5" name="rating" value="5" {{ isset($rating) && $rating->rating == 5 ? 'checked' : '' }}>
                         <label for="star5"></label>
-                        <input type="radio" id="star4" name="rating" value="4">
+                        <input type="radio" id="star4" name="rating" value="4" {{ isset($rating) && $rating->rating == 4 ? 'checked' : '' }}>
                         <label for="star4"></label>
-                        <input type="radio" id="star3" name="rating" value="3">
+                        <input type="radio" id="star3" name="rating" value="3" {{ isset($rating) && $rating->rating == 3 ? 'checked' : '' }}>
                         <label for="star3"></label>
-                        <input type="radio" id="star2" name="rating" value="2">
+                        <input type="radio" id="star2" name="rating" value="2" {{ isset($rating) && $rating->rating == 2 ? 'checked' : '' }}>
                         <label for="star2"></label>
-                        <input type="radio" id="star1" name="rating" value="1">
+                        <input type="radio" id="star1" name="rating" value="1" {{ isset($rating) && $rating->rating == 1 ? 'checked' : '' }}>
                         <label for="star1"></label>
                     </div>
                 </div>
+            
+                <!-- Feedback Message -->
                 <div class="col-md-12 form-input">
-                    {{-- <label for="feedback_message">Feedback Message</label> --}}
-                    <textarea placeholder="Feedback Message" name="feedback_message" id="feedback_message" class="form-control" cols="30" rows="5" spellcheck="false"></textarea>
+                    <textarea placeholder="Feedback Message" name="feedback_message" id="feedback_message" class="form-control" cols="30" rows="5" spellcheck="false">{{ isset($rating) ? $rating->feedback_message : '' }}</textarea>
                 </div>
+            
+                <!-- Upload or Record Audio -->
                 <div class="row">
                     <div class="col-md-6 form-input">
                         <h6>Upload or Record Audio</h6>
                         <input type="file" class="form-control" name="audioFile" id="audioFile" accept="audio/*">
-                       
+                        @if(isset($rating) && $rating->audio_file)
+                            <audio controls>
+                                <source src="{{ asset('storage/' . $rating->audio_file) }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        @endif
                     </div>
-                    {{-- <div class="col-md-6">
-                        <audio id="recordedAudio" controls></audio>
-                        <button type="button" id="startRecord" class="btn btn-secondary mt-2">Start Recording</button>
-                        <button type="button" id="stopRecord" class="btn btn-secondary mt-2" disabled>Stop Recording</button>
-                    </div> --}}
                 </div>
+            
+                <!-- Upload Image -->
                 <div class="col-md-12">
                     <h6>Upload Image</h6>
                     <input type="file" class="form-control" name="image" id="image" accept="image/*">
+                    @if(isset($rating) && $rating->image)
+                        <img src="{{ asset('storage/' . $rating->image) }}" alt="Uploaded Image" class="img-thumbnail" style="max-width: 200px; margin-top: 10px;">
+                    @endif
                 </div>
+            
+                <!-- Submit Button -->
                 <div class="col-md-12">
-                    <button type="submit" id="submitRating" class="rating-submit btn btn-primary" style="margin-top: 30px;">Submit</button>
+                    <button type="submit" id="submitRating" class="rating-submit btn btn-primary" style="margin-top: 30px;">
+                        {{ isset($rating) ? 'Update Rating' : 'Submit Rating' }}
+                    </button>
                 </div>
             </form>
+            
+            
             
         </div>
     </div>
