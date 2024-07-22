@@ -103,7 +103,7 @@ class BookingController extends Controller
 
     public function cancelBooking(Request $request, $booking_id)
 {
-    dd("hi");
+    // dd("hi");
     try {
         $booking = Booking::where('booking_id', $booking_id)->firstOrFail();
         $today = Carbon::today();
