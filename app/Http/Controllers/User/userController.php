@@ -396,7 +396,7 @@ public function bookingSuccess($id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'mobile_number ' => 'required|string|max:15',
+            'phonenumber' => 'required|string|max:15',
             'email' => 'required|email|max:255',
             'dob' => 'nullable|date',
             'about' => 'nullable|string',
