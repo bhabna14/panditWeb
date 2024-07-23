@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Storage;
 
 class RatingController extends Controller
 {
-    public function submitOrUpdateRating(Request $request)
+    public function submitRating(Request $request)
     {
-        // dd("hi");
+        dd("hi");
         // Validate incoming request data
         $validatedData = $request->validate([
             'booking_id' => 'required|exists:bookings,id',
@@ -20,15 +20,10 @@ class RatingController extends Controller
             'feedback_message' => 'nullable|string',
             'audioFile' => 'nullable|file|mimes:audio/mpeg,mpga,mp3,wav,aac',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            'id' => 'nullable|exists:ratings,id', // For updating an existing rating
         ]);
 
-        // Determine if this is a new rating or an update
-        $rating = $request->has('id') 
-            ? Rating::findOrFail($request->id) 
-            : new Rating();
-dd($rating );
-        // Fill rating details
+        // Create a new rating
+        $rating = new Rating();
         $rating->user_id = Auth::guard('users')->user()->userid; // Save the authenticated user's ID
         $rating->booking_id = $validatedData['booking_id'];
         $rating->rating = $validatedData['rating'];
@@ -36,20 +31,12 @@ dd($rating );
 
         // Handle audio file upload
         if ($request->hasFile('audioFile')) {
-            // Delete old audio file if exists
-            if ($rating->audio_file) {
-                Storage::disk('public')->delete($rating->audio_file);
-            }
             $audioPath = $request->file('audioFile')->store('audio', 'public');
             $rating->audio_file = $audioPath;
         }
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            // Delete old image file if exists
-            if ($rating->image_path) {
-                Storage::disk('public')->delete($rating->image_path);
-            }
             $imagePath = $request->file('image')->store('images', 'public');
             $rating->image_path = $imagePath;
         }
@@ -60,7 +47,7 @@ dd($rating );
             'success' => true,
             'message' => 'Rating submitted successfully!',
             'rating' => $rating
-        ], 200);
+        ], 201);
     }
 }
 

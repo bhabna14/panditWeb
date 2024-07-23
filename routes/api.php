@@ -136,4 +136,8 @@ Route::delete('/user/address/{id}', [UserProfileController::class, 'removeAddres
 Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::class, 'getUserDetails']);
 
 
-Route::middleware('auth:sanctum')->post('/submit-or-update-rating', [RatingController::class, 'submitOrUpdateRating']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/submit-rating', [RatingController::class, 'submitRating']);
+    Route::post('/update-rating', [RatingController::class, 'updateRating']);
+    Route::get('/rating/{id}', [RatingController::class, 'showRating']);
+});
