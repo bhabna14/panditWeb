@@ -37,7 +37,7 @@ class UserProfileController extends Controller
         }
     }
 
-    public function updateProfile(Request $request)
+    public function updateUserProfile(Request $request)
     {
         // Validate incoming request data
         $validator = Validator::make($request->all(), [

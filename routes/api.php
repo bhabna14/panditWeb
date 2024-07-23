@@ -126,7 +126,7 @@ Route::middleware('auth:sanctum')->post('/saveaddress', [UserProfileController::
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/update-address', [UserProfileController::class, 'updateAddress']);
 });
-Route::middleware('auth:sanctum')->post('/update-profile', [UserProfileController::class, 'updateProfile']);
+Route::middleware('auth:sanctum')->post('/update-profile', [UserProfileController::class, 'updateUserProfile']);
 
 Route::delete('/user/address/{id}', [UserProfileController::class, 'removeAddress']);
 
