@@ -42,9 +42,9 @@ class UserProfileController extends Controller
         // Validate incoming request data
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'phonenumber' => 'required|string|max:15',
+            // 'phonenumber' => 'required|string|max:15',
             'email' => 'required|email|max:255',
-            'dob' => 'nullable|date',
+            // 'dob' => 'nullable|date',
             'about' => 'nullable|string',
             'gender' => 'nullable|string',
             'userphoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -71,9 +71,9 @@ class UserProfileController extends Controller
 
         // Update user profile
         $user->name = $request->input('name');
-        $user->mobile_number = $request->input('phonenumber');
+        // $user->mobile_number = $request->input('phonenumber');
         $user->email = $request->input('email');
-        $user->dob = $request->input('dob');
+        // $user->dob = $request->input('dob');
         $user->about = $request->input('about');
         $user->gender = $request->input('gender');
 
