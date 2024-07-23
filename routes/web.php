@@ -27,6 +27,8 @@ use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\Pandit\PoojaListController;
 use App\Http\Controllers\Pandit\PanditLoginController; 
 use App\Http\Controllers\Pandit\PoojaDetailsController;
+use App\Http\Controllers\pandit\PanditOtpController;
+
 
 
 use App\Http\Controllers\sebayatregisterController;
