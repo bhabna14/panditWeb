@@ -27,7 +27,7 @@ class RatingController extends Controller
         $rating = $request->has('id') 
             ? Rating::findOrFail($request->id) 
             : new Rating();
-
+dd($rating );
         // Fill rating details
         $rating->user_id = Auth::guard('users')->user()->userid; // Save the authenticated user's ID
         $rating->booking_id = $validatedData['booking_id'];
