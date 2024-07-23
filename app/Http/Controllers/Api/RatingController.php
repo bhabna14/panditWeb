@@ -12,7 +12,7 @@ class RatingController extends Controller
 {
     public function submitOrUpdateRating(Request $request)
     {
-        dd("hi");
+        // dd("hi");
         // Validate incoming request data
         $validatedData = $request->validate([
             'booking_id' => 'required|exists:bookings,id',
@@ -20,12 +20,12 @@ class RatingController extends Controller
             'feedback_message' => 'nullable|string',
             'audioFile' => 'nullable|file|mimes:audio/mpeg,mpga,mp3,wav,aac',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
-            'rating_id' => 'nullable|exists:ratings,id', // For updating an existing rating
+            'id' => 'nullable|exists:ratings,id', // For updating an existing rating
         ]);
 
         // Determine if this is a new rating or an update
-        $rating = $request->has('rating_id') 
-            ? Rating::findOrFail($request->rating_id) 
+        $rating = $request->has('id') 
+            ? Rating::findOrFail($request->id) 
             : new Rating();
 
         // Fill rating details
