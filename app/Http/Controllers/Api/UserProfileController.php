@@ -59,15 +59,15 @@ class UserProfileController extends Controller
         }
 
         // Get the authenticated user
-        $user = Auth::guard('users')->user();
+        // $user = Auth::guard('users')->user();
 
         // Check if user is authenticated
-        if (!$user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'User not authenticated.',
-            ], 401);
-        }
+        // if (!$user) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'User not authenticated.',
+        //     ], 401);
+        // }
 
         // Update user profile
         $user->name = $request->input('name');
