@@ -584,7 +584,7 @@ public function bookingSuccess($id)
     {
         // Validate incoming request data
         $validatedData = $request->validate([
-            'booking_id' => 'required|exists:bookings,booking_id',
+            'booking_id' => 'required|exists:bookings,id',
             'rating' => 'required|integer|between:1,5',
             'feedback_message' => 'nullable|string',
             'audioFile' => 'nullable|file|mimes:audio/mpeg,mpga,mp3,wav,aac',
@@ -598,7 +598,7 @@ public function bookingSuccess($id)
             : new Rating();
     
         // Fill rating details
-        $rating->user_id =Auth::guard('users')->user()->userid; // Save the authenticated user's ID
+        $rating->user_id = Auth::guard('users')->user()->userid; // Save the authenticated user's ID
         $rating->booking_id = $validatedData['booking_id'];
         $rating->rating = $validatedData['rating'];
         $rating->feedback_message = $validatedData['feedback_message'];
@@ -625,8 +625,10 @@ public function bookingSuccess($id)
     
         $rating->save();
     
-        return redirect()->back()->with('success', 'Rating submitted successfully!');
+        return redirect()->with('success', 'Rating submitted successfully!')
+                         ->with('rating', $rating);
     }
+    
     
     
 

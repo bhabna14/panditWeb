@@ -92,7 +92,7 @@ class UserProfileController extends Controller
         ], 422);
     }
 
-    $user = Auth::guard('users')->user();
+    $user = Auth::guard('sanctum')->user();
 
     if (!$user) {
         return response()->json([

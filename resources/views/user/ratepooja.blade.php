@@ -11,6 +11,8 @@
             @foreach ($errors->all() as $error)
             <li class="text-red">{{ $error }}</li>
             @endforeach
+         
+
             <div class="col-md-12">
                 <div class="row">
                     <div class="col-md-2">
@@ -28,20 +30,20 @@
                 @if(isset($rating))
                     <input type="hidden" name="rating_id" value="{{ $rating->id }}">
                 @endif
-                <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-            
+                <input type="hidden" name="booking_id" value="{{ $booking->id }}">
+                
                 <!-- Rating Selection -->
                 <div class="rating-container mt-20">
                     <div class="rating">
-                        <input type="radio" id="star5" name="rating" value="5" {{ $rating->rating == 5 ? 'checked' : '' }}>
+                        <input type="radio" id="star5" name="rating" value="5" {{ isset($rating) && $rating->rating == 5 ? 'checked' : '' }}>
                         <label for="star5"></label>
-                        <input type="radio" id="star4" name="rating" value="4" {{ $rating->rating == 4 ? 'checked' : '' }}>
+                        <input type="radio" id="star4" name="rating" value="4" {{ isset($rating) && $rating->rating == 4 ? 'checked' : '' }}>
                         <label for="star4"></label>
-                        <input type="radio" id="star3" name="rating" value="3" {{ $rating->rating == 3 ? 'checked' : '' }}>
+                        <input type="radio" id="star3" name="rating" value="3" {{ isset($rating) && $rating->rating == 3 ? 'checked' : '' }}>
                         <label for="star3"></label>
-                        <input type="radio" id="star2" name="rating" value="2" {{ $rating->rating == 2 ? 'checked' : '' }}>
+                        <input type="radio" id="star2" name="rating" value="2" {{ isset($rating) && $rating->rating == 2 ? 'checked' : '' }}>
                         <label for="star2"></label>
-                        <input type="radio" id="star1" name="rating" value="1" {{ $rating->rating == 1 ? 'checked' : '' }}>
+                        <input type="radio" id="star1" name="rating" value="1" {{ isset($rating) && $rating->rating == 1 ? 'checked' : '' }}>
                         <label for="star1"></label>
                     </div>
                 </div>
@@ -56,7 +58,7 @@
                     <div class="col-md-6 form-input">
                         <h6>Upload or Record Audio</h6>
                         <input type="file" class="form-control" name="audioFile" id="audioFile" accept="audio/*">
-                        @if($rating->audio_file)
+                        @if(isset($rating) && $rating->audio_file)
                             <audio controls>
                                 <source src="{{ asset('storage/' . $rating->audio_file) }}" type="audio/mpeg">
                                 Your browser does not support the audio element.
@@ -69,8 +71,8 @@
                 <div class="col-md-12">
                     <h6>Upload Image</h6>
                     <input type="file" class="form-control" name="image" id="image" accept="image/*">
-                    @if(isset($rating) && $rating->image)
-                        <img src="{{ asset('storage/' . $rating->image) }}" alt="Uploaded Image" class="img-thumbnail" style="max-width: 200px; margin-top: 10px;">
+                    @if(isset($rating) && $rating->image_path)
+                        <img src="{{ asset('storage/' . $rating->image_path) }}" alt="Uploaded Image" class="img-thumbnail" style="max-width: 200px; margin-top: 10px;">
                     @endif
                 </div>
             
@@ -81,6 +83,7 @@
                     </button>
                 </div>
             </form>
+            
             
             
             
