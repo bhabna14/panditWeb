@@ -188,8 +188,8 @@ class UserProfileController extends Controller
 
         // Validate request data (optional but recommended)
         $validatedData = $request->validate([
-            'fullname' => 'required|string|max:255',
-            'number' => 'required|string|max:20',
+            // 'fullname' => 'required|string|max:255',
+            // 'number' => 'required|string|max:20',
             'country' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'city' => 'required|string|max:255',
@@ -201,8 +201,8 @@ class UserProfileController extends Controller
         // Create new UserAddress instance and populate data
         $addressData = new UserAddress();
         $addressData->user_id = $user->userid;
-        $addressData->fullname = $validatedData['fullname'];
-        $addressData->number = $validatedData['number'];
+        // $addressData->fullname = $validatedData['fullname'];
+        // $addressData->number = $validatedData['number'];
         $addressData->country = $validatedData['country'];
         $addressData->state = $validatedData['state'];
         $addressData->city = $validatedData['city'];
