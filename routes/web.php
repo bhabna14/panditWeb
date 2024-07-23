@@ -48,6 +48,10 @@ Route::controller(userController::class)->group(function() {
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');
     Route::get('/pandit-list', 'panditlist')->name('panditlist');
+
+    Route::get('/pandits/{pooja_id}',  'list')->name('pandit.list');
+
+
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
     Route::get('/pooja/{slug}', 'poojadetails')->name('pooja.show');
     Route::get('/pooja/{poojaSlug}/{panditSlug}', 'panditDetails')->name('pandit.details');

@@ -245,6 +245,25 @@ class userController extends Controller
             return view('user/panditlist', compact('pandits'));
        
      }
+
+     public function list($pooja_id)
+    {
+        // Fetch the list of pandits for the specified pooja
+        // $pandits = Pandit::where('pooja_id', $pooja_id)->get();
+        // dd($pooja_id);
+        $pooja_id = Poojadetails::where('id', $pooja_id)->first();
+
+        $pooja = Poojalist::where('id', $pooja_id->pooja_id)->firstOrFail();
+        // dd($pooja);
+        // Fetch the related Poojadetails items along with the Profile
+        $pandit_pujas = Poojadetails::with('profile')
+            ->where('pooja_id', $pooja->id)
+            ->get();
+
+        // Return a view with the list of pandits
+        return view('user.puja-details', compact('pooja', 'pandit_pujas'));
+    }
+
     
     public function ajaxSearch(Request $request)
     {

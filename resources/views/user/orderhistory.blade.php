@@ -2,6 +2,25 @@
 @extends('user.layouts.front-dashboard')
 
 @section('styles')
+<style>
+  .rejected-status{
+    margin-bottom: 20px;
+
+  }
+  .rejected-status a{
+    color: blue;
+    font-weight: blod;
+    text-decoration: underline;
+  }
+.rejected-text{
+  margin-bottom: 20px;
+}
+
+/* Make sure no parent has pointer-events: none; */
+.order-history-sec .status-text a {
+    pointer-events: auto;
+}
+</style>
 @endsection
 
 @section('content')
@@ -34,70 +53,89 @@
       @endif
       @foreach ($bookings as $index => $booking)
       <div class="col-md-12">
-        <div class="order-history-sec">
-          <div class="order-details">
-            <div class="row">
-              <div class="col-md-2">
-                BOOKING DATE <br>
-                {{ $booking->booking_date }},{{ $booking->booking_time }}
+          <div class="order-history-sec">
+              <div class="order-details">
+                  <div class="row">
+                      <div class="col-md-2">
+                          BOOKING DATE <br>
+                          {{ $booking->booking_date }},{{ $booking->booking_time }}
+                      </div>
+                      <div class="col-md-2">
+                          TOTAL FEE <br>
+                          ₹ {{ $booking->pooja_fee }}
+                      </div>
+                      @if($booking->payment_type == "full")
+                      <div class="col-md-2">
+                          TOTAL PAID <br>
+                          ₹ {{ $booking->paid }}
+                      </div>
+                      @else
+                      <div class="col-md-2">
+                          ADVANCE PAID <br>
+                          ₹ {{ $booking->paid }}
+                      </div>
+                      @endif
+                      
+                      @if($booking->payment_type == "advance")
+                      <div class="col-md-3">
+                          REMAINING <br>
+                          ₹ {{ sprintf('%.2f', $booking->pooja_fee - $booking->paid) }}
+                      </div>
+                      @else
+                      <div class="col-md-3">
+                      </div>
+                      @endif
+      
+                      <div class="col-md-3 text-right">
+                          BOOKING NUMBER <br>
+                          # {{ $booking->booking_id }}
+                      </div>
+                  </div>
               </div>
-              <div class="col-md-2">
-                TOTAL FEE <br>
-                ₹ {{ $booking->pooja_fee }}
+              <div class="row order-details-booking">
+                  <div class="col-md-2">
+                      <img src="{{ asset('assets/img/'.$booking->pooja->poojalist->pooja_photo) }}" alt="">
+                  </div>
+                  <div class="col-md-6">
+                      <h6>{{ $booking->pooja->pooja_name }}</h6>
+                      <p>{{ $booking->pandit->title }} {{ $booking->pandit->name }}</p>
+                      <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
+                  </div>
+                  <div class="col-md-4">
+                      @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status != "rejected")
+                      <span class="status-text"><i class="fa fa-circle comp-dot" aria-hidden="true"></i>Completed on {{ $booking->booking_date }}</span>
+                      @endif
+                      @if ($booking->status == "canceled")
+                      <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Canceled on {{ $booking->canceled_at }}</span>
+                      @endif
+                      @if ($booking->status == "rejected")
+                      {{-- <span class="status-text rejected-status"> --}}
+                          
+                          <a class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white rejected-text" href="{{ route('pandit.list', ['pooja_id' => $booking->pooja_id]) }}" target="_blank" style="margin-bottom: 10px;background-color: #c80100 !important;">The pandit is booked. Please choose another pandit.View available pandits</a>
+                      {{-- </span> --}}
+                      @endif
+                      @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status !== 'canceled' && $booking->status != "rejected")
+                      <a href="{{ route('rate.pooja', ['id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;background-color: #c80100 !important;">Rate the Pooja</a>
+                      @endif
+                      @if (Carbon\Carbon::parse($booking->booking_date)->isFuture() && $booking->status !== 'canceled' && $booking->status !== 'rejected')
+                      <a href="{{ route('cancelForm', $booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white cancel-pooja-btn" style="margin-bottom: 10px;width: 100%;">Cancel Pooja</a>
+                      @endif
+                      <a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">View Details</a>
+                  </div>
               </div>
-              <div class="col-md-2">
-                TOTAL PAID <br>
-                ₹ {{ $booking->paid }}
-              </div>
-              <div class="col-md-3">
-              </div>
-              <div class="col-md-3 text-right">
-                BOOKING NUMBER <br>
-                # {{ $booking->booking_id }}
-              </div>
-            </div>
-          </div>
-          <div class="row order-details-booking">
-            <div class="col-md-2">
-              <img src="{{ asset('assets/img/'.$booking->pooja->poojalist->pooja_photo) }}" alt="">
-            </div>
-            <div class="col-md-7">
-              <h6>{{ $booking->pooja->pooja_name }}</h6>
-              <p>{{ $booking->pandit->title }} {{ $booking->pandit->name }}</p>
-              <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
-            </div>
-            <div class="col-md-3">
-              @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status != "rejected")
-              <span class="status-text"><i class="fa fa-circle comp-dot" aria-hidden="true"></i>Completed on {{ $booking->booking_date }}</span>
-              @endif
               @if ($booking->status == "canceled")
-              <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Canceled on {{ $booking->canceled_at }}</span>
+              <div class="refund-deatils">
+                  <div class="row">
+                      <div class="col-md-12">
+                          <p>The money will be added to your bank account within 7 working days. For any questions, please contact your bank with this number 415825317362. For any questions, please contact your bank with reference number 415825317362.</p>
+                      </div>
+                  </div>
+              </div>
               @endif
-              @if ($booking->status == "rejected")
-              <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Rejected By {{ $booking->pandit->title }} {{ $booking->pandit->name }}</span>
-              @endif
-              @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status !== 'canceled' && $booking->status != "rejected")
-              <a href="{{ route('rate.pooja', ['id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;background-color: #c80100 !important;">Rate the Pooja</a>
-              @endif
-              @if (Carbon\Carbon::parse($booking->booking_date)->isFuture() && $booking->status !== 'canceled' && $booking->status !== 'rejected')
-                  <a href="{{ route('cancelForm', $booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white cancel-pooja-btn" style="margin-bottom: 10px;width: 100%;">Cancel Pooja</a>
-              @endif
-              <a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">View Details</a>
-            </div>
           </div>
-          @if ($booking->status == "canceled")
-         
-          <div class="refund-deatils">
-             <div class="row">
-                <div class="col-md-12">
-                   <p>The money will be added to your bank account with in 7 working days . For any questions, please contact your bank with this number 415825317362. For any questions, please contact your bank with reference number 415825317362.</p>
-                </div>
-             </div>
-          </div>
-          @endif
-        </div>
       </div>
       @endforeach
+      
       
       
     

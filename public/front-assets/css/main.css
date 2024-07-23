@@ -17,6 +17,7 @@
   /* background-size: cover; */
   background-position: top left;
   width: 100%;
+ 
 }
 .ratio {
   /* height: 133px; */
@@ -13010,7 +13011,7 @@ table.table-5 td {
     flex-direction: column;
     border-radius: 10px;
     box-shadow: 5px 5px 10px rgb(169 184 223 / 40%);
-    cursor: pointer;
+    /* cursor: pointer; */
 }
 
 .card {
@@ -13988,6 +13989,7 @@ h3.post-title {
 
 .order-history-sec {
   position: relative;
+  z-index: 1;
 }
 
 .order-history-sec a.button {
