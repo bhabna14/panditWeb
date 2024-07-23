@@ -100,24 +100,24 @@
                           <div class="col-md-6">
                               <div class="form-group">
                                   <label for="mobile_number">Mobile number</label>
-                                  <input type="text" class="form-control" id="mobile_number" name="phonenumber" value="{{ Auth::guard('users')->user()->mobile_number }}" placeholder="Enter Mobile number">
+                                  <input type="text" class="form-control" id="mobile_number" name="phonenumber" value="{{ Auth::guard('users')->user()->mobile_number }}" placeholder="Enter Mobile number" readonly>
                               </div>
                           </div>
                       </div>
   
                       <div class="row">
-                          <div class="col-md-6">
+                          <div class="col-md-12">
                               <div class="form-group">
                                   <label for="email">Email</label>
                                   <input type="text" class="form-control" id="email" name="email" value="{{ Auth::guard('users')->user()->email }}" placeholder="Enter Email">
                               </div>
                           </div>
-                          <div class="col-md-6">
+                          {{-- <div class="col-md-6">
                               <div class="form-group">
                                   <label for="date_of_birth">Date of Birth</label>
                                   <input type="date" class="form-control" id="date_of_birth" name="dob" value="{{ Auth::guard('users')->user()->dob }}">
                               </div>
-                          </div>
+                          </div> --}}
                       </div>
                       <div class="row">
                         <div class="col-md-6">
