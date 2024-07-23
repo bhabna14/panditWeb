@@ -243,8 +243,8 @@ class UserProfileController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'id' => 'required|exists:user_addresses,id',
-            'fullname' => 'required|string|max:255',
-            'number' => 'required|string|max:15',
+            // 'fullname' => 'required|string|max:255',
+            // 'number' => 'required|string|max:15',
             'country' => 'required|string|max:255',
             'state' => 'required|string|max:255',
             'city' => 'required|string|max:255',
@@ -263,8 +263,8 @@ class UserProfileController extends Controller
         $address = UserAddress::find($request->id);
 
         if ($address) {
-            $address->fullname = $request->fullname;
-            $address->number = $request->number;
+            // $address->fullname = $request->fullname;
+            // $address->number = $request->number;
             $address->country = $request->country;
             $address->state = $request->state;
             $address->city = $request->city;
