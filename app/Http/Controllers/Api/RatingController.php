@@ -12,6 +12,7 @@ class RatingController extends Controller
 {
     public function submitOrUpdateRating(Request $request)
     {
+        dd("hi");
         // Validate incoming request data
         $validatedData = $request->validate([
             'booking_id' => 'required|exists:bookings,id',
