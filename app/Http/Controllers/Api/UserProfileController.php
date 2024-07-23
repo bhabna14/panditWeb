@@ -78,6 +78,51 @@ class UserProfileController extends Controller
     
         return response()->json(['success' => true, 'message' => 'Profile updated successfully.', 'user' => $user], 200);
     }
+
+    public function updateUserPhoto(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'userphoto' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'success' => false,
+            'errors' => $validator->errors(),
+        ], 422);
+    }
+
+    $user = Auth::guard('users')->user();
+
+    if (!$user) {
+        return response()->json([
+            'success' => false,
+            'message' => 'User not authenticated.',
+        ], 401);
+    }
+
+    if ($request->hasFile('userphoto')) {
+        if ($user->userphoto && Storage::exists($user->userphoto)) {
+            Storage::delete($user->userphoto);
+        }
+
+        $avatarPath = $request->file('userphoto')->store('avatars', 'public');
+        $user->userphoto = $avatarPath;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User photo updated successfully.',
+            'user' => $user,
+        ], 200);
+    }
+
+    return response()->json([
+        'success' => false,
+        'message' => 'User photo not uploaded.',
+    ], 400);
+}
+
     
 
     public function orderHistory(Request $request)

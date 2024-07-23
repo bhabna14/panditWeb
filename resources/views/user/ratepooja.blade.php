@@ -28,20 +28,20 @@
                 @if(isset($rating))
                     <input type="hidden" name="rating_id" value="{{ $rating->id }}">
                 @endif
-                <input type="hidden" name="booking_id" value="{{ $booking->id }}">
+                <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
             
                 <!-- Rating Selection -->
                 <div class="rating-container mt-20">
                     <div class="rating">
-                        <input type="radio" id="star5" name="rating" value="5" {{ isset($rating) && $rating->rating == 5 ? 'checked' : '' }}>
+                        <input type="radio" id="star5" name="rating" value="5" {{ $rating->rating == 5 ? 'checked' : '' }}>
                         <label for="star5"></label>
-                        <input type="radio" id="star4" name="rating" value="4" {{ isset($rating) && $rating->rating == 4 ? 'checked' : '' }}>
+                        <input type="radio" id="star4" name="rating" value="4" {{ $rating->rating == 4 ? 'checked' : '' }}>
                         <label for="star4"></label>
-                        <input type="radio" id="star3" name="rating" value="3" {{ isset($rating) && $rating->rating == 3 ? 'checked' : '' }}>
+                        <input type="radio" id="star3" name="rating" value="3" {{ $rating->rating == 3 ? 'checked' : '' }}>
                         <label for="star3"></label>
-                        <input type="radio" id="star2" name="rating" value="2" {{ isset($rating) && $rating->rating == 2 ? 'checked' : '' }}>
+                        <input type="radio" id="star2" name="rating" value="2" {{ $rating->rating == 2 ? 'checked' : '' }}>
                         <label for="star2"></label>
-                        <input type="radio" id="star1" name="rating" value="1" {{ isset($rating) && $rating->rating == 1 ? 'checked' : '' }}>
+                        <input type="radio" id="star1" name="rating" value="1" {{ $rating->rating == 1 ? 'checked' : '' }}>
                         <label for="star1"></label>
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                     <div class="col-md-6 form-input">
                         <h6>Upload or Record Audio</h6>
                         <input type="file" class="form-control" name="audioFile" id="audioFile" accept="audio/*">
-                        @if(isset($rating) && $rating->audio_file)
+                        @if($rating->audio_file)
                             <audio controls>
                                 <source src="{{ asset('storage/' . $rating->audio_file) }}" type="audio/mpeg">
                                 Your browser does not support the audio element.
