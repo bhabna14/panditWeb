@@ -438,12 +438,14 @@ public function bookingSuccess($id)
 
     //     return response()->json(['success' => 'Photo deleted successfully.']);
     // }
-    public function ratePooja($id)
-    {
-        $booking = Booking::with('pooja', 'pandit')->findOrFail($id);
+    // public function ratePooja($id)
+    // {
+    //     $booking = Booking::with('pooja', 'pandit')->findOrFail($id);
 
-        return view('user/ratepooja', compact('booking'));
-    }
+    //     return view('user/ratepooja', compact('booking'));
+    // }
+
+
     // public function viewdetails(){
     //     return view('user/view-pooja-details');
     // }
@@ -549,36 +551,17 @@ public function bookingSuccess($id)
     }
 
 
-    //saving rating
-    // public function submitRating(Request $request)
-    // {
-    //     $request->validate([
-    //         'rating' => 'required|integer|min:1|max:5',
-    //         'feedback_message' => 'required|string',
-    //         'audio_path' => 'nullable|file|mimes:audio/*',
-    //         'image_path' => 'nullable|file|mimes:jpeg,png,jpg,gif',
-    //     ]);
-
-    //     $rating = new Rating();
-    //     $rating->booking_id = $request->booking_id;
-    //     $rating->user_id =Auth::guard('users')->user()->userid;
-    //     $rating->rating = $request->rating;
-    //     $rating->feedback_message = $request->feedback_message;
-
-    //     if ($request->hasFile('audioFile')) {
-    //         $audioPath = $request->file('audioFile')->store('audio', 'public');
-    //         $rating->audio_path = $audioPath;
-    //     }
-
-    //     if ($request->hasFile('image')) {
-    //         $imagePath = $request->file('image')->store('images', 'public');
-    //         $rating->image_path = $imagePath;
-    //     }
-
-    //     $rating->save();
-
-    //     return redirect()->route('orderhistory')->with('success', 'Rating submitted successfully!');
-    // }
+    public function ratePooja($id)
+    {
+        $booking = Booking::findOrFail($id); // Ensure the booking exists
+    
+        // Check if the user has already rated this booking
+        $rating = Rating::where('booking_id', $id)
+                        ->where('user_id', Auth::guard('users')->user()->userid)
+                        ->first();
+    
+        return view('user/ratepooja', compact('booking', 'rating'));
+    }
 
     public function submitOrUpdateRating(Request $request)
     {
@@ -591,18 +574,18 @@ public function bookingSuccess($id)
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'rating_id' => 'nullable|exists:ratings,id', // For updating an existing rating
         ]);
-    
+
         // Determine if this is a new rating or an update
         $rating = $request->has('rating_id') 
             ? Rating::findOrFail($request->rating_id) 
             : new Rating();
-    
+
         // Fill rating details
         $rating->user_id = Auth::guard('users')->user()->userid; // Save the authenticated user's ID
         $rating->booking_id = $validatedData['booking_id'];
         $rating->rating = $validatedData['rating'];
         $rating->feedback_message = $validatedData['feedback_message'];
-    
+
         // Handle audio file upload
         if ($request->hasFile('audioFile')) {
             // Delete old audio file if exists
@@ -612,7 +595,7 @@ public function bookingSuccess($id)
             $audioPath = $request->file('audioFile')->store('audio', 'public');
             $rating->audio_file = $audioPath;
         }
-    
+
         // Handle image upload
         if ($request->hasFile('image')) {
             // Delete old image file if exists
@@ -622,12 +605,14 @@ public function bookingSuccess($id)
             $imagePath = $request->file('image')->store('images', 'public');
             $rating->image_path = $imagePath;
         }
-    
+
         $rating->save();
-    
-        return redirect()->with('success', 'Rating submitted successfully!')
-                         ->with('rating', $rating);
+
+        return redirect()->route('orderhistory')
+                        ->with('success', 'Rating submitted successfully!')
+                        ->with('rating', $rating);
     }
+
     
     
     

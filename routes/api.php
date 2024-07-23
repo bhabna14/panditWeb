@@ -132,3 +132,6 @@ Route::middleware('auth:sanctum')->post('/update-userphoto', [UserProfileControl
 Route::delete('/user/address/{id}', [UserProfileController::class, 'removeAddress']);
 
 Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::class, 'getUserDetails']);
+
+
+Route::middleware('auth:sanctum')->post('/submit-or-update-rating', [RatingController::class, 'submitOrUpdateRating']);

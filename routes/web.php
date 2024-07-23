@@ -99,7 +99,8 @@ Route::group(['middleware' => ['auth:users']], function () {
         Route::get('/rate-pooja/{id}','ratePooja')->name('rate.pooja');
         // Route::post('submit-rating', 'submitRating')->name('submitRating');
         // Route::post('/submit-or-update-rating',  'submitOrUpdateRating')->name('submitOrUpdateRating');
-        Route::post('/submitOrUpdateRating',  'submitOrUpdateRating')->name('submitOrUpdateRating');
+        Route::post('/submitOrUpdateRating', 'submitOrUpdateRating')->name('submitOrUpdateRating');
+
 
         Route::get('/view-ordered-pooja-details/{id}', [UserController::class, 'viewdetails'])->name('viewdetails');
 

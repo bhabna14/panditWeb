@@ -56,7 +56,7 @@
                 <!-- Upload or Record Audio -->
                 <div class="row">
                     <div class="col-md-6 form-input">
-                        <h6>Upload or Record Audio</h6>
+                        <h6>UploadAudio</h6>
                         <input type="file" class="form-control" name="audioFile" id="audioFile" accept="audio/*">
                         @if(isset($rating) && $rating->audio_file)
                             <audio controls>
@@ -83,6 +83,7 @@
                     </button>
                 </div>
             </form>
+            
             
             
             
