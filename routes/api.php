@@ -17,6 +17,8 @@ use App\Http\Controllers\Api\UserLoginController;
 use App\Http\Controllers\Api\PoojaSkillController;
 use App\Http\Controllers\Api\YoutubeUrlController;
 use App\Http\Controllers\Api\PoojaDetailsController;
+use App\Http\Controllers\Api\RatingController;
+
 
 /// controllers for frontend pages 
 use App\Http\Controllers\Api\PanditController;
