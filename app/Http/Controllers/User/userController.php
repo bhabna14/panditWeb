@@ -458,7 +458,9 @@ public function bookingSuccess($id)
 
     public function mngaddress(){
         $user = Auth::guard('users')->user();
-        $addressdata = UserAddress::where('user_id', $user->userid)->get();
+        $addressdata = UserAddress::where('user_id', $user->userid)
+                                    ->where('status','active')
+                                    ->get();
         // $addressdata = UserAddress::where('userid', $user_id)->get();
         return view('user/mngaddress', compact('addressdata'));
     }
@@ -471,8 +473,8 @@ public function bookingSuccess($id)
         $user = Auth::guard('users')->user();
         $userid = $user->userid;
         $addressdata->user_id = $userid;
-        $addressdata->fullname = $request->fullname;
-        $addressdata->number = $request->number;
+        // $addressdata->fullname = $request->fullname;
+        // $addressdata->number = $request->number;
         $addressdata->country = $request->country;
 
         $addressdata->state = $request->state;
@@ -483,6 +485,7 @@ public function bookingSuccess($id)
         $addressdata->area = $request->area;
         // $addressdata->landmark = $request->landmark;
         $addressdata->address_type = $request->address_type;
+        $addressdata->status = 'active';
         $addressdata->save();
 
         return redirect()->route('mngaddress')->with('success', 'Address created successfully.');
@@ -493,8 +496,8 @@ public function bookingSuccess($id)
         $user = Auth::guard('users')->user();
         $userid = $user->userid;
         $addressdata->user_id = $userid;
-        $addressdata->fullname = $request->fullname;
-        $addressdata->number = $request->number;
+        // $addressdata->fullname = $request->fullname;
+        // $addressdata->number = $request->number;
         $addressdata->country = $request->country;
 
         $addressdata->state = $request->state;
@@ -503,6 +506,7 @@ public function bookingSuccess($id)
 
         $addressdata->area = $request->area;
         $addressdata->address_type = $request->address_type;
+        $addressdata->status = 'active';
         $addressdata->save();
 
         return redirect()->back()->with('success', 'Address created successfully.');
@@ -511,11 +515,12 @@ public function bookingSuccess($id)
     {
         // Find the address by ID
         $address = UserAddress::find($id);
-
+    
         if ($address) {
-            // Delete the address
-            $address->delete();
-            return redirect()->back()->with('success', 'Address removed successfully.');
+            // Set the status to 'inactive'
+            $address->status = 'inactive';
+            $address->save();
+            return redirect()->back()->with('success', 'Address deactivated successfully.');
         } else {
             return redirect()->back()->with('error', 'Address not found.');
         }
@@ -530,14 +535,15 @@ public function bookingSuccess($id)
         $address = UserAddress::find($request->id);
 
         if ($address) {
-            $address->fullname = $request->fullname;
-            $address->number = $request->number;
+            // $address->fullname = $request->fullname;
+            // $address->number = $request->number;
             $address->country = $request->country;
             $address->state = $request->state;
             $address->city = $request->city;
             $address->pincode = $request->pincode;
             $address->area = $request->area;
             $address->address_type = $request->address_type;
+            $address->status = 'active';
             $address->save();
 
             return redirect()->route('mngaddress')->with('success', 'Address updated successfully.');

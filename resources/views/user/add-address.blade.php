@@ -1,6 +1,11 @@
 @extends('user.layouts.front-dashboard')
 
 @section('styles')
+<style>
+  .tabs__pane {
+    margin-bottom: 27px;
+}
+</style>
 @endsection
 
 @section('content')
@@ -50,20 +55,7 @@
               
                   <form action="{{ route('saveaddress') }}" method="post" enctype="multipart/form-data">
                     @csrf
-                      <div class="row">
-                        <div class="col-md-6">
-                          <div class="form-group">
-                            {{-- <label for="exampleInputEmail1">Full name (First and Last name)</label> --}}
-                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="fullname" placeholder="Enter Your Full Name">
-                          </div>
-                        </div>
-                        <div class="col-md-6">
-                        <div class="form-group">
-                          {{-- <label for="exampleInputEmail1">Mobile number</label> --}}
-                          <input type="text" class="form-control" id="exampleInputEmail1" value="" name="number" placeholder="Enter Mobile number">
-                        </div>
-                        </div>
-                      </div>
+                     
                       <div class="row mt-10">
                         <div class="col-md-6">
                           <div class="form-group">
@@ -86,13 +78,18 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             {{-- <label for="exampleInputEmail1">Town/City   </label> --}}
-                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="city" placeholder="Enter Town/City">
+                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="city" placeholder="Enter Town/City" required>
                           </div>
                         </div>
                         <div class="col-md-6">
                         <div class="form-group">
                           {{-- <label for="exampleInputEmail1">Pincode</label> --}}
-                          <input type="text" class="form-control" id="exampleInputEmail1" value="" name="pincode" placeholder="Enter Pincode">
+                          <input type="number" class="form-control" id="exampleInputEmail1" value="" name="pincode" placeholder="Enter Pincode" min="100000"
+                          max="999999"
+                          maxlength="6"
+                          required
+                          pattern="\d{6}"
+                          title="Please enter a 6-digit pincode" required>
                         </div>
                         </div>
                       </div>
@@ -102,7 +99,7 @@
                         <div class="col-md-12">
                         <div class="form-group">
                           {{-- <label for="exampleInputEmail1">Area, Street</label> --}}
-                          <textarea name="area" class="form-control" id=""  rows="15" placeholder="Enter Area, Street, Sector, Village"></textarea>
+                          <textarea name="area" class="form-control" id=""  rows="15" placeholder="Enter Area, Street, Sector, Village" required></textarea>
                           {{-- <input type="text" class="form-control" id="exampleInputEmail1" value="" name="area" placeholder="Enter Area, Street, Sector, Village"> --}}
                         </div>
                         </div>

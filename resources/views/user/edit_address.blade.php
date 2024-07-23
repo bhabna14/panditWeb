@@ -41,18 +41,7 @@
                   <form action="{{ route('updateaddress') }}" method="post" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="id" value="{{ $address->id }}">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="fullname" value="{{ $address->fullname }}" placeholder="Enter Your Full Name">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="number" value="{{ $address->number }}" placeholder="Enter Mobile number">
-                            </div>
-                        </div>
-                    </div>
+                  
                     <div class="row mt-10">
                         <div class="col-md-6">
                             <div class="form-group">

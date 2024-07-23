@@ -54,12 +54,12 @@
                 <div class=" rounded-4 bg-white shadow-3">
                     <div class="fw-500 lh-14 address-single-heading">{{$addressdata->address_type}}</div>
                     <div class="address-details">
-                        <p>{{$addressdata->fullname}}</p>
+                       
                         <p> {{$addressdata->area}}</p>
                         <p>{{$addressdata->city}}</p>
                         <p>{{$addressdata->state}} {{$addressdata->pincode}}</p>
                         <p>{{$addressdata->country}}</p>
-                        <p>Phone number: {{$addressdata->number}}</p>
+                        
                     </div>
                     <div class="action-btns">
                         <a href="{{route('editAddress',$addressdata->id)}}">Edit</a> | 

@@ -2,6 +2,18 @@
 
 @section('styles')
 <meta name="csrf-token" content="{{ csrf_token() }}">
+
+<style>
+  div#Message {
+    background-color: #def2d7;
+    /* color: #fff; */
+    color: #5b7052;
+    padding: 17px;
+    font-size: 18px;
+    margin: 16px 0px;
+    border-radius: 5px;
+}
+</style>
 @endsection
 
 @section('content')
@@ -32,9 +44,9 @@
            
 
           </div>
-          <div class="tabs__content pt-30 js-tabs-content">
+          <div class="tabs__content pt-10 js-tabs-content">
             @if(session()->has('success'))
-            <div class="alert alert-success" id="Message">
+            <div class="text-success-2 lh-1 fw-500" id="Message">
                 {{ session()->get('success') }}
             </div>
             @endif

@@ -209,6 +209,7 @@ class UserProfileController extends Controller
         $addressData->pincode = $validatedData['pincode'];
         $addressData->area = $validatedData['area'];
         $addressData->address_type = $validatedData['address_type'];
+        $addressData->status = 'active';
 
         // Save the address
         $addressData->save();
@@ -220,14 +221,36 @@ class UserProfileController extends Controller
             , 201);
     }
 
+    // public function removeAddress($id)
+    // {
+    //     // Find the address by ID
+    //     $address = UserAddress::find($id);
+
+    //     if ($address) {
+    //         // Delete the address
+    //         $address->delete();
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Address removed successfully.'
+    //         ], 200);
+    //     } else {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Address not found.'
+    //         ], 404);
+    //     }
+    // }
+
     public function removeAddress($id)
     {
         // Find the address by ID
         $address = UserAddress::find($id);
 
         if ($address) {
-            // Delete the address
-            $address->delete();
+            // Set the status to 'inactive' instead of deleting
+            $address->status = 'inactive';
+            $address->save();
+            
             return response()->json([
                 'success' => true,
                 'message' => 'Address removed successfully.'
@@ -239,6 +262,7 @@ class UserProfileController extends Controller
             ], 404);
         }
     }
+
     public function updateAddress(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -271,6 +295,7 @@ class UserProfileController extends Controller
             $address->pincode = $request->pincode;
             $address->area = $request->area;
             $address->address_type = $request->address_type;
+            $addressData->status = 'active';
             $address->save();
 
             return response()->json([

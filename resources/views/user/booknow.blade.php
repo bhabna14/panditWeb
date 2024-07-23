@@ -125,8 +125,10 @@
                               <div class="your-address">
                                   <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
                                   <label for="address{{ $address->id }}">
-                                      {{ $address->fullname }}, {{ $address->landmark }}, {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}<br>
-                                      Mobile Number: {{ $address->number }}
+                                    {{ $address->area }},{{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
+                                    <br>
+                                   
+                                     
                                   </label>
                               </div>
                           @endforeach
@@ -178,7 +180,7 @@
             <div class="col-md-12">
                 <form action="{{ route('savefrontaddress') }}" method="post" enctype="multipart/form-data">
                     @csrf
-                    <div class="row">
+                    {{-- <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <input type="text" class="form-control" name="fullname" placeholder="Enter Your Full Name">
@@ -189,7 +191,7 @@
                                 <input type="text" class="form-control" name="number" placeholder="Enter Mobile number">
                             </div>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="row mt-10">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -209,19 +211,19 @@
                     <div class="row mt-10">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <input type="text" class="form-control" name="city" placeholder="Enter Town/City">
+                                <input type="text" class="form-control" name="city" placeholder="Enter Town/City" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <input type="text" class="form-control" name="pincode" placeholder="Enter Pincode">
+                                <input type="text" class="form-control" name="pincode" placeholder="Enter Pincode" required>
                             </div>
                         </div>
                     </div>
                     <div class="row mt-10">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <textarea name="area" class="form-control" rows="5" placeholder="Enter Area, Street, Sector, Village"></textarea>
+                                <textarea name="area" class="form-control" rows="5" placeholder="Enter Area, Street, Sector, Village" required></textarea>
                             </div>
                         </div>
                     </div>

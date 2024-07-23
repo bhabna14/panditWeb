@@ -13681,7 +13681,7 @@ button.rating-submit {
 /* manage address */ 
 .single-address {
   border: 1px solid #dfdfdf;
-  height: 252px;
+  height: 206px;
   background-color: #fff;
 }
 .address-single-heading {
@@ -13698,7 +13698,7 @@ button.rating-submit {
   padding: 0px 0px 10px 15px;
 }
 .add-address-cont {
-  padding-top: 100px;
+  padding-top: 75px;
 }
 .form-control {
   display: block;
