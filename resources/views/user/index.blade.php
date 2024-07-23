@@ -12,7 +12,7 @@
         <div class="col-md-12 text-center">
           <h1 data-aos="fade-up" data-aos-delay="500">Reliable Pandit Booking For Every <br> Religious Event</h1>
           <p data-aos="fade-up" data-aos-delay="500">Experienced Pandits For Every Occasion, Just a Click Away</p>
-          <a href="" class="book-now-btn" data-aos="fade-up" data-aos-delay="500">Book Now</a>
+          <a href="{{url('pandit-list')}}" class="book-now-btn" data-aos="fade-up" data-aos-delay="500">Book Now</a>
           
         </div>
       </div>

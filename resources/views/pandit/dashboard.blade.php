@@ -42,6 +42,7 @@
 															Hi, Welcome Back 
 															<span class="text-primary">
 																{{ $profile->name ?? 'Pandit' }}
+																
 															</span>!
 														</h3>
 														<p class="text-dark tx-14 mb-3 lh-3">

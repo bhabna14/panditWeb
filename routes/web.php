@@ -270,10 +270,20 @@ Route::prefix('user')->middleware(['user'])->group(function () {
     });
 });
 
+// Route::controller(PanditLoginController::class)->group(function() {
+//     Route::post('/pandit/save-panditlogin', 'storeLoginData')->name('pandit.login');
+//     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
+//     Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
+// });
+
 Route::controller(PanditLoginController::class)->group(function() {
-    Route::post('/pandit/save-panditlogin', 'storeLoginData')->name('pandit.login');
     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
-    Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
+});
+
+
+Route::controller(PanditOtpController::class)->group(function() {
+    Route::post('/send-otp',  'sendOtp');
+    Route::post('/verify-otp',  'verifyOtp');
 });
 
 /// pandit routes

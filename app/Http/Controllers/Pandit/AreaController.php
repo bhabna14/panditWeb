@@ -32,6 +32,7 @@ class AreaController extends Controller
         $districts = Panditdistrict::all()->keyBy('districtCode');
         $subdistricts = Panditsubdistrict::all()->keyBy('subdistrictCode');
         $villages = Panditvillage::all()->keyBy('villageCode');
+
     
         foreach ($poojaAreas as $poojaArea) {
             $poojaArea->stateName = $states->get($poojaArea->state_code)->stateName ?? '';
@@ -111,9 +112,15 @@ class AreaController extends Controller
 
         if ($poojaArea) {
             $states = Panditstate::all();
-            $districts = Panditdistrict::distinct()->where('stateCode', $poojaArea->state_code)->get();
-            $subdistricts = Panditsubdistrict::distinct()->where('districtCode', $poojaArea->district_code)->get();
-            $villages = Panditvillage::distinct()->where('subdistrictCode', $poojaArea->subdistrict_code)->get();
+            $districts = Panditdistrict::where('stateCode', $poojaArea->state_code)
+            ->distinct('districtCode')
+            ->get(['districtCode', 'districtName']);
+            $subdistricts = Panditsubdistrict::where('districtCode', $poojaArea->district_code)
+            ->distinct('subdistrictCode')
+            ->get(['subdistrictCode', 'subdistrictName']);
+            $villages = Panditvillage::where('subdistrictCode', $poojaArea->subdistrict_code)
+            ->distinct('villageCode')
+            ->get(['villageCode', 'villageName']);
 
             return view('pandit/edit-poojaarea', compact('poojaArea', 'states', 'districts', 'subdistricts', 'villages'));
         } else {

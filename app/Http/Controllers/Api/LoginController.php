@@ -64,7 +64,7 @@ class LoginController extends Controller
             }
         }
     }
-
+    
     public function checkOtp(Request $request)
     {
         $request->validate([

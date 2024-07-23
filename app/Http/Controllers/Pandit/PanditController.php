@@ -194,8 +194,10 @@ class PanditController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/pandit/login');
+        return redirect('/pandit/panditlogin');
     }
+
+
   
 
 }

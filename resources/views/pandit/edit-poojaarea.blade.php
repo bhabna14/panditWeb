@@ -39,7 +39,7 @@
                         
                             <div class="form-group">
                                 <label for="state">State:</label>
-                                <select name="state" id="state" class="form-control">
+                                <select name="state" id="state" class="form-control" onchange="getDistrict(this.value)">
                                     @foreach ($states as $state)
                                         <option value="{{ $state->stateCode }}" {{ $poojaArea->state_code == $state->stateCode ? 'selected' : '' }}>{{ $state->stateName }}</option>
                                     @endforeach
@@ -48,7 +48,7 @@
                         
                             <div class="form-group">
                                 <label for="district">District:</label>
-                                <select name="district" id="district" class="form-control">
+                                <select name="district" id="district" class="form-control"  onchange="getSubdistrict(this.value)">
                                     @foreach ($districts as $district)
                                         <option value="{{ $district->districtCode }}" {{ $poojaArea->district_code == $district->districtCode ? 'selected' : '' }}>{{ $district->districtName }}</option>
                                     @endforeach
@@ -57,7 +57,7 @@
                         
                             <div class="form-group">
                                 <label for="city">Subdistrict:</label>
-                                <select name="city" id="city" class="form-control">
+                                <select name="city" id="city" class="form-control"  onchange="getVillage(this.value)">>
                                     @foreach ($subdistricts as $subdistrict)
                                         <option value="{{ $subdistrict->subdistrictCode }}" {{ $poojaArea->subdistrict_code == $subdistrict->subdistrictCode ? 'selected' : '' }}>{{ $subdistrict->subdistrictName }}</option>
                                     @endforeach
@@ -88,6 +88,8 @@
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
+    <script src="{{ asset('assets/js/pandit-area.js') }}"></script>
+
     <script>
         $(document).ready(function() {
             $('#village').select2();

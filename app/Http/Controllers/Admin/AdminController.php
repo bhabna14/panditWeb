@@ -60,15 +60,10 @@ class AdminController extends Controller
         $pandit_profiles = Profile::all(); // Fetch all profiles                  
          return view('admin/dashboard', compact('pandit_profiles'));
     } 
-    public function adminlogout(Request $request)
+    public function adminlogout()
     {
-        Auth::logout();
-
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return redirect('/admin');
+      
+        return view("panditlogin");
     }
 
     public function managepandit() {
