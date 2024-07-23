@@ -141,6 +141,7 @@
                   </div>
                   <div class="row">
                         <div class="form-input mt-20 col-md-12">
+                            <label for="">Please Select the Date and Time</label>
                             <input type="text" name="booking_date" required class="form-control" id="booking_date"  placeholder="Select a date and time">
                             {{-- <label class="lh-1 text-16 text-light-1">Date</label> --}}
                         </div>

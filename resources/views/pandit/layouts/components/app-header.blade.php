@@ -39,81 +39,38 @@
 												<span class="light-layout"><svg xmlns="http://www.w3.org/2000/svg" class="header-icon-svgs" width="24" height="24" viewBox="0 0 24 24"><path d="M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c1.658 0 3.007 1.349 3.007 3.007S13.658 15.007 12 15.007 8.993 13.658 8.993 12 10.342 8.993 12 8.993zM10.998 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2h-3zm17 0h3v2h-3zM4.219 18.363l2.12-2.122 1.415 1.414-2.12 2.122zM16.24 6.344l2.122-2.122 1.414 1.414-2.122 2.122zM6.342 7.759 4.22 5.637l1.415-1.414 2.12 2.122zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z"/></svg></span>
 											</a>
 										</li>
-										<li class="dropdown nav-item  main-header-message ">
-											<a class="new nav-link"  data-bs-toggle="dropdown" href="javascript:void(0);"><svg xmlns="http://www.w3.org/2000/svg" class="header-icon-svgs" width="24" height="24" viewBox="0 0 24 24"><path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zm0 2v.511l-8 6.223-8-6.222V6h16zM4 18V9.044l7.386 5.745a.994.994 0 0 0 1.228 0L20 9.044 20.002 18H4z"/></svg><span class="badge bg-secondary header-badge">5</span></a>
+										<li class="dropdown main-profile-menu nav nav-item nav-link ps-lg-2">
+											@php
+												$user = Auth::guard('pandits')->user();
+												$profile = \App\Models\Profile::where('pandit_id', $user->pandit_id)->first();
+											@endphp
+											<a class="new nav-link profile-user d-flex" href="" data-bs-toggle="dropdown">
+												<img alt="" src="{{ asset($profile->profile_photo ?? 'assets/img/faces/default.jpg') }}" class="">
+											</a>
 											<div class="dropdown-menu">
-												<div class="menu-header-content text-start border-bottom">
-													<div class="d-flex">
-														<h6 class="dropdown-title mb-1 tx-15 font-weight-semibold">Messages</h6>
-														<span class="badge badge-pill badge-warning ms-auto my-auto float-end">Mark All Read</span>
+												<div class="menu-header-content p-3 border-bottom">
+													<div class="d-flex wd-100p">
+														<div class="main-img-user">
+															<img alt="" src="{{ asset($profile->profile_photo ?? 'assets/img/faces/default.jpg') }}" class="">
+														</div>
+														<div class="ms-3 my-auto">
+															<h6 class="tx-15 font-weight-semibold mb-0">{{ $profile->name ?? 'Pandit' }}</h6>
+															<span class="dropdown-title-text subtext op-6 tx-12">Premium Member</span>
+														</div>
 													</div>
-													<p class="dropdown-title-text subtext mb-0 op-6 pb-0 tx-12 ">You have 4 unread messages</p>
 												</div>
-												<div class="main-message-list chat-scroll">
-													<a href="{{url('chat')}}" class="dropdown-item d-flex border-bottom">
-														<div class="  drop-img  cover-image  " data-image-src="{{asset('assets/img/faces/3.jpg')}}">
-															<span class="avatar-status bg-teal"></span>
-														</div>
-														<div class="wd-90p">
-															<div class="d-flex">
-																<h5 class="mb-0 name">Teri Dactyl</h5>
-															</div>
-															<p class="mb-0 desc">I'm sorry but i'm not sure how to help you with that......</p>
-															<p class="time mb-0 text-start float-start ms-2 mt-2">Mar 15 3:55 PM</p>
-														</div>
-													</a>
-													<a href="{{url('chat')}}" class="dropdown-item d-flex border-bottom">
-														<div class="drop-img cover-image" data-image-src="{{asset('assets/img/faces/2.jpg')}}">
-															<span class="avatar-status bg-teal"></span>
-														</div>
-														<div class="wd-90p">
-															<div class="d-flex">
-																<h5 class="mb-0 name">Allie Grater</h5>
-															</div>
-															<p class="mb-0 desc">All set ! Now, time to get to you now......</p>
-															<p class="time mb-0 text-start float-start ms-2 mt-2">Mar 06 01:12 AM</p>
-														</div>
-													</a>
-													<a href="{{url('chat')}}" class="dropdown-item d-flex border-bottom">
-														<div class="drop-img cover-image" data-image-src="{{asset('assets/img/faces/9.jpg')}}">
-															<span class="avatar-status bg-teal"></span>
-														</div>
-														<div class="wd-90p">
-															<div class="d-flex">
-																<h5 class="mb-0 name">Aida Bugg</h5>
-															</div>
-															<p class="mb-0 desc">Are you ready to pickup your Delivery...</p>
-															<p class="time mb-0 text-start float-start ms-2 mt-2">Feb 25 10:35 AM</p>
-														</div>
-													</a>
-													<a href="{{url('chat')}}" class="dropdown-item d-flex border-bottom">
-														<div class="drop-img cover-image" data-image-src="{{asset('assets/img/faces/12.jpg')}}">
-															<span class="avatar-status bg-teal"></span>
-														</div>
-														<div class="wd-90p">
-															<div class="d-flex">
-																<h5 class="mb-0 name">John Quil</h5>
-															</div>
-															<p class="mb-0 desc">Here are some products ...</p>
-															<p class="time mb-0 text-start float-start ms-2 mt-2">Feb 12 05:12 PM</p>
-														</div>
-													</a>
-													<a href="{{url('chat')}}" class="dropdown-item d-flex border-bottom">
-														<div class="drop-img cover-image" data-image-src="{{asset('assets/img/faces/5.jpg')}}">
-															<span class="avatar-status bg-teal"></span>
-														</div>
-														<div class="wd-90p">
-															<div class="d-flex">
-																<h5 class="mb-0 name">Liz Erd</h5>
-															</div>
-															<p class="mb-0 desc">I'm sorry but i'm not sure how...</p>
-															<p class="time mb-0 text-start float-start ms-2 mt-2">Jan 29 03:16 PM</p>
-														</div>
-													</a>
-												</div>
-												<div class="text-center dropdown-footer">
-													<a class="btn btn-primary btn-sm btn-block text-center"  href="{{url('chat')}}">VIEW ALL</a>
-												</div>
+												<a class="dropdown-item" href="{{ url('/pandit/manageprofile') }}">
+													<i class="far fa-user-circle"></i> Profile
+												</a>
+												<a class="dropdown-item" href="{{ url('mail-settings') }}">
+													<i class="far fa-sun"></i> Settings
+												</a>
+												<form method="POST" action="{{ url('pandit/logout') }}">
+													@csrf
+													<button type="submit" class="dropdown-item">
+														<i class="far fa-arrow-alt-circle-left"></i> Logout
+													</button>
+												</form>
 											</div>
 										</li>
 										<li class="dropdown nav-item main-header-notification d-flex">

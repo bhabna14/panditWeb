@@ -38,10 +38,10 @@
                                                 <div class="panel-body tabs-menu-body border-0 p-3">
                                                     <div class="tab-content">
                                                         <div class="tab-pane active" id="tab5">
-                                                            @if (session('success'))
-                                                                <div class="alert alert-success">
-                                                                    {{ session('success') }}
-                                                                </div>
+                                                            @if (session('message'))
+                                                            <div class="alert alert-success">
+                                                                {{ session('message') }}
+                                                            </div>
                                                             @elseif (session('error'))
                                                                 <div class="alert alert-danger">
                                                                     {{ session('error') }}
