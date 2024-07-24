@@ -20,7 +20,7 @@ use App\Events\BookingApproved;
 use Illuminate\Support\Facades\Auth;
 
 
- 
+
 class PanditController extends Controller
 { 
     public function index()
