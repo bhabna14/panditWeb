@@ -21,10 +21,15 @@
     padding: 10px 20px;
     border-radius: 5px;
     text-decoration: none;
-    color: white;
-  }
+    color: #c80100;
+    border: 1px solid;
+}
   .filter-buttons a.active {
     background-color: #c80100;
+    color:#fff;
+  }
+  .filter-buttons  a.active a:hover{
+    color: #fff !important;
   }
 </style>
 @endsection
@@ -41,9 +46,10 @@
         <div class="filter-buttons">
           <a href="{{ route('booking.history', ['filter' => 'all']) }}" class="{{ request('filter') == 'all' || !request('filter') ? 'active' : '' }}">All</a>
           <a href="{{ route('booking.history', ['filter' => 'pending']) }}" class="{{ request('filter') == 'pending' ? 'active' : '' }}">Pending</a>
+          <a href="{{ route('booking.history', ['filter' => 'confirmed']) }}" class="{{ request('filter') == 'confirmed' ? 'active' : '' }}">Confirmed</a>
+
           <a href="{{ route('booking.history', ['filter' => 'canceled']) }}" class="{{ request('filter') == 'canceled' ? 'active' : '' }}">Canceled</a>
           <a href="{{ route('booking.history', ['filter' => 'rejected']) }}" class="{{ request('filter') == 'rejected' ? 'active' : '' }}">Rejected</a>
-          <a href="{{ route('booking.history', ['filter' => 'confirmed']) }}" class="{{ request('filter') == 'confirmed' ? 'active' : '' }}">Confirmed</a>
           <a href="{{ route('booking.history', ['filter' => 'completed']) }}" class="{{ request('filter') == 'completed' ? 'active' : '' }}">Completed</a>
         </div>
       </div>

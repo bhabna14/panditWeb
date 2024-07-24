@@ -18,7 +18,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Rating;
 use Illuminate\Support\Facades\Log;
-
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use PDF;
 use DB;
@@ -417,10 +417,12 @@ public function bookingSuccess($id)
                 $bookingsQuery->where('status', 'rejected');
                 break;
             case 'confirmed':
-                $bookingsQuery->where('status', 'paid');
+                    $bookingsQuery->where('status', 'paid')
+                                  ->whereDate('booking_date', '>=', Carbon::now());
                 break;
             case 'completed':
-                $bookingsQuery->where('status', 'completed');
+                $bookingsQuery->where('status', 'paid')
+                            ->whereDate('booking_date', '<', Carbon::now());
                 break;
             default:
                 // No filter applied, show all bookings with status 'paid' or 'rejected'

@@ -1657,7 +1657,7 @@ button:focus {
 .button.-blue-1:hover {
   border-color: #bc1823;
   background-color: #fff !important;
-  color: #B90B0B !important;
+  color: #fff !important;
   cursor: pointer;
 }
 p.short-desc {

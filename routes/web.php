@@ -298,6 +298,7 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
         Route::post('/booking/reject/{id}', 'rejectBooking')->name('pandit.booking.reject');
         Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');
+        Route::post('/panditlogout', 'panditlogout')->name('pandit.logout');
     });
 });
 

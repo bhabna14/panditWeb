@@ -256,7 +256,7 @@
 												<a class="dropdown-item" href="{{ url('mail-settings') }}">
 													<i class="far fa-sun"></i> Settings
 												</a>
-												<form method="POST" action="{{ url('pandit/logout') }}">
+												<form method="POST" action="{{ route('pandit.logout') }}">
 													@csrf
 													<button type="submit" class="dropdown-item">
 														<i class="far fa-arrow-alt-circle-left"></i> Logout
