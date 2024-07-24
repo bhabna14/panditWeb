@@ -395,18 +395,45 @@ public function bookingSuccess($id)
     
         return view('user.my-profile', compact('bookings'));
     }
-    
-    public function orderhistory(){
+    public function orderhistory(Request $request)
+    {
         $user = Auth::guard('users')->user();
+        $filter = $request->input('filter', 'all'); // Default to 'all' if no filter is provided
     
-        // Fetch recent bookings for the user
-        $bookings = Booking::with('pooja.poojalist','pandit','address') // Load relationship to get pooja details
-                           ->where('user_id', $user->userid)
-                           ->orderByDesc('created_at')
-                           ->whereIn('application_status', ['paid', 'rejected'])
-                           ->get();
-        return view('user/orderhistory', compact('bookings'));
+        // Base query to fetch bookings for the user
+        $bookingsQuery = Booking::with('pooja.poojalist', 'pandit', 'address') // Load relationship to get pooja details
+                                ->where('user_id', $user->userid)
+                                ->orderByDesc('created_at');
+    
+        // Apply filter based on the status
+        switch ($filter) {
+            case 'pending':
+                $bookingsQuery->where('status', 'pending');
+                break;
+            case 'canceled':
+                $bookingsQuery->where('status', 'canceled');
+                break;
+            case 'rejected':
+                $bookingsQuery->where('status', 'rejected');
+                break;
+            case 'confirmed':
+                $bookingsQuery->where('status', 'paid');
+                break;
+            case 'completed':
+                $bookingsQuery->where('status', 'completed');
+                break;
+            default:
+                // No filter applied, show all bookings with status 'paid' or 'rejected'
+                $bookingsQuery->whereIn('status', ['paid', 'rejected']);
+                break;
+        }
+    
+        // Get the bookings
+        $bookings = $bookingsQuery->get();
+    
+        return view('user.orderhistory', compact('bookings'));
     }
+    
     public function userprofile(){
         $user = Auth::guard('users')->user();
         return view('user/userprofile',compact('user'));

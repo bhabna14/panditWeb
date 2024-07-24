@@ -59,7 +59,7 @@
                                                             @endif
                                                         
                                                             @if (session('otp_sent'))
-                                                                <form id="loginForm" action="/verify-otp" method="POST">
+                                                                <form id="loginForm" action="/verify-otp-user" method="POST">
                                                                     @csrf
                                                                     <div id="step1">
                                                                         <div class="form-group">
@@ -82,7 +82,7 @@
                                                                     </div>
                                                                 </form>
                                                             @else
-                                                                <form id="loginForm" action="/send-otp" method="POST">
+                                                                <form id="loginForm" action="/send-otp-user" method="POST">
                                                                     @csrf
                                                                     <div id="step1">
                                                                         <div class="form-group">

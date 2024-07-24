@@ -1,25 +1,31 @@
-
 @extends('user.layouts.front-dashboard')
 
 @section('styles')
 <style>
   .rejected-status{
     margin-bottom: 20px;
-
   }
   .rejected-status a{
     color: blue;
-    font-weight: blod;
+    font-weight: bold;
     text-decoration: underline;
   }
-.rejected-text{
-  margin-bottom: 20px;
-}
-
-/* Make sure no parent has pointer-events: none; */
-.order-history-sec .status-text a {
+  .rejected-text{
+    margin-bottom: 20px;
+  }
+  .order-history-sec .status-text a {
     pointer-events: auto;
-}
+  }
+  .filter-buttons a {
+    margin-right: 10px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+  }
+  .filter-buttons a.active {
+    background-color: #c80100;
+  }
 </style>
 @endsection
 
@@ -29,16 +35,20 @@
   <div class="dashboard__content bg-light-2">
     <div class="row y-gap-20 justify-between items-end pb-30 mt-30 lg:pb-40 md:pb-32">
       <div class="col-auto">
-
         <h1 class="text-30 lh-14 fw-600">Booking History</h1>
-        {{-- <div class="text-15 text-light-1">Lorem ipsum dolor sit amet, consectetur.</div> --}}
-
       </div>
-
       <div class="col-auto">
-
+        <div class="filter-buttons">
+          <a href="{{ route('booking.history', ['filter' => 'all']) }}" class="{{ request('filter') == 'all' || !request('filter') ? 'active' : '' }}">All</a>
+          <a href="{{ route('booking.history', ['filter' => 'pending']) }}" class="{{ request('filter') == 'pending' ? 'active' : '' }}">Pending</a>
+          <a href="{{ route('booking.history', ['filter' => 'canceled']) }}" class="{{ request('filter') == 'canceled' ? 'active' : '' }}">Canceled</a>
+          <a href="{{ route('booking.history', ['filter' => 'rejected']) }}" class="{{ request('filter') == 'rejected' ? 'active' : '' }}">Rejected</a>
+          <a href="{{ route('booking.history', ['filter' => 'confirmed']) }}" class="{{ request('filter') == 'confirmed' ? 'active' : '' }}">Confirmed</a>
+          <a href="{{ route('booking.history', ['filter' => 'completed']) }}" class="{{ request('filter') == 'completed' ? 'active' : '' }}">Completed</a>
+        </div>
       </div>
     </div>
+
     <div class="row">
       @if (session()->has('success'))
       <div class="alert alert-success" id="Message">
@@ -51,6 +61,7 @@
               {{ $errors->first('danger') }}
           </div>
       @endif
+
       @foreach ($bookings as $index => $booking)
       <div class="col-md-12">
           <div class="order-history-sec">
@@ -109,10 +120,7 @@
                       <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Canceled on {{ $booking->canceled_at }}</span>
                       @endif
                       @if ($booking->status == "rejected")
-                      {{-- <span class="status-text rejected-status"> --}}
-                          
                           <a class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white rejected-text" href="{{ route('pandit.list', ['pooja_id' => $booking->pooja_id]) }}" target="_blank" style="margin-bottom: 10px;background-color: #c80100 !important;">The pandit is booked. Please choose another pandit.View available pandits</a>
-                      {{-- </span> --}}
                       @endif
                       @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status !== 'canceled' && $booking->status != "rejected")
                       <a href="{{ route('rate.pooja', ['id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;background-color: #c80100 !important;">Rate the Pooja</a>
@@ -135,17 +143,9 @@
           </div>
       </div>
       @endforeach
-      
-      
-      
-    
-     
     </div>
-   
   </div>
 </div>
-
-
 
 @endsection
 

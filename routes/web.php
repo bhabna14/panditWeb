@@ -41,8 +41,8 @@ Route::fallback(function () {
     abort(404);
 });
 Route::get('/otplogin', [OtplessLoginController::class, 'otplogin'])->name('otplogin');
-Route::post('/send-otp', [OtplessLoginController::class, 'sendOtp']);
-Route::post('/verify-otp', [OtplessLoginController::class, 'verifyOtp']);
+Route::post('/send-otp-user', [OtplessLoginController::class, 'sendOtp']);
+Route::post('/verify-otp-user', [OtplessLoginController::class, 'verifyOtp']);
 
 ## user login
 Route::controller(userController::class)->group(function() {
@@ -101,7 +101,7 @@ Route::group(['middleware' => ['auth:users']], function () {
         Route::post('updateaddress', 'updateAddress')->name('updateaddress');
         Route::get('removeaddress/{id}',  'removeAddress')->name('removeaddress');
 
-        Route::get('/order-history', 'orderhistory')->name('orderhistory');
+        Route::get('/order-history', 'orderhistory')->name('booking.history');
         Route::get('/rate-pooja/{id}','ratePooja')->name('rate.pooja');
         // Route::post('submit-rating', 'submitRating')->name('submitRating');
         // Route::post('/submit-or-update-rating',  'submitOrUpdateRating')->name('submitOrUpdateRating');
