@@ -38,7 +38,7 @@ class PanditController extends Controller
         $pandit = Auth::guard('pandits')->user();
 
         $pandit_id = Profile::where('pandit_id',$pandit->pandit_id);
-        dd($pandit_id->id);
+        // dd($pandit_id->id);
     
         // Debugging: Check the authenticated pandit's pandit_id
         \Log::info('Authenticated pandit id:', ['pandit_id' => $pandit->pandit_id]);
