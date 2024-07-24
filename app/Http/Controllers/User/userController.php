@@ -408,7 +408,7 @@ public function bookingSuccess($id)
         // Apply filter based on the status
         switch ($filter) {
             case 'pending':
-                $bookingsQuery->where('status', 'pending');
+                $bookingsQuery->where('status', 'pending' );
                 break;
             case 'canceled':
                 $bookingsQuery->where('status', 'canceled');

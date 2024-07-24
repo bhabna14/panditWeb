@@ -37,12 +37,15 @@ class PanditController extends Controller
     {
         $pandit = Auth::guard('pandits')->user();
     
-        // Debugging: Check the authenticated pandit's pandit_id
-        \Log::info('Authenticated pandit id:', ['pandit_id' => $pandit->pandit_id]);
+        // Fetch the pandit's profile details using their pandit_id
+        $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
     
-        // Fetch bookings for the authenticated pandit
+        // Debugging: Check the authenticated pandit's profile id
+        \Log::info('Authenticated pandit profile id:', ['id' => $pandit_details->id]);
+    
+        // Fetch bookings for the authenticated pandit using the profile id
         $bookings = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
-                           ->where('pandit_id', $pandit->id)
+                           ->where('pandit_id', $pandit_details->id) // Use id from profile
                            ->orderBy('created_at', 'desc')
                            ->get();
     
@@ -51,6 +54,7 @@ class PanditController extends Controller
     
         return view('/pandit/poojarequest', compact('bookings'));
     }
+    
     
         public function approveBooking($id)
         {

@@ -1657,7 +1657,7 @@ button:focus {
 .button.-blue-1:hover {
   border-color: #bc1823;
   background-color: #fff !important;
-  color: #fff !important;
+  color: #bc1823 !important;
   cursor: pointer;
 }
 p.short-desc {
@@ -12040,10 +12040,11 @@ div[data-slider] > input[type=range]::-ms-tooltip {
 .form-input label {
   position: absolute;
   top: 0;
-  top: 26px;
-  padding: 0 15px;
+  top: -28px;
+  /* padding: 0 15px; */
   pointer-events: none;
-  font-size: 14px;
+  font-size: 16px;
+  /* margin-top: 29px; */
   transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
