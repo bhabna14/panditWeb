@@ -134,7 +134,7 @@
                           @endforeach
                       </div>
                   </div>
-                  <div class="row" style="margin-top:20px">
+                  <div class="row" style="margin-top:20px;margin-bottom: 24px;">
                     <div class="col-md-4">
                         <a href="#" class="add-address-btn" id="addAddressBtn"><i class="fa fa-plus"></i> Add Address</a>
                     </div>

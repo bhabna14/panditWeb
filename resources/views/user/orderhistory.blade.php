@@ -131,7 +131,7 @@
                       @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status !== 'canceled' && $booking->status != "rejected")
                       <a href="{{ route('rate.pooja', ['id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;background-color: #c80100 !important;">Rate the Pooja</a>
                       @endif
-                      @if (Carbon\Carbon::parse($booking->booking_date)->isFuture() && $booking->status !== 'canceled' && $booking->status !== 'rejected')
+                      @if (Carbon\Carbon::parse($booking->booking_date)->isFuture() && $booking->status !== 'canceled' && $booking->status !== 'rejected' && $booking->status == 'paid')
                       <a href="{{ route('cancelForm', $booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white cancel-pooja-btn" style="margin-bottom: 10px;width: 100%;">Cancel Pooja</a>
                       @endif
                       <a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">View Details</a>
