@@ -122,7 +122,7 @@
             
                 <div class="row">
                     <div class="col-md-12">
-                        @if($addresses->isEmpty())
+                        @if($addresses->isEmpty())     
                             <div class="alert alert-warning">
                                 Please add an address to proceed with the booking.
                             </div>
