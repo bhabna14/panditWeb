@@ -52,7 +52,7 @@ class PanditController extends Controller
         // Debugging: Log the bookings fetched
         \Log::info('Bookings fetched:', ['bookings' => $bookings]);
     
-        return view('/pandit/poojarequest', compact('bookings','pandit'));
+        return view('/pandit/poojarequest', compact('bookings'));
     }
     
     
