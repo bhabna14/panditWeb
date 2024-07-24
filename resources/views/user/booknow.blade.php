@@ -113,42 +113,50 @@
           <li>{{ $error }}</li>
             @endforeach
           <div class="col-md-7">
-              <form action="{{ route('booking.confirm') }}" method="POST">
-                  @csrf
-                  <input type="hidden" name="pandit_id" value="{{ $pandit->id }}">
-                  <input type="hidden" name="pooja_id" value="{{ $pooja->id }}">
-                  <input type="hidden" name="pooja_fee" value="{{ $poojaFee }}">
-                  <input type="hidden" class="form-control" name="advance_fee" value="{{ $poojaFee * 20 / 100 }}">
-                  <div class="row">
-                      <div class="col-md-12">
-                          @foreach ($addresses as $address)
-                              <div class="your-address">
-                                  <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
-                                  <label for="address{{ $address->id }}">
-                                    {{ $address->area }},{{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
-                                    <br>
-                                   
-                                     
-                                  </label>
-                              </div>
-                          @endforeach
-                      </div>
-                  </div>
-                  <div class="row" style="margin-top:20px;margin-bottom: 24px;">
+            <form action="{{ route('booking.confirm') }}" method="POST">
+                @csrf
+                <input type="hidden" name="pandit_id" value="{{ $pandit->id }}">
+                <input type="hidden" name="pooja_id" value="{{ $pooja->id }}">
+                <input type="hidden" name="pooja_fee" value="{{ $poojaFee }}">
+                <input type="hidden" class="form-control" name="advance_fee" value="{{ $poojaFee * 20 / 100 }}">
+            
+                <div class="row">
+                    <div class="col-md-12">
+                        @if($addresses->isEmpty())
+                            <div class="alert alert-warning">
+                                Please add an address to proceed with the booking.
+                            </div>
+                        @else
+                            @foreach ($addresses as $address)
+                                <div class="your-address">
+                                    <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
+                                    <label for="address{{ $address->id }}">
+                                        {{ $address->area }}, {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
+                                        <br>
+                                    </label>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+            
+                <div class="row" style="margin-top:20px; margin-bottom: 24px;">
                     <div class="col-md-4">
                         <a href="#" class="add-address-btn" id="addAddressBtn"><i class="fa fa-plus"></i> Add Address</a>
                     </div>
-                  </div>
-                  <div class="row">
+                </div>
+            
+                @if(!$addresses->isEmpty())
+                    <div class="row">
                         <div class="form-input mt-20 col-md-12">
                             <label for="">Please Select the Date and Time</label>
-                            <input type="text" name="booking_date" required class="form-control" id="booking_date"  placeholder="Select a date and time">
-                            {{-- <label class="lh-1 text-16 text-light-1">Date</label> --}}
+                            <input type="text" name="booking_date" required class="form-control" id="booking_date" placeholder="Select a date and time">
                         </div>
-                      
-                  </div>
-                  <button type="submit" class="button -md -blue-1 bg-dark-3 text-white mt-20">Confirm Booking</button>
-              </form>
+                    </div>
+                    <button type="submit" class="button -md -blue-1 bg-dark-3 text-white mt-20">Confirm Booking</button>
+                @endif
+            </form>
+            
           </div>
           <div class="col-xl-5 col-lg-5">
               <div class="md:ml-0">
