@@ -92,6 +92,8 @@ Route::group(['middleware' => ['auth:users']], function () {
 
         Route::get('/my-profile', 'myprofile')->name('myprofile');
         Route::get('/manage-address', 'mngaddress')->name('mngaddress');
+        Route::get('/address/set-default/{id}', 'setDefault')->name('setDefaultAddress');
+
         Route::get('/addaddress', 'addfrontaddress')->name('addfrontaddress');
         Route::get('/add-address', 'addaddress')->name('addaddress');
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');

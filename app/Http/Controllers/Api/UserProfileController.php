@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
+use App\Models\Profile;
+use App\Models\Poojalist;
+
 use App\Models\UserAddress;
 
 use Illuminate\Support\Facades\Storage; // Import Storage facade
@@ -333,5 +336,41 @@ public function orderHistory(Request $request)
             ], 404);
         }
     }
+    public function combinedSearch(Request $request)
+    {
+        $searchTerm = $request->input('searchTerm');
+    
+        // Search for pandits
+        $pandits = Profile::where('name', 'LIKE', '%' . $searchTerm . '%')->get();
+    
+        // Search for poojas
+        $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')->get();
+    
+        if ($pandits->isEmpty() && $poojas->isEmpty()) {
+            return response()->json([
+                'message' => 'No data found'
+            ], 404);
+        }
+    
+        return response()->json([
+            'pandits' => $pandits,
+            'poojas' => $poojas,
+        ]);
+    }
+    public function setDefault($id)
+    {
+        $address = UserAddress::findOrFail($id);
 
+        // Ensure the address belongs to the authenticated user
+        if ($address->user_id != Auth::guard('sanctum')->user()->userid) {
+            return response()->json(['error' => 'You do not have permission to set this address as default.'], 403);
+        }
+
+        // Set the address as default
+        $address->setAsDefault();
+
+        return response()->json(['success' => 'Address set as default successfully.'], 200);
+    }
+    
+    
 }

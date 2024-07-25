@@ -136,6 +136,12 @@ Route::delete('/user/address/{id}', [UserProfileController::class, 'removeAddres
 Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::class, 'getUserDetails']);
 
 
+Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::class, 'getUserDetails']);
+Route::middleware('auth:sanctum')->post('/search', [UserProfileController::class, 'combinedSearch']);
+
+Route::middleware('auth:sanctum')->post('/addresses/{id}/set-default', [UserProfileController::class, 'setDefault'])->name('addresses.setDefault');
+
+
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/submit-rating', [RatingController::class, 'submitRating']);
     Route::post('/update-rating', [RatingController::class, 'updateRating']);

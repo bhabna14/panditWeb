@@ -516,19 +516,35 @@ public function bookingSuccess($id)
     // }
 
     public function viewdetails($id)
-{
-    $booking = Booking::with(['pooja.poojalist', 'pandit'])->findOrFail($id);
-    return view('user/view-pooja-details', compact('booking'));
-}
+    {
+        $booking = Booking::with(['pooja.poojalist', 'pandit'])->findOrFail($id);
+        return view('user/view-pooja-details', compact('booking'));
+    }
 
     public function mngaddress(){
         $user = Auth::guard('users')->user();
         $addressdata = UserAddress::where('user_id', $user->userid)
                                     ->where('status','active')
                                     ->get();
+        $addressdata->is_default = true;
         // $addressdata = UserAddress::where('userid', $user_id)->get();
         return view('user/mngaddress', compact('addressdata'));
     }
+    public function setDefault($id)
+    {
+        $address = UserAddress::findOrFail($id);
+
+        // Ensure the address belongs to the authenticated user
+        if ($address->user_id != Auth::guard('users')->user()->userid) {
+            return redirect()->back()->with('error', 'You do not have permission to set this address as default.');
+        }
+
+        // Set the address as default
+        $address->setAsDefault();
+
+        return redirect()->back()->with('success', 'Address set as default successfully.');
+    }
+
     public function addaddress(){
         return view('user/add-address');
     }

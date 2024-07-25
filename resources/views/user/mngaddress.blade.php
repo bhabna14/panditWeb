@@ -1,6 +1,17 @@
 @extends('user.layouts.front-dashboard')
 
 @section('styles')
+<style>
+  div#Message {
+    background-color: #def2d7;
+    /* color: #fff; */
+    color: #5b7052;
+    padding: 17px;
+    font-size: 18px;
+    margin: 16px 0px;
+    border-radius: 5px;
+}
+</style>
 @endsection
 
 @section('content')
@@ -24,17 +35,26 @@
 
 
         <div class="row y-gap-30">
-          @if(session('success'))
-          <div class="alert alert-success">
-              {{ session('success') }}
+          @if(session()->has('success'))
+          <div class="text-success-2 lh-1 fw-500" id="Message">
+              {{ session()->get('success') }}
           </div>
           @endif
-          
-          @if(session('error'))
-              <div class="alert alert-danger">
-                  {{ session('error') }}
+      
+          @if ($errors->has('danger'))
+              <div class="alert alert-danger" id="Message">
+                  {{ $errors->first('danger') }}
               </div>
           @endif
+          @if ($errors->any())
+          <div class="alert alert-danger">
+              <ul>
+                  @foreach ($errors->all() as $error)
+                      <li>{{ $error }}</li>
+                  @endforeach
+              </ul>
+          </div>
+         @endif
             <div class="col-xl-4 col-md-6 ">
               <a href="{{ url('add-address')}}">
                 <div class="single-address text-center" style="cursor: pointer">
@@ -48,27 +68,35 @@
               </a>
             </div>
            
-          @foreach ($addressdata as $index => $addressdata)
-          <div class="col-xl-4 col-md-6 ">
-            <div class="single-address">
-                <div class=" rounded-4 bg-white shadow-3">
-                    <div class="fw-500 lh-14 address-single-heading">{{$addressdata->address_type}}</div>
-                    <div class="address-details">
-                       
-                        <p> {{$addressdata->area}}</p>
-                        <p>{{$addressdata->city}}</p>
-                        <p>{{$addressdata->state}} {{$addressdata->pincode}}</p>
-                        <p>{{$addressdata->country}}</p>
-                        
-                    </div>
-                    <div class="action-btns">
-                        <a href="{{route('editAddress',$addressdata->id)}}">Edit</a> | 
-                        <a href="{{ route('removeaddress', $addressdata->id) }}" onclick="return confirm('Are you sure you want to remove this address?')">Remove</a>
+            @foreach ($addressdata as $index => $address)
+            <div class="col-xl-4 col-md-6">
+                <div class="single-address">
+                    <div class="rounded-4 bg-white shadow-3 position-relative">
+                        @if($address->default == 1)
+                            <div class="fw-500 lh-14 address-single-heading">
+                                Default
+                            </div>
+                        @endif
+                        <div class="fw-500 lh-14 address-single-heading">{{$address->address_type}}</div>
+                        <div class="address-details">
+                            <p>{{$address->area}}</p>
+                            <p>{{$address->city}}</p>
+                            <p>{{$address->state}} {{$address->pincode}}</p>
+                            <p>{{$address->country}}</p>
+                        </div>
+                        <div class="action-btns">
+                            <a href="{{route('editAddress', $address->id)}}">Edit</a> | 
+                            <a href="{{route('removeaddress', $address->id)}}" onclick="return confirm('Are you sure you want to remove this address?')">Remove</a> |
+                            @if(!$address->is_default)
+                                <a href="{{route('setDefaultAddress', $address->id)}}">Set as Default</a>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>
-          </div>
-          @endforeach
+        @endforeach
+        
+            
 
           {{-- <div class="col-xl-4 col-md-6 ">
             <div class="single-address">
