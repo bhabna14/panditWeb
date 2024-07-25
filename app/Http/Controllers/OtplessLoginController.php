@@ -163,6 +163,73 @@ class OtplessLoginController extends Controller
     }
     
     
+    // public function verifyOtp(Request $request)
+    // {
+    //     // Validate the OTP length
+    //     $validator = Validator::make($request->all(), [
+    //         'otp' => 'required|digits:6', // Ensure OTP is exactly 6 digits
+    //     ]);
+    
+    //     if ($validator->fails()) {
+    //         return redirect()->back()->withErrors($validator)->withInput();
+    //     }
+    
+    //     $orderId = $request->session()->get('otp_order_id');
+    //     $otp = $request->input('otp');
+    //     $phoneNumber = $request->session()->get('otp_phone');
+    
+    //     $client = new Client();
+    
+    //     $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
+    
+    //     try {
+    //         $response = $client->post($url, [
+    //             'headers' => [
+    //                 'Content-Type'  => 'application/json',
+    //                 'clientId'      => $this->clientId,
+    //                 'clientSecret'  => $this->clientSecret,
+    //             ],
+    //             'json' => [
+    //                 'orderId' => $orderId,
+    //                 'otp' => $otp,
+    //                 'phoneNumber' => $phoneNumber,
+    //             ],
+    //         ]);
+    
+    //         $body = json_decode($response->getBody(), true);
+    
+    //         // Debugging: Print the response body
+    //         logger("Response Body: " . print_r($body, true));
+    
+    //         if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
+    //             // Check if user already exists
+    //             $user = User::where('mobile_number', $phoneNumber)->first();
+    
+    //             if (!$user) {
+    //                 // User does not exist, create a new user
+    //                 $user = User::create([
+    //                     'userid' => 'USER' . rand(10000, 99999),
+    //                     'mobile_number' => $phoneNumber,
+    //                     'order_id' => $orderId,
+    //                 ]);
+    //             }
+    
+    //             // Log the user in using the custom guard
+    //             Auth::guard('users')->login($user);
+    
+    //             // Redirect to the intended page or home page
+    //             return redirect()->route('userindex')->with('success', 'User authenticated successfully.');
+    //         } else {
+    //             return redirect()->back()->with('message', 'Wrong OTP. Please try again.');
+    //         }
+    //     } catch (RequestException $e) {
+    //         // Debugging: Print the error message
+    //         logger("Request Exception: " . $e->getMessage());
+    //         return redirect()->back()->with('message', 'Failed to verify OTP due to an error.');
+    //     }
+    // }
+    
+
     public function verifyOtp(Request $request)
     {
         // Validate the OTP length
@@ -198,9 +265,6 @@ class OtplessLoginController extends Controller
     
             $body = json_decode($response->getBody(), true);
     
-            // Debugging: Print the response body
-            logger("Response Body: " . print_r($body, true));
-    
             if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
                 // Check if user already exists
                 $user = User::where('mobile_number', $phoneNumber)->first();
@@ -217,17 +281,25 @@ class OtplessLoginController extends Controller
                 // Log the user in using the custom guard
                 Auth::guard('users')->login($user);
     
-                // Redirect to the intended page or home page
-                return redirect()->route('userindex')->with('success', 'User authenticated successfully.');
+                // Get the referer URL from the session
+                $referer = session()->get('login_referer', route('userindex'));
+    
+                // Decode the URL once
+                $referer = urldecode($referer);
+    
+                // Clear the referer from the session after using it
+                $request->session()->forget('login_referer');
+    
+                // Redirect to the referer URL or home page if not available
+                return redirect($referer)->with('success', 'User authenticated successfully.');
             } else {
                 return redirect()->back()->with('message', 'Wrong OTP. Please try again.');
             }
         } catch (RequestException $e) {
-            // Debugging: Print the error message
-            logger("Request Exception: " . $e->getMessage());
             return redirect()->back()->with('message', 'Failed to verify OTP due to an error.');
         }
     }
+    
     
     
 

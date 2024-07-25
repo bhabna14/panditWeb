@@ -83,12 +83,18 @@
                                             <p class="total-fee">Total Fee : ₹{{ $pandit_puja->pooja_fee }}</p>
                                             <p class="total-fee">Advance Fee : ₹{{ $advancefee = $pandit_puja->pooja_fee * 20/100 }}</p>
                                             <p>Total Time : {{ $pandit_puja->pooja_duration }} hrs</p>
-                                            <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $single_pandit->slug, 'poojaSlug' => $pandit_puja->poojalist->slug, 'poojaFee' => $pandit_puja->pooja_fee]) : route('userlogin') }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
+                                            {{-- <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $single_pandit->slug, 'poojaSlug' => $pandit_puja->poojalist->slug, 'poojaFee' => $pandit_puja->pooja_fee]) : route('userlogin') }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
                                                 {{ Auth::guard('users')->check() ? 'Book Now' : 'Login to Book' }}
-                                            </a>
+                                            </a> --}}
                                             {{-- <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $single_pandit->slug, 'poojaSlug' => $pandit_puja->poojalist->slug, 'poojaFee' => $pandit_puja->pooja_fee]) : '#' }}" class="button -md -blue-1 bg-dark-3 text-white mt-10" onclick="openModal('{{ Auth::guard('users')->check() ? '' : 'loginModal' }}')">
                                                 {{ Auth::guard('users')->check() ? 'Book Now' : 'Login to Book' }}
                                             </a> --}}
+
+                                            <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $single_pandit->slug, 'poojaSlug' => $pandit_puja->poojalist->slug, 'poojaFee' => $pandit_puja->pooja_fee]) : route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
+                                                {{ Auth::guard('users')->check() ? 'Book Now' : 'Login to Book' }}
+                                            </a>
+                                            
+                                            
                                         </div>
                                     </div>
                                 </div>

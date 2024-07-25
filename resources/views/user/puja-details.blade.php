@@ -41,49 +41,45 @@
                 <div class="tabs__content js-tabs-content">
                   <div class="tabs__pane -tab-item-1 is-tab-el-active">
                     <div class="row" data-aos="fade-up">
-                        @foreach ($pandit_pujas as $pandit_puja)
-                        @if($pandit_puja->profile)
-                            <div class="col-md-4 pandit-card">
-                                {{-- <a href="{{ route('pandit.details', ['poojaSlug' => $pooja->slug, 'panditSlug' => $pandit_puja->profile->slug]) }}"> --}}
-                                    <div class="card" data-state="#pooja">
-                                        <div class="card-header">
-                                            <img class="card-pooja" src="{{asset($pandit_puja->profile->profile_photo)}}" alt="image">
-                                        </div>
-                                        <div class="pooja-head row">
-                                            <div class="col-md-8 col-7">
-                                                <h5>{{ $pandit_puja->profile->name }}</h5>
-                                                <p class="total-fee">Total Fee : ₹{{ $pandit_puja->pooja_fee }}</p>
-                                                 <p class="total-fee">Advance Fee : ₹{{ $advancefee = $pandit_puja->pooja_fee * 20/100 }}</p>
- 
-                                                 <p>Total Time : {{ $pandit_puja->pooja_duration }} hrs</p>
-                                                
-                                            </div>
-                                            <div class="col-md-4 col-5 text-right">
-                                                <span class="rating">4.4</span>
-                                                
-                                            </div>
-                                            <div class="col-md-12 col-12">
-                                              <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $pandit_puja->profile->slug, 'poojaSlug' => $pooja->slug, 'poojaFee' => $pandit_puja->pooja_fee]) : route('userlogin') }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
-                                                {{ Auth::guard('users')->check() ? 'Book Now' : 'Login to Book' }}
-                                               </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                {{-- </a> --}}
-                            </div>
-                        @else
-                            <div class="col-md-4 pandit-card">
-                                <p>No profile info available for this pandit.</p>
-                            </div>
-                        @endif
-                    @endforeach
+                      @foreach ($pandit_pujas as $pandit_puja)
+                      @if($pandit_puja->profile)
+                          <div class="col-md-4 pandit-card">
+                              <div class="card" data-state="#pooja">
+                                  <div class="card-header">
+                                      <img class="card-pooja" src="{{ asset($pandit_puja->profile->profile_photo) }}" alt="image">
+                                  </div>
+                                  <div class="pooja-head row">
+                                      <div class="col-md-8 col-7">
+                                          <h5>{{ $pandit_puja->profile->name }}</h5>
+                                          <p class="total-fee">Total Fee : ₹{{ $pandit_puja->pooja_fee }}</p>
+                                          <p class="total-fee">Advance Fee : ₹{{ $advancefee = $pandit_puja->pooja_fee * 20 / 100 }}</p>
+                                          <p>Total Time : {{ $pandit_puja->pooja_duration }} hrs</p>
+                                      </div>
+                                      <div class="col-md-4 col-5 text-right">
+                                          <span class="rating">4.4</span>
+                                      </div>
+                                      <div class="col-md-12 col-12">
+                                          <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $pandit_puja->profile->slug, 'poojaSlug' => $pooja->slug, 'poojaFee' => $pandit_puja->pooja_fee]) : route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
+                                              {{ Auth::guard('users')->check() ? 'Book Now' : 'Login to Book' }}
+                                          </a>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      @else
+                          <div class="col-md-4 pandit-card">
+                              <p>No profile info available for this pandit.</p>
+                          </div>
+                      @endif
+                  @endforeach
+                  
                     </div>
                   </div>
                   <div class="tabs__pane -tab-item-2">
                     <p class="text-15 text-dark-1" style="
-    margin-top: 22px;
-    font-size: 17px;
-">
+                          margin-top: 22px;
+                          font-size: 17px;
+                      ">
                       {{ $pooja->description }}
                     </p>
                   </div>

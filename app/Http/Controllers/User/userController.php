@@ -46,8 +46,16 @@ class userController extends Controller
         return view("user/index" , compact('upcomingPoojas','otherpoojas','pandits'));
     }
 
-    public function userlogin(){
-        return view("login");
+    // public function userlogin(){
+    //     return view("login");
+    // }
+    public function userlogin(Request $request)
+    {
+        $referer = $request->input('referer');
+        session(['login_referer' => $referer]);
+
+        // Return the login view
+        return view('login');
     }
     public function demo(){
         return view("panditlogin");
@@ -102,13 +110,22 @@ class userController extends Controller
     // }
     public function userlogout(Request $request)
     {
+        // Log out the user
         Auth::guard('users')->logout();
+    
+        // Invalidate the current session
         $request->session()->invalidate();
+    
+        // Regenerate the CSRF token to prevent reuse
         $request->session()->regenerateToken();
-
+    
+        // Clear specific session data if needed
+        $request->session()->forget('login_referer'); // Clear referer URL if set
+    
+        // Redirect to the home page or any other desired page
         return redirect('/');
     }
-
+    
 
     public function userregister()
     {
