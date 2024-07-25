@@ -129,41 +129,47 @@ class UserProfileController extends Controller
     {
         // Get the authenticated user
         $user = Auth::guard('sanctum')->user();
-    
+
         // Fetch recent bookings for the user
-        $bookings = Booking::with('pooja.poojalist', 'pandit', 'address', 'ratings') // Load relationships to get pooja details
+        $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
                             ->where('user_id', $user->userid)
                             ->orderByDesc('created_at')
-                            // ->take(10) // Limit to 10 recent bookings (adjust as needed)
                             ->get();
-    
-        // Append URLs for pooja_video, pooja_photo, and profile_photo
+
+        // Append URLs for pooja_video, pooja_photo, profile_photo, and rating media files
         $bookings->each(function ($booking) {
             // Append URLs for pooja_video
             if ($booking->pooja && $booking->pooja->pooja_video) {
                 $booking->pooja->pooja_video_url = asset($booking->pooja->pooja_video);
             }
-    
+
             // Append URLs for pooja_photo
             if ($booking->pooja->poojalist->pooja_photo) {
-                $booking->pooja->poojalist->pooja_photo_url =asset('assets/img/'.$booking->pooja->poojalist->pooja_photo);
+                $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
             }
-            // $booking->pandit->pooja_photo_url = asset('assets/img/'.$booking->pooja->poojalist->pooja_photo); // Adjust accordingly if profile_photo is stored elsewhere
-    
-            // Append URL for profile_photo (assuming it's stored in the User model)
-            $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo); // Adjust accordingly if profile_photo is stored elsewhere
+
+            // Append URL for profile_photo
+            if ($booking->pandit->profile_photo) {
+                $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
+            }
+
+            // Include ratings and their media file URLs
+            if ($booking->ratings) {
+                $booking->ratings->each(function ($rating) {
+                    $rating->rating_date = $rating->created_at->format('Y-m-d');
+                    $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
+                    $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
+                });
+            }
         });
-        $bookings->ratings->each(function ($rating) {
-            $rating->rating_date = $rating->created_at->format('Y-m-d');
-            $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
-            $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
-        });
+
         return response()->json([
             'success' => true,
             'message' => 'Order history fetched successfully.',
             'bookings' => $bookings,
         ], 200);
     }
+
     
     public function manageAddress(Request $request)
     {
