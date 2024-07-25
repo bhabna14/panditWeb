@@ -153,8 +153,8 @@ class UserProfileController extends Controller
             // Append URL for profile_photo (assuming it's stored in the User model)
             $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo); // Adjust accordingly if profile_photo is stored elsewhere
         });
-        $bookings->image_url = $bookings->ratings->image_path ? asset(Storage::url($bookings->image_path)) : null;
-        $bookings->audio_url = $bookings->ratings->audio_file ? asset(Storage::url($bookings->audio_file)) : null;
+        $bookings->ratings->image_url = $bookings->ratings->image_path ? asset(Storage::url($bookings->ratings->image_path)) : null;
+        $bookings->ratings->audio_url = $bookings->ratings->audio_file ? asset(Storage::url($bookings->ratings->audio_file)) : null;
         return response()->json([
             'success' => true,
             'message' => 'Order history fetched successfully.',
