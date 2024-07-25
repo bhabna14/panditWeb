@@ -426,7 +426,7 @@ public function bookingSuccess($id)
                 break;
             default:
                 // No filter applied, show all bookings with status 'paid' or 'rejected'
-                $bookingsQuery->whereIn('status', ['paid', 'rejected']);
+                $bookingsQuery->whereIn('status', ['pending','paid', 'rejected','canceled']);
                 break;
         }
     
