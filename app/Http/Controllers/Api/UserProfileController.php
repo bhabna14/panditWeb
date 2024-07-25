@@ -153,7 +153,7 @@ class UserProfileController extends Controller
             // Append URL for profile_photo (assuming it's stored in the User model)
             $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo); // Adjust accordingly if profile_photo is stored elsewhere
         });
-        $booking->ratings->each(function ($rating) {
+        $bookings->ratings->each(function ($rating) {
             $rating->rating_date = $rating->created_at->format('Y-m-d');
             $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
             $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
