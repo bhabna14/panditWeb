@@ -131,7 +131,7 @@ class UserProfileController extends Controller
         $user = Auth::guard('sanctum')->user();
     
         // Fetch recent bookings for the user
-        $bookings = Booking::with('pooja.poojalist', 'pandit', 'address') // Load relationships to get pooja details
+        $bookings = Booking::with('pooja.poojalist', 'pandit', 'address', 'ratings') // Load relationships to get pooja details
                             ->where('user_id', $user->userid)
                             ->orderByDesc('created_at')
                             // ->take(10) // Limit to 10 recent bookings (adjust as needed)
