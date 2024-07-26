@@ -355,12 +355,12 @@ public function orderHistory(Request $request)
         // }
 
         $data = [
-            'pandits' => $pandits->isEmpty() ? '' : $pandits->map(function ($pandit) {
+            'pandits' => $pandits->isEmpty() ? [] : $pandits->map(function ($pandit) {
                 // Generate the URL for the profile photo
                 $pandit->profile_photo_url = $pandit->profile_photo ? asset($pandit->profile_photo) : null;
                 return $pandit;
             }),
-            'poojas'  => $poojas->isEmpty() ? '' : $poojas->map(function ($pooja) {
+            'poojas'  => $poojas->isEmpty() ? [] : $poojas->map(function ($pooja) {
                 // Generate the URL for the pooja image
                 $pooja->pooja_img_url = $pooja->pooja_photo ?  asset('assets/img/' . $pooja->pooja_photo) : null;
                 return $pooja;
@@ -369,7 +369,7 @@ public function orderHistory(Request $request)
     
         return response()->json([
            'success' => true,
-            'message' => 'Search Result Fetched successfully.',
+            'message' => 'Search Result Fetched Successfully.',
             'date' => $data
         ]);
     }
