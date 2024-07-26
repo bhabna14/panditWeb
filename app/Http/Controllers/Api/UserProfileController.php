@@ -196,7 +196,7 @@ public function orderHistory(Request $request)
         }
 
         // Fetch managed addresses for the user
-        $addressData = UserAddress::where('user_id', $user->userid)->get();
+        $addressData = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
 
         return response()->json([
             'success' => 200,

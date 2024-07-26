@@ -53,6 +53,7 @@ public function processPayment(Request $request, $booking_id)
 
         // Update booking with payment details
         $booking->application_status = 'paid';
+        $booking->payment_status = 'paid';
         $booking->status = 'paid';
         $booking->paid =  $paidAmountInRupees;
         $booking->payment_id = $request->razorpay_payment_id;
@@ -107,6 +108,7 @@ public function processPayment(Request $request, $booking_id)
         }
     
         $booking->status = 'canceled';
+        $booking->payment_status = 'process';
         $booking->canceled_at = now();
         $booking->cancel_reason = $validatedData['cancel_reason'];
         $booking->refund_method = $validatedData['refund_method'];

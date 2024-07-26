@@ -52,17 +52,12 @@
                     <div class="row y-gap-10">
                         <div class="col-12">
                             <div class="d-flex justify-between">
-                                <div class="text-15 lh-16">First name</div>
-                                <div class="text-15 lh-16 fw-500 text-blue-1">{{ $booking->user->first_name ?? 'N/A' }}</div>
+                                <div class="text-15 lh-16">Full Name</div>
+                                <div class="text-15 lh-16 fw-500 text-blue-1">{{ $booking->user->name ?? 'N/A' }}</div>
                             </div>
                         </div>
 
-                        <div class="col-12">
-                            <div class="d-flex justify-between border-top-light pt-10">
-                                <div class="text-15 lh-16">Last name</div>
-                                <div class="text-15 lh-16 fw-500 text-blue-1">{{ $booking->user->last_name ?? 'N/A' }}</div>
-                            </div>
-                        </div>
+                        
 
                         <div class="col-12">
                             <div class="d-flex justify-between border-top-light pt-10">
@@ -74,7 +69,7 @@
                         <div class="col-12">
                             <div class="d-flex justify-between border-top-light pt-10">
                                 <div class="text-15 lh-16">Phone</div>
-                                <div class="text-15 lh-16 fw-500 text-blue-1">{{ $booking->user->phonenumber ?? 'N/A' }}</div>
+                                <div class="text-15 lh-16 fw-500 text-blue-1">{{ Auth::guard('users')->user()->mobile_number ?? 'N/A' }}</div>
                             </div>
                         </div>
 
@@ -86,11 +81,11 @@
 
                         <div class="col-12">
                             <div class="d-flex justify-between border-top-light pt-10">
-                                <div class="text-15 lh-16 fw-500 text-blue-1"> Full Name: {{ $booking->address->fullname }}<br>
+                                <div class="text-15 lh-16 fw-500 text-blue-1">
                                     {{ $booking->address->area ?? 'N/A' }},{{ $booking->address->city ?? 'N/A' }},{{ $booking->address->state ?? 'N/A' }}
                                     {{ $booking->address->country ?? 'N/A' }}<br>
                                     Pincode : {{ $booking->address->pincode ?? 'N/A' }}<br>
-                                    Landmark : {{ $booking->address->landmark ?? 'N/A' }}
+                                   
                                 </div>
                             </div>
                         </div>

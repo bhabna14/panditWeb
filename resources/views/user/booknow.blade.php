@@ -128,14 +128,17 @@
                             </div>
                         @else
                             @foreach ($addresses as $address)
-                                <div class="your-address">
-                                    <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
-                                    <label for="address{{ $address->id }}">
-                                        {{ $address->area }}, {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
-                                        <br>
-                                    </label>
-                                </div>
-                            @endforeach
+                            <div class="your-address">
+                                <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
+                                <label for="address{{ $address->id }}">
+                                    <div class="address-type">{{ $address->address_type }}</div>
+                                    {{ $address->area }}, {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
+                                    @if($address->default == 1)
+                                        <div class="default-badge">Default</div>
+                                    @endif
+                                </label>
+                            </div>
+                             @endforeach
                         @endif
                     </div>
                 </div>
@@ -172,8 +175,8 @@
                               <input type="hidden" class="form-control" name="pandit_id" value="{{ $pandit->pandit_id }}">
                               <div class="text-14 lh-15 mt-5">{{ $pooja->poojalist->pooja_name }}</div>
                               {{-- <div class="text-16 lh-15 mt-5 fw-600">₹ {{ $pooja->poojalist->pooja_fee }}</div> --}}
-                              <div class="text-16 lh-15 mt-5 fw-600">Total Fee: ₹{{ $poojaFee }}</div>
-                              <div class="text-16 lh-15 mt-5 fw-600">Advance Fee: ₹{{ $poojaFee * 20/100 }}</div>
+                              <div class="text-16 lh-15 mt-5 fw-600">Total Fee: ₹{{ sprintf('%.2f',  $poojaFee) }}</div>
+                              <div class="text-16 lh-15 mt-5 fw-600">Advance Fee: ₹{{ sprintf('%.2f', ($poojaFee * 20/100)) }}</div>
                           </div>
                       </div>
                   </div>
@@ -220,26 +223,26 @@
                     <div class="row mt-10">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <input type="text" class="form-control" name="city" placeholder="Enter Town/City" required>
+                                <input type="text" class="form-control" name="city" placeholder="Enter Town/City *" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <input type="text" class="form-control" name="pincode" placeholder="Enter Pincode" required>
+                                <input type="text" class="form-control" name="pincode" placeholder="Enter Pincode *" required>
                             </div>
                         </div>
                     </div>
                     <div class="row mt-10">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <textarea name="area" class="form-control" rows="5" placeholder="Enter Area, Street, Sector, Village" required></textarea>
+                                <textarea name="area" class="form-control" rows="5" placeholder="Enter Area, Street, Sector, Village *" required></textarea>
                             </div>
                         </div>
                     </div>
                     <div class="row mt-10">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="address_type">Address Type</label>
+                                <label for="address_type">Address Type *</label>
                             </div>
                         </div>
                         <div class="col-md-2">

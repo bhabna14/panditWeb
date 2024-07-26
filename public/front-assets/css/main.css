@@ -1405,7 +1405,7 @@ a.add-address-btn {
 /* input:not([type="radio"]){
   width: 0% !important;
 } */
-.your-address {
+/* .your-address {
   border: 1px solid #cccc;
   padding: 8px 10px;
   border-radius: 5px;
@@ -1413,6 +1413,37 @@ a.add-address-btn {
 }
 .your-address input[type="radio"] {
   margin-right: 10px;
+} */
+.your-address {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+  background-color: #f9f9f9;
+}
+.your-address input[type="radio"] {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+.your-address label {
+  display: block;
+  margin-left: 40px;
+}
+.your-address .address-type {
+  font-weight: bold;
+  color: #555;
+}
+.your-address .default-badge {
+  background-color: #007bff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 12px;
 }
 main {
   overflow: hidden;
@@ -14010,11 +14041,11 @@ h3.post-title {
   bottom: 0;
   z-index: 1;
 }
-.order-inner-details {
+/* .order-inner-details {
   border: 1px solid #d5d9d9;
   border-radius: 10px;
   padding: 19px;
-}
+} */
 .text-red{
   color: red;
 }

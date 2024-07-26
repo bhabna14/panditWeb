@@ -308,7 +308,7 @@ class userController extends Controller
             return redirect()->route('userlogin')->with('message', 'You are not logged in yet. Please log in to book.');
         }
         $user = Auth::guard('users')->user();
-        $addresses = UserAddress::where('user_id', $user->userid)->get();
+        $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
         // Fetch pandit and pooja details based on slugs
         $pandit = Profile::where('slug', $panditSlug)->firstOrFail();
         $pooja = Poojadetails::whereHas('poojalist', function ($query) use ($poojaSlug) {
