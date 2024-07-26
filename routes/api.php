@@ -137,7 +137,7 @@ Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::
 
 
 Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::class, 'getUserDetails']);
-Route::middleware('auth:sanctum')->post('/search', [UserProfileController::class, 'combinedSearch']);
+Route::post('/search', [UserProfileController::class, 'combinedSearch']);
 
 Route::middleware('auth:sanctum')->post('/addresses/{id}/set-default', [UserProfileController::class, 'setDefault'])->name('addresses.setDefault');
 

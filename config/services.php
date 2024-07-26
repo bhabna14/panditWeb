@@ -30,8 +30,13 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
     'razorpay' => [
-    'key' => env('RAZORPAY_KEY'),
-    'secret' => env('RAZORPAY_SECRET'),
+        'key' => env('RAZORPAY_KEY'),
+        'secret' => env('RAZORPAY_SECRET'),
+    ],
+    'shopify' => [
+        'api_url' => env('SHOPIFY_API_URL'),
+        'api_key' => env('SHOPIFY_API_KEY'),
+        'api_password' => env('SHOPIFY_API_PASSWORD'),
     ],
 
 
