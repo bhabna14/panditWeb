@@ -29,7 +29,7 @@
                 <div class="form-group">
                     <label for="refund_method">Refund Method</label>
                     <select name="refund_method" id="refund_method" class="form-control" required>
-                        <option value="original">Back to Original Payment Method</option>
+                        <option value="razorpay">Back to Original Payment Method</option>
                     </select>
                 </div>
                 <button type="submit" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-top:20px">Confirm Cancellation</button>

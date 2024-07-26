@@ -86,6 +86,7 @@
               <img src="{{ asset('assets/img/'.$booking->pooja->poojalist->pooja_photo) }}" alt="Pooja Photo">
             </div>
             <div class="col-md-6">
+              <h6>{{ $booking->booking_id }}</h6>
               <h6>{{ $booking->pooja->pooja_name }}</h6>
               <p>{{ $booking->pandit->title }} {{ $booking->pandit->name }}</p>
               <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
