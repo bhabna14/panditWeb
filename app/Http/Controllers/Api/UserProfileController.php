@@ -357,7 +357,7 @@ public function orderHistory(Request $request)
         $data = [
             'pandits' => $pandits->isEmpty() ? [] : $pandits->map(function ($pandit) {
                 // Generate the URL for the profile photo
-                $pandit->profile_photo_url = $pandit->profile_photo ? asset($pandit->profile_photo) : null;
+                $pandit->profile_photo = $pandit->profile_photo ? asset($pandit->profile_photo) : null;
                 return $pandit;
             }),
             'poojas'  => $poojas->isEmpty() ? [] : $poojas->map(function ($pooja) {
