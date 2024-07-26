@@ -49,7 +49,7 @@ class UserProfileController extends Controller
             // 'dob' => 'nullable|date',
             'about' => 'nullable|string',
             'gender' => 'nullable|string',
-            'userphoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'userphoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
     
         // Using Sanctum guard to get authenticated user

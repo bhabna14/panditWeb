@@ -33,6 +33,7 @@ class BookingController extends Controller
             // Assign the authenticated user's ID to the booking
             $validatedData['user_id'] = Auth::guard('sanctum')->user()->userid;
             $validatedData['application_status'] = 'pending';
+            $validatedData['payment_status'] = 'pending';
             $validatedData['status'] = 'pending';
 
             // Create a new booking record
@@ -87,6 +88,7 @@ class BookingController extends Controller
             // Update booking with payment details
             $booking->payment_id = $validatedData['payment_id'];
             $booking->application_status = $validatedData['application_status'];
+            $booking->application_status = $validatedData['payment_status'];
             $booking->status = $validatedData['status'];
             $booking->paid = $validatedData['paid'];
             $booking->payment_type = $validatedData['payment_type']; // Update payment_type
@@ -140,6 +142,8 @@ class BookingController extends Controller
         }
 
         $booking->status = 'canceled';
+        $booking->payment_status = 'process';
+        $booking->application_status = 'canceled';
         $booking->canceled_at = now();
         $booking->cancel_reason = $validatedData['cancel_reason'];
         $booking->refund_method = $validatedData['refund_method'];
