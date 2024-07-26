@@ -2,7 +2,7 @@
 
 @section('styles')
 <style>
-  div#Message {
+  .text-success-2{
     background-color: #def2d7;
     /* color: #fff; */
     color: #5b7052;
@@ -10,6 +10,20 @@
     font-size: 18px;
     margin: 16px 0px;
     border-radius: 5px;
+}
+.text-error-2{
+    background-color: #def2d7;
+    /* color: #fff; */
+    color: red;
+    padding: 17px;
+    font-size: 18px;
+    margin: 16px 0px;
+    border-radius: 5px;
+}
+.flex-div {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid #dfdfdf;
 }
 </style>
 @endsection
@@ -38,6 +52,12 @@
           @if(session()->has('success'))
           <div class="text-success-2 lh-1 fw-500" id="Message">
               {{ session()->get('success') }}
+          </div>
+          @endif
+
+          @if(session()->has('error'))
+          <div class="text-error-2 lh-1 fw-500" id="Message">
+              {{ session()->get('error') }}
           </div>
           @endif
       
@@ -72,12 +92,15 @@
             <div class="col-xl-4 col-md-6">
                 <div class="single-address">
                     <div class="rounded-4 bg-white shadow-3 position-relative">
-                        @if($address->default == 1)
-                            <div class="fw-500 lh-14 address-single-heading">
-                                Default
-                            </div>
-                        @endif
-                        <div class="fw-500 lh-14 address-single-heading">{{$address->address_type}}</div>
+                       <div class="flex-div">
+                            
+                            <div class="fw-500 lh-14 address-single-heading">{{$address->address_type}}</div>
+                            @if($address->default == 1)
+                                <div class="fw-500 lh-14 address-single-heading">
+                                    Default
+                                </div>
+                            @endif
+                       </div>
                         <div class="address-details">
                             <p>{{$address->area}}</p>
                             <p>{{$address->city}}</p>
@@ -86,8 +109,14 @@
                         </div>
                         <div class="action-btns">
                             <a href="{{route('editAddress', $address->id)}}">Edit</a> | 
-                            <a href="{{route('removeaddress', $address->id)}}" onclick="return confirm('Are you sure you want to remove this address?')">Remove</a> |
-                            @if(!$address->is_default)
+                            @if($address->default == 1)
+                                <!-- Disable Remove link for default address -->
+                                <span>Remove (Default address cannot be removed)</span>
+                            @else
+                                <a href="{{route('removeaddress', $address->id)}}" onclick="return confirm('Are you sure you want to remove this address?')">Remove</a>
+                            @endif
+                            |
+                            @if(!$address->default)
                                 <a href="{{route('setDefaultAddress', $address->id)}}">Set as Default</a>
                             @endif
                         </div>
@@ -95,6 +124,7 @@
                 </div>
             </div>
         @endforeach
+        
         
             
 

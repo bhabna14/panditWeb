@@ -37,6 +37,12 @@
                        Pooja List
                     </a>
                   </li>
+                  <li class="d-none xl:d-flex">
+                    <a href="{{route('panditlogin')}}" class="button px-10 fw-300 -blue-1 h-50 " style="   font-size: 15px;
+                  color: #000;
+                 text-transform: uppercase;" ><i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
+          
+                  </li>
                   {{-- <li>
                     <a href="book-temple-sevayat-name.html">
                        Panji
@@ -105,7 +111,7 @@
               <div data-x-dd-click="searchMenu-loc">
                   <div class="button px-10 fw-300 -blue-1 h-50" style="font-size: 15px; color: #000; text-transform: uppercase;">
                       <i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i>
-                      {{ Auth::guard('users')->user()->mobile_number }} <i class="icon-chevron-sm-down text-7 ml-10"></i>
+                      {{ Auth::guard('users')->user()->name ?: Auth::guard('users')->user()->mobile_number }}! <i class="icon-chevron-sm-down text-7 ml-10"></i>
                   </div>
               </div>
               <div class="searchMenu-loc__field shadow-2 js-popup-window" data-x-dd="searchMenu-loc" data-x-dd-toggle="-is-active">
@@ -118,7 +124,7 @@
                               <a href="{{ url('manage-address') }}">Manage Address</a>
                           </div>
                           <div class="text-center js-search-option">
-                              <a href="{{ url('order-history') }}">Orders</a>
+                              <a href="{{ url('booking-history') }}">Manage Bookings</a>
                           </div>
                           <div class="text-center js-search-option">
                               <a href="{{ route('userlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
@@ -145,8 +151,8 @@
               {{-- <a href="{{url('/my-profile')}}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style = 'margin-left: 20px;width: 100px;background-color: #c80100 !important;'>My Profile</a> --}}
               {{-- <a href="http://127.0.0.1:8000/login" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-left: 20px;width: 100px;background-color: #c80100 !important;justify-content: left;align-items: left;/* align-items: end; */"><i class="d-flex items-center icon-user text-inherit text-18 mx-10" style="margin-right: 7px;"></i> Login</a> --}}
               <a href="{{route('panditlogin')}}" class="button px-10 fw-300 -blue-1 h-50 " style="   font-size: 15px;
-    color: #000;
-    text-transform: uppercase;" ><i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
+                  color: #000;
+                 text-transform: uppercase;" ><i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
           
               {{-- <div class="searchMenu-loc px-10 lg:py-20 lg:px-0 js-form-dd js-liverSearch">
                 
@@ -181,12 +187,23 @@
               
               <div class="dropdown">
                 <button class="dropbtn"><a href="#" class="d-flex items-center icon-user text-inherit text-22"></a></button>
+                @auth('users')
                 <div class="dropdown-content">
+                  
                   <a href="{{url('my-profile')}}">My profile</a>
                   <a href="{{url('order-history')}}">Manage Address</a>
                   <a href="{{url('manage-address')}}">Orders</a>
                   <a href="#">Logout</a>
                 </div>
+                @else
+                <div class="dropdown-content">
+                  <a href="{{ route('userlogin') }}">
+                    <div class="button px-10 fw-300 -blue-1 h-50" style="font-size: 15px; color: #000; text-transform: uppercase;">
+                        <i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i>Login
+                    </div>
+                </a>
+                </div>
+                @endauth
               </div>
             </div>
             <div><button class="d-flex items-center icon-menu text-inherit text-20" data-x-click="header, header-logo, header-mobile-icons, mobile-menu"></button></div>

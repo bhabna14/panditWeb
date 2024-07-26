@@ -13690,7 +13690,7 @@ button.rating-submit {
   background-color: #fff;
 }
 .address-single-heading {
-  border-bottom: 1px solid #dfdfdf;
+  /* border-bottom: 1px solid #dfdfdf; */
   padding: 10px;
 }
 .address-details {

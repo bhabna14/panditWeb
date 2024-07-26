@@ -539,11 +539,17 @@ public function bookingSuccess($id)
             return redirect()->back()->with('error', 'You do not have permission to set this address as default.');
         }
 
-        // Set the address as default
-        $address->setAsDefault();
+        // Set all addresses to not default
+        UserAddress::where('user_id', $address->user_id)
+            ->update(['default' => '0']);
+
+        // Set the selected address as default
+        $address->default = '1';
+        $address->save();
 
         return redirect()->back()->with('success', 'Address set as default successfully.');
     }
+
 
     public function addaddress(){
         return view('user/add-address');
@@ -598,14 +604,43 @@ public function bookingSuccess($id)
         $address = UserAddress::find($id);
     
         if ($address) {
-            // Set the status to 'inactive'
+            // Ensure the address belongs to the authenticated user
+            if ($address->user_id != Auth::guard('users')->user()->userid) {
+                return redirect()->back()->with('error', 'You do not have permission to remove this address.');
+            }
+    
+            // Check if the address is the default address
+            if ($address->default == '1') {
+                // Check if there are other addresses
+                $otherAddresses = UserAddress::where('user_id', $address->user_id)
+                    ->where('id', '!=', $address->id)
+                    ->count();
+    
+                if ($otherAddresses > 0) {
+                    // Set a new default address if other addresses exist
+                    $newDefaultAddress = UserAddress::where('user_id', $address->user_id)
+                        ->where('id', '!=', $address->id)
+                        ->first();
+    
+                    if ($newDefaultAddress) {
+                        $newDefaultAddress->default = '1';
+                        $newDefaultAddress->save();
+                    }
+                } else {
+                    return redirect()->back()->with('error', 'You cannot delete the default address unless another address is set as default.');
+                }
+            }
+    
+            // Set the address status to 'inactive'
             $address->status = 'inactive';
             $address->save();
-            return redirect()->back()->with('success', 'Address deactivated successfully.');
+    
+            return redirect()->back()->with('error', 'Address Deleted successfully.');
         } else {
             return redirect()->back()->with('error', 'Address not found.');
         }
     }
+    
     public function editAddress($id)
     {
         $address = UserAddress::find($id);
