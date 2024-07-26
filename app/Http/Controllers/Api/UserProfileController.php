@@ -236,6 +236,7 @@ public function orderHistory(Request $request)
         $addressData->area = $validatedData['area'];
         $addressData->address_type = $validatedData['address_type'];
         $addressData->status = 'active';
+        // $addressdata->default = '0';
 
         // Save the address
         $addressData->save();
@@ -322,6 +323,7 @@ public function orderHistory(Request $request)
             $address->area = $request->area;
             $address->address_type = $request->address_type;
             $addressData->status = 'active';
+            // $addressdata->default = '0';
             $address->save();
 
             return response()->json([
