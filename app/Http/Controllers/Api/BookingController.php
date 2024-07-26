@@ -88,7 +88,7 @@ class BookingController extends Controller
             // Update booking with payment details
             $booking->payment_id = $validatedData['payment_id'];
             $booking->application_status = $validatedData['application_status'];
-            $booking->application_status = $validatedData['payment_status'];
+            $booking->payment_status = $validatedData['payment_status'];
             $booking->status = $validatedData['status'];
             $booking->paid = $validatedData['paid'];
             $booking->payment_type = $validatedData['payment_type']; // Update payment_type
