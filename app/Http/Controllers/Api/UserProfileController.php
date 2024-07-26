@@ -348,15 +348,21 @@ public function orderHistory(Request $request)
         // Search for poojas
         $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')->get();
     
-        if ($pandits->isEmpty() && $poojas->isEmpty()) {
-            return response()->json([
-                'message' => 'No data found'
-            ], 404);
-        }
+        // if ($pandits->isEmpty() && $poojas->isEmpty()) {
+        //     return response()->json([
+        //         'message' => 'No data found'
+        //     ], 404);
+        // }
+
+        $data = [
+            'pandits' => $pandits->isEmpty() ? 'No pandits found' : $pandits,
+            'poojas'  => $poojas->isEmpty() ? 'No poojas found' : $poojas,
+        ];
     
         return response()->json([
-            'pandits' => $pandits,
-            'poojas' => $poojas,
+           'success' => true,
+            'message' => 'Search Result Fetched successfully.',
+            'date' => $data
         ]);
     }
     public function setDefault($id)
