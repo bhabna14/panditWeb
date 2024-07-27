@@ -39,10 +39,16 @@
         
         
               <div class="sidebar -dashboard">
+
+                <div class="sidebar__item side-menu">
+                  <div class="sidebar__button {{ Request::is('/') ? 'active' : '' }}">
+                    <a class="side-menu__item" href="{{url('/')}}"><svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13zm7 7v-5h4v5h-4zm2-15.586 6 6V15l.001 5H16v-5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v5H6v-9.586l6-6z"></path></svg><span class="side-menu__label">Home</span></a>
+                  </div>
+                </div>
         
                 <div class="sidebar__item side-menu">
-                  <div class="sidebar__button {{ Request::is('my-profile') ? 'active' : '' }}">
-                    <a class="side-menu__item" href="{{url('my-profile')}}"><svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13zm7 7v-5h4v5h-4zm2-15.586 6 6V15l.001 5H16v-5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v5H6v-9.586l6-6z"></path></svg><span class="side-menu__label">Dashboards</span></a>
+                  <div class="sidebar__button {{ Request::is('dashboard') ? 'active' : '' }}">
+                    <a class="side-menu__item" href="{{url('dashboard')}}"><svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13zm7 7v-5h4v5h-4zm2-15.586 6 6V15l.001 5H16v-5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v5H6v-9.586l6-6z"></path></svg><span class="side-menu__label">Dashboards</span></a>
                   </div>
                 </div>
         

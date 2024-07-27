@@ -51,8 +51,8 @@
                                   <div class="pooja-head row">
                                       <div class="col-md-8 col-7">
                                           <h5>{{ $pandit_puja->profile->name }}</h5>
-                                          <p class="total-fee">Total Fee : ₹{{ $pandit_puja->pooja_fee }}</p>
-                                          <p class="total-fee">Advance Fee : ₹{{ $advancefee = $pandit_puja->pooja_fee * 20 / 100 }}</p>
+                                          <p class="total-fee">Total Fee : ₹{{ sprintf('%.2f',$pandit_puja->pooja_fee) }}</p>
+                                          <p class="total-fee">Advance Fee : ₹{{ sprintf('%.2f',$advancefee = $pandit_puja->pooja_fee * 20 / 100) }}</p>
                                           <p>Total Time : {{ $pandit_puja->pooja_duration }} hrs</p>
                                       </div>
                                       <div class="col-md-4 col-5 text-right">

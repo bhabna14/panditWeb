@@ -208,6 +208,9 @@
                                       <span class="text-success">Already Paid</span>
                                   @elseif ($booking->application_status == 'rejected' )
                                       <span class="text-success">Rejected</span>
+                                  
+                                  @elseif ($booking->application_status == 'canceled' )
+                                      <span class="text-success">Canceled</span>
                                   @else
                                       <span class="text-muted">Waiting for approval</span>
                                   @endif

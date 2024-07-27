@@ -66,4 +66,8 @@ class Booking extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'userid');
     }
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class, 'booking_id');
+    }
 }

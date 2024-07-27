@@ -81,8 +81,8 @@
                                             <h5>{{ $pandit_puja->poojalist->pooja_name }}</h5>
                                             <p class="short-desc">{{ $pandit_puja->poojalist->short_description }}</p>
                                             
-                                            <p class="total-fee">Total Fee : ₹{{ $pandit_puja->pooja_fee }}</p>
-                                            <p class="total-fee">Advance Fee : ₹{{ $advancefee = $pandit_puja->pooja_fee * 20/100 }}</p>
+                                            <p class="total-fee">Total Fee : ₹{{ sprintf('%.2f', $pandit_puja->pooja_fee) }}</p>
+                                            <p class="total-fee">Advance Fee : ₹{{ sprintf('%.2f',$advancefee = $pandit_puja->pooja_fee * 20/100) }}</p>
                                             <p>Total Time : {{ $pandit_puja->pooja_duration }} hrs</p>
                                             {{-- <a href="{{ Auth::guard('users')->check() ? route('book.now', ['panditSlug' => $single_pandit->slug, 'poojaSlug' => $pandit_puja->poojalist->slug, 'poojaFee' => $pandit_puja->pooja_fee]) : route('userlogin') }}" class="button -md -blue-1 bg-dark-3 text-white mt-10">
                                                 {{ Auth::guard('users')->check() ? 'Book Now' : 'Login to Book' }}
