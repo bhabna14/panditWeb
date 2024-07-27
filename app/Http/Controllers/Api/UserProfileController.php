@@ -198,7 +198,7 @@ public function orderHistory(Request $request)
         if ($booking->poojalist) {
             // Append URLs for pooja_photo in poojalist
             if ($booking->poojalist->pooja_photo) {
-                $booking->poojalist->pooja_photo_url = asset($booking->poojalist->pooja_photo);
+                $booking->poojalist->pooja_photo_url =asset('assets/img/' . $booking->poojalist->pooja_photo);
             }
 
             // Wrap poojalist in pooja object
