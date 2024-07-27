@@ -74,33 +74,46 @@ class BookingController extends Controller
                 'payment_status' => 'required|string',
                 'status' => 'required|string',
                 'paid' => 'required|numeric',
-                'payment_type' => 'required|string', // Add payment_type validation
-                'payment_method' => 'required|string', // Add payment_method validation
+                'payment_type' => 'required|string',
+                'payment_method' => 'required|string',
             ]);
-    
+        
             // Find the booking by booking_id
             $booking = Booking::where('booking_id', $booking_id)->first();
-    
+        
             // Check if booking exists
             if (!$booking) {
+                \Log::error('Booking not found', ['booking_id' => $booking_id]);
                 return response()->json(['error' => 'Booking not found.'], 404);
             }
-    
+        
             // Update booking with payment details
             $booking->payment_id = $validatedData['payment_id'];
             $booking->application_status = $validatedData['application_status'];
             $booking->payment_status = $validatedData['payment_status'];
             $booking->status = $validatedData['status'];
             $booking->paid = $validatedData['paid'];
-            $booking->payment_type = $validatedData['payment_type']; // Update payment_type
-            $booking->payment_method = $validatedData['payment_method']; // Update payment_method
-            $booking->save();
-    
+            $booking->payment_type = $validatedData['payment_type'];
+            $booking->payment_method = $validatedData['payment_method'];
+        
+            // Save booking and check for errors
+            if (!$booking->save()) {
+                \Log::error('Failed to save booking', ['booking_id' => $booking_id]);
+                return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
+            }
+        
             return response()->json(['success' => 'Payment details saved successfully!', 'booking' => $booking], 200);
         } catch (\Exception $e) {
+            // Log detailed error information
+            \Log::error('Exception occurred while saving payment details', [
+                'exception' => $e->getMessage(),
+                'booking_id' => $booking_id,
+                'request_data' => $request->all()
+            ]);
             return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
         }
     }
+    
 
 
 
