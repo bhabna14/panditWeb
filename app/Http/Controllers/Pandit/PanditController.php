@@ -14,25 +14,54 @@ use App\Models\Career;
 use App\Models\EduDetail;
 use App\Models\VedicDetail;
 use App\Models\Poojaskill;
+use App\Models\Poojalist;
 use App\Models\Poojaitemlist;
+use App\Models\PanditCancel;
 use App\Models\Booking;
+use App\Models\Poojastatus;
 use App\Events\BookingApproved;
 use Illuminate\Support\Facades\Auth;
-
-
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class PanditController extends Controller
 { 
+
     public function index()
     {
+        $today = Carbon::today()->toDateString();
         $user = Auth::guard('pandits')->user();
         
         $profile = Profile::where('pandit_id', $user->pandit_id)->first();
+        
+        // Fetch bookings for today with application status approved and join with pooja_list to get the pooja name
+        $bookings = DB::table('bookings')
+                  ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
+                  ->where('bookings.pandit_id', $user->id)
+                  ->where('bookings.application_status', 'approved')
+                  ->whereDate('bookings.booking_date', $today)
+                  ->orderBy('bookings.booking_date', 'asc') // Order by booking_date ascending
+                  ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
+                  ->get();
+        
+        // Retrieve the status for each booking
+        foreach ($bookings as $booking) {
+            $booking->status = Poojastatus::where('booking_id', $booking->booking_id)
+                                          ->where('pooja_id', $booking->pooja_id)
+                                          ->first();
+        }
 
-        return view('pandit/dashboard', compact('user', 'profile'));
+        $pooja_status = DB::table('pooja_status')
+    ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
+    ->where('pooja_status.status', 'active')
+    ->select('pooja_status.start_time', 'pooja_status.end_time', 'pooja_list.pooja_name', 'pooja_status.pooja_status', 'pooja_status.pooja_duration as pooja_duration')
+    ->get();
+ 
+        
+        return view('pandit.dashboard', compact('profile', 'bookings', 'today','pooja_status'));
     }
+    
 
-  
     public function poojarequest()
     {
         $pandit = Auth::guard('pandits')->user();
@@ -54,7 +83,7 @@ class PanditController extends Controller
     
         return view('/pandit/poojarequest', compact('bookings'));
     }
-    
+
     
         public function approveBooking($id)
         {
@@ -66,18 +95,25 @@ class PanditController extends Controller
             return redirect()->back()->with('success', 'Booking approved successfully!');
         }
 
-        public function rejectBooking($id)
+        public function rejectBooking(Request $request, $id)
         {
             $booking = Booking::findOrFail($id);
             $booking->application_status = 'rejected';
             $booking->save();
-
+        
+            // Save to PanditCancel table
+            $pandit = Auth::guard('pandits')->user();
+        
+            PanditCancel::create([
+                'pandit_id' => $pandit->pandit_id,
+                'booking_id' => $request->booking_id,
+                'cancel_reason' => $request->cancel_reason,
+            ]);
+        
             return redirect()->back()->with('success', 'Booking rejected successfully!');
         }
 
-    public function poojahistory(){
-        return view("/pandit/poojahistory");
-    }
+
 
     public function poojaexperties(){
 
@@ -190,6 +226,7 @@ class PanditController extends Controller
     
     return redirect()->back()->with('success', 'Locations saved successfully.');
     }
+
     public function panditlogout(Request $request)
     {
         Auth::logout();
@@ -201,7 +238,11 @@ class PanditController extends Controller
         return redirect('/pandit/panditlogin');
     }
 
-
+    public function getDetails($id)
+    {
+        $booking = Booking::with(['user', 'pooja', 'address'])->findOrFail($id);
+        return response()->json($booking);
+    }
   
 
 }

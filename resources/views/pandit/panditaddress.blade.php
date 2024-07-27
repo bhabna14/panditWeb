@@ -99,7 +99,7 @@
                                                                         <div class="col-md-12">
                                                                             <div class="form-group">
                                                                                 <label for="prepincode">Pincode</label>
-                                                                                <input type="text" class="form-control"
+                                                                                <input type="number" class="form-control"
                                                                                     name="prepincode" value="{{$addressdata->prepincode ?? ''}}" id="prepincode"
                                                                                     placeholder="Enter Pincode">
                                                                             </div>
@@ -189,7 +189,7 @@
                                                                     <div class="col-md-12">
                                                                         <div class="form-group">
                                                                             <label for="perpincode">Pincode</label>
-                                                                            <input type="text" class="form-control"
+                                                                            <input type="number" class="form-control"
                                                                                 name="perpincode" value="{{$addressdata->perpincode ?? ''}}" id="perpincode"
                                                                                 placeholder="Enter Pincode">
                                                                         </div>

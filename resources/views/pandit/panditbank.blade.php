@@ -84,7 +84,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="exampleInputPassword1">Account Number</label>
-                                                <input type="text" class="form-control" name="accnumber"
+                                                <input type="number" class="form-control" name="accnumber"
                                                     value="{{$bankdata->accnumber ?? ''}}" id="exampleInputPassword1"
                                                     placeholder="Enter Account Number">
                                             </div>

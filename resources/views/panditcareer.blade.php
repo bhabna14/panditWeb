@@ -65,7 +65,7 @@
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <div class="form-group">
-                                                                    <label for="experience">Total Experience</label>
+                                                                    <label for="experience">Total Pooja Experience</label>
                                                                     <input type="number" class="form-control" name="experience" id="experience" placeholder="Total Experience">
                                                                 </div>
                                                             </div>
@@ -88,7 +88,7 @@
 
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label for="upload_id">Upload</label>
+                                                                        <label for="upload_id">Upload(ID)</label>
                                                                         <input type="file" class="form-control" name="upload_id[]" id="upload_id" multiple>
                                                                     </div>
                                                                 </div>
@@ -118,7 +118,7 @@
 
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label for="upload_edu">Upload</label>
+                                                                        <label for="upload_edu">Upload(Education)</label>
                                                                         <input type="file" class="form-control" name="upload_edu[]" id="upload_edu" multiple>
                                                                     </div>
                                                                 </div>
@@ -139,7 +139,7 @@
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <div class="form-group">
-                                                                        <label for="upload_vedic">Upload</label>
+                                                                        <label for="upload_vedic">Upload(Vedic)</label>
                                                                         <input type="file" class="form-control" name="upload_vedic[]" id="upload_vedic" multiple>
                                                                     </div>
                                                                 </div>

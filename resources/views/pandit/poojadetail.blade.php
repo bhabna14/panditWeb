@@ -112,12 +112,12 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <input type="text" name="fee[{{ $poojaSkill->id }}]"
+                                                                <input type="number" name="fee[{{ $poojaSkill->id }}]"
                                                                     class="form-control"
                                                                     value="{{ old('fee.' . $poojaSkill->id) }}" required>
                                                             </td>
                                                             <td>
-                                                                <input type="text"
+                                                                <input type="number"
                                                                     name="duration[{{ $poojaSkill->id }}]"
                                                                     class="form-control"
                                                                     value="{{ old('duration.' . $poojaSkill->id) }}"
@@ -132,7 +132,7 @@
                                                                     class="form-control">
                                                             </td>
                                                             <td>
-                                                                <input type="text"
+                                                                <input type="number"
                                                                     name="done_count[{{ $poojaSkill->id }}]"
                                                                     class="form-control"
                                                                     value="{{ old('done_count.' . $poojaSkill->id) }}">

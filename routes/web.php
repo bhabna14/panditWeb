@@ -28,6 +28,8 @@ use App\Http\Controllers\Pandit\PoojaListController;
 use App\Http\Controllers\Pandit\PanditLoginController; 
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\PanditOtpController;
+use App\Http\Controllers\Pandit\PoojaStatusController;
+use App\Http\Controllers\Pandit\PoojaHistoryController;
 
 
 
@@ -295,8 +297,8 @@ Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
         Route::get('/panditlogin', 'panditlogin')->name('panditlogin');
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
-        Route::get('/poojahistory', 'poojahistory')->name('poojahistory');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
+        Route::get('/booking/details/{id}', 'getDetails')->name('bookingdetails');
         Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
         Route::post('/booking/reject/{id}', 'rejectBooking')->name('pandit.booking.reject');
         Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');
@@ -390,4 +392,14 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
         Route::put('/updatepoojalist', 'updatePoojalist');
     });
+});
+
+Route::controller(PoojaStatusController::class)->group(function() {
+
+    Route::post('/pooja/start','start')->name('pooja.start');
+    Route::post('/pooja/end', 'end')->name('pooja.end');
+});
+
+Route::controller(PoojaHistoryController::class)->group(function() {
+    Route::get('pandit/poojahistory', 'poojahistory')->name('poojahistory');
 });

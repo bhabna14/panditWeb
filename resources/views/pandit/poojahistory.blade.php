@@ -30,14 +30,14 @@
         </div>
     </div>
 </div>
-
 <div class="col-lg-12 col-xl-12 p-0">
     <div class="row">
+        @foreach($complete_pooja as $pooja)
         <div class="col-xl-3 col-lg-6 alert">
             <div class="card item-card ">
                 <div class="card-body pb-0">
                     <div class="text-center zoom">
-                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/jagannath.jpeg') }}" alt="img"></a>
+                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/' . $pooja->poojaList->pooja_photo) }}" alt="img"></a>
                     </div>
                     <div class="card-body px-0 pb-3">
                         <div class="row">
@@ -47,306 +47,32 @@
                                         <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
                                         <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
                                         <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-half text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-o text-warning fs-16"></i></a>
+                                        <a href="javascript:void(0);"><i class="fa fa-star-half text-warning fs-16"></i></a>
+                                        <a href="javascript:void(0);"><i class="fa fa-star-o text-warning fs-16"></i></a>
                                     </div>
-                                    <a class="shop-title fs-18">Rath Pooja</a>
+                                    <a class="shop-title fs-18">{{ $pooja->poojaList->pooja_name }}</a>
                                 </div>
                                 <hr>
                             </div>
                             <div class="col-2">
                                 <div class="cardprice-2">
-                                    <span class="number-font">1,967</span>
+                                    <span class="number-font">{{ $pooja->paid ?? '00.00'  }}</span>
                                 </div>
                             </div>
                             <div style="text-align: center;width: 100%">
-                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">(12-02-2001)</h4>
-                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration -<span>3hr</span></h6>
-                               
+                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">({{ \Carbon\Carbon::parse($pooja->poojaList->pooja_date)->format('d-m-Y') }})</h4>
+                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration - <span>{{ $pooja->poojaStatus->pooja_duration ?? 'N/A' }}</span></h6>
                             </div>
                         </div>
                     </div>
                 </div>
-                
             </div>
         </div>
-        <div class="col-xl-3 col-lg-6 alert">
-            <div class="card item-card ">
-                <div class="card-body pb-0">
-                    <div class="text-center zoom">
-                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/jagannath.jpeg') }}" alt="img"></a>
-                    </div>
-                    <div class="card-body px-0 pb-3">
-                        <div class="row">
-                            <div class="col-10">
-                                <div class="cardtitle">
-                                    <div>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-half text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-o text-warning fs-16"></i></a>
-                                    </div>
-                                    <a class="shop-title fs-18">Rath Pooja</a>
-                                </div>
-                                <hr>
-                            </div>
-                            <div class="col-2">
-                                <div class="cardprice-2">
-                                    <span class="number-font">1,967</span>
-                                </div>
-                            </div>
-                            <div style="text-align: center;width: 100%">
-                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">(12-02-2001)</h4>
-                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration -<span>3hr</span></h6>
-                               
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 alert">
-            <div class="card item-card ">
-                <div class="card-body pb-0">
-                    <div class="text-center zoom">
-                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/jagannath.jpeg') }}" alt="img"></a>
-                    </div>
-                    <div class="card-body px-0 pb-3">
-                        <div class="row">
-                            <div class="col-10">
-                                <div class="cardtitle">
-                                    <div>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-half text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-o text-warning fs-16"></i></a>
-                                    </div>
-                                    <a class="shop-title fs-18">Rath Pooja</a>
-                                </div>
-                                <hr>
-                            </div>
-                            <div class="col-2">
-                                <div class="cardprice-2">
-                                    <span class="number-font">1,967</span>
-                                </div>
-                            </div>
-                            <div style="text-align: center;width: 100%">
-                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">(12-02-2001)</h4>
-                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration -<span>3hr</span></h6>
-                               
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 alert">
-            <div class="card item-card ">
-                <div class="card-body pb-0">
-                    <div class="text-center zoom">
-                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/jagannath.jpeg') }}" alt="img"></a>
-                    </div>
-                    <div class="card-body px-0 pb-3">
-                        <div class="row">
-                            <div class="col-10">
-                                <div class="cardtitle">
-                                    <div>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-half text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-o text-warning fs-16"></i></a>
-                                    </div>
-                                    <a class="shop-title fs-18">Rath Pooja</a>
-                                </div>
-                                <hr>
-                            </div>
-                            <div class="col-2">
-                                <div class="cardprice-2">
-                                    <span class="number-font">1,967</span>
-                                </div>
-                            </div>
-                            <div style="text-align: center;width: 100%">
-                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">(12-02-2001)</h4>
-                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration -<span>3hr</span></h6>
-                               
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 alert">
-            <div class="card item-card ">
-                <div class="card-body pb-0">
-                    <div class="text-center zoom">
-                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/jagannath.jpeg') }}" alt="img"></a>
-                    </div>
-                    <div class="card-body px-0 pb-3">
-                        <div class="row">
-                            <div class="col-10">
-                                <div class="cardtitle">
-                                    <div>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-half text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-o text-warning fs-16"></i></a>
-                                    </div>
-                                    <a class="shop-title fs-18">Rath Pooja</a>
-                                </div>
-                                <hr>
-                            </div>
-                            <div class="col-2">
-                                <div class="cardprice-2">
-                                    <span class="number-font">1,967</span>
-                                </div>
-                            </div>
-                            <div style="text-align: center;width: 100%">
-                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">(12-02-2001)</h4>
-                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration -<span>3hr</span></h6>
-                               
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 alert">
-            <div class="card item-card ">
-                <div class="card-body pb-0">
-                    <div class="text-center zoom">
-                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/jagannath.jpeg') }}" alt="img"></a>
-                    </div>
-                    <div class="card-body px-0 pb-3">
-                        <div class="row">
-                            <div class="col-10">
-                                <div class="cardtitle">
-                                    <div>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-half text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-o text-warning fs-16"></i></a>
-                                    </div>
-                                    <a class="shop-title fs-18">Rath Pooja</a>
-                                </div>
-                                <hr>
-                            </div>
-                            <div class="col-2">
-                                <div class="cardprice-2">
-                                    <span class="number-font">1,967</span>
-                                </div>
-                            </div>
-                            <div style="text-align: center;width: 100%">
-                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">(12-02-2001)</h4>
-                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration -<span>3hr</span></h6>
-                               
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 alert">
-            <div class="card item-card ">
-                <div class="card-body pb-0">
-                    <div class="text-center zoom">
-                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/jagannath.jpeg') }}" alt="img"></a>
-                    </div>
-                    <div class="card-body px-0 pb-3">
-                        <div class="row">
-                            <div class="col-10">
-                                <div class="cardtitle">
-                                    <div>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-half text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-o text-warning fs-16"></i></a>
-                                    </div>
-                                    <a class="shop-title fs-18">Rath Pooja</a>
-                                </div>
-                                <hr>
-                            </div>
-                            <div class="col-2">
-                                <div class="cardprice-2">
-                                    <span class="number-font">1,967</span>
-                                </div>
-                            </div>
-                            <div style="text-align: center;width: 100%">
-                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">(12-02-2001)</h4>
-                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration -<span>3hr</span></h6>
-                               
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6 alert">
-            <div class="card item-card ">
-                <div class="card-body pb-0">
-                    <div class="text-center zoom">
-                        <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/jagannath.jpeg') }}" alt="img"></a>
-                    </div>
-                    <div class="card-body px-0 pb-3">
-                        <div class="row">
-                            <div class="col-10">
-                                <div class="cardtitle">
-                                    <div>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i class="fa fa-star text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-half text-warning fs-16"></i></a>
-                                        <a href="javascript:void(0);"><i
-                                                class="fa fa-star-o text-warning fs-16"></i></a>
-                                    </div>
-                                    <a class="shop-title fs-18">Rath Pooja</a>
-                                </div>
-                                <hr>
-                            </div>
-                            <div class="col-2">
-                                <div class="cardprice-2">
-                                    <span class="number-font">1,967</span>
-                                </div>
-                            </div>
-                            <div style="text-align: center;width: 100%">
-                                <h4 class="shop-description fs-13 text-muted mt-2 mb-0">(12-02-2001)</h4>
-                                <h6 class="shop-description fs-13 text-muted mt-2 mb-0">Duration -<span>3hr</span></h6>
-                               
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
+        @endforeach
     </div>
 </div>
+
+
 @endsection
 
 @section('scripts')

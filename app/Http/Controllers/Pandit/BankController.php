@@ -37,9 +37,9 @@ class BankController extends Controller
         $request->validate([
             'bankname' => 'required|string|max:255',
             'branchname' => 'required|string|max:255',
-            'ifsccode' => 'required|string|size:10',
+            'ifsccode' => 'required|size:10',
             'accname' => 'required|string|max:255',
-            'accnumber' => 'required|digits:12',
+            'accnumber' => 'required|digits_between:10,12',
             'upi_number' => 'required|string|max:255',
         ]);
     

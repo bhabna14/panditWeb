@@ -32,17 +32,15 @@ class ProfileController extends Controller
     public function saveprofile(Request $request)
     {
         $request->validate([
-   
-            'profile_photo' => 'nullable|image|max:2048', // Ensure it's an image file
+            'profile_photo' => 'required|image|max:2048', 
+            'whatsappno' => 'numeric|digits:10',
         ]);
 
         $profile = new Profile();
 
         $profile->pandit_id = Auth::guard('pandits')->user()->pandit_id;
-
         $profile->title = $request->title;
         $profile->name = $request->name;
-        $profile->slug = Str::slug($request->name, '-');
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;

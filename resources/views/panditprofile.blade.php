@@ -75,7 +75,7 @@
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
-                                                                            <label for="exampleInputEmail1">Name</label>
+                                                                            <label for="exampleInputEmail1">Full Name</label>
                                                                             <input type="text" class="form-control"
                                                                                 id="name" name="name"
                                                                                 placeholder="Enter Name" required>
@@ -122,7 +122,7 @@
                                                                     
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
-                                                                            <label for="exampleInputPassword1">Photo</label>
+                                                                            <label for="exampleInputPassword1">Profile Photo</label>
                                                                             <input type="file" name="profile_photo"
                                                                                 class="form-control" id="profile_photo">
                                                                         </div>

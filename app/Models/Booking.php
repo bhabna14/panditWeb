@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Booking extends Model
 {
     use HasFactory;
+    protected $table = 'bookings';
 
     protected $fillable = [
         'booking_id',
@@ -18,15 +19,23 @@ class Booking extends Model
         'pooja_fee',
         'advance_fee',
         'booking_date',
-        
         'status',
         'application_status',
         'canceled_at',
         'cancel_reason',
         'refund_method',
-       
         'refund_amount',
     ];
+
+    public function poojaList()
+    {
+        return $this->belongsTo(Poojalist::class, 'pooja_id');
+    }
+
+    public function poojaStatus()
+    {
+        return $this->hasOne(Poojastatus::class, 'booking_id', 'booking_id')->whereColumn('pooja_id', 'pooja_id');
+    }
 
     public static function boot()
     {
@@ -44,7 +53,7 @@ class Booking extends Model
 
     public function pooja()
     {
-        return $this->belongsTo(Poojadetails::class, 'pooja_id','id');
+        return $this->belongsTo(Poojadetails::class, 'pooja_id', 'id');
     }
 
     public function address()
@@ -55,9 +64,5 @@ class Booking extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'userid');
-    }
-    public function ratings()
-    {
-        return $this->hasMany(Rating::class, 'booking_id');
     }
 }

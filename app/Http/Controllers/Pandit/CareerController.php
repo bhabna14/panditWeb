@@ -32,7 +32,6 @@ class CareerController extends Controller
     
             return view('pandit.managecareer', compact('pandit_profile', 'pandit_career', 'pandit_idcards', 'pandit_educations', 'pandit_vedics'));
     }
-    
 
     public function savecareer(Request $request)
     {
@@ -42,11 +41,7 @@ class CareerController extends Controller
             'experience' => 'required|integer|min:0',
             'id_type.*' => 'required|string|in:adhar,voter,pan,DL,health card',
             'upload_id.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-            'education_type.*' => 'required|string|in:10th,+2,+3,Master Degree',
-            'upload_edu.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-            'vedic_type.*' => 'required|string|max:255',
-            'upload_vedic.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-        ]);
+                ]);
 
         $career = new Career();
 
@@ -109,7 +104,6 @@ class CareerController extends Controller
         }
     }
 
-    
     public function deletIdproof($id)
     {
             $affected = IdcardDetail::where('id', $id)->update(['status' => 'deleted']);
@@ -156,9 +150,6 @@ class CareerController extends Controller
                         'education_type' => 'nullable|array',
                         'upload_edu' => 'nullable|array',
                         'upload_edu.*' => 'file|mimes:jpg,png,pdf|max:2048',
-                        'vedic_type' => 'nullable|array',
-                        'upload_vedic' => 'nullable|array',
-                        'upload_vedic.*' => 'file|mimes:jpg,png,pdf|max:2048',
                     ]);
                 
                     // Find the career record by its ID
