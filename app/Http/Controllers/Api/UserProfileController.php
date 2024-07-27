@@ -187,31 +187,25 @@ public function orderHistory(Request $request)
     $user = Auth::guard('sanctum')->user();
 
     // Fetch recent bookings for the user
-    $bookings = Booking::with(['poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
+    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
                         ->where('user_id', $user->userid)
                         ->orderByDesc('created_at')
                         ->get();
 
     // Append URLs for pooja_video, pooja_photo, profile_photo, and rating media files
     $bookings->each(function ($booking) {
-        // Check if poojalist exists before accessing its properties
-        if ($booking->poojalist) {
-            // Append URLs for pooja_photo in poojalist
-            if ($booking->poojalist->pooja_photo) {
-                $booking->poojalist->pooja_photo_url =asset('assets/img/' . $booking->poojalist->pooja_photo);
-            }
+        // Append URLs for pooja_video
+        if ($booking->pooja && $booking->pooja->pooja_video) {
+            $booking->pooja->pooja_video_url = asset($booking->pooja->pooja_video);
+        }
 
-            // Wrap poojalist in pooja object
-            $booking->pooja = [
-                'poojalist' => $booking->poojalist->toArray()
-            ];
-
-            // Remove the direct poojalist relationship to avoid redundancy
-            unset($booking->poojalist);
+        // Append URLs for pooja_photo
+        if ($booking->pooja->poojalist->pooja_photo) {
+            $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
         }
 
         // Append URL for profile_photo
-        if ($booking->pandit && $booking->pandit->profile_photo) {
+        if ($booking->pandit->profile_photo) {
             $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
         }
 
@@ -243,7 +237,6 @@ public function orderHistory(Request $request)
         'bookings' => $bookings,
     ], 200);
 }
-
 
 
     
