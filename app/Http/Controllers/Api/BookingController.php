@@ -71,6 +71,7 @@ class BookingController extends Controller
             $validatedData = $request->validate([
                 'payment_id' => 'required|string',
                 'application_status' => 'required|string',
+                'payment_status' => 'required|string',
                 'status' => 'required|string',
                 'paid' => 'required|numeric',
                 'payment_type' => 'required|string', // Add payment_type validation
