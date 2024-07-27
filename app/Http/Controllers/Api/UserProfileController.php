@@ -141,12 +141,7 @@ public function orderHistory(Request $request)
 
     // Append URLs for pooja_video, pooja_photo, profile_photo, and rating media files
     $bookings->each(function ($booking) {
-        // Append URLs for pooja_video
-        if ($booking->pooja && $booking->pooja->pooja_video) {
-            $booking->pooja->pooja_video_url = asset($booking->pooja->pooja_video);
-        }
-
-        // Append URLs for pooja_photo
+        // Append URLs for pooja_photo in poojalist
         if ($booking->poojalist->pooja_photo) {
             $booking->poojalist->pooja_photo_url = asset('assets/img/' . $booking->poojalist->pooja_photo);
         }
@@ -184,6 +179,7 @@ public function orderHistory(Request $request)
         'bookings' => $bookings,
     ], 200);
 }
+
 
 
     
