@@ -45,7 +45,7 @@
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
-                                    <td>{{ $booking->pooja->pooja_name }}</td>
+                                    <td>{{ $booking->pooja->pooja_name ?? 'N/A' }}</td>
                                     <td>{{ $booking->booking_date }} {{ $booking->booking_time }}</td>
                                     <td>
                                         @if($booking->application_status === 'pending')
@@ -55,9 +55,9 @@
                                         </form>
                                         <form action="{{ route('pandit.booking.reject', $booking->id) }}" method="POST" style="display:inline;">
                                             @csrf
-                                            <button type="button" class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Reject</button>
-                                        
-                                            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                            <button type="button" class="btn btn-primary me-3" data-bs-toggle="modal" data-bs-target="#exampleModal-{{ $booking->id }}" data-bs-whatever="@mdo">Reject</button>
+                                
+                                            <div class="modal fade" id="exampleModal-{{ $booking->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                                                 <div class="modal-dialog">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
@@ -65,9 +65,9 @@
                                                             <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <input type="hidden" value="{{$booking->id }}" id="booking_id" name="booking_id">
+                                                            <input type="hidden" value="{{ $booking->id }}" id="booking_id" name="booking_id">
                                                             <div class="mb-3">
-                                                                <label for="recipient-name" class="col-form-label">Cancel Reason:</label>
+                                                                <label for="cancel_reason" class="col-form-label">Cancel Reason:</label>
                                                                 <select class="form-control" id="cancel_reason" name="cancel_reason" required>
                                                                     <option value="">Select Reason</option>
                                                                     <option value="I am not free at this time">I am not available at this time</option>
@@ -84,7 +84,7 @@
                                                 </div>
                                             </div>
                                         </form>
-                                        
+                                
                                         @elseif($booking->application_status === 'approved')
                                         <span class="btn btn-success">Approved</span>
                                         @elseif($booking->application_status === 'paid')
@@ -95,6 +95,7 @@
                                     </td>
                                 </tr>
                                 @endforeach
+                                
                             </tbody>
                         </table>
                     </div>

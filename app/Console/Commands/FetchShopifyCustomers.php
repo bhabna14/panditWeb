@@ -20,7 +20,7 @@ class FetchShopifyCustomers extends Command
      *
      * @var string
      */
-    protected $description = 'Fetch customers from Shopify created in the year 2024 and save to database';
+    protected $description = 'Fetch customers from Shopify created in the year 2024 to the present and save to database';
 
     /**
      * Execute the console command.
@@ -33,7 +33,7 @@ class FetchShopifyCustomers extends Command
         $auth = config('services.shopify.api_key') . ':' . config('services.shopify.api_password');
         $nextPageInfo = null;
         $createdAtMin = '2024-01-01T00:00:00Z';
-        $createdAtMax = '2024-12-31T23:59:59Z';
+        $createdAtMax = now()->toIso8601String(); // Current date and time
 
         do {
             $url = $baseUrl;

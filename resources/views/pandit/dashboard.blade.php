@@ -24,126 +24,213 @@
         </div>
     </div>
     <!-- /breadcrumb -->
-	@if (session('success'))
-    <div class="alert alert-success" id ="Message">
-        {{ session('success') }}
-    </div>
-@endif
+    @if (session('success'))
+        <div class="alert alert-success" id ="Message">
+            {{ session('success') }}
+        </div>
+    @endif
 
-@if (session('error'))
-    <div class="alert alert-danger" id ="Message">
-        {{ session('error') }}
-    </div>
-@endif
+    @if (session('error'))
+        <div class="alert alert-danger" id ="Message">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <!-- row -->
     <div class="row">
         <!-- Bookings Section -->
-		<div class="col-xl-7 col-lg-12 col-md-12 col-sm-12">
-			<div class="row">
-				<div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
-					<div class="card">
-						<div class="text-center pt-4">
-							<h3 style="font-weight: bold; font-family: Copperplate, Papyrus, fantasy; font-size: 30px">
-								{{ $today }}
-							</h3>
-							<h3 style="font-family: 'Trebuchet MS', sans-serif; font-size: 20px;" id="liveTime"></h3>
-						</div>
-						<div class="card-body">
-							<div class="row">
-								@foreach ($bookings as $booking)
-									<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
-										<div class="card text-center p-3">
-											<h5 class="text-dark font-weight-semibold mb-2">
-												{{ $booking->pooja_name }}
-												({{ \Carbon\Carbon::parse($booking->booking_date)->format('H:i') }})
-											</h5>
-											<div class="d-flex justify-content-center">
-												@if ($booking->status)
-													@if ($booking->status->start_time && !$booking->status->end_time)
-														<!-- If started but not ended, show End button -->
-														<form action="{{ route('pooja.end') }}" method="POST">
-															@csrf
-															<input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-															<input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
-															<button type="submit" class="btn btn-success mb-2">End</button>
-														</form>
-													@elseif (!$booking->status->start_time)
-														<!-- If not started, show Start button -->
-														<form action="{{ route('pooja.start') }}" method="POST" class="mr-2">
-															@csrf
-															<input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-															<input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
-															<button type="submit" class="btn btn-primary mb-2">Start</button>
-														</form>
-													@else
-														<!-- If started and ended, show Completed button -->
-														<button class="btn btn-secondary mb-2" disabled>Pooja Completed</button>
-													@endif
-												@else
-													<!-- If no status record, show both Start and End buttons -->
-													<form action="{{ route('pooja.start') }}" method="POST" class="mr-2">
-														@csrf
-														<input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-														<input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
-														<button type="submit" class="btn btn-primary mb-2">Start</button>
-													</form>
-													<form action="{{ route('pooja.end') }}" method="POST">
-														@csrf
-														<input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-														<input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
-														<button type="submit" class="btn btn-success mb-2" style="margin-left: 10px">End</button>
-													</form>
-												@endif
-											</div>
-										</div>
-									</div>
-								@endforeach
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-        <!-- Profile Section -->
-        <div class="col-xl-5 col-lg-12 col-md-12 col-sm-12">
+        <div class="col-xl-7 col-lg-12 col-md-12 col-sm-12">
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
                     <div class="card">
+                        <div class="text-center pt-4">
+                            <h3
+                                style="text-shadow: 8px 8px 20px rgba(0,0,0,0.7);font-weight: bold; font-family: Copperplate, Papyrus, fantasy; font-size: 40px">
+                                {{ $today }}
+                            </h3>
+                            <h3 style="text-shadow: 3px 3px 10px rgba(0,0,0,0.4);color: #B7070A;font-family: 'Trebuchet MS', sans-serif; font-size: 20px;"
+                                id="liveTime"></h3>
+                        </div>
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-xl-9 col-lg-7 col-md-6 col-sm-12">
-                                    <div class="text-justified align-items-center">
-                                        <h3 class="text-dark font-weight-semibold mb-2 mt-0">
-                                            Hi, Welcome Back
-                                            <span class="text-primary">
-                                                {{ $profile->name ?? 'Pandit' }}
-                                            </span>!
-                                        </h3>
-                                        <p class="text-dark tx-14 mb-3 lh-3">
-                                            If you want to get request of pooja then you will first complete all profile
-                                            details
-                                        </p>
-                                        <button class="btn btn-primary shadow">Upgrade Now</button>
-                                    </div>
-                                </div>
-                                <div
-                                    class="col-xl-3 col-lg-5 col-md-6 col-sm-12 d-flex align-items-center justify-content-center">
-                                    <div class="chart-circle float-md-end mt-4 mt-md-0" data-value="0.30" data-thickness="8"
-                                        data-color="">
-                                        <canvas width="100" height="100"></canvas>
-                                        <div class="chart-circle-value circle-style">
-                                            <div class="tx-18 font-weight-semibold">35%</div>
+                                @foreach ($bookings as $booking)
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
+                                        <div class="card text-center p-3">
+                                            <h5 class="text-dark font-weight-semibold mb-2">
+                                                {{ $booking->pooja_name }}
+                                                ({{ \Carbon\Carbon::parse($booking->booking_date)->format('H:i') }})
+                                            </h5>
+                                            <div class="d-flex justify-content-center">
+                                                @if ($booking->status)
+                                                    @if ($booking->status->start_time && !$booking->status->end_time)
+                                                        <!-- If started but not ended, show End button -->
+                                                        <form action="{{ route('pooja.end') }}" method="POST">
+                                                            @csrf
+                                                            <input type="hidden" name="booking_id"
+                                                                value="{{ $booking->id }}">
+                                                            <input type="hidden" name="pooja_id"
+                                                                value="{{ $booking->pooja_id }}">
+                                                            <button type="submit" class="btn btn-success mb-2">End</button>
+                                                        </form>
+                                                    @elseif (!$booking->status->start_time)
+                                                        <!-- If not started, show Start button -->
+                                                        <form action="{{ route('pooja.start') }}" method="POST"
+                                                            class="mr-2">
+                                                            @csrf
+                                                            <input type="hidden" name="booking_id"
+                                                                value="{{ $booking->id }}">
+                                                            <input type="hidden" name="pooja_id"
+                                                                value="{{ $booking->pooja_id }}">
+                                                            <button type="submit"
+                                                                class="btn btn-primary mb-2">Start</button>
+                                                        </form>
+                                                    @else
+                                                        <!-- If started and ended, show Completed button -->
+                                                        <button class="btn btn-secondary mb-2" disabled>Pooja
+                                                            Completed</button>
+                                                    @endif
+                                                @else
+                                                    <!-- If no status record, show both Start and End buttons -->
+                                                    <form action="{{ route('pooja.start') }}" method="POST"
+                                                        class="mr-2">
+                                                        @csrf
+                                                        <input type="hidden" name="booking_id"
+                                                            value="{{ $booking->id }}">
+                                                        <input type="hidden" name="pooja_id"
+                                                            value="{{ $booking->pooja_id }}">
+                                                        <button type="submit" class="btn btn-primary mb-2">Start</button>
+                                                    </form>
+                                                    <form action="{{ route('pooja.end') }}" method="POST">
+                                                        @csrf
+                                                        <input type="hidden" name="booking_id"
+                                                            value="{{ $booking->id }}">
+                                                        <input type="hidden" name="pooja_id"
+                                                            value="{{ $booking->pooja_id }}">
+                                                        <button type="submit" class="btn btn-success mb-2"
+                                                            style="margin-left: 10px">End</button>
+                                                    </form>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                @endforeach
+
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+
+        <!-- Profile Section -->
+
+        <div class="col-xl-5 col-lg-12 col-md-12 col-sm-12">
+            <div class="row">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
+                    <div class="card">
+                        <div class="text-center pt-4" style="border-bottom: 1px solid black;padding-bottom: 10px">
+                            <h3>POOJA REQUEST</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                @foreach ($pooja_request as $request)
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
+                                        <div class="card text-center p-3">
+                                            <h5 class="text-dark font-weight-semibold mb-2">
+                                                {{ $request->pooja->pooja_name }}
+                                            </h5>
+                                            <div class="d-flex justify-content-center">
+                                                @if ($request->application_status === 'pending')
+                                                    <div class="btn-group" role="group" aria-label="Action Buttons">
+                                                        <form action="{{ route('pandit.booking.approve', $request->id) }}"
+                                                            method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-info">Approve</button>
+                                                        </form>
+                                                        <form action="{{ route('pandit.booking.reject', $request->id) }}"
+                                                            method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <button type="button" class="btn btn-warning me-3"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#exampleModal-{{ $request->id }}"
+                                                                data-bs-whatever="@mdo">Reject</button>
+                                                            <div class="modal fade" id="exampleModal-{{ $request->id }}"
+                                                                tabindex="-1" aria-labelledby="exampleModalLabel"
+                                                                aria-hidden="true">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title"
+                                                                                id="exampleModalLabel">Please Select Your
+                                                                                Reason</h5>
+                                                                            <button aria-label="Close" class="btn-close"
+                                                                                data-bs-dismiss="modal"
+                                                                                type="button"><span
+                                                                                    aria-hidden="true">&times;</span></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <input type="hidden"
+                                                                                value="{{ $request->id }}"
+                                                                                id="booking_id" name="booking_id">
+                                                                            <div class="mb-3">
+                                                                                <label for="cancel_reason"
+                                                                                    class="col-form-label">Cancel
+                                                                                    Reason:</label>
+                                                                                <select class="form-control"
+                                                                                    id="cancel_reason"
+                                                                                    name="cancel_reason" required>
+                                                                                    <option value="">Select Reason
+                                                                                    </option>
+                                                                                    <option
+                                                                                        value="I am not free at this time">
+                                                                                        I am not available at this time
+                                                                                    </option>
+                                                                                    <option
+                                                                                        value="I am not available in this city">
+                                                                                        I am not available in this city
+                                                                                    </option>
+                                                                                    <option value="Personal problem">
+                                                                                        Personal problem</option>
+                                                                                </select>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button"
+                                                                                class="btn btn-secondary"
+                                                                                data-bs-dismiss="modal">Close</button>
+                                                                            <button type="submit"
+                                                                                class="btn btn-danger">Submit</button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                @elseif($request->application_status === 'approved')
+                                                    <span class="btn btn-success">Approved</span>
+                                                @elseif($request->application_status === 'paid')
+                                                    <span class="btn btn-success">Paid</span>
+                                                @elseif($request->application_status === 'rejected')
+                                                    <span class="btn btn-danger">Rejected</span>
+                                                @endif
+
+                                                <a style="color: white;margin-left: -15px"
+                                                    class="btn ripple btn-success view-booking" data-bs-toggle="modal"
+                                                    data-bs-target="#full-screen" data-booking-id="{{ $booking->id }}">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 
@@ -171,21 +258,78 @@
                                     <th>Pooja Status</th>
                                 </tr>
                             </thead>
-							<tbody>
-								@foreach ($pooja_status as $index => $status)
-								<tr>
-									<td>{{ $index + 1 }}</td>
-									<td>{{ $status->pooja_name }}</td>
-									<td>{{ $status->start_time ? \Carbon\Carbon::parse($status->start_time)->format('Y-m-d H:i:s') : 'Not Started' }}</td>
-									<td>{{ $status->end_time ? \Carbon\Carbon::parse($status->end_time)->format('Y-m-d H:i:s') : 'Not Ended' }}</td>
-									<td>{{ $status->pooja_duration }}</td>
-									<td>{{ $status->pooja_status }}</td>
+                            <tbody>
+                                @foreach ($pooja_status as $index => $status)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $status->pooja_name }}</td>
+                                        <td>{{ $status->start_time ? \Carbon\Carbon::parse($status->start_time)->format('Y-m-d H:i:s') : 'Not Started' }}
+                                        </td>
+                                        <td>{{ $status->end_time ? \Carbon\Carbon::parse($status->end_time)->format('Y-m-d H:i:s') : 'Not Ended' }}
+                                        </td>
+                                        <td>{{ $status->pooja_duration }}</td>
+                                        <td>{{ $status->pooja_status }}</td>
 
-								</tr>
-								@endforeach
-							</tbody>
+                                    </tr>
+                                @endforeach
+                            </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="full-screen" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen" role="document" style="width: 1200px">
+            <div class="modal-content modal-content-demo">
+                <div class="modal-header">
+                    <h6 class="modal-title">Pooja Request</h6>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped ">
+
+                        <tbody>
+                            <tr>
+                                <th>Full Name</th>
+                                <td id="modal-full-name">N/A</td>
+                            </tr>
+                            <tr>
+                                <th>Pooja Name</th>
+                                <td id="modal-pooja-name">N/A</td>
+                            </tr>
+                            <tr>
+                                <th>Mobile Number</th>
+                                <td id="modal-mobile-number">N/A</td>
+                            </tr>
+                            <tr>
+                                <th>Pooja Fee</th>
+                                <td>₹ <span id="modal-pooja-fee">N/A</span></td>
+                            </tr>
+                            <tr>
+                                <th>Paid Amount</th>
+                                <td>₹ <span id="modal-paid-amount">N/A</span></td>
+                            </tr>
+                            <tr>
+                                <th>Date and Time</th>
+                                <td id="modal-date-time">N/A</td>
+                            </tr>
+                            <tr>
+                                <th>Address</th>
+                                <td id="modal-address">N/A</td>
+                            </tr>
+
+
+                        </tbody>
+                    </table>
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
                 </div>
             </div>
         </div>
@@ -235,7 +379,7 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
 
-	<script>
+    <script>
         setTimeout(function() {
             document.getElementById('Message').style.display = 'none';
         }, 3000);
@@ -243,5 +387,64 @@
             document.getElementById('Messages').style.display = 'none';
         }, 3000);
     </script>
-	
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const viewButtons = document.querySelectorAll('.view-booking');
+
+            viewButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const bookingId = this.getAttribute('data-booking-id');
+
+                    // Fetch booking details using AJAX
+                    fetch(`/pandit/booking/details/${bookingId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            // Mask the mobile number and name
+                            const maskedMobileNumber = maskMobileNumber(data.user
+                                ?.mobile_number);
+                            const maskedName = maskName(data.user?.name);
+
+                            // Update modal content
+                            document.getElementById('modal-full-name').textContent =
+                                maskedName || 'N/A';
+                            document.getElementById('modal-pooja-name').textContent = data.pooja
+                                ?.pooja_name || 'N/A';
+                            document.getElementById('modal-mobile-number').textContent =
+                                maskedMobileNumber || 'N/A';
+                            document.getElementById('modal-pooja-fee').textContent = data.pooja
+                                ?.pooja_fee || 'N/A';
+                            document.getElementById('modal-paid-amount').textContent = data
+                                .paid || 'N/A';
+                            document.getElementById('modal-date-time').textContent = data
+                                .booking_time || 'N/A';
+                            document.getElementById('modal-address').innerHTML = `
+                        ${data.address?.country || 'N/A'}<br>
+                        Pincode: ${data.address?.pincode || 'N/A'}<br>
+                        Landmark: ${data.address?.landmark || 'N/A'}
+                    `;
+                        })
+                        .catch(error => console.error('Error fetching booking details:', error));
+                });
+            });
+
+            function maskMobileNumber(mobileNumber) {
+                if (!mobileNumber) return 'N/A';
+                return mobileNumber.slice(0, 5) + '*****';
+            }
+
+            function maskName(name) {
+                if (!name) return 'N/A';
+
+                return name.split(' ').map(word => {
+                    if (word.length <= 2) return word; // Handle short words
+
+                    const firstChar = word.charAt(0);
+                    const lastChar = word.charAt(word.length - 1);
+                    const maskedMiddle = '*'.repeat(word.length - 2);
+
+                    return `${firstChar}${maskedMiddle}${lastChar}`;
+                }).join(' ');
+            }
+        });
+    </script>
 @endsection

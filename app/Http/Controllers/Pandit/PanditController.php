@@ -28,14 +28,14 @@ class PanditController extends Controller
 { 
 
     public function index()
-    {
-        $today = Carbon::today()->toDateString();
-        $user = Auth::guard('pandits')->user();
-        
-        $profile = Profile::where('pandit_id', $user->pandit_id)->first();
-        
-        // Fetch bookings for today with application status approved and join with pooja_list to get the pooja name
-        $bookings = DB::table('bookings')
+{
+    $today = Carbon::today()->toDateString();
+    $user = Auth::guard('pandits')->user();
+
+    $profile = Profile::where('pandit_id', $user->pandit_id)->first();
+
+    // Fetch bookings for today with application status approved and join with pooja_list to get the pooja name
+    $bookings = DB::table('bookings')
                   ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
                   ->where('bookings.pandit_id', $user->id)
                   ->where('bookings.application_status', 'approved')
@@ -43,45 +43,38 @@ class PanditController extends Controller
                   ->orderBy('bookings.booking_date', 'asc') // Order by booking_date ascending
                   ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
                   ->get();
-        
-        // Retrieve the status for each booking
-        foreach ($bookings as $booking) {
-            $booking->status = Poojastatus::where('booking_id', $booking->booking_id)
-                                          ->where('pooja_id', $booking->pooja_id)
-                                          ->first();
-        }
 
-        $pooja_status = DB::table('pooja_status')
-    ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
-    ->where('pooja_status.status', 'active')
-    ->select('pooja_status.start_time', 'pooja_status.end_time', 'pooja_list.pooja_name', 'pooja_status.pooja_status', 'pooja_status.pooja_duration as pooja_duration')
-    ->get();
- 
-        
-        return view('pandit.dashboard', compact('profile', 'bookings', 'today','pooja_status'));
+    // Retrieve the status for each booking
+    foreach ($bookings as $booking) {
+        $booking->status = Poojastatus::where('booking_id', $booking->id)
+                                      ->where('pooja_id', $booking->pooja_id)
+                                      ->first();
     }
-    
 
+    $pooja_status = DB::table('pooja_status')
+                      ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
+                      ->where('pooja_status.status', 'active')
+                      ->select('pooja_status.start_time', 'pooja_status.end_time', 'pooja_list.pooja_name', 'pooja_status.pooja_status', 'pooja_status.pooja_duration as pooja_duration')
+                      ->get();
+
+    $pooja_request = Booking::where('pandit_id', $user->id)
+                            ->where('application_status', 'pending')
+                            ->orderBy('created_at', 'desc')
+                            ->get();
+
+    return view('pandit.dashboard', compact('profile', 'bookings', 'today', 'pooja_status', 'pooja_request'));
+}
     public function poojarequest()
     {
         $pandit = Auth::guard('pandits')->user();
-    
-        // Fetch the pandit's profile details using their pandit_id
-        $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
-    
-        // Debugging: Check the authenticated pandit's profile id
-        \Log::info('Authenticated pandit profile id:', ['id' => $pandit_details->id]);
-    
+        
         // Fetch bookings for the authenticated pandit using the profile id
         $bookings = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
-                           ->where('pandit_id', $pandit_details->id) // Use id from profile
+                           ->where('pandit_id', $pandit->id)
                            ->orderBy('created_at', 'desc')
                            ->get();
-    
-        // Debugging: Log the bookings fetched
-        \Log::info('Bookings fetched:', ['bookings' => $bookings]);
-    
-        return view('/pandit/poojarequest', compact('bookings'));
+
+        return view('pandit.poojarequest', compact('bookings'));
     }
 
     

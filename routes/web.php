@@ -16,7 +16,6 @@ use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\YoutubeController;
 
-
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
 use App\Http\Controllers\Pandit\SkillController;
@@ -30,8 +29,6 @@ use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
 use App\Http\Controllers\Pandit\PoojaHistoryController;
-
-
 
 use App\Http\Controllers\sebayatregisterController;
 use App\Http\Controllers\Auth\LoginRegisterController;
