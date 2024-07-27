@@ -129,7 +129,7 @@
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
                     <div class="card">
-                        <div class="text-center pt-4" style="border-bottom: 1px solid black;padding-bottom: 10px">
+                        <div class="text-center pt-4">
                             <h3>POOJA REQUEST</h3>
                         </div>
                         <div class="card-body">
@@ -215,15 +215,16 @@
                                                     <span class="btn btn-danger">Rejected</span>
                                                 @endif
 
-                                                <a style="color: white;margin-left: -15px"
+                                                <a style="color: white; margin-left: -15px"
                                                     class="btn ripple btn-success view-booking" data-bs-toggle="modal"
-                                                    data-bs-target="#full-screen" data-booking-id="{{ $booking->id }}">
+                                                    data-bs-target="#full-screen" data-booking-id="{{ $request->id }}">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             </div>
                                         </div>
                                     </div>
                                 @endforeach
+
                             </div>
                         </div>
                     </div>

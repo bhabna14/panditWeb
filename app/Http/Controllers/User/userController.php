@@ -555,49 +555,64 @@ public function bookingSuccess($id)
         return view('user/add-address');
     }
 
-    public function saveaddress(Request $request){
-        $addressdata = new UserAddress();
+    public function saveaddress(Request $request)
+    {
         $user = Auth::guard('users')->user();
         $userid = $user->userid;
+    
+        // Check if the user already has addresses
+        $hasAddresses = UserAddress::where('user_id', $userid)->exists();
+    
+        // Create the new address
+        $addressdata = new UserAddress();
         $addressdata->user_id = $userid;
-        // $addressdata->fullname = $request->fullname;
-        // $addressdata->number = $request->number;
         $addressdata->country = $request->country;
-
         $addressdata->state = $request->state;
         $addressdata->city = $request->city;
         $addressdata->pincode = $request->pincode;
-
-        // $addressdata->flatno = $request->flatno;
         $addressdata->area = $request->area;
-        // $addressdata->landmark = $request->landmark;
         $addressdata->address_type = $request->address_type;
         $addressdata->status = 'active';
+    
+        // Set as default if it's the first address
+        if (!$hasAddresses) {
+            $addressdata->default = 1;
+        }
+    
         $addressdata->save();
-
+    
         return redirect()->route('mngaddress')->with('success', 'Address created successfully.');
     }
-
-    public function savefrontaddress(Request $request){
-        $addressdata = new UserAddress();
+    
+    public function savefrontaddress(Request $request)
+    {
         $user = Auth::guard('users')->user();
         $userid = $user->userid;
+    
+        // Check if the user already has addresses
+        $hasAddresses = UserAddress::where('user_id', $userid)->exists();
+    
+        // Create the new address
+        $addressdata = new UserAddress();
         $addressdata->user_id = $userid;
-        // $addressdata->fullname = $request->fullname;
-        // $addressdata->number = $request->number;
         $addressdata->country = $request->country;
-
         $addressdata->state = $request->state;
         $addressdata->city = $request->city;
         $addressdata->pincode = $request->pincode;
-
         $addressdata->area = $request->area;
         $addressdata->address_type = $request->address_type;
         $addressdata->status = 'active';
+    
+        // Set as default if it's the first address
+        if (!$hasAddresses) {
+            $addressdata->default = 1;
+        }
+    
         $addressdata->save();
-
+    
         return redirect()->back()->with('success', 'Address created successfully.');
     }
+    
     public function removeAddress($id)
     {
         // Find the address by ID
