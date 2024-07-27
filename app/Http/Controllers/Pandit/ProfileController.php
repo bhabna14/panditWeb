@@ -41,6 +41,7 @@ class ProfileController extends Controller
         $profile->pandit_id = Auth::guard('pandits')->user()->pandit_id;
         $profile->title = $request->title;
         $profile->name = $request->name;
+        $profile->slug = Str::slug($request->name, '-');
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
