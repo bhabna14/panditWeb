@@ -86,11 +86,11 @@ public function processPayment(Request $request, $booking_id)
     
         $validatedData = $request->validate([
             'cancel_reason' => 'required|string|max:255',
-            'refund_method' => 'required|string|in:original',
+            'refund_method' => 'required|string|in:razorpay', // Updated to match the form option
         ]);
     
         // Log the booking details and cancellation request
-        Log::info('Booking cancellation requested', [
+        \Log::info('Booking cancellation requested', [
             'booking_id' => $booking->id,
             'booking_date' => $booking->booking_date,
             'today' => $today,
@@ -99,6 +99,7 @@ public function processPayment(Request $request, $booking_id)
             'refund_method' => $validatedData['refund_method']
         ]);
     
+        // Calculate refund amount based on days difference
         if ($daysDifference > 20) {
             $refundAmount = $booking->pooja_fee;
         } elseif ($daysDifference > 1 && $daysDifference <= 20) {
@@ -115,14 +116,48 @@ public function processPayment(Request $request, $booking_id)
         $booking->refund_amount = $refundAmount;
         $booking->save();
     
+        // Process refund through Razorpay if selected
+        if ($validatedData['refund_method'] === 'razorpay') {
+            // Call the Razorpay API to process the refund
+            $this->processRazorpayRefund($booking, $refundAmount);
+        }
+    
         // Log booking cancellation
-        Log::info('Booking canceled successfully', [
+        \Log::info('Booking canceled successfully', [
             'booking_id' => $booking->id,
             'refund_amount' => $refundAmount
         ]);
     
-        return redirect()->route('orderhistory')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . $refundAmount);
+        return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . $refundAmount);
     }
+
+
+    protected function processRazorpayRefund($booking, $amount)
+    {
+        // Assuming you have the Razorpay API setup
+        $api = new \Razorpay\Api\Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+
+
+        try {
+            $refund = $api->refund->create([
+                'payment_id' => $booking->payment_id, // Assuming you have this saved in the booking
+                'amount' => $amount * 100, // Amount in paise
+                'notes' => ['Reason' => 'Booking Cancellation'],
+            ]);
+
+            \Log::info('Razorpay refund processed', [
+                'payment_id' => $booking->payment_id,
+                'refund_id' => $refund->id,
+                'amount' => $amount
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Razorpay refund error', [
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    
     
     
     
