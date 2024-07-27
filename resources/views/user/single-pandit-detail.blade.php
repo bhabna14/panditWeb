@@ -54,7 +54,7 @@
                 <div class="pandit-desc">
                     <h5>{{ $single_pandit->name }}</h5>
                     <p>{{ $single_pandit->about_pandit }}</p>
-                    <h6>Language Known : {{ $single_pandit->language }}</h6>
+                    <h6 class="pt-10">Languages Known : {{ $single_pandit->language }}</h6>
                 </div>
             </div>
         </div>
