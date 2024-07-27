@@ -70,7 +70,7 @@ class BookingController extends Controller
             // Validate incoming request data
             $validatedData = $request->validate([
                 'payment_id' => 'required|string',
-                'application_status' => 'required|string',
+                // 'application_status' => 'required|string',
                 'payment_status' => 'required|string',
                 'status' => 'required|string',
                 'paid' => 'required|numeric',
@@ -89,7 +89,7 @@ class BookingController extends Controller
         
             // Update booking with payment details
             $booking->payment_id = $validatedData['payment_id'];
-            $booking->application_status = $validatedData['application_status'];
+            // $booking->application_status = $validatedData['application_status'];
             $booking->payment_status = $validatedData['payment_status'];
             $booking->status = $validatedData['status'];
             $booking->paid = $validatedData['paid'];
