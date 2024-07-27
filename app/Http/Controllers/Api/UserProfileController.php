@@ -147,8 +147,8 @@ public function orderHistory(Request $request)
         }
 
         // Append URLs for pooja_photo
-        if ($booking->pooja->poojalist->pooja_photo) {
-            $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
+        if ($booking->poojalist->pooja_photo) {
+            $booking->poojalist->pooja_photo_url = asset('assets/img/' . $booking->poojalist->pooja_photo);
         }
 
         // Append URL for profile_photo
