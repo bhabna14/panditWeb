@@ -93,7 +93,15 @@ class userController extends Controller
     
        
     }
-
+    public function searchPooja(Request $request)
+    {
+        $search = $request->input('search');
+        $pandit_pujas = PanditPuja::whereHas('poojalist', function($query) use ($search) {
+            $query->where('pooja_name', 'LIKE', "%{$search}%");
+        })->get();
+    
+        return response()->json($pandit_pujas);
+    }
 
     public function dashboard(){
         return view('user.dashboard');
@@ -561,7 +569,8 @@ public function bookingSuccess($id)
         $userid = $user->userid;
     
         // Check if the user already has addresses
-        $hasAddresses = UserAddress::where('user_id', $userid)->exists();
+        $hasAddresses = UserAddress::where('user_id', $userid)
+                                    ->where('status', 'active')->exists();
     
         // Create the new address
         $addressdata = new UserAddress();
@@ -590,7 +599,7 @@ public function bookingSuccess($id)
         $userid = $user->userid;
     
         // Check if the user already has addresses
-        $hasAddresses = UserAddress::where('user_id', $userid)->exists();
+        $hasAddresses = UserAddress::where('user_id', $userid)->where('status', 'active')->exists();
     
         // Create the new address
         $addressdata = new UserAddress();

@@ -78,7 +78,7 @@ Route::controller(userController::class)->group(function() {
     Route::get('/ajax-search',  'ajaxSearch')->name('pandit.ajaxSearch');
     Route::get('/ajax-search-pooja', 'ajaxSearchPooja')->name('pooja.ajaxSearchPooja');
 
-
+    Route::get('/search-pooja','searchPooja')->name('search.pooja');
 
     // routes/web.php
 Route::get('/poojas', 'fetchPoojas')->name('fetchPoojas');
