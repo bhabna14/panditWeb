@@ -20,6 +20,7 @@ class Booking extends Model
         'advance_fee',
         'booking_date',
         'status',
+        'payment_status',
         'application_status',
         'canceled_at',
         'cancel_reason',

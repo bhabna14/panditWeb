@@ -355,6 +355,7 @@ public function confirmBooking(Request $request)
         // Assign the authenticated user's ID to the booking
         $validatedData['user_id'] = Auth::guard('users')->user()->userid;
         $validatedData['application_status'] = 'pending';
+        $validatedData['payment_status'] = 'pending';
         $validatedData['status'] = 'pending';
         // Create a new booking record
         $booking = Booking::create($validatedData);
