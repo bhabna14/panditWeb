@@ -187,7 +187,7 @@ public function orderHistory(Request $request)
     $user = Auth::guard('sanctum')->user();
 
     // Fetch recent bookings for the user
-    $bookings = Booking::with(['pooja','poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
+    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
                         ->where('user_id', $user->userid)
                         ->orderByDesc('created_at')
                         ->get();
