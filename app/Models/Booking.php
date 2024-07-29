@@ -54,7 +54,7 @@ class Booking extends Model
 
     public function pooja()
     {
-        return $this->belongsTo(Poojadetails::class, 'pooja_id', 'pooja_id');
+        return $this->belongsTo(Poojadetails::class, 'pooja_id', 'id');
     }
     
     public function address()

@@ -187,7 +187,7 @@ public function orderHistory(Request $request)
     $user = Auth::guard('sanctum')->user();
 
     // Fetch recent bookings for the user
-    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
+    $bookings = Booking::with(['pooja','poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
                         ->where('user_id', $user->userid)
                         ->orderByDesc('created_at')
                         ->get();
@@ -195,14 +195,14 @@ public function orderHistory(Request $request)
     // Append URLs for pooja_video, pooja_photo, profile_photo, and rating media files
     $bookings->each(function ($booking) {
         // Append URLs for pooja_video
-        if ($booking->pooja && $booking->pooja->pooja_video) {
-            $booking->pooja->pooja_video_url = asset($booking->pooja->pooja_video);
-        }
+        // if ($booking->pooja && $booking->pooja->pooja_video) {
+        //     $booking->pooja->pooja_video_url = asset($booking->pooja->pooja_video);
+        // }
 
-        // Append URLs for pooja_photo
-        if ($booking->pooja->poojalist->pooja_photo) {
-            $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
-        }
+        // // Append URLs for pooja_photo
+        // if ($booking->pooja->poojalist->pooja_photo) {
+        //     $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
+        // }
 
         // Append URL for profile_photo
         if ($booking->pandit->profile_photo) {
