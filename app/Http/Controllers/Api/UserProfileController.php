@@ -126,13 +126,68 @@ class UserProfileController extends Controller
         ], 400);
     }
 
+// public function orderHistory(Request $request)
+// {
+//     // Get the authenticated user
+//     $user = Auth::guard('sanctum')->user();
+
+//     // Fetch recent bookings for the user
+//     $bookings = Booking::with(['poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
+//                         ->where('user_id', $user->userid)
+//                         ->orderByDesc('created_at')
+//                         ->get();
+
+//     // Append URLs for pooja_video, pooja_photo, profile_photo, and rating media files
+//     $bookings->each(function ($booking) {
+//         // Check if poojalist exists before accessing its properties
+//         if ($booking->poojalist) {
+//             // Append URLs for pooja_photo in poojalist
+//             if ($booking->poojalist->pooja_photo) {
+//                 $booking->poojalist->pooja_photo_url = asset('assets/img/' . $booking->poojalist->pooja_photo);
+//             }
+//         }
+
+//         // Append URL for profile_photo
+//         if ($booking->pandit && $booking->pandit->profile_photo) {
+//             $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
+//         }
+
+//         // Include ratings and their media file URLs as an object
+//         if ($booking->ratings) {
+//             $rating = $booking->ratings->first(); // Assuming only one rating per booking
+
+//             if ($rating) {
+//                 $rating->rating_date = $rating->created_at->format('Y-m-d');
+//                 $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
+//                 $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
+
+//                 // Append rating details as an object in the booking
+//                 $booking->rating_details = $rating->toArray();
+//             } else {
+//                 $booking->rating_details = null; // No ratings available
+//             }
+//         } else {
+//             $booking->rating_details = null; // No ratings relationship
+//         }
+
+//         // Remove the ratings relationship to avoid redundancy
+//         unset($booking->ratings);
+//     });
+
+//     return response()->json([
+//         'success' => true,
+//         'message' => 'Order history fetched successfully.',
+//         'bookings' => $bookings,
+//     ], 200);
+// } 
+
 public function orderHistory(Request $request)
 {
     // Get the authenticated user
     $user = Auth::guard('sanctum')->user();
 
     // Fetch recent bookings for the user
-    $bookings = Booking::with(['poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
+    $bookings = Booking::with(['poojalist', 'pandit', 'address', 'ratings', 'poojadetails']) // Load relationships to get pooja details and ratings
                         ->where('user_id', $user->userid)
                         ->orderByDesc('created_at')
                         ->get();
@@ -145,6 +200,15 @@ public function orderHistory(Request $request)
             if ($booking->poojalist->pooja_photo) {
                 $booking->poojalist->pooja_photo_url = asset('assets/img/' . $booking->poojalist->pooja_photo);
             }
+
+            // Wrap poojalist in pooja object
+            $booking->pooja = [
+                'poojalist' => $booking->poojalist->toArray(),
+                'poojadetails' => $booking->poojadetails ? $booking->poojadetails->toArray() : null,
+            ];
+
+            // Remove the direct poojalist relationship to avoid redundancy
+            unset($booking->poojalist);
         }
 
         // Append URL for profile_photo
@@ -179,7 +243,8 @@ public function orderHistory(Request $request)
         'message' => 'Order history fetched successfully.',
         'bookings' => $bookings,
     ], 200);
-}  
+}
+
 
 // public function orderHistory(Request $request)
 // {
