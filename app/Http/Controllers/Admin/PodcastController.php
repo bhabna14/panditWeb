@@ -23,7 +23,7 @@ class PodcastController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
             // 'music' => 'required|mimes:mp3,wav|max:10000'
         ]);
 
@@ -55,7 +55,7 @@ class PodcastController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
             'music' => 'nullable|mimes:mp3,WAV|max:100000000'
         ]);
 

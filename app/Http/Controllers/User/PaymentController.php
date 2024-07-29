@@ -99,12 +99,16 @@ public function processPayment(Request $request, $booking_id)
             'refund_method' => $validatedData['refund_method']
         ]);
     
-        if ($daysDifference > 20) {
-            $refundAmount = $booking->pooja_fee;
-        } elseif ($daysDifference > 1 && $daysDifference <= 20) {
-            $refundAmount = $booking->paid * 0.80; // 20% cancellation fee
+        if ($booking->payment_type == 'advance') {
+            $refundAmount = 0; // No refund for advance payment
         } else {
-            $refundAmount = 0; // No refund
+            if ($daysDifference > 20) {
+                $refundAmount = $booking->pooja_fee;
+            } elseif ($daysDifference > 0 && $daysDifference <= 20) {
+                $refundAmount = $booking->pooja_fee * 0.80; // 20% cancellation fee
+            } else {
+                $refundAmount = $booking->pooja_fee * 0.80; // 20% cancellation fee if the booking date is today or less than a day
+            }
         }
     
         $booking->status = 'canceled';
@@ -122,7 +126,7 @@ public function processPayment(Request $request, $booking_id)
             'refund_amount' => $refundAmount
         ]);
     
-        return redirect()->route('orderhistory')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . $refundAmount);
+        return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . $refundAmount);
     }
 
 
