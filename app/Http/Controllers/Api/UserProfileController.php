@@ -187,28 +187,28 @@ public function orderHistory(Request $request)
     $user = Auth::guard('sanctum')->user();
 
     // Fetch recent bookings for the user
-    $bookings = Booking::with(['poojalist', 'pandit', 'address', 'ratings', 'poojadetails']) // Load relationships to get pooja details and ratings
+    $bookings = Booking::with(['poojaList', 'pandit', 'address', 'ratings', 'pooja']) // Load relationships to get pooja details and ratings
                         ->where('user_id', $user->userid)
                         ->orderByDesc('created_at')
                         ->get();
 
-    // Append URLs for pooja_video, pooja_photo, profile_photo, and rating media files
+    // Append URLs for pooja_photo, profile_photo, and rating media files
     $bookings->each(function ($booking) {
-        // Check if poojalist exists before accessing its properties
-        if ($booking->poojalist) {
-            // Append URLs for pooja_photo in poojalist
-            if ($booking->poojalist->pooja_photo) {
-                $booking->poojalist->pooja_photo_url = asset('assets/img/' . $booking->poojalist->pooja_photo);
+        // Check if poojaList exists before accessing its properties
+        if ($booking->poojaList) {
+            // Append URLs for pooja_photo in poojaList
+            if ($booking->poojaList->pooja_photo) {
+                $booking->poojaList->pooja_photo_url = asset('assets/img/' . $booking->poojaList->pooja_photo);
             }
 
-            // Wrap poojalist in pooja object
+            // Wrap poojaList in pooja object
             $booking->pooja = [
-                'poojalist' => $booking->poojalist->toArray(),
-                'poojadetails' => $booking->poojadetails ? $booking->poojadetails->toArray() : null,
+                'poojalist' => $booking->poojaList->toArray(),
+                'poojadetails' => $booking->pooja ? $booking->pooja->toArray() : null,
             ];
 
-            // Remove the direct poojalist relationship to avoid redundancy
-            unset($booking->poojalist);
+            // Remove the direct poojaList relationship to avoid redundancy
+            unset($booking->poojaList);
         }
 
         // Append URL for profile_photo
@@ -244,6 +244,7 @@ public function orderHistory(Request $request)
         'bookings' => $bookings,
     ], 200);
 }
+
 
 
 // public function orderHistory(Request $request)

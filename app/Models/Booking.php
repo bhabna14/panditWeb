@@ -56,10 +56,7 @@ class Booking extends Model
     {
         return $this->belongsTo(Poojadetails::class, 'pooja_id', 'id');
     }
-    public function poojadetails()
-    {
-        return $this->hasOneThrough(Poojadetails::class, Poojalist::class, 'id', 'pooja_id', 'pooja_id', 'pooja_id');
-    }
+    
     public function address()
     {
         return $this->belongsTo(UserAddress::class, 'address_id');
