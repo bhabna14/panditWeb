@@ -42,8 +42,8 @@ class BookingController extends Controller
             // Log success message
             \Log::info('Booking created successfully.', ['data' => $validatedData]);
 
-            $booking->load(['user', 'pandit', 'pooja', 'address']);
-            $booking->pooja->pooja_photo =asset('assets/img/'.$booking->pooja->pooja_photo);
+            $booking->load(['user', 'pandit', 'poojalist', 'address']);
+            $booking->poojalist->pooja_photo =asset('assets/img/'.$booking->poojalist->pooja_photo);
             $booking->pandit->profile_photo = asset($booking->pandit->profile_photo);
             $booking->user->userphoto = asset(Storage::url($booking->user->userphoto));
 
