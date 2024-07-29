@@ -116,7 +116,7 @@
             <form action="{{ route('booking.confirm') }}" method="POST">
                 @csrf
                 <input type="hidden" name="pandit_id" value="{{ $pandit->id }}">
-                <input type="hidden" name="pooja_id" value="{{ $pooja->id }}">
+                <input type="hidden" name="pooja_id" value="{{ $pooja->pooja_id }}">
                 <input type="hidden" name="pooja_fee" value="{{ $poojaFee }}">
                 <input type="hidden" class="form-control" name="advance_fee" value="{{ $poojaFee * 20 / 100 }}">
             

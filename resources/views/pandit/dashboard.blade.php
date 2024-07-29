@@ -419,9 +419,14 @@
                             document.getElementById('modal-date-time').textContent = data
                                 .booking_time || 'N/A';
                             document.getElementById('modal-address').innerHTML = `
+                            Area: ${data.address?.area || 'N/A'}<br>
+                            City: ${data.address?.city || 'N/A'}<br>
+                            State: ${data.address?.state || 'N/A'}<br>
+                            Pincode: ${data.address?.pincode || 'N/A'}<br>
                         ${data.address?.country || 'N/A'}<br>
-                        Pincode: ${data.address?.pincode || 'N/A'}<br>
-                        Landmark: ${data.address?.landmark || 'N/A'}
+                        Address Type: ${data.address?.address_type || 'N/A'}<br>
+                       
+
                     `;
                         })
                         .catch(error => console.error('Error fetching booking details:', error));

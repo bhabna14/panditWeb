@@ -30,7 +30,7 @@ class Booking extends Model
 
     public function poojaList()
     {
-        return $this->belongsTo(Poojalist::class, 'pooja_id');
+        return $this->belongsTo(Poojalist::class, 'pooja_id','id');
     }
 
     public function poojaStatus()

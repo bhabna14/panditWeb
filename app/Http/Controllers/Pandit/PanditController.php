@@ -30,14 +30,19 @@ class PanditController extends Controller
     public function index()
 {
     $today = Carbon::today()->toDateString();
-    $user = Auth::guard('pandits')->user();
+    // $user = Auth::guard('pandits')->user();
 
-    $profile = Profile::where('pandit_id', $user->pandit_id)->first();
+    // $profile = Profile::where('pandit_id', $user->pandit_id)->first();
+
+    $pandit = Auth::guard('pandits')->user();
+
+    // Fetch the pandit's profile details using their pandit_id
+    $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
 
     // Fetch bookings for today with application status approved and join with pooja_list to get the pooja name
     $bookings = DB::table('bookings')
                   ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
-                  ->where('bookings.pandit_id', $user->id)
+                  ->where('bookings.pandit_id', $pandit_details->id)
                   ->where('bookings.application_status', 'approved')
                   ->whereDate('bookings.booking_date', $today)
                   ->orderBy('bookings.booking_date', 'asc') // Order by booking_date ascending
@@ -57,25 +62,36 @@ class PanditController extends Controller
                       ->select('pooja_status.start_time', 'pooja_status.end_time', 'pooja_list.pooja_name', 'pooja_status.pooja_status', 'pooja_status.pooja_duration as pooja_duration')
                       ->get();
 
-    $pooja_request = Booking::where('pandit_id', $user->id)
-                            ->where('application_status', 'pending')
-                            ->orderBy('created_at', 'desc')
-                            ->get();
+    $pooja_request = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
+                    ->where('pandit_id', $pandit_details->id) // Use id from profile
+                    ->orderBy('created_at', 'desc')
+                    ->get();
 
-    return view('pandit.dashboard', compact('profile', 'bookings', 'today', 'pooja_status', 'pooja_request'));
+                            
+
+    return view('pandit.dashboard', compact('bookings', 'today', 'pooja_status','pooja_request'));
 }
-    public function poojarequest()
-    {
-        $pandit = Auth::guard('pandits')->user();
-        
-        // Fetch bookings for the authenticated pandit using the profile id
-        $bookings = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
-                           ->where('pandit_id', $pandit->id)
-                           ->orderBy('created_at', 'desc')
-                           ->get();
+public function poojarequest()
+{
+    $pandit = Auth::guard('pandits')->user();
 
-        return view('pandit.poojarequest', compact('bookings'));
-    }
+    // Fetch the pandit's profile details using their pandit_id
+    $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
+
+    // Debugging: Check the authenticated pandit's profile id
+    \Log::info('Authenticated pandit profile id:', ['id' => $pandit_details->id]);
+
+    // Fetch bookings for the authenticated pandit using the profile id
+    $bookings = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
+                       ->where('pandit_id', $pandit_details->id) // Use id from profile
+                       ->orderBy('created_at', 'desc')
+                       ->get();
+
+    // Debugging: Log the bookings fetched
+    \Log::info('Bookings fetched:', ['bookings' => $bookings]);
+
+    return view('/pandit/poojarequest', compact('bookings'));
+}
 
     
         public function approveBooking($id)
@@ -233,8 +249,34 @@ class PanditController extends Controller
 
     public function getDetails($id)
     {
+        // Retrieve the booking with related user, pooja, and address
         $booking = Booking::with(['user', 'pooja', 'address'])->findOrFail($id);
-        return response()->json($booking);
+    // dd($booking);
+        // Build the response data
+        $response = [
+            'user' => [
+                'name' => $booking->user->name,
+                'mobile_number' => $booking->user->mobile_number,
+            ],
+            'pooja' => [
+                'pooja_name' => $booking->pooja->pooja_name,
+                'pooja_fee' => $booking->pooja->pooja_fee,
+            ],
+            'paid' => $booking->paid,
+            'booking_time' => $booking->created_at->format('Y-m-d H:i:s'),
+            'address' => [
+                'country' => $booking->address->country,
+                'state' => $booking->address->state,
+                'city' => $booking->address->city,
+                'pincode' => $booking->address->pincode,
+                'area' => $booking->address->area,
+                'address_type' => $booking->address->address_type,
+                'landmark' => $booking->address->landmark,
+            ],
+        ];
+    
+        // Return the JSON response
+        return response()->json($response);
     }
   
 
