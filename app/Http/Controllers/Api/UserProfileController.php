@@ -204,10 +204,10 @@ public function orderHistory(Request $request)
         //     $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
         // }
 
-        if ($booking->poojalist) {
+        if ($booking->pooja && $booking->pooja->poojalist) {
             // Append URLs for pooja_photo in poojalist
-             if ($booking->poojalist->pooja_photo) {
-                $booking->poojalist->pooja_photo_url = asset('assets/img/' . $booking->poojalist->pooja_photo);
+            if ($booking->pooja->poojalist->pooja_photo) {
+                $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
             }
         }
 
