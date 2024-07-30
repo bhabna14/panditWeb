@@ -3,64 +3,41 @@ namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth; // Make sure to import this
+use Illuminate\Support\Facades\Auth; // Import this for authentication
 use App\Models\Profile;
 use App\Models\Career;
 
-
 class CheckController extends Controller
 {
-    public function checkPanditIdPr()
+    public function checkPanditProfile()
     {
         try {
             // Get the authenticated user's pandit_id
             $pandit_id = Auth::guard('sanctum')->user()->pandit_id;
 
             // Check if the pandit_id exists in the Profile table
-            $exists = Profile::where('pandit_id', $pandit_id)->exists();
-
-            // Return the appropriate response
-            if ($exists) {
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'YES'
-                ], 200);
-            } else {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'NO'
-                ], 404);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    public function checkPanditIdCr()
-    {
-        try {
-            // Get the authenticated user's pandit_id
-            $pandit_id = Auth::guard('sanctum')->user()->pandit_id;
+            $profileExists = Profile::where('pandit_id', $pandit_id)->exists();
 
             // Check if the pandit_id exists in the Career table
-            $exists = Career::where('pandit_id', $pandit_id)->exists();
+            $careerExists = Career::where('pandit_id', $pandit_id)->exists();
+
+            // Determine the response message
+            $message = '';
+
+            if ($profileExists) {
+                $message = 'Profile exists.';
+            } elseif ($careerExists) {
+                $message = 'Career exists.';
+            } else {
+                $message = 'No record found.';
+            }
 
             // Return the appropriate response
-            if ($exists) {
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'YES'
-                ], 200);
-            } else {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'NO'
-                ], 404);
-            }
+            return response()->json([
+                'status' => $profileExists || $careerExists ? 200 : 404,
+                'message' => $message
+            ], $profileExists || $careerExists ? 200 : 404);
+
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
@@ -69,5 +46,4 @@ class CheckController extends Controller
             ], 500);
         }
     }
-    
 }

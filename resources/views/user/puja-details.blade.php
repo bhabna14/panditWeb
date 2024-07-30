@@ -67,9 +67,7 @@
                               </div>
                           </div>
                       @else
-                          <div class="col-md-4 pandit-card">
-                              <p>No profile info available for this pandit.</p>
-                          </div>
+                        
                       @endif
                   @endforeach
                   
