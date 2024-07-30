@@ -19,6 +19,8 @@ use App\Http\Controllers\Api\YoutubeUrlController;
 use App\Http\Controllers\Api\PoojaDetailsController;
 use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\PanditLoginController;
+use App\Http\Controllers\Api\CheckController;
+
 
 
 /// controllers for frontend pages 
@@ -70,10 +72,9 @@ Route::controller(PoojaDetailsController::class)->group(function() {
 });
 
 Route::controller(PoojaListController::class)->group(function() {
-    Route::get('/all-pooja-list', 'AllPoojaList');
-    Route::get('/singlepoojaitem','singlePoojaItem');
+    Route::post('/save-pooja-item-list', 'savePoojaItemList');
+    Route::middleware('auth:sanctum')->get('/pooja-item-list', 'poojaitemlist');
     Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');
-    Route::post('/save-pooja-item-list',  'savePoojaItemList');
     Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
 });
 
@@ -91,6 +92,11 @@ Route::controller(PodcastController::class)->group(function() {
 Route::controller(YoutubeUrlController::class)->group(function() {
 
 Route::get('/manage-youtube','manageYoutube')->name('api.manageYoutube');
+
+});
+Route::controller(CheckController::class)->group(function() {
+    Route::get('/check-panditid-pr', 'checkPanditIdPr');
+    Route::get('/check-panditid-cr', 'checkPanditIdCr');
 
 });
 
