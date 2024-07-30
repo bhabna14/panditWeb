@@ -1,5 +1,5 @@
 		<!-- FAVICON -->
-		<link rel="icon" href="{{asset('assets/img/brand/favicon.png')}}" type="image/x-icon"/>
+    <link rel="shortcut icon" href="//cdn.shopify.com/s/files/1/0654/9789/1030/files/MicrosoftTeams-image_471_32x32.png?v=1660732431" type="image/png">
 
 		<!-- ICONS CSS -->
 		<link href="{{asset('assets/plugins/icons/icons.css')}}" rel="stylesheet">
