@@ -122,99 +122,75 @@
                         </div>
                         <div class="card-body">
                             <div class="row">
-                                @foreach ($pooja_request as $request)
-                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
-                                        <div class="card text-center p-3">
-                                            <h5 class="text-dark font-weight-semibold mb-2">
-                                                {{ $request->pooja->pooja_name }}
-                                            </h5>
-                                            <div class="d-flex justify-content-center">
-                                                @if ($request->application_status === 'pending')
-                                                    <div class="btn-group" role="group" aria-label="Action Buttons">
-                                                        <form action="{{ route('pandit.booking.approve', $request->id) }}"
-                                                            method="POST" style="display:inline;">
-                                                            @csrf
-                                                            <button type="submit" class="btn btn-info">Approve</button>
-                                                        </form>
-                                                        <form action="{{ route('pandit.booking.reject', $request->id) }}"
-                                                            method="POST" style="display:inline;">
-                                                            @csrf
-                                                            <button type="button" class="btn btn-warning me-3"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#exampleModal-{{ $request->id }}"
-                                                                data-bs-whatever="@mdo">Reject</button>
-                                                            <div class="modal fade" id="exampleModal-{{ $request->id }}"
-                                                                tabindex="-1" aria-labelledby="exampleModalLabel"
-                                                                aria-hidden="true">
-                                                                <div class="modal-dialog">
-                                                                    <div class="modal-content">
-                                                                        <div class="modal-header">
-                                                                            <h5 class="modal-title"
-                                                                                id="exampleModalLabel">Please Select Your
-                                                                                Reason</h5>
-                                                                            <button aria-label="Close" class="btn-close"
-                                                                                data-bs-dismiss="modal"
-                                                                                type="button"><span
-                                                                                    aria-hidden="true">&times;</span></button>
-                                                                        </div>
-                                                                        <div class="modal-body">
-                                                                            <input type="hidden"
-                                                                                value="{{ $request->id }}"
-                                                                                id="booking_id" name="booking_id">
-                                                                            <div class="mb-3">
-                                                                                <label for="cancel_reason"
-                                                                                    class="col-form-label">Cancel
-                                                                                    Reason:</label>
-                                                                                <select class="form-control"
-                                                                                    id="cancel_reason"
-                                                                                    name="cancel_reason" required>
-                                                                                    <option value="">Select Reason
-                                                                                    </option>
-                                                                                    <option
-                                                                                        value="I am not free at this time">
-                                                                                        I am not available at this time
-                                                                                    </option>
-                                                                                    <option
-                                                                                        value="I am not available in this city">
-                                                                                        I am not available in this city
-                                                                                    </option>
-                                                                                    <option value="Personal problem">
-                                                                                        Personal problem</option>
-                                                                                </select>
+                                @if($pooja_request->isEmpty())
+                                    <div class="col-12">
+                                        <div class="alert alert-warning text-center">
+                                            No request found.
+                                        </div>
+                                    </div>
+                                @else
+                                    @foreach ($pooja_request as $request)
+                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
+                                            <div class="card text-center p-3">
+                                                <h5 class="text-dark font-weight-semibold mb-2">
+                                                    {{ $request->pooja->pooja_name }}
+                                                </h5>
+                                                <div class="d-flex justify-content-center">
+                                                    @if ($request->application_status === 'pending')
+                                                        <div class="btn-group" role="group" aria-label="Action Buttons">
+                                                            <form action="{{ route('pandit.booking.approve', $request->id) }}" method="POST" style="display:inline;">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-info">Approve</button>
+                                                            </form>
+                                                            <form action="{{ route('pandit.booking.reject', $request->id) }}" method="POST" style="display:inline;">
+                                                                @csrf
+                                                                <button type="button" class="btn btn-warning me-3" data-bs-toggle="modal" data-bs-target="#exampleModal-{{ $request->id }}" data-bs-whatever="@mdo">Reject</button>
+                                                                <div class="modal fade" id="exampleModal-{{ $request->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                                    <div class="modal-dialog">
+                                                                        <div class="modal-content">
+                                                                            <div class="modal-header">
+                                                                                <h5 class="modal-title" id="exampleModalLabel">Please Select Your Reason</h5>
+                                                                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
                                                                             </div>
-                                                                        </div>
-                                                                        <div class="modal-footer">
-                                                                            <button type="button"
-                                                                                class="btn btn-secondary"
-                                                                                data-bs-dismiss="modal">Close</button>
-                                                                            <button type="submit"
-                                                                                class="btn btn-danger">Submit</button>
+                                                                            <div class="modal-body">
+                                                                                <input type="hidden" value="{{ $request->id }}" id="booking_id" name="booking_id">
+                                                                                <div class="mb-3">
+                                                                                    <label for="cancel_reason" class="col-form-label">Cancel Reason:</label>
+                                                                                    <select class="form-control" id="cancel_reason" name="cancel_reason" required>
+                                                                                        <option value="">Select Reason</option>
+                                                                                        <option value="I am not free at this time">I am not available at this time</option>
+                                                                                        <option value="I am not available in this city">I am not available in this city</option>
+                                                                                        <option value="Personal problem">Personal problem</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                                <button type="submit" class="btn btn-danger">Submit</button>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                @elseif($request->application_status === 'approved')
-                                                    <span class="btn btn-success">Approved</span>
-                                                @elseif($request->application_status === 'paid')
-                                                    <span class="btn btn-success">Paid</span>
-                                                @elseif($request->application_status === 'rejected')
-                                                    <span class="btn btn-danger">Rejected</span>
-                                                @endif
-
-                                                <a style="color: white; margin-left: 12px"
-                                                    class="btn ripple btn-success view-booking" data-bs-toggle="modal"
-                                                    data-bs-target="#full-screen" data-booking-id="{{ $request->id }}">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
+                                                            </form>
+                                                        </div>
+                                                    @elseif($request->application_status === 'approved')
+                                                        <span class="btn btn-success">Approved</span>
+                                                    @elseif($request->application_status === 'paid')
+                                                        <span class="btn btn-success">Paid</span>
+                                                    @elseif($request->application_status === 'rejected')
+                                                        <span class="btn btn-danger">Rejected</span>
+                                                    @endif
+                                                    <a style="color: white; margin-left: 8px" class="btn ripple btn-success view-booking" data-bs-toggle="modal" data-bs-target="#full-screen" data-booking-id="{{ $request->id }}">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                @endforeach
-
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>
