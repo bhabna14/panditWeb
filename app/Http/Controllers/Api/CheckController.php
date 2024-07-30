@@ -25,11 +25,11 @@ class CheckController extends Controller
             $message = '';
 
             if ($profileExists) {
-                $message = 'Profile exists.';
+                $message = 'Profile exists';
             } elseif ($careerExists) {
-                $message = 'Career exists.';
+                $message = 'Career exists';
             } else {
-                $message = 'No record found.';
+                $message = 'No record found';
             }
 
             // Return the appropriate response

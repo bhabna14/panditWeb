@@ -53,6 +53,7 @@
                                                     <th class="border-bottom-0">Pandit Name</th>
                                                     <th class="border-bottom-0">Booking Date</th>
                                                     <th class="border-bottom-0">Total Payment</th>
+                                                    <th class="border-bottom-0">Paid Amount</th>
                                                     <th class="border-bottom-0">Approved By</th>
                                                     <th class="border-bottom-0">Application Status</th>
                                                     
@@ -71,15 +72,24 @@
                                                                         <img src="{{asset('assets/img/user.jpg') }}" alt="user">
                                                                 </div>
                                                                 <div class="media-text">
-                                                                    <a href="" class="title">{{}}</a>
-                                                                    <span class="small text">demo@gmail.com</span>
+                                                                    <a href="" class="title">{{ $booking->pandit->title }} {{ $booking->pandit->name }}</a>
+                                                                    <h6 class="title">{{ $booking->pooja->pooja_name }}</h6>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         </a>
                                                         
-                                                    <td>14/05/2024</td>
-                                                    <td>2000</td>
+                                                    <td>{{ $booking->booking_date }}</td>
+                                                    <td>{{ $booking->pooja_fee }}</td>
+                                                    <td>{{ $booking->paid }}
+                                                        @if($booking->payment_type == "full")
+                                                        <h6 class="title">(Full paid with 5% discount)</h6>
+                                                        @else
+                                                        <h6 class="title">(Advanced paid 20%)</h6>
+                                                        @endif
+
+
+                                                    </td>
                                                     <td>Pandit</td>
                                                         <td>
                                                                 <span class="badge badge-success">Approved</span> 

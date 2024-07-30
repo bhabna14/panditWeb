@@ -75,7 +75,7 @@
                   <div class="row">
                       <div class="col-md-2">
                           BOOKING DATE <br>
-                          {{ $booking->booking_date }},{{ $booking->booking_time }}
+                          {{ $booking->booking_date }}
                       </div>
                       <div class="col-md-2">
                           TOTAL FEE <br>
