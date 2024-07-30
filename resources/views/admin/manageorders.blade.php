@@ -19,13 +19,13 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Orders</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Bookings</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
                             {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Pandits</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Bookings</li>
                         </ol>
                     </div>
                 </div>
@@ -61,36 +61,38 @@
                                             </thead>
                                             <tbody>
                                            
-                                            
-                                                <tr>
-                                                    <td>1</td>
-                                                    <a href="{{url('admin/pandit-profile/')}}" class="title">
-                                                    <td class="tb-col">
-                                                        <div class="media-group">
-                                                            <div class="media media-md media-middle media-circle">
-                                                                    <img src="{{asset('assets/img/user.jpg') }}" alt="user">
+                                                @foreach ($bookings as $booking)
+                                                    <tr>
+                                                        <td>1</td>
+                                                        <a href="" class="title">
+                                                        <td class="tb-col">
+                                                            <div class="media-group">
+                                                                <div class="media media-md media-middle media-circle">
+                                                                        <img src="{{asset('assets/img/user.jpg') }}" alt="user">
+                                                                </div>
+                                                                <div class="media-text">
+                                                                    <a href="" class="title">{{}}</a>
+                                                                    <span class="small text">demo@gmail.com</span>
+                                                                </div>
                                                             </div>
-                                                            <div class="media-text">
-                                                                <a href="{{url('admin/pandit-profile/')}}" class="title">demo demo</a>
-                                                                <span class="small text">demo@gmail.com</span>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    </a>
-                                                    
-                                                   <td>14/05/2024</td>
-                                                   <td>2000</td>
-                                                   <td>Pandit</td>
-                                                    <td>
-                                                            <span class="badge badge-success">Approved</span> 
-                                                       
-                                                    </td>
-                                                    
-                                                    <td>
-                                                        <a href="{{url('admin/pandit-profile/')}}"><i class="fas fa-eye"></i></a> | 
-                                                        <a href="{{url('admin/editsebayat/')}}"><i class="fa fa-edit"></i></a> | 
-                                                        <a href="{{url('admin/dltsebayat/')}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
-                                                </tr>
+                                                        </td>
+                                                        </a>
+                                                        
+                                                    <td>14/05/2024</td>
+                                                    <td>2000</td>
+                                                    <td>Pandit</td>
+                                                        <td>
+                                                                <span class="badge badge-success">Approved</span> 
+                                                        
+                                                        </td>
+                                                        
+                                                        <td>
+                                                            <a href="{{url('admin/pandit-profile/')}}"><i class="fas fa-eye"></i></a> | 
+                                                            <a href="{{url('admin/editsebayat/')}}"><i class="fa fa-edit"></i></a> | 
+                                                            <a href="{{url('admin/dltsebayat/')}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
+                                                    </tr>
+                                                @endforeach
+                                                
                                              
                                               
                                                 

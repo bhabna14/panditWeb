@@ -34,9 +34,9 @@ class CheckController extends Controller
 
             // Return the appropriate response
             return response()->json([
-                'status' => $profileExists || $careerExists ? 200 : 404,
+                'status' => $profileExists || $careerExists ? 200 : 200,
                 'message' => $message
-            ], $profileExists || $careerExists ? 200 : 404);
+            ], $profileExists || $careerExists ? 200 : 200);
 
         } catch (\Exception $e) {
             return response()->json([
