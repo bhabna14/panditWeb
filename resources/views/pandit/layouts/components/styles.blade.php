@@ -21,7 +21,7 @@
 		<link href="{{asset('assets/css/style-transparent.css')}}" rel="stylesheet">
 
 		<!-- SKIN-MODES CSS -->
-		<link href="{{asset('assets/css/skin-modes.css')}}" rel="stylesheet" />
+		{{-- <link href="{{asset('assets/css/skin-modes.css')}}" rel="stylesheet" /> --}}
 
 		<!-- ANIMATION CSS -->
 		<link href="{{asset('assets/css/animate.css')}}" rel="stylesheet">
