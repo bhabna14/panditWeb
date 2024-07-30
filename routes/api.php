@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\PoojaSkillController;
 use App\Http\Controllers\Api\YoutubeUrlController;
 use App\Http\Controllers\Api\PoojaDetailsController;
 use App\Http\Controllers\Api\RatingController;
+use App\Http\Controllers\Api\PanditLoginController;
 
 
 /// controllers for frontend pages 
@@ -33,11 +34,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::controller(LoginController::class)->group(function() {
-    Route::post('/store-login-data','storeLoginData');
-    Route::post('/check-otp','checkOtp');
-});
+Route::controller(PanditLoginController::class)->group(function() {
 
+    Route::post('/pandit-send-otp',  'sendOtp');
+    Route::post('/pandit-verify-otp', 'verifyOtp');
+});
 Route::controller(AreaController::class)->group(function() {
     Route::get('/get-districts/{stateCode}', 'getDistrict');
     Route::get('/get-subdistricts/{districtCode}', 'getSubdistrict');
@@ -63,13 +64,13 @@ Route::controller(PoojaSkillController::class)->group(function() {
 
 Route::controller(PoojaDetailsController::class)->group(function() {
     Route::get('/poojadetails','getPoojaDetails');
-    Route::post('/poojadetails/save', 'savePoojadetails');
+    Route::post('/save-pooja-details',  'savePoojadetails');
     Route::get('/managepoojadetails',  'managePoojaDetails');
     Route::post('/updatePoojadetails', 'updatePoojadetails');
 });
 
 Route::controller(PoojaListController::class)->group(function() {
-    Route::get('/poojaitemlist', 'poojaItemList');
+    Route::get('/all-pooja-list', 'AllPoojaList');
     Route::get('/singlepoojaitem','singlePoojaItem');
     Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');
     Route::post('/save-pooja-item-list',  'savePoojaItemList');

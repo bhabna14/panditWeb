@@ -19,10 +19,11 @@ class PoojaStatusController extends Controller
         $pooja_id = $request->input('pooja_id');
     
         // Fetch the booking record
-        $booking = Booking::find($booking_id);
+        $booking = Booking::where('booking_id', $booking_id)->first();
     
         // Check if the booking exists
         if (!$booking) {
+            \Log::error('Booking not found', ['booking_id' => $booking_id]);
             return redirect()->back()->with('error', 'Booking not found.');
         }
     
@@ -32,7 +33,7 @@ class PoojaStatusController extends Controller
         // Check if there is any ongoing Pooja for this Pandit
         $ongoingPooja = DB::table('pooja_status')
                           ->whereIn('booking_id', function($query) use ($pandit_id) {
-                              $query->select('id')
+                              $query->select('booking_id')
                                     ->from('bookings')
                                     ->where('pandit_id', $pandit_id);
                           })
@@ -58,6 +59,7 @@ class PoojaStatusController extends Controller
             return redirect()->back()->with('error', 'Failed to start Pooja.');
         }
     }
+    
     
 public function end(Request $request)
 {
@@ -100,6 +102,7 @@ public function end(Request $request)
             ->update(['application_status' => 'completed',
             'status' => 'completed',
         ]);
+
 
         // Redirect with success or error message
         if ($updated) {

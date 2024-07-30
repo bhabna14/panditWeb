@@ -33,112 +33,63 @@ class PoojaDetailsController extends Controller
         }
     }
     
-        public function savePoojadetails(Request $request)
-        {
+    public function savePoojadetails(Request $request)
+    {
+        try {
             $panditId = Auth::guard('sanctum')->user()->pandit_id;
-            // Initialize a flag to track if at least one new record was saved
-            $atLeastOneSaved = false;
     
-            // Check for duplicates and save new entries
-            foreach ($request->input('pooja_name', []) as $poojaSkillId => $pooja_name) {
-                $pooja_id = $request->input('pooja_id.' . $poojaSkillId);
-                $fee = $request->input('fee.' . $poojaSkillId);
-                $duration = $request->input('duration.' . $poojaSkillId);
-                $done_count = $request->input('done_count.' . $poojaSkillId);
+            // Retrieve input data
+            $pooja_id = $request->input('pooja_id');
+            $pooja_name = $request->input('pooja_name');
+            $fee = $request->input('fee');
+            $duration = $request->input('duration');
+            $done_count = $request->input('done_count');
     
-                // Handle file uploads
-                $image = $request->file('image.' . $poojaSkillId);
-                $video = $request->file('video.' . $poojaSkillId);
+            // Handle file uploads
+            $image = $request->file('image');
+            $video = $request->file('video');
     
-                $imagePath = null;
-                $videoPath = null;
+            $imagePath = null;
+            $videoPath = null;
     
-                if ($image) {
-                    $imagePath = 'uploads/pooja_photo/' . $image->getClientOriginalName();
-                    $image->move(public_path('uploads/pooja_photo'), $imagePath);
-                }
-                
-                if ($video) {
-                    $videoPath = 'uploads/pooja_video/' . $video->getClientOriginalName();
-                    $video->move(public_path('uploads/pooja_video'), $videoPath);
-                }
-    
-                // Create new Pooja details
-                $poojaDetails = new Poojadetails();
-                $poojaDetails->pandit_id = $panditId;
-                $poojaDetails->pooja_id = $pooja_id;
-                $poojaDetails->pooja_name = $pooja_name;
-                $poojaDetails->pooja_fee = $fee;
-                $poojaDetails->pooja_duration = $duration;
-                $poojaDetails->pooja_done = $done_count;
-                $poojaDetails->pooja_photo = $imagePath;
-                $poojaDetails->pooja_video = $videoPath;
-    
-                // Save the new pooja details
-                $poojaSkill = Poojaskill::find($poojaSkillId);
-                if ($poojaSkill) {
-                    $poojaSkill->pooja_status = 'hide';
-                    $poojaSkill->save();
-                }
-    
-                if ($poojaDetails->save()) {
-                    $atLeastOneSaved = true;
-                }
+            if ($image) {
+                $imagePath = 'uploads/pooja_photo/' . $image->getClientOriginalName();
+                $image->move(public_path('uploads/pooja_photo'), $imagePath);
             }
     
-            if ($atLeastOneSaved) {
+            if ($video) {
+                $videoPath = 'uploads/pooja_video/' . $video->getClientOriginalName();
+                $video->move(public_path('uploads/pooja_video'), $videoPath);
+            }
+    
+            // Create new Pooja details
+            $poojaDetails = new Poojadetails();
+            $poojaDetails->pandit_id = $panditId;
+            $poojaDetails->pooja_id = $pooja_id;
+            $poojaDetails->pooja_name = $pooja_name;
+            $poojaDetails->pooja_fee = $fee;
+            $poojaDetails->pooja_duration = $duration;
+            $poojaDetails->pooja_done = $done_count;
+            $poojaDetails->pooja_photo = $imagePath;
+            $poojaDetails->pooja_video = $videoPath;
+    
+            // Save the new pooja details and update the pooja skill status
+            if ($poojaDetails->save()) {
+                $poojaSkill = new Poojaskill();
+                $poojaSkill->pandit_id = $panditId;
+                $poojaSkill->pooja_id = $pooja_id;
+                $poojaSkill->pooja_name = $pooja_name;
+                $poojaSkill->pooja_photo = $imagePath;
+                $poojaSkill->pooja_status = 'hide';
+                $poojaSkill->save();
+    
                 return response()->json(['message' => 'Data saved successfully.'], 201);
             } else {
                 return response()->json(['message' => 'Failed to save data.'], 500);
             }
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while saving pooja details.'], 500);
         }
-    
-        public function updatePoojadetails(Request $request)
-        {
-            $panditId = Auth::guard('sanctum')->user()->pandit_id;
-    
-            // Initialize a flag to track if at least one update was successful
-            $atLeastOneUpdated = false;
-    
-            // Process each pooja detail from the form
-            foreach ($request->input('pooja_name', []) as $poojaDetailId => $pooja_name) {
-                // Find the corresponding Poojadetails record
-                $poojaDetail = Poojadetails::where('id', $poojaDetailId)
-                                           ->where('pandit_id', $panditId)
-                                           ->firstOrFail();
-    
-                // Update fields based on form inputs
-                $poojaDetail->pooja_fee = $request->input('fee.' . $poojaDetailId);
-                $poojaDetail->pooja_duration = $request->input('duration.' . $poojaDetailId);
-                $poojaDetail->pooja_done = $request->input('done_count.' . $poojaDetailId);
-    
-                $image = $request->file('image.' . $poojaDetailId);
-                $video = $request->file('video.' . $poojaDetailId);
-    
-                if ($image) {
-                    $imagePath = 'uploads/pooja_photo/' . $image->getClientOriginalName();
-                    $image->move(public_path('uploads/pooja_photo'), $imagePath);
-                    $poojaDetail->pooja_photo = $imagePath;
-                }
-    
-                if ($video) {
-                    $videoPath = 'uploads/pooja_video/' . $video->getClientOriginalName();
-                    $video->move(public_path('uploads/pooja_video'), $videoPath);
-                    $poojaDetail->pooja_video = $videoPath;
-                }
-    
-                // Save the updated Poojadetails record
-                if ($poojaDetail->save()) {
-                    $atLeastOneUpdated = true;
-                }
-            }
-    
-            if ($atLeastOneUpdated) {
-                return response()->json(['message' => 'Data updated successfully.'], 201);
-            } else {
-                return response()->json(['message' => 'Failed to update data.'], 500);
-            }
-        }
-
+    }
     
 }

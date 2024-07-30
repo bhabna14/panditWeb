@@ -43,7 +43,7 @@ class PanditController extends Controller
     $bookings = DB::table('bookings')
                   ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
                   ->where('bookings.pandit_id', $pandit_details->id)
-                  ->where('bookings.application_status', 'approved')
+                  ->where('bookings.payment_status', 'paid')
                   ->whereDate('bookings.booking_date', $today)
                   ->orderBy('bookings.booking_date', 'asc') // Order by booking_date ascending
                   ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
@@ -51,7 +51,7 @@ class PanditController extends Controller
 
     // Retrieve the status for each booking
     foreach ($bookings as $booking) {
-        $booking->status = Poojastatus::where('booking_id', $booking->id)
+        $booking->status = Poojastatus::where('booking_id', $booking->booking_id)
                                       ->where('pooja_id', $booking->pooja_id)
                                       ->first();
     }
@@ -60,6 +60,7 @@ class PanditController extends Controller
                       ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
                       ->where('pooja_status.status', 'active')
                       ->select('pooja_status.start_time', 'pooja_status.end_time', 'pooja_list.pooja_name', 'pooja_status.pooja_status', 'pooja_status.pooja_duration as pooja_duration')
+                      ->orderBy('pooja_status.id', 'desc')
                       ->get();
 
     $pooja_request = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
@@ -67,8 +68,7 @@ class PanditController extends Controller
                     ->orderBy('created_at', 'desc')
                     ->get();
 
-                            
-
+                        
     return view('pandit.dashboard', compact('bookings', 'today', 'pooja_status','pooja_request'));
 }
 public function poojarequest()
