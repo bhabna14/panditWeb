@@ -26,8 +26,7 @@ class PanditLoginController extends Controller
     public function sendOtp(Request $request)
     {
         $phoneNumber = $request->input('phone');
-        $countryCode = '+91'; // Assuming the country code is +91
-        $fullPhoneNumber = $countryCode . $phoneNumber;
+        $fullPhoneNumber =  $phoneNumber; // Assuming the country code is +91
     
         // Log the full phone number for debugging
         Log::info("Sending OTP to: " . $fullPhoneNumber);
