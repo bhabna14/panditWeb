@@ -39,7 +39,7 @@ class PoojaListController extends Controller
             $selectedPoojas = Poojaskill::where('pandit_id', $pandit_details->pandit_id)
                                         ->where('status', 'active')
                                         ->get()->map(function ($pooja) {
-                                            $pooja->pooja_photo_url = asset('storage/' . $pooja->pooja_photo); // Generate full URL for the photo
+                                            $pooja->pooja_photo_url = asset('assets/img/' . $pooja->pooja_photo); // Generate full URL for the photo
                                             return $pooja;
                                         });
     
@@ -49,7 +49,7 @@ class PoojaListController extends Controller
             ->where('application_status', 'pending')
             ->orderBy('created_at', 'desc')
             ->get()->map(function ($booking) {
-                $booking->pooja->pooja_photo_url = asset('storage/' . $booking->pooja->pooja_photo); // Generate full URL for the pooja photo
+                $booking->pooja->pooja_photo_url = asset('assets/img/' . $booking->pooja->pooja_photo); // Generate full URL for the pooja photo
                 return $booking;
             });
     
