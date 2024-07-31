@@ -85,120 +85,8 @@ class PoojaListController extends Controller
         }
     }
 
-    public function savePoojaItemList(Request $request)
-    {
-        try {
-            // Validate the incoming request data
-            $validatedData = $request->validate([
-                'pooja_id' => 'required|integer', // Example validation rules, adjust as per your needs
-                'pooja_name' => 'required|string',
-                'list_name.*' => 'required|string',
-                'quantity.*' => 'required|integer',
-                'unit.*' => 'required|string',
-            ]);
-    
-            $profileId = Auth::guard('sanctum')->user()->pandit_id;
-            // Extract data from the request
-            $poojaId = $validatedData['pooja_id'];
-            $poojaName = $validatedData['pooja_name'];
-            $listNames = $validatedData['list_name'];
-            $quantities = $validatedData['quantity'];
-            $units = $validatedData['unit'];
-    
-            $processedNames = [];
-    
-            // Process each item in the list
-            foreach ($listNames as $key => $listName) {
-                // Skip if this pooja_name is already processed within this request
-                if (in_array($listName, $processedNames)) {
-                    continue;
-                }
-    
-                // Check if the pooja_name already exists for the given pooja_id and pandit_id in the database
-                $existingItem = PoojaItems::where([
-                    ['pandit_id', '=', $profileId],
-                    ['pooja_id', '=', $poojaId],
-                    ['pooja_name', '=', $poojaName],
-                    ['pooja_list', '=', $listName]
-                ])->first();
-    
-                if ($existingItem) {
-                    continue; // Skip saving this item and move to the next one
-                }
-    
-                // Save each item to the database
-                $poojaItem = new PoojaItems();
-                $poojaItem->pandit_id = $profileId;
-                $poojaItem->pooja_id = $poojaId;
-                $poojaItem->pooja_name = $poojaName;
-                $poojaItem->pooja_list = $listName;
-                $poojaItem->list_quantity = $quantities[$key];
-                $poojaItem->list_unit = $units[$key];
-    
-                if ($poojaItem->save()) {
-                    $processedNames[] = $listName;
-                }
-            }
-    
-            if (!empty($processedNames)) {
-                return response()->json(['message' => 'Data saved successfully.'], 201);
-            } else {
-                return response()->json(['message' => 'Failed to save data.'], 500);
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'An error occurred while saving pooja items.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    public function listofitem(){
-        $listofitem = Poojaitemlists::where('status', 'active')->with('variants')->get();
-   
-        if ($listofitem->isEmpty()) {
-            return response()->json([
-                'status' => 404,
-                'message' => 'No data found',
-                'data' => []
-            ], 404);
-        }
-    
-        return response()->json([
-            'status' => 200,
-            'message' => 'Data retrieved successfully',
-            'data' => $listofitem
-        ], 200);
-    }
-    public function poojaitemlist($pooja_id)
-    {
-        try {
-            $panditId = Auth::guard('sanctum')->user()->pandit_id;
-            
-            $Poojaitemlist = Poojaitems::join('pooja_list', 'pooja_list.id', '=', 'pandit_poojaitem.pooja_id')
-                                        ->where('pandit_poojaitem.pooja_id', $pooja_id)
-                                        ->where('pandit_poojaitem.status', 'active')
-                                        ->where('pandit_poojaitem.pandit_id', $panditId)
-                                        ->select('pandit_poojaitem.*', 'pooja_list.pooja_photo')
-                                        ->get()
-                                        ->map(function ($item) {
-                                            $item->pooja_photo_url = $item->pooja_photo ? asset('assets/img/' . $item->pooja_photo) : asset('assets/img/default-image.jpg');
-                                            return $item;
-                                        });
-    
-            return response()->json([
-                'status' => 200,
-                'message' => 'Pooja items fetched successfully.',
-                'data' => $Poojaitemlist
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred while fetching pooja items.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-    
+  
+ 
 
     public function deletePoojaItem($id)
     {
@@ -246,4 +134,124 @@ class PoojaListController extends Controller
             return response()->json(['error' => 'Pooja item not found or does not belong to the authenticated pandit.'], 404);
         }
     }
+
+
+
+       // done by bhabna
+    public function listofitem(){
+        $listofitem = Poojaitemlists::where('status', 'active')->with('variants')->get();
+   
+        if ($listofitem->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'No data found',
+                'data' => []
+            ], 404);
+        }
+    
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data retrieved successfully',
+            'data' => $listofitem
+        ], 200);
+    }
+    public function poojaitemlist($pooja_id)
+    {
+        try {
+            $panditId = Auth::guard('sanctum')->user()->pandit_id;
+            
+            $Poojaitemlist = Poojaitems::join('pooja_list', 'pooja_list.id', '=', 'pandit_poojaitem.pooja_id')
+                                        ->where('pandit_poojaitem.pooja_id', $pooja_id)
+                                        ->where('pandit_poojaitem.status', 'active')
+                                        ->where('pandit_poojaitem.pandit_id', $panditId)
+                                        ->select('pandit_poojaitem.*', 'pooja_list.pooja_photo')
+                                        ->get()
+                                        ->map(function ($item) {
+                                            $item->pooja_photo_url = $item->pooja_photo ? asset('assets/img/' . $item->pooja_photo) : asset('assets/img/default-image.jpg');
+                                            return $item;
+                                        });
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Pooja items fetched successfully.',
+                'data' => $Poojaitemlist
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching pooja items.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function savePoojaItemList(Request $request)
+    {
+        try {
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'pooja_id' => 'required|integer', // Example validation rules, adjust as per your needs
+                'pooja_name' => 'required|string',
+                'list_name.*' => 'required|string',
+                'quantity.*' => 'required|integer',
+                
+            ]);
+    
+            $profileId = Auth::guard('sanctum')->user()->pandit_id;
+            // Extract data from the request
+            $poojaId = $validatedData['pooja_id'];
+            $poojaName = $validatedData['pooja_name'];
+            $listNames = $validatedData['list_name'];
+            $quantities = $validatedData['quantity'];
+           
+    
+            $processedNames = [];
+    
+            // Process each item in the list
+            foreach ($listNames as $key => $listName) {
+                // Skip if this pooja_name is already processed within this request
+                if (in_array($listName, $processedNames)) {
+                    continue;
+                }
+    
+                // Check if the pooja_name already exists for the given pooja_id and pandit_id in the database
+                $existingItem = PoojaItems::where([
+                    ['pandit_id', '=', $profileId],
+                    ['pooja_id', '=', $poojaId],
+                    ['pooja_name', '=', $poojaName],
+                    ['pooja_list', '=', $listName]
+                ])->first();
+    
+                if ($existingItem) {
+                    continue; // Skip saving this item and move to the next one
+                }
+    
+                // Save each item to the database
+                $poojaItem = new PoojaItems();
+                $poojaItem->pandit_id = $profileId;
+                $poojaItem->pooja_id = $poojaId;
+                $poojaItem->pooja_name = $poojaName;
+                $poojaItem->pooja_list = $listName;
+                $poojaItem->list_quantity = $quantities[$key];
+               
+    
+                if ($poojaItem->save()) {
+                    $processedNames[] = $listName;
+                }
+            }
+    
+            if (!empty($processedNames)) {
+                return response()->json(['message' => 'Data saved successfully.'], 201);
+            } else {
+                return response()->json(['message' => 'Failed to save data.'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while saving pooja items.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    
 }
