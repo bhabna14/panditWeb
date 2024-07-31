@@ -154,12 +154,14 @@ class PoojaListController extends Controller
     }
 
 
-    public function poojaitemlist()
+    public function poojaitemlist($pooja_id)
     {
         try {
             $panditId = Auth::guard('sanctum')->user()->pandit_id;
-
-            $Poojaitemlist = Poojaitems::where('status', 'active')->where('pandit_id', $panditId)->get();
+          
+            $Poojaitemlist = Poojaitems::where('pooja_id', $pooja_id)->where('status', 'active')
+                                        ->where('pandit_id', $panditId)
+                                        ->get();
 
             return response()->json([
                 'status' => 200,
