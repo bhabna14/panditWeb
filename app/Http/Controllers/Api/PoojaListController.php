@@ -153,8 +153,8 @@ class PoojaListController extends Controller
         }
     }
     public function listofitem(){
-        $listofitem = Poojaitemlists::where('status','active')->get();
-      
+        $listofitem = Poojaitemlists::where('status', 'active')->with('variants')->get();
+   
         if ($listofitem->isEmpty()) {
             return response()->json([
                 'status' => 404,
@@ -162,7 +162,7 @@ class PoojaListController extends Controller
                 'data' => []
             ], 404);
         }
-      
+    
         return response()->json([
             'status' => 200,
             'message' => 'Data retrieved successfully',
