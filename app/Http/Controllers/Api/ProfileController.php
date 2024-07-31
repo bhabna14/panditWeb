@@ -9,14 +9,14 @@ use App\Models\IdcardDetail;
 use App\Models\EduDetail;
 use App\Models\VedicDetail;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
 
 class ProfileController extends Controller
 {
   
     public function saveProfile(Request $request)
     {
-       
-    
         // Retrieve the authenticated user
         $user = Auth::guard('sanctum')->user();
 
@@ -27,6 +27,7 @@ class ProfileController extends Controller
         $profile->pandit_id = $user->pandit_id;
         $profile->title = $request->title;
         $profile->name = $request->name;
+        $profile->slug = Str::slug($request->name, '-');
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
@@ -92,6 +93,7 @@ class ProfileController extends Controller
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
+        $profile->about_pandit = $request->about;
     
         $pandilang = $request->input('language', []);
         if (is_array($pandilang)) {
