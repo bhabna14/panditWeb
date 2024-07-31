@@ -305,6 +305,7 @@ class userController extends Controller
  
          // Fetch the related pooja details for this pandit
          $pandit_pujas = Poojadetails::where('pandit_id', $single_pandit->pandit_id)
+         ->where('status','active')
              ->with('poojalist') // Load the poojalist relationship
              ->get();
  
