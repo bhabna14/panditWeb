@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Profile;
 use App\Models\Poojaskill;
 use App\Models\Poojadetails;
+use App\Models\Poojalist;
 use Illuminate\Support\Facades\Auth;
 
 class PoojaDetailsController extends Controller
@@ -53,13 +54,20 @@ class PoojaDetailsController extends Controller
             $videoPath = null;
     
             if ($image) {
-                $imagePath = 'uploads/pooja_photo/' . $image->getClientOriginalName();
+                $imagePath = 'uploads/pooja_photo/' . time() . '_' . $image->getClientOriginalName();
                 $image->move(public_path('uploads/pooja_photo'), $imagePath);
             }
     
             if ($video) {
-                $videoPath = 'uploads/pooja_video/' . $video->getClientOriginalName();
+                $videoPath = 'uploads/pooja_video/' . time() . '_' . $video->getClientOriginalName();
                 $video->move(public_path('uploads/pooja_video'), $videoPath);
+            }
+    
+            // Fetch pooja photo from Poojalist table
+            $pooja_photo = Poojalist::where('id', $pooja_id)->first();
+    
+            if (!$pooja_photo) {
+                return response()->json(['message' => 'Pooja not found.'], 404);
             }
     
             // Create new Pooja details
@@ -79,7 +87,7 @@ class PoojaDetailsController extends Controller
                 $poojaSkill->pandit_id = $panditId;
                 $poojaSkill->pooja_id = $pooja_id;
                 $poojaSkill->pooja_name = $pooja_name;
-                $poojaSkill->pooja_photo = $imagePath;
+                $poojaSkill->pooja_photo = $pooja_photo->pooja_photo; // Use the photo from Poojalist
                 $poojaSkill->pooja_status = 'hide';
                 $poojaSkill->save();
     
@@ -88,8 +96,9 @@ class PoojaDetailsController extends Controller
                 return response()->json(['message' => 'Failed to save data.'], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['message' => 'An error occurred while saving pooja details.'], 500);
+            return response()->json(['message' => 'An error occurred while saving pooja details.', 'error' => $e->getMessage()], 500);
         }
     }
+    
     
 }
