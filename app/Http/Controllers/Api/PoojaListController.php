@@ -152,7 +152,24 @@ class PoojaListController extends Controller
             ], 500);
         }
     }
-
+    public function listofitem(){
+        $listofitem = Poojaitemlists::orderBy('created_at', 'desc')
+                                    ->where('status','active')->get();
+      
+        if ($listofitem->isEmpty()) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'No data found',
+                'data' => []
+            ], 404);
+        }
+      
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data retrieved successfully',
+            'data' => $listofitem
+        ], 200);
+    }
     public function poojaitemlist($pooja_id)
     {
         try {
