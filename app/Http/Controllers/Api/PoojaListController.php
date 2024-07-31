@@ -153,16 +153,22 @@ class PoojaListController extends Controller
         }
     }
 
-
     public function poojaitemlist($pooja_id)
     {
         try {
             $panditId = Auth::guard('sanctum')->user()->pandit_id;
-          
-            $Poojaitemlist = Poojaitems::where('pooja_id', $pooja_id)->where('status', 'active')
-                                        ->where('pandit_id', $panditId)
-                                        ->get();
-
+            
+            $Poojaitemlist = Poojaitems::join('pooja_list', 'pooja_list.id', '=', 'pandit_poojaitem.pooja_id')
+                                        ->where('pandit_poojaitem.pooja_id', $pooja_id)
+                                        ->where('pandit_poojaitem.status', 'active')
+                                        ->where('pandit_poojaitem.pandit_id', $panditId)
+                                        ->select('pandit_poojaitem.*', 'pooja_list.pooja_photo')
+                                        ->get()
+                                        ->map(function ($item) {
+                                            $item->pooja_photo_url = $item->pooja_photo ? asset('assets/img/' . $item->pooja_photo) : asset('assets/img/default-image.jpg');
+                                            return $item;
+                                        });
+    
             return response()->json([
                 'status' => 200,
                 'message' => 'Pooja items fetched successfully.',
@@ -176,6 +182,7 @@ class PoojaListController extends Controller
             ], 500);
         }
     }
+    
 
     public function deletePoojaItem($id)
     {
