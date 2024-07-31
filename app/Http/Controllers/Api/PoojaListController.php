@@ -190,10 +190,10 @@ class PoojaListController extends Controller
         try {
             // Validate the incoming request data
             $validatedData = $request->validate([
-                'pooja_id' => 'required|integer', // Example validation rules, adjust as per your needs
+                'pooja_id' => 'required|string', // Example validation rules, adjust as per your needs
                 'pooja_name' => 'required|string',
                 'list_name.*' => 'required|string',
-                'quantity.*' => 'required|integer',
+                'quantity.*' => 'required|string',
                 
             ]);
     
