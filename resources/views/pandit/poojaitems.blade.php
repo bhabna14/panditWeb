@@ -103,6 +103,7 @@
                                                                         </select>
                                                                     </td>
                                                                     
+                                                                    
                                                                     {{-- <td>
                                                                         <select class="form-control" id="weight_unit"
                                                                             name="unit[]" required>
@@ -162,10 +163,13 @@
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
+    
     <script>
         $(document).ready(function() {
             $('#list_name').on('change', function() {
-                var variants = $(this).find(':selected').data('variants');
+                // Get the selected option
+                var selectedOption = $(this).find('option:selected');
+                var variants = selectedOption.data('variants');
                 var $variantSelect = $('#listVariant');
     
                 // Clear previous options
@@ -174,14 +178,18 @@
     
                 if (variants) {
                     // Parse the JSON data
-                    variants = JSON.parse(variants);
-    
-                    // Populate the variant dropdown
-                    $.each(variants, function(index, variant) {
-                        $variantSelect.append('<option value="' + variant.id + '">' + variant.title + ' - ' + variant.price + '</option>');
-                    });
+                    try {
+                        variants = JSON.parse(variants);
+                        // Populate the variant dropdown
+                        $.each(variants, function(index, variant) {
+                            $variantSelect.append('<option value="' + variant.id + '">' + variant.title + ' - ' + variant.price + '</option>');
+                        });
+                    } catch (e) {
+                        console.error('Error parsing variant data:', e);
+                    }
                 }
             });
         });
     </script>
+    
 @endsection
