@@ -62,7 +62,7 @@ class PoojaListController extends Controller
             ->orderBy('bookings.booking_date', 'asc')
             ->select('bookings.*', 'pooja_list.pooja_name as pooja_name', 'pooja_list.pooja_photo as pooja_photo')
             ->get()->map(function ($booking) {
-                $booking->pooja_photo_url = asset('storage/' . $booking->pooja_photo); // Generate full URL for the pooja photo
+                $booking->pooja_photo_url = asset('assets/img/' . $booking->pooja_photo); // Generate full URL for the pooja photo
                 return $booking;
             });             
     
