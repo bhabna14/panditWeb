@@ -231,6 +231,7 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
     Route::controller(OrderController::class)->group(function() {
         Route::get('/manage-orders', 'manageorders')->name('manageorders');
+        Route::get('/booking/{id}','showbooking')->name('admin.booking.show');
         // Route::get('/savelocation', 'savelocation')->name('savelocation');
     });
 

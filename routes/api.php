@@ -72,6 +72,7 @@ Route::controller(PoojaDetailsController::class)->group(function() {
 });
 
 Route::controller(PoojaListController::class)->group(function() {
+    Route::get('/all-pooja-list', 'AllPoojaList');
     Route::post('/save-pooja-item-list', 'savePoojaItemList');
     Route::middleware('auth:sanctum')->get('/pooja-item-list', 'poojaitemlist');
     Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');

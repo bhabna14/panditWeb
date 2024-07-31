@@ -19,6 +19,7 @@ class PoojaListController extends Controller
         $Poojaskills = Poojaskill::where('status', 'active')->where('pandit_id',$panditId)->get();
 
         $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
+        // $Poojaitemlist = Poojaitemlists::with('variants')->where('status', 'active')->get();
 
         return view('/pandit/poojaitemlist', compact('Poojaskills','Poojaitemlist'));
     }

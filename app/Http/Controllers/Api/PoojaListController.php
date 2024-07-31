@@ -10,6 +10,9 @@ use App\Models\Poojaitems;
 use App\Models\Poojalist;
 use App\Models\Profile;
 use App\Models\Booking;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+
 
 use Illuminate\Support\Facades\Auth;
 
@@ -19,12 +22,14 @@ class PoojaListController extends Controller
     public function AllPoojaList()
     {
         try {
+            $today = Carbon::today()->toDateString();
+
             $all_Pooja_Lists = Poojalist::where('status', 'active')->get();
 
             $pandit = Auth::guard('sanctum')->user();
 
             $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
-
+            
             $selectedPoojas = Poojaskill::where('pandit_id', $pandit_details->pandit_id)
                                         ->where('status', 'active')
                                         ->get();
@@ -33,7 +38,15 @@ class PoojaListController extends Controller
             ->where('pandit_id', $pandit_details->id) 
             ->where('application_status', 'pending') 
             ->orderBy('created_at', 'desc')->get();
-                                        
+
+            $today_pooja = DB::table('bookings')
+            ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
+            ->where('bookings.pandit_id', $pandit_details->id)
+            ->where('bookings.payment_status', 'paid')
+            ->whereDate('bookings.booking_date', $today)
+            ->orderBy('bookings.booking_date', 'asc') // Order by booking_date ascending
+            ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
+            ->get();                 
 
             return response()->json([
                 'status' => 200,
@@ -42,6 +55,7 @@ class PoojaListController extends Controller
                     'all_pooja_list' => $all_Pooja_Lists,
                     'selected_pooja' => $selectedPoojas,
                     'request_pooja' => $pooja_requests,
+                    'today_pooja' => $today_pooja,
                 ]
             ], 200);
         } catch (\Exception $e) {
@@ -52,6 +66,7 @@ class PoojaListController extends Controller
             ], 500);
         }
     }
+
     public function savePoojaItemList(Request $request)
     {
         try {
@@ -141,6 +156,51 @@ class PoojaListController extends Controller
             ], 500);
         }
     }
-    
 
+    public function deletePoojaItem($id)
+    {
+        try {
+            $poojaItem = PoojaItems::findOrFail($id);
+            $poojaItem->status = 'deleted'; // Update the status field
+
+            if ($poojaItem->save()) {
+                return response()->json(['success' => 'Pooja item deleted successfully.']);
+            } else {
+                return response()->json(['error' => 'Delete not successful.'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Pooja item not found.'], 404);
+        }
+    }
+
+    public function updatePoojaitem(Request $request, $id)
+    {
+        // Validate the incoming request data
+        $validatedData = $request->validate([
+            'list_name' => 'required|string|max:255',
+            'list_quantity' => 'required|string|max:255',
+            'unit' => 'required|string|max:255',
+        ]);
+    
+        // Get the authenticated Pandit's ID
+        $panditId = Auth::guard('sanctum')->user()->pandit_id;
+    
+        if (!$panditId) {
+            return response()->json(['error' => 'No authenticated pandit found.'], 404);
+        }
+    
+        // Find the Pooja item by ID and ensure it belongs to the authenticated Pandit
+        $poojaItem = PoojaItems::where('pandit_id', $panditId)->find($id);
+        
+        if ($poojaItem) {
+            $poojaItem->pooja_list = $validatedData['list_name'];
+            $poojaItem->list_quantity = $validatedData['list_quantity'];
+            $poojaItem->list_unit = $validatedData['unit'];
+            $poojaItem->save();
+    
+            return response()->json(['success' => 'Pooja item updated successfully.']);
+        } else {
+            return response()->json(['error' => 'Pooja item not found or does not belong to the authenticated pandit.'], 404);
+        }
+    }
 }

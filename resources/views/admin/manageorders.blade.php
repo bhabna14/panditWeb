@@ -49,35 +49,40 @@
                                             <thead>
                                                 <tr>
                                                 <th class="border-bottom-0">#</th>
-
+                                                <th class="border-bottom-0">Booking Id</th>
                                                     <th class="border-bottom-0">Pandit Name</th>
                                                     <th class="border-bottom-0">Booking Date</th>
                                                     <th class="border-bottom-0">Total Payment</th>
                                                     <th class="border-bottom-0">Paid Amount</th>
-                                                    <th class="border-bottom-0">Approved By</th>
+                                                   
                                                     <th class="border-bottom-0">Application Status</th>
-                                                    
+                                                    <th class="border-bottom-0">Payment Status</th>
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                            
-                                                @foreach ($bookings as $booking)
+                                                @foreach ($bookings as $index => $booking)
                                                     <tr>
-                                                        <td>1</td>
-                                                        <a href="" class="title">
+                                                        <td>{{ $index + 1 }}</td>
+                                                      
+                                                        <td>   <a href="{{url('admin/booking/'. $booking->id)}}">{{ $booking->booking_id }} </a></td>
+                                                        
+                                                      
                                                         <td class="tb-col">
+                                                            <a href="{{url('admin/booking/'. $booking->id)}}" class="title">
                                                             <div class="media-group">
                                                                 <div class="media media-md media-middle media-circle">
                                                                         <img src="{{asset('assets/img/user.jpg') }}" alt="user">
                                                                 </div>
                                                                 <div class="media-text">
-                                                                    <a href="" class="title">{{ $booking->pandit->title }} {{ $booking->pandit->name }}</a>
+                                                                    <span class="title">{{ $booking->pandit->title }} {{ $booking->pandit->name }}</span>
                                                                     <h6 class="title">{{ $booking->pooja->pooja_name }}</h6>
                                                                 </div>
                                                             </div>
+                                                             </a>
                                                         </td>
-                                                        </a>
+                                                      
                                                         
                                                     <td>{{ $booking->booking_date }}</td>
                                                     <td>{{ $booking->pooja_fee }}</td>
@@ -90,14 +95,18 @@
 
 
                                                     </td>
-                                                    <td>Pandit</td>
+                                                   
                                                         <td>
-                                                                <span class="badge badge-success">Approved</span> 
+                                                                <span class="badge badge-success">{{ $booking->application_status }}</span> 
                                                         
                                                         </td>
+                                                        <td>
+                                                            <span class="badge badge-success">{{ $booking->payment_status }}</span> 
+                                                    
+                                                         </td>
                                                         
                                                         <td>
-                                                            <a href="{{url('admin/pandit-profile/')}}"><i class="fas fa-eye"></i></a> | 
+                                                            <a href="{{url('admin/booking/'. $booking->id)}}"><i class="fas fa-eye"></i></a> | 
                                                             <a href="{{url('admin/editsebayat/')}}"><i class="fa fa-edit"></i></a> | 
                                                             <a href="{{url('admin/dltsebayat/')}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
                                                     </tr>

@@ -8,7 +8,7 @@ use App\Models\Poojalist;
 use App\Models\Poojaitemlists;
 use App\Models\PoojaUnit;
 use Illuminate\Support\Str;
-
+use DB;
 
 class PujaController extends Controller
 {
@@ -97,9 +97,14 @@ class PujaController extends Controller
     
     }
 
-    public function managePujaList(){
-        $poojaitems = Poojaitemlists::where('status', 'active')->get();
-        return view('admin/managepujalist',compact('poojaitems'));
+    public function managePujaList() {
+        $poojaitems = DB::table('poojaitem_list')
+            ->join('variants', 'poojaitem_list.id', '=', 'variants.product_id')
+            ->select('poojaitem_list.id as product_id', 'poojaitem_list.item_name', 'variants.title as variant_title', 'variants.price')
+            ->where('poojaitem_list.status', 'active')
+            ->get();
+    
+        return view('admin/managepujalist', compact('poojaitems'));
     }
 
     public function saveitem(Request $request){

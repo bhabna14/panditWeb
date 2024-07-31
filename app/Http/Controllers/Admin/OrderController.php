@@ -26,4 +26,10 @@ class OrderController extends Controller
                             ->get();
         return view('admin/manageorders',compact('bookings'));
     }
+    public function showbooking($id)
+    {
+        $booking = Booking::with(['pooja', 'pandit', 'address', 'user', 'poojaStatus', 'ratings'])->findOrFail($id);
+        
+        return view('admin/showbookingdetails', compact('booking'));
+    }
 }

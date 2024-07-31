@@ -87,30 +87,32 @@
                                             <thead>
                                                 <tr>
                                                     <th class="border-bottom-0">SlNo</th>
-                                                   
                                                     <th class="border-bottom-0">Item Name</th>
-                                                    
+                                                    <th class="border-bottom-0">Variant Title</th>
+                                                    <th class="border-bottom-0">Price</th>
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                
                                                 @foreach ($poojaitems as $index => $poojaitem)
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
-                                                    <td>{{ $poojaitem->item_name}}</td>
+                                                    <td>{{ $poojaitem->item_name }}</td>
+                                                    <td>{{ $poojaitem->variant_title }}</td>
+                                                    <td>{{ $poojaitem->price }}</td>
                                                     <td>
-                                                        <a class="btn ripple btn-primary me-3 edit-item" href="javascript:void(0);" data-id="{{ $poojaitem->id }}" data-name="{{ $poojaitem->item_name }}">
+                                                        <a class="btn ripple btn-primary me-3 edit-item" href="javascript:void(0);" data-id="{{ $poojaitem->product_id }}" data-name="{{ $poojaitem->item_name }}">
                                                             <i class="fa fa-edit"></i>
                                                         </a>
-                                                        {{-- <a href="{{url('admin/editpooja/'.$poojaitem->id)}}"><i class="fa fa-edit"></i></a> |  --}}
-                                                        <a class="btn ripple btn-primary" href="{{url('admin/dltitem/'.$poojaitem->id)}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                                        <a class="btn ripple btn-primary" href="{{ url('admin/dltitem/'.$poojaitem->product_id) }}" onClick="return confirm('Are you sure to delete ?');">
+                                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                                        </a>
                                                     </td>
                                                 <tr>
                                                 @endforeach
-                                                
                                             </tbody>
                                         </table>
+                                        
                                     </div>
                                 </div>
                             </div>

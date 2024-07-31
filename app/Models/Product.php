@@ -13,7 +13,7 @@ class Product extends Model
     // Mass assignable attributes
     protected $fillable = [
         'product_id',
-        'title',
+        'item_name',
         'slug',
         'product_type',
         'status',
