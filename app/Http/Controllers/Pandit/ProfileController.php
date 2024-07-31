@@ -46,6 +46,8 @@ class ProfileController extends Controller
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
+        $profile->about_pandit = $request->about;
+
 
         $pandilang = $request->input('language');
  
@@ -115,7 +117,8 @@ class ProfileController extends Controller
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
-    
+        $profile->about_pandit = $request->about;
+
         $pandilang = $request->input('language');
  
         $langString = implode(',', $pandilang);

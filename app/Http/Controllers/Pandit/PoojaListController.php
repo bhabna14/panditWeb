@@ -68,7 +68,7 @@ class PoojaListController extends Controller
             'pooja_name' => 'required|string',
             'list_name.*' => 'required|string',
             'quantity.*' => 'required|integer',
-            'unit.*' => 'required|string',
+            // 'unit.*' => 'required|string',
         ]);
     
         $profileId = Auth::guard('pandits')->user()->pandit_id;
@@ -77,7 +77,7 @@ class PoojaListController extends Controller
         $poojaName = $validatedData['pooja_name'];
         $listNames = $validatedData['list_name'];
         $quantities = $validatedData['quantity'];
-        $units = $validatedData['unit'];
+        // $units = $validatedData['unit'];
     
         $duplicates = [];
         $savedItems = [];
@@ -111,7 +111,7 @@ class PoojaListController extends Controller
             $poojaItem->pooja_name = $poojaName;
             $poojaItem->pooja_list = $listName;
             $poojaItem->list_quantity = $quantities[$key];
-            $poojaItem->list_unit = $units[$key];
+            // $poojaItem->list_unit = $units[$key];
     
             if ($poojaItem->save()) {
                 $savedItems[] = $listName;

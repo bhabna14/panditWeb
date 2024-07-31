@@ -234,7 +234,6 @@
                                         </td>
                                         <td>{{ $status->pooja_duration }}</td>
                                         <td>{{ $status->pooja_status }}</td>
-
                                     </tr>
                                 @endforeach
                             </tbody>

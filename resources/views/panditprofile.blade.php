@@ -75,7 +75,7 @@
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
-                                                                            <label for="exampleInputEmail1">Full Name</label>
+                                                                            <label for="exampleInputEmail1">Full Name <span style="color: red">*</span></label>
                                                                             <input type="text" class="form-control"
                                                                                 id="name" name="name"
                                                                                 placeholder="Enter Name" required>
@@ -95,7 +95,7 @@
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
                                                                             <label for="exampleInputPassword1">Whatsapp
-                                                                                Number</label>
+                                                                                Number <span style="color: red">*</span></label>
                                                                             <input type="number" class="form-control"
                                                                                 id="whatsappno" name="whatsappno"
                                                                                 placeholder="Whatsapp Number" required>
@@ -122,9 +122,9 @@
                                                                     
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
-                                                                            <label for="exampleInputPassword1">Profile Photo</label>
+                                                                            <label for="exampleInputPassword1">Profile Photo <span style="color: red">*</span></label>
                                                                             <input type="file" name="profile_photo"
-                                                                                class="form-control" id="profile_photo">
+                                                                                class="form-control" id="profile_photo" required>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -149,7 +149,7 @@
                                                                 <div class="row">
                                                                     <div class="col-md-12">
                                                                         <div class="form-group">
-                                                                            <label for="language">Select Language</label>
+                                                                            <label for="language">Select Language <span style="color: red">*</span></label>
                                                                             <select class="form-control select2"
                                                                                 id="language" name="language[]"
                                                                                 multiple="multiple" required>
@@ -158,6 +158,14 @@
                                                                                         {{ $language }}</option>
                                                                                 @endforeach
                                                                             </select>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-12">
+                                                                        <div class="form-group">
+                                                                            <label for="language">About <span style="color: red">*</span></label>
+                                                                            <textarea  class="form-control" name ="about" id = "about"></textarea>
                                                                         </div>
                                                                     </div>
                                                                 </div>

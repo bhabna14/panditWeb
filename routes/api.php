@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AreaController;
 use App\Http\Controllers\Api\BankController;
 use App\Http\Controllers\Api\LoginController;
-use App\Http\Controllers\Api\CareerController;
+// use App\Http\Controllers\Api\CareerController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\CareersController;
 use App\Http\Controllers\Api\PodcastController;
@@ -54,7 +54,7 @@ Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/update/{id}','updateProfile');
 });
 
-Route::controller(CareerController::class)->group(function() {
+Route::controller(CareersController::class)->group(function() {
     Route::post('/career/save', 'saveCareer');
     Route::get('/manage-career', 'manageCareer');
 });
@@ -77,6 +77,8 @@ Route::controller(PoojaListController::class)->group(function() {
     Route::middleware('auth:sanctum')->get('/pooja-item-list', 'poojaitemlist');
     Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');
     Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
+    Route::get('/pooja-item-list', 'poojaitemlist');
+
 });
 
 Route::controller(BankController::class)->group(function() {

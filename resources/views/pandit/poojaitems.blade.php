@@ -64,8 +64,8 @@
                                                                     <th class="border-bottom-0">Sl</th>
                                                                     <th class="border-bottom-0">Puja Name</th>
                                                                     <th class="border-bottom-0">List Name</th>
-                                                                    <th class="border-bottom-0">Quantity</th>
-                                                                    <th class="border-bottom-0">Unit</th>
+                                                                    <th class="border-bottom-0">Variant</th>
+                                                                    {{-- <th class="border-bottom-0">Unit</th> --}}
                                                                     <th class="border-bottom-0">Action</th>
                                                                 </tr>
                                                             </thead>
@@ -89,19 +89,21 @@
                                                                         <select class="form-control chosen-select" name="list_name[]" id="list_name" required>
                                                                             <option value="">Select Puja List</option>
                                                                             @foreach ($Poojaitemlist as $pujalist)
-                                                                                <option value="{{ $pujalist->id }}" data-variants="{{ json_encode($pujalist->variants) }}">
+                                                                                <option value="{{ $pujalist->id }}" data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
                                                                                     {{ $pujalist->item_name }}
                                                                                 </option>
+                                                                            
                                                                             @endforeach
                                                                         </select>
                                                                     </td>
                                                                     <td>
-                                                                        <label for="listVariant">Variant</label>
-                                                                        <select class="form-control chosen-select" name="list_variant" id="listVariant" required>
+                                                                        {{-- <label for="listVariant">Variant</label> --}}
+                                                                        <select class="form-control chosen-select" name="quantity[]" id="listVariant" required>
                                                                             <option value="">Select Variant</option>
                                                                             <!-- Variants will be populated via JavaScript -->
                                                                         </select>
                                                                     </td>
+                                                                    
                                                                     
                                                                     
                                                                     {{-- <td>
@@ -161,13 +163,13 @@
         }, 3000);
     </script>
     <!-- smart photo master js -->
-    <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
+    {{-- <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script> --}}
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
     
+    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <script>
         $(document).ready(function() {
             $('#list_name').on('change', function() {
-                // Get the selected option
                 var selectedOption = $(this).find('option:selected');
                 var variants = selectedOption.data('variants');
                 var $variantSelect = $('#listVariant');
@@ -177,9 +179,14 @@
                 $variantSelect.append('<option value="">Select Variant</option>');
     
                 if (variants) {
-                    // Parse the JSON data
                     try {
-                        variants = JSON.parse(variants);
+                        // Ensure the data is a JSON string and decode HTML entities
+                        if (typeof variants === 'string') {
+                            // Decode HTML entities
+                            variants = variants.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+                            variants = JSON.parse(variants);
+                        }
+                        
                         // Populate the variant dropdown
                         $.each(variants, function(index, variant) {
                             $variantSelect.append('<option value="' + variant.id + '">' + variant.title + ' - ' + variant.price + '</option>');
@@ -191,5 +198,6 @@
             });
         });
     </script>
+    
     
 @endsection
