@@ -18,7 +18,7 @@ class Poojadetails extends Model
 
     public function profile()
     {
-        return $this->belongsTo(Profile::class, 'pandit_id', 'pandit_id')->where('pandit_status', 'accepted');
+        return $this->belongsTo(Profile::class, 'pandit_id', 'pandit_id');
     }
    
 }
