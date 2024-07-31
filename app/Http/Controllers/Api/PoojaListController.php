@@ -190,53 +190,45 @@ class PoojaListController extends Controller
         try {
             // Validate the incoming request data
             $validatedData = $request->validate([
-                'pooja_id' => 'required|string', // Example validation rules, adjust as per your needs
+                'pooja_id' => 'required|integer',
                 'pooja_name' => 'required|string',
-                'list_name.*' => 'required|string',
-                'quantity.*' => 'required|string',
-                
+                'list_name' => 'required|array',
+                'list_name.*' => 'required|array'
             ]);
     
             $profileId = Auth::guard('sanctum')->user()->pandit_id;
-            // Extract data from the request
+    
             $poojaId = $validatedData['pooja_id'];
             $poojaName = $validatedData['pooja_name'];
             $listNames = $validatedData['list_name'];
-            $quantities = $validatedData['quantity'];
-           
     
             $processedNames = [];
     
-            // Process each item in the list
-            foreach ($listNames as $key => $listName) {
-                // Skip if this pooja_name is already processed within this request
-                if (in_array($listName, $processedNames)) {
-                    continue;
-                }
+            foreach ($listNames as $list) {
+                foreach ($list as $listName => $quantity) {
+                    // Check if the pooja_name already exists for the given pooja_id and pandit_id in the database
+                    $existingItem = PoojaItems::where([
+                        ['pandit_id', '=', $profileId],
+                        ['pooja_id', '=', $poojaId],
+                        ['pooja_name', '=', $poojaName],
+                        ['pooja_list', '=', $listName]
+                    ])->first();
     
-                // Check if the pooja_name already exists for the given pooja_id and pandit_id in the database
-                $existingItem = PoojaItems::where([
-                    ['pandit_id', '=', $profileId],
-                    ['pooja_id', '=', $poojaId],
-                    ['pooja_name', '=', $poojaName],
-                    ['pooja_list', '=', $listName]
-                ])->first();
+                    if ($existingItem) {
+                        continue; // Skip saving this item and move to the next one
+                    }
     
-                if ($existingItem) {
-                    continue; // Skip saving this item and move to the next one
-                }
+                    // Save each item to the database
+                    $poojaItem = new PoojaItems();
+                    $poojaItem->pandit_id = $profileId;
+                    $poojaItem->pooja_id = $poojaId;
+                    $poojaItem->pooja_name = $poojaName;
+                    $poojaItem->pooja_list = $listName;
+                    $poojaItem->list_quantity = $quantity;
     
-                // Save each item to the database
-                $poojaItem = new PoojaItems();
-                $poojaItem->pandit_id = $profileId;
-                $poojaItem->pooja_id = $poojaId;
-                $poojaItem->pooja_name = $poojaName;
-                $poojaItem->pooja_list = $listName;
-                $poojaItem->list_quantity = $quantities[$key];
-               
-    
-                if ($poojaItem->save()) {
-                    $processedNames[] = $listName;
+                    if ($poojaItem->save()) {
+                        $processedNames[] = $listName;
+                    }
                 }
             }
     
@@ -252,6 +244,7 @@ class PoojaListController extends Controller
             ], 500);
         }
     }
+    
 
     
 }
