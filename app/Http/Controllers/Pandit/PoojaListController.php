@@ -33,7 +33,8 @@ class PoojaListController extends Controller
         
         $poojaname = Poojaskill::where('id', $pooja_id)->where('pandit_id',$panditId)->first();
 
-        $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
+        // $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
+         $Poojaitemlist = Poojaitemlists::with('variants')->where('status', 'active')->get();
 
         if (!$poojaname) {
             return redirect()->back()->with('error', 'Pooja not found.');

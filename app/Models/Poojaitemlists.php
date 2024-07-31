@@ -19,6 +19,6 @@ class Poojaitemlists extends Model
 
     public function variants()
     {
-        return $this->hasMany(Variant::class);
+        return $this->hasMany(Variant::class, 'product_id'); // Ensure 'product_id' matches the foreign key in the variants table
     }
 }

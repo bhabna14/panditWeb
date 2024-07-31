@@ -14,6 +14,6 @@ class Variant extends Model
 
     public function product()
     {
-        return $this->belongsTo(Poojaitemlists::class);
+        return $this->belongsTo(Poojaitemlists::class, 'product_id');
     }
 }
