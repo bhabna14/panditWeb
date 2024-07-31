@@ -153,8 +153,7 @@ class PoojaListController extends Controller
         }
     }
     public function listofitem(){
-        $listofitem = Poojaitemlists::orderBy('created_at', 'desc')
-                                    ->where('status','active')->get();
+        $listofitem = Poojaitemlists::where('status','active')->get();
       
         if ($listofitem->isEmpty()) {
             return response()->json([
