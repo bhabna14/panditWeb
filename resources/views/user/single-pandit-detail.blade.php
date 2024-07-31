@@ -74,7 +74,7 @@
                             <div class="col-md-4 pandit-card">
                                 <div class="card" data-state="#pooja">
                                     <div class="card-header">
-                                        {{-- <img class="card-pooja" src="{{ $pandit_puja->poojalist->pooja_photo ? asset('assets/img/' . $pandit_puja->poojalist->pooja_photo) : asset('assets/img/default-image.jpg') }}" alt="image"> --}}
+                                        <img class="card-pooja" src="{{ $pandit_puja->poojalist->pooja_photo ? asset('assets/img/' . $pandit_puja->poojalist->pooja_photo) : asset('assets/img/default-image.jpg') }}" alt="image">
 
                                     </div>
                                     <div class="pooja-head row">
