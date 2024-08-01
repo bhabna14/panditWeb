@@ -107,7 +107,7 @@
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Puja Name</th>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">List Name</th>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Quantity</th>
-                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Unit</th>
+                                    {{-- <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Unit</th> --}}
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Action</th>
                                 </tr>
                             </thead>
@@ -233,9 +233,10 @@ function fetchPoojaDetails(poojaId, reopenModal = false) {
                     var row = `<tr id="row-${item.id}">
                         <td>${index + 1}</td>
                         <td>${item.pooja_name}</td>
-                        <td>${item.pooja_list}</td>
-                        <td>${item.list_quantity}</td>
-                        <td>${item.list_unit}</td>
+                        <td>${item.item_name || 'N/A'}</td> <!-- Updated to display item_name -->
+                       
+                        <td>${item.title || 'N/A'}</td>
+                       
                         <td>
                             <button class="btn btn-md btn-danger" onclick="deletePoojaItem(${item.id});"><i class="fa fa-trash"></i></button>
                             <a onclick="openEditModal(${item.id}, '${item.pooja_list}', '${item.list_quantity}', '${item.list_unit}');" class="btn ripple btn-success me-3 edit-item" href="javascript:void(0);">
@@ -258,6 +259,7 @@ function fetchPoojaDetails(poojaId, reopenModal = false) {
             tableBody.innerHTML = `<tr><td colspan="6" class="text-center">Error loading data</td></tr>`;
         });
 }
+
 
 function openEditModal(id, poojaList, quantity, unit) {
     var modaldemo2 = new bootstrap.Modal(document.getElementById('modaldemo2'));
