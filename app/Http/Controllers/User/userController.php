@@ -236,6 +236,7 @@ class userController extends Controller
 
         // Fetch the related Poojadetails items along with the Profile
         $pandit_pujas = Poojadetails::with('profile')
+            ->where('status','active')
             ->where('pooja_id', $pooja->id)
             ->get();
 
