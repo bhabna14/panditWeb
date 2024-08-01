@@ -71,6 +71,7 @@
                            
 
                             @foreach ($pandit_pujas as $pandit_puja)
+                            @if($pandit_puja->poojalist)
                             <div class="col-md-4 pandit-card">
                                 <div class="card" data-state="#pooja">
                                     <div class="card-header">
@@ -101,6 +102,9 @@
                                     </div>
                                 </div>
                             </div>
+                            @else
+                        
+                            @endif
                             @endforeach
                             
                         </div>
