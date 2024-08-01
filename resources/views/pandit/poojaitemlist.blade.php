@@ -107,7 +107,7 @@
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Puja Name</th>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">List Name</th>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Quantity</th>
-                                   
+                                    {{-- <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Unit</th> --}}
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Action</th>
                                 </tr>
                             </thead>
@@ -157,7 +157,7 @@
                                     <label for="listQuantity">Quantity</label>
                                     <input type="text" class="form-control" id="listQuantity" name="list_quantity" placeholder="Enter Quantity">
                                 </div>
-                                
+                               
                             </div>
                         </div>
                     </div>
@@ -227,7 +227,7 @@ function fetchPoojaDetails(poojaId, reopenModal = false) {
                        
                         <td>
                             <button class="btn btn-md btn-danger" onclick="deletePoojaItem(${item.id});"><i class="fa fa-trash"></i></button>
-                            <a onclick="openEditModal(${item.id}, '${item.pooja_list}', '${item.list_quantity}', '${item.list_unit}');" class="btn ripple btn-success me-3 edit-item" href="javascript:void(0);">
+                            <a onclick="openEditModal(${item.pooja_list}, '${item.item_name}', '${item.title}');" class="btn ripple btn-success me-3 edit-item" href="javascript:void(0);">
                                 <i class="fa fa-edit"></i>
                             </a>
                         </td>
@@ -249,12 +249,12 @@ function fetchPoojaDetails(poojaId, reopenModal = false) {
 }
 
 
-function openEditModal(id, poojaList, quantity, unit) {
+function openEditModal(id, poojaList, quantity) {
     var modaldemo2 = new bootstrap.Modal(document.getElementById('modaldemo2'));
     document.getElementById('itemId').value = id;
     document.getElementById('list_name').value = poojaList;
     document.getElementById('listQuantity').value = quantity;
-    document.getElementById('weight_unit').value = unit;
+   
     modaldemo2.show();
 }
 

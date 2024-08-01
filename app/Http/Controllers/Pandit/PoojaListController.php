@@ -46,41 +46,60 @@ class PoojaListController extends Controller
 
 
     public function getPoojaDetails($pooja_id)
-{
-    try {
-        $panditId = Auth::guard('pandits')->user()->pandit_id;
-
-        $poojaItems = PoojaItems::join('poojaitem_list', 'poojaitem_list.id', '=', 'pandit_poojaitem.pooja_list')
-                                ->join('variants', 'variants.id', '=', 'pandit_poojaitem.list_quantity') // Ensure the column name is correct
-                                ->where('pandit_poojaitem.pooja_id', $pooja_id)
-                                ->where('pandit_poojaitem.status', 'active')
-                                ->where('pandit_poojaitem.pandit_id', $panditId)
-                                ->select('pandit_poojaitem.*', 'poojaitem_list.item_name', 'variants.title')
-                                ->get();
-
-        if ($poojaItems->isEmpty()) {
-            return response()->json(['error' => 'Pooja items not found.'], 404);
+    {
+        try {
+            $panditId = Auth::guard('pandits')->user()->pandit_id;
+    
+            $poojaItems = PoojaItems::join('poojaitem_list', 'poojaitem_list.id', '=', 'pandit_poojaitem.pooja_list')
+                ->join('variants', 'variants.id', '=', 'pandit_poojaitem.list_quantity') // Ensure the column name is correct
+                ->where('pandit_poojaitem.pooja_id', $pooja_id)
+                ->where('pandit_poojaitem.status', 'active')
+                ->where('pandit_poojaitem.pandit_id', $panditId)
+                ->select('pandit_poojaitem.*', 'poojaitem_list.item_name', 'variants.title')
+                ->get();
+    
+            if ($poojaItems->isEmpty()) {
+                return response()->json(['error' => 'Pooja items not found.'], 404);
+            }
+    
+            $poojaItems->each(function ($item) {
+                $item->pooja_photo_url = isset($item->pooja_photo) ? asset('assets/img/' . $item->pooja_photo) : asset('assets/img/default-image.jpg');
+            });
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Pooja details fetched successfully.',
+                'poojaItems' => $poojaItems
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching pooja details.',
+                'error' => $e->getMessage()
+            ]);
         }
-
-        $poojaItems->each(function ($item) {
-            // Ensure that `pooja_photo` exists in the selected columns or change it to a relevant column
-            $item->pooja_photo_url = isset($item->pooja_photo) ? asset('assets/img/' . $item->pooja_photo) : asset('assets/img/default-image.jpg');
-        });
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Pooja details fetched successfully.',
-            'poojaItems' => $poojaItems
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 500,
-            'message' => 'An error occurred while fetching pooja details.',
-            'error' => $e->getMessage()
-        ]);
     }
-}
-
+    
+    public function getVariants($listName)
+    {
+        try {
+            // Fetch variants based on listName
+            $variants = Variant::where('title', $listName)->get();
+            
+            return response()->json([
+                'status' => 200,
+                'message' => 'Variants fetched successfully.',
+                'variants' => $variants
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching variants.',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+    
     
     public function savePoojaItemList(Request $request)
     {

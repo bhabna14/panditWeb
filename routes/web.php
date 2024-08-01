@@ -294,7 +294,6 @@ Route::controller(PanditOtpController::class)->group(function() {
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
         Route::get('/panditlogin', 'panditlogin')->name('panditlogin');
-        Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
         Route::get('/booking/details/{id}', 'getDetails')->name('bookingdetails');
         Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
@@ -389,6 +388,8 @@ Route::group(['prefix' => 'pandit'], function () {
         Route::delete('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
         Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
         Route::put('/updatepoojalist', 'updatePoojalist');
+        Route::get('/get-variants/{listName}', 'getVariants');
+            Route::put('/pooja/{id}', 'updatePoojaItem');
     });
 });
 
