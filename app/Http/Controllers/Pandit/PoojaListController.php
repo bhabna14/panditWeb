@@ -64,7 +64,7 @@ class PoojaListController extends Controller
 
         $poojaItems->each(function ($item) {
             // Ensure that `pooja_photo` exists in the selected columns or change it to a relevant column
-            $item->pooja_photo_url = isset($item->pooja_photo) ? asset('storage/' . $item->pooja_photo) : asset('assets/img/default-image.jpg');
+            $item->pooja_photo_url = isset($item->pooja_photo) ? asset('assets/img/' . $item->pooja_photo) : asset('assets/img/default-image.jpg');
         });
 
         return response()->json([

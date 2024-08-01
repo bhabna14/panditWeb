@@ -41,6 +41,10 @@ class CareerController extends Controller
             'experience' => 'required|integer|min:0',
             'id_type.*' => 'required|string|in:adhar,voter,pan,DL,health card',
             'upload_id.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
+            'education_type.*' => 'required|string|in:10th,+2,+3,Master Degree',
+            'upload_edu.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
+            'vedic_type.*' => 'required|string|max:255',
+            'upload_vedic.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
                 ]);
 
         $career = new Career();

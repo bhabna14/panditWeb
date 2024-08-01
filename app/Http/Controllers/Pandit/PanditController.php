@@ -162,8 +162,6 @@ public function poojarequest()
         $citys = City::all(); 
         $states = State::all(); 
 
-
-     
         $languages = [
             'English','Odia','Hindi','Sanskrit','Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 'Kashmiri',
             'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi',

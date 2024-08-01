@@ -107,7 +107,7 @@
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Puja Name</th>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">List Name</th>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Quantity</th>
-                                    {{-- <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Unit</th> --}}
+                                   
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Action</th>
                                 </tr>
                             </thead>
@@ -157,19 +157,7 @@
                                     <label for="listQuantity">Quantity</label>
                                     <input type="text" class="form-control" id="listQuantity" name="list_quantity" placeholder="Enter Quantity">
                                 </div>
-                                <div class="form-group">
-                                    <label for="weight_unit">Unit</label>
-
-                                    <select class="form-control" id="weight_unit" name="unit" required>
-                                        <option value=" ">Select Unit</option>
-                                        <option value="Kilogram">Kilogram (kg)</option>
-                                        <option value="Gram">Gram (gm)</option>
-                                        <option value="Milligram">Milligram (mg)</option>
-                                        <option value="Piece">Piece (psc)</option>
-                                        <option value="Liter">Liter (ltr)</option>
-                                        <option value="Milli Liter">Milli Liter (ml)</option>
-                                    </select>
-                                </div>
+                                
                             </div>
                         </div>
                     </div>

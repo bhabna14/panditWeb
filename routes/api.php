@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\PoojaDetailsController;
 use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\PanditLoginController;
 use App\Http\Controllers\Api\CheckController;
+use App\Http\Controllers\Api\PoojaStatusController;
 
 
 
@@ -77,11 +78,19 @@ Route::controller(PoojaListController::class)->group(function() {
     Route::middleware('auth:sanctum')->get('/pooja-item-list', 'poojaitemlist');
     Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');
     Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
-
+    Route::get('/approved-pooja', 'approvedPoojaList');
+    
     // did by bhabna
     Route::get('/pooja-item-list/{pooja_id}', 'poojaitemlist');
     Route::get('/list-pooja-item', 'listofitem');
 
+});
+
+Route::controller(PoojaStatusController::class)->group(function() {
+    Route::middleware('auth:sanctum')->post('/bookings/{id}/approve', 'approveBooking');
+    Route::middleware('auth:sanctum')->post('/bookings/{id}/reject', 'rejectBooking');
+    Route::middleware('auth:sanctum')->post('/bookings/start', 'start');
+    Route::middleware('auth:sanctum')->post('/bookings/end',  'end');
 });
 
 Route::controller(BankController::class)->group(function() {

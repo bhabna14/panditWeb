@@ -110,6 +110,7 @@ class AreaController extends Controller
                     'message' => 'Data saved successfully.',
                     'data' => $poojaArea
                 ], 200);
+
             } else {
                 Log::error('Failed to save pooja area.', ['data' => $validatedData]);
 
@@ -118,6 +119,7 @@ class AreaController extends Controller
                     'message' => 'Failed to save data.',
                     'data' => []
                 ], 500);
+
             }
         } catch (\Exception $e) {
             // Log the error
@@ -137,7 +139,6 @@ public function manageArea()
     $panditId = Auth::guard('sanctum')->user()->pandit_id;
 
     $poojaAreas = Poojaarea::where('status', 'active')->where('pandit_id', $panditId)->get();
-    
     $states = Panditstate::all()->keyBy('stateCode');
     $districts = Panditdistrict::all()->keyBy('districtCode');
     $subdistricts = Panditsubdistrict::all()->keyBy('subdistrictCode');

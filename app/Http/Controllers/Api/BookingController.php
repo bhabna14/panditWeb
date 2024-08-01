@@ -176,6 +176,8 @@ class BookingController extends Controller
         return response()->json(['error' => 'Failed to cancel booking. Please try again.'], 500);
     }
 }
+
+
     
     
 }

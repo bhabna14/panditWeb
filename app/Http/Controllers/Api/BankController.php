@@ -33,6 +33,9 @@ class BankController extends Controller
         );
 
         // Return a JSON response
-        return response()->json(['success' => 'Bank details saved successfully!', 'data' => $bankdata], 200);
+        return response()->json([
+            'success' => 'Bank details saved successfully!', 
+            'data' => $bankdata
+        ], 200);
     }
 }
