@@ -224,7 +224,11 @@ class PoojaListController extends Controller
             $poojaItem->pandit_id = $profileId; // Assuming you want to link this to the authenticated pandit
     
             if ($poojaItem->save()) {
-                return response()->json(['message' => 'Data saved successfully.'], 201);
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Data saved successfully.'
+                
+                ], 201);
             } else {
                 return response()->json(['message' => 'Failed to save data.'], 500);
             }
