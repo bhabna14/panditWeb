@@ -5,9 +5,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Career;
 use App\Models\Profile;
-use App\Models\IdcardDetail;
-use App\Models\EduDetail;
-use App\Models\VedicDetail;
+use App\Models\PanditIdCard;
+use App\Models\PanditEducation;
+use App\Models\PanditVedic;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 
@@ -93,41 +93,5 @@ class CareersController extends Controller
             return redirect()->back()->withErrors(['danger' => 'An error occurred while saving data.']);
         }
     }
-
-
-    public function manageCareer()
-{
-    try {
-        $profileId = Auth::guard('sanctum')->user()->pandit_id;
-
-        // Fetch data
-        $pandit_profile = Profile::where('pandit_id', $profileId)->latest()->first();
-        $pandit_career = Career::where('pandit_id', $profileId)->latest()->first();
-        $pandit_idcards = PanditIdCard::where('pandit_id', $profileId)->where('status', 'active')->get();
-        $pandit_educations = PanditEducation::where('pandit_id', $profileId)->where('status', 'active')->get();
-        $pandit_vedics = PanditVedic::where('pandit_id', $profileId)->where('status', 'active')->get();
-
-        // Return JSON response
-        return response()->json([
-            'status' => 200,
-            'message' => 'Career details fetched successfully.',
-            'data' => [
-                'pandit_profile' => $pandit_profile,
-                'pandit_career' => $pandit_career,
-                'pandit_idcards' => $pandit_idcards,
-                'pandit_educations' => $pandit_educations,
-                'pandit_vedics' => $pandit_vedics,
-            ]
-        ], 200);
-    } catch (\Exception $e) {
-        // Return error response
-        return response()->json([
-            'status' => 500,
-            'message' => 'Failed to fetch career details.',
-            'error' => $e->getMessage()
-        ], 500);
-    }
-}
-
     
 }

@@ -3,11 +3,11 @@ namespace App\Http\Controllers\Api;
  
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Profile;
 use App\Models\Career;
-use App\Models\IdcardDetail;
-use App\Models\EduDetail;
-use App\Models\VedicDetail;
+use App\Models\Profile;
+use App\Models\PanditIdCard;
+use App\Models\PanditEducation;
+use App\Models\PanditVedic;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -115,6 +115,40 @@ class ProfileController extends Controller
             return response()->json(['success' => true, 'message' => 'Data updated successfully.'], 200);
         } else {
             return response()->json(['success' => false, 'message' => 'Failed to update data.'], 500);
+        }
+    }
+
+    public function showProfileDetails()
+    {
+        try {
+            $profileId = Auth::guard('sanctum')->user()->pandit_id;
+    
+            // Fetch data
+            $pandit_profile = Profile::where('pandit_id', $profileId)->latest()->first();
+            $pandit_career = Career::where('pandit_id', $profileId)->latest()->first();
+            $pandit_idcards = PanditIdCard::where('pandit_id', $profileId)->where('status', 'active')->get();
+            $pandit_educations = PanditEducation::where('pandit_id', $profileId)->where('status', 'active')->get();
+            $pandit_vedics = PanditVedic::where('pandit_id', $profileId)->where('status', 'active')->get();
+    
+            // Return JSON response
+            return response()->json([
+                'status' => 200,
+                'message' => 'Profile details fetched successfully.',
+                'data' => [
+                    'pandit_profile' => $pandit_profile,
+                    'pandit_career' => $pandit_career,
+                    'pandit_idcards' => $pandit_idcards,
+                    'pandit_educations' => $pandit_educations,
+                    'pandit_vedics' => $pandit_vedics,
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            // Return error response
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to fetch Profile details.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
      

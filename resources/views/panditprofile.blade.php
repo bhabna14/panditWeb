@@ -164,11 +164,12 @@
                                                                 <div class="row">
                                                                     <div class="col-md-12">
                                                                         <div class="form-group">
-                                                                            <label for="language">About <span style="color: red">*</span></label>
-                                                                            <textarea  class="form-control" name ="about" id = "about"></textarea>
+                                                                            <label for="about">About Pandit<span style="color: red">*</span></label>
+                                                                            <textarea class="form-control" name="about" id="about"></textarea>
                                                                         </div>
                                                                     </div>
                                                                 </div>
+                                                                
                                                                 <div class="text-center col-md-12">
                                                                     <button type="submit" class="btn btn-primary"
                                                                         style="width: 150px;">Submit</button>

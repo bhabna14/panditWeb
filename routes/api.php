@@ -53,11 +53,11 @@ Route::controller(AreaController::class)->group(function() {
 Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/save', 'saveProfile');
     Route::post('/profile/update/{id}','updateProfile');
+    Route::get('/show-profile-details', 'showProfileDetails');
 });
 
 Route::controller(CareersController::class)->group(function() {
     Route::post('/career/save', 'saveCareer');
-    Route::get('/manage-career', 'manageCareer');
 });
 
 Route::controller(PoojaSkillController::class)->group(function() {

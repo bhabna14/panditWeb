@@ -104,6 +104,12 @@ public function start(Request $request)
             ['start_time' => $start_time, 'end_time' => null, 'pooja_status' => 'started']
         );
 
+        $bookingUpdated = DB::table('bookings')
+        ->where('booking_id', $booking_id)
+        ->update(['application_status' => 'started',
+        'status' => 'started',
+    ]);
+
         // Return success or error message
         if ($statusUpdated) {
             return response()->json(['message' => 'Pooja started successfully.'], 200);

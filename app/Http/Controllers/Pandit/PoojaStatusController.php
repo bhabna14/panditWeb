@@ -39,6 +39,7 @@ class PoojaStatusController extends Controller
                           })
                           ->whereNull('end_time')
                           ->exists();
+
     
         if ($ongoingPooja) {
             return redirect()->back()->with('error', 'You must complete the ongoing Pooja before starting a new one.');
@@ -51,6 +52,13 @@ class PoojaStatusController extends Controller
             ['booking_id' => $booking_id, 'pooja_id' => $pooja_id],
             ['start_time' => $start_time, 'end_time' => null, 'pooja_status' => 'started']
         );
+
+        $bookingUpdated = DB::table('bookings')
+        ->where('booking_id', $booking_id)
+        ->update(['application_status' => 'started',
+        'status' => 'started',
+    ]);
+
     
         // Redirect with success or error message
         if ($statusUpdated) {

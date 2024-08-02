@@ -153,9 +153,12 @@
                                         @endforeach
                                     </select>
                                 </div>
+                              
                                 <div class="form-group">
-                                    <label for="listQuantity">Quantity</label>
-                                    <input type="text" class="form-control" id="listQuantity" name="list_quantity" placeholder="Enter Quantity">
+                                    <label for="variantSelect">Variant</label>
+                                    <select class="form-control" id="listQuantity" name="list_quantity" required>
+                                        <!-- Options will be dynamically populated here -->
+                                    </select>
                                 </div>
                                
                             </div>

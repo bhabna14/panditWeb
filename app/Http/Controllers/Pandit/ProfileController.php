@@ -12,6 +12,7 @@ use App\Models\PanditEducation;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use App\Rules\WordCount;
 
 
 class ProfileController extends Controller
@@ -34,7 +35,9 @@ class ProfileController extends Controller
         $request->validate([
             'profile_photo' => 'required|image|max:2048', 
             'whatsappno' => 'numeric|digits:10',
+            'about' => ['required', new WordCount(200)], // Validate the about field with max 200 words
         ]);
+        
 
         $profile = new Profile();
 
