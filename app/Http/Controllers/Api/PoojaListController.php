@@ -172,7 +172,11 @@ class PoojaListController extends Controller
                 ->get();
 
             if ($poojaItems->isEmpty()) {
-                return response()->json(['error' => 'Pooja items not found.'], 404);
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Pooja items not found.',
+                    'data' => []
+                ], 404);
             }
 
             $poojaItems->each(function ($item) {
