@@ -257,7 +257,7 @@ class PoojaListController extends Controller
             // Fetch approved Pooja
             $approved_pooja = Booking::with(['user', 'pooja', 'address'])
                 ->where('pandit_id', $pandit_details->id)
-                ->where('application_status', 'approved')
+                ->where('status','!=', 'pending')
                 ->orderBy('created_at', 'desc')
                 ->get()
                 ->map(function ($booking) {
