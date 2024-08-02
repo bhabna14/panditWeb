@@ -136,9 +136,15 @@ public function start(Request $request)
 public function end(Request $request)
 {
     try {
+        // Validate the request
+        $validatedData = $request->validate([
+            'booking_id' => 'required',
+            'pooja_id' => 'required',
+        ]);
+
         // Retrieve the booking_id and pooja_id from the request
-        $booking_id = $request->input('booking_id');
-        $pooja_id = $request->input('pooja_id');
+        $booking_id = $validatedData['booking_id'];
+        $pooja_id = $validatedData['pooja_id'];
         
         $end_time = Carbon::now();
         
@@ -178,7 +184,7 @@ public function end(Request $request)
                 ]);
     
             // Return success or error message
-            if ($updated) {
+            if ($updated && $bookingUpdated) {
                 return response()->json(['message' => 'Pooja ended successfully.'], 200);
             } else {
                 return response()->json(['message' => 'Failed to end pooja.'], 500);
@@ -188,12 +194,14 @@ public function end(Request $request)
             return response()->json(['message' => 'Pooja start time not found.'], 404);
         }
     } catch (\Exception $e) {
+        \Log::error('An error occurred while ending the Pooja.', ['error' => $e->getMessage()]);
         return response()->json([
             'message' => 'An error occurred while ending the Pooja.',
             'error' => $e->getMessage()
         ], 500);
     }
 }
+
 
 
 }
