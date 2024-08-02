@@ -163,8 +163,8 @@ class PoojaListController extends Controller
             $panditId = Auth::guard('sanctum')->user()->pandit_id;
 
             $poojaItems = PoojaItems::join('pooja_list', 'pooja_list.id', '=', 'pandit_poojaitem.pooja_id')
-                ->join('poojaitem_list', 'poojaitem_list.id', '=', 'pandit_poojaitem.pooja_list')
-                ->join('variants', 'variants.id', '=', 'pandit_poojaitem.list_quantity') // Ensure the column name is correct
+                ->join('poojaitem_list', 'poojaitem_list.id', '=', 'pandit_poojaitem.item_id')
+                ->join('variants', 'variants.id', '=', 'pandit_poojaitem.variant_id') // Ensure the column name is correct
                 ->where('pandit_poojaitem.pooja_id', $pooja_id)
                 ->where('pandit_poojaitem.status', 'active')
                 ->where('pandit_poojaitem.pandit_id', $panditId)
