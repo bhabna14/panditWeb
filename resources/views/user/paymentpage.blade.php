@@ -20,7 +20,7 @@
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="payment_option" id="full_payment" value="full" required>
                         <label class="form-check-label" for="full_payment">
-                            Pay Full Amount in Advance (5% discount): ₹{{ $booking->pooja_fee * 0.95 }}
+                            Pay Full Amount in Advance (5% discount): ₹{{ sprintf('%.2f',$booking->pooja_fee * 0.95) }}
                         </label>
                     </div>
                     <div class="form-check">

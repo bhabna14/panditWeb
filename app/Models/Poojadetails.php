@@ -20,6 +20,11 @@ class Poojadetails extends Model
     {
         return $this->belongsTo(Profile::class, 'pandit_id', 'pandit_id')->where('pandit_status', 'accepted');
     }
+    public function bookings()
+{
+    return $this->hasMany(Booking::class, 'pooja_id', 'pooja_id');
+}
+
    
 }
 

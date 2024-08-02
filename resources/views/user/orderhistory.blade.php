@@ -45,7 +45,7 @@
       <div class="col-auto">
         <div class="filter-buttons">
           <a href="{{ route('booking.history', ['filter' => 'all']) }}" class="{{ request('filter') == 'all' || !request('filter') ? 'active' : '' }}">All</a>
-          <a href="{{ route('booking.history', ['filter' => 'pending']) }}" class="{{ request('filter') == 'pending' ? 'active' : '' }}">Pending</a>
+          <a href="{{ route('booking.history', ['filter' => 'pending']) }}" class="{{ request('filter') == 'pending' ? 'active' : '' }}">Payment Pending</a>
           <a href="{{ route('booking.history', ['filter' => 'confirmed']) }}" class="{{ request('filter') == 'confirmed' ? 'active' : '' }}">Confirmed</a>
 
           <a href="{{ route('booking.history', ['filter' => 'canceled']) }}" class="{{ request('filter') == 'canceled' ? 'active' : '' }}">Canceled</a>
@@ -119,7 +119,7 @@
                       <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
                   </div>
                   <div class="col-md-4">
-                      @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status != "rejected")
+                      @if ($booking->status == "completed")
                       <span class="status-text"><i class="fa fa-circle comp-dot" aria-hidden="true"></i>Completed on {{ $booking->booking_date }}</span>
                       @endif
                       @if ($booking->status == "canceled")

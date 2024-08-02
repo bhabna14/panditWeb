@@ -273,22 +273,24 @@ class userController extends Controller
      }
 
      public function list($pooja_id)
-    {
-        // Fetch the list of pandits for the specified pooja
-        // $pandits = Pandit::where('pooja_id', $pooja_id)->get();
-        // dd($pooja_id);
-        $pooja_id = Poojadetails::where('id', $pooja_id)->first();
-
-        $pooja = Poojalist::where('id', $pooja_id->pooja_id)->firstOrFail();
-        // dd($pooja);
-        // Fetch the related Poojadetails items along with the Profile
-        $pandit_pujas = Poojadetails::with('profile')
-            ->where('pooja_id', $pooja->id)
-            ->get();
-
-        // Return a view with the list of pandits
-        return view('user.puja-details', compact('pooja', 'pandit_pujas'));
-    }
+     {
+         // Fetch the pooja details
+         $pooja = Poojalist::where('id', $pooja_id)->firstOrFail();
+     
+         // Fetch the related Poojadetails items along with the Profile, excluding rejected ones
+         $pandit_pujas = Poojadetails::with('profile')
+             ->where('pooja_id', $pooja->id)
+             ->whereDoesntHave('bookings', function ($query) use ($pooja_id) {
+                 $query->where('pooja_id', $pooja_id)
+                       ->where('status', 'rejected');
+             })
+             ->get();
+     
+         // Return a view with the list of pandits
+         return view('user.puja-details', compact('pooja', 'pandit_pujas'));
+     }
+     
+     
 
     
     public function ajaxSearch(Request $request)
@@ -449,7 +451,7 @@ public function bookingSuccess($id)
                                   ->whereDate('booking_date', '>=', Carbon::now());
                 break;
             case 'completed':
-                $bookingsQuery->where('status', 'paid')
+                $bookingsQuery->where('status', 'completed')
                             ->whereDate('booking_date', '<', Carbon::now());
                 break;
             default:

@@ -168,7 +168,7 @@
                       <div class="row x-gap-15 y-gap-20">
                           <div class="col-auto">
                               <!-- Display pandit's photo (example) -->
-                              <img src="{{ asset('front-assets/img/avatars/pandit.jpeg') }}" alt="image" class="size-140 rounded-4 object-cover">
+                              <img src="{{ asset($pandit->profile_photo) }}" alt="image" class="size-140 rounded-4 object-cover">
                           </div>
                           <div class="col">
                               <div class="lh-17 fw-500">{{ $pandit->name }}</div>
