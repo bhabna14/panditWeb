@@ -9,11 +9,11 @@ class Variant extends Model
 {
     use HasFactory;
     protected $fillable = [
-        'variant_id', 'product_id', 'title', 'price'
+        'item_id', 'title', 'price'
     ];
 
     public function product()
     {
-        return $this->belongsTo(Poojaitemlists::class, 'product_id');
+        return $this->belongsTo(Poojaitemlists::class, 'item_id');
     }
 }

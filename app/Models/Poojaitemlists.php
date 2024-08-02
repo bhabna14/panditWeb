@@ -10,7 +10,7 @@ class Poojaitemlists extends Model
     use HasFactory;
     protected $table = "poojaitem_list";
     protected $fillable = [
-        'product_id',
+        
         'item_name',
         'slug',
         'product_type',
@@ -19,6 +19,6 @@ class Poojaitemlists extends Model
 
     public function variants()
     {
-        return $this->hasMany(Variant::class, 'product_id'); // Ensure 'product_id' matches the foreign key in the variants table
+        return $this->hasMany(Variant::class, 'item_id'); // Ensure 'product_id' matches the foreign key in the variants table
     }
 }

@@ -18,7 +18,9 @@ class PoojaListController extends Controller
 
         $Poojaskills = Poojaskill::where('status', 'active')->where('pandit_id',$panditId)->get();
 
-        $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
+        // $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
+
+        $Poojaitemlist = Poojaitemlists::with('variants')->where('status', 'active')->get();
         // $Poojaitemlist = Poojaitemlists::with('variants')->where('status', 'active')->get();
 
         return view('/pandit/poojaitemlist', compact('Poojaskills','Poojaitemlist'));
@@ -50,8 +52,8 @@ class PoojaListController extends Controller
         try {
             $panditId = Auth::guard('pandits')->user()->pandit_id;
     
-            $poojaItems = PoojaItems::join('poojaitem_list', 'poojaitem_list.id', '=', 'pandit_poojaitem.pooja_list')
-                ->join('variants', 'variants.id', '=', 'pandit_poojaitem.list_quantity') // Ensure the column name is correct
+            $poojaItems = PoojaItems::join('poojaitem_list', 'poojaitem_list.id', '=', 'pandit_poojaitem.item_id')
+                ->join('variants', 'variants.id', '=', 'pandit_poojaitem.variant_id') // Ensure the column name is correct
                 ->where('pandit_poojaitem.pooja_id', $pooja_id)
                 ->where('pandit_poojaitem.status', 'active')
                 ->where('pandit_poojaitem.pandit_id', $panditId)
@@ -107,25 +109,24 @@ class PoojaListController extends Controller
         $validatedData = $request->validate([
             'pooja_id' => 'required|integer',
             'pooja_name' => 'required|string',
-            'list_name.*' => 'required|string',
-            'quantity.*' => 'required|integer',
+            'item_id.*' => 'required|integer',
+            'variant_id.*' => 'required|integer',
             // 'unit.*' => 'required|string',
         ]);
     
         $profileId = Auth::guard('pandits')->user()->pandit_id;
         $poojaId = $validatedData['pooja_id'];
         $poojaName = $validatedData['pooja_name'];
-        $listNames = $validatedData['list_name'];
-        $quantities = $validatedData['quantity'];
-        // $units = $validatedData['unit'];
+        $item_ids = $validatedData['item_id'];
+        $variant_ids = $validatedData['variant_id'];
     
         $duplicates = [];
         $savedItems = [];
         $processedNames = [];
     
-        foreach ($listNames as $key => $listName) {
-            if (in_array($listName, $processedNames)) {
-                $duplicates[] = $listName;
+        foreach ($item_ids as $key => $itemId) {
+            if (in_array($itemId, $processedNames)) {
+                $duplicates[] = $itemId;
                 continue;
             }
     
@@ -133,16 +134,13 @@ class PoojaListController extends Controller
                 ['pandit_id', '=', $profileId],
                 ['pooja_id', '=', $poojaId],
                 ['pooja_name', '=', $poojaName],
-                ['pooja_list', '=', $listName]
+                ['item_id', '=', $itemId]
             ])->first();
     
             if ($existingItem) {
-                $duplicates[] = $listName;
+                $duplicates[] = $itemId;
                 continue;
             }
-    
-            // Ensure $quantities[$key] exists
-            $quantity = isset($quantities[$key]) ? $quantities[$key] : null;
     
             // Save each item to the database
             $poojaItem = new PoojaItems();
@@ -150,14 +148,14 @@ class PoojaListController extends Controller
                 'pandit_id' => $profileId,
                 'pooja_id' => $poojaId,
                 'pooja_name' => $poojaName,
-                'pooja_list' => $listName,
-                'list_quantity' => $quantity,
+                'item_id' => $itemId,
+                'variant_id' => $variant_ids[$key],
                 // 'list_unit' => isset($units[$key]) ? $units[$key] : null,
             ]);
     
             if ($poojaItem->save()) {
-                $savedItems[] = $listName;
-                $processedNames[] = $listName;
+                $savedItems[] = $itemId;
+                $processedNames[] = $itemId;
             }
         }
     
@@ -167,7 +165,8 @@ class PoojaListController extends Controller
             return redirect()->back()->with('error', 'Failed to save any data.');
         }
     }
-    
+
+
 
     public function deletePoojaItem($id)
     {

@@ -146,18 +146,33 @@
                                 <div class="form-group">
                                     <label for="list_name">List Name</label>
 
-                                    <select class="form-control chosen-select" name="list_name" id="list_name" required>
+                                    {{-- <select class="form-control chosen-select" name="list_name" id="list_name" required>
                                         <option value="">Select Puja List</option>
                                         @foreach ($Poojaitemlist as $pujalist)
                                             <option value="{{ $pujalist }}">{{ $pujalist }}</option>
+                                        @endforeach
+                                    </select> --}}
+
+                                    <select class="form-control chosen-select" name="list_name" id="list_name" required>
+                                        <option value="">Select Puja List</option>
+                                        @foreach ($Poojaitemlist as $pujalist)
+                                            <option value="{{ $pujalist->id }}" data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
+                                                {{ $pujalist->item_name }}
+                                            </option>
+                                        
                                         @endforeach
                                     </select>
                                 </div>
                               
                                 <div class="form-group">
                                     <label for="variantSelect">Variant</label>
-                                    <select class="form-control" id="listQuantity" name="list_quantity" required>
+                                    {{-- <select class="form-control" id="listQuantity" name="list_quantity" required>
                                         <!-- Options will be dynamically populated here -->
+                                    </select> --}}
+
+                                    <select class="form-control chosen-select" name="list_quantity" id="listQuantity" required>
+                                        <option value="">Select Variant</option>
+                                        <!-- Variants will be populated via JavaScript -->
                                     </select>
                                 </div>
                                
@@ -183,6 +198,7 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     {{-- <script src="{{ asset('assets/js/pandit-poojalist.js') }}"></script> --}}
+    
     <script>
 
 document.addEventListener('DOMContentLoaded', function() {

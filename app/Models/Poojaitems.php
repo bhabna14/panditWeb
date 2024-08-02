@@ -13,9 +13,9 @@ class Poojaitems extends Model
         'pandit_id',
         'pooja_id',
         'pooja_name',
-        'pooja_list',
-        'list_quantity',
-        // 'list_unit', // Uncomment if you want to add unit to fillable
+        'item_id',
+        'variant_id'
+        
     ];
     // Add relationships if necessary
     public function pooja()

@@ -63,7 +63,7 @@
                                                                 <tr>
                                                                     <th class="border-bottom-0">Sl</th>
                                                                     <th class="border-bottom-0">Puja Name</th>
-                                                                    <th class="border-bottom-0">List Name</th>
+                                                                    <th class="border-bottom-0">Item Name</th>
                                                                     <th class="border-bottom-0">Variant</th>
                                                                     {{-- <th class="border-bottom-0">Unit</th> --}}
                                                                     <th class="border-bottom-0">Action</th>
@@ -86,7 +86,7 @@
                                                                         </div>
                                                                     </td>
                                                                     <td>
-                                                                        <select class="form-control chosen-select" name="list_name[]" id="list_name" required>
+                                                                        <select class="form-control chosen-select" name="item_id[]" id="item_id" required>
                                                                             <option value="">Select Puja List</option>
                                                                             @foreach ($Poojaitemlist as $pujalist)
                                                                                 <option value="{{ $pujalist->id }}" data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
@@ -98,26 +98,12 @@
                                                                     </td>
                                                                     <td>
                                                                         {{-- <label for="listVariant">Variant</label> --}}
-                                                                        <select class="form-control chosen-select" name="quantity[]" id="listVariant" required>
+                                                                        <select class="form-control chosen-select" name="variant_id[]" id="variant_id" required>
                                                                             <option value="">Select Variant</option>
                                                                             <!-- Variants will be populated via JavaScript -->
                                                                         </select>
                                                                     </td>
-                                                                    
-                                                                    
-                                                                    
-                                                                    {{-- <td>
-                                                                        <select class="form-control" id="weight_unit"
-                                                                            name="unit[]" required>
-                                                                            <option value=" ">Select Unit</option>
-                                                                            <option value="Kilogram">Kilogram (kg)</option>
-                                                                            <option value="Gram">Gram (gm)</option>
-                                                                            <option value="Milligram">Milligram (mg)</option>
-                                                                            <option value="Piece">Piece (psc)</option>
-                                                                            <option value="Liter">Liter (ltr)</option>
-                                                                            <option value="Milli Liter">Milli Liter (ml)</option>
-                                                                        </select>
-                                                                    </td> --}}
+                                                                  
                                                                     <td>
                                                                         <button type="button"
                                                                             class="btn btn-success add_item_btn"
@@ -162,17 +148,14 @@
             document.getElementById('Message').style.display = 'none';
         }, 3000);
     </script>
-    <!-- smart photo master js -->
-    {{-- <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script> --}}
+  
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
-    
-    {{-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> --}}
     <script>
         $(document).ready(function() {
-            $('#list_name').on('change', function() {
+            $('#item_id').on('change', function() {
                 var selectedOption = $(this).find('option:selected');
                 var variants = selectedOption.data('variants');
-                var $variantSelect = $('#listVariant');
+                var $variantSelect = $('#variant_id');
     
                 // Clear previous options
                 $variantSelect.empty();

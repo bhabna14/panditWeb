@@ -6,14 +6,15 @@ function addPujaListSection(poojaId) {
 
     const newRow = `
         <tr class="remove_puja_item">
+             <td></td> <!-- You might want to keep a sequential number for better UX -->
             <td></td> <!-- You might want to keep a sequential number for better UX -->
             <td>
-                <select class="form-control" name="list_name[]" onchange="updateVariants(this)">
+                <select class="form-control" name="item_id[]" onchange="updateVariants(this)">
                     ${options}
                 </select>
             </td>
             <td>
-                <select class="form-control" name="quantity[]" required>
+                <select class="form-control" name="variant_id[]" required>
                     <option value="">Select Variant</option>
                     <!-- Variants will be populated via JavaScript -->
                 </select>
@@ -35,7 +36,7 @@ function removePujaListSection(button) {
 function updateVariants(selectElement) {
     const selectedOption = $(selectElement).find('option:selected');
     const variantsData = selectedOption.data('variants');
-    const $variantSelect = $(selectElement).closest('tr').find('select[name="list_variant[]"]');
+    const $variantSelect = $(selectElement).closest('tr').find('select[name="variant_id[]"]');
 
     // Clear previous options
     $variantSelect.empty();
