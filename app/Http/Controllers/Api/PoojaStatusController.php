@@ -69,8 +69,8 @@ public function start(Request $request)
     try {
         // Validate the request
         $validatedData = $request->validate([
-            'booking_id' => 'required|string',
-            'pooja_id' => 'required|string',
+            'booking_id' => 'required',
+            'pooja_id' => 'required',
         ]);
 
         // Retrieve the booking_id and pooja_id from the request
