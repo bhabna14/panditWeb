@@ -202,47 +202,28 @@ class PoojaListController extends Controller
             $validatedData = $request->validate([
                 'pooja_id' => 'required|integer',
                 'pooja_name' => 'required|string',
-                'list_name' => 'required|array',
-                'list_name.*' => 'required|array'
+                'pooja_list' => 'required|integer',
+                'list_quantity' => 'required|integer'
             ]);
     
             $profileId = Auth::guard('sanctum')->user()->pandit_id;
     
+            // Assign the validated data to variables
             $poojaId = $validatedData['pooja_id'];
             $poojaName = $validatedData['pooja_name'];
-            $listNames = $validatedData['list_name'];
+            $poojaList = $validatedData['pooja_list'];
+            $listQuantity = $validatedData['list_quantity'];
     
-            $processedNames = [];
+            // Here you should save the data to the database
+            // Assuming you have a model named PoojaItemList, you could do something like:
+            $poojaItem = new PoojaItemList();
+            $poojaItem->pooja_id = $poojaId;
+            $poojaItem->pooja_name = $poojaName;
+            $poojaItem->pooja_list = $poojaList;
+            $poojaItem->list_quantity = $listQuantity;
+            $poojaItem->pandit_id = $profileId; // Assuming you want to link this to the authenticated pandit
     
-            foreach ($listNames as $list) {
-                foreach ($list as $listName => $quantity) {
-                    // Check if the pooja_name already exists for the given pooja_id and pandit_id in the database
-                    $existingItem = PoojaItems::where([
-                        ['pandit_id', '=', $profileId],
-                        ['pooja_id', '=', $poojaId],
-                        ['pooja_name', '=', $poojaName],
-                        ['pooja_list', '=', $listName]
-                    ])->first();
-    
-                    if ($existingItem) {
-                        continue; // Skip saving this item and move to the next one
-                    }
-    
-                    // Save each item to the database
-                    $poojaItem = new PoojaItems();
-                    $poojaItem->pandit_id = $profileId;
-                    $poojaItem->pooja_id = $poojaId;
-                    $poojaItem->pooja_name = $poojaName;
-                    $poojaItem->pooja_list = $listName;
-                    $poojaItem->list_quantity = $quantity;
-    
-                    if ($poojaItem->save()) {
-                        $processedNames[] = $listName;
-                    }
-                }
-            }
-    
-            if (!empty($processedNames)) {
+            if ($poojaItem->save()) {
                 return response()->json(['message' => 'Data saved successfully.'], 201);
             } else {
                 return response()->json(['message' => 'Failed to save data.'], 500);
@@ -254,7 +235,7 @@ class PoojaListController extends Controller
             ], 500);
         }
     }
-
+    
 
     public function approvedPoojaList()
     {
