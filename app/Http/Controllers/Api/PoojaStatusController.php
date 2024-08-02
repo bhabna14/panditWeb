@@ -67,9 +67,15 @@ public function rejectBooking(Request $request, $id)
 public function start(Request $request)
 {
     try {
+        // Validate the request
+        $validatedData = $request->validate([
+            'booking_id' => 'required|string',
+            'pooja_id' => 'required|string',
+        ]);
+
         // Retrieve the booking_id and pooja_id from the request
-        $booking_id = $request->input('booking_id');
-        $pooja_id = $request->input('pooja_id');
+        $booking_id = $validatedData['booking_id'];
+        $pooja_id = $validatedData['pooja_id'];
 
         // Fetch the booking record
         $booking = Booking::where('booking_id', $booking_id)->first();
@@ -106,24 +112,27 @@ public function start(Request $request)
         );
 
         $bookingUpdated = DB::table('bookings')
-        ->where('booking_id', $booking_id)
-        ->update(['application_status' => 'started',
-        'status' => 'started',
-    ]);
+            ->where('booking_id', $booking_id)
+            ->update([
+                'application_status' => 'started',
+                'status' => 'started',
+            ]);
 
         // Return success or error message
-        if ($statusUpdated) {
+        if ($statusUpdated && $bookingUpdated) {
             return response()->json(['message' => 'Pooja started successfully.'], 200);
         } else {
             return response()->json(['message' => 'Failed to start Pooja.'], 500);
         }
     } catch (\Exception $e) {
+        \Log::error('An error occurred while starting the Pooja.', ['error' => $e->getMessage()]);
         return response()->json([
             'message' => 'An error occurred while starting the Pooja.',
             'error' => $e->getMessage()
         ], 500);
     }
 }
+
 public function end(Request $request)
 {
     try {
