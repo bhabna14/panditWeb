@@ -216,7 +216,7 @@ class PoojaListController extends Controller
     
             // Here you should save the data to the database
             // Assuming you have a model named PoojaItemList, you could do something like:
-            $poojaItem = new PoojaItemList();
+            $poojaItem = new PoojaItems();
             $poojaItem->pooja_id = $poojaId;
             $poojaItem->pooja_name = $poojaName;
             $poojaItem->pooja_list = $poojaList;
