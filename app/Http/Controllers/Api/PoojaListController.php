@@ -202,8 +202,8 @@ class PoojaListController extends Controller
             $validatedData = $request->validate([
                 'pooja_id' => 'required|integer',
                 'pooja_name' => 'required|string',
-                'pooja_list' => 'required|integer',
-                'list_quantity' => 'required|integer'
+                'item_id' => 'required|integer',
+                'variant_id' => 'required|integer'
             ]);
     
             $profileId = Auth::guard('sanctum')->user()->pandit_id;
@@ -211,16 +211,16 @@ class PoojaListController extends Controller
             // Assign the validated data to variables
             $poojaId = $validatedData['pooja_id'];
             $poojaName = $validatedData['pooja_name'];
-            $poojaList = $validatedData['pooja_list'];
-            $listQuantity = $validatedData['list_quantity'];
+            $itemId = $validatedData['item_id'];
+            $variantId = $validatedData['variant_id'];
     
             // Here you should save the data to the database
             // Assuming you have a model named PoojaItemList, you could do something like:
             $poojaItem = new PoojaItems();
             $poojaItem->pooja_id = $poojaId;
             $poojaItem->pooja_name = $poojaName;
-            $poojaItem->pooja_list = $poojaList;
-            $poojaItem->list_quantity = $listQuantity;
+            $poojaItem->item_id = $itemId;
+            $poojaItem->variant_id = $variantId;
             $poojaItem->pandit_id = $profileId; // Assuming you want to link this to the authenticated pandit
     
             if ($poojaItem->save()) {
