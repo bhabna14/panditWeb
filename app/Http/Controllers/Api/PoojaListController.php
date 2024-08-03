@@ -92,19 +92,29 @@ class PoojaListController extends Controller
     public function deletePoojaItem($id)
     {
         try {
+            // Find the existing PoojaItem by ID
             $poojaItem = PoojaItems::findOrFail($id);
-            $poojaItem->status = 'deleted'; // Update the status field
-
+    
+            // Update the status to 'deleted'
+            $poojaItem->status = 'deleted';
+    
+            // Save the changes to the database
             if ($poojaItem->save()) {
-                return response()->json(['success' => 'Pooja item deleted successfully.']);
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Data status updated to deleted successfully.'
+                ], 200);
             } else {
-                return response()->json(['error' => 'Delete not successful.'], 500);
+                return response()->json(['message' => 'Failed to update data status.'], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Pooja item not found.'], 404);
+            return response()->json([
+                'message' => 'An error occurred while updating pooja item status.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
-
+    
   
 
 
