@@ -61,7 +61,12 @@
               @if($booking->payment_status == 'paid')
                 <p>By {{ $booking->payment_method ?? 'N/A' }}</p>
               @elseif($booking->payment_status == 'refundprocess')
+                @if($booking->payment_type == "advance")
+                  <p>No Refund</p>
+                @elseif($booking->payment_type == "full")
                 <p>Process for Refund</p>
+                @else
+                @endif
               @elseif($booking->payment_status == 'refunded')
                 <p>By {{ $booking->refund_method ?? 'N/A' }}</p>
               @else

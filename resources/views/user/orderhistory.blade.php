@@ -31,6 +31,11 @@
   .filter-buttons  a.active a:hover{
     color: #fff !important;
   }
+  .refund-details {
+    padding: 10px;
+    border: 1px solid #ddd;
+    margin: 10px 12px 15px 12px;
+}
 </style>
 @endsection
 
