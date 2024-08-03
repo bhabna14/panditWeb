@@ -55,8 +55,8 @@ class PoojaStatusController extends Controller
 
         $bookingUpdated = DB::table('bookings')
         ->where('booking_id', $booking_id)
-        ->update(['application_status' => 'started',
-        'status' => 'started',
+        ->update(['pooja_status' => 'started',
+       
     ]);
 
     
@@ -182,8 +182,8 @@ public function end(Request $request)
 
             $bookingUpdated = DB::table('bookings')
             ->where('booking_id', $booking_id)
-            ->update(['application_status' => 'completed',
-            'status' => 'completed',
+            ->update(['pooja_status' => 'completed',
+          
         ]);
 
 

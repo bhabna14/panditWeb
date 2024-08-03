@@ -68,7 +68,7 @@
                                                             <input type="hidden" value="{{ $booking->id }}" id="booking_id" name="booking_id">
                                                             <div class="mb-3">
                                                                 <label for="cancel_reason" class="col-form-label">Cancel Reason:</label>
-                                                                <select class="form-control" id="cancel_reason" name="cancel_reason" required>
+                                                                <select class="form-control" id="cancel_reason" name="pandit_cancel_reason" required>
                                                                     <option value="">Select Reason</option>
                                                                     <option value="I am not free at this time">I am not available at this time</option>
                                                                     <option value="I am not available in this city">I am not available in this city</option>

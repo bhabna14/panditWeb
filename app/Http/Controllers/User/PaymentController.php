@@ -55,6 +55,7 @@ public function processPayment(Request $request, $booking_id)
         // $booking->application_status = 'paid';
         $booking->payment_status = 'paid';
         $booking->status = 'paid';
+        $booking->pooja_status = 'pending';
         $booking->paid =  $paidAmountInRupees;
         $booking->payment_id = $request->razorpay_payment_id;
         $booking->payment_type = $request->payment_type;
@@ -103,17 +104,17 @@ public function processPayment(Request $request, $booking_id)
             $refundAmount = 0; // No refund for advance payment
         } else {
             if ($daysDifference > 20) {
-                $refundAmount = $booking->pooja_fee;
+                $refundAmount = $booking->paid;
             } elseif ($daysDifference > 0 && $daysDifference <= 20) {
-                $refundAmount = $booking->pooja_fee * 0.80; // 20% cancellation fee
+                $refundAmount = $booking->paid * 0.80; // 20% cancellation fee
             } else {
-                $refundAmount = $booking->pooja_fee * 0.80; // 20% cancellation fee if the booking date is today or less than a day
+                $refundAmount = $booking->paid * 0.80; // 20% cancellation fee if the booking date is today or less than a day
             }
         }
     
         $booking->status = 'canceled';
-        $booking->payment_status = 'process';
-        $booking->application_status = 'canceled';
+        $booking->payment_status = 'refundprocess';
+        $booking->pooja_status = 'canceled';
         $booking->canceled_at = now();
         $booking->cancel_reason = $validatedData['cancel_reason'];
         $booking->refund_method = $validatedData['refund_method'];

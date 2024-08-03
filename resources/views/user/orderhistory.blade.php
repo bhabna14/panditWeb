@@ -45,11 +45,11 @@
       <div class="col-auto">
         <div class="filter-buttons">
           <a href="{{ route('booking.history', ['filter' => 'all']) }}" class="{{ request('filter') == 'all' || !request('filter') ? 'active' : '' }}">All</a>
-          <a href="{{ route('booking.history', ['filter' => 'pending']) }}" class="{{ request('filter') == 'pending' ? 'active' : '' }}">Payment Pending</a>
+          {{-- <a href="{{ route('booking.history', ['filter' => 'pending']) }}" class="{{ request('filter') == 'pending' ? 'active' : '' }}">Payment Pending</a> --}}
           <a href="{{ route('booking.history', ['filter' => 'confirmed']) }}" class="{{ request('filter') == 'confirmed' ? 'active' : '' }}">Confirmed</a>
 
           <a href="{{ route('booking.history', ['filter' => 'canceled']) }}" class="{{ request('filter') == 'canceled' ? 'active' : '' }}">Canceled</a>
-          <a href="{{ route('booking.history', ['filter' => 'rejected']) }}" class="{{ request('filter') == 'rejected' ? 'active' : '' }}">Rejected</a>
+          <a href="{{ route('booking.history', ['filter' => 'rejected']) }}" class="{{ request('filter') == 'rejected' ? 'active' : '' }}">Rejected By Pandit</a>
           <a href="{{ route('booking.history', ['filter' => 'completed']) }}" class="{{ request('filter') == 'completed' ? 'active' : '' }}">Completed</a>
         </div>
       </div>
@@ -119,19 +119,20 @@
                       <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
                   </div>
                   <div class="col-md-4">
-                      @if ($booking->status == "completed")
+                    
+                      @if ($booking->status == "paid" && $booking->payment_status == "paid" && $booking->application_status == "approved"  && $booking->pooja_status == "completed" )
                       <span class="status-text"><i class="fa fa-circle comp-dot" aria-hidden="true"></i>Completed on {{ $booking->booking_date }}</span>
                       @endif
-                      @if ($booking->status == "canceled")
+                      @if ($booking->status == "canceled" && $booking->payment_status == "refundprocess" && $booking->application_status == "approved"  && $booking->pooja_status == "canceled")
                       <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Canceled on {{ $booking->canceled_at }}</span>
                       @endif
                       @if ($booking->status == "rejected")
                           <a class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white rejected-text" href="{{ route('pandit.list', ['pooja_id' => $booking->pooja_id ,'pandit_id' =>  $booking->pandit->pandit_id]) }}" target="_blank" style="margin-bottom: 10px;background-color: #c80100 !important;">The pandit is booked. Please choose another pandit.View available pandits</a>
                       @endif
-                      @if (Carbon\Carbon::parse($booking->booking_date)->isPast() && $booking->status !== 'canceled' && $booking->status != "rejected")
+                      @if ($booking->status == "paid" && $booking->payment_status == "paid" && $booking->application_status == "approved"  && $booking->pooja_status == "completed")
                       <a href="{{ route('rate.pooja', ['id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;background-color: #c80100 !important;">Rate the Pooja</a>
                       @endif
-                      @if (Carbon\Carbon::parse($booking->booking_date)->isFuture() && $booking->status !== 'canceled' && $booking->status !== 'rejected' && $booking->status == 'paid')
+                      @if (Carbon\Carbon::parse($booking->booking_date)->subDay()->isFuture() && $booking->status == 'paid' && $booking->payment_status == 'paid' && $booking->application_status == 'approved'  && $booking->pooja_status == "pending")
                       <a href="{{ route('cancelForm', $booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white cancel-pooja-btn" style="margin-bottom: 10px;width: 100%;">Cancel Pooja</a>
                       @endif
                       <a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">View Details</a>

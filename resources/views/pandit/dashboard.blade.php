@@ -153,10 +153,10 @@
                                                                                 <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
                                                                             </div>
                                                                             <div class="modal-body">
-                                                                                <input type="hidden" value="{{ $request->id }}" id="booking_id" name="booking_id">
+                                                                                <input type="hidden" value="{{ $request->booking_id }}" id="booking_id" name="booking_id">
                                                                                 <div class="mb-3">
                                                                                     <label for="cancel_reason" class="col-form-label">Cancel Reason:</label>
-                                                                                    <select class="form-control" id="cancel_reason" name="cancel_reason" required>
+                                                                                    <select class="form-control" id="cancel_reason" name="pandit_cancel_reason" required>
                                                                                         <option value="">Select Reason</option>
                                                                                         <option value="I am not free at this time">I am not available at this time</option>
                                                                                         <option value="I am not available in this city">I am not available in this city</option>
@@ -208,7 +208,7 @@
         <div class="col-12 col-sm-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Product Summary</h4>
+                    <h4 class="card-title">Pooja Status Summary</h4>
                 </div>
                 <div class="card-body pt-0 example1-table">
                     <div class="table-responsive">

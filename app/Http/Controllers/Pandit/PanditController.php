@@ -57,12 +57,21 @@ class PanditController extends Controller
     }
 
     $pooja_status = DB::table('pooja_status')
-                      ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
-                      ->where('pooja_status.status', 'active')
-                      ->select('pooja_status.start_time', 'pooja_status.end_time', 'pooja_list.pooja_name', 'pooja_status.pooja_status', 'pooja_status.pooja_duration as pooja_duration')
-                      ->orderBy('pooja_status.id', 'desc')
-                      ->get();
-
+                    ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
+                    ->join('bookings', 'bookings.booking_id', '=', 'pooja_status.booking_id') // Adjusted to join with bookings table
+                    ->where('pooja_status.status', 'active')
+                    ->where('bookings.pandit_id', $pandit_details->id) // Filter by pandit_id
+                    ->select(
+                        'pooja_status.start_time',
+                        'pooja_status.end_time',
+                        'pooja_list.pooja_name',
+                        'pooja_status.pooja_status',
+                        'pooja_status.pooja_duration as pooja_duration',
+                        'pooja_status.booking_id as booking_id' // Include booking_id in the result
+                    )
+                    ->orderBy('pooja_status.id', 'desc')
+                    ->get();
+                    // dd($pooja_status);
     $pooja_request = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
                     ->where('pandit_id', $pandit_details->id) // Use id from profile
                     ->orderBy('created_at', 'desc')
@@ -107,7 +116,10 @@ public function poojarequest()
         public function rejectBooking(Request $request, $id)
         {
             $booking = Booking::findOrFail($id);
+            $booking->status = 'rejected';
             $booking->application_status = 'rejected';
+            $booking->payment_status = 'rejected';
+            $booking->pooja_status = 'rejected';
             $booking->save();
         
             // Save to PanditCancel table
@@ -116,7 +128,7 @@ public function poojarequest()
             PanditCancel::create([
                 'pandit_id' => $pandit->pandit_id,
                 'booking_id' => $request->booking_id,
-                'cancel_reason' => $request->cancel_reason,
+                'pandit_cancel_reason' => $request->pandit_cancel_reason,
             ]);
         
             return redirect()->back()->with('success', 'Booking rejected successfully!');

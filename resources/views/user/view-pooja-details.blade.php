@@ -60,7 +60,7 @@
               <h4>Payment Method</h4>
               @if($booking->payment_status == 'paid')
                 <p>{{ $booking->payment_method ?? 'N/A' }}</p>
-              @elseif($booking->payment_status == 'process')
+              @elseif($booking->payment_status == 'refundprocess')
                 <p>Process for Refund</p>
               @elseif($booking->payment_status == 'refunded')
                 <p>{{ $booking->refund_method ?? 'N/A' }}</p>

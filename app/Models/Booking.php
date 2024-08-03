@@ -22,6 +22,7 @@ class Booking extends Model
         'status',
         'payment_status',
         'application_status',
+        'pooja_status',
         'canceled_at',
         'cancel_reason',
         'refund_method',

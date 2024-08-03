@@ -53,7 +53,7 @@ document.getElementById('pay-now').onclick = function(e){
         document.getElementById('payment_type').value = 'full';
     } else {
         amount = {{ $booking->advance_fee * 100 }}; // Amount in paise
-        document.getElementById('payment_type').value = 'partial';
+        document.getElementById('payment_type').value = 'advance';
     }
 
     var options = {
