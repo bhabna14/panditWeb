@@ -38,20 +38,14 @@ class PoojaListController extends Controller
             // Fetch selected poojas for the pandit
             $selectedPoojas = Poojaskill::where('pandit_id', $pandit_details->pandit_id)
                                         ->where('status', 'active')
-                                        ->get()->map(function ($pooja) {
-                                            $pooja->pooja_photo_url = asset('assets/img/' . $pooja->pooja_photo); // Generate full URL for the photo
-                                            return $pooja;
-                                        });
+                                        ->get();
     
             // Fetch pooja requests
             $pooja_requests = Booking::with(['user', 'pooja', 'address']) // Load relationships
             ->where('pandit_id', $pandit_details->id)
             ->where('application_status', 'pending')
             ->orderBy('created_at', 'desc')
-            ->get()->map(function ($booking) {
-                $booking->pooja->pooja_photo_url = asset('assets/img/' . $booking->pooja->pooja_photo); // Generate full URL for the pooja photo
-                return $booking;
-            });
+            ->get();
     
             // Fetch today's pooja
             $today_pooja = Booking::with(['user', 'pooja', 'address'])
@@ -62,10 +56,7 @@ class PoojaListController extends Controller
             ->whereDate('bookings.booking_date', $today)
             ->orderBy('bookings.booking_date', 'asc')
             ->select('bookings.*', 'pooja_list.pooja_name as pooja_name', 'pooja_list.pooja_photo as pooja_photo')
-            ->get()->map(function ($booking) {
-                $booking->pooja->pooja_photo_url = asset('assets/img/' . $booking->pooja->pooja_photo); // Generate full URL for the pooja photo
-                return $booking;
-            });             
+            ->get();       
     
             return response()->json([
                 'status' => 200,
