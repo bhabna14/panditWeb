@@ -26,7 +26,7 @@ class PoojaListController extends Controller
     
             // Fetch all pooja lists with active status
             $all_Pooja_Lists = Poojalist::where('status', 'active')->get();
-            dd($all_Pooja_Lists);
+            // dd($all_Pooja_Lists);
             foreach ($all_Pooja_Lists as $poojalist) {
                 $poojalist->pooja_img_url = asset('assets/img/' . $poojalist->pooja_photo);
             }
@@ -63,7 +63,7 @@ class PoojaListController extends Controller
             ->orderBy('bookings.booking_date', 'asc')
             ->select('bookings.*', 'pooja_list.pooja_name as pooja_name', 'pooja_list.pooja_photo as pooja_photo')
             ->get()->map(function ($booking) {
-                $booking->pooja_photo_url = asset('assets/img/' . $booking->pooja_photo); // Generate full URL for the pooja photo
+                $booking->pooja->pooja_photo_url = asset('assets/img/' . $booking->pooja->pooja_photo); // Generate full URL for the pooja photo
                 return $booking;
             });             
     
