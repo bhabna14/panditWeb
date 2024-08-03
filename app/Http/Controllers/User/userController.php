@@ -298,20 +298,22 @@ class userController extends Controller
 
         return response()->json($pandits);
     }
-
-     public function singlePanditDetails($slug)
-     {
-         // Fetch the single pandit based on the provided slug
-         $single_pandit = Profile::where('slug', $slug)->firstOrFail();
- 
-         // Fetch the related pooja details for this pandit
-         $pandit_pujas = Poojadetails::where('pandit_id', $single_pandit->pandit_id)
-         ->where('status','active')
-             ->with('poojalist') // Load the poojalist relationship
-             ->get();
- 
-         return view('user.single-pandit-detail', compact('single_pandit', 'pandit_pujas'));
-     }
+    public function singlePanditDetails($slug)
+    {
+        // Fetch the single pandit based on the provided slug
+        $single_pandit = Profile::where('slug', $slug)->firstOrFail();
+    
+        // Fetch the related pooja details for this pandit and join with pandit_poojaskill table
+        $pandit_pujas = Poojadetails::where('pooja_details.pandit_id', $single_pandit->pandit_id)
+            ->where('pooja_details.status', 'active')
+            ->join('pandit_poojaskill', 'pooja_details.pandit_id', '=', 'pandit_poojaskill.pandit_id')
+            ->with('poojalist') // Load the poojalist relationship
+            ->select('pooja_details.*', 'pandit_poojaskill.skill_name') // Select necessary columns
+            ->get();
+    
+        return view('user.single-pandit-detail', compact('single_pandit', 'pandit_pujas'));
+    }
+    
      public function bookNow($panditSlug, $poojaSlug, $poojaFee)
     {
         if (!Auth::guard('users')->check()) {
@@ -358,6 +360,7 @@ public function confirmBooking(Request $request)
         $validatedData['user_id'] = Auth::guard('users')->user()->userid;
         $validatedData['application_status'] = 'pending';
         $validatedData['payment_status'] = 'pending';
+        $validatedData['pooja_status'] = 'pending';
         $validatedData['status'] = 'pending';
         // Create a new booking record
         $booking = Booking::create($validatedData);
@@ -436,25 +439,43 @@ public function bookingSuccess($id)
         // Apply filter based on the status
         switch ($filter) {
             case 'pending':
-                $bookingsQuery->where('status', 'pending' );
-                break;
-            case 'canceled':
-                $bookingsQuery->where('status', 'canceled');
-                break;
-            case 'rejected':
-                $bookingsQuery->where('status', 'rejected');
+                $bookingsQuery->where('status', 'pending')
+                                ->where('payment_status', 'pending')
+                                ->where('application_status', 'pending')
+                                ->where('pooja_status', 'pending');
                 break;
             case 'confirmed':
-                    $bookingsQuery->where('status', 'paid')
-                                  ->whereDate('booking_date', '>=', Carbon::now());
+                $bookingsQuery->where('status', 'paid')
+                                ->where('payment_status', 'paid')
+                                ->where('application_status', 'approved')
+                                ->where('pooja_status', 'pending');
                 break;
             case 'completed':
-                $bookingsQuery->where('status', 'completed');
-                           
+                    $bookingsQuery->where('status', 'paid')
+                                  ->where('payment_status', 'paid')
+                                  ->where('application_status', 'approved')
+                                  ->where('pooja_status', 'completed');
+                    break;
+            case 'canceled':
+                $bookingsQuery->where('status', 'canceled')
+                                ->where('payment_status', 'refundprocess')
+                                ->where('application_status', 'approved')
+                                ->where('pooja_status', 'canceled');
                 break;
+            case 'rejected':
+                $bookingsQuery->where('status', 'rejected')
+                                ->where('payment_status', 'rejected')
+                                ->where('application_status', 'rejected')
+                                ->where('pooja_status', 'rejected');
+                break;
+           
             default:
                 // No filter applied, show all bookings with status 'paid' or 'rejected'
-                $bookingsQuery->whereIn('status', ['pending','paid', 'rejected','canceled']);
+                $bookingsQuery->whereNotIn('status', ['pending'])
+                            ->whereNotIn('payment_status',  ['pending'])
+                            ->whereNotIn('application_status',  ['pending']);
+                            // ->whereNotIn('pooja_status',  ['pending']);
+
                 break;
         }
     
