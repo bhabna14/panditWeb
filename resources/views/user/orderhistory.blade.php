@@ -138,15 +138,34 @@
                       <a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">View Details</a>
                   </div>
               </div>
-              @if ($booking->status == "canceled")
-              <div class="refund-deatils">
-                  <div class="row">
-                      <div class="col-md-12">
-                          <p>The money will be added to your bank account within 7 working days. For any questions, please contact your bank with this number 415825317362. For any questions, please contact your bank with reference number 415825317362.</p>
-                      </div>
-                  </div>
-              </div>
-              @endif
+              @if ($booking->status == "canceled" && $booking->payment_status == "refundprocess" && $booking->application_status == "approved" && $booking->pooja_status == "canceled")
+                <div class="refund-details">
+                    <div class="row">
+                        <div class="col-md-12">
+                            @php
+                                $bookingDate = \Carbon\Carbon::parse($booking->booking_date);
+                                $currentDate = \Carbon\Carbon::now();
+                                $daysBeforePooja = $currentDate->diffInDays($bookingDate);
+                                $refundAmount = $booking->refund_amount; // Assuming refund_amount is already calculated and stored in the booking
+                            @endphp
+
+                            @if ($booking->payment_type == "advance")
+                                <p>
+                                    You paid an advance payment for this pooja and you canceled before {{ $daysBeforePooja }} days from the pooja so the refund amount is {{ $refundAmount }}.
+                                    For any query call us at +919090808080.
+                                </p>
+                            @elseif ($booking->payment_type == "full")
+                                
+                                <p>
+                                    You paid a full payment for this pooja and you canceled before {{ $daysBeforePooja }} days from the pooja so the refund amount is {{ $booking->refund_amount }} (with the cancellation charge of 20%).
+                                    For any query call us at +919090808080.
+                                </p>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @endif
+
           </div>
       </div>
       @endforeach

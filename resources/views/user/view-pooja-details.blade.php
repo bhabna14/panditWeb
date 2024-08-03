@@ -59,11 +59,11 @@
             <div class="col-md-4 details-container">
               <h4>Payment Method</h4>
               @if($booking->payment_status == 'paid')
-                <p>{{ $booking->payment_method ?? 'N/A' }}</p>
+                <p>By {{ $booking->payment_method ?? 'N/A' }}</p>
               @elseif($booking->payment_status == 'refundprocess')
                 <p>Process for Refund</p>
               @elseif($booking->payment_status == 'refunded')
-                <p>{{ $booking->refund_method ?? 'N/A' }}</p>
+                <p>By {{ $booking->refund_method ?? 'N/A' }}</p>
               @else
                 <p>Payment Not Done Yet</p>
               @endif
