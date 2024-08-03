@@ -37,7 +37,10 @@ class PoojaListController extends Controller
             // Fetch selected poojas for the pandit
             $selectedPoojas = Poojaskill::where('pandit_id', $pandit_details->pandit_id)
                                         ->where('status', 'active')
-                                        ->get();
+                                        ->get()->map(function ($pooja) {
+                                            $pooja->pooja_photo_url = asset('assets/img/' . $pooja->pooja_photo); // Generate full URL for the photo
+                                            return $pooja;
+                                        });
     
             // Fetch pooja requests
             $pooja_requests = Booking::with(['user', 'pooja', 'address']) // Load relationships
