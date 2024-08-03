@@ -213,6 +213,9 @@
                                   
                                   @elseif ($booking->status == 'canceled' && $booking->payment_status == 'refundprocess' && $booking->application_status == 'approved' && $booking->pooja_status == 'canceled' )
                                       <span class="text-success">Canceled</span>
+
+                                  @elseif ($booking->status == 'paid' && $booking->payment_status == 'paid' && $booking->application_status == 'approved' && $booking->pooja_status == 'completed' )
+                                      <span class="text-success">Canceled</span>
                                   @else
                                       {{-- <span class="text-muted">Waiting for approval</span> --}}
                                   @endif
