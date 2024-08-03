@@ -155,13 +155,13 @@
                             @endphp
 
                             @if ($booking->payment_type == "advance")
-                                <p class="refund-details">
+                                <p>
                                     You paid an advance payment for this pooja and you canceled before {{ $daysBeforePooja }} days from the pooja so the refund amount is {{ $refundAmount }}.
                                     For any query call us at +919090808080.
                                 </p>
                             @elseif ($booking->payment_type == "full")
                                 
-                                <p class="refund-details">
+                                <p>
                                     You paid a full payment for this pooja and you canceled before {{ $daysBeforePooja }} days from the pooja so the refund amount is {{ $booking->refund_amount }} (with the cancellation charge of 20%).
                                     For any query call us at +919090808080.
                                 </p>
