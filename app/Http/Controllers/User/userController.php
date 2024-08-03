@@ -298,22 +298,20 @@ class userController extends Controller
 
         return response()->json($pandits);
     }
-    public function singlePanditDetails($slug)
-    {
-        // Fetch the single pandit based on the provided slug
-        $single_pandit = Profile::where('slug', $slug)->firstOrFail();
-    
-        // Fetch the related pooja details for this pandit and join with pandit_poojaskill table
-        $pandit_pujas = Poojadetails::where('pandit_poojadetails.pandit_id', $single_pandit->pandit_id)
-            ->where('pandit_poojadetails.status', 'active')
-            ->join('pandit_poojaskill', 'pandit_poojadetails.pandit_id', '=', 'pandit_poojaskill.pandit_id')
-            ->with('poojalist') // Load the poojalist relationship
-            ->select('pandit_poojadetails.*', 'pandit_poojaskill.pooja_name') // Select necessary columns
-            ->get();
-    
-        return view('user.single-pandit-detail', compact('single_pandit', 'pandit_pujas'));
-    }
-    
+
+     public function singlePanditDetails($slug)
+     {
+         // Fetch the single pandit based on the provided slug
+         $single_pandit = Profile::where('slug', $slug)->firstOrFail();
+ 
+         // Fetch the related pooja details for this pandit
+         $pandit_pujas = Poojadetails::where('pandit_id', $single_pandit->pandit_id)
+         ->where('status','active')
+             ->with('poojalist') // Load the poojalist relationship
+             ->get();
+ 
+         return view('user.single-pandit-detail', compact('single_pandit', 'pandit_pujas'));
+     }
      public function bookNow($panditSlug, $poojaSlug, $poojaFee)
     {
         if (!Auth::guard('users')->check()) {
