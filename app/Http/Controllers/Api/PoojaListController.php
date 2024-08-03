@@ -43,22 +43,29 @@ class PoojaListController extends Controller
                                         });
     
             // Fetch pooja requests
-            $pooja_requests = Booking::with(['user', 'pooja', 'address']) // Load relationships
-            ->where('pandit_id', $pandit_details->id)
-            ->where('application_status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->get();
-    
-            // Fetch today's pooja
-            $today_pooja = Booking::with(['user', 'pooja', 'address'])
-            ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
-            ->where('bookings.pandit_id', $pandit_details->id)
-            ->where('bookings.payment_status', 'paid')
-            ->where('bookings.status','!=', 'completed')
-            ->whereDate('bookings.booking_date', $today)
-            ->orderBy('bookings.booking_date', 'asc')
-            ->select('bookings.*', 'pooja_list.pooja_name as pooja_name', 'pooja_list.pooja_photo as pooja_photo')
-            ->get();       
+           // Fetch pooja requests
+           $pooja_requests = Booking::with(['user', 'pooja', 'address']) // Load relationships
+           ->where('pandit_id', $pandit_details->id)
+           ->where('application_status', 'pending')
+           ->orderBy('created_at', 'desc')
+           ->get()->map(function ($booking) {
+               $booking->pooja->pooja_photo_url = asset('assets/img/' . $booking->pooja->pooja_photo); // Generate full URL for the pooja photo
+               return $booking;
+           });
+   
+           // Fetch today's pooja
+           $today_pooja = Booking::with(['user', 'pooja', 'address'])
+           ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
+           ->where('bookings.pandit_id', $pandit_details->id)
+           ->where('bookings.payment_status', 'paid')
+           ->where('bookings.status','!=', 'completed')
+           ->whereDate('bookings.booking_date', $today)
+           ->orderBy('bookings.booking_date', 'asc')
+           ->select('bookings.*', 'pooja_list.pooja_name as pooja_name', 'pooja_list.pooja_photo as pooja_photo')
+           ->get()->map(function ($booking) {
+               $booking->pooja_photo_url = asset('assets/img/' . $booking->pooja_photo); // Generate full URL for the pooja photo
+               return $booking;
+           });       
     
             return response()->json([
                 'status' => 200,
