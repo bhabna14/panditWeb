@@ -102,7 +102,7 @@ class PoojaListController extends Controller
             if ($poojaItem->save()) {
                 return response()->json([
                     'status' => 200,
-                    'message' => 'Data status updated to deleted successfully.'
+                    'message' => 'Data status deleted successfully.'
                 ], 200);
             } else {
                 return response()->json(['message' => 'Failed to update data status.'], 500);
