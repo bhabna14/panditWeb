@@ -689,6 +689,12 @@ p.blockquote:after {
     /* width: 62%; */
     margin-top: 13px;
 }
+.upcoming-event-img img{
+ 
+    max-width: 100%;
+    height: 200px;
+
+}
 /* 
 .overlay {
   position: absolute;
@@ -2635,7 +2641,7 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 39px;
 }
 .event-text {
-  padding: 44px 14px 0px 34px;
+  padding: 31px 14px 0px 34px;
 }
 .footer {
   background-image: url(../img/footer.png);
