@@ -132,10 +132,10 @@
                       <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Canceled on {{ $booking->canceled_at }}</span>
                       @endif
                       @if ($booking->status == "rejected")
-                          <a class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white rejected-text" href="{{ route('pandit.list', ['pooja_id' => $booking->pooja_id ,'pandit_id' =>  $booking->pandit->pandit_id]) }}" target="_blank" style="margin-bottom: 10px;background-color: #c80100 !important;">The pandit is booked. Please choose another pandit.View available pandits</a>
+                          <a class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white rejected-text" href="{{ route('pandit.list', ['pooja_id' => $booking->pooja_id ,'pandit_id' =>  $booking->pandit->pandit_id]) }}" target="_blank" style="margin-bottom: 10px;background-color: #c80100 !important;">The pandit is booked. Please choose another pandit.View available pandits</a>
                       @endif
                       @if ($booking->status == "paid" && $booking->payment_status == "paid" && $booking->application_status == "approved"  && $booking->pooja_status == "completed")
-                      <a href="{{ route('rate.pooja', ['id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;background-color: #c80100 !important;">Rate the Pooja</a>
+                      <a href="{{ route('rate.pooja', ['id' => $booking->id]) }}" class="button px-10 fw-400 text-14  bg-dark-4 h-50 text-white" style="margin-bottom: 10px;background-color: #c80100 !important;">Rate the Pooja</a>
                       @endif
                       @if (Carbon\Carbon::parse($booking->booking_date)->subDay()->isFuture() && $booking->status == 'paid' && $booking->payment_status == 'paid' && $booking->application_status == 'approved'  && $booking->pooja_status == "pending")
                       <a href="{{ route('cancelForm', $booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white cancel-pooja-btn" style="margin-bottom: 10px;width: 100%;">Cancel Pooja</a>
