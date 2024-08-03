@@ -35,7 +35,7 @@ class ProfileController extends Controller
         $request->validate([
             'profile_photo' => 'required|image|max:2048', 
             'whatsappno' => 'numeric|digits:10',
-            'about' => ['required', new WordCount(200)], // Validate the about field with max 200 words
+            'about' => 'required', // Validate the about field with max 200 words
         ]);
         
 
