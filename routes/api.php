@@ -84,7 +84,7 @@ Route::controller(PoojaListController::class)->group(function() {
     Route::get('/pooja-item-list/{pooja_id}', 'poojaitemlist');
     Route::post('/save-pooja-item-list', 'savePoojaItemList');
     Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
-    Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');
+    Route::delete('/delete-pooja-items/{id}', 'deletePoojaItem');
    
 
 });
