@@ -74,15 +74,18 @@ Route::controller(PoojaDetailsController::class)->group(function() {
 
 Route::controller(PoojaListController::class)->group(function() {
     Route::get('/all-pooja-list', 'AllPoojaList');
-    Route::post('/save-pooja-item-list', 'savePoojaItemList');
+   
     Route::middleware('auth:sanctum')->get('/pooja-item-list', 'poojaitemlist');
-    Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');
-    Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
+    
     Route::get('/approved-pooja', 'approvedPoojaList');
     
     // did by bhabna
-    Route::get('/pooja-item-list/{pooja_id}', 'poojaitemlist');
     Route::get('/list-pooja-item', 'listofitem');
+    Route::get('/pooja-item-list/{pooja_id}', 'poojaitemlist');
+    Route::post('/save-pooja-item-list', 'savePoojaItemList');
+    Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
+    Route::delete('/delet-pooja-items/{id}', 'deletePoojaItem');
+   
 
 });
 
