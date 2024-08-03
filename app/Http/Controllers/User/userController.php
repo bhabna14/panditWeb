@@ -451,8 +451,8 @@ public function bookingSuccess($id)
                                   ->whereDate('booking_date', '>=', Carbon::now());
                 break;
             case 'completed':
-                $bookingsQuery->where('status', 'completed')
-                            ->whereDate('booking_date', '<', Carbon::now());
+                $bookingsQuery->where('status', 'completed');
+                           
                 break;
             default:
                 // No filter applied, show all bookings with status 'paid' or 'rejected'

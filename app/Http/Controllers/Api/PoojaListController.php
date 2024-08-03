@@ -25,11 +25,10 @@ class PoojaListController extends Controller
             $today = Carbon::today()->toDateString();
     
             // Fetch all pooja lists with active status
-            $all_Pooja_Lists = Poojalist::where('status', 'active')->get()->map(function ($pooja) {
-                $pooja->pooja_photo_url = asset('assets/img/'.$pooja->pooja_photo); // Generate full URL for the photo
-                return $pooja;
-            });
-    
+            $all_Pooja_Lists = Poojalist::where('status', 'active')->get();
+            foreach ($all_Pooja_Lists as $poojalist) {
+                $poojalist->pooja_img_url = asset('assets/img/' . $poojalist->pooja_photo);
+            }
             $pandit = Auth::guard('sanctum')->user();
     
             // Fetch pandit details
