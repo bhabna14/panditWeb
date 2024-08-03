@@ -105,36 +105,7 @@ class PoojaListController extends Controller
         }
     }
 
-    public function updatePoojaitem(Request $request, $id)
-    {
-        // Validate the incoming request data
-        $validatedData = $request->validate([
-            'list_name' => 'required|string|max:255',
-            'list_quantity' => 'required|string|max:255',
-            'unit' => 'required|string|max:255',
-        ]);
-    
-        // Get the authenticated Pandit's ID
-        $panditId = Auth::guard('sanctum')->user()->pandit_id;
-    
-        if (!$panditId) {
-            return response()->json(['error' => 'No authenticated pandit found.'], 404);
-        }
-    
-        // Find the Pooja item by ID and ensure it belongs to the authenticated Pandit
-        $poojaItem = PoojaItems::where('pandit_id', $panditId)->find($id);
-        
-        if ($poojaItem) {
-            $poojaItem->pooja_list = $validatedData['list_name'];
-            $poojaItem->list_quantity = $validatedData['list_quantity'];
-            $poojaItem->list_unit = $validatedData['unit'];
-            $poojaItem->save();
-    
-            return response()->json(['success' => 'Pooja item updated successfully.']);
-        } else {
-            return response()->json(['error' => 'Pooja item not found or does not belong to the authenticated pandit.'], 404);
-        }
-    }
+  
 
 
 
@@ -244,6 +215,44 @@ class PoojaListController extends Controller
             ], 500);
         }
     }
+    public function updatePoojaitem(Request $request, $id)
+    {
+        try {
+            // Validate the incoming request data
+            $validatedData = $request->validate([
+                'pooja_id' => 'required|integer',
+                'pooja_name' => 'required|string',
+                'item_id' => 'required|integer',
+                'variant_id' => 'required|integer'
+            ]);
+
+            // Find the existing PoojaItem by ID
+            $poojaItem = PoojaItems::findOrFail($id);
+
+            // Assign the validated data to variables
+            $poojaItem->pooja_id = $validatedData['pooja_id'];
+            $poojaItem->pooja_name = $validatedData['pooja_name'];
+            $poojaItem->item_id = $validatedData['item_id'];
+            $poojaItem->variant_id = $validatedData['variant_id'];
+            $poojaItem->pandit_id = Auth::guard('sanctum')->user()->pandit_id; // Assuming you want to link this to the authenticated pandit
+
+            // Save the updated data to the database
+            if ($poojaItem->save()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Data updated successfully.'
+                ], 200);
+            } else {
+                return response()->json(['message' => 'Failed to update data.'], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating pooja items.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     
 
     public function approvedPoojaList()

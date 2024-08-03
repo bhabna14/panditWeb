@@ -272,7 +272,7 @@ class userController extends Controller
        
      }
 
-     public function list($pooja_id)
+     public function list($pooja_id , $pandit_id)
      {
          // Fetch the pooja details
          $pooja = Poojalist::where('id', $pooja_id)->firstOrFail();
@@ -280,10 +280,8 @@ class userController extends Controller
          // Fetch the related Poojadetails items along with the Profile, excluding rejected ones
          $pandit_pujas = Poojadetails::with('profile')
              ->where('pooja_id', $pooja->id)
-             ->whereDoesntHave('bookings', function ($query) use ($pooja_id) {
-                 $query->where('pooja_id', $pooja_id)
-                       ->where('status', 'rejected');
-             })
+         
+        
              ->get();
      
          // Return a view with the list of pandits

@@ -50,7 +50,7 @@ Route::controller(userController::class)->group(function() {
     Route::get('/', 'userindex')->name('userindex');
     Route::get('/pandit-list', 'panditlist')->name('panditlist');
 
-    Route::get('/pandits/{pooja_id}',  'list')->name('pandit.list');
+    Route::get('/pandits/{pooja_id}/{pandit_id}',  'list')->name('pandit.list');
 
 
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
