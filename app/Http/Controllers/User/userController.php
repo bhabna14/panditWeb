@@ -304,11 +304,11 @@ class userController extends Controller
         $single_pandit = Profile::where('slug', $slug)->firstOrFail();
     
         // Fetch the related pooja details for this pandit and join with pandit_poojaskill table
-        $pandit_pujas = Poojadetails::where('pooja_details.pandit_id', $single_pandit->pandit_id)
-            ->where('pooja_details.status', 'active')
-            ->join('pandit_poojaskill', 'pooja_details.pandit_id', '=', 'pandit_poojaskill.pandit_id')
+        $pandit_pujas = Poojadetails::where('pandit_poojadetails.pandit_id', $single_pandit->pandit_id)
+            ->where('pandit_poojadetails.status', 'active')
+            ->join('pandit_poojaskill', 'pandit_poojadetails.pandit_id', '=', 'pandit_poojaskill.pandit_id')
             ->with('poojalist') // Load the poojalist relationship
-            ->select('pooja_details.*', 'pandit_poojaskill.skill_name') // Select necessary columns
+            ->select('pandit_poojadetails.*', 'pandit_poojaskill.pooja_name') // Select necessary columns
             ->get();
     
         return view('user.single-pandit-detail', compact('single_pandit', 'pandit_pujas'));
