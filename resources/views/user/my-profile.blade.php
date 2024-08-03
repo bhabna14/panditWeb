@@ -175,7 +175,7 @@
                                 <th>Pandit Name</th>
                                 <th>Total Fee</th>
                                 <th>Total Paid</th>
-                                <th>Status</th>
+                                {{-- <th>Status</th> --}}
                                 <th>Refund Amount</th>
                                 <th>Pooja Time</th>
                                 <th>Action</th>
@@ -191,13 +191,13 @@
                                 <td class="fw-500">₹ {{ $booking->pooja_fee }}</td>
                               
                                 <td>₹ {{ $booking->paid ? $booking->paid : '0' }}</td>
-                                <td>
+                                {{-- <td>
                                     <div class="rounded-100 py-4 text-center col-12 text-14 fw-500
                                         
                                     ">
                                         {{ ucfirst($booking->status) }}
                                     </div>
-                                </td>
+                                </td> --}}
                                 <td>₹ {{ $booking->refund_amount ? $booking->refund_amount : '0' }}</td>
                                 <td>{{ $booking->booking_date }}</td>
                                 <td>
