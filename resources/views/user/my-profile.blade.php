@@ -23,7 +23,7 @@
         <div class="row dashboard-row">
           <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <div class="row">
-              <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-5 col-lg-12 col-md-12 col-xs-12">
                 <div class="card">
                   <div class="card-body">
                     <div class="row">
@@ -49,17 +49,17 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                 <div class="card sales-card">
                   <div class="row">
                     <div class="col-8">
                       <div class="ps-4 pt-4 pe-3 pb-4">
                         <div class="">
-                          <h6 class="mb-2 tx-12 ">Total Orders</h6>
+                          <h6 class="mb-2 tx-12 ">Total Bookings</h6>
                         </div>
                         <div class="pb-0 mt-0">
                           <div class="d-flex">
-                            <h4 class="tx-20 font-weight-semibold mb-2">{{ 6}}</h4>
+                            <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalbookings }}</h4>
                           </div>
                           {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
                             <span class="text-success font-weight-semibold"> +427</span>
@@ -127,32 +127,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
-                <div class="card sales-card">
-                  <div class="row">
-                    <div class="col-8">
-                      <div class="ps-4 pt-4 pe-3 pb-4">
-                        <div class="">
-                          <h6 class="mb-2 tx-12 ">Total Confirmed</h6>
-                        </div>
-                        <div class="pb-0 mt-0">
-                          <div class="d-flex">
-                            <h4 class="tx-20 font-weight-semibold mb-2">{{ 6}}</h4>
-                          </div>
-                          {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-                            <span class="text-success font-weight-semibold"> +427</span>
-                          </p> --}}
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-4">
-                      <div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-                        <i class="fa fa-user tx-16 text-primary"></i>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            
              
             </div>
           </div>

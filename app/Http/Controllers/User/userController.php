@@ -413,7 +413,7 @@ public function bookingSuccess($id)
     public function myprofile()
     {
         $user = Auth::guard('users')->user();
-    
+        $totalbookings = Booking::count();
         // Fetch recent bookings for the user
         $bookings = Booking::with('pooja','pandit') // Load relationship to get pooja details
                            ->where('user_id', $user->userid)
@@ -422,7 +422,7 @@ public function bookingSuccess($id)
                            ->take(10) // Limit to 10 recent bookings (adjust as needed)
                            ->get();
     
-        return view('user.my-profile', compact('bookings'));
+        return view('user.my-profile', compact('bookings','totalbookings'));
     }
     public function orderhistory(Request $request)
     {
