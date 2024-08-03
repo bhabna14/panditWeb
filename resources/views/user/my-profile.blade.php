@@ -201,17 +201,17 @@
                                 <td>₹ {{ $booking->refund_amount ? $booking->refund_amount : '0' }}</td>
                                 <td>{{ $booking->booking_date }}</td>
                                 <td>
-                                  @if ($booking->application_status == 'pending')
+                                  @if ($booking->status == 'pending' && $booking->payment_status == 'pending' && $booking->application_status == 'pending' && $booking->pooja_status == 'pending')
                                   <span class="text-muted">Waiting for approval</span>
-                                  @elseif ($booking->application_status == 'approved')
+                                  @elseif ($booking->status == 'pending' && $booking->payment_status == 'pending' && $booking->application_status == 'approved' && $booking->pooja_status == 'pending')
                                       <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="btn btn-success pay-btn">Pay</a>
 
-                                  @elseif ($booking->application_status == 'approved' && $booking->payment_status == 'paid' )
+                                  @elseif ($booking->status == 'paid' && $booking->payment_status == 'paid' && $booking->application_status == 'approved' && $booking->pooja_status == 'pending' )
                                       <span class="text-success">Already Paid</span>
-                                  @elseif ($booking->application_status == 'rejected' )
+                                  @elseif ($booking->status == 'rejected' && $booking->payment_status == 'rejected' && $booking->application_status == 'rejected' && $booking->pooja_status == 'rejected' )
                                       <span class="text-success">Rejected</span>
                                   
-                                  @elseif ($booking->application_status == 'approved' && $booking->status == 'canceled' )
+                                  @elseif ($booking->status == 'canceled' && $booking->payment_status == 'refundprocess' && $booking->application_status == 'approved' && $booking->pooja_status == 'canceled' )
                                       <span class="text-success">Canceled</span>
                                   @else
                                       {{-- <span class="text-muted">Waiting for approval</span> --}}
