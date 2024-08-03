@@ -201,7 +201,7 @@
                                 <td>₹ {{ $booking->refund_amount ? $booking->refund_amount : '0' }}</td>
                                 <td>{{ $booking->booking_date }}</td>
                                 <td>
-                                  @if ($booking->application_status == 'approved' && $booking->payment_status == 'pending')
+                                  @if ($booking->application_status == 'approved')
                                       <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="btn btn-success pay-btn">Pay</a>
 
                                   @elseif ($booking->application_status == 'approved' && $booking->payment_status == 'paid' )
@@ -209,7 +209,7 @@
                                   @elseif ($booking->application_status == 'rejected' )
                                       <span class="text-success">Rejected</span>
                                   
-                                  @elseif ($booking->application_status == 'canceled' )
+                                  @elseif ($booking->application_status == 'approved' && $booking->status == 'canceled' )
                                       <span class="text-success">Canceled</span>
                                   @else
                                       <span class="text-muted">Waiting for approval</span>
