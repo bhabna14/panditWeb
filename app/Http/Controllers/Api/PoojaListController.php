@@ -26,6 +26,7 @@ class PoojaListController extends Controller
     
             // Fetch all pooja lists with active status
             $all_Pooja_Lists = Poojalist::where('status', 'active')->get();
+            dd($all_Pooja_Lists);
             foreach ($all_Pooja_Lists as $poojalist) {
                 $poojalist->pooja_img_url = asset('assets/img/' . $poojalist->pooja_photo);
             }
