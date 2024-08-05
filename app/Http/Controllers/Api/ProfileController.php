@@ -180,6 +180,10 @@ class ProfileController extends Controller
             if ($pandit_profile->profile_photo) {
                 $pandit_profile->profile_photo_url = asset($pandit_profile->profile_photo);
             }
+
+            if ($pandit_idcards->profile_photo) {
+                $pandit_idcards->id_card_url = asset('/uploads/id_proof/'.$pandit_idcards->upload_id);
+            }
             // Return JSON response
             return response()->json([
                 'status' => 200,
