@@ -151,7 +151,7 @@
                                 $bookingDate = \Carbon\Carbon::parse($booking->booking_date);
                                 $currentDate = \Carbon\Carbon::now();
                                 $daysBeforePooja = $currentDate->diffInDays($bookingDate);
-                                $refundAmount = $booking->refund_amount; // Assuming refund_amount is already calculated and stored in the booking
+                                $refundAmount = $booking->payment->refund_amount; // Assuming refund_amount is already calculated and stored in the booking
                             @endphp
 
                             @if ($booking->payment->payment_type == "advance")
