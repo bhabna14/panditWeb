@@ -178,7 +178,7 @@ class ProfileController extends Controller
     
 
             if ($pandit_profile->profile_photo) {
-                $pandit_profile->profile_photo_url = asset('/uploads/profile_photo/' .$pandit_profile->profile_photo);
+                $pandit_profile->profile_photo_url = asset($pandit_profile->profile_photo);
             }
             // Return JSON response
             return response()->json([
