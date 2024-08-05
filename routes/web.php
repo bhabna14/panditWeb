@@ -126,7 +126,7 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('/booking-success/{booking}', [PaymentController::class,'bookingSuccess'])->name('booking.success');
 
     Route::get('/cancel-pooja/{id}', [PaymentController::class, 'showCancelForm'])->name('cancelForm');
-    Route::post('/cancel-pooja/{id}', [PaymentController::class, 'cancelBooking'])->name('cancelBooking');
+    Route::post('/cancel-pooja/{bookind_id}', [PaymentController::class, 'cancelBooking'])->name('cancelBooking');
 
 });
 

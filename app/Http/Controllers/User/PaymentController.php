@@ -187,9 +187,9 @@ class PaymentController extends Controller
     //     return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . $refundAmount);
     // }
 
-    public function cancelBooking(Request $request, $id)
+    public function cancelBooking(Request $request, $bookind_id)
     {
-        $booking = Booking::findOrFail($id);
+        $booking = Booking::findOrFail($bookind_id);
         $today = Carbon::today();
         $bookingDate = Carbon::parse($booking->booking_date);
         $daysDifference = $bookingDate->diffInDays($today);
@@ -229,7 +229,7 @@ class PaymentController extends Controller
         $booking->save();
 
         // Update payment with refund details
-        $payment = Payment::where('booking_id', $id)->first();
+        $payment = Payment::where('booking_id', $bookind_id)->first();
         if ($payment) {
             $booking->canceled_at = now();
             $payment->payment_status = 'refundprocess';
@@ -241,7 +241,7 @@ class PaymentController extends Controller
 
         // Log booking cancellation
         Log::info('Booking canceled successfully', [
-            'booking_id' => $booking->id,
+            'booking_id' => $booking->bookind_id,
             'refund_amount' => $refundAmount
         ]);
 
