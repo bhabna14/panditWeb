@@ -146,11 +146,11 @@
                             <tr>
                                 <th>#</th>
                                 <th>Booking Id</th>
-                                {{-- <th>Pooja Name</th> --}}
+                                <th>Pooja Name</th>
                                 <th>Pandit Name</th>
                                 <th>Total Fee</th>
                                 <th>Total Paid</th>
-                                {{-- <th>Status</th> --}}
+                              
                                 <th>Refund Amount</th>
                                 <th>Pooja Time</th>
                                 <th>Action</th>
@@ -161,18 +161,12 @@
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td><a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" >{{ $booking->booking_id }}</a></td>
-                                {{-- <td>{{ $booking->poojaList->pooja_name }}</td> --}}
+                                <td>{{ $booking->pooja->pooja_name }}</td>
                                 <td>{{ $booking->pandit->name }}</td>
                                 <td class="fw-500">₹ {{ $booking->pooja_fee }}</td>
                               
                                 <td>₹ {{ $booking->paid ? $booking->paid : '0' }}</td>
-                                {{-- <td>
-                                    <div class="rounded-100 py-4 text-center col-12 text-14 fw-500
-                                        
-                                    ">
-                                        {{ ucfirst($booking->status) }}
-                                    </div>
-                                </td> --}}
+                              
                                 <td>₹ {{ $booking->refund_amount ? $booking->refund_amount : '0' }}</td>
                                 <td>{{ $booking->booking_date }}</td>
                                 <td>
