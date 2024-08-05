@@ -424,17 +424,20 @@ public function bookingSuccess($id)
                                 ->where('application_status', 'approved')
                                 ->where('pooja_status', 'canceled')
                                 ->count();
-
+    
         // Fetch recent bookings for the user
-        $bookings = Booking::with('pooja.poojalist','pandit') // Load relationship to get pooja details
-                           ->where('user_id', $user->userid)
-                           ->orderByDesc('created_at')
-                           ->where('application_status','!=', 'paid')
+        $bookings = Booking::with(['pooja.poojalist', 'pandit']) // Load relationship to get pooja details
+                           ->leftJoin('payments', 'bookings.booking_id', '=', 'payments.booking_id')
+                           ->where('bookings.user_id', $user->userid)
+                           ->orderByDesc('bookings.created_at')
+                           ->where('bookings.application_status', 'approved')
+                           ->select('bookings.*', 'payments.paid')
                            ->take(10) // Limit to 10 recent bookings (adjust as needed)
                            ->get();
     
-        return view('user.my-profile', compact('bookings','totalbookings','totalCompleted','totalCanceled'));
+        return view('user.my-profile', compact('bookings', 'totalbookings', 'totalCompleted', 'totalCanceled'));
     }
+    
     public function orderhistory(Request $request)
     {
         $user = Auth::guard('users')->user();

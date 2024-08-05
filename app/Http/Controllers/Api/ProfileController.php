@@ -176,6 +176,10 @@ class ProfileController extends Controller
             $pandit_educations = PanditEducation::where('pandit_id', $profileId)->where('status', 'active')->get();
             $pandit_vedics = PanditVedic::where('pandit_id', $profileId)->where('status', 'active')->get();
     
+
+            if ($pandit_profile->profile_photo) {
+                $pandit_profile->profile_photo_url = asset('/uploads/profile_photo/' .$pandit_profile->profile_photo);
+            }
             // Return JSON response
             return response()->json([
                 'status' => 200,

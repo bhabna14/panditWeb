@@ -10,7 +10,7 @@ use Razorpay\Api\Api;
 use App\Models\UserBankDetail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\Payment;
 
 class PaymentController extends Controller
 {
@@ -26,6 +26,48 @@ class PaymentController extends Controller
 
     return view('user/paymentpage', compact('booking'));
 }
+
+// public function processPayment(Request $request, $booking_id)
+// {
+//     $booking = Booking::findOrFail($booking_id);
+
+//     try {
+//         // Initialize Razorpay API
+//         $api = new \Razorpay\Api\Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+
+//         // Fetch payment details
+//         $payment = $api->payment->fetch($request->razorpay_payment_id);
+
+//         \Log::info('Payment details:', (array)$payment);
+
+//         // Capture the payment if it's not captured automatically
+//         if (!$payment->captured) {
+//             $payment = $payment->capture(['amount' => $payment->amount]);
+//         }
+
+//         // Check if payment is captured
+//         if ($payment->status != 'captured') {
+//             return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
+//         }
+//         $paidAmountInRupees = $payment->amount / 100;
+
+//         // Update booking with payment details
+//         // $booking->application_status = 'paid';
+//         $booking->payment_status = 'paid';
+//         $booking->status = 'paid';
+//         $booking->pooja_status = 'pending';
+//         $booking->paid =  $paidAmountInRupees;
+//         $booking->payment_id = $request->razorpay_payment_id;
+//         $booking->payment_type = $request->payment_type;
+//         $booking->payment_method = 'razorpay';
+//         $booking->save();
+
+//         return redirect()->route('booking.success', ['booking' => $booking_id])->with('success', 'Payment successful and booking confirmed!');
+//     } catch (\Exception $e) {
+//         \Log::error('Payment verification failed: ' . $e->getMessage());
+//         return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
+//     }
+// }
 
 public function processPayment(Request $request, $booking_id)
 {
@@ -51,16 +93,22 @@ public function processPayment(Request $request, $booking_id)
         }
         $paidAmountInRupees = $payment->amount / 100;
 
-        // Update booking with payment details
-        // $booking->application_status = 'paid';
+        // Update booking with payment statuses
         $booking->payment_status = 'paid';
         $booking->status = 'paid';
         $booking->pooja_status = 'pending';
-        $booking->paid =  $paidAmountInRupees;
-        $booking->payment_id = $request->razorpay_payment_id;
-        $booking->payment_type = $request->payment_type;
-        $booking->payment_method = 'razorpay';
         $booking->save();
+
+        // Save payment details in the payments table
+        Payment::create([
+            'booking_id' => $booking->booking_id,
+            'user_id' => $booking->user_id,  // Assuming you have a user_id in the bookings table
+            'payment_id' => $request->razorpay_payment_id,
+            'payment_status' => 'paid',
+            'paid' => $paidAmountInRupees,
+            'payment_type' => $request->payment_type,
+            'payment_method' => 'razorpay',
+        ]);
 
         return redirect()->route('booking.success', ['booking' => $booking_id])->with('success', 'Payment successful and booking confirmed!');
     } catch (\Exception $e) {
