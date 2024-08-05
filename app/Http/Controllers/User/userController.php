@@ -426,7 +426,7 @@ public function bookingSuccess($id)
                                 ->count();
 
         // Fetch recent bookings for the user
-        $bookings = Booking::with('pooja','pandit') // Load relationship to get pooja details
+        $bookings = Booking::with('pooja','pandit','poojaList') // Load relationship to get pooja details
                            ->where('user_id', $user->userid)
                            ->orderByDesc('created_at')
                            ->where('application_status','!=', 'paid')
