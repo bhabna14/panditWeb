@@ -165,9 +165,9 @@
                                 <td>{{ $booking->pandit->name }}</td>
                                 <td class="fw-500">₹ {{ $booking->pooja_fee }}</td>
                               
-                                <td>₹ {{ $booking->payment->paid ? $booking->payment->paid : '0' }}</td>
+                                <td>₹ {{ $booking->paid ? $booking->paid : '0' }}</td>
                               
-                                <td>₹ {{ $booking->payment->refund_amount ? $booking->payment->refund_amount : '0' }}</td>
+                                <td>₹ {{ $booking->refund_amount ? $booking->refund_amount : '0' }}</td>
                                 <td>{{ $booking->booking_date }}</td>
                                 <td>
                                   @if ($booking->status == 'pending' && $booking->payment_status == 'pending' && $booking->application_status == 'pending' && $booking->pooja_status == 'pending')
