@@ -89,7 +89,7 @@
     <!-- row closed -->
 
     {{-- modal start --}}
-    <div class="modal fade" id="modaldemo6">
+    <div class="modal fade" id="modaldemo6" data-pooja-id="">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content modal-content-demo">
                 <div class="modal-header">
@@ -100,18 +100,19 @@
                 </div>
                 <div class="modal-body">
                     <div class="table-responsive export-table">
-                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom table-hover">
+                        <table id="file-datatable"
+                            class="table table-bordered text-nowrap key-buttons border-bottom table-hover">
                             <thead>
                                 <tr>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Slno</th>
-                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Puja Name</th>
-                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">List Name</th>
-                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Quantity</th>
-                                    {{-- <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Unit</th> --}}
+                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Puja Name
+                                    </th>
+                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">List Name
+                                    </th>
+                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Variant</th>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Action</th>
                                 </tr>
                             </thead>
-                          
                             <tbody>
                                 <!-- This will be dynamically filled with AJAX -->
                             </tbody>
@@ -124,7 +125,6 @@
             </div>
         </div>
     </div>
-
 
 
     <div class="modal fade" id="modaldemo2">
@@ -145,37 +145,23 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="list_name">List Name</label>
-
-                                    {{-- <select class="form-control chosen-select" name="list_name" id="list_name" required>
+                                    <select class="form-control chosen-select" name="list_name" id="list_name" required
+                                        disabled>
                                         <option value="">Select Puja List</option>
                                         @foreach ($Poojaitemlist as $pujalist)
-                                            <option value="{{ $pujalist }}">{{ $pujalist }}</option>
-                                        @endforeach
-                                    </select> --}}
-
-                                    <select class="form-control chosen-select" name="list_name" id="list_name" required>
-                                        <option value="">Select Puja List</option>
-                                        @foreach ($Poojaitemlist as $pujalist)
-                                            <option value="{{ $pujalist->id }}" data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
+                                            <option value="{{ $pujalist->id }}"
+                                                data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
                                                 {{ $pujalist->item_name }}
                                             </option>
-                                        
                                         @endforeach
                                     </select>
+
                                 </div>
-                              
                                 <div class="form-group">
                                     <label for="variantSelect">Variant</label>
-                                    {{-- <select class="form-control" id="listQuantity" name="list_quantity" required>
-                                        <!-- Options will be dynamically populated here -->
-                                    </select> --}}
-
-                                    <select class="form-control chosen-select" name="list_quantity" id="listQuantity" required>
-                                        <option value="">Select Variant</option>
-                                        <!-- Variants will be populated via JavaScript -->
+                                    <select class="form-control chosen-select" name="variant" id="variant" required>
                                     </select>
                                 </div>
-                               
                             </div>
                         </div>
                     </div>
@@ -186,11 +172,7 @@
                 </form>
             </div>
         </div>
-    </div> 
-
-   
-
-
+    </div>
 @endsection
 
 @section('scripts')
@@ -198,35 +180,49 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     {{-- <script src="{{ asset('assets/js/pandit-poojalist.js') }}"></script> --}}
-    
+
     <script>
+        // Event listener for list_name change to fetch variants
+        document.getElementById('list_name').addEventListener('change', function() {
+            var itemId = this.value;
 
-document.addEventListener('DOMContentLoaded', function() {
-    var modaldemo6 = document.getElementById('modaldemo6');
+            if (itemId) {
+                fetchVariants(itemId);
+            } else {
+                var variantSelect = document.getElementById('variant');
+                variantSelect.innerHTML = '<option value="">Select Variant</option>';
+            }
+        });
 
-    modaldemo6.addEventListener('show.bs.modal', function(event) {
-        var button = event.relatedTarget; // Button that triggered the modal
-        var poojaId = button.getAttribute('data-pooja-id'); // Extract info from data-* attributes
+        document.addEventListener('DOMContentLoaded', function() {
+            var modaldemo6 = document.getElementById('modaldemo6');
 
-        // Store poojaId in the modal element for later use
-        modaldemo6.setAttribute('data-pooja-id', poojaId);
+            modaldemo6.addEventListener('show.bs.modal', function(event) {
+                var button = event.relatedTarget; // Button that triggered the modal
+                var poojaId = button.getAttribute('data-pooja-id'); // Extract info from data-* attributes
 
-        // Fetch and display pooja details in the modal
-        fetchPoojaDetails(poojaId);
-    });
+                // Store poojaId in the modal element for later use
+                modaldemo6.setAttribute('data-pooja-id', poojaId);
 
-    modaldemo6.addEventListener('hidden.bs.modal', function () {
-        // Ensure backdrop is properly removed
-        var backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.parentNode.removeChild(backdrop);
-        }
-        document.body.classList.remove('modal-open');
-        document.body.style = "";
-    });
-});
+                // Fetch and display pooja details in the modal
+                fetchPoojaDetails(poojaId);
+            });
 
-function fetchPoojaDetails(poojaId, reopenModal = false) {
+            modaldemo6.addEventListener('hidden.bs.modal', function() {
+                // Ensure backdrop is properly removed
+                var backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.parentNode.removeChild(backdrop);
+                }
+                document.body.classList.remove('modal-open');
+                document.body.style = "";
+            });
+        });
+
+        // Function to fetch Pooja details
+        function fetchPoojaDetails(poojaId, reopenModal = false) {
+    document.getElementById('modaldemo6').setAttribute('data-pooja-id', poojaId);
+
     fetch('/pandit/get-poojadetails/' + poojaId)
         .then(response => response.json())
         .then(data => {
@@ -240,13 +236,11 @@ function fetchPoojaDetails(poojaId, reopenModal = false) {
                     var row = `<tr id="row-${item.id}">
                         <td>${index + 1}</td>
                         <td>${item.pooja_name}</td>
-                        <td>${item.item_name || 'N/A'}</td> <!-- Updated to display item_name -->
-                       
+                        <td>${item.item_name || 'N/A'}</td>
                         <td>${item.title || 'N/A'}</td>
-                       
                         <td>
                             <button class="btn btn-md btn-danger" onclick="deletePoojaItem(${item.id});"><i class="fa fa-trash"></i></button>
-                            <a onclick="openEditModal(${item.pooja_list}, '${item.item_name}', '${item.title}');" class="btn ripple btn-success me-3 edit-item" href="javascript:void(0);">
+                            <a href="/pandit/edit-poojaitem/${item.id}" class="btn ripple btn-success me-3 edit-item">
                                 <i class="fa fa-edit"></i>
                             </a>
                         </td>
@@ -268,102 +262,53 @@ function fetchPoojaDetails(poojaId, reopenModal = false) {
 }
 
 
-function openEditModal(id, poojaList, quantity) {
-    var modaldemo2 = new bootstrap.Modal(document.getElementById('modaldemo2'));
-    document.getElementById('itemId').value = id;
-    document.getElementById('list_name').value = poojaList;
-    document.getElementById('listQuantity').value = quantity;
-   
-    modaldemo2.show();
-}
+     
+        function deletePoojaItem(itemId) {
+            var poojaId = document.getElementById('modaldemo6').getAttribute('data-pooja-id');
+            fetch(`/pandit/delete-poojaitem/${itemId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Content-Type': 'application/json'
+                    },
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Network response was not ok.');
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert(data.success); // Show success message
 
-function submitEditForm() {
-    var form = document.getElementById('editItemForm');
-    var formData = new FormData(form);
+                        // Remove the deleted row from the table
+                        var deletedRow = document.getElementById('row-' + itemId);
+                        if (deletedRow) {
+                            deletedRow.remove();
+                        } else {
+                            console.error('Row not found in table.');
+                        }
 
-    // Get the poojaId from the modal element
-    var poojaId = document.getElementById('modaldemo6').getAttribute('data-pooja-id');
-
-    fetch('/pandit/updatepoojalist', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        },
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert(data.success);
-            var modaldemo2 = bootstrap.Modal.getInstance(document.getElementById('modaldemo2'));
-            modaldemo2.hide();
-
-            // Ensure backdrop is properly removed
-            var backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.parentNode.removeChild(backdrop);
-            }
-            document.body.classList.remove('modal-open');
-            document.body.style = "";
-
-            fetchPoojaDetails(poojaId, true); // Pass true to reopen the main modal
-        } else {
-            alert(data.error);
+                        // Re-fetch and display the pooja details
+                        fetchPoojaDetails(poojaId);
+                    } else {
+                        throw new Error('Failed to delete item.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting item:', error);
+                    alert('Failed to delete item. Please try again.'); // Show error message
+                });
         }
-    })
-    .catch(error => {
-        console.error('Error updating pooja item:', error);
-        alert('Error updating pooja item.');
-    });
-}
 
-function deletePoojaItem(itemId) {
-    var poojaId = document.getElementById('modaldemo6').getAttribute('data-pooja-id');
-    fetch(`/pandit/delete-poojaitem/${itemId}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json'
-            },
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Network response was not ok.');
-        })
-        .then(data => {
-            if (data.success) {
-                alert(data.success); // Show success message
+        setTimeout(function() {
+            document.getElementById('Message').style.display = 'none';
+        }, 3000);
 
-                // Remove the deleted row from the table
-                var deletedRow = document.getElementById('row-' + itemId);
-                if (deletedRow) {
-                    deletedRow.remove();
-                } else {
-                    console.error('Row not found in table.');
-                }
-
-                // Re-fetch and display the pooja details
-                fetchPoojaDetails(poojaId);
-            } else {
-                throw new Error('Failed to delete item.');
-            }
-        })
-        .catch(error => {
-            console.error('Error deleting item:', error);
-            alert('Failed to delete item. Please try again.'); // Show error message
+        $(document).ready(function() {
+            $('[data-toggle="tooltip"]').tooltip();
         });
-}
-
-setTimeout(function() {
-    document.getElementById('Message').style.display = 'none';
-}, 3000);
-
-$(document).ready(function() {
-    $('[data-toggle="tooltip"]').tooltip();
-});
     </script>
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>

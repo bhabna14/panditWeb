@@ -379,17 +379,34 @@ Route::group(['prefix' => 'pandit'], function () {
     });
 });
 
-Route::group(['prefix' => 'pandit'], function () {
+// Route::group(['prefix' => 'pandit'], function () {
+//     Route::controller(PoojaListController::class)->group(function() {
+//         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
+//         Route::get('/poojaitem', 'singlepoojaitem');
+//         Route::post('/save-poojaitemlist', 'savePoojaItemList');
+//         Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
+//         Route::delete('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
+//         Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
+//         Route::put('/updatepoojalist', 'updatePoojalist');
+//         Route::get('/get-variants/{listName}', 'getVariants');
+//             Route::put('/pooja/{id}', 'updatePoojaItem');
+//     });
+// });
+
+oute::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaListController::class)->group(function() {
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
         Route::get('/poojaitem', 'singlepoojaitem');
         Route::post('/save-poojaitemlist', 'savePoojaItemList');
         Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
-        Route::delete('/delete-poojaitem/{id}','deletePoojaItem')->name('deletePoojaItem');
+        Route::delete('/delete-poojaitem/{id}', 'deletePoojaItem')->name('deletePoojaItem');
         Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
         Route::put('/updatepoojalist', 'updatePoojalist');
         Route::get('/get-variants/{listName}', 'getVariants');
-            Route::put('/pooja/{id}', 'updatePoojaItem');
+        Route::get('/get-variants-title/{itemId}',  'getVariantTitle');
+        Route::get('/edit-poojaitem/{id}', 'editPoojaItem')->name('editPoojaItem');
+        Route::put('/update-poojaitem/{id}', 'updatePoojaItem')->name('updatePoojaItem');
+
     });
 });
 

@@ -125,16 +125,19 @@
                                 @if($pooja_request->isEmpty())
                                     <div class="col-12">
                                         <div class="alert alert-warning text-center">
-                                            No request found.
+                                            No pooja request found.
                                         </div>
                                     </div>
                                 @else
                                     @foreach ($pooja_request as $request)
                                         <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
                                             <div class="card text-center p-3">
+                                                @if ($request->application_status === 'pending')
                                                 <h5 class="text-dark font-weight-semibold mb-2">
                                                     {{ $request->pooja->pooja_name }}
                                                 </h5>
+                                                @endif
+
                                                 <div class="d-flex justify-content-center">
                                                     @if ($request->application_status === 'pending')
                                                         <div class="btn-group" role="group" aria-label="Action Buttons">
@@ -153,10 +156,10 @@
                                                                                 <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
                                                                             </div>
                                                                             <div class="modal-body">
-                                                                                <input type="hidden" value="{{ $request->booking_id }}" id="booking_id" name="booking_id">
+                                                                                <input type="hidden" value="{{ $request->id }}" id="booking_id" name="booking_id">
                                                                                 <div class="mb-3">
                                                                                     <label for="cancel_reason" class="col-form-label">Cancel Reason:</label>
-                                                                                    <select class="form-control" id="cancel_reason" name="pandit_cancel_reason" required>
+                                                                                    <select class="form-control" id="cancel_reason" name="cancel_reason" required>
                                                                                         <option value="">Select Reason</option>
                                                                                         <option value="I am not free at this time">I am not available at this time</option>
                                                                                         <option value="I am not available in this city">I am not available in this city</option>
@@ -180,9 +183,13 @@
                                                     @elseif($request->application_status === 'rejected')
                                                         <span class="btn btn-danger">Rejected</span>
                                                     @endif
+
+                                                    @if ($request->application_status === 'pending')
+
                                                     <a style="color: white; margin-left: 8px" class="btn ripple btn-success view-booking" data-bs-toggle="modal" data-bs-target="#full-screen" data-booking-id="{{ $request->id }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
+                                                    @endif
                                                 </div>
                                             </div>
                                         </div>
@@ -208,7 +215,7 @@
         <div class="col-12 col-sm-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Pooja Status Summary</h4>
+                    <h4 class="card-title">Product Summary</h4>
                 </div>
                 <div class="card-body pt-0 example1-table">
                     <div class="table-responsive">
@@ -286,8 +293,6 @@
                                 <th>Address</th>
                                 <td id="modal-address">N/A</td>
                             </tr>
-
-
                         </tbody>
                     </table>
 

@@ -44,6 +44,7 @@ class PanditController extends Controller
                   ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
                   ->where('bookings.pandit_id', $pandit_details->id)
                   ->where('bookings.payment_status', 'paid')
+                  ->where('bookings.pooja_status','!=','canceled')
                   ->whereDate('bookings.booking_date', $today)
                   ->orderBy('bookings.booking_date', 'asc') // Order by booking_date ascending
                   ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')

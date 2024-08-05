@@ -54,6 +54,8 @@ Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/save', 'saveProfile');
     Route::post('/profile/update/{id}','updateProfile');
     Route::get('/show-profile-details', 'showProfileDetails');
+    Route::middleware('auth:sanctum')->get('/edit-profile',  'editProfile');
+
 });
 
 Route::controller(CareersController::class)->group(function() {

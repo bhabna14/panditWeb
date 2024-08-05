@@ -5,23 +5,58 @@ namespace App\Http\Controllers\pandit;
 use App\Models\Poojaitems;
 use App\Models\Profile;
 use App\Models\Poojaskill;
+use App\Models\Variant;
 use Illuminate\Http\Request;
 use App\Models\Poojaitemlists;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+
 
 class PoojaListController extends Controller
 {
+
+    public function getVariantTitle($itemId)
+    {
+        try {
+            $variants = DB::table('variants')
+                ->where('item_id', $itemId)
+                ->select('id', 'title')
+                ->get();
+    
+            if ($variants->isEmpty()) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'No variants found for the given item ID.'
+                ]);
+            }
+    
+            return response()->json([
+                'status' => 200,
+                'variants' => $variants
+            ]);
+        } catch (\Exception $e) {
+            // Log the error details for further investigation
+            \Log::error('Error fetching variants: ' . $e->getMessage());
+    
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching variants.',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+    
+
+    
     public function poojaitemlist(){
 
         $panditId = Auth::guard('pandits')->user()->pandit_id;
 
         $Poojaskills = Poojaskill::where('status', 'active')->where('pandit_id',$panditId)->get();
 
-        // $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
 
         $Poojaitemlist = Poojaitemlists::with('variants')->where('status', 'active')->get();
-        // $Poojaitemlist = Poojaitemlists::with('variants')->where('status', 'active')->get();
 
         return view('/pandit/poojaitemlist', compact('Poojaskills','Poojaitemlist'));
     }
@@ -35,14 +70,12 @@ class PoojaListController extends Controller
         
         $poojaname = Poojaskill::where('id', $pooja_id)->where('pandit_id',$panditId)->first();
 
-        // $Poojaitemlist = Poojaitemlists::where('status', 'active')->pluck('item_name');
          $Poojaitemlist = Poojaitemlists::with('variants')->where('status', 'active')->get();
 
         if (!$poojaname) {
             return redirect()->back()->with('error', 'Pooja not found.');
         }
 
-        // Assuming you want to pass the pooja to a view
         return view('/pandit/poojaitems', compact('poojaname','Poojaitemlist'));
     }
 
@@ -53,7 +86,7 @@ class PoojaListController extends Controller
             $panditId = Auth::guard('pandits')->user()->pandit_id;
     
             $poojaItems = PoojaItems::join('poojaitem_list', 'poojaitem_list.id', '=', 'pandit_poojaitem.item_id')
-                ->join('variants', 'variants.id', '=', 'pandit_poojaitem.variant_id') // Ensure the column name is correct
+                ->join('variants', 'variants.id', '=', 'pandit_poojaitem.variant_id')
                 ->where('pandit_poojaitem.pooja_id', $pooja_id)
                 ->where('pandit_poojaitem.status', 'active')
                 ->where('pandit_poojaitem.pandit_id', $panditId)
@@ -166,8 +199,6 @@ class PoojaListController extends Controller
         }
     }
 
-
-
     public function deletePoojaItem($id)
     {
         try {
@@ -183,27 +214,33 @@ class PoojaListController extends Controller
             return response()->json(['error' => 'Pooja item not found.'], 404);
         }
     }
+    public function editPoojaItem($id)
+    {
+        $poojaItem = Poojaitems::findOrFail($id);
+    
+        // Assuming `pooja_itemlist` is the table that contains the `item_name`
+        $poojaItemLists = Poojaitemlists::with('variants')->where('status', 'active')->get();
 
-    public function updatePoojalist(Request $request)
-{
-    $validatedData = $request->validate([
-        'id' => 'required|integer',
-        'list_name' => 'required|string|max:255',
-        'list_quantity' => 'required|string|max:255',
-        'unit' => 'required|string|max:255',
-    ]);
-
-    $poojaItem = PoojaItems::find($validatedData['id']);
-    if ($poojaItem) {
-        $poojaItem->pooja_list = $validatedData['list_name'];
-        $poojaItem->list_quantity = $validatedData['list_quantity'];
-        $poojaItem->list_unit = $validatedData['unit'];
-        $poojaItem->save();
-
-        return response()->json(['success' => 'Pooja item updated successfully.']);
-    } else {
-        return response()->json(['error' => 'Pooja item not found.'], 404);
+    
+        $variants = Variant::where('item_id', $poojaItem->item_id)->get();
+    
+        return view('pandit.updatepoojaitem', compact('poojaItem', 'poojaItemLists', 'variants'));
     }
-}
-
+    
+    
+    
+    // Update the Pooja item
+    public function updatePoojaItem(Request $request, $id)
+    {
+        $request->validate([
+            'variant_id' => 'required|exists:variants,id',
+        ]);
+    
+        $poojaItem = Poojaitems::findOrFail($id);
+        $poojaItem->variant_id = $request->input('variant_id');
+        $poojaItem->save();
+    
+        return redirect()->route('poojaitemlist', $id)->with('success', 'Pooja Item updated successfully.');
+    }
+    
 }

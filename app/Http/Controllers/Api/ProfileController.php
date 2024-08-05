@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Career;
 use App\Models\Profile;
+use App\Models\IdcardDetail;
 use App\Models\PanditIdCard;
 use App\Models\PanditEducation;
 use App\Models\PanditVedic;
@@ -18,13 +19,13 @@ class ProfileController extends Controller
     public function saveProfile(Request $request)
     {
         // Retrieve the authenticated user
-        $user = Auth::guard('sanctum')->user();
+        $pandit = Auth::guard('sanctum')->user();
 
-        if (!$user) {
+        if (!$pandit) {
             return response()->json(['error' => 'No authenticated user found.'], 401);
         }
         $profile = new Profile();
-        $profile->pandit_id = $user->pandit_id;
+        $profile->pandit_id = $pandit->pandit_id;
         $profile->title = $request->title;
         $profile->name = $request->name;
         $profile->slug = Str::slug($request->name, '-');
@@ -32,7 +33,8 @@ class ProfileController extends Controller
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
-    
+        $profile->about_pandit = $request->about;
+
         // Handle the language input
         $pandilang = $request->input('language');
         if (is_array($pandilang)) {
@@ -50,6 +52,15 @@ class ProfileController extends Controller
             $file->move(public_path('uploads/profile_photo'), $filename);
             $profile->profile_photo = $filePath;
         }
+
+        $iddata = new IdcardDetail();
+        $iddata->pandit_id = $pandit->pandit_id;
+        $iddata->id_type = $request->id_type;
+
+        $file = $request->file('upload_id')[$key];
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->move(public_path('uploads/id_proof'), $fileName);
+        $iddata->upload_id = $fileName; 
     
         // Save the profile and return appropriate response
         if ($profile->save()) {
@@ -57,6 +68,28 @@ class ProfileController extends Controller
         } else {
             return response()->json(['error' => 'Failed to save data.'], 500);
         }
+    }
+
+    public function editProfile()
+    {
+        // Get the authenticated user's pandit_id
+        $profileId = Auth::guard('sanctum')->user()->pandit_id;
+    
+        // Retrieve the latest profile for the authenticated user
+        $pandit_profile = Profile::where('pandit_id', $profileId)->latest()->first();
+    
+        // Define the list of languages
+        $languages = [
+            'English', 'Odia', 'Hindi', 'Sanskrit', 'Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 
+            'Kashmiri', 'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi', 
+            'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
+        ];
+    
+        // Return the profile and languages as a JSON response
+        return response()->json([
+            'profile' => $pandit_profile,
+            'languages' => $languages,
+        ]);
     }
     
     
@@ -68,7 +101,7 @@ class ProfileController extends Controller
         if (!$user) {
             return response()->json(['error' => 'No authenticated user found.'], 401);
         }
-    
+
         // Validate the request data
         $request->validate([
             'title' => 'required|string|max:255',
@@ -80,7 +113,7 @@ class ProfileController extends Controller
         ]);
     
         // Find the profile belonging to the authenticated user
-        $profile = Profile::where('pandit_id', $user->id)->first();
+        $profile = Profile::where('pandit_id', $user->pandit_id)->first();
     
         if (!$profile) {
             return response()->json(['error' => 'Profile not found.'], 404);
@@ -110,6 +143,15 @@ class ProfileController extends Controller
             $file->move(public_path('uploads/profile_photo'), $filename);
             $profile->profile_photo = $filePath;
         }
+
+        $iddata = new IdcardDetail();
+        $iddata->pandit_id = $pandit->pandit_id;
+        $iddata->id_type = $request->id_type;
+
+        $file = $request->file('upload_id')[$key];
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $filePath = $file->move(public_path('uploads/id_proof'), $fileName);
+        $iddata->upload_id = $fileName; 
     
         if ($profile->save()) {
             return response()->json(['success' => true, 'message' => 'Data updated successfully.'], 200);
@@ -151,5 +193,8 @@ class ProfileController extends Controller
             ], 500);
         }
     }
+
+
+    
      
 }
