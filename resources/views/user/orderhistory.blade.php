@@ -129,7 +129,7 @@
                       <span class="status-text"><i class="fa fa-circle comp-dot" aria-hidden="true"></i>Completed on {{ $booking->booking_date }}</span>
                       @endif
                       @if ($booking->status == "canceled" && $booking->payment_status == "refundprocess" && $booking->application_status == "approved"  && $booking->pooja_status == "canceled")
-                      <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Canceled on {{ $booking->canceled_at }}</span>
+                      <span class="status-text"><i class="fa fa-circle cancel-dot" aria-hidden="true"></i>Canceled on {{ $booking->payment->canceled_at }}</span>
                       @endif
                       @if ($booking->status == "rejected")
                           <a class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white rejected-text" href="{{ route('pandit.list', ['pooja_id' => $booking->pooja_id ,'pandit_id' =>  $booking->pandit->pandit_id]) }}" target="_blank" style="margin-bottom: 10px;background-color: #c80100 !important;">The pandit is booked. Please choose another pandit.View available pandits</a>
@@ -154,12 +154,12 @@
                                 $refundAmount = $booking->refund_amount; // Assuming refund_amount is already calculated and stored in the booking
                             @endphp
 
-                            @if ($booking->payment_type == "advance")
+                            @if ($booking->payment->payment_type == "advance")
                                 <p>
                                     You paid an advance payment for this pooja and you canceled before {{ $daysBeforePooja }} days from the pooja so the refund amount is {{ $refundAmount }}.
                                     For any query call us at +919090808080.
                                 </p>
-                            @elseif ($booking->payment_type == "full")
+                            @elseif ($booking->payment->payment_type == "full")
                                 
                                 <p>
                                     You paid a full payment for this pooja and you canceled before {{ $daysBeforePooja }} days from the pooja so the refund amount is {{ $booking->refund_amount }} (with the cancellation charge of 20%).
