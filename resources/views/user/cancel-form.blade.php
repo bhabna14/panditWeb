@@ -20,7 +20,7 @@
         </div>
         <div class="row">
            
-            <form action="{{ route('cancelBooking', $booking->bookind_id) }}" method="POST">
+            <form action="{{ route('cancelBooking', $booking->booking_id) }}" method="POST">
                 @csrf
                 <div class="form-group">
                     <label for="cancel_reason">Reason for Cancellation</label>
