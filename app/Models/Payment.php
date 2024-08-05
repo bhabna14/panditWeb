@@ -17,6 +17,9 @@ class Payment extends Model
         'paid',
         'payment_type',
         'payment_method',
+        'cancel_reason',
+        'refund_method',
+        'refund_amount',
     ];
     public function booking()
     {
