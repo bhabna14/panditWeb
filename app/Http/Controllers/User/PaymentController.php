@@ -186,19 +186,18 @@ class PaymentController extends Controller
     
     //     return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . $refundAmount);
     // }
-
     public function cancelBooking(Request $request, $booking_id)
     {
         $booking = Booking::findOrFail($booking_id);
         $today = Carbon::today();
         $bookingDate = Carbon::parse($booking->booking_date);
         $daysDifference = $bookingDate->diffInDays($today);
-
+    
         $validatedData = $request->validate([
             'cancel_reason' => 'required|string|max:255',
             'refund_method' => 'required|string|in:original',
         ]);
-
+    
         // Log the booking details and cancellation request
         Log::info('Booking cancellation requested', [
             'booking_id' => $booking->id,
@@ -208,7 +207,7 @@ class PaymentController extends Controller
             'cancel_reason' => $validatedData['cancel_reason'],
             'refund_method' => $validatedData['refund_method']
         ]);
-
+    
         if ($booking->payment_type == 'advance') {
             $refundAmount = 0; // No refund for advance payment
         } else {
@@ -220,33 +219,39 @@ class PaymentController extends Controller
                 $refundAmount = $booking->paid * 0.80; // 20% cancellation fee if the booking date is today or less than a day
             }
         }
-
+    
         // Update booking with cancellation details
         $booking->status = 'canceled';
         $booking->payment_status = 'refundprocess';
         $booking->pooja_status = 'canceled';
-      
+        $booking->canceled_at = now();
+        $booking->cancel_reason = $validatedData['cancel_reason'];
+        $booking->refund_method = $validatedData['refund_method'];
+        $booking->refund_amount = $refundAmount;
         $booking->save();
-
+    
         // Update payment with refund details
         $payment = Payment::where('booking_id', $booking_id)->first();
         if ($payment) {
-            $booking->canceled_at = now();
             $payment->payment_status = 'refundprocess';
             $payment->cancel_reason = $validatedData['cancel_reason'];
             $payment->refund_method = $validatedData['refund_method'];
             $payment->refund_amount = $refundAmount;
             $payment->save();
+        } else {
+            // Optionally log if no payment is found
+            Log::warning('No payment found for booking_id', ['booking_id' => $booking_id]);
         }
-
+    
         // Log booking cancellation
         Log::info('Booking canceled successfully', [
             'booking_id' => $booking->booking_id,
             'refund_amount' => $refundAmount
         ]);
-
+    
         return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . $refundAmount);
     }
+    
 
 
 
