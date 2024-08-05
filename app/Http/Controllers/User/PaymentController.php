@@ -224,27 +224,27 @@ class PaymentController extends Controller
         $booking->status = 'canceled';
         $booking->payment_status = 'refundprocess';
         $booking->pooja_status = 'canceled';
-        $booking->canceled_at = now();
-        $booking->cancel_reason = $validatedData['cancel_reason'];
-        $booking->refund_method = $validatedData['refund_method'];
-        $booking->refund_amount = $refundAmount;
+      
+      
         $booking->save();
     
         // Update payment with refund details
         $payment = Payment::where('booking_id', $booking_id)->first();
         if ($payment) {
+            
             $payment->payment_status = 'refundprocess';
+            $booking->canceled_at = now();
             $payment->cancel_reason = $validatedData['cancel_reason'];
             $payment->refund_method = $validatedData['refund_method'];
             $payment->refund_amount = $refundAmount;
             $payment->save();
         } else {
             // Optionally log if no payment is found
-            Log::warning('No payment found for booking_id', ['booking_id' => $booking_id]);
+            \Log::warning('No payment found for booking_id', ['booking_id' => $booking_id]);
         }
     
         // Log booking cancellation
-        Log::info('Booking canceled successfully', [
+        \Log::info('Booking canceled successfully', [
             'booking_id' => $booking->booking_id,
             'refund_amount' => $refundAmount
         ]);
