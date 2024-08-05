@@ -86,22 +86,22 @@
                           TOTAL FEE <br>
                           ₹ {{ $booking->pooja_fee }}
                       </div>
-                      @if($booking->payment_type == "full")
+                      @if($booking->payment->payment_type == "full")
                       <div class="col-md-2">
                           TOTAL PAID <br>
-                          ₹ {{ $booking->paid }}
+                          ₹ {{ $booking->payment->paid }}
                       </div>
                       @else
                       <div class="col-md-2">
                           ADVANCE PAID <br>
-                          ₹ {{ $booking->paid }}
+                          ₹ {{ $booking->payment->paid }}
                       </div>
                       @endif
                       
-                      @if($booking->payment_type == "advance")
+                      @if($booking->payment->payment_type == "advance")
                       <div class="col-md-3">
                           REMAINING <br>
-                          ₹ {{ sprintf('%.2f', $booking->pooja_fee - $booking->paid) }}
+                          ₹ {{ sprintf('%.2f', $booking->pooja_fee - $booking->payment->paid) }}
                       </div>
                       @else
                       <div class="col-md-3">

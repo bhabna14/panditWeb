@@ -389,14 +389,7 @@ public function confirmBooking(Request $request)
     }
 }
 
-public function bookingSuccess($id)
-{
-    $booking = Booking::with(['user', 'pandit', 'pooja', 'address'])->findOrFail($id);
-     $pandit_id = $booking->pandit_id ;
-    $panditdetails = Profile::where('id',$pandit_id)->first();
-    // dd($panditdetails);
-    return view('user.booking-success', compact('booking','panditdetails'));
-}
+
    
     // public function booknow(){
     //     $user = User::where('status', 'active')->first();
@@ -444,7 +437,7 @@ public function bookingSuccess($id)
         $filter = $request->input('filter', 'all'); // Default to 'all' if no filter is provided
     
         // Base query to fetch bookings for the user
-        $bookingsQuery = Booking::with('pooja.poojalist', 'pandit', 'address') // Load relationship to get pooja details
+        $bookingsQuery = Booking::with('pooja.poojalist', 'pandit', 'address','payment') // Load relationship to get pooja details
                                 ->where('user_id', $user->userid)
                                 ->orderByDesc('created_at');
     

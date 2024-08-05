@@ -60,8 +60,7 @@ Route::controller(userController::class)->group(function() {
     Route::get('/our-pandit/{slug}', 'singlepanditDetails')->name('pandit.show');
     Route::get('/book-now/{panditSlug}/{poojaSlug}/{poojaFee}', 'bookNow')->name('book.now');
     Route::post('/booking/confirm',  'confirmBooking')->name('booking.confirm');
-    Route::get('/booking-success/{booking}', 'bookingSuccess')->name('booking.success');
-
+    
     // Route::get('/booking/success',  'bookingSuccess')->name('booking.success');
     // Route::get('/pandit-details', 'panditetails')->name('panditdetails');
     // Route::get('/book-now', 'booknow')->name('booknow');
@@ -124,6 +123,7 @@ Route::group(['middleware' => ['auth:users']], function () {
 Route::group(['middleware' => ['auth:users']], function () {
     Route::get('/payment/{booking_id}', [PaymentController::class, 'showPaymentPage'])->name('payment.page');
     Route::post('/payment/process/{booking_id}', [PaymentController::class, 'processPayment'])->name('payment.process');
+    Route::get('/booking-success/{booking}', [PaymentController::class,'bookingSuccess'])->name('booking.success');
 
     Route::get('/cancel-pooja/{id}', [PaymentController::class, 'showCancelForm'])->name('cancelForm');
     Route::post('/cancel-pooja/{id}', [PaymentController::class, 'cancelBooking'])->name('cancelBooking');

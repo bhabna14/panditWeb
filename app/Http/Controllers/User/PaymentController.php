@@ -11,6 +11,7 @@ use App\Models\UserBankDetail;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\Payment;
+use App\Models\Profile;
 
 class PaymentController extends Controller
 {
@@ -69,54 +70,62 @@ class PaymentController extends Controller
 //     }
 // }
 
-public function processPayment(Request $request, $booking_id)
-{
-    $booking = Booking::findOrFail($booking_id);
+    public function processPayment(Request $request, $booking_id)
+    {
+        $booking = Booking::findOrFail($booking_id);
 
-    try {
-        // Initialize Razorpay API
-        $api = new \Razorpay\Api\Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+        try {
+            // Initialize Razorpay API
+            $api = new \Razorpay\Api\Api(config('services.razorpay.key'), config('services.razorpay.secret'));
 
-        // Fetch payment details
-        $payment = $api->payment->fetch($request->razorpay_payment_id);
+            // Fetch payment details
+            $payment = $api->payment->fetch($request->razorpay_payment_id);
 
-        \Log::info('Payment details:', (array)$payment);
+            \Log::info('Payment details:', (array)$payment);
 
-        // Capture the payment if it's not captured automatically
-        if (!$payment->captured) {
-            $payment = $payment->capture(['amount' => $payment->amount]);
-        }
+            // Capture the payment if it's not captured automatically
+            if (!$payment->captured) {
+                $payment = $payment->capture(['amount' => $payment->amount]);
+            }
 
-        // Check if payment is captured
-        if ($payment->status != 'captured') {
+            // Check if payment is captured
+            if ($payment->status != 'captured') {
+                return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
+            }
+            $paidAmountInRupees = $payment->amount / 100;
+
+            // Update booking with payment statuses
+            $booking->payment_status = 'paid';
+            $booking->status = 'paid';
+            $booking->pooja_status = 'pending';
+            $booking->save();
+
+            // Save payment details in the payments table
+            Payment::create([
+                'booking_id' => $booking->booking_id,
+                'user_id' => $booking->user_id,  // Assuming you have a user_id in the bookings table
+                'payment_id' => $request->razorpay_payment_id,
+                'payment_status' => 'paid',
+                'paid' => $paidAmountInRupees,
+                'payment_type' => $request->payment_type,
+                'payment_method' => 'razorpay',
+            ]);
+
+            return redirect()->route('booking.success', ['booking' => $booking_id])->with('success', 'Payment successful and booking confirmed!');
+        } catch (\Exception $e) {
+            \Log::error('Payment verification failed: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
         }
-        $paidAmountInRupees = $payment->amount / 100;
-
-        // Update booking with payment statuses
-        $booking->payment_status = 'paid';
-        $booking->status = 'paid';
-        $booking->pooja_status = 'pending';
-        $booking->save();
-
-        // Save payment details in the payments table
-        Payment::create([
-            'booking_id' => $booking->booking_id,
-            'user_id' => $booking->user_id,  // Assuming you have a user_id in the bookings table
-            'payment_id' => $request->razorpay_payment_id,
-            'payment_status' => 'paid',
-            'paid' => $paidAmountInRupees,
-            'payment_type' => $request->payment_type,
-            'payment_method' => 'razorpay',
-        ]);
-
-        return redirect()->route('booking.success', ['booking' => $booking_id])->with('success', 'Payment successful and booking confirmed!');
-    } catch (\Exception $e) {
-        \Log::error('Payment verification failed: ' . $e->getMessage());
-        return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
     }
-}
-
+    public function bookingSuccess($id)
+    {
+        $booking = Booking::with(['user', 'pandit', 'pooja', 'address', 'payment'])->findOrFail($id);
+        $pandit_id = $booking->pandit_id;
+        $panditdetails = Profile::where('id', $pandit_id)->first();
+    
+        return view('user.booking-success', compact('booking', 'panditdetails'));
+    }
+    
 
 
     public function showCancelForm($id)

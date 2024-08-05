@@ -29,7 +29,7 @@
                         </div>
                         <div class="col-lg-2 col-md-6">
                             <div class="text-15 lh-12">Paid Amount</div>
-                            <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->paid ? $booking->paid : 0 }} </div>
+                            <div class="text-15 lh-12 fw-500 text-blue-1">{{ $booking->payment->paid ?? 0 }} </div>
                         </div>
 
                         <div class="col-lg-2 col-md-6">
