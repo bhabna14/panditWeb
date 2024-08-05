@@ -393,7 +393,7 @@ Route::group(['prefix' => 'pandit'], function () {
 //     });
 // });
 
-oute::group(['prefix' => 'pandit'], function () {
+Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaListController::class)->group(function() {
         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
         Route::get('/poojaitem', 'singlepoojaitem');
