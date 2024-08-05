@@ -162,7 +162,7 @@
                             @elseif ($booking->payment->payment_type == "full")
                                 
                                 <p>
-                                    You paid a full payment for this pooja and you canceled before {{ $daysBeforePooja }} days from the pooja so the refund amount is {{ $booking->refund_amount }} (with the cancellation charge of 20%).
+                                    You paid a full payment for this pooja and you canceled before {{ $daysBeforePooja }} days from the pooja so the refund amount is {{ $booking->payment->refund_amount }} (with the cancellation charge of 20%).
                                     For any query call us at +919090808080.
                                 </p>
                             @endif
