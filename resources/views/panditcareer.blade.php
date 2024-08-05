@@ -81,7 +81,8 @@
                                                                             <option value="voter">Voter Card</option>
                                                                             <option value="pan">Pan Card</option>
                                                                             <option value="DL">DL</option>
-                                                                            <option value="health card">Health Card</option>
+                                                                            <option value="health_card">Health Card</option>
+
                                                                         </select>
                                                                     </div>
                                                                 </div>
