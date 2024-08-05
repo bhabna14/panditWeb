@@ -20,10 +20,11 @@ class ProfileController extends Controller
     {
         // Retrieve the authenticated user
         $pandit = Auth::guard('sanctum')->user();
-
+    
         if (!$pandit) {
             return response()->json(['error' => 'No authenticated user found.'], 401);
         }
+    
         $profile = new Profile();
         $profile->pandit_id = $pandit->pandit_id;
         $profile->title = $request->title;
@@ -34,7 +35,7 @@ class ProfileController extends Controller
         $profile->bloodgroup = $request->bloodgroup;
         $profile->maritalstatus = $request->marital;
         $profile->about_pandit = $request->about;
-
+    
         // Handle the language input
         $pandilang = $request->input('language');
         if (is_array($pandilang)) {
@@ -52,18 +53,21 @@ class ProfileController extends Controller
             $file->move(public_path('uploads/profile_photo'), $filename);
             $profile->profile_photo = $filePath;
         }
-
+    
         $iddata = new IdcardDetail();
         $iddata->pandit_id = $pandit->pandit_id;
         $iddata->id_type = $request->id_type;
-
-        $file = $request->file('upload_id')[$key];
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->move(public_path('uploads/id_proof'), $fileName);
-        $iddata->upload_id = $fileName; 
+    
+        // Handle ID upload
+        if ($request->hasFile('upload_id')) {
+            $file = $request->file('upload_id');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/id_proof'), $fileName);
+            $iddata->upload_id = $fileName;
+        }
     
         // Save the profile and return appropriate response
-        if ($profile->save()) {
+        if ($profile->save() && $iddata->save()) {
             return response()->json(['message' => 'Profile created successfully', 'user' => $profile], 201);
         } else {
             return response()->json(['error' => 'Failed to save data.'], 500);
