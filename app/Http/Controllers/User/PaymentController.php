@@ -229,7 +229,7 @@ class PaymentController extends Controller
         $booking->save();
     
         // Update payment with refund details
-        $payment = Payment::where('booking_id', $booking_id)->first();
+        $payment = Payment::where('booking_id',  $booking->booking_id)->first();
         if ($payment) {
             
             $payment->payment_status = 'refundprocess';
