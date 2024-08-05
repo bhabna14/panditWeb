@@ -35,6 +35,7 @@ class BookingController extends Controller
             $validatedData['application_status'] = 'pending';
             $validatedData['payment_status'] = 'pending';
             $validatedData['status'] = 'pending';
+            $validatedData['pooja_status'] = 'pending';
 
             // Create a new booking record
             $booking = Booking::create($validatedData);
