@@ -423,7 +423,7 @@ public function confirmBooking(Request $request)
                            ->leftJoin('payments', 'bookings.booking_id', '=', 'payments.booking_id')
                            ->where('bookings.user_id', $user->userid)
                            ->orderByDesc('bookings.created_at')
-                           ->where('bookings.application_status', 'approved')
+                           ->where('bookings.application_status', 'pending')
                            ->select('bookings.*', 'payments.paid')
                            ->take(10) // Limit to 10 recent bookings (adjust as needed)
                            ->get();
