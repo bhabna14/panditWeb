@@ -419,7 +419,7 @@ public function confirmBooking(Request $request)
                                 ->count();
     
         // Fetch recent bookings for the user
-        $bookings = Booking::with(['pooja.poojalist', 'pandit']) // Load relationship to get pooja details
+        $bookings = Booking::with(['pooja.poojalist', 'pandit','payment']) // Load relationship to get pooja details
                            ->leftJoin('payments', 'bookings.booking_id', '=', 'payments.booking_id')
                            ->where('bookings.user_id', $user->userid)
                            ->orderByDesc('bookings.created_at')
