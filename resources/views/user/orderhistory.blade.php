@@ -145,9 +145,16 @@
                       @if (Carbon\Carbon::parse($booking->booking_date)->subDay()->isFuture() && $booking->status == 'paid' && $booking->payment_status == 'paid' && $booking->application_status == 'approved'  && $booking->pooja_status == "pending")
                       <a href="{{ route('cancelForm', $booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white cancel-pooja-btn" style="margin-bottom: 10px;width: 100%;">Cancel Pooja</a>
                       @endif
-                      @if ($booking->payment->payment_type == 'advance' && $booking->status == 'paid' && $booking->payment_status == 'paid' && $booking->application_status == 'approved' && $booking->pooja_status == 'started')
-                      <a href="{{ route('payRemainingAmount', $booking->id) }}" class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;">Pay the remaining amount</a>
+                      @if ($booking->status != 'rejected')
+                        @if ($booking->payment->payment_type == 'advance' && 
+                            $booking->status == 'paid' && 
+                            $booking->payment_status == 'paid' && 
+                            $booking->application_status == 'approved' && 
+                            $booking->pooja_status == 'started')
+                            <a href="{{ route('payRemainingAmount', $booking->id) }}" class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;">Pay the remaining amount</a>
+                        @endif
                       @endif
+                  
 
                       <a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">View Details</a>
                   </div>
