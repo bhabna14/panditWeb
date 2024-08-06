@@ -69,72 +69,69 @@ class PoojaStatusController extends Controller
     }
 
 
-public function end(Request $request)
-{
-    // Retrieve the booking_id and pooja_id from the request
-    $booking_id = $request->input('booking_id');
-    $pooja_id = $request->input('pooja_id');
-    
-    $end_time = Carbon::now();
-    
-    // Fetch the pooja_status record for the given booking_id and pooja_id
-    $status = DB::table('pooja_status')
+    public function end(Request $request)
+    {
+        // Retrieve the booking_id and pooja_id from the request
+        $booking_id = $request->input('booking_id');
+        $pooja_id = $request->input('pooja_id');
+        
+        $end_time = Carbon::now();
+        
+        // Fetch the pooja_status record for the given booking_id and pooja_id
+        $status = DB::table('pooja_status')
+                    ->where('booking_id', $booking_id)
+                    ->where('pooja_id', $pooja_id)
+                    ->first();
+        
+        if ($status && $status->start_time) {
+            // Calculate the duration in seconds
+            $start_time = Carbon::parse($status->start_time);
+            $durationInSeconds = $end_time->diffInSeconds($start_time);
+            
+            // Convert duration to H:i:s format
+            $hours = intdiv($durationInSeconds, 3600);
+            $minutes = intdiv($durationInSeconds % 3600, 60);
+            $seconds = $durationInSeconds % 60;
+            
+            $duration = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
+            
+            // Check if full payment is made
+            $fullPayment = DB::table('payments')
                 ->where('booking_id', $booking_id)
-                ->where('pooja_id', $pooja_id)
+                ->where('payment_type', 'full')
                 ->first();
     
-    if ($status && $status->start_time) {
-        // Calculate the duration in seconds
-        $start_time = Carbon::parse($status->start_time);
-        $durationInSeconds = $end_time->diffInSeconds($start_time);
-        
-        // Convert duration to H:i:s format
-        $hours = intdiv($durationInSeconds, 3600);
-        $minutes = intdiv($durationInSeconds % 3600, 60);
-        $seconds = $durationInSeconds % 60;
-        
-        $duration = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-        
-        // Update the record in the pooja_status table
-       
-
-        $payment = DB::table('payments')
-        ->where('booking_id', $booking_id)
-        ->where('payment_type','!=','full')
-        ->get();
-
-        if ($payment) {
-            return redirect()->back()->with('error', 'User has not made full payment for Puja.');
-        }else{
+            if (!$fullPayment) {
+                return redirect()->back()->with('error', 'User has not made full payment for Puja.');
+            }
+    
+            // Update the record in the pooja_status table
             $updated = DB::table('pooja_status')
-            ->where('booking_id', $booking_id)
-            ->where('pooja_id', $pooja_id)
-            ->update([
-                'end_time' => $end_time,
-                'pooja_duration' => $duration, // Store the duration in H:i:s format
-                'pooja_status' => 'completed'  // Update the status to 'completed'
-            ]);
-
+                ->where('booking_id', $booking_id)
+                ->where('pooja_id', $pooja_id)
+                ->update([
+                    'end_time' => $end_time,
+                    'pooja_duration' => $duration, // Store the duration in H:i:s format
+                    'pooja_status' => 'completed'  // Update the status to 'completed'
+                ]);
+    
+            // Update the status in the bookings table
             $bookingUpdated = DB::table('bookings')
-            ->where('booking_id', $booking_id)
-            ->update(['pooja_status' => 'completed',
-          
-        ]);
-        }
-
-
-        // Redirect with success or error message
-        if ($updated) {
-            return redirect()->back()->with('success', 'Pooja ended successfully.');
+                ->where('booking_id', $booking_id)
+                ->update(['pooja_status' => 'completed']);
+    
+            // Redirect with success or error message
+            if ($updated && $bookingUpdated) {
+                return redirect()->back()->with('success', 'Pooja ended successfully.');
+            } else {
+                return redirect()->back()->with('error', 'Failed to end Pooja.');
+            }
         } else {
-            return redirect()->back()->with('error', 'Failed to end pooja.');
+            // If no start time is found, return an error
+            return redirect()->back()->with('error', 'Pooja start time not found.');
         }
-    } else {
-        // If no start time is found, return an error
-        return redirect()->back()->with('error', 'Pooja start time not found.');
     }
-}
-
+    
 
     
 }
