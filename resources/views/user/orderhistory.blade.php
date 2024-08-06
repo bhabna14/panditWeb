@@ -87,27 +87,31 @@
                           TOTAL FEE <br>
                           ₹ {{ $booking->pooja_fee }}
                       </div>
-                      @if($booking->payment->payment_type == "full")
-                      <div class="col-md-2">
-                          TOTAL PAID <br>
-                          ₹ {{ $booking->payment->paid }}
-                      </div>
-                      @else
-                      <div class="col-md-2">
-                          ADVANCE PAID <br>
-                          ₹ {{ $booking->payment->paid }}
-                      </div>
-                      @endif
                       
-                      @if($booking->payment->payment_type == "advance")
-                      <div class="col-md-3">
-                          REMAINING <br>
-                          ₹ {{ sprintf('%.2f', $booking->pooja_fee - $booking->payment->paid) }}
-                      </div>
-                      @else
-                      <div class="col-md-3">
-                      </div>
-                      @endif
+                      @if($booking->status != "rejected")
+                          @if($booking->payment->payment_type == "full")
+                              <div class="col-md-2">
+                                  TOTAL PAID <br>
+                                  ₹ {{ $booking->payment->paid }}
+                              </div>
+                          @else
+                              <div class="col-md-2">
+                                  ADVANCE PAID <br>
+                                  ₹ {{ $booking->payment->paid }}
+                              </div>
+                          @endif
+                          
+                          @if($booking->payment->payment_type == "advance")
+                              <div class="col-md-3">
+                                  REMAINING <br>
+                                  ₹ {{ sprintf('%.2f', $booking->pooja_fee - $booking->payment->paid) }}
+                              </div>
+                          @else
+                              <div class="col-md-3">
+                              </div>
+                          @endif
+                       @endif
+                  
       
                       <div class="col-md-3 text-right">
                           BOOKING NUMBER <br>
