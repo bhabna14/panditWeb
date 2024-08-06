@@ -405,7 +405,7 @@ public function confirmBooking(Request $request)
     public function contact(){
         return view('user/contact');
     }
-    public function myprofile()
+    public function userdashboard()
     {
         $user = Auth::guard('users')->user();
         $totalbookings = Booking::count();
