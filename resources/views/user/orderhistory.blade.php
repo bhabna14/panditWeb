@@ -110,6 +110,9 @@
                               <div class="col-md-3">
                               </div>
                           @endif
+                        @else
+                          <div class="col-md-5">
+                          </div>
                        @endif
                   
       
