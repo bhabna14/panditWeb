@@ -116,8 +116,8 @@ public function start(Request $request)
         $bookingUpdated = DB::table('bookings')
             ->where('booking_id', $booking_id)
             ->update([
-                'application_status' => 'started',
-                'status' => 'started',
+               'pooja_status' => 'started'
+                
             ]);
 
         // Return success or error message
@@ -167,7 +167,17 @@ public function end(Request $request)
             $seconds = $durationInSeconds % 60;
             
             $duration = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
-            
+
+            // Check if full payment is made
+            $fullPayment = DB::table('payments')
+                ->where('booking_id', $booking_id)
+                ->where('payment_type', 'full')
+                ->first();
+
+            if (!$fullPayment) {
+                return response()->json(['message' => 'User has not made full payment for Pooja.'], 400);
+            }
+
             // Update the record in the pooja_status table
             $updated = DB::table('pooja_status')
                 ->where('booking_id', $booking_id)
@@ -178,18 +188,18 @@ public function end(Request $request)
                     'pooja_status' => 'completed'  // Update the status to 'completed'
                 ]);
 
+            // Update the status in the bookings table
             $bookingUpdated = DB::table('bookings')
                 ->where('booking_id', $booking_id)
                 ->update([
-                    'application_status' => 'completed',
-                    'status' => 'completed',
+                    'pooja_status' => 'completed',
                 ]);
-    
+
             // Return success or error message
             if ($updated && $bookingUpdated) {
                 return response()->json(['message' => 'Pooja ended successfully.'], 200);
             } else {
-                return response()->json(['message' => 'Failed to end pooja.'], 500);
+                return response()->json(['message' => 'Failed to end Pooja.'], 500);
             }
         } else {
             // If no start time is found, return an error
@@ -203,6 +213,7 @@ public function end(Request $request)
         ], 500);
     }
 }
+
 
 
 
