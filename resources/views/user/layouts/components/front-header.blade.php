@@ -118,7 +118,7 @@
                   <div class="bg-white sm:px-0 sm:py-15 rounded-4 text-center">
                       <div class="y-gap-5 js-results">
                           <div class="text-center js-search-option">
-                              <a href="{{ url('dashboard') }}">My Profile</a>
+                              <a href="{{ url('/user/dashboard') }}">Dashboard</a>
                           </div>
                           <div class="text-center js-search-option">
                               <a href="{{ url('manage-address') }}">Manage Address</a>
