@@ -54,7 +54,7 @@ class AddressController extends Controller
 
         if (!$addressdata) {
             return response()->json([
-                'success' => false,
+                'success' => true,
                 'message' => 'No address details found for the authenticated Pandit.'
             ], 404);
         }

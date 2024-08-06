@@ -55,7 +55,8 @@ class BankController extends Controller
         // Check if bank details are found
         if (!$bankdata) {
             return response()->json([
-                'error' => 'Bank details not found!'
+                'success' => true,
+                'message' => 'Bank details not found!'
             ], 404);
         }
 
