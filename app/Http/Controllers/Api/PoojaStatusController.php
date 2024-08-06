@@ -40,37 +40,43 @@ class PoojaStatusController extends Controller
     }
 }
 public function rejectBooking(Request $request, $id)
-{
-    try {
-        $booking = Booking::findOrFail($id);
-        $booking->application_status = 'rejected';
-        $booking->status = 'rejected';
-        $booking->payment_status = 'rejected';
-        $booking->pooja_status = 'rejected';
-       
-        $booking->save();
+    {
+        try {
+            // Validate the request
+            $validatedData = $request->validate([
+                'pandit_cancel_reason' => 'required|string|max:255',
+            ]);
 
-        // Broadcast the event or perform any other necessary actions here
-        $pandit = Auth::guard('sanctum')->user();
-        PanditCancel::create([
-            'pandit_id' => $pandit->pandit_id,
-            'booking_id' => $request->booking_id,
-            'pandit_cancel_reason' => $request->pandit_cancel_reason,
-        ]);
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Booking rejected successfully!',
-            'booking' => $booking
-        ], 200);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 500,
-            'message' => 'Failed to reject booking.',
-            'error' => $e->getMessage()
-        ], 500);
+            // Find the booking by ID
+            $booking = Booking::findOrFail($id);
+            
+            // Update the booking status to 'rejected'
+            $booking->status = 'rejected';
+            $booking->application_status = 'rejected';
+            $booking->payment_status = 'rejected';
+            $booking->pooja_status = 'rejected';
+            $booking->save();
+        
+            // Get the authenticated pandit
+            $pandit = Auth::guard('pandits')->user();
+        
+            // Save to PanditCancel table
+            PanditCancel::create([
+                'pandit_id' => $pandit->pandit_id,
+                'booking_id' => $booking->booking_id,  // Save the booking_id
+                'pandit_cancel_reason' => $validatedData['pandit_cancel_reason'],
+            ]);
+        
+            // Return a success response
+            return response()->json(['message' => 'Booking rejected successfully!'], 200);
+        } catch (\Exception $e) {
+            \Log::error('An error occurred while rejecting the booking.', ['error' => $e->getMessage()]);
+            return response()->json([
+                'message' => 'An error occurred while rejecting the booking.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
 public function start(Request $request)
 {
