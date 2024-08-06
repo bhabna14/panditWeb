@@ -32,7 +32,7 @@ class PujaController extends Controller
         $upcomingPoojas = Poojalist::where('status', 'active')
                         ->where('pooja_date', '>=', now())
                         ->orderBy('pooja_date', 'asc')
-                        ->take(4)
+                        
                         ->get();
     
         foreach ($upcomingPoojas as $upcomingPooja) {
@@ -40,7 +40,7 @@ class PujaController extends Controller
         }
 
         //Get 9 pandits 
-        $pandits = Profile::where('pandit_status', 'accepted')->take(9)->get();
+        $pandits = Profile::where('pandit_status', 'accepted')>get();
         foreach ($pandits as $pandit) {
             $pandit->profile_photo = asset($pandit->profile_photo);
         }
