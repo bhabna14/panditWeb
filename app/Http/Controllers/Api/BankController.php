@@ -5,7 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Profile;
-use App\Models\BankDetail;
+use App\Models\Bankdetail;
 use Illuminate\Support\Facades\Auth;
 
 class BankController extends Controller
@@ -14,28 +14,35 @@ class BankController extends Controller
     {
         // Get the active profile
         $panditId = Auth::guard('sanctum')->user()->pandit_id;
-
-
+    
         // Validate the request data
-        $request->validate([
-            'bankname' => 'required|string|max:255',
-            'branchname' => 'required|string|max:255',
-            'ifsccode' => 'required|string|size:11', // Changed size to 11, usually the length for IFSC codes
-            'accname' => 'required|string|max:255',
-            'accnumber' => 'required|digits:12',
-            'upi_number' => 'required|string|max:255',
-        ]);
-
+        // $request->validate([
+        //     'bankname' => 'required|string|max:255',
+        //     'branchname' => 'required|string|max:255',
+        //     'ifsccode' => 'required|string|size:11', // Changed size to 11, usually the length for IFSC codes
+        //     'accname' => 'required|string|max:255',
+        //     'accnumber' => 'required|digits:12',
+        //     'upi_number' => 'required|string|max:255',
+        // ]);
+    
         // Update or create the bank details
         $bankdata = BankDetail::updateOrCreate(
             ['pandit_id' => $panditId],
-            $request->all()
+            [
+                'bankname' => $request->bankname,
+                'branchname' => $request->branchname,
+                'ifsccode' => $request->ifsccode,
+                'accname' => $request->accname,
+                'accnumber' => $request->accnumber,
+                'upi_number' => $request->upi_number,
+            ]
         );
-
+    
         // Return a JSON response
         return response()->json([
             'success' => 'Bank details saved successfully!', 
             'data' => $bankdata
         ], 200);
     }
+    
 }
