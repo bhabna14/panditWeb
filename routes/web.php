@@ -30,7 +30,7 @@ use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
 use App\Http\Controllers\Pandit\PoojaHistoryController;
 
-use App\Http\Controllers\sebayatregisterController;
+
 use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
 use Twilio\Rest\Client;
@@ -88,7 +88,7 @@ Route::get('/poojas', 'fetchPoojas')->name('fetchPoojas');
 Route::group(['middleware' => ['auth:users']], function () {
         Route::controller(userController::class)->group(function() {
 
-        Route::get('/user/dashboard', 'userdashboard')->name('userdashboard');
+        Route::get('/user-dashboard', 'userdashboard')->name('userdashboard');
         Route::get('/manage-address', 'mngaddress')->name('mngaddress');
         Route::get('/address/set-default/{id}', 'setDefault')->name('setDefaultAddress');
 

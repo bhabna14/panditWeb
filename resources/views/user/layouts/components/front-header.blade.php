@@ -118,14 +118,15 @@
                   <div class="bg-white sm:px-0 sm:py-15 rounded-4 text-center">
                       <div class="y-gap-5 js-results">
                           <div class="text-center js-search-option">
-                              <a href="{{ url('/user/dashboard') }}">Dashboard</a>
+                              <a href="{{ url('/user-dashboard') }}">Dashboard</a>
+                          </div>
+                          <div class="text-center js-search-option">
+                            <a href="{{ url('booking-history') }}">Manage Bookings</a>
                           </div>
                           <div class="text-center js-search-option">
                               <a href="{{ url('manage-address') }}">Manage Address</a>
                           </div>
-                          <div class="text-center js-search-option">
-                              <a href="{{ url('booking-history') }}">Manage Bookings</a>
-                          </div>
+                         
                           <div class="text-center js-search-option">
                               <a href="{{ route('userlogout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
                               <form id="logout-form" action="{{ route('userlogout') }}" method="POST" style="display: none;">
