@@ -141,6 +141,7 @@ class ProfileController extends Controller
             $profileId = Auth::guard('sanctum')->user()->pandit_id;
     
             // Fetch data
+            $pandit_profile_login = PanditLogin::where('pandit_id', $profileId)->latest()->first();
             $pandit_profile = Profile::where('pandit_id', $profileId)->latest()->first();
             $pandit_career = Career::where('pandit_id', $profileId)->latest()->first();
             $pandit_idcards = PanditIdCard::where('pandit_id', $profileId)->where('status', 'active')->get();
@@ -164,6 +165,7 @@ class ProfileController extends Controller
                 'status' => 200,
                 'message' => 'Profile details fetched successfully.',
                 'data' => [
+                    'pandit_profile_login' => $pandit_profile_login,
                     'pandit_profile' => $pandit_profile,
                     'pandit_career' => $pandit_career,
                     'pandit_idcards' => $pandit_idcards,
