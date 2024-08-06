@@ -64,6 +64,7 @@ class PanditController extends Controller
 
             // Fetch the related Poojadetails items along with the Profile
             $panditPujas = Poojadetails::with('profile')
+                    ->where('status','active')
                 ->where('pooja_id', $pooja->id)
                 ->get();
 
