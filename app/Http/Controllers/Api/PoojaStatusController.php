@@ -47,10 +47,16 @@ public function rejectBooking(Request $request, $id)
         $booking->status = 'rejected';
         $booking->payment_status = 'rejected';
         $booking->pooja_status = 'rejected';
-        $booking->cancel_reason = $request->cancel_reason;
+       
         $booking->save();
 
         // Broadcast the event or perform any other necessary actions here
+        $pandit = Auth::guard('sanctum')->user();
+        PanditCancel::create([
+            'pandit_id' => $pandit->pandit_id,
+            'booking_id' => $request->booking_id,
+            'pandit_cancel_reason' => $request->pandit_cancel_reason,
+        ]);
 
         return response()->json([
             'status' => 200,
