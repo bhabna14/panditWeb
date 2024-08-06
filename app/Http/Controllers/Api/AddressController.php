@@ -56,7 +56,7 @@ class AddressController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'No address details found for the authenticated Pandit.'
-            ], 404);
+            ], 200);
         }
 
         return response()->json([

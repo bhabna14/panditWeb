@@ -57,7 +57,7 @@ class BankController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Bank details not found!'
-            ], 404);
+            ], 200);
         }
 
         // Return a JSON response with the bank details
