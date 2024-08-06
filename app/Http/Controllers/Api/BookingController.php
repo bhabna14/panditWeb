@@ -182,11 +182,14 @@ class BookingController extends Controller
     public function processRemainingPayment(Request $request, $booking_id)
     {
         Log::info('Starting processRemainingPayment', ['booking_id' => $booking_id]);
-    
+
+        // Ensure the session remains active
+        session()->keep(['_token']);
+
         try {
             $booking = Booking::findOrFail($booking_id);
             Log::info('Booking found', ['booking' => $booking]);
-    
+
             // Validate the request
             $validatedData = $request->validate([
                 'payment_id' => 'required|string|max:255',
@@ -195,7 +198,7 @@ class BookingController extends Controller
             ]);
 
             $paidAmountInRupees = $validatedData['paid'];
-    
+
             // Save payment details in the payments table
             Payment::create([
                 'booking_id' => $booking->booking_id,
@@ -204,12 +207,15 @@ class BookingController extends Controller
                 'payment_status' => 'paid',
                 'paid' => $paidAmountInRupees,
                 'payment_type' => 'full',
-                'payment_method' => 'razorpay',
+                'payment_method' => 'razoypay',
             ]);
             Log::info('Payment details saved in the database');
-    
+
             Log::info('Payment process completed successfully');
             return response()->json(['message' => 'Payment processed successfully.'], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            Log::error('Booking not found', ['exception' => $e->getMessage()]);
+            return response()->json(['message' => 'Booking not found. Please check the booking ID and try again.', 'error' => $e->getMessage()], 404);
         } catch (\Exception $e) {
             Log::error('Payment verification failed', ['exception' => $e->getMessage()]);
             return response()->json(['message' => 'Payment verification failed. Please try again.', 'error' => $e->getMessage()], 500);
