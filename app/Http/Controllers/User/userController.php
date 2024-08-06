@@ -294,7 +294,8 @@ class userController extends Controller
     public function ajaxSearch(Request $request)
     {
         $searchTerm = $request->input('searchTerm');
-        $pandits = Profile::where('name', 'LIKE', '%' . $searchTerm . '%')->get();
+        $pandits = Profile::where('name', 'LIKE', '%' . $searchTerm . '%')
+                             ->where('pandit_status','accepted')->get();
 
         return response()->json($pandits);
     }

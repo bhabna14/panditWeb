@@ -463,11 +463,12 @@ public function orderHistory(Request $request)
     
         // Search for pandits
         $pandits = Profile::where('name', 'LIKE', '%' . $searchTerm . '%')
-                            ->where()
+                            ->where('pandit_status','accepted')
                             ->get();
     
         // Search for poojas
-        $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')->get();
+        $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')
+        ->where('status','active')->get();
     
         // if ($pandits->isEmpty() && $poojas->isEmpty()) {
         //     return response()->json([

@@ -101,33 +101,31 @@ class ProfileController extends Controller
         }
     
         // Update the scalar fields
-        $profile->pandit_id = $profile->pandit_id;
-        $profile->title = $request->title;
+       
         $profile->name = $request->name;
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
-        $profile->bloodgroup = $request->bloodgroup;
-        $profile->maritalstatus = $request->marital;
+        
         $profile->about_pandit = $request->about;
     
-        $pandilang = $request->input('language', []);
-        if (is_array($pandilang)) {
-            $langString = implode(',', $pandilang);
-        } else {
-            $langString = '';
-        }
-        $profile->language = $langString;
+        // $pandilang = $request->input('language', []);
+        // if (is_array($pandilang)) {
+        //     $langString = implode(',', $pandilang);
+        // } else {
+        //     $langString = '';
+        // }
+        // $profile->language = $langString;
     
-        if ($request->hasFile('upload_id')) {
-            $file = $request->file('upload_id');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('uploads/id_proof'), $fileName);
-            $iddata = new IdcardDetail();
-            $iddata->pandit_id = $profile->pandit_id;
-            $iddata->id_type = $request->id_type;
-            $iddata->upload_id = $fileName;
-            $iddata->save();
-        }
+        // if ($request->hasFile('upload_id')) {
+        //     $file = $request->file('upload_id');
+        //     $fileName = time() . '_' . $file->getClientOriginalName();
+        //     $file->move(public_path('uploads/id_proof'), $fileName);
+        //     $iddata = new IdcardDetail();
+        //     $iddata->pandit_id = $profile->pandit_id;
+        //     $iddata->id_type = $request->id_type;
+        //     $iddata->upload_id = $fileName;
+        //     $iddata->save();
+        // }
     
         if ($profile->save()) {
             return response()->json(['success' => true, 'message' => 'Data updated successfully.'], 200);
