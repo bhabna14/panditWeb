@@ -58,7 +58,9 @@ class PanditController extends Controller
     {
         try {
             // Fetch the pooja based on the provided slug
-            $pooja = Poojalist::where('slug', $slug)->firstOrFail();
+            $pooja = Poojalist::where('slug', $slug)
+                                ->where('pandit_status','accepted')
+                                ->firstOrFail();
 
             // Fetch the related Poojadetails items along with the Profile
             $panditPujas = Poojadetails::with('profile')
