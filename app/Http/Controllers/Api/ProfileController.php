@@ -85,13 +85,13 @@ class ProfileController extends Controller
         }
     
         // Validate the request data
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'whatsappno' => 'required|string|max:15',
-            'language.*' => 'string',
-        ]);
+        // $request->validate([
+        //     'title' => 'required|string|max:255',
+        //     'name' => 'required|string|max:255',
+        //     'email' => 'required|email|max:255',
+        //     'whatsappno' => 'required|string|max:15',
+        //     'language.*' => 'string',
+        // ]);
     
         // Find the profile belonging to the authenticated user
         $profile = Profile::where('pandit_id', $user->pandit_id)->first();

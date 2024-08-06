@@ -462,7 +462,9 @@ public function orderHistory(Request $request)
         $searchTerm = $request->input('searchTerm');
     
         // Search for pandits
-        $pandits = Profile::where('name', 'LIKE', '%' . $searchTerm . '%')->get();
+        $pandits = Profile::where('name', 'LIKE', '%' . $searchTerm . '%')
+                            ->where()
+                            ->get();
     
         // Search for poojas
         $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')->get();
