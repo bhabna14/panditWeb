@@ -161,8 +161,8 @@
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td><a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" >{{ $booking->booking_id }}</a></td>
-                                <td>{{ $booking->pooja->pooja_name ?? 'NA' }}</td>
-                                <td>{{ $booking->pandit->name }}</td>
+                                <td>{{ $booking->pooja->pooja_name ?? 'N/A' }}</td>
+                                <td>{{ $booking->pandit->name ?? 'N/A' }}</td>
                                 <td class="fw-500">₹ {{ $booking->pooja_fee }}</td>
                               
                                 <td>₹ {{ $booking->paid ? $booking->paid : '0' }}</td>

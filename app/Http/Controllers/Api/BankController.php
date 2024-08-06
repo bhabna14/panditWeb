@@ -44,5 +44,27 @@ class BankController extends Controller
             'data' => $bankdata
         ], 200);
     }
+    public function getBankDetails()
+    {
+        // Get the active profile
+        $panditId = Auth::guard('sanctum')->user()->pandit_id;
+
+        // Retrieve the bank details for the pandit
+        $bankdata = BankDetail::where('pandit_id', $panditId)->first();
+
+        // Check if bank details are found
+        if (!$bankdata) {
+            return response()->json([
+                'error' => 'Bank details not found!'
+            ], 404);
+        }
+
+        // Return a JSON response with the bank details
+        return response()->json([
+            'success' => 'Bank details retrieved successfully!', 
+            'data' => $bankdata
+        ], 200);
+    }
+
     
 }

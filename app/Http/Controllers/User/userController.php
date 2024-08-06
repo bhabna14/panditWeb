@@ -430,7 +430,7 @@ public function confirmBooking(Request $request)
                            ->take(10) // Limit to 10 recent bookings (adjust as needed)
                            ->get();
     
-        return view('user.my-profile', compact('bookings', 'totalbookings', 'totalCompleted', 'totalCanceled'));
+        return view('user.user-dashboard', compact('bookings', 'totalbookings', 'totalCompleted', 'totalCanceled'));
     }
     
     public function orderhistory(Request $request)
