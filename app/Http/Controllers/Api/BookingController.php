@@ -119,63 +119,102 @@ class BookingController extends Controller
 
 
     public function processPayment(Request $request, $booking_id)
-{
-    try {
-        // Validate incoming request data
-        $validatedData = $request->validate([
-            'payment_id' => 'required|string',
-            'payment_status' => 'required|string',
-            'status' => 'required|string',
-            'paid' => 'required|numeric',
-            'payment_type' => 'required|string',
-            'payment_method' => 'required|string',
-        ]);
+    {
+        try {
+            // Validate incoming request data
+            $validatedData = $request->validate([
+                'payment_id' => 'required|string',
+                'payment_status' => 'required|string',
+                'status' => 'required|string',
+                'paid' => 'required|numeric',
+                'payment_type' => 'required|string',
+                'payment_method' => 'required|string',
+            ]);
 
-        // Find the booking by booking_id
-        $booking = Booking::where('booking_id', $booking_id)->first();
+            // Find the booking by booking_id
+            $booking = Booking::where('booking_id', $booking_id)->first();
 
-        // Check if booking exists
-        if (!$booking) {
-            \Log::error('Booking not found', ['booking_id' => $booking_id]);
-            return response()->json(['error' => 'Booking not found.'], 404);
+            // Check if booking exists
+            if (!$booking) {
+                \Log::error('Booking not found', ['booking_id' => $booking_id]);
+                return response()->json(['error' => 'Booking not found.'], 404);
+            }
+
+            // Update booking with payment statuses
+            $booking->payment_status = $validatedData['payment_status'];
+            $booking->status = $validatedData['status'];
+            $booking->save();
+
+            // Save payment details in the payments table
+            Payment::updateOrCreate(
+                ['booking_id' => $booking_id],
+                [
+                    'user_id' => $booking->user_id,
+                    'payment_id' => $validatedData['payment_id'],
+                    'payment_status' => $validatedData['payment_status'],
+                    'paid' => $validatedData['paid'],
+                    'payment_type' => $validatedData['payment_type'],
+                    'payment_method' => $validatedData['payment_method'],
+                ]
+            );
+
+            // Fetch the updated payment details
+            $payment = Payment::where('booking_id', $booking_id)->first();
+
+            return response()->json([
+                'success' => 'Payment details saved successfully!',
+                'booking' => $booking,
+                'payment' => $payment
+            ], 200);
+        } catch (\Exception $e) {
+            // Log detailed error information
+            \Log::error('Exception occurred while saving payment details', [
+                'exception' => $e->getMessage(),
+                'booking_id' => $booking_id,
+                'request_data' => $request->all()
+            ]);
+            return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
         }
+    }
 
-        // Update booking with payment statuses
-        $booking->payment_status = $validatedData['payment_status'];
-        $booking->status = $validatedData['status'];
-        $booking->save();
 
-        // Save payment details in the payments table
-        Payment::updateOrCreate(
-            ['booking_id' => $booking_id],
-            [
+    // process for remaining payment
+    public function processRemainingPayment(Request $request, $booking_id)
+    {
+        Log::info('Starting processRemainingPayment', ['booking_id' => $booking_id]);
+    
+        try {
+            $booking = Booking::findOrFail($booking_id);
+            Log::info('Booking found', ['booking' => $booking]);
+    
+            // Validate the request
+            $validatedData = $request->validate([
+                'payment_id' => 'required|string|max:255',
+                'paid' => 'required|numeric',
+                'payment_method' => 'required|string|max:255',
+            ]);
+
+            $paidAmountInRupees = $validatedData['paid'];
+    
+            // Save payment details in the payments table
+            Payment::create([
+                'booking_id' => $booking->booking_id,
                 'user_id' => $booking->user_id,
                 'payment_id' => $validatedData['payment_id'],
-                'payment_status' => $validatedData['payment_status'],
-                'paid' => $validatedData['paid'],
-                'payment_type' => $validatedData['payment_type'],
-                'payment_method' => $validatedData['payment_method'],
-            ]
-        );
-
-        // Fetch the updated payment details
-        $payment = Payment::where('booking_id', $booking_id)->first();
-
-        return response()->json([
-            'success' => 'Payment details saved successfully!',
-            'booking' => $booking,
-            'payment' => $payment
-        ], 200);
-    } catch (\Exception $e) {
-        // Log detailed error information
-        \Log::error('Exception occurred while saving payment details', [
-            'exception' => $e->getMessage(),
-            'booking_id' => $booking_id,
-            'request_data' => $request->all()
-        ]);
-        return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
+                'payment_status' => 'paid',
+                'paid' => $paidAmountInRupees,
+                'payment_type' => 'full',
+                'payment_method' => 'razorpay',
+            ]);
+            Log::info('Payment details saved in the database');
+    
+            Log::info('Payment process completed successfully');
+            return response()->json(['message' => 'Payment processed successfully.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Payment verification failed', ['exception' => $e->getMessage()]);
+            return response()->json(['message' => 'Payment verification failed. Please try again.', 'error' => $e->getMessage()], 500);
+        }
     }
-}
 
     
 
