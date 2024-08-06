@@ -1,10 +1,8 @@
 @extends('pandit.layouts.app')
 
 @section('styles')
-    <!--- Internal Select2 css-->
+    <!-- Internal Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    <!-- Include Chosen CSS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.min.css" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -12,9 +10,9 @@
         <div class="col-lg-12 col-md-12">
             <div class="custom-card main-content-body-profile">
                 <div class="tab-content">
-                    <div class="main-content-body   tab-pane active" id="poojaitemlist">
+                    <div class="main-content-body tab-pane active" id="poojaitemlist">
                         <div class="left-content m-2">
-                            <a href="{{ url('/pandit/poojaitemlist') }}" class=" btn btn-danger">
+                            <a href="{{ url('/pandit/poojaitemlist') }}" class="btn btn-danger">
                                 << Back</a>
                         </div>
                         <div class="card">
@@ -65,7 +63,6 @@
                                                                     <th class="border-bottom-0">Puja Name</th>
                                                                     <th class="border-bottom-0">Item Name</th>
                                                                     <th class="border-bottom-0">Variant</th>
-                                                                    {{-- <th class="border-bottom-0">Unit</th> --}}
                                                                     <th class="border-bottom-0">Action</th>
                                                                 </tr>
                                                             </thead>
@@ -74,48 +71,38 @@
                                                                     <td>1</td>
                                                                     <td class="tb-col">
                                                                         <div class="media-group">
-                                                                            <div
-                                                                                class="media media-md media-middle media-circle">
-                                                                                <img src="{{ asset('assets/img/' . $poojaname->pooja_photo) }}"
-                                                                                    alt="user">
+                                                                            <div class="media media-md media-middle media-circle">
+                                                                                <img src="{{ asset('assets/img/' . $poojaname->pooja_photo) }}" alt="user">
                                                                             </div>
                                                                             <div class="media-text">
-                                                                                <a href=""
-                                                                                    class="title">{{ $poojaname->pooja_name }}</a>
+                                                                                <a href="" class="title">{{ $poojaname->pooja_name }}</a>
                                                                             </div>
                                                                         </div>
                                                                     </td>
                                                                     <td>
-                                                                        <select class="form-control chosen-select" name="item_id[]" id="item_id" required>
+                                                                        <select class="form-control select2" name="item_id[]" id="item_id" required>
                                                                             <option value="">Select Puja List</option>
                                                                             @foreach ($Poojaitemlist as $pujalist)
                                                                                 <option value="{{ $pujalist->id }}" data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
                                                                                     {{ $pujalist->item_name }}
                                                                                 </option>
-                                                                            
                                                                             @endforeach
                                                                         </select>
                                                                     </td>
                                                                     <td>
-                                                                        {{-- <label for="listVariant">Variant</label> --}}
-                                                                        <select class="form-control chosen-select" name="variant_id[]" id="variant_id" required>
+                                                                        <select class="form-control select2" name="variant_id[]" id="variant_id" required>
                                                                             <option value="">Select Variant</option>
-                                                                            <!-- Variants will be populated via JavaScript -->
                                                                         </select>
                                                                     </td>
-                                                                  
                                                                     <td>
-                                                                        <button type="button"
-                                                                            class="btn btn-success add_item_btn"
-                                                                            onclick="addPujaListSection({{ $poojaname->id }})">Add
-                                                                            More</button>
+                                                                        <button type="button" class="btn btn-success add_item_btn"
+                                                                            onclick="addPujaListSection({{ $poojaname->id }})">Add More</button>
                                                                     </td>
                                                                 </tr>
                                                             </tbody>
                                                         </table>
                                                         <div class="text-center col-md-12">
-                                                            <button type="submit" class="btn btn-primary"
-                                                                style="width: 150px;">Submit</button>
+                                                            <button type="submit" class="btn btn-primary" style="width: 150px;">Submit</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -130,46 +117,42 @@
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('scripts')
-    <!-- Internal Select2 js-->
+    <!-- Internal Select2 js -->
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="{{ asset('assets/js/pandit-item.js') }}"></script>
     <script>
         var poojaItemList = @json($Poojaitemlist);
     </script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.8.7/chosen.jquery.min.js"></script>
     <script>
         setTimeout(function() {
             document.getElementById('Message').style.display = 'none';
         }, 3000);
     </script>
-  
-    <script src="{{ asset('assets/js/gallery.js') }}"></script>
     <script>
         $(document).ready(function() {
+            $('.select2').select2();
+
             $('#item_id').on('change', function() {
                 var selectedOption = $(this).find('option:selected');
                 var variants = selectedOption.data('variants');
                 var $variantSelect = $('#variant_id');
-    
+
                 // Clear previous options
                 $variantSelect.empty();
                 $variantSelect.append('<option value="">Select Variant</option>');
-    
+
                 if (variants) {
                     try {
                         // Ensure the data is a JSON string and decode HTML entities
                         if (typeof variants === 'string') {
-                            // Decode HTML entities
                             variants = variants.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
                             variants = JSON.parse(variants);
                         }
-                        
+
                         // Populate the variant dropdown
                         $.each(variants, function(index, variant) {
                             $variantSelect.append('<option value="' + variant.id + '">' + variant.title + ' - ' + variant.price + '</option>');
@@ -181,6 +164,4 @@
             });
         });
     </script>
-    
-    
 @endsection

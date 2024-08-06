@@ -44,6 +44,7 @@ class PanditController extends Controller
                   ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
                   ->where('bookings.pandit_id', $pandit_details->id)
                   ->where('bookings.payment_status', 'paid')
+                  ->where('bookings.application_status', 'approved')
                   ->where('bookings.pooja_status','!=','canceled')
                   ->whereDate('bookings.booking_date', $today)
                   ->orderBy('bookings.booking_date', 'asc') // Order by booking_date ascending
@@ -129,7 +130,7 @@ public function poojarequest()
             PanditCancel::create([
                 'pandit_id' => $pandit->pandit_id,
                 'booking_id' => $request->booking_id,
-                'pandit_cancel_reason' => $request->pandit_cancel_reason,
+                'pandit_cancel_reason' => $request->cancel_reason,
             ]);
         
             return redirect()->back()->with('success', 'Booking rejected successfully!');
@@ -274,6 +275,7 @@ public function poojarequest()
                 'pooja_fee' => $booking->pooja->pooja_fee,
             ],
             'paid' => $booking->paid,
+            'pooja_status' => $booking->pooja_status,
             'booking_time' => $booking->created_at->format('Y-m-d H:i:s'),
             'address' => [
                 'country' => $booking->address->country,

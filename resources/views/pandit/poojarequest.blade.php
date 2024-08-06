@@ -65,10 +65,10 @@
                                                             <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <input type="hidden" value="{{ $booking->id }}" id="booking_id" name="booking_id">
+                                                            <input type="hidden" value="{{ $booking->booking_id }}" id="booking_id" name="booking_id">
                                                             <div class="mb-3">
                                                                 <label for="cancel_reason" class="col-form-label">Cancel Reason:</label>
-                                                                <select class="form-control" id="cancel_reason" name="pandit_cancel_reason" required>
+                                                                <select class="form-control" id="cancel_reason" name="cancel_reason" required>
                                                                     <option value="">Select Reason</option>
                                                                     <option value="I am not free at this time">I am not available at this time</option>
                                                                     <option value="I am not available in this city">I am not available in this city</option>
@@ -147,6 +147,10 @@
                                 <th>Address</th>
                                 <td id="modal-address">N/A</td>
                             </tr>
+                            <tr>
+                                <th>Pooja Status</th>
+                                <td id="modal-pooja-status">N/A</td>
+                            </tr>
                             
                            
                         </tbody>
@@ -194,6 +198,9 @@
                     document.getElementById('modal-pooja-fee').textContent = data.pooja?.pooja_fee || 'N/A';
                     document.getElementById('modal-paid-amount').textContent = data.paid || 'N/A';
                     document.getElementById('modal-date-time').textContent = data.booking_time || 'N/A';
+                    document.getElementById('modal-pooja-status').textContent = data.pooja_status || 'N/A';
+                    
+
                     document.getElementById('modal-address').innerHTML = `
                         ${data.address?.country || 'N/A'}<br>
                         Pincode: ${data.address?.pincode || 'N/A'}<br>

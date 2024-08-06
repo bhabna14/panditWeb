@@ -23,26 +23,31 @@ class PoojaListController extends Controller
     {
         try {
             $today = Carbon::today()->toDateString();
-    
-            // Fetch all pooja lists with active status
-            $all_Pooja_Lists = Poojalist::where('status', 'active')->get()->map(function ($pooja) {
-                $pooja->pooja_photo_url = asset('assets/img/'.$pooja->pooja_photo); // Generate full URL for the photo
-                return $pooja;
-            });
+
             $pandit = Auth::guard('sanctum')->user();
-    
-            // Fetch pandit details
+        
             $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
             
-            // Fetch selected poojas for the pandit
             $selectedPoojas = Poojaskill::where('pandit_id', $pandit_details->pandit_id)
                                         ->where('status', 'active')
-                                        ->get()->map(function ($pooja) {
-                                            $pooja->pooja_photo_url = asset('assets/img/' . $pooja->pooja_photo); // Generate full URL for the photo
+                                        ->get();
+    
+            $selectedPoojaIds = $selectedPoojas->pluck('pooja_id')->toArray();
+    
+            $all_Pooja_Lists = Poojalist::where('status', 'active')
+                                        ->whereNotIn('id', $selectedPoojaIds)
+                                        ->get()
+                                        ->map(function ($pooja) {
+                                            $pooja->pooja_photo_url = asset('assets/img/'.$pooja->pooja_photo); // Generate full URL for the photo
                                             return $pooja;
                                         });
-    
-            // Fetch pooja requests
+            
+            // Add the photo URLs to selected poojas
+            $selectedPoojas = $selectedPoojas->map(function ($pooja) {
+                $pooja->pooja_photo_url = asset('assets/img/' . $pooja->pooja_photo); // Generate full URL for the photo
+                return $pooja;
+            });
+            
            // Fetch pooja requests
            $pooja_requests = Booking::with(['user', 'pooja', 'address']) // Load relationships
            ->where('pandit_id', $pandit_details->id)

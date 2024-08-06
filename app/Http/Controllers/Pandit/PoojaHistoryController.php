@@ -15,33 +15,37 @@ class PoojaHistoryController extends Controller
     public function poojahistory()
     {
         $pandit = Auth::guard('pandits')->user();
-
+    
         // Fetch the pandit's profile details using their pandit_id
         $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
-
+    
+        // Fetch completed Poojas
         $complete_pooja = Booking::with(['poojaList', 'poojaStatus'])
-                                ->where('pooja_status', 'completed')
-                                ->where('pandit_id', $pandit_details->id)
-                                ->get();
-
-
-                                $all_poojas = Booking::with(['poojaList', 'poojaStatus'])
-                                ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
-                                ->where('bookings.pandit_id', $pandit_details->id)
-                                ->where('bookings.payment_status', 'paid')
-                                ->where('bookings.pooja_status','!=','canceled')
-                                ->orderBy('bookings.booking_date', 'asc') 
-                                ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
-                                ->get();
-
-                                foreach ($all_poojas as $booking) {
-                                    $booking->status = Poojastatus::where('booking_id', $booking->booking_id)
-                                                                  ->where('pooja_id', $booking->pooja_id)
-                                                                  ->first();
-                                }
-                            
-
-        return view('pandit.poojahistory', compact('complete_pooja','all_poojas'));
-
+            ->where('pooja_status', 'completed')
+            ->where('pandit_id', $pandit_details->id)
+            ->get();
+    
+        // Fetch all Poojas for the Pandit
+        $all_poojas = Booking::with(['poojaList', 'poojaStatus'])
+            ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
+            ->where('bookings.pandit_id', $pandit_details->id)
+            ->where('bookings.pooja_status', '!=', 'canceled')
+            ->orderBy('bookings.booking_date', 'asc')
+            ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
+            ->get();
+    
+        // Filter to include only Poojas that have started but not ended
+        $all_poojas = $all_poojas->filter(function ($booking) {
+            $status = Poojastatus::where('booking_id', $booking->booking_id)
+                ->where('pooja_id', $booking->pooja_id)
+                ->first();
+            
+            $booking->status = $status;
+    
+            return $status && $status->start_time && !$status->end_time;
+        });
+    
+        return view('pandit.poojahistory', compact('complete_pooja', 'all_poojas'));
     }
+    
 }

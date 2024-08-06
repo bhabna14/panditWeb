@@ -8,7 +8,11 @@
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
+
+    <!-- SweetAlert css -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.3.0/dist/sweetalert2.min.css" rel="stylesheet" />
 @endsection
+
 
 @section('content')
     <!-- breadcrumb -->
@@ -23,19 +27,7 @@
             </ol>
         </div>
     </div>
-    <!-- /breadcrumb -->
-    @if (session('success'))
-        <div class="alert alert-success" id ="Message">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="alert alert-danger" id ="Message">
-            {{ session('error') }}
-        </div>
-    @endif
-
+ 
     <!-- row -->
     <div class="row">
         <!-- Bookings Section -->
@@ -129,71 +121,70 @@
                                         </div>
                                     </div>
                                 @else
-                                    @foreach ($pooja_request as $request)
-                                        <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
-                                            <div class="card text-center p-3">
-                                                @if ($request->application_status === 'pending')
+                                @foreach ($pooja_request as $request)
+                                @if ($request->application_status !== 'approved' && $request->application_status !== 'rejected')
+                                    <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
+                                        <div class="card text-center p-3">
                                                 <h5 class="text-dark font-weight-semibold mb-2">
                                                     {{ $request->pooja->pooja_name ?? 'N/A' }}
                                                 </h5>
-                                                @endif
-
-                                                <div class="d-flex justify-content-center">
-                                                    @if ($request->application_status === 'pending')
-                                                        <div class="btn-group" role="group" aria-label="Action Buttons">
-                                                            <form action="{{ route('pandit.booking.approve', $request->id) }}" method="POST" style="display:inline;">
-                                                                @csrf
-                                                                <button type="submit" class="btn btn-info">Approve</button>
-                                                            </form>
-                                                            <form action="{{ route('pandit.booking.reject', $request->id) }}" method="POST" style="display:inline;">
-                                                                @csrf
-                                                                <button type="button" class="btn btn-warning me-3" data-bs-toggle="modal" data-bs-target="#exampleModal-{{ $request->id }}" data-bs-whatever="@mdo">Reject</button>
-                                                                <div class="modal fade" id="exampleModal-{{ $request->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                                                    <div class="modal-dialog">
-                                                                        <div class="modal-content">
-                                                                            <div class="modal-header">
-                                                                                <h5 class="modal-title" id="exampleModalLabel">Please Select Your Reason</h5>
-                                                                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+                            
+                                            <div class="d-flex justify-content-center">
+                                                @if ($request->application_status === 'pending')
+                                                    <div class="btn-group" role="group" aria-label="Action Buttons">
+                                                        <form action="{{ route('pandit.booking.approve', $request->id) }}" method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <button type="submit" class="btn btn-info">Approve</button>
+                                                        </form>
+                                                        <form action="{{ route('pandit.booking.reject', $request->id) }}" method="POST" style="display:inline;">
+                                                            @csrf
+                                                            <button type="button" class="btn btn-warning me-3" data-bs-toggle="modal" data-bs-target="#exampleModal-{{ $request->id }}" data-bs-whatever="@mdo">Reject</button>
+                                                            <div class="modal fade" id="exampleModal-{{ $request->id }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header">
+                                                                            <h5 class="modal-title" id="exampleModalLabel">Please Select Your Reason</h5>
+                                                                            <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
+                                                                        </div>
+                                                                        <div class="modal-body">
+                                                                            <input type="hidden" value="{{ $request->booking_id }}" id="booking_id" name="booking_id">
+                                                                            <div class="mb-3">
+                                                                                <label for="cancel_reason" class="col-form-label">Cancel Reason:</label>
+                                                                                <select class="form-control" id="cancel_reason" name="cancel_reason" required>
+                                                                                    <option value="">Select Reason</option>
+                                                                                    <option value="I am not free at this time">I am not available at this time</option>
+                                                                                    <option value="I am not available in this city">I am not available in this city</option>
+                                                                                    <option value="Personal problem">Personal problem</option>
+                                                                                </select>
                                                                             </div>
-                                                                            <div class="modal-body">
-                                                                                <input type="hidden" value="{{ $request->id }}" id="booking_id" name="booking_id">
-                                                                                <div class="mb-3">
-                                                                                    <label for="cancel_reason" class="col-form-label">Cancel Reason:</label>
-                                                                                    <select class="form-control" id="cancel_reason" name="cancel_reason" required>
-                                                                                        <option value="">Select Reason</option>
-                                                                                        <option value="I am not free at this time">I am not available at this time</option>
-                                                                                        <option value="I am not available in this city">I am not available in this city</option>
-                                                                                        <option value="Personal problem">Personal problem</option>
-                                                                                    </select>
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="modal-footer">
-                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                                                <button type="submit" class="btn btn-danger">Submit</button>
-                                                                            </div>
+                                                                        </div>
+                                                                        <div class="modal-footer">
+                                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                            <button type="submit" class="btn btn-danger">Submit</button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                            </form>
-                                                        </div>
-                                                    @elseif($request->application_status === 'approved')
-                                                        <span class="btn btn-success">Approved</span>
-                                                    @elseif($request->application_status === 'paid')
-                                                        <span class="btn btn-success">Paid</span>
-                                                    @elseif($request->application_status === 'rejected')
-                                                        <span class="btn btn-danger">Rejected</span>
-                                                    @endif
-
-                                                    @if ($request->application_status === 'pending')
-
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                @elseif($request->application_status === 'approved')
+                                                    <span class="btn btn-success">Approved</span>
+                                                @elseif($request->application_status === 'paid')
+                                                    <span class="btn btn-success">Paid</span>
+                                                @elseif($request->application_status === 'rejected')
+                                                    <span class="btn btn-danger">Rejected</span>
+                                                @endif
+                            
                                                     <a style="color: white; margin-left: 8px" class="btn ripple btn-success view-booking" data-bs-toggle="modal" data-bs-target="#full-screen" data-booking-id="{{ $request->id }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
-                                                    @endif
-                                                </div>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    </div>
+                                @endif
+                            @endforeach
+                            
+                            
                                 @endif
                             </div>
                         </div>
@@ -307,19 +298,6 @@
 @endsection
 
 @section('scripts')
-    <script>
-        function updateTime() {
-            var now = new Date();
-            var hours = now.getHours().toString().padStart(2, '0');
-            var minutes = now.getMinutes().toString().padStart(2, '0');
-            var seconds = now.getSeconds().toString().padStart(2, '0');
-            var formattedTime = hours + ':' + minutes + ':' + seconds;
-            document.getElementById('liveTime').innerText = formattedTime;
-        }
-
-        setInterval(updateTime, 1000); // Update every second
-        updateTime(); // Initial call to set the time immediately
-    </script>
     <!-- Internal Chart.Bundle js-->
     <script src="{{ asset('assets/plugins/chartjs/Chart.bundle.min.js') }}"></script>
 
@@ -348,54 +326,54 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
 
-    <script>
-        setTimeout(function() {
-            document.getElementById('Message').style.display = 'none';
-        }, 3000);
-        setTimeout(function() {
-            document.getElementById('Messages').style.display = 'none';
-        }, 3000);
-    </script>
+    <!-- SweetAlert js -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.3.0/dist/sweetalert2.all.min.js"></script>
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const viewButtons = document.querySelectorAll('.view-booking');
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: '{{ session('success') }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
 
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '{{ session('error') }}',
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            @endif
+
+            const viewButtons = document.querySelectorAll('.view-booking');
             viewButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const bookingId = this.getAttribute('data-booking-id');
-
-                    // Fetch booking details using AJAX
                     fetch(`/pandit/booking/details/${bookingId}`)
                         .then(response => response.json())
                         .then(data => {
-                            // Mask the mobile number and name
-                            const maskedMobileNumber = maskMobileNumber(data.user
-                                ?.mobile_number);
+                            const maskedMobileNumber = maskMobileNumber(data.user?.mobile_number);
                             const maskedName = maskName(data.user?.name);
-
-                            // Update modal content
-                            document.getElementById('modal-full-name').textContent =
-                                maskedName || 'N/A';
-                            document.getElementById('modal-pooja-name').textContent = data.pooja
-                                ?.pooja_name || 'N/A';
-                            document.getElementById('modal-mobile-number').textContent =
-                                maskedMobileNumber || 'N/A';
-                            document.getElementById('modal-pooja-fee').textContent = data.pooja
-                                ?.pooja_fee || 'N/A';
-                            document.getElementById('modal-paid-amount').textContent = data
-                                .paid || 'N/A';
-                            document.getElementById('modal-date-time').textContent = data
-                                .booking_time || 'N/A';
+                            document.getElementById('modal-full-name').textContent = maskedName || 'N/A';
+                            document.getElementById('modal-pooja-name').textContent = data.pooja?.pooja_name || 'N/A';
+                            document.getElementById('modal-mobile-number').textContent = maskedMobileNumber || 'N/A';
+                            document.getElementById('modal-pooja-fee').textContent = data.pooja?.pooja_fee || 'N/A';
+                            document.getElementById('modal-paid-amount').textContent = data.paid || 'N/A';
+                            document.getElementById('modal-date-time').textContent = data.booking_time || 'N/A';
                             document.getElementById('modal-address').innerHTML = `
-                            Area: ${data.address?.area || 'N/A'}<br>
-                            City: ${data.address?.city || 'N/A'}<br>
-                            State: ${data.address?.state || 'N/A'}<br>
-                            Pincode: ${data.address?.pincode || 'N/A'}<br>
-                        ${data.address?.country || 'N/A'}<br>
-                        Address Type: ${data.address?.address_type || 'N/A'}<br>
-                       
-
-                    `;
+                                Area: ${data.address?.area || 'N/A'}<br>
+                                City: ${data.address?.city || 'N/A'}<br>
+                                State: ${data.address?.state || 'N/A'}<br>
+                                Pincode: ${data.address?.pincode || 'N/A'}<br>
+                                ${data.address?.country || 'N/A'}<br>
+                                Address Type: ${data.address?.address_type || 'N/A'}<br>
+                            `;
                         })
                         .catch(error => console.error('Error fetching booking details:', error));
                 });
@@ -408,17 +386,15 @@
 
             function maskName(name) {
                 if (!name) return 'N/A';
-
                 return name.split(' ').map(word => {
-                    if (word.length <= 2) return word; // Handle short words
-
+                    if (word.length <= 2) return word;
                     const firstChar = word.charAt(0);
                     const lastChar = word.charAt(word.length - 1);
                     const maskedMiddle = '*'.repeat(word.length - 2);
-
                     return `${firstChar}${maskedMiddle}${lastChar}`;
                 }).join(' ');
             }
         });
     </script>
 @endsection
+
