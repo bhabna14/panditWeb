@@ -24,7 +24,7 @@ class BookingController extends Controller
             // Validate incoming request data
             $validatedData = $request->validate([
                 'pandit_id' => 'required|exists:pandit_profile,id',
-                'pooja_id' => 'required|exists:pandit_poojadetails,id',
+                'pooja_id' => 'required',
                 'pooja_fee' => 'required|numeric',
                 'advance_fee' => 'required|numeric',
                 'booking_date' => 'required|date',
