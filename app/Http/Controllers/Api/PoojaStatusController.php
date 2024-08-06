@@ -58,7 +58,8 @@ public function rejectBooking(Request $request, $id)
             $booking->save();
         
             // Get the authenticated pandit
-            $pandit = Auth::guard('pandits')->user();
+            // $pandit = Auth::guard('pandits')->user();
+            $pandit = Auth::guard('sanctum')->user();
         
             // Save to PanditCancel table
             PanditCancel::create([
