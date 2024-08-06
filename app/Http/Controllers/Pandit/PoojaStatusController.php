@@ -111,7 +111,7 @@ public function end(Request $request)
           
         ]);
 
-        $payment = DB::table('payment')
+        $payment = DB::table('payments')
         ->where('booking_id', $booking_id)
         ->where('payment_type','!=','full')
         ->get();

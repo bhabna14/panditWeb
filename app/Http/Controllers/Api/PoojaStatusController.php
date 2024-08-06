@@ -45,6 +45,8 @@ public function rejectBooking(Request $request, $id)
         $booking = Booking::findOrFail($id);
         $booking->application_status = 'rejected';
         $booking->status = 'rejected';
+        $booking->payment_status = 'rejected';
+        $booking->pooja_status = 'rejected';
         $booking->cancel_reason = $request->cancel_reason;
         $booking->save();
 
