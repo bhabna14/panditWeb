@@ -152,8 +152,7 @@
                         @if ($booking->payment->payment_type == 'advance' && 
                             $booking->status == 'paid' && 
                             $booking->payment_status == 'paid' && 
-                            $booking->application_status == 'approved' && 
-                            $booking->pooja_status == 'started')
+                            $booking->application_status == 'approved' )
                             <a href="{{ route('payRemainingAmount', $booking->id) }}" class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;">Pay the remaining amount</a>
                         @endif
                       @endif
