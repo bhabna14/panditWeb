@@ -124,7 +124,7 @@
               </div>
               <div class="row order-details-booking">
                   <div class="col-md-2">
-                      <img src="{{ asset('assets/img/'.$booking->pooja->pooja_photo) }}" alt="">
+                      {{-- <img src="{{ asset('assets/img/'.$booking->pooja->poojalist->pooja_photo) }}" alt=""> --}}
                   </div>
                   <div class="col-md-6">
                       <h6>{{ $booking->pooja->pooja_name }}</h6>
