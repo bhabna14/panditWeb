@@ -8,23 +8,24 @@
     <link href="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.css') }}" rel="stylesheet">
 @endsection
 @section('content')
-<div class="breadcrumb-header justify-content-between">
-    <div class="left-content">
-        <span class="main-content-title mg-b-0 mg-b-lg-1">MANAGE POOJA DETAILS</span>
+    <div class="breadcrumb-header justify-content-between">
+        <div class="left-content">
+            <span class="main-content-title mg-b-0 mg-b-lg-1">MANAGE POOJA DETAILS</span>
+        </div>
+        <div class="justify-content-center mt-2">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Pages</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Profile</li>
+            </ol>
+        </div>
     </div>
-    <div class="justify-content-center mt-2">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Pages</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Profile</li>
-        </ol>
-    </div>
-</div>
     <div class="row row-sm">
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-body">
                     <div class="table-responsive  export-table">
-                        <form action="{{ url('/pandit/update-poojadetails') }}" method="post" enctype="multipart/form-data">
+                        <form action="{{ url('/pandit/update-poojadetails') }}" method="post"
+                            enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
@@ -58,9 +59,30 @@
                                                     value="{{ old('fee.' . $poojaDetail->id, $poojaDetail->pooja_fee) }}">
                                             </td>
                                             <td>
-                                                <input type="text" name="duration[{{ $poojaDetail->id }}]"
-                                                    class="form-control"
-                                                    value="{{ old('duration.' . $poojaDetail->id, $poojaDetail->pooja_duration) }}">
+                                                <div class="row">
+                                                    @php
+                                                        $durationParts = explode(' ', $poojaDetail->pooja_duration);
+                                                        $durationValue = $durationParts[0] ?? '';
+                                                        $durationUnit = $durationParts[1] ?? '';
+                                                    @endphp
+                                                        <input type="number" name="duration_value[{{ $poojaDetail->id }}]"
+                                                            class="form-control"
+                                                            value="{{ old('duration_value.' . $poojaDetail->id, $durationValue) }}"
+                                                            required>
+                                                   
+                                                        <select class="form-control"
+                                                            name="duration_unit[{{ $poojaDetail->id }}]">
+                                                            <option value=" ">Select..</option>
+                                                            <option value="Day"
+                                                                {{ $durationUnit == 'Day' ? 'selected' : '' }}>Day</option>
+                                                            <option value="Hour"
+                                                                {{ $durationUnit == 'Hour' ? 'selected' : '' }}>Hour
+                                                            </option>
+                                                            <option value="Minute"
+                                                                {{ $durationUnit == 'Minute' ? 'selected' : '' }}>Minute
+                                                            </option>
+                                                        </select>
+                                                </div>
                                             </td>
                                             <td>
                                                 <input type="file" name="image[{{ $poojaDetail->id }}]"
@@ -89,13 +111,13 @@
                                                     class="form-control"
                                                     value="{{ old('done_count.' . $poojaDetail->id, $poojaDetail->pooja_done) }}">
                                             </td>
-
                                             <input type="hidden" name="pooja_id[{{ $poojaDetail->id }}]"
                                                 value="{{ $poojaDetail->pooja_id }}">
                                             <input type="hidden" name="pooja_name[{{ $poojaDetail->id }}]"
                                                 value="{{ $poojaDetail->pooja_name }}">
                                         </tr>
                                     @endforeach
+
                                 </tbody>
                             </table>
                             <div class="text-center col-md-12">
@@ -104,7 +126,7 @@
                         </form>
                     </div>
 
-                  
+
                 </div>
             </div>
         </div>

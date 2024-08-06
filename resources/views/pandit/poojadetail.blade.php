@@ -97,52 +97,46 @@
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($Poojaskills as $index => $poojaSkill)
-                                                        <tr>
-                                                            <td>{{ $index + 1 }}</td>
-                                                            <td class="tb-col">
-                                                                <div class="media-group">
-                                                                    <div class="media media-md media-middle media-circle">
-                                                                        <img src="{{ asset('assets/img/' . $poojaSkill->pooja_photo) }}"
-                                                                            alt="{{ $poojaSkill->pooja_name }}">
-                                                                    </div>
-                                                                    <div class="media-text">
-                                                                        <a href=""
-                                                                            class="title">{{ $poojaSkill->pooja_name }}</a>
-                                                                    </div>
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td class="tb-col">
+                                                            <div class="media-group">
+                                                                <div class="media media-md media-middle media-circle">
+                                                                    <img src="{{ asset('assets/img/' . $poojaSkill->pooja_photo) }}" alt="{{ $poojaSkill->pooja_name }}">
                                                                 </div>
-                                                            </td>
-                                                            <td>
-                                                                <input type="number" name="fee[{{ $poojaSkill->id }}]"
-                                                                    class="form-control"
-                                                                    value="{{ old('fee.' . $poojaSkill->id) }}" required>
-                                                            </td>
-                                                            <td>
-                                                                <input type="number"
-                                                                    name="duration[{{ $poojaSkill->id }}]"
-                                                                    class="form-control"
-                                                                    value="{{ old('duration.' . $poojaSkill->id) }}"
-                                                                    required>
-                                                            </td>
-                                                            <td>
-                                                                <input type="file" name="image[{{ $poojaSkill->id }}]"
-                                                                    class="form-control">
-                                                            </td>
-                                                            <td>
-                                                                <input type="file" name="video[{{ $poojaSkill->id }}]"
-                                                                    class="form-control">
-                                                            </td>
-                                                            <td>
-                                                                <input type="number"
-                                                                    name="done_count[{{ $poojaSkill->id }}]"
-                                                                    class="form-control"
-                                                                    value="{{ old('done_count.' . $poojaSkill->id) }}">
-                                                            </td>
-                                                            <input type="hidden" name="pooja_id[{{ $poojaSkill->id }}]"
-                                                                value="{{ $poojaSkill->pooja_id }}">
-                                                            <input type="hidden" name="pooja_name[{{ $poojaSkill->id }}]"
-                                                                value="{{ $poojaSkill->pooja_name }}">
-                                                        </tr>
+                                                                <div class="media-text">
+                                                                    <a href="" class="title">{{ $poojaSkill->pooja_name }}</a>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="fee[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('fee.' . $poojaSkill->id) }}" required>
+                                                        </td>
+                                                        <td>
+                                                            <div class="row">
+                                                                <input type="number" name="duration_value[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('duration_value.' . $poojaSkill->id) }}" required>
+                                                                <select class="form-control" name="duration_unit[{{ $poojaSkill->id }}]">
+                                                                    <option value=" ">Select..</option>
+                                                                    <option value="Day">Day</option>
+                                                                    <option value="Hour">Hour</option>
+                                                                    <option value="Minute">Minute</option>
+                                                                </select>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <input type="file" name="image[{{ $poojaSkill->id }}]" class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="file" name="video[{{ $poojaSkill->id }}]" class="form-control">
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="done_count[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('done_count.' . $poojaSkill->id) }}">
+                                                        </td>
+                                                        <input type="hidden" name="pooja_id[{{ $poojaSkill->id }}]" value="{{ $poojaSkill->pooja_id }}">
+                                                        <input type="hidden" name="pooja_name[{{ $poojaSkill->id }}]" value="{{ $poojaSkill->pooja_name }}">
+                                                    </tr>
                                                     @endforeach
+                                                    
                                                 </tbody>
                                             </table>
                                             <div class="text-center col-md-12">
