@@ -58,32 +58,35 @@ class PanditController extends Controller
     {
         try {
             // Fetch the pooja based on the provided slug
-            $pooja = Poojalist::where('slug', $slug)
-                               
-                                ->firstOrFail();
-
+            $pooja = Poojalist::where('slug', $slug)->firstOrFail();
+    
             // Fetch the related Poojadetails items along with the Profile
             $panditPujas = Poojadetails::with('profile')
-                    ->where('status','active')
+                ->where('status', 'active')
                 ->where('pooja_id', $pooja->id)
                 ->get();
-
+    
+            // Filter out pandit pujas with a null profile
+            $filteredPanditPujas = $panditPujas->filter(function ($poojaDetail) {
+                return !is_null($poojaDetail->profile);
+            });
+    
             // Modify the photo and video URLs for each pooja
-            $pooja->pooja_photo = url('assets/img/'. $pooja->pooja_photo);
-            foreach ($panditPujas as $poojaDetail) {
+            $pooja->pooja_photo = url('assets/img/' . $pooja->pooja_photo);
+            foreach ($filteredPanditPujas as $poojaDetail) {
                 $poojaDetail->pooja_photo = url($poojaDetail->pooja_photo);
                 $poojaDetail->pooja_video = url($poojaDetail->pooja_video);
                 if ($poojaDetail->profile) {
                     $poojaDetail->profile->profile_photo = url($poojaDetail->profile->profile_photo);
                 }
             }
-
+    
             // Prepare the data to return
             $data = [
                 'pooja' => $pooja,
-                'pandit_pujas' => $panditPujas,
+                'pandit_pujas' => $filteredPanditPujas->values(), // Convert the collection back to an array
             ];
-
+    
             return response()->json([
                 'status' => 200,
                 'message' => 'Pooja details fetched successfully',
@@ -93,8 +96,10 @@ class PanditController extends Controller
             return response()->json([
                 'status' => 500,
                 'message' => 'Failed to fetch pooja details.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
+    
 
 }
