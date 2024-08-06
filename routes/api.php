@@ -109,6 +109,8 @@ Route::controller(BankController::class)->group(function() {
 
 Route::controller(AddressController::class)->group(function() {
     Route::post('/pandit/saveaddress', 'saveAddress');
+    Route::middleware('auth:sanctum')->get('pandit/show-address','address');
+
 });
 
 Route::controller(PodcastController::class)->group(function() {
@@ -137,11 +139,7 @@ Route::controller(PujaController::class)->group(function() {
 Route::get('/our-pandit/{slug}', [PanditController::class, 'singlePanditDetails']);
 Route::get('/pooja/{slug}', [PanditController::class, 'poojadetails']);
 
-//user login api
-// Route::controller(UserLoginController::class)->group(function() {
-//     Route::post('/login','storeLoginData');
-//     Route::post('/verify-otp','checkUserOtp');
-// });
+//home page user login api
 
 Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
 Route::post('/verify-otpless', [OtpController::class, 'verifyOtp'])->name('api.verify-otp');

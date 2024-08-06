@@ -46,4 +46,23 @@ class AddressController extends Controller
             'data' => $addressdata
         ], 200);
     }
+    public function address()
+    {
+        $panditId = Auth::guard('sanctum')->user()->pandit_id;
+
+    $addressdata = Addressdetail::where('pandit_id', $panditId)->first();
+
+        if (!$addressdata) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No address details found for the authenticated Pandit.'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Address details retrieved successfully!',
+            'data' => $addressdata
+        ], 200);
+    }
 }
