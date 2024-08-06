@@ -226,7 +226,8 @@ class userController extends Controller
     public function ajaxSearchPooja(Request $request)
     {
         $searchTerm = $request->input('searchTerm');
-        $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')->get();
+        $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')
+                            ->where('status','active')->get();
 
         return response()->json($poojas);
     }
