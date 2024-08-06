@@ -45,12 +45,12 @@
                 <p><strong>Pooja Name:</strong> {{ $booking->pooja->pooja_name }}</p>
                 <p><strong>Pooja Fee:</strong> ₹{{ $booking->pooja_fee }}</p>
                 <p><strong>Pooja Date:</strong> {{ $booking->booking_date }}</p>
-                <p><strong>Total Paid:</strong> ₹{{ $booking->paid }}   @if($booking->payment_type == "full")
+                <p><strong>Total Paid:</strong> ₹{{ $booking->payment->paid }}   @if($booking->payment->payment_type == "full")
                     (Full paid with 5% discount)
                     @else
                     (Advanced paid 20%)
                     @endif</p>
-                <p><strong>Payment Details:</strong> {{ $booking->payment_id }} ({{ $booking->payment_method }})</p>
+                <p><strong>Payment Details:</strong> {{ $booking->payment->payment_id }} ({{ $booking->payment->payment_method }})</p>
             </div>
         </div>
     </div>

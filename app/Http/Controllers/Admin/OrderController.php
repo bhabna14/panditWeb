@@ -21,7 +21,7 @@ class OrderController extends Controller
 {
     //
     public function manageorders(){
-        $bookings = Booking::with('pooja','pandit') // Load relationship to get pooja details
+        $bookings = Booking::with('pooja','pandit','payment') // Load relationship to get pooja details
                             ->orderByDesc('created_at')
                             ->get();
         return view('admin/manageorders',compact('bookings'));
