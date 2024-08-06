@@ -73,7 +73,7 @@ class PanditController extends Controller
                     ->orderBy('pooja_status.id', 'desc')
                     ->get();
                     // dd($pooja_status);
-    $pooja_request = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
+    $pooja_request = Booking::with(['user', 'pooja.poojalist', 'address']) // Load relationships to get user, pooja, and address details
                     ->where('pandit_id', $pandit_details->id) // Use id from profile
                     ->orderBy('created_at', 'desc')
                     ->get();
