@@ -49,14 +49,17 @@ Route::controller(AreaController::class)->group(function() {
     Route::post('/save-poojaArea', 'saveForm');
     Route::get('/manage-poojaArea', 'manageArea');
 });
-
 Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/save', 'saveProfile');
     Route::post('/profile/update/{id}','updateProfile');
     Route::get('/show-profile-details', 'showProfileDetails');
     Route::middleware('auth:sanctum')->get('/edit-profile',  'editProfile');
+    Route::middleware('auth:sanctum')->post('/update-photo','updatePhoto');
+
 
 });
+
+
 
 Route::controller(CareersController::class)->group(function() {
     Route::post('/career/save', 'saveCareer');

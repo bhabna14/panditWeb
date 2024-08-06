@@ -9,27 +9,8 @@
 @endsection
 @section('content')
 
-<div class="row row-sm pt-4">
-    <div class="col-lg-12">
-        
-        <div class="card custom-card overflow-hidden">
-            
-            <div class="card-body">
-          
-                <div class="card">
-                    <div class="card-body p-2">
-                        <div class="input-group">
-                            <input type="text" class="form-control" placeholder="Search ...">
-                            <span class="input-group-append">
-                                <button class="btn btn-primary" type="button">Search</button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<div class="row row-sm">
+ 
 <div class="col-lg-12 col-xl-12 p-0">
     <div class="row">
         @foreach($complete_pooja as $pooja)
@@ -69,10 +50,65 @@
             </div>
         </div>
         @endforeach
-    </div>
-</div>
-
-
+        @foreach ($all_poojas as $booking)
+        @if (!$booking->status || !$booking->status->end_time)
+            <div class="col-xl-3 col-lg-6 alert">
+                <div class="card item-card">
+                    <div class="card-body pb-0">
+                        <div class="text-center zoom">
+                            <a href="#"><img class="w-100 br-5" src="{{ asset('assets/img/' . $booking->poojaList->pooja_photo) }}" alt="img"></a>
+                        </div>
+                        <div class="card-body px-0 pb-3">
+                            <div class="row">
+                                <h5 class="text-dark font-weight-semibold mb-2">
+                                    {{ $booking->pooja_name }}
+                                    ({{ \Carbon\Carbon::parse($booking->booking_date)->format('H:i') }})
+                                </h5>
+                                <div class="d-flex justify-content-center align-items-center" style="margin-left:70px">
+                                    @if ($booking->status)
+                                        @if ($booking->status->start_time && !$booking->status->end_time)
+                                            <!-- If started but not ended, show End button -->
+                                            <form action="{{ route('pooja.end') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
+                                                <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
+                                                <button type="submit" class="btn btn-success mb-2">End</button>
+                                            </form>
+                                        @elseif (!$booking->status->start_time)
+                                            <!-- If not started, show Start button -->
+                                            <form action="{{ route('pooja.start') }}" method="POST" class="mr-2">
+                                                @csrf
+                                                <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
+                                                <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
+                                                <button type="submit" class="btn btn-primary mb-2">Start</button>
+                                            </form>
+                                        @else
+                                            <!-- If started and ended, show Completed button -->
+                                            <button class="btn btn-secondary mb-2" disabled>Pooja Completed</button>
+                                        @endif
+                                    @else
+                                        <!-- If no status record, show both Start and End buttons -->
+                                        <form action="{{ route('pooja.start') }}" method="POST" class="mr-2">
+                                            @csrf
+                                            <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
+                                            <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
+                                            <button type="submit" class="btn btn-primary mb-2">Start</button>
+                                        </form>
+                                        <form action="{{ route('pooja.end') }}" method="POST">
+                                            @csrf
+                                            <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
+                                            <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
+                                            <button type="submit" class="btn btn-success mb-2" style="margin-left: 10px">End</button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+    @endforeach
 @endsection
 
 @section('scripts')

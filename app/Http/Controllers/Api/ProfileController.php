@@ -74,38 +74,16 @@ class ProfileController extends Controller
         }
     }
 
-    public function editProfile()
-    {
-        // Get the authenticated user's pandit_id
-        $profileId = Auth::guard('sanctum')->user()->pandit_id;
-    
-        // Retrieve the latest profile for the authenticated user
-        $pandit_profile = Profile::where('pandit_id', $profileId)->latest()->first();
-    
-        // Define the list of languages
-        $languages = [
-            'English', 'Odia', 'Hindi', 'Sanskrit', 'Assamese', 'Bengali', 'Bodo', 'Dogri', 'Gujarati', 'Kannada', 
-            'Kashmiri', 'Konkani', 'Maithili', 'Malayalam', 'Manipuri', 'Marathi', 'Nepali', 'Punjabi', 
-            'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
-        ];
-    
-        // Return the profile and languages as a JSON response
-        return response()->json([
-            'profile' => $pandit_profile,
-            'languages' => $languages,
-        ]);
-    }
-    
     
     public function updateProfile(Request $request)
     {
         // Retrieve the authenticated user
         $user = Auth::guard('sanctum')->user();
-
+    
         if (!$user) {
             return response()->json(['error' => 'No authenticated user found.'], 401);
         }
-
+    
         // Validate the request data
         $request->validate([
             'title' => 'required|string|max:255',
@@ -113,7 +91,6 @@ class ProfileController extends Controller
             'email' => 'required|email|max:255',
             'whatsappno' => 'required|string|max:15',
             'language.*' => 'string',
-            'profile_photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
     
         // Find the profile belonging to the authenticated user
@@ -124,6 +101,7 @@ class ProfileController extends Controller
         }
     
         // Update the scalar fields
+        $profile->pandit_id = $profile->pandit_id;
         $profile->title = $request->title;
         $profile->name = $request->name;
         $profile->email = $request->email;
@@ -140,22 +118,16 @@ class ProfileController extends Controller
         }
         $profile->language = $langString;
     
-        if ($request->hasFile('profile_photo')) {
-            $file = $request->file('profile_photo');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $filePath = 'uploads/profile_photo/' . $filename;
-            $file->move(public_path('uploads/profile_photo'), $filename);
-            $profile->profile_photo = $filePath;
+        if ($request->hasFile('upload_id')) {
+            $file = $request->file('upload_id');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/id_proof'), $fileName);
+            $iddata = new IdcardDetail();
+            $iddata->pandit_id = $profile->pandit_id;
+            $iddata->id_type = $request->id_type;
+            $iddata->upload_id = $fileName;
+            $iddata->save();
         }
-
-        $iddata = new IdcardDetail();
-        $iddata->pandit_id = $pandit->pandit_id;
-        $iddata->id_type = $request->id_type;
-
-        $file = $request->file('upload_id')[$key];
-        $fileName = time() . '_' . $file->getClientOriginalName();
-        $filePath = $file->move(public_path('uploads/id_proof'), $fileName);
-        $iddata->upload_id = $fileName; 
     
         if ($profile->save()) {
             return response()->json(['success' => true, 'message' => 'Data updated successfully.'], 200);
@@ -163,6 +135,7 @@ class ProfileController extends Controller
             return response()->json(['success' => false, 'message' => 'Failed to update data.'], 500);
         }
     }
+    
 
     public function showProfileDetails()
     {
@@ -176,14 +149,18 @@ class ProfileController extends Controller
             $pandit_educations = PanditEducation::where('pandit_id', $profileId)->where('status', 'active')->get();
             $pandit_vedics = PanditVedic::where('pandit_id', $profileId)->where('status', 'active')->get();
     
-            // profile photo url
-            if ($pandit_profile->profile_photo) {
+            // Set profile photo URL if it exists
+            if ($pandit_profile && $pandit_profile->profile_photo) {
                 $pandit_profile->profile_photo_url = asset($pandit_profile->profile_photo);
             }
-            //  // id cards url
-            // if ($pandit_idcards->upload_id) {
-            //     $pandit_idcards->id_card_url = asset('/uploads/id_proof/'.$pandit_idcards->upload_id);
-            // }
+    
+            // Iterate through idcards to set the URL
+            foreach ($pandit_idcards as $idcard) {
+                if ($idcard->upload_id) {
+                    $idcard->id_card_url = asset('/uploads/id_proof/' . $idcard->upload_id);
+                }
+            }
+    
             // Return JSON response
             return response()->json([
                 'status' => 200,
@@ -206,7 +183,45 @@ class ProfileController extends Controller
         }
     }
 
+    public function updatePhoto(Request $request)
+    {
+        // Retrieve the authenticated user's profile
+        $profileId = Auth::guard('sanctum')->user()->pandit_id;
+        $profile = Profile::where('pandit_id', $profileId)->first();
 
-    
-     
+        if (!$profile) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Profile not found.',
+            ], 404);
+        }
+
+        // Debugging: Check if the file is in the request
+        if (!$request->hasFile('profile_photo')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No photo uploaded. Debug: File not found in request.',
+            ], 400);
+        }
+
+        // Handle the profile photo upload
+        $file = $request->file('profile_photo');
+        $filename = time() . '.' . $file->getClientOriginalExtension();
+        $filePath = 'uploads/profile_photo/' . $filename;
+        $file->move(public_path('uploads/profile_photo'), $filename);
+        $profile->profile_photo = $filePath;
+
+        if ($profile->save()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Profile photo updated successfully.',
+                'profile_photo_url' => asset($filePath),
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update profile photo.',
+            ], 500);
+        }
+    }
 }

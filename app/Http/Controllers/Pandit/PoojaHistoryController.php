@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Profile;
+use App\Models\Poojastatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
@@ -19,10 +20,28 @@ class PoojaHistoryController extends Controller
         $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
 
         $complete_pooja = Booking::with(['poojaList', 'poojaStatus'])
-                                ->where('application_status', 'completed')
+                                ->where('pooja_status', 'completed')
                                 ->where('pandit_id', $pandit_details->id)
                                 ->get();
 
-        return view('pandit.poojahistory', compact('complete_pooja'));
+
+                                $all_poojas = Booking::with(['poojaList', 'poojaStatus'])
+                                ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
+                                ->where('bookings.pandit_id', $pandit_details->id)
+                                ->where('bookings.payment_status', 'paid')
+                                ->where('bookings.pooja_status','!=','canceled')
+                                ->orderBy('bookings.booking_date', 'asc') 
+                                ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
+                                ->get();
+
+                                foreach ($all_poojas as $booking) {
+                                    $booking->status = Poojastatus::where('booking_id', $booking->booking_id)
+                                                                  ->where('pooja_id', $booking->pooja_id)
+                                                                  ->first();
+                                }
+                            
+
+        return view('pandit.poojahistory', compact('complete_pooja','all_poojas'));
+
     }
 }
