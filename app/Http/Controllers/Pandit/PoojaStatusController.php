@@ -96,7 +96,17 @@ public function end(Request $request)
         $duration = sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
         
         // Update the record in the pooja_status table
-        $updated = DB::table('pooja_status')
+       
+
+        $payment = DB::table('payments')
+        ->where('booking_id', $booking_id)
+        ->where('payment_type','!=','full')
+        ->get();
+
+        if ($payment) {
+            return redirect()->back()->with('error', 'User has not made full payment for Puja.');
+        }else{
+            $updated = DB::table('pooja_status')
             ->where('booking_id', $booking_id)
             ->where('pooja_id', $pooja_id)
             ->update([
@@ -110,14 +120,6 @@ public function end(Request $request)
             ->update(['pooja_status' => 'completed',
           
         ]);
-
-        $payment = DB::table('payments')
-        ->where('booking_id', $booking_id)
-        ->where('payment_type','!=','full')
-        ->get();
-
-        if ($payment) {
-            return redirect()->back()->with('error', 'User has not made full payment for Puja.');
         }
 
 
