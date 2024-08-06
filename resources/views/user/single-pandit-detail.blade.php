@@ -45,12 +45,12 @@
 <section class="pandit-single-profile">
     <div class="container">
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="pandit-profile">
                     <img src="{{ asset($single_pandit->profile_photo) }}" alt="">
                 </div>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="pandit-desc">
                     <h5>{{ $single_pandit->name }}</h5>
                     <p>{{ $single_pandit->about_pandit }}</p>
