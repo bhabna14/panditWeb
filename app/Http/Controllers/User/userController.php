@@ -268,7 +268,7 @@ class userController extends Controller
 
     public function panditlist(){
         $pandits = Profile::where('pandit_status', 'accepted')
-                            ->paginate(9);
+                            ->paginate(12);
             return view('user/panditlist', compact('pandits'));
        
      }
