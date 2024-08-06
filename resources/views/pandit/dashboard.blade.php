@@ -134,7 +134,7 @@
                                             <div class="card text-center p-3">
                                                 @if ($request->application_status === 'pending')
                                                 <h5 class="text-dark font-weight-semibold mb-2">
-                                                    {{ $request->pooja->pooja_name }}
+                                                    {{ $request->pooja->pooja_name ?? 'N/A' }}
                                                 </h5>
                                                 @endif
 
