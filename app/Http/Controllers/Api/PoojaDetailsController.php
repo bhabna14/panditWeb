@@ -125,16 +125,15 @@ class PoojaDetailsController extends Controller
                 }
             }
 
-            // Prepare the data to return
-            $data = [
-                'pooja' => $pooja,
-                'pandit_pujas' => $filteredPanditPujas->values(), // Convert the collection back to an array
-            ];
+            // // Prepare the data to return
+            // $data = $pooja
+                
+            
 
             return response()->json([
                 'status' => 200,
                 'message' => 'Pooja details fetched successfully',
-                'data' => $data,
+                'data' => $pooja,
             ]);
         } catch (\Exception $e) {
             return response()->json([
