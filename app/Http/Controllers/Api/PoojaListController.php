@@ -28,7 +28,7 @@ class PoojaListController extends Controller
         
             $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
             
-            $selectedPoojas = Poojaskill::where('pandit_id', $pandit_details->pandit_id)
+            $selectedPoojas = Poojaskill::where('pandit_id', $pandit->pandit_id)
                                         ->where('status', 'active')
                                         ->get();
     
