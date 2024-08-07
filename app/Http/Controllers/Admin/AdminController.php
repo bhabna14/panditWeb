@@ -71,7 +71,7 @@ class AdminController extends Controller
     }
 
     public function managepandit() {
-        $pandit_profiles = Profile::all(); // Fetch all profiles
+        $pandit_profiles = Profile::orderBy('id', 'desc')->get(); // Fetch all profiles
         return view('admin/managepandit', compact('pandit_profiles'));
     }
 
