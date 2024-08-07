@@ -16,6 +16,8 @@ use App\Models\Poojadetails;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Rating;
+use App\Models\PanditLogin;
+
 
 class OrderController extends Controller
 {
@@ -28,8 +30,12 @@ class OrderController extends Controller
     }
     public function showbooking($id)
     {
-        $booking = Booking::with(['pooja', 'pandit','panditlogin', 'address', 'user', 'poojaStatus', 'ratings'])->findOrFail($id);
+        $booking = Booking::with(['pooja', 'pandit', 'address', 'user', 'poojaStatus', 'ratings'])->findOrFail($id);
         
-        return view('admin/showbookingdetails', compact('booking'));
+         $pandit_id = $booking->pandit->pandit_id;
+
+         $pandit_login = PanditLogin::where('pandit_id', $pandit_id)->first();
+         
+        return view('admin/showbookingdetails', compact('booking','pandit_login'));
     }
 }

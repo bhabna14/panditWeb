@@ -74,9 +74,9 @@
         <div class="card custom-card overflow-hidden">
             <div class="card-header">Pandit Details</div>
             <div class="card-body">
-                {{-- <p><strong>Pandit Id:</strong> {{ $booking->panditlogin->pandit_id }}</p> --}}
+                {{-- <p><strong>Pandit Id:</strong> {{ $pandit_login->pandit_id }}</p> --}}
                 <p><strong>Name:</strong> {{ $booking->pandit->title }} {{ $booking->pandit->name }}</p>
-                <p><strong>Phone:</strong> {{ $booking->panditlogin->mobile_no }}</p>
+                <p><strong>Phone:</strong> {{ $pandit_login->mobile_no }}</p>
             </div>
         </div>
     </div>

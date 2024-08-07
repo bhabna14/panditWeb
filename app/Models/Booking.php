@@ -53,10 +53,7 @@ class Booking extends Model
         return $this->belongsTo(Profile::class, 'pandit_id', 'id');
     }
 
-    public function panditlogin()
-    {
-        return $this->belongsTo(PanditLogin::class, 'pandit_id', 'id');
-    }
+   
 
     public function pooja()
     {
