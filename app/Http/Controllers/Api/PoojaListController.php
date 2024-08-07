@@ -10,8 +10,6 @@ use App\Models\Poojaitems;
 use App\Models\Poojalist;
 use App\Models\Profile;
 use App\Models\Booking;
-use App\Models\Poojadetails;
-
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -30,7 +28,7 @@ class PoojaListController extends Controller
         
             $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
             
-            $selectedPoojas = Poojadetails::where('pandit_id', $pandit->pandit_id)
+            $selectedPoojas = Poojaskill::where('pandit_id', $pandit->pandit_id)
                                         ->where('status', 'active')
                                         ->get();
     
