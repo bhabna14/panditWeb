@@ -170,7 +170,7 @@ public function manageArea()
     ], 200);
 }
 
-public function updatePoojaArea(Request $request)
+public function updatePoojaArea(Request $request,$id)
 {
     $pandit = Auth::guard('sanctum')->user();
 
@@ -182,7 +182,7 @@ public function updatePoojaArea(Request $request)
     }
 
     // Find the Pooja area for the authenticated Pandit
-    $poojaArea = Poojaarea::where('pandit_id', $pandit->pandit_id)->first();
+    $poojaArea = Poojaarea::where('id', $id)->first();
 
     if (!$poojaArea) {
         return response()->json([
