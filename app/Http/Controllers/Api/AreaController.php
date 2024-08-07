@@ -73,57 +73,69 @@ class AreaController extends Controller
     }
   
     public function saveForm(Request $request)
-{
-    try {
-        // Ensure the user is authenticated
-        $user = Auth::guard('sanctum')->user();
-
-        if (!$user) {
-            return response()->json([
-                'status' => 401,
-                'message' => 'Unauthenticated.'
-            ], 401);
-        }
-
-        // Create a new Poojaarea record
-        $poojaArea = new Poojaarea();
-        $poojaArea->pandit_id = $user->pandit_id;
-        $poojaArea->state_code = $request->input('state');
-        $poojaArea->district_code = $request->input('district');
-        $poojaArea->subdistrict_code = $request->input('city');
-        $poojaArea->village_code = implode(',', $request->input('village'));
-
-        // Save the Poojaarea record and check for success
-        if ($poojaArea->save()) {
-            Log::info('Pooja area created successfully.', ['data' => $request->all()]);
-
-            return response()->json([
-                'status' => 200,
-                'message' => 'Data saved successfully.',
-                'data' => $poojaArea
-            ], 200);
-
-        } else {
-            Log::error('Failed to save pooja area.', ['data' => $request->all()]);
-
+    {
+        try {
+            // Ensure the user is authenticated
+            $user = Auth::guard('sanctum')->user();
+    
+            if (!$user) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Unauthenticated.'
+                ], 401);
+            }
+    
+            // Create a new Poojaarea record
+            $poojaArea = new Poojaarea();
+            $poojaArea->pandit_id = $user->pandit_id;
+            $poojaArea->state_code = $request->input('state');
+            $poojaArea->district_code = $request->input('district');
+            $poojaArea->subdistrict_code = $request->input('city');
+            $poojaArea->village_code = $request->input('village');
+            $villageCode = $request->input('village');
+    
+    
+            if (is_array($villageCode)) {
+                $villageString =  implode(',', $validatedData['village']);
+            } else {
+                $villageString = $villageCode; // Assuming it's already a string if not an array
+            }
+    
+            $poojaArea->village_code = $villageString;
+    
+    
+    
+            // Save the Poojaarea record and check for success
+            if ($poojaArea->save()) {
+                Log::info('Pooja area created successfully.', ['data' => $request->all()]);
+    
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Data saved successfully.',
+                    'data' => $poojaArea
+                ], 200);
+    
+            } else {
+                Log::error('Failed to save pooja area.', ['data' => $request->all()]);
+    
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'Failed to save data.',
+                    'data' => []
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error saving pooja area: ' . $e->getMessage());
+    
+            // Return a JSON error response
             return response()->json([
                 'status' => 500,
-                'message' => 'Failed to save data.',
-                'data' => []
+                'message' => 'Failed to save data. Please try again.',
+                'error' => $e->getMessage()
             ], 500);
         }
-    } catch (\Exception $e) {
-        // Log the error
-        Log::error('Error saving pooja area: ' . $e->getMessage());
-
-        // Return a JSON error response
-        return response()->json([
-            'status' => 500,
-            'message' => 'Failed to save data. Please try again.',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
 
 public function manageArea()

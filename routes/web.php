@@ -168,7 +168,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 ## admin routes
 Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::controller(AdminController::class)->group(function() {
-        Route::get('/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');
         Route::get('/pandit-profile', 'panditprofile')->name('panditprofile');
         Route::get('/manage-users', 'manageuser')->name('manageuser');
@@ -270,13 +270,13 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 });
 
 // user routes
-Route::prefix('user')->middleware(['user'])->group(function () {
+// Route::prefix('user')->middleware(['user'])->group(function () {
 
-    Route::controller(userController::class)->group(function() {
-        Route::get('/dashboard', 'dashboard')->name('user.dashboard');
+//     Route::controller(userController::class)->group(function() {
+//         Route::get('/dashboard', 'dashboard')->name('user.dashboard');
         
-    });
-});
+//     });
+// });
 
 // Route::controller(PanditLoginController::class)->group(function() {
 //     Route::post('/pandit/save-panditlogin', 'storeLoginData')->name('pandit.login');
