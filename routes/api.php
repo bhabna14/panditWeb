@@ -49,10 +49,11 @@ Route::controller(AreaController::class)->group(function() {
     Route::get('/get-village/{subdistrictsCode}', 'getVillage');
     Route::post('/save-poojaArea', 'saveForm');
     Route::get('/manage-poojaArea', 'manageArea');
-    Route::post('/update-pooja-area', 'updatePoojaArea');
+    Route::post('/update-pooja-area/{id}', 'updatePoojaArea');
     Route::post('/delet-pooja-area/{id}','deletePoojaArea');
 
 });
+
 Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/save', 'saveProfile');
     Route::post('/profile/updatepanditprofile','updateProfile');

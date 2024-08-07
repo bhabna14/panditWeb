@@ -158,44 +158,44 @@ public function manageArea()
     ], 200);
 }
 
-public function updatePoojaArea(Request $request)
-{
-    $pandit = Auth::guard('sanctum')->user();
+    public function updatePoojaArea(Request $request,$id)
+    {
+        $pandit = Auth::guard('sanctum')->user();
 
-    if (!$pandit) {
-        return response()->json([
-            'status' => 401,
-            'message' => 'Unauthenticated.'
-        ], 401);
+        if (!$pandit) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthenticated.'
+            ], 401);
+        }
+
+        // Find the Pooja area for the authenticated Pandit
+        $poojaArea = Poojaarea::where('id', $id)->first();
+
+        if (!$poojaArea) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Pooja area not found.'
+            ], 404);
+        }
+
+        try {
+            // Log the Pooja area before update
+            \Log::info('Updating Pooja Area', ['poojaArea' => $poojaArea]);
+
+            $poojaArea->subdistrict_code = $request->input('subdistrict_code');
+            $villageString = implode(',', $request->input('village_code'));
+            $poojaArea->village_code = $villageString;
+            $poojaArea->save();
+
+            return response()->json(['message' => 'Pooja area updated successfully.'], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Failed to update Pooja area', ['error' => $e->getMessage()]);
+
+            return response()->json(['error' => 'Failed to update pooja area.'], 400);
+        }
     }
-
-    // Find the Pooja area for the authenticated Pandit
-    $poojaArea = Poojaarea::where('pandit_id', $pandit->pandit_id)->first();
-
-    if (!$poojaArea) {
-        return response()->json([
-            'status' => 404,
-            'message' => 'Pooja area not found.'
-        ], 404);
-    }
-
-    try {
-        // Log the Pooja area before update
-        \Log::info('Updating Pooja Area', ['poojaArea' => $poojaArea]);
-
-        $poojaArea->subdistrict_code = $request->input('subdistrict_code');
-        $villageString = implode(',', $request->input('village_code'));
-        $poojaArea->village_code = $villageString;
-        $poojaArea->save();
-
-        return response()->json(['message' => 'Pooja area updated successfully.'], 200);
-    } catch (\Exception $e) {
-        // Log the error for debugging
-        \Log::error('Failed to update Pooja area', ['error' => $e->getMessage()]);
-
-        return response()->json(['error' => 'Failed to update pooja area.'], 400);
-    }
-}
 
 public function deletePoojaArea(Request $request, $id)
 {
