@@ -500,38 +500,36 @@ public function confirmBooking(Request $request)
     }
     public function updateProfile(Request $request)
     {
+        // Validate the request
         $request->validate([
             'name' => 'required|string|max:255',
-            // 'phonenumber' => 'required|string|max:15',
-            'email' => 'required|email|max:255',
-            // 'dob' => 'nullable|date',
+            'email' => 'nullable|email|max:255',
             'about' => 'nullable|string',
             'gender' => 'nullable|string',
             'userphoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
-
+    
         $user = Auth::guard('users')->user();
         $user->name = $request->input('name');
-        // $user->mobile_number = $request->input('phonenumber');
         $user->email = $request->input('email');
-        // $user->dob = $request->input('dob');
         $user->about = $request->input('about');
         $user->gender = $request->input('gender');
-
-        if ($request->hasFile('avatar')) {
-            // Delete the old avatar if it exists
+    
+        if ($request->hasFile('userphoto')) {
+            // Delete the old userphoto if it exists
             if ($user->userphoto && Storage::exists($user->userphoto)) {
                 Storage::delete($user->userphoto);
             }
-
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+    
+            $avatarPath = $request->file('userphoto')->store('avatars', 'public');
             $user->userphoto = $avatarPath;
         }
-
+    
         $user->save();
-
+    
         return redirect()->route('user.userprofile')->with('success', 'Profile updated successfully.');
     }
+    
     // public function deletePhoto()
     // {
     //     $user = Auth::guard('users')->user();

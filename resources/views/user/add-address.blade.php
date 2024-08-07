@@ -78,18 +78,13 @@
                         <div class="col-md-6">
                           <div class="form-group">
                             {{-- <label for="exampleInputEmail1">Town/City   </label> --}}
-                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="city" placeholder="Enter Town/City" required>
+                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="city" placeholder="Enter Town/City *" required>
                           </div>
                         </div>
                         <div class="col-md-6">
                         <div class="form-group">
                           {{-- <label for="exampleInputEmail1">Pincode</label> --}}
-                          <input type="number" class="form-control" id="exampleInputEmail1" value="" name="pincode" placeholder="Enter Pincode" min="100000"
-                          max="999999"
-                          maxlength="6"
-                          required
-                          pattern="\d{6}"
-                          title="Please enter a 6-digit pincode" required>
+                          <input type="text" class="form-control" name="pincode" placeholder="Enter Pincode *" required pattern="\d{6}" maxlength="6" title="Pincode should be exactly 6 digits">
                         </div>
                         </div>
                       </div>
@@ -99,7 +94,7 @@
                         <div class="col-md-12">
                         <div class="form-group">
                           {{-- <label for="exampleInputEmail1">Area, Street</label> --}}
-                          <textarea name="area" class="form-control" id=""  rows="15" placeholder="Enter Area, Street, Sector, Village" required></textarea>
+                          <textarea name="area" class="form-control" id=""  rows="15" placeholder="Enter Area, Street, Sector, Village *" required></textarea>
                           {{-- <input type="text" class="form-control" id="exampleInputEmail1" value="" name="area" placeholder="Enter Area, Street, Sector, Village"> --}}
                         </div>
                         </div>

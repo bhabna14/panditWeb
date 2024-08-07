@@ -105,7 +105,7 @@
                       <div class="row">
                           <div class="col-md-6">
                               <div class="form-group">
-                                  <label for="full_name">Full name (First and Last name)</label>
+                                  <label for="full_name">Full name (First and Last name) *</label>
                                   <input type="text" class="form-control" id="full_name" name="name" value="{{ Auth::guard('users')->user()->name }}" placeholder="Enter Name">
                               </div>
                           </div>
