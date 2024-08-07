@@ -8,7 +8,7 @@ use App\Models\Profile;
 use App\Models\Poojaskill;
 use App\Models\Poojadetails;
 use App\Models\Poojalist;
-use App\Models\Poojaitem;
+use App\Models\Poojaitems;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -214,7 +214,7 @@ class PoojaDetailsController extends Controller
                 ->update(['status' => 'deleted']);
 
             // Update status to "deleted" in pandit_poojaitem
-            Poojaitem::where('pooja_id', $pooja_id)
+            Poojaitems::where('pooja_id', $pooja_id)
                 ->where('pandit_id', $panditId)
                 ->update(['status' => 'deleted']);
 
