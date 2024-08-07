@@ -99,16 +99,15 @@ class PoojaDetailsController extends Controller
             return response()->json(['message' => 'An error occurred while saving pooja details.', 'error' => $e->getMessage()], 500);
         }
     }
-    public function getSinglePoojadetails($pooja_id)
+    public function getSinglePoojadetails($id)
     {
         try {
-            // Fetch the pooja details based on the provided pooja_id
-            $pooja = Poojalist::findOrFail($pooja_id);
+            // Fetch the pooja details based on the provided id
+            $pooja = Poojadetails::findOrFail($id);
 
             // Fetch the related Poojadetails items along with the Profile
-            $panditPujas = Poojadetails::with('profile')
-                ->where('status', 'active')
-                ->where('pooja_id', $pooja->id)
+            $panditPujas = Poojadetails::where('status', 'active')
+                ->where('id', $pooja->id)
                 ->get();
 
             // Filter out pandit pujas with a null profile
