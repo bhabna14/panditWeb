@@ -55,7 +55,7 @@
                                                     <th class="border-bottom-0">Total Payment</th>
                                                     <th class="border-bottom-0">Paid Amount</th>
                                                    
-                                                    <th class="border-bottom-0">Application Status</th>
+                                                    {{-- <th class="border-bottom-0">Application Status</th> --}}
                                                     <th class="border-bottom-0">Payment Status</th>
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
@@ -86,20 +86,28 @@
                                                         
                                                     <td>{{ $booking->booking_date }}</td>
                                                     <td>{{ $booking->pooja_fee }}</td>
-                                                    <td>{{ $booking->paid }}
-                                                        @if($booking->payment_type == "full")
-                                                        <h6 class="title">(Full paid with 5% discount)</h6>
+                                                    <td>
+                                                       @if($booking->payment_status == "paid")
+                                                            @if($booking->payment->payment_type == "full")
+                                                            <h6 class="title">{{ $booking->payment->paid }} <br>(Full paid with 5% discount)</h6>
+                                                            @else
+                                                            <h6 class="title">{{ $booking->payment->paid }} <br>(Advanced paid 20%)</h6>
+                                                            @endif
+                                                        @elseif($booking->payment_status == "refundprocess")
+                                                          <h6>Refund On Process</h6>
+                                                        @elseif($booking->payment_status == "refundcompleted")
+                                                            <h6>Refund On Completed</h6>
                                                         @else
-                                                        <h6 class="title">(Advanced paid 20%)</h6>
+                                                        <h6>Not Yet Paid</h6>
                                                         @endif
 
 
                                                     </td>
                                                    
-                                                        <td>
+                                                        {{-- <td>
                                                                 <span class="badge badge-success">{{ $booking->application_status }}</span> 
                                                         
-                                                        </td>
+                                                        </td> --}}
                                                         <td>
                                                             <span class="badge badge-success">{{ $booking->payment_status }}</span> 
                                                     
