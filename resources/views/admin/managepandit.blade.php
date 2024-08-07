@@ -84,15 +84,11 @@
                                     <td>{{ $profile->pandit_status }}</td>
                                     <td>
                                         @if($profile->pandit_status == 'accepted')
-                                            <form action="{{ route('rejectPandit', $profile->id) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                <button type="submit" class="btn btn-success">Accepted</button>
-                                            </form>
+                                          
+                                            <span class="badge badge-success">Accepted</span>
                                         @elseif($profile->pandit_status == 'rejected')
-                                            <form action="{{ route('acceptPandit', $profile->id) }}" method="POST" style="display:inline;">
-                                                @csrf
-                                                <button type="submit" class="btn btn-danfer">Rejected</button>
-                                            </form>
+                                            
+                                            <span class="badge badge-danger">Rejected</span>
                                         @elseif($profile->pandit_status == 'pending')
                                             <form action="{{ route('acceptPandit', $profile->id) }}" method="POST" style="display:inline;">
                                                 @csrf
