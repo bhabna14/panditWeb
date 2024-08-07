@@ -126,6 +126,60 @@ class PoojaDetailsController extends Controller
         }
     }
 
+    public function updatePoojadetails(Request $request, $id)
+    {
+        try {
+            $panditId = Auth::guard('sanctum')->user()->pandit_id;
+    
+            // Find the existing pooja details
+            $poojaDetails = Poojadetails::findOrFail($id);
+    
+            // Ensure the authenticated pandit has permission to update the pooja details
+            if ($poojaDetails->pandit_id !== $panditId) {
+                return response()->json([
+                    'status' => 403,
+                    'message' => 'Unauthorized to update these pooja details.',
+                ], 403);
+            }
+    
+            // Handle file uploads
+            if ($request->hasFile('pooja_photo')) {
+                $image = $request->file('pooja_photo');
+                $imagePath = 'uploads/pooja_photo/' . time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path('uploads/pooja_photo'), $imagePath);
+                $poojaDetails->pooja_photo = $imagePath;
+            }
+    
+            if ($request->hasFile('pooja_video')) {
+                $video = $request->file('pooja_video');
+                $videoPath = 'uploads/pooja_video/' . time() . '_' . $video->getClientOriginalName();
+                $video->move(public_path('uploads/pooja_video'), $videoPath);
+                $poojaDetails->pooja_video = $videoPath;
+            }
+    
+            // Update the pooja details with the provided data
+            
+            $poojaDetails->pooja_fee = $request->input('pooja_fee');
+            $poojaDetails->pooja_duration = $request->input('pooja_duration');
+            $poojaDetails->pooja_done = $request->input('pooja_done');
+    
+            // Save the updated pooja details
+            $poojaDetails->save();
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Pooja details updated successfully',
+                'data' => $poojaDetails,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to update pooja details.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     
     
 }

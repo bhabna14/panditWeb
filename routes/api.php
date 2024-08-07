@@ -74,8 +74,10 @@ Route::controller(PoojaDetailsController::class)->group(function() {
     Route::get('/poojadetails','getPoojaDetails');
     Route::post('/save-pooja-details',  'savePoojadetails');
     Route::get('/managepoojadetails',  'managePoojaDetails');
-    Route::post('/updatePoojadetails', 'updatePoojadetails');
-    Route::middleware('auth:sanctum')->get('/get-pooja-details/{id}','getSinglePoojadetails');
+    // Route::post('/updatePoojadetails', 'updatePoojadetails');
+    Route::get('/get-pooja-details/{id}','getSinglePoojadetails');
+    Route::post('/update-pooja-details/{id}', 'updatePoojadetails');
+
 
 });
 
