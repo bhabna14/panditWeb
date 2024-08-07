@@ -408,16 +408,18 @@ public function confirmBooking(Request $request)
     public function userdashboard()
     {
         $user = Auth::guard('users')->user();
-        $totalbookings = Booking::count();
+        $totalbookings = Booking::where('user_id',$user->userid)->count();
         $totalCompleted = Booking::where('status', 'paid')
                                 ->where('payment_status', 'paid')
                                 ->where('application_status', 'approved')
                                 ->where('pooja_status', 'completed')
+                                ->where('user_id',$user->userid)
                                 ->count();
         $totalCanceled = Booking::where('status', 'canceled')
                                 ->where('payment_status', 'refundprocess')
                                 ->where('application_status', 'approved')
                                 ->where('pooja_status', 'canceled')
+                                ->where('user_id',$user->userid)
                                 ->count();
     
         // Fetch recent bookings for the user
