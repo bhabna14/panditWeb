@@ -192,7 +192,7 @@
                                                         <th style='text-align: center'>SlNo.</th>
                                                         <th style='text-align: center'>Id Type</th>
                                                         <th style='text-align: center'>Photo</th>
-                                                        <th style='text-align: center'>Action</th>
+                                                        {{-- <th style='text-align: center'>Action</th> --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -205,8 +205,8 @@
                                                                 <a href="{{ asset('uploads/id_proof/' . $pandit_idcard->upload_id) }}" target="_blank">
                                                                     <img src="{{ asset('uploads/id_proof/' . $pandit_idcard->upload_id) }}" style="width:80px; height:40px" alt="" />
                                                                 </a>                                                            </td>
-                                                        <td style='text-align: center;font-weight: bold'>
-                                                            <a  style="font-size: 25px;color: red" href="{{url('/admin/deletIdproofs/'.$pandit_idcard->id)}}" onclick="return confirm('Are you sure to delete?')" ><i class="fa fa-trash" aria-hidden="true"></i></a></td></td>
+                                                        {{-- <td style='text-align: center;font-weight: bold'>
+                                                            <a  style="font-size: 25px;color: red" href="{{url('/admin/deletIdproofs/'.$pandit_idcard->id)}}" onclick="return confirm('Are you sure to delete?')" ><i class="fa fa-trash" aria-hidden="true"></i></a></td></td> --}}
                                                     </tr>
 
                                                     @else
@@ -229,7 +229,7 @@
                                                         <th style='text-align: center'>SlNo.</th>
                                                         <th style='text-align: center'>Id Type</th>
                                                         <th style='text-align: center'>Photo</th>
-                                                        <th style='text-align: center'>Action</th>
+                                                        {{-- <th style='text-align: center'>Action</th> --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -242,8 +242,8 @@
                                                                 <a href="{{ asset('uploads/vedic_details/' . $pandit_vedic->upload_vedic) }}" target="_blank">
                                                                     <img src="{{ asset('uploads/vedic_details/' . $pandit_vedic->upload_vedic) }}" style="width:80px; height:40px" alt="" />
                                                                 </a>                                                            </td>
-                                                        <td style='text-align: center;font-weight: bold'>
-                                                            <a  style="font-size: 25px;color: red" href="{{url('/admin/deletVedics/'.$pandit_vedic->id)}}" onclick="return confirm('Are you sure to delete?')" ><i class="fa fa-trash" aria-hidden="true"></i></a></td></td>
+                                                        {{-- <td style='text-align: center;font-weight: bold'>
+                                                            <a  style="font-size: 25px;color: red" href="{{url('/admin/deletVedics/'.$pandit_vedic->id)}}" onclick="return confirm('Are you sure to delete?')" ><i class="fa fa-trash" aria-hidden="true"></i></a></td></td> --}}
                                                     </tr>
                                                     @else
                                                     nothing
@@ -264,7 +264,7 @@
                                                         <th style='text-align: center'>SlNo.</th>
                                                         <th style='text-align: center'>Education</th>
                                                         <th style='text-align: center'>Photo</th>
-                                                        <th style='text-align: center'>Action</th>
+                                                        {{-- <th style='text-align: center'>Action</th> --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -277,8 +277,8 @@
                                                                 <a href="{{ asset('uploads/edu_details/' . $pandit_education->upload_education) }}" target="_blank">
                                                                     <img src="{{ asset('uploads/edu_details/' . $pandit_education->upload_education) }}" style="width:80px; height:40px" alt="" />
                                                                 </a>                                                            </td>
-                                                        <td style='text-align: center;font-weight: bold'>
-                                                            <a  style="font-size: 25px;color: red" href="{{url('/admin/deletEducations/'.$pandit_education->id)}}" onclick="return confirm('Are you sure to delete?')" ><i class="fa fa-trash" aria-hidden="true"></i></a></td></td>
+                                                        {{-- <td style='text-align: center;font-weight: bold'>
+                                                            <a  style="font-size: 25px;color: red" href="{{url('/admin/deletEducations/'.$pandit_education->id)}}" onclick="return confirm('Are you sure to delete?')" ><i class="fa fa-trash" aria-hidden="true"></i></a></td></td> --}}
                                                     </tr>
 
                                                     @else
