@@ -75,6 +75,8 @@ Route::controller(PoojaDetailsController::class)->group(function() {
     Route::post('/save-pooja-details',  'savePoojadetails');
     Route::get('/managepoojadetails',  'managePoojaDetails');
     Route::post('/updatePoojadetails', 'updatePoojadetails');
+    Route::get('pooja-details/{pooja_id}','getSinglePoojadetails');
+
 });
 
 Route::controller(PoojaListController::class)->group(function() {
