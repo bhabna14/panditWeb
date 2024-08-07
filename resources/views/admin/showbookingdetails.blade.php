@@ -54,7 +54,7 @@
                         (Advanced paid 20%)
                         @endif
                     @else
-                        <strong>Payment Not Done Yet</strong>
+                        <strong>Payment Details:</strong>Payment Not Done Yet
                     @endif
                 </p>
                 <p>
@@ -62,7 +62,7 @@
                         <strong>Payment Details:</strong> 
                         {{ $booking->payment->payment_id }} ({{ $booking->payment->payment_method }})
                     @else
-                        <strong>Payment Not Done Yet</strong>
+                        <strong>Payment Details:</strong>Payment Not Done Yet
                     @endif
                 </p>
             </div>
