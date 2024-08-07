@@ -57,7 +57,14 @@
                         <strong>Payment Not Done Yet</strong>
                     @endif
                 </p>
-                <p><strong>Payment Details:</strong> {{ $booking->payment->payment_id }} ({{ $booking->payment->payment_method }})</p>
+                <p>
+                    @if($booking->payment_status == "paid")
+                        <strong>Payment Details:</strong> 
+                        {{ $booking->payment->payment_id }} ({{ $booking->payment->payment_method }})
+                    @else
+                        <strong>Payment Not Done Yet</strong>
+                    @endif
+                </p>
             </div>
         </div>
     </div>
