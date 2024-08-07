@@ -8,6 +8,8 @@ use App\Models\Profile;
 use App\Models\Poojaskill;
 use App\Models\Poojadetails;
 use App\Models\Poojalist;
+use App\Models\Poojaitem;
+
 use Illuminate\Support\Facades\Auth;
 
 class PoojaDetailsController extends Controller
@@ -196,5 +198,36 @@ class PoojaDetailsController extends Controller
     }
 
     
-    
+    public function deletePoojaDetails($pooja_id)
+    {
+        try {
+            $panditId = Auth::guard('sanctum')->user()->pandit_id;
+
+            // Update status to "deleted" in pandit_poojadetails
+            Poojadetails::where('pooja_id', $pooja_id)
+                ->where('pandit_id', $panditId)
+                ->update(['status' => 'deleted']);
+
+            // Update status to "deleted" in pandit_poojaskill
+            Poojaskill::where('pooja_id', $pooja_id)
+                ->where('pandit_id', $panditId)
+                ->update(['status' => 'deleted']);
+
+            // Update status to "deleted" in pandit_poojaitem
+            Poojaitem::where('pooja_id', $pooja_id)
+                ->where('pandit_id', $panditId)
+                ->update(['status' => 'deleted']);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Pooja details deleted successfully',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to delete pooja details.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

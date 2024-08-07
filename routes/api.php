@@ -81,6 +81,7 @@ Route::controller(PoojaDetailsController::class)->group(function() {
     // Route::post('/updatePoojadetails', 'updatePoojadetails');
     Route::get('/get-pooja-details/{id}','getSinglePoojadetails');
     Route::post('/update-pooja-details/{id}', 'updatePoojadetails');
+    Route::delete('/delete-pooja/{pooja_id}', 'deletePoojaDetails');
 
 
 });
