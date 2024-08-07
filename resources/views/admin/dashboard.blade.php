@@ -53,16 +53,17 @@
 									</div>
 								</div>
 								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-pandits')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12 ">Total Pandit</h6>
+														<h6 class="mb-2 tx-12 ">Total Pandits</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">7</h4>
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalPandit }}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
 															<span class="text-success font-weight-semibold"> +427</span>
@@ -77,18 +78,20 @@
 											</div>
 										</div>
 									</div>
+									</a>
 								</div>
 								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-pandits')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Total Pending Pandit</h6>
+														<h6 class="mb-2 tx-12">Total Pending Pandits</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">9</h4>
+															<h4 class="tx-20 font-weight-semibold mb-2">{{$pendingPandit}}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
 															<span class="font-weight-semibold text-danger"> -453</span>
@@ -103,18 +106,20 @@
 											</div>
 										</div>
 									</div>
+									</a>
 								</div>
 								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-orders')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Total Approved Pandit</h6>
+														<h6 class="mb-2 tx-12">Total Orders</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">8</h4>
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalOrder}}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
 															<span class=" text-success font-weight-semibold"> +788</span>
@@ -129,18 +134,22 @@
 											</div>
 										</div>
 									</div>
+									</a>
 								</div>
+								
 								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-users')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
+												
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Total Rejected Pandit</h6>
+														<h6 class="mb-2 tx-12">Total Users</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-22 font-weight-semibold mb-2">6</h4>
+															<h4 class="tx-22 font-weight-semibold mb-2">{{$totalUser}}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
 															<span class="text-danger font-weight-semibold"> -693</span>
@@ -150,11 +159,12 @@
 											</div>
 											<div class="col-4">
 												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-													<i class="si si-user-unfollow tx-16 text-warning"></i>
+													<i class="fa fa-user tx-16 text-primary"></i>
 												</div>
 											</div>
 										</div>
 									</div>
+									</a>
 								</div>
 								
 							</div>

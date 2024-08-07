@@ -11,6 +11,8 @@ use App\Models\PanditVedic;
 use App\Models\VedicDetail;
 use App\Models\IdcardDetail;
 use App\Models\PanditIdCard;
+use App\Models\Booking;
+
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
 use App\Http\Controllers\Controller;
@@ -52,15 +54,15 @@ class AdminController extends Controller
     }
     public function admindashboard()
     {
-        // $userCount = User::where('role', 'user')->count();
-        // $pendinguser = User::where('application_status', 'pending')->count();
-        // $approuser = User::where('application_status', 'approved')->count();
-        // $rejecteduser = User::where('application_status', 'rejected')->count();
-        // $sebayatlists = User::where('status', 'active')->get();
+        $totalPandit = Profile::where('status', 'active')->count();
+        $pendingPandit = Profile::where('pandit_status', 'pending')->count();
+        $totalOrder = Booking:: count();
+        $totalUser = User::count();
+
         $pandit_profiles = Profile::orderBy('id', 'desc')
-        ->where('pandit_status', 'pending')                        
-        ->get(); // Fetch all profiles                  
-         return view('admin/dashboard', compact('pandit_profiles'));
+                                    ->where('pandit_status', 'pending')                        
+                                    ->get(); // Fetch all profiles                  
+         return view('admin/dashboard', compact('pandit_profiles','totalPandit','pendingPandit','totalOrder','totalUser'));
     } 
     public function adminlogout()
     {
