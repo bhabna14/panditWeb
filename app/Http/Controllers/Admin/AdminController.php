@@ -78,7 +78,7 @@ class AdminController extends Controller
     public function showProfile($id) {
 
         $pandit_profile = Profile::find($id);
-        $pandtId = $pandit_profile->profile_id;
+        $pandtId = $pandit_profile->pandit_id;
 
         $pandit_careers = Career::where('pandit_id', $pandtId)->where('status','active')->get();
         $pandit_idcards = PanditIdCard::where('pandit_id', $pandtId)->where('status','active')->get();
