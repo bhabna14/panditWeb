@@ -103,15 +103,29 @@ class PoojaDetailsController extends Controller
     {
         try {
             $panditId = Auth::guard('sanctum')->user()->pandit_id;
+            
             // Fetch the pooja details based on the provided id
             $pooja = Poojadetails::findOrFail($id);
-
+    
             // Fetch the related Poojadetails items along with the Profile
             $panditPujas = Poojadetails::where('status', 'active')
                 ->where('id', $pooja->id)
                 ->where('pandit_id', $panditId)
                 ->get();
-
+    
+            // Modify pooja_photo and pooja_video format
+            if ($pooja->pooja_photo) {
+                $pooja->pooja_photo = [
+                    'name' => basename($pooja->pooja_photo),
+                ];
+            }
+    
+            if ($pooja->pooja_video) {
+                $pooja->pooja_video = [
+                    'name' => basename($pooja->pooja_video),
+                ];
+            }
+    
             return response()->json([
                 'status' => 200,
                 'message' => 'Pooja details fetched successfully',
@@ -125,6 +139,7 @@ class PoojaDetailsController extends Controller
             ], 500);
         }
     }
+    
 
     public function updatePoojadetails(Request $request, $id)
     {
