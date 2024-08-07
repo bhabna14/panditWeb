@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /// controllers for pandit dashboards
-use App\Http\Controllers\api\AreaController;
+use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\BankController;
 use App\Http\Controllers\Api\LoginController;
 // use App\Http\Controllers\Api\CareerController;
