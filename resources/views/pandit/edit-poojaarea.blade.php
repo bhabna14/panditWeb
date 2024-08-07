@@ -39,21 +39,24 @@
                         
                             <div class="form-group">
                                 <label for="state">State:</label>
-                                <select name="state" id="state" class="form-control" onchange="getDistrict(this.value)">
+                                <select name="state" id="state" class="form-control" disabled>
                                     @foreach ($states as $state)
                                         <option value="{{ $state->stateCode }}" {{ $poojaArea->state_code == $state->stateCode ? 'selected' : '' }}>{{ $state->stateName }}</option>
                                     @endforeach
                                 </select>
+                                <input type="hidden" name="state" value="{{ $poojaArea->state_code }}">
                             </div>
-                        
+                            
                             <div class="form-group">
                                 <label for="district">District:</label>
-                                <select name="district" id="district" class="form-control"  onchange="getSubdistrict(this.value)">
+                                <select name="district" id="district" class="form-control" disabled>
                                     @foreach ($districts as $district)
                                         <option value="{{ $district->districtCode }}" {{ $poojaArea->district_code == $district->districtCode ? 'selected' : '' }}>{{ $district->districtName }}</option>
                                     @endforeach
                                 </select>
+                                <input type="hidden" name="district" value="{{ $poojaArea->district_code }}">
                             </div>
+                            
                         
                             <div class="form-group">
                                 <label for="city">Subdistrict:</label>

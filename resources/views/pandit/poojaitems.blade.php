@@ -4,7 +4,6 @@
     <!-- Internal Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
 @endsection
-
 @section('content')
     <div class="row row-sm">
         <div class="col-lg-12 col-md-12">
@@ -15,6 +14,18 @@
                             <a href="{{ url('/pandit/poojaitemlist') }}" class="btn btn-danger">
                                 << Back</a>
                         </div>
+                        @if (session()->has('success'))
+                        <div class="alert alert-success" id="Message">
+                            {{ session()->get('success') }}
+                        </div>
+                    @endif
+                    
+                    @if (session()->has('error'))
+                        <div class="alert alert-danger" id="Message">
+                            {{ session()->get('error') }}
+                        </div>
+                    @endif
+                    
                         <div class="card">
                             <div class="card-body">
                                 <div class="panel-group1" id="accordion11" role="tablist">
@@ -36,17 +47,6 @@
                                                         </div>
                                                     @endif
 
-                                                    @if (session()->has('success'))
-                                                        <div class="alert alert-success" id="Message">
-                                                            {{ session()->get('success') }}
-                                                        </div>
-                                                    @endif
-
-                                                    @if ($errors->has('danger'))
-                                                        <div class="alert alert-danger" id="Message">
-                                                            {{ $errors->first('danger') }}
-                                                        </div>
-                                                    @endif
                                                     <form action="{{ url('/pandit/save-poojaitemlist') }}" method="post"
                                                         enctype="multipart/form-data">
                                                         @csrf

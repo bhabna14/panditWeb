@@ -163,11 +163,13 @@ class PoojaListController extends Controller
                 continue;
             }
     
+            // Check for duplicate entry
             $existingItem = PoojaItems::where([
                 ['pandit_id', '=', $profileId],
                 ['pooja_id', '=', $poojaId],
                 ['pooja_name', '=', $poojaName],
-                ['item_id', '=', $itemId]
+                ['item_id', '=', $itemId],
+                ['variant_id', '=', $variant_ids[$key]]
             ])->first();
     
             if ($existingItem) {
@@ -192,13 +194,17 @@ class PoojaListController extends Controller
             }
         }
     
-        if (!empty($savedItems)) {
+        if (!empty($duplicates)) {
+            $duplicateItems = implode(', ', $duplicates);
+            return redirect()->back()->with('error', 'Duplicate Pooja items found and skipped: ' . $duplicateItems);
+        } elseif (!empty($savedItems)) {
             return redirect()->route('poojaitemlist')->with('success', 'Pooja items saved successfully: ' . implode(', ', $savedItems));
         } else {
             return redirect()->back()->with('error', 'Failed to save any data.');
         }
+        
     }
-
+    
     public function deletePoojaItem($id)
     {
         try {

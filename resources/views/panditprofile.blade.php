@@ -2,6 +2,7 @@
 
 @section('styles')
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 @endsection
 
 @section('class')
@@ -31,38 +32,42 @@
                                                 <div class="panel-body tabs-menu-body border-0 p-3">
                                                     <div class="tab-content">
                                                         <div class="tab-pane active" id="profile">
-                                                            <!-- Display Success Message -->
-
-
+                                                            <!-- Display SweetAlert2 Messages -->
                                                             @if ($errors->any())
-                                                                <div class="alert alert-danger">
-                                                                    <ul>
-                                                                        @foreach ($errors->all() as $error)
-                                                                            <li>{{ $error }}</li>
-                                                                        @endforeach
-                                                                    </ul>
-                                                                </div>
+                                                                <script>
+                                                                    Swal.fire({
+                                                                        icon: 'error',
+                                                                        title: 'Oops...',
+                                                                        html: '{!! implode("<br>", $errors->all()) !!}'
+                                                                    });
+                                                                </script>
                                                             @endif
 
                                                             @if (session()->has('success'))
-                                                                <div class="alert alert-success" id="Message">
-                                                                    {{ session()->get('success') }}
-                                                                </div>
+                                                                <script>
+                                                                    Swal.fire({
+                                                                        icon: 'success',
+                                                                        title: 'Success!',
+                                                                        text: '{{ session()->get('success') }}'
+                                                                    });
+                                                                </script>
                                                             @endif
 
                                                             @if ($errors->has('danger'))
-                                                                <div class="alert alert-danger" id="Message">
-                                                                    {{ $errors->first('danger') }}
-                                                                </div>
+                                                                <script>
+                                                                    Swal.fire({
+                                                                        icon: 'error',
+                                                                        title: 'Error!',
+                                                                        text: '{{ $errors->first('danger') }}'
+                                                                    });
+                                                                </script>
                                                             @endif
 
                                                             {{-- form start --}}
-
                                                             <form action="{{ url('/pandit/save-profile') }}" method="post"
                                                                 enctype="multipart/form-data">
                                                                 @csrf
                                                                 <div class="row">
-                                                                    
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
                                                                             <label for="title">Title</label>
@@ -191,6 +196,7 @@
     @endsection
 
     @section('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script src="{{ asset('assets/js/generate-otp.js') }}"></script>
         <script src="{{ asset('assets/js/login.js') }}"></script>
         <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>

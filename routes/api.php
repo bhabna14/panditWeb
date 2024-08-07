@@ -42,12 +42,16 @@ Route::controller(PanditLoginController::class)->group(function() {
     Route::post('/pandit-send-otp',  'sendOtp');
     Route::post('/pandit-verify-otp', 'verifyOtp');
 });
+
 Route::controller(AreaController::class)->group(function() {
     Route::get('/get-districts/{stateCode}', 'getDistrict');
     Route::get('/get-subdistricts/{districtCode}', 'getSubdistrict');
     Route::get('/get-village/{subdistrictsCode}', 'getVillage');
     Route::post('/save-poojaArea', 'saveForm');
     Route::get('/manage-poojaArea', 'manageArea');
+    Route::post('/update-pooja-area', 'updatePoojaArea');
+    Route::post('/delet-pooja-area/{id}','deletePoojaArea');
+
 });
 Route::controller(ProfileController::class)->group(function() {
     Route::post('/profile/save', 'saveProfile');

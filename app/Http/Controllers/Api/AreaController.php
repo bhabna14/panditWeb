@@ -11,6 +11,7 @@ use App\Models\Panditsubdistrict;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+
 class AreaController extends Controller
 {
 
@@ -72,67 +73,58 @@ class AreaController extends Controller
     }
   
     public function saveForm(Request $request)
-    {
-        try {
-            // Validate incoming request data
-            $validatedData = $request->validate([
-                'state' => 'required|string|max:255',
-                'district' => 'required|string|max:255',
-                'city' => 'required|string|max:255',
-                'village' => 'required|array',
-                'village.*' => 'string|max:255', // Ensure each village is a string and has a max length
-            ]);
+{
+    try {
+        // Ensure the user is authenticated
+        $user = Auth::guard('sanctum')->user();
 
-            // Ensure the user is authenticated
-            $user = Auth::guard('sanctum')->user();
+        if (!$user) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthenticated.'
+            ], 401);
+        }
 
-            if (!$user) {
-                return response()->json([
-                    'status' => 401,
-                    'message' => 'Unauthenticated.'
-                ], 401);
-            }
+        // Create a new Poojaarea record
+        $poojaArea = new Poojaarea();
+        $poojaArea->pandit_id = $user->pandit_id;
+        $poojaArea->state_code = $request->input('state');
+        $poojaArea->district_code = $request->input('district');
+        $poojaArea->subdistrict_code = $request->input('city');
+        $poojaArea->village_code = implode(',', $request->input('village'));
 
-            // Create a new Poojaarea record
-            $poojaArea = new Poojaarea();
-            $poojaArea->pandit_id = $user->pandit_id;
-            $poojaArea->state_code = $validatedData['state'];
-            $poojaArea->district_code = $validatedData['district'];
-            $poojaArea->subdistrict_code = $validatedData['city'];
-            $poojaArea->village_code = implode(',', $validatedData['village']);
+        // Save the Poojaarea record and check for success
+        if ($poojaArea->save()) {
+            Log::info('Pooja area created successfully.', ['data' => $request->all()]);
 
-            // Save the Poojaarea record and check for success
-            if ($poojaArea->save()) {
-                Log::info('Pooja area created successfully.', ['data' => $validatedData]);
+            return response()->json([
+                'status' => 200,
+                'message' => 'Data saved successfully.',
+                'data' => $poojaArea
+            ], 200);
 
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'Data saved successfully.',
-                    'data' => $poojaArea
-                ], 200);
+        } else {
+            Log::error('Failed to save pooja area.', ['data' => $request->all()]);
 
-            } else {
-                Log::error('Failed to save pooja area.', ['data' => $validatedData]);
-
-                return response()->json([
-                    'status' => 500,
-                    'message' => 'Failed to save data.',
-                    'data' => []
-                ], 500);
-
-            }
-        } catch (\Exception $e) {
-            // Log the error
-            Log::error('Error saving pooja area: ' . $e->getMessage());
-
-            // Return a JSON error response
             return response()->json([
                 'status' => 500,
-                'message' => 'Failed to save data. Please try again.',
-                'error' => $e->getMessage()
+                'message' => 'Failed to save data.',
+                'data' => []
             ], 500);
         }
+    } catch (\Exception $e) {
+        // Log the error
+        Log::error('Error saving pooja area: ' . $e->getMessage());
+
+        // Return a JSON error response
+        return response()->json([
+            'status' => 500,
+            'message' => 'Failed to save data. Please try again.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 
 public function manageArea()
 {
@@ -164,6 +156,59 @@ public function manageArea()
         'message' => 'Pooja areas retrieved successfully',
         'data' => $poojaAreas
     ], 200);
+}
+
+public function updatePoojaArea(Request $request)
+{
+    $pandit = Auth::guard('sanctum')->user();
+
+    if (!$pandit) {
+        return response()->json([
+            'status' => 401,
+            'message' => 'Unauthenticated.'
+        ], 401);
+    }
+
+    // Find the Pooja area for the authenticated Pandit
+    $poojaArea = Poojaarea::where('pandit_id', $pandit->pandit_id)->first();
+
+    if (!$poojaArea) {
+        return response()->json([
+            'status' => 404,
+            'message' => 'Pooja area not found.'
+        ], 404);
+    }
+
+    try {
+        // Log the Pooja area before update
+        \Log::info('Updating Pooja Area', ['poojaArea' => $poojaArea]);
+
+        $poojaArea->subdistrict_code = $request->input('subdistrict_code');
+        $villageString = implode(',', $request->input('village_code'));
+        $poojaArea->village_code = $villageString;
+        $poojaArea->save();
+
+        return response()->json(['message' => 'Pooja area updated successfully.'], 200);
+    } catch (\Exception $e) {
+        // Log the error for debugging
+        \Log::error('Failed to update Pooja area', ['error' => $e->getMessage()]);
+
+        return response()->json(['error' => 'Failed to update pooja area.'], 400);
+    }
+}
+
+public function deletePoojaArea(Request $request, $id)
+{
+    $poojaArea = Poojaarea::find($id);
+
+    if ($poojaArea) {
+        $poojaArea->status = 'deleted';
+        $poojaArea->save();
+        
+        return response()->json(['message' => 'Pooja area deleted successfully.'], 200);
+    } else {
+        return response()->json(['error' => 'Failed to delete pooja area.'], 400);
+    }
 }
 
 

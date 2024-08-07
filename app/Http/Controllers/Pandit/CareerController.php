@@ -41,11 +41,12 @@ class CareerController extends Controller
             'experience' => 'required|integer|min:0',
             'id_type.*' => 'required|string|in:adhar,voter,pan,DL,health card',
             'upload_id.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-            'education_type.*' => 'required|string|in:10th,+2,+3,Master Degree',
-            'upload_edu.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
-            'vedic_type.*' => 'required|string|max:255',
-            'upload_vedic.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
+            'education_type.*' => 'nullable|string',
+        'upload_edu.*' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
+        'vedic_type.*' => 'nullable|string',
+        'upload_vedic.*' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
                 ]);
+                
 
         $career = new Career();
 
@@ -70,37 +71,40 @@ class CareerController extends Controller
 
         //Pandit Education Photo Upload
 
-        foreach ($request->education_type as $key => $education_type) {
-            $file = $request->file('upload_edu')[$key];
-
-            $fileName = time().'_'.$file->getClientOriginalName();
-            $filePath = $file->move(public_path('uploads/edu_details'), $fileName);
-
-            // Save form data to the database
-            $edudata = new EduDetail();
-            $edudata->pandit_id = Auth::guard('pandits')->user()->pandit_id;
-            $edudata->education_type = $education_type;
-            $edudata->upload_education = $fileName; // Save file path in the database
-            $edudata->save();
+        if ($request->has('education_type') && $request->has('upload_edu')) {
+            foreach ($request->education_type as $key => $education_type) {
+                if ($education_type) { // Ensure education_type is not empty
+                    $file = $request->file('upload_edu')[$key];
+                    $fileName = time().'_'.$file->getClientOriginalName();
+                    $filePath = $file->move(public_path('uploads/edu_details'), $fileName);
+    
+                    // Save form data to the database
+                    $edudata = new EduDetail();
+                    $edudata->pandit_id = Auth::guard('pandits')->user()->pandit_id;
+                    $edudata->education_type = $education_type;
+                    $edudata->upload_education = $fileName; // Save file path in the database
+                    $edudata->save();
+                }
+            }
         }
-
+    
         // Pandit Vedic Photo Upload
-
-        
-        foreach ($request->vedic_type as $key => $vedic_type) {
-            $file = $request->file('upload_vedic')[$key];
-
-            $fileName = time().'_'.$file->getClientOriginalName();
-            $filePath = $file->move(public_path('uploads/vedic_details'), $fileName);
-
-            // Save form data to the database
-            $vedicdata = new VedicDetail();
-            $vedicdata->pandit_id = Auth::guard('pandits')->user()->pandit_id;
-            $vedicdata->vedic_type = $vedic_type;
-            $vedicdata->upload_vedic = $fileName; // Save file path in the database
-            $vedicdata->save();
+        if ($request->has('vedic_type') && $request->has('upload_vedic')) {
+            foreach ($request->vedic_type as $key => $vedic_type) {
+                if ($vedic_type) { // Ensure vedic_type is not empty
+                    $file = $request->file('upload_vedic')[$key];
+                    $fileName = time().'_'.$file->getClientOriginalName();
+                    $filePath = $file->move(public_path('uploads/vedic_details'), $fileName);
+    
+                    // Save form data to the database
+                    $vedicdata = new VedicDetail();
+                    $vedicdata->pandit_id = Auth::guard('pandits')->user()->pandit_id;
+                    $vedicdata->vedic_type = $vedic_type;
+                    $vedicdata->upload_vedic = $fileName; // Save file path in the database
+                    $vedicdata->save();
+                }
+            }
         }
-
         if ($career->save()) {
             return redirect("pandit/dashboard")->with('success', 'Data saved successfully.');
         } else {
