@@ -14,7 +14,7 @@
             <div class="container">
                 <div class="row">
                     <div
-                        class="col-xl-5 col-lg-6 col-md-8 col-sm-8 col-xs-10 card-sigin-main mx-auto my-auto py-45 justify-content-center">
+                        class="col-xl-6 col-lg-6 col-md-8 col-sm-8 col-xs-10 card-sigin-main mx-auto my-auto py-45 justify-content-center">
                         <div class="card-sigin mt-5 mt-md-0">
                             <!-- Demo content-->
                             <div class="main-card-signin d-md-flex">
@@ -26,7 +26,7 @@
                                     <div class="">
                                         <div class="main-signup-header">
                                             <div class="panel panel-primary">
-                                                <div style="text-align: center;border-bottom: 1px solid black">
+                                                <div style="text-align: center;">
                                                     <h2>PROFILE INFORMATION</h2>
                                                 </div>
                                                 <div class="panel-body tabs-menu-body border-0 p-3">

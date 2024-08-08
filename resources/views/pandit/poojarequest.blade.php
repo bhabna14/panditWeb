@@ -202,10 +202,13 @@
                     
 
                     document.getElementById('modal-address').innerHTML = `
-                        ${data.address?.country || 'N/A'}<br>
-                        Pincode: ${data.address?.pincode || 'N/A'}<br>
-                        Landmark: ${data.address?.landmark || 'N/A'}
-                    `;
+                                Country: ${data.address?.country || 'N/A'}<br>
+                                State: ${data.address?.state || 'N/A'}<br>                                    
+                                City: ${data.address?.city || 'N/A'}<br>
+                                Area: ${data.address?.area || 'N/A'}<br>
+                                Pincode: ${data.address?.pincode || 'N/A'}<br>
+                                Address Type: ${data.address?.address_type || 'N/A'}<br>
+                            `;
                 })
                 .catch(error => console.error('Error fetching booking details:', error));
         });

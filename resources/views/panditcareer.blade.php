@@ -12,7 +12,7 @@
     <div class="page-single">
         <div class="container">
             <div class="row">
-                <div class="col-xl-5 col-lg-6 col-md-8 col-sm-8 col-xs-10 card-sigin-main mx-auto my-auto py-45 justify-content-center">
+                <div class="col-xl-6 col-lg-6 col-md-8 col-sm-8 col-xs-10 card-sigin-main mx-auto my-auto py-45 justify-content-center">
                     <div class="card-sigin mt-5 mt-md-0">
                         <div class="main-card-signin d-md-flex">
                             <div class="wd-100p">
@@ -22,7 +22,7 @@
                                 <div class="">
                                     <div class="main-signup-header">
                                         <div class="panel panel-primary">
-                                            <div style="text-align: center;border-bottom: 1px solid black">
+                                            <div style="text-align: center;">
                                                 <h2>CAREER INFORMATION</h2>
                                             </div>
                                             <div class="panel-body tabs-menu-body border-0 p-3">
@@ -52,7 +52,7 @@
 
                                                         <form action="{{ url('/pandit/save-career') }}" method="post" enctype="multipart/form-data">
                                                             @csrf
-                                                            <div class="row" style="border-bottom: 1px solid black">
+                                                            <div class="row">
                                                                 <input type="hidden" class="form-control" id="career_id" name="career_id" value="CAREER{{ rand(1000, 9999) }}" placeholder="">
                                                                 <div class="col-md-6">
                                                                     <div class="form-group">
@@ -69,7 +69,7 @@
                                                             </div>
                                                             <div id="show_doc_item" style="border-bottom: 1px solid black">
                                                                 <div class="row">
-                                                                    <div class="col-md-6">
+                                                                    <div class="col-md-4">
                                                                         <div class="form-group">
                                                                             <label for="id_type">ID Proof<span style="color:red">*</span></label>
                                                                             <select name="id_type[]" class="form-control" id="id_type" required>
@@ -83,7 +83,7 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    <div class="col-md-4">
+                                                                    <div class="col-md-6">
                                                                         <div class="form-group">
                                                                             <label for="upload_id">Upload(ID) <span style="color:red">*</span></label>
                                                                             <input type="file" class="form-control" name="upload_id[]" id="upload_id" multiple required>
@@ -100,7 +100,7 @@
 
                                                             <div id="show_edu_item" style="border-bottom: 1px solid black">
                                                                 <div class="row">
-                                                                    <div class="col-md-6">
+                                                                    <div class="col-md-4">
                                                                         <div class="form-group">
                                                                             <label for="education_type">Education</label>
                                                                             <select name="education_type[]" class="form-control" id="education_type">
@@ -113,7 +113,7 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    <div class="col-md-4">
+                                                                    <div class="col-md-6">
                                                                         <div class="form-group">
                                                                             <label for="upload_edu">Upload(Education)</label>
                                                                             <input type="file" class="form-control" name="upload_edu[]" id="upload_edu" multiple>
@@ -128,13 +128,13 @@
                                                             </div>
                                                             <div id="show_vedic_item" style="border-bottom: 1px solid black">
                                                                 <div class="row">
-                                                                    <div class="col-md-6">
+                                                                    <div class="col-md-4">
                                                                         <div class="form-group">
                                                                             <label for="vedic_type">Vedic Type</label>
                                                                             <input type="text" class="form-control" name="vedic_type[]" id="vedic_type" placeholder="Enter Vedic">
                                                                         </div>
                                                                     </div>
-                                                                    <div class="col-md-4">
+                                                                    <div class="col-md-6">
                                                                         <div class="form-group">
                                                                             <label for="upload_vedic">Upload(Vedic)</label>
                                                                             <input type="file" class="form-control" name="upload_vedic[]" id="upload_vedic" multiple>

@@ -56,7 +56,8 @@
                                             <td>
                                                 <input  style="width: 100px" type="text" name="fee[{{ $poojaDetail->id }}]"
                                                     class="form-control"
-                                                    value="{{ old('fee.' . $poojaDetail->id, $poojaDetail->pooja_fee) }}">
+                                                    value="{{ old('fee.' . $poojaDetail->id, $poojaDetail->pooja_fee) }}" pattern="[0-9]*" 
+                                                    title="Only numbers are allowed">
                                             </td>
                                             <td>
                                                 <div class="row">

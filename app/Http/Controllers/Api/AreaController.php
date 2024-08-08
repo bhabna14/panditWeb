@@ -17,7 +17,11 @@ class AreaController extends Controller
 
     public function getDistrict($stateCode)
     {
-        $districts = Panditdistrict::distinct()->where('stateCode', $stateCode)->get(['districtCode', 'districtName']);
+        $districts = Panditdistrict::distinct()
+        ->where('stateCode', $stateCode)
+        ->orderBy('districtCode', 'asc')
+        ->get(['districtCode', 'districtName']);
+        
         
         if ($districts->isEmpty()) {
             return response()->json([
@@ -36,7 +40,10 @@ class AreaController extends Controller
     
     public function getSubdistrict($districtCode)
     {
-        $subdistricts = Panditsubdistrict::distinct()->where('districtCode', $districtCode)->get(['subdistrictCode', 'subdistrictName']);
+        $subdistricts = Panditsubdistrict::distinct()
+        ->where('districtCode', $districtCode)
+        ->orderBy('subdistrictName', 'asc')
+        ->get(['subdistrictCode', 'subdistrictName']);
         
         if ($subdistricts->isEmpty()) {
             return response()->json([
@@ -55,7 +62,10 @@ class AreaController extends Controller
     
     public function getVillage($subdistrictCode)
     {
-        $villages = Panditvillage::distinct()->where('subdistrictCode', $subdistrictCode)->get(['villageCode', 'villageName']);
+        $villages = Panditvillage::distinct()
+        ->where('subdistrictCode', $subdistrictCode)
+        ->orderBy('villageName', 'asc')
+        ->get(['villageCode', 'villageName']);
         
         if ($villages->isEmpty()) {
             return response()->json([

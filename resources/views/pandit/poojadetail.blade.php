@@ -110,8 +110,8 @@
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <input style="width: 100px" type="number" name="fee[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('fee.' . $poojaSkill->id) }}" required>
-
+                                                            <input style="width: 100px" type="number" name="fee[{{ $poojaSkill->id }}]" class="form-control" value="{{ old('fee.' . $poojaSkill->id) }}" required pattern="[0-9]*" 
+                                                            title="Only numbers are allowed">
                                                         </td>
                                                         <td>
                                                             <div class="row">

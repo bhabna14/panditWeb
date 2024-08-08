@@ -175,7 +175,7 @@
                                                     <span class="btn btn-danger">Rejected</span>
                                                 @endif
                             
-                                                    <a style="color: white; margin-left: 8px" class="btn ripple btn-success view-booking" data-bs-toggle="modal" data-bs-target="#full-screen" data-booking-id="{{ $request->id }}">
+                                                    <a style="color: white; margin-left: -15px" class="btn ripple btn-success view-booking" data-bs-toggle="modal" data-bs-target="#full-screen" data-booking-id="{{ $request->id }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                             </div>
@@ -367,11 +367,11 @@
                             document.getElementById('modal-paid-amount').textContent = data.paid || 'N/A';
                             document.getElementById('modal-date-time').textContent = data.booking_time || 'N/A';
                             document.getElementById('modal-address').innerHTML = `
-                                Area: ${data.address?.area || 'N/A'}<br>
+                                Country: ${data.address?.country || 'N/A'}<br>
+                                State: ${data.address?.state || 'N/A'}<br>                                    
                                 City: ${data.address?.city || 'N/A'}<br>
-                                State: ${data.address?.state || 'N/A'}<br>
+                                Area: ${data.address?.area || 'N/A'}<br>
                                 Pincode: ${data.address?.pincode || 'N/A'}<br>
-                                ${data.address?.country || 'N/A'}<br>
                                 Address Type: ${data.address?.address_type || 'N/A'}<br>
                             `;
                         })

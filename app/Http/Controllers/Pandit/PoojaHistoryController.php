@@ -29,7 +29,9 @@ class PoojaHistoryController extends Controller
         $all_poojas = Booking::with(['poojaList', 'poojaStatus'])
             ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
             ->where('bookings.pandit_id', $pandit_details->id)
-            ->where('bookings.pooja_status', '!=', 'canceled')
+            ->where('bookings.payment_status', 'paid')
+            ->where('bookings.application_status', 'approved')
+            ->where('bookings.pooja_status','!=','canceled')
             ->orderBy('bookings.booking_date', 'asc')
             ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
             ->get();

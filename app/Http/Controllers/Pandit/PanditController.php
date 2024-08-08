@@ -30,9 +30,7 @@ class PanditController extends Controller
     public function index()
 {
     $today = Carbon::today()->toDateString();
-    // $user = Auth::guard('pandits')->user();
-
-    // $profile = Profile::where('pandit_id', $user->pandit_id)->first();
+   
 
     $pandit = Auth::guard('pandits')->user();
 
@@ -281,11 +279,14 @@ public function poojarequest()
                 'booking_time' => $booking->booking_date,
                 'payment_status' => $booking->payment_status,
                 'pooja_status' => $booking->pooja_status,
-                
+
                 'address' => [
                     'country' => $booking->address->country,
+                    'state' => $booking->address->state,
+                    'city' => $booking->address->city,
+                    'area' => $booking->address->area,
+                    'address_type' => $booking->address->address_type,
                     'pincode' => $booking->address->pincode,
-                    'landmark' => $booking->address->landmark,
                 ],
             ];
     
@@ -294,8 +295,4 @@ public function poojarequest()
             return response()->json(['message' => 'An error occurred while fetching the booking details.', 'error' => $e->getMessage()], 500);
         }
     }
-    
-  
-  
-
 }
