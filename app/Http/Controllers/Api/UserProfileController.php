@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
-use App\Models\Payment;
-
 use App\Models\Profile;
 use App\Models\Poojalist;
 
@@ -189,7 +187,7 @@ public function orderHistory(Request $request)
     $user = Auth::guard('sanctum')->user();
 
     // Fetch recent bookings for the user
-    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address', 'ratings', 'payment']) // Load relationships to get pooja details, ratings, and payments
+    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address', 'ratings', 'payment'])
                         ->where('user_id', $user->userid)
                         ->orderByDesc('created_at')
                         ->get();
@@ -229,16 +227,17 @@ public function orderHistory(Request $request)
         // Remove the ratings relationship to avoid redundancy
         unset($booking->ratings);
 
-        // Include payment details
-        if ($booking->payment && $booking->payment instanceof \Illuminate\Database\Eloquent\Collection) {
-            $booking->payment_details = $booking->payment->map(function ($payment) {
-                $payment->payment_date = $payment->created_at->format('Y-m-d');
-                $payment->payment_method_url = $payment->payment_method_image ? asset('assets/img/' . $payment->payment_method_image) : null;
+        // Fetch the latest payment
+        $latestPayment = $booking->payment()->latest('created_at')->first(); // Get the most recent payment
 
-                return $payment;
-            });
+        if ($latestPayment) {
+            $latestPayment->payment_date = $latestPayment->created_at->format('Y-m-d');
+            $latestPayment->payment_method_url = $latestPayment->payment_method_image ? asset('assets/img/' . $latestPayment->payment_method_image) : null;
+
+            // Append latest payment details to booking
+            $booking->payment = $latestPayment;
         } else {
-            $booking->payment_details = null; // No payment details available or not a collection
+            $booking->latest_payment = null; // No payment details available
         }
 
         // Remove the payment relationship to avoid redundancy
@@ -251,7 +250,6 @@ public function orderHistory(Request $request)
         'bookings' => $bookings,
     ], 200);
 }
-
 
 
 
