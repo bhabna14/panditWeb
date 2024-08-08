@@ -172,7 +172,7 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');
         Route::get('/pandit-profile', 'panditprofile')->name('panditprofile');
         Route::get('/manage-users', 'manageuser')->name('manageuser');
-        Route::get('/user-profile', 'userprofile')->name('userprofile');
+        Route::get('/user-profile/{id}', 'userProfile')->name('userprofile');
 
         Route::post('admin/pandit/accept/{id}', 'acceptPandit')->name('acceptPandit');
         Route::post('admin/pandit/reject/{id}', 'rejectPandit')->name('rejectPandit');

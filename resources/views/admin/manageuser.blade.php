@@ -48,52 +48,41 @@
                                         <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
                                             <thead>
                                                 <tr>
-                                                <th class="border-bottom-0">#</th>
-
+                                                    <th class="border-bottom-0">#</th>
                                                     <th class="border-bottom-0">Name</th>
+                                                    <th class="border-bottom-0">Phone Number</th>
                                                     <th class="border-bottom-0">Registered Date</th>
-                                                    <th class="border-bottom-0">Approved Date</th>
-                                                    <th class="border-bottom-0">Added By</th>
-                                                    <th class="border-bottom-0">Application Status</th>
-                                                    
+                                                   
+                                                   
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                           
-                                            
+                                                @foreach ($users as $user)
                                                 <tr>
-                                                    <td>1</td>
-                                                    <a href="{{url('admin/user-profile/')}}" class="title">
-                                                    <td class="tb-col">
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>
                                                         <div class="media-group">
                                                             <div class="media media-md media-middle media-circle">
-                                                                    <img src="{{asset('assets/img/user.jpg') }}" alt="user">
+                                                                <img src="{{ asset($user->userphoto ? 'storage/' . $user->userphoto : 'front-assets/img/images.jfif') }}" alt="user">
+
                                                             </div>
                                                             <div class="media-text">
-                                                                <a href="{{url('admin/user-profile/')}}" class="title">demo demo</a>
-                                                                <span class="small text">demo@gmail.com</span>
+                                                                <a href="{{ url('admin/user-profile/' . $user->id) }}" class="title">{{ $user->name  ?? 'N/A' }}</a>
+                                                                <span class="small text">{{ $user->email ?? 'N/A' }}</span>
                                                             </div>
                                                         </div>
                                                     </td>
-                                                    </a>
-                                                    
-                                                   <td>14/05/2024</td>
-                                                   <td>20/05/2024</td>
-                                                   <td>User</td>
+                                                    <td>{{ $user->mobile_number }}</td>
+                                                    <td>{{ $user->created_at->format('d/m/Y') }}</td>
+                                                  
                                                     <td>
-                                                            <span class="badge badge-success">Approved</span> 
-                                                       
+                                                        <a href="{{ url('admin/user-profile/' . $user->id) }}"><i class="fas fa-eye"></i></a> | 
+                                                        <a href="{{ url('admin/edit-user/' . $user->id) }}"><i class="fa fa-edit"></i></a> | 
+                                                        <a href="{{ url('admin/delete-user/' . $user->id) }}" onClick="return confirm('Are you sure you want to delete this user?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                                     </td>
-                                                    
-                                                    <td>
-                                                        <a href="{{url('admin/pandit-profile/')}}"><i class="fas fa-eye"></i></a> | 
-                                                        <a href="{{url('admin/editsebayat/')}}"><i class="fa fa-edit"></i></a> | 
-                                                        <a href="{{url('admin/dltsebayat/')}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
                                                 </tr>
-                                             
-                                              
-                                                
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>

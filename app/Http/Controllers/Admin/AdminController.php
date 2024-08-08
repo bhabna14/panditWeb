@@ -266,10 +266,19 @@ if ($profileSaved && $careerSaved) {
     }
   
     public function manageuser(){
-        return view('admin/manageuser');
+        $users = User::all(); // Fetch all users using Eloquent
+        
+        return view('admin/manageuser', compact('users'));
     }
-    public function userprofile(){
-        return view('admin/user-profile');
+    public function userProfile($id)
+    {
+        // Fetch the user and their bookings
+        $user = User::findOrFail($id);
+        $bookings = Booking::where('user_id', $id)->get();
+    
+        // Pass the data to the view
+        return view('admin.user-profile', compact('user', 'bookings'));
     }
+    
    
 }
