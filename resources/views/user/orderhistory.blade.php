@@ -162,19 +162,20 @@
                       @endif
                       @php
                       // Fetch the latest payment record for the booking
-                      $latestPayment = \App\Models\Payment::where('booking_id', $booking->id)
+                      $latestPayment = \App\Models\Payment::where('booking_id', $booking->booking_id)
                                           ->orderBy('created_at', 'desc')
                                           ->first();
-                  @endphp
-                  
-                  @if ($booking->status != 'rejected')
-                      @if ($latestPayment && $latestPayment->payment_type != 'full' && 
-                          $booking->status == 'paid' && 
-                          $booking->payment_status == 'paid' && 
-                          $booking->application_status == 'approved' )
-                          <a href="{{ route('payRemainingAmount', $booking->id) }}" class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;">Pay the remaining amount</a>
+                                          
+                      @endphp
+                      {{-- @dd($latestPayment) --}}
+                      @if ($booking->status != 'rejected')
+                          @if ($latestPayment && $latestPayment->payment_type != 'full' && 
+                              $booking->status == 'paid' && 
+                              $booking->payment_status == 'paid' && 
+                              $booking->application_status == 'approved' )
+                              <a href="{{ route('payRemainingAmount', $booking->id) }}" class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;">Pay the remaining amount</a>
+                          @endif
                       @endif
-                  @endif
                   
                   
 

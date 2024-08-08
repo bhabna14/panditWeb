@@ -208,40 +208,47 @@ class PaymentController extends Controller
             'refund_method' => $validatedData['refund_method']
         ]);
     
-        // Update payment with refund details
-        $payment = Payment::where('booking_id',  $booking->booking_id)->first();
-        if ($payment) {
-
-            if ($payment->payment_type == 'advance') {
-                $refundAmount = 0; // No refund for advance payment
+        // Fetch all payments related to this booking and user
+        $payments = Payment::where('booking_id', $booking->booking_id)
+                           ->where('user_id', $booking->user_id)
+                           ->get();
+    
+        if ($payments->isEmpty()) {
+            // Log if no payment is found
+            \Log::warning('No payment found for booking_id', ['booking_id' => $booking_id]);
+            return redirect()->route('booking.history')->with('error', 'No payments found for this booking.');
+        }
+    
+        // Calculate the total paid amount
+        $totalPaid = $payments->sum('paid');
+    
+        // Determine refund amount based on days difference and payment type
+        if ($payments->last()->payment_type == 'advance') {
+            $refundAmount = 0; // No refund for advance payment
+        } else {
+            if ($daysDifference > 20) {
+                $refundAmount = $totalPaid;
+            } elseif ($daysDifference > 0 && $daysDifference <= 20) {
+                $refundAmount = $totalPaid * 0.80; // 20% cancellation fee
             } else {
-                if ($daysDifference > 20) {
-                    $refundAmount = $payment->paid;
-                } elseif ($daysDifference > 0 && $daysDifference <= 20) {
-                    $refundAmount = $payment->paid * 0.80; // 20% cancellation fee
-                } else {
-                    $refundAmount = $payment->paid * 0.80; // 20% cancellation fee if the booking date is today or less than a day
-                }
+                $refundAmount = $totalPaid * 0.80; // 20% cancellation fee if the booking date is today or less than a day
             }
-            
+        }
+    
+        // Update payment(s) with refund details
+        foreach ($payments as $payment) {
             $payment->payment_status = 'refundprocess';
             $payment->canceled_at = now();
             $payment->cancel_reason = $validatedData['cancel_reason'];
             $payment->refund_method = $validatedData['refund_method'];
             $payment->refund_amount = $refundAmount;
             $payment->save();
-        } else {
-            // Optionally log if no payment is found
-            \Log::warning('No payment found for booking_id', ['booking_id' => $booking_id]);
         }
-
-
+    
         // Update booking with cancellation details
         $booking->status = 'canceled';
         $booking->payment_status = 'refundprocess';
         $booking->pooja_status = 'canceled';
-      
-      
         $booking->save();
     
         // Log booking cancellation
@@ -250,7 +257,7 @@ class PaymentController extends Controller
             'refund_amount' => $refundAmount
         ]);
     
-        return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . $refundAmount);
+        return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . sprintf('%.2f', $refundAmount));
     }
     
 
