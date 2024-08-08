@@ -38,7 +38,7 @@ class userController extends Controller
                         ->where(function($query) {
                             $query->whereNull('pooja_date');
                          })
-                        ->take(8)
+                        ->take(9)
                         ->get();
         $pandits = Profile::where('pandit_status', 'accepted')
                         ->take(6)
