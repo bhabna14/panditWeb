@@ -274,7 +274,9 @@ if ($profileSaved && $careerSaved) {
     {
         // Fetch the user and their bookings
         $user = User::findOrFail($id);
-        $bookings = Booking::where('user_id', $id)->get();
+        // dd();
+        $bookings = Booking::with(['pooja', 'pandit', 'address', 'user', 'poojaStatus', 'ratings'])
+                            ->where('user_id', $user->userid)->get();
     
         // Pass the data to the view
         return view('admin.user-profile', compact('user', 'bookings'));
