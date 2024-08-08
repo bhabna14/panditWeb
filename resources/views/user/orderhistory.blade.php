@@ -88,32 +88,44 @@
                           ₹ {{ $booking->pooja_fee }}
                       </div>
                       
-                      @if($booking->status != "rejected")
-                          @if($booking->payment->payment_type == "full")
-                              <div class="col-md-2">
-                                  TOTAL PAID <br>
-                                  ₹ {{ $booking->payment->paid }}
-                              </div>
-                          @else
-                              <div class="col-md-2">
-                                  ADVANCE PAID <br>
-                                  ₹ {{ $booking->payment->paid }}
-                              </div>
-                          @endif
+                      @php
+                          // Fetch the latest payment record for the booking
+                          $latestPayment = \App\Models\Payment::where('booking_id', $booking->booking_id)
+                                              ->orderBy('created_at', 'desc')
+                                              ->first();
                           
-                          @if($booking->payment->payment_type == "advance")
+                          // Initialize total paid and remaining amounts
+                          $totalPaid = $latestPayment ? $latestPayment->paid : 0;
+                          $remainingAmount = $booking->pooja_fee - $totalPaid;
+
+                          $payments = \App\Models\Payment::where('booking_id', $booking->booking_id)
+                                   ->where('user_id', $booking->user_id)
+                                   ->get();
+
+                          // Calculate the total paid amount
+                          $totalPaidam = $payments->sum('paid');
+                      @endphp
+
+                      @if($booking->status != 'rejected')
+                          <div class="col-md-2">
+                              TOTAL PAID <br>
+                              ₹ {{ sprintf('%.2f', $totalPaidam) }}
+                          </div>
+                          
+                          @if($latestPayment && $latestPayment->payment_type != 'full')
                               <div class="col-md-3">
                                   REMAINING <br>
-                                  ₹ {{ sprintf('%.2f', $booking->pooja_fee - $booking->payment->paid) }}
+                                  ₹ {{ sprintf('%.2f', $remainingAmount) }}
                               </div>
                           @else
                               <div class="col-md-3">
                               </div>
                           @endif
-                        @else
+                      @else
                           <div class="col-md-5">
                           </div>
-                       @endif
+                      @endif
+
                   
       
                       <div class="col-md-3 text-right">
@@ -148,14 +160,22 @@
                       @if (Carbon\Carbon::parse($booking->booking_date)->subDay()->isFuture() && $booking->status == 'paid' && $booking->payment_status == 'paid' && $booking->application_status == 'approved'  && $booking->pooja_status == "pending")
                       <a href="{{ route('cancelForm', $booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white cancel-pooja-btn" style="margin-bottom: 10px;width: 100%;">Cancel Pooja</a>
                       @endif
-                      @if ($booking->status != 'rejected')
-                        @if ($booking->payment->payment_type == 'advance' && 
-                            $booking->status == 'paid' && 
-                            $booking->payment_status == 'paid' && 
-                            $booking->application_status == 'approved' )
-                            <a href="{{ route('payRemainingAmount', $booking->id) }}" class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;">Pay the remaining amount</a>
-                        @endif
+                      @php
+                      // Fetch the latest payment record for the booking
+                      $latestPayment = \App\Models\Payment::where('booking_id', $booking->id)
+                                          ->orderBy('created_at', 'desc')
+                                          ->first();
+                  @endphp
+                  
+                  @if ($booking->status != 'rejected')
+                      @if ($latestPayment && $latestPayment->payment_type != 'full' && 
+                          $booking->status == 'paid' && 
+                          $booking->payment_status == 'paid' && 
+                          $booking->application_status == 'approved' )
+                          <a href="{{ route('payRemainingAmount', $booking->id) }}" class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;">Pay the remaining amount</a>
                       @endif
+                  @endif
+                  
                   
 
                       <a href="{{ url('view-ordered-pooja-details/'.$booking->id) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">View Details</a>

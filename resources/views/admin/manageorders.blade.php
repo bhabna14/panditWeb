@@ -77,7 +77,7 @@
                                                                 </div>
                                                                 <div class="media-text">
                                                                     <span class="title">{{ $booking->pandit->title }} {{ $booking->pandit->name }}</span>
-                                                                    <h6 class="title">{{ $booking->pooja->pooja_name }}</h6>
+                                                                    <h6 class="title">{{ $booking->pooja->pooja_name ?? "N/A" }}</h6>
                                                                 </div>
                                                             </div>
                                                              </a>

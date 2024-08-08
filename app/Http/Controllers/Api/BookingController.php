@@ -181,46 +181,58 @@ class BookingController extends Controller
     // process for remaining payment
     public function processRemainingPayment(Request $request, $booking_id)
     {
-        Log::info('Starting processRemainingPayment', ['booking_id' => $booking_id]);
-
+        \Log::info('Starting processRemainingPayment', ['booking_id' => $booking_id]);
+    
         // Ensure the session remains active
         session()->keep(['_token']);
-
+    
         try {
-            $booking = Booking::findOrFail($booking_id);
-            Log::info('Booking found', ['booking' => $booking]);
-
-            // Validate the request
+            // Find the booking
+            $booking = Booking::where('booking_id', $booking_id)->first();
+            if (!$booking) {
+                \Log::error('Booking not found', ['booking_id' => $booking_id]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Booking not found.'
+                ], 404);
+            }
+            
+            \Log::info('Booking found', ['booking' => $booking]);
+    
+            // Validate request data
             $validatedData = $request->validate([
-                'payment_id' => 'required|string|max:255',
+                'payment_id' => 'required|string',
                 'paid' => 'required|numeric',
-                'payment_method' => 'required|string|max:255',
             ]);
-
-            $paidAmountInRupees = $validatedData['paid'];
-
+            
             // Save payment details in the payments table
-            Payment::create([
+            $payment = Payment::create([
                 'booking_id' => $booking->booking_id,
                 'user_id' => $booking->user_id,
                 'payment_id' => $validatedData['payment_id'],
                 'payment_status' => 'paid',
-                'paid' => $paidAmountInRupees,
+                'paid' => $validatedData['paid'],
                 'payment_type' => 'full',
-                'payment_method' => 'razoypay',
+                'payment_method' => 'razorpay', // or any method you want to specify
             ]);
-            Log::info('Payment details saved in the database');
-
-            Log::info('Payment process completed successfully');
-            return response()->json(['message' => 'Payment processed successfully.'], 200);
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            Log::error('Booking not found', ['exception' => $e->getMessage()]);
-            return response()->json(['message' => 'Booking not found. Please check the booking ID and try again.', 'error' => $e->getMessage()], 404);
+            \Log::info('Payment details saved in the database', ['payment' => $payment]);
+    
+            \Log::info('Payment process completed successfully');
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment details saved successfully.',
+                'data' => $payment
+            ], 200);
         } catch (\Exception $e) {
-            Log::error('Payment verification failed', ['exception' => $e->getMessage()]);
-            return response()->json(['message' => 'Payment verification failed. Please try again.', 'error' => $e->getMessage()], 500);
+            \Log::error('Payment process failed', ['exception' => $e->getMessage()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Payment process failed. Please try again.'
+            ], 500);
         }
     }
+    
+    
 
     
 
