@@ -230,7 +230,7 @@ public function orderHistory(Request $request)
         unset($booking->ratings);
 
         // Include payment details
-        if ($booking->payment) {
+        if ($booking->payment && $booking->payment instanceof \Illuminate\Database\Eloquent\Collection) {
             $booking->payment_details = $booking->payment->map(function ($payment) {
                 $payment->payment_date = $payment->created_at->format('Y-m-d');
                 $payment->payment_method_url = $payment->payment_method_image ? asset('assets/img/' . $payment->payment_method_image) : null;
@@ -238,7 +238,7 @@ public function orderHistory(Request $request)
                 return $payment;
             });
         } else {
-            $booking->payment_details = null; // No payment details available
+            $booking->payment_details = null; // No payment details available or not a collection
         }
 
         // Remove the payment relationship to avoid redundancy
@@ -251,6 +251,7 @@ public function orderHistory(Request $request)
         'bookings' => $bookings,
     ], 200);
 }
+
 
 
 
