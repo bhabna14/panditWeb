@@ -152,12 +152,15 @@
                 @if(!$addresses->isEmpty())
                     <div class="row">
                         <div class="form-input mt-20 col-md-12">
-                            <label for="">Please Select the Date and Time</label>
+                            <label for="">Please Select the Date and Time * </label>
                             <input type="text" name="booking_date" required class="form-control" id="booking_date" placeholder="Select a date and time">
 
                             {{-- <input type="text" name="booking_date" required class="form-control" id="booking_date" placeholder="Select a date and time"> --}}
                         </div>
                     </div>
+                    @if($pooja->poojalist->pooja_date)
+                     <span style="color:red; font-weight:bold">* Please select the time as per your convenience.</span>
+                     @endif
                     <button type="submit" class="button -md -blue-1 bg-dark-3 text-white mt-20">Confirm Booking</button>
                 @endif
             </form>
@@ -316,41 +319,49 @@
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
 <script>
-    $(function() {
-        var today = new Date();
-        var maxDate = new Date();
-        maxDate.setMonth(today.getMonth() + 2);
+   $(function() {
+    var today = new Date();
+    var maxDate = new Date();
+    maxDate.setMonth(today.getMonth() + 2);
 
-        // Check if pooja_date exists and set the date-time picker options accordingly
-        var poojaDate = "{{ $pooja->poojalist->pooja_date ?? '' }}";
-        
-        if (poojaDate) {
-            // If pooja_date exists, set it as the default value and make the date part non-editable
-            $("#booking_date").datetimepicker({
-                format: "Y-m-d H:i",
-                step: 30,
-                minDate: today,
-                maxDate: maxDate,
-                defaultDate: poojaDate,
-                timepicker: true,
-                datepicker: false,
-                onShow: function (ct) {
-                    this.setOptions({
-                        minDate: poojaDate,
-                        startDate: poojaDate
-                    })
-                }
-            }).val(poojaDate).prop('readonly', true);
-        } else {
-            // If pooja_date doesn't exist, allow setting both the date and time
-            $("#booking_date").datetimepicker({
-                format: "Y-m-d H:i",
-                step: 30,
-                minDate: today,
-                maxDate: maxDate
-            });
+    var poojaDate = "{{ $pooja->poojalist->pooja_date ?? '' }}";
+
+    // Initialize datetime picker
+    if (poojaDate) {
+        $("#booking_date").datetimepicker({
+            format: "Y-m-d H:i",
+            step: 30,
+            minDate: today,
+            maxDate: maxDate,
+            defaultDate: poojaDate,
+            timepicker: true,
+            datepicker: false,
+            onShow: function (ct) {
+                this.setOptions({
+                    minDate: poojaDate,
+                    startDate: poojaDate
+                });
+            }
+        }).val(poojaDate).prop('readonly', true);
+    } else {
+        $("#booking_date").datetimepicker({
+            format: "Y-m-d H:i",
+            step: 30,
+            minDate: today,
+            maxDate: maxDate
+        });
+    }
+
+    // Form submission check
+    $("form").on("submit", function(e) {
+        var bookingDateTime = $("#booking_date").val();
+        if (!bookingDateTime || !bookingDateTime.includes(':')) {
+            alert("Please select the time before confirming your booking.");
+            e.preventDefault(); // Prevent form submission
         }
     });
+});
+
 </script>
 
 
