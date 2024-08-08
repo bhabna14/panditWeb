@@ -168,14 +168,27 @@
                                           
                       @endphp
                       {{-- @dd($latestPayment) --}}
+                      @php
+                        $remainingAmount = $booking->pooja_fee - $booking->payment->paid;
+                    @endphp
+
                       @if ($booking->status != 'rejected')
-                          @if ($latestPayment && $latestPayment->payment_type != 'full' && 
-                              $booking->status == 'paid' && 
-                              $booking->payment_status == 'paid' && 
-                              $booking->application_status == 'approved' )
-                              <a href="{{ route('payRemainingAmount', $booking->id) }}" class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" style="margin-bottom: 10px;">Pay the remaining amount</a>
-                          @endif
-                      @endif
+                            @if ($latestPayment && $latestPayment->payment_type != 'full' && 
+                                $booking->status == 'paid' && 
+                                $booking->payment_status == 'paid' && 
+                                $booking->application_status == 'approved' )
+                                
+                                <button id="pay-button" 
+                                        class="button px-10 fw-400 text-14 bg-dark-4 h-50 text-white" 
+                                        style="margin-bottom: 10px;" 
+                                        data-amount="{{ $remainingAmount * 100 }}">
+                                    Pay the remaining amount (₹{{ $remainingAmount }})
+                                </button>
+                            @endif
+                        @endif
+                  
+                  
+                  
                   
                   
 
@@ -234,4 +247,59 @@
       });
   });
 </script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('pay-button').onclick = function(e) {
+        e.preventDefault();
+
+        var amount = this.getAttribute('data-amount'); // Get the remaining amount
+
+        var options = {
+            "key": "{{ config('services.razorpay.key') }}", // Your Razorpay Key ID
+            "amount": amount, // Amount in paise (e.g., 1000 paise = ₹10)
+            "currency": "INR",
+             "name": "33 Pandits",
+            "description": "Pay the remaining amount",
+            "order_id": "{{ $latestPayment->razorpay_order_id }}", // The order ID received from Razorpay, if applicable
+            "handler": function (response) {
+                // Send payment response to the server
+                processPayment(response.razorpay_payment_id);
+            },
+           "prefill": {
+                "name": "{{ $booking->address->fullname }}",
+                "contact": "{{ $booking->address->number }}"
+            },
+            "theme": {
+                "color": "#F37254"
+            }
+        };
+
+        var rzp = new Razorpay(options);
+        rzp.open();
+    };
+
+    function processPayment(payment_id) {
+        $.ajax({
+            url: "{{ route('processRemainingPayment', $booking->id) }}",
+            type: 'POST',
+            data: {
+                "_token": "{{ csrf_token() }}",
+                "razorpay_payment_id": payment_id
+            },
+            success: function(response) {
+                if(response.success) {
+                    alert('Payment successful!');
+                    location.reload();
+                } else {
+                    alert('Payment failed: ' + response.error);
+                }
+            },
+            error: function(response) {
+                alert('Something went wrong. Please try again.');
+            }
+        });
+    }
+</script>
+
+
 @endsection
