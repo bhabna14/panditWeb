@@ -113,7 +113,7 @@
           <li>{{ $error }}</li>
             @endforeach
           <div class="col-md-7">
-            <form action="{{ route('booking.confirm') }}" method="POST">
+            <form action="{{ route('booking.confirm') }}" method="POST" id="bookingForm" >
                 @csrf
                 <input type="hidden" name="pandit_id" value="{{ $pandit->id }}">
                 <input type="hidden" name="pooja_id" value="{{ $pooja->pooja_id }}">
@@ -353,7 +353,7 @@
     }
 
     // Form submission check
-    $("form").on("submit", function(e) {
+    $("#bookingForm").on("submit", function(e) { // Assuming you add an id="bookingForm" to the booking form
         var bookingDateTime = $("#booking_date").val();
         if (!bookingDateTime || !bookingDateTime.includes(':')) {
             alert("Please select the time before confirming your booking.");
