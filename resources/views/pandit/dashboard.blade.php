@@ -23,7 +23,7 @@
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Sales</li>
+                <li class="breadcrumb-item active" aria-current="page">Pooja</li>
             </ol>
         </div>
     </div>
@@ -206,7 +206,7 @@
         <div class="col-12 col-sm-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">Product Summary</h4>
+                    <h4 class="card-title">Pooja Summary</h4>
                 </div>
                 <div class="card-body pt-0 example1-table">
                     <div class="table-responsive">
@@ -396,5 +396,18 @@
             }
         });
     </script>
+        <script>
+            function updateTime() {
+                var now = new Date();
+                var hours = now.getHours().toString().padStart(2, '0');
+                var minutes = now.getMinutes().toString().padStart(2, '0');
+                var seconds = now.getSeconds().toString().padStart(2, '0');
+                var formattedTime = hours + ':' + minutes + ':' + seconds;
+                document.getElementById('liveTime').innerText = formattedTime;
+            }
+    
+            setInterval(updateTime, 1000); // Update every second
+            updateTime(); // Initial call to set the time immediately
+        </script>
 @endsection
 

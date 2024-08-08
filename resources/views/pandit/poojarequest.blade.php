@@ -136,8 +136,8 @@
                                 <td>₹ <span id="modal-pooja-fee">N/A</span></td>
                             </tr>
                             <tr>
-                                <th>Paid Amount</th>
-                                <td>₹ <span id="modal-paid-amount">N/A</span></td>
+                                <th>Payment Status</th>
+                                <td><span id="modal-payment-status">N/A</span></td>
                             </tr>
                             <tr>
                                 <th>Date and Time</th>
@@ -196,7 +196,7 @@
                     document.getElementById('modal-pooja-name').textContent = data.pooja?.pooja_name || 'N/A';
                     document.getElementById('modal-mobile-number').textContent = maskedMobileNumber || 'N/A';
                     document.getElementById('modal-pooja-fee').textContent = data.pooja?.pooja_fee || 'N/A';
-                    document.getElementById('modal-paid-amount').textContent = data.paid || 'N/A';
+                    document.getElementById('modal-payment-status').textContent = data.payment_status || 'N/A';
                     document.getElementById('modal-date-time').textContent = data.booking_time || 'N/A';
                     document.getElementById('modal-pooja-status').textContent = data.pooja_status || 'N/A';
                     
@@ -230,8 +230,5 @@
         }).join(' ');
     }
 });
-
-
-
     </script>
 @endsection

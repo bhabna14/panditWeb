@@ -99,12 +99,13 @@
                                                                         <div class="col-md-12">
                                                                             <div class="form-group">
                                                                                 <label for="prepincode">Pincode</label>
-                                                                                <input type="number" class="form-control"
-                                                                                    name="prepincode" value="{{$addressdata->prepincode ?? ''}}" id="prepincode"
-                                                                                    placeholder="Enter Pincode">
+                                                                                <input type="text" class="form-control" name="prepincode" value="{{$addressdata->prepincode ?? ''}}" id="prepincode" placeholder="Enter Pincode" maxlength="6" pattern="\d{6}">
+                                                                                <small class="text-danger" id="pincode-error" style="display: none;">Pincode must be exactly 6 digits.</small>
                                                                             </div>
                                                                         </div>
                                                                     </div>
+                                                                    
+                                                                    
                                                                     <div class="row">
                                                                         <div class="col-md-12">
                                                                             <div class="form-group">
@@ -189,11 +190,10 @@
                                                                     <div class="col-md-12">
                                                                         <div class="form-group">
                                                                             <label for="perpincode">Pincode</label>
-                                                                            <input type="number" class="form-control"
-                                                                                name="perpincode" value="{{$addressdata->perpincode ?? ''}}" id="perpincode"
-                                                                                placeholder="Enter Pincode">
+                                                                            <input type="text" class="form-control" name="perpincode" value="{{$addressdata->perpincode ?? ''}}" id="perpincode" placeholder="Enter Pincode" maxlength="6" pattern="\d{6}">
                                                                         </div>
                                                                     </div>
+                                                                    
                                                                 </div>
                                                                 <div class="row">
                                                                     <div class="col-md-12">

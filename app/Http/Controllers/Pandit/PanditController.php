@@ -258,39 +258,44 @@ public function poojarequest()
 
         return redirect('/pandit/panditlogin');
     }
-
     public function getDetails($id)
     {
-        // Retrieve the booking with related user, pooja, and address
-        $booking = Booking::with(['user', 'pooja', 'address'])->findOrFail($id);
-    // dd($booking);
-        // Build the response data
-        $response = [
-            'user' => [
-                'name' => $booking->user->name,
-                'mobile_number' => $booking->user->mobile_number,
-            ],
-            'pooja' => [
-                'pooja_name' => $booking->pooja->pooja_name,
-                'pooja_fee' => $booking->pooja->pooja_fee,
-            ],
-            'paid' => $booking->paid,
-            'pooja_status' => $booking->pooja_status,
-            'booking_time' => $booking->created_at->format('Y-m-d H:i:s'),
-            'address' => [
-                'country' => $booking->address->country,
-                'state' => $booking->address->state,
-                'city' => $booking->address->city,
-                'pincode' => $booking->address->pincode,
-                'area' => $booking->address->area,
-                'address_type' => $booking->address->address_type,
-                'landmark' => $booking->address->landmark,
-            ],
-        ];
+        try {
+            $booking = Booking::with(['pooja', 'user', 'address'])->find($id);
     
-        // Return the JSON response
-        return response()->json($response);
+            if (!$booking) {
+                return response()->json(['message' => 'Booking not found.'], 404);
+            }
+    
+            $data = [
+                'user' => [
+                    'name' => $booking->user->name,
+                    'mobile_number' => $booking->user->mobile_number,
+                ],
+
+                'pooja' => [
+                    'pooja_name' => $booking->pooja->pooja_name,
+                    'pooja_fee' => $booking->pooja->pooja_fee,
+                ],
+
+                'booking_time' => $booking->booking_date,
+                'payment_status' => $booking->payment_status,
+                'pooja_status' => $booking->pooja_status,
+                
+                'address' => [
+                    'country' => $booking->address->country,
+                    'pincode' => $booking->address->pincode,
+                    'landmark' => $booking->address->landmark,
+                ],
+            ];
+    
+            return response()->json($data, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching the booking details.', 'error' => $e->getMessage()], 500);
+        }
     }
+    
+  
   
 
 }

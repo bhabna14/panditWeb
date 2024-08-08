@@ -54,7 +54,7 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <input type="text" name="fee[{{ $poojaDetail->id }}]"
+                                                <input  style="width: 100px" type="text" name="fee[{{ $poojaDetail->id }}]"
                                                     class="form-control"
                                                     value="{{ old('fee.' . $poojaDetail->id, $poojaDetail->pooja_fee) }}">
                                             </td>

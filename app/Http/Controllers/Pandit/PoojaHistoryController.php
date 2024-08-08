@@ -15,7 +15,7 @@ class PoojaHistoryController extends Controller
     public function poojahistory()
     {
         $pandit = Auth::guard('pandits')->user();
-    
+
         // Fetch the pandit's profile details using their pandit_id
         $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
     

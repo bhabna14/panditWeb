@@ -50,51 +50,55 @@
                                        
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="exampleInputEmail1">Bank Name</label>
+                                                <label for="bankname">Bank Name</label>
                                                 <input type="text" class="form-control" name="bankname"
-                                                    value="{{$bankdata->bankname ?? ''}}" id="exampleInputEmail1"
+                                                    value="{{$bankdata->bankname ?? ''}}" id="bankname"
                                                     placeholder="Enter Bank Name">
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="exampleInputPassword1">Branch Name</label>
+                                                <label for="branchname">Branch Name</label>
                                                 <input type="text" class="form-control" name="branchname"
-                                                    value="{{$bankdata->branchname ?? ''}}" id="exampleInputPassword1"
+                                                    value="{{$bankdata->branchname ?? ''}}" id="branchname"
                                                     placeholder="Enter Branch Name">
                                             </div>
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="exampleInputPassword1">IFSC Code</label>
+                                                <label for="ifsccode">IFSC Code</label>
                                                 <input type="text" class="form-control" name="ifsccode"
-                                                    value="{{$bankdata->ifsccode ?? ''}}" id="exampleInputPassword1"
-                                                    placeholder="Enter IFSC Code">
+                                                       value="{{$bankdata->ifsccode ?? ''}}" id="ifsccode"
+                                                       placeholder="Enter IFSC Code" maxlength="11" oninput="this.value = this.value.toUpperCase()">
                                             </div>
                                         </div>
+                                        
+                                        
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="exampleInputEmail1">Account Holder Name</label>
+                                                <label for="accname">Account Holder Name</label>
                                                 <input type="text" class="form-control" name="accname"
-                                                    value="{{$bankdata->accname ?? ''}}" id="exampleInputEmail1"
+                                                    value="{{$bankdata->accname ?? ''}}" id="accname"
                                                     placeholder="Enter Account Holder Name">
                                             </div>
                                         </div>
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="exampleInputPassword1">Account Number</label>
-                                                <input type="number" class="form-control" name="accnumber"
-                                                    value="{{$bankdata->accnumber ?? ''}}" id="exampleInputPassword1"
-                                                    placeholder="Enter Account Number">
+                                                <label for="accnumber">Account Number</label>
+                                                <input type="text" class="form-control" name="accnumber"
+                                                       value="{{$bankdata->accnumber ?? ''}}" id="accnumber"
+                                                       placeholder="Enter Account Number" maxlength="17" oninput="validateAccountNumber(this)">
+                                                <small id="accNumberError" class="text-danger"></small>
                                             </div>
                                         </div>
+                                        
 
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="exampleInputPassword1">UPI Number/ID</label>
+                                                <label for="upi_number">UPI Number/ID</label>
                                                 <input type="text" class="form-control" name="upi_number"
-                                                    value="{{$bankdata->upi_number ?? ''}}" id="exampleInputPassword1"
+                                                    value="{{$bankdata->upi_number ?? ''}}" id="upi_number"
                                                     placeholder="Enter Account Number">
                                             </div>
                                         </div>
@@ -127,6 +131,7 @@
     <script src="{{ asset('assets/js/pandit-profile.js') }}"></script>
 
     <script>
+
         setTimeout(function() {
             document.getElementById('Message').style.display = 'none';
         }, 3000);
