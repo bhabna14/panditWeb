@@ -289,75 +289,86 @@ class PaymentController extends Controller
     }
 
 
-    public function payRemainingAmount($booking_id)
+    public function payRemainingAmount($id)
     {
         
-        $booking = Booking::findOrFail($booking_id);
-
+        $booking = Booking::findOrFail($id);
+        // dd($booking);
         // Calculate the remaining amount to be paid
         $remainingAmount = $booking->pooja_fee - $booking->payment->paid;
 
         return view('user.pay-remaining-amount', compact('booking', 'remainingAmount'));
     }
 
+    // public function processRemainingPayment(Request $request, $booking_id)
+    // {
+    // dd($booking_id);
+
+    //     \Log::info('Starting processRemainingPayment', ['booking_id' => $booking_id]);
+    
+    //     // Ensure the session remains active
+    //     session()->keep(['_token']);
+    //     try {
+    //         $booking = Booking::findOrFail($booking_id);
+    //         \Log::info('Booking found', ['booking' => $booking]);
+    
+    //         // Initialize Razorpay API
+    //         $api = new \Razorpay\Api\Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+    //         \Log::info('Razorpay API initialized');
+    
+    //         // Fetch payment details
+    //         $payment = $api->payment->fetch($request->razorpay_payment_id);
+    //         \Log::info('Payment details fetched', ['payment' => (array)$payment]);
+    
+    //         // Capture the payment if it's not captured automatically
+    //         if (!$payment->captured) {
+    //             $payment = $payment->capture(['amount' => $payment->amount]);
+    //             \Log::info('Payment captured', ['payment' => (array)$payment]);
+    //         }
+    
+    //         // Check if payment is captured
+    //         if ($payment->status != 'captured') {
+    //             \Log::error('Payment verification failed', ['payment_status' => $payment->status]);
+    //             return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
+    //         }
+    
+    //         $paidAmountInRupees = $payment->amount / 100;
+    //         \Log::info('Paid amount in rupees', ['paidAmountInRupees' => $paidAmountInRupees]);
+    
+    //         // Save payment details in the payments table
+    //         Payment::create([
+    //             'booking_id' => $booking->booking_id,
+    //             'user_id' => $booking->user_id,
+    //             'payment_id' => $request->razorpay_payment_id,
+    //             'payment_status' => 'paid',
+    //             'paid' => $paidAmountInRupees,
+    //             'payment_type' => 'full',
+    //             'payment_method' => 'razorpay',
+    //         ]);
+    //         \Log::info('Payment details saved in the database');
+    
+    //         // Optionally, update booking details if necessary
+    //         // $booking->paid += $paidAmountInRupees;
+    //         // $booking->payment_type = 'full';
+    //         // $booking->save();
+    
+    //         \Log::info('Payment process completed successfully');
+    //         return view("success");
+    //     } catch (\Exception $e) {
+    //         \Log::error('Payment verification failed', ['exception' => $e->getMessage()]);
+    //         return redirect()->back()->with('error', 'Payment verification failed. Please try again.');
+    //     }
+    // }
+    
     public function processRemainingPayment(Request $request, $booking_id)
     {
-        \Log::info('Starting processRemainingPayment', ['booking_id' => $booking_id]);
-
-        try {
-            $booking = Booking::findOrFail($booking_id);
-            \Log::info('Booking found', ['booking' => $booking]);
-
-            // Initialize Razorpay API
-            $api = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
-            \Log::info('Razorpay API initialized');
-
-            // Fetch payment details from Razorpay
-            $payment = $api->payment->fetch($request->razorpay_payment_id);
-            \Log::info('Payment details fetched', ['payment' => (array)$payment]);
-
-            // Capture the payment if it's not already captured
-            if (!$payment->captured) {
-                $payment = $payment->capture(['amount' => $payment->amount]);
-                \Log::info('Payment captured', ['payment' => (array)$payment]);
-            }
-
-            // Check if payment was successfully captured
-            if ($payment->status != 'captured') {
-                \Log::error('Payment verification failed', ['payment_status' => $payment->status]);
-                return response()->json(['error' => 'Payment verification failed. Please try again.'], 400);
-            }
-
-            $paidAmountInRupees = $payment->amount / 100;
-            \Log::info('Paid amount in rupees', ['paidAmountInRupees' => $paidAmountInRupees]);
-
-            // Save the new payment details in the payments table
-            $newPayment = Payment::create([
-                'booking_id' => $booking->booking_id,
-                'user_id' => $booking->user_id,
-                'payment_id' => $request->razorpay_payment_id,
-                'payment_status' => 'paid',
-                'paid' => $paidAmountInRupees,
-                'payment_type' => 'full',
-                'payment_method' => 'razorpay',
-            ]);
-            \Log::info('Payment details saved in the database', ['newPayment' => $newPayment]);
-
-            // Optionally, update the booking details if necessary
-            $booking->update([
-                'payment_status' => 'full',
-                'status' => 'paid',
-            ]);
-            \Log::info('Booking status updated');
-
-            return response()->json(['success' => 'Payment processed successfully.'], 200);
-
-        } catch (\Exception $e) {
-            \Log::error('Payment processing failed', ['exception' => $e->getMessage()]);
-            return response()->json(['error' => 'Payment processing failed. Please try again.'], 500);
-        }
+        dd("ProcessRemainingPayment called with booking ID: " . $booking_id);
+        \Log::info('ProcessRemainingPayment called', ['booking_id' => $booking_id]);
+    
+        // Your existing code...
     }
     
+
     
     
 

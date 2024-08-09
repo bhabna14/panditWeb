@@ -130,6 +130,7 @@ Route::group(['middleware' => ['auth:users']], function () {
 
 
     Route::get('/pay-remaining-amount/{booking_id}', [PaymentController::class, 'payRemainingAmount'])->name('payRemainingAmount');
+    // Route::post('/process-remaining-payment/{booking_id}', [PaymentController::class, 'processRemainingPayment'])->name('processRemainingPayment');
     Route::post('/process-remaining-payment/{booking_id}', [PaymentController::class, 'processRemainingPayment'])->name('processRemainingPayment');
 
 });

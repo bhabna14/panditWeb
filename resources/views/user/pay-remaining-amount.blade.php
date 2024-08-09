@@ -13,11 +13,13 @@
                 <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
                 <button id="pay-button" type="button">Pay ₹{{ $remainingAmount }}</button>
             </form>
+            
         </div>
     </div>
 </div>
 @endsection
 
+@section('scripts')
 @section('scripts')
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
@@ -29,7 +31,10 @@
             "name": "33 Pandits",
             "description": "Payment for remaining amount",
             "handler": function (response){
+                // Setting the payment ID received from Razorpay
                 document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;
+                
+                // Submitting the form
                 document.forms[0].submit();
             },
             "prefill": {
@@ -44,4 +49,6 @@
         e.preventDefault();
     }
 </script>
+@endsection
+
 @endsection

@@ -314,7 +314,39 @@ public function orderHistory(Request $request)
 //         'bookings' => $bookings,
 //     ], 200);
 // }
+public function deletePhoto()
+    {
+        // Authenticate the user
+        $user = Auth::guard('sanctum')->user();
+        
+        // Log the user ID attempting to delete the photo
+        Log::info('User ID ' . $user->userid . ' is attempting to delete their photo.');
 
+        // Check if the user has a photo
+        if ($user->userphoto) {
+            try {
+                // Delete the photo from storage
+                Storage::delete('public/' . $user->userphoto);
+
+                // Update the user's photo column in the database
+                $user->update(['userphoto' => null]);
+
+                // Log success message
+                Log::info('Photo deleted successfully for User ID ' . $user->userid);
+
+                return response()->json(['message' => 'Photo deleted successfully'], 200);
+            } catch (\Exception $e) {
+                // Log error if deletion fails
+                Log::error('Failed to delete photo for User ID ' . $user->userid . ': ' . $e->getMessage());
+
+                return response()->json(['message' => 'Failed to delete photo'], 500);
+            }
+        }
+
+        // Log if no photo found for deletion
+        Log::info('No photo found for deletion for User ID ' . $user->userid);
+        return response()->json(['message' => 'No photo found for deletion'], 404);
+    }
 
     
     public function manageAddress(Request $request)
