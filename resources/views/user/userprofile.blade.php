@@ -93,7 +93,7 @@
                       <div class="text-14 mt-5">PNG or JPG no bigger than 800px wide and tall.</div>
   
                       <div class="d-inline-block mt-15">
-                          <input type="file" name="avatar" class="form-control">
+                          <input type="file" name="userphoto" class="form-control">
                       </div>
                   </div>
               </div>

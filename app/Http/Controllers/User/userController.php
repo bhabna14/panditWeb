@@ -520,8 +520,9 @@ public function confirmBooking(Request $request)
             if ($user->userphoto && Storage::exists($user->userphoto)) {
                 Storage::delete($user->userphoto);
             }
-    
+        
             $avatarPath = $request->file('userphoto')->store('avatars', 'public');
+            \Log::info('Avatar stored at: ' . $avatarPath); // Add this line to log the path
             $user->userphoto = $avatarPath;
         }
     
