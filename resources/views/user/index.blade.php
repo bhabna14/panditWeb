@@ -109,7 +109,7 @@
 
                 <div class="col-auto md:d-none">
 
-                    <a href="{{ url('book-pandit')}}" class="button -md pandit-btn">
+                    <a href="{{ route('panditlist')}}" class="button -md pandit-btn">
                         View All Pandits <div class="icon-arrow-top-right ml-15"></div>
                     </a>
 
