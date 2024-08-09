@@ -77,8 +77,8 @@
               <h4>Booking Summary</h4>
               <p>Total Fee: ₹ {{ $booking->pooja_fee ?? 'N/A' }}</p>
               <p>Advance Fee: ₹ {{ $booking->advance_fee ?? 'N/A' }}</p>
-              <p>Paid Amount: ₹ {{ $booking->paid ?? 'N/A' }}</p>
-              <p>Refund Details: ₹{{ $booking->refund_amount ?? 'N/A' }}</p>
+              <p>Paid Amount: ₹ {{ $booking->payment->paid ?? 'N/A' }}</p>
+              <p>Refund Details: ₹{{ $booking->payment->refund_amount ?? 'N/A' }}</p>
             </div>
           </div>
         </div>
