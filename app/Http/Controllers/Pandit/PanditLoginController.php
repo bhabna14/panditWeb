@@ -25,7 +25,7 @@ class PanditLoginController extends Controller
         $user = PanditLogin::where('mobile_no', $data['mobile_no'])->first();
     
         // Generate a new OTP
-        $otp = rand(1000, 9999);
+        $otp = "0000";
     
         if ($user) {
             // Check if the user already has a pandit_id
