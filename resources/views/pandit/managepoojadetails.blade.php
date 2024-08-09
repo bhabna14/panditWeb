@@ -35,7 +35,7 @@
                                         <th class="border-bottom-0">Puja Name</th>
                                         <th class="border-bottom-0">Fee</th>
                                         <th class="border-bottom-0">Duration</th>
-                                        <th class="border-bottom-0">Upload Img</th>
+                                        <th class="border-bottom-0">Upload Image</th>
                                         <th class="border-bottom-0">View</th>
                                         <th class="border-bottom-0">Upload Video</th>
                                         <th class="border-bottom-0">View</th>
@@ -86,29 +86,33 @@
                                                 </div>
                                             </td>
                                             <td>
-                                                <input type="file" name="image[{{ $poojaDetail->id }}]"
+                                                <input type="file"  style="width: 200px" name="image[{{ $poojaDetail->id }}]"
                                                     class="form-control">
                                             </td>
                                             <td>
+                                                @if ($poojaDetail->pooja_photo)
                                                 <a href="{{ asset($poojaDetail->pooja_photo) }}" target="_blank"
                                                     class="btn btn-success">
-                                                    View Image
+                                                    Image
                                                 </a>
+                                                @else
+                                                <P style="color: red">No Image</P>
+                                                @endif
                                             </td>
                                             <td>
-                                                <input type="file" name="video[{{ $poojaDetail->id }}]"
+                                                <input style="width: 200px" type="file" name="video[{{ $poojaDetail->id }}]"
                                                     class="form-control">
                                             </td>
                                             <td>
                                                 @if ($poojaDetail->pooja_video)
                                                     <a href="{{ asset($poojaDetail->pooja_video) }}" target="_blank"
-                                                        class="btn btn-danger">Watch Video</a>
+                                                        class="btn btn-danger">Video</a>
                                                 @else
-                                                    No video uploaded
+                                                <P style="color: red">No video</p>
                                                 @endif
                                             </td>
                                             <td>
-                                                <input type="text" name="done_count[{{ $poojaDetail->id }}]"
+                                                <input  type="text" name="done_count[{{ $poojaDetail->id }}]"
                                                     class="form-control"
                                                     value="{{ old('done_count.' . $poojaDetail->id, $poojaDetail->pooja_done) }}">
                                             </td>

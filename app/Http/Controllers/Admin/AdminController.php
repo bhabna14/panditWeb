@@ -37,21 +37,16 @@ class AdminController extends Controller
         $phonenumber = $request->input('phonenumber');
         $otp = $request->input('otp');
     
-        // Retrieve superadmin from the database based on phonenumber number
         $superadmin = Admin::where('phonenumber', $phonenumber)->first();
     
         if ($superadmin && $superadmin->otp === $otp) {
-            // Phone number and otp match
-            // Perform superadmin login
             Auth::guard('admins')->login($superadmin);
             return redirect()->intended('/admin/dashboard');
         } else {
-            // Invalid phone number or otp
             return redirect()->back()->withInput()->withErrors(['login_error' => 'Invalid phone number or email']);
         }
-
-    
     }
+
     public function admindashboard()
     {
         $totalPandit = Profile::where('status', 'active')->count();

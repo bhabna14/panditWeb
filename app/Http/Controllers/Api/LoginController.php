@@ -11,82 +11,89 @@ class LoginController extends Controller
 {
     public function storeLoginData(Request $request)
     {
-        // Validate the input data including mobile number format
+        // Validate the input data
         $data = $request->validate([
             'mobile_no' => 'required|string|regex:/^\d{10}$/',
         ], [
             'mobile_no.regex' => 'Mobile number must be exactly 10 digits.',
         ]);
-
+    
         // Retrieve the user by mobile number
         $user = PanditLogin::where('mobile_no', $data['mobile_no'])->first();
-
-        // Generate a new OTP and pandit_id
+    
+        // Generate a new OTP
         $otp = rand(1000, 9999);
-        $panditId = 'PANDIT' . rand(10000, 99999);
-
+    
+        // Generate a new order ID
+        $orderId = 'ORDER' . rand(100000, 999999);
+    
         if ($user) {
-            // Update the existing user's OTP and pandit_id
+            // Check if the user already has a pandit_id
+            if (empty($user->pandit_id)) {
+                // Generate a new pandit_id if it does not exist
+                $panditId = 'PANDIT' . rand(10000, 99999);
+                $user->pandit_id = $panditId;
+            }
+    
+            // Update the existing user's OTP and order ID
             $user->otp = $otp;
-
+            $user->order_id = $orderId;
+    
             // Save the user and handle potential save errors
             if ($user->save()) {
-                Auth::guard('pandits')->login($user);
                 return response()->json([
-                    'success' => true,
                     'message' => 'OTP updated successfully.',
+                    'order_id' => $orderId,
                 ], 200);
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to update OTP.',
-                ], 500);
+                return response()->json(['message' => 'Failed to update OTP.'], 500);
             }
         } else {
+            // Generate a new pandit_id for a new user
+            $panditId = 'PANDIT' . rand(10000, 99999);
+    
             // Create a new user with the provided data, OTP, and pandit_id
             $data['otp'] = $otp;
             $data['pandit_id'] = $panditId;
-
+            $data['order_id'] = $orderId;
+    
             $user = PanditLogin::create($data);
-
+    
             // Save the user and handle potential save errors
             if ($user) {
-                Auth::guard('pandits')->login($user);
                 return response()->json([
-                    'success' => true,
                     'message' => 'OTP generated successfully.',
+                    'order_id' => $orderId,
                 ], 201);
             } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Failed to save OTP.',
-                ], 500);
+                return response()->json(['message' => 'Failed to save OTP.'], 500);
             }
         }
     }
+    
     
     public function checkOtp(Request $request)
     {
         $request->validate([
             'otp' => 'required|integer',
+            'order_id' => 'required|string',
         ]);
-
+    
         $inputOtp = $request->input('otp');
-
-        $user = PanditLogin::where('otp', $inputOtp)->first();
-
+        $orderId = $request->input('order_id');
+    
+        // Retrieve the user by order ID and OTP
+        $user = PanditLogin::where('order_id', $orderId)->where('otp', $inputOtp)->first();
+    
         // Check if user exists and the OTP matches
         if ($user) {
-            // Log the user in
-            Auth::guard('pandits')->login($user);
-
             // Clear the OTP after successful validation
             $user->otp = null;
             $user->save();
-
+    
             // Generate a new token
             $token = $user->createToken('auth_token')->plainTextToken;
-
+    
             return response()->json([
                 'message' => 'Login successful.',
                 'user' => $user,
@@ -98,4 +105,5 @@ class LoginController extends Controller
             return response()->json(['message' => 'Invalid OTP.'], 401);
         }
     }
+    
 }

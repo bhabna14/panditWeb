@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AreaController;
 use App\Http\Controllers\Api\BankController;
 use App\Http\Controllers\Api\LoginController;
-// use App\Http\Controllers\Api\CareerController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\CareersController;
 use App\Http\Controllers\Api\PodcastController;
@@ -31,16 +30,18 @@ use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\OtpController;
 
-
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::controller(PanditLoginController::class)->group(function() {
+// Route::controller(PanditLoginController::class)->group(function() {
+//     Route::post('/pandit-send-otp',  'sendOtp');
+//     Route::post('/pandit-verify-otp', 'verifyOtp');
+// });
 
-    Route::post('/pandit-send-otp',  'sendOtp');
-    Route::post('/pandit-verify-otp', 'verifyOtp');
+Route::controller(LoginController::class)->group(function() {
+    Route::post('/pandit-send-otp',  'storeLoginData');
+    Route::post('/pandit-verify-otp', 'checkOtp');
 });
 
 Route::controller(AreaController::class)->group(function() {

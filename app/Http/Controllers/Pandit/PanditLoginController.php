@@ -90,8 +90,7 @@ class PanditLoginController extends Controller
                     // Clear the OTP after successful validation
                     $user->otp = null;
                     $user->save();
-            
-                    // Redirect to dashboard
+
                     return redirect()->route('pandit.profile')->with('success', 'Login successful.');
                 } else {
                     // OTP is invalid, redirect back with an error message
@@ -99,7 +98,7 @@ class PanditLoginController extends Controller
                 }
                
             }
-        
+
             // If profile exists, validate OTP
             if ($user->otp == $inputOtp) {
                 // Clear the OTP after successful validation
@@ -119,5 +118,8 @@ class PanditLoginController extends Controller
         {
             return view('pandit/panditotp');
         }
+public function showLoginForm(){
+    return view('pandit/demo-login');
 
+}
 }

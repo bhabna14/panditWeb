@@ -69,7 +69,7 @@
                                                 <label for="ifsccode">IFSC Code</label>
                                                 <input type="text" class="form-control" name="ifsccode"
                                                        value="{{$bankdata->ifsccode ?? ''}}" id="ifsccode"
-                                                       placeholder="Enter IFSC Code" maxlength="11" oninput="this.value = this.value.toUpperCase()">
+                                                       placeholder="Enter IFSC Code" maxlength="15" oninput="this.value = this.value.toUpperCase()">
                                             </div>
                                         </div>
                                         

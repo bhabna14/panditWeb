@@ -86,16 +86,7 @@ class ProfileController extends Controller
             return response()->json(['error' => 'No authenticated user found.'], 401);
         }
     
-        // Validate the request data
-        // $request->validate([
-        //     'title' => 'required|string|max:255',
-        //     'name' => 'required|string|max:255',
-        //     'email' => 'required|email|max:255',
-        //     'whatsappno' => 'required|string|max:15',
-        //     'language.*' => 'string',
-        // ]);
-    
-        // Find the profile belonging to the authenticated user
+     
         $profile = Profile::where('pandit_id', $user->pandit_id)->first();
     
         if (!$profile) {
@@ -109,25 +100,6 @@ class ProfileController extends Controller
         $profile->whatsappno = $request->whatsappno;
         
         $profile->about_pandit = $request->about;
-    
-        // $pandilang = $request->input('language', []);
-        // if (is_array($pandilang)) {
-        //     $langString = implode(',', $pandilang);
-        // } else {
-        //     $langString = '';
-        // }
-        // $profile->language = $langString;
-    
-        // if ($request->hasFile('upload_id')) {
-        //     $file = $request->file('upload_id');
-        //     $fileName = time() . '_' . $file->getClientOriginalName();
-        //     $file->move(public_path('uploads/id_proof'), $fileName);
-        //     $iddata = new IdcardDetail();
-        //     $iddata->pandit_id = $profile->pandit_id;
-        //     $iddata->id_type = $request->id_type;
-        //     $iddata->upload_id = $fileName;
-        //     $iddata->save();
-        // }
     
         if ($profile->save()) {
             return response()->json(['success' => true, 'message' => 'Data updated successfully.'], 200);

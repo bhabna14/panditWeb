@@ -41,7 +41,6 @@
                                                             {{ session('error') }}
                                                         </div>
                                                     @endif
-
                                                     @if (session('otp_sent'))
                                                     <form action="/verify-otp" method="POST">
                                                         @csrf

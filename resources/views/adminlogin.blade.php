@@ -47,19 +47,7 @@
                                                                 </ul>
                                                             </div>
                                                         @endif
-                                                        {{-- <form action="{{ route('adminauthenticate') }}" method="post">
-                                                                @csrf
-                                                                <div class="form-group">
-                                                                    <label>Phone</label> <input class="form-control" placeholder="Enter your phonenumber" name="phonenumber" type="text">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label>otp</label> <input class="form-control" placeholder="Enter your otp" name="otp" type="text">
-                                                                </div>
-                                                                
-                                                                <!-- <a href="{{url('index')}}" class="btn btn-primary btn-block">Sign In</a> -->
-                                                                <input type="submit" class="col-md-3 offset-md-5 btn btn-primary" value="Login">
-                                                               
-                                                        </form> --}}
+                                                        
 
                                                         <form id="loginForm" method="POST" action="{{ route('adminauthenticate') }}">
                                                             @csrf
