@@ -239,64 +239,86 @@ class BookingController extends Controller
 
 
     public function cancelBooking(Request $request, $booking_id)
-{
-    // dd("hi");
-    try {
-        $booking = Booking::where('booking_id', $booking_id)->firstOrFail();
-        $today = Carbon::today();
-        $bookingDate = Carbon::parse($booking->booking_date);
-        $daysDifference = $bookingDate->diffInDays($today);
-
-        $validator = Validator::make($request->all(), [
-            'cancel_reason' => 'required|string|max:255',
-            'refund_method' => 'required|string|in:original',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+    {
+        try {
+            // Fetch the booking record
+            $booking = Booking::findOrFail($booking_id);
+            $today = Carbon::today();
+            $bookingDate = Carbon::parse($booking->booking_date);
+            $daysDifference = $bookingDate->diffInDays($today);
+    
+            // Validate request data
+            $validatedData = $request->validate([
+                'cancel_reason' => 'required|string|max:255',
+                'refund_method' => 'required|string|in:original',
+            ]);
+    
+            // Log the booking details and cancellation request
+            Log::info('Booking cancellation requested', [
+                'booking_id' => $booking->id,
+                'booking_date' => $booking->booking_date,
+                'today' => $today,
+                'days_difference' => $daysDifference,
+                'cancel_reason' => $validatedData['cancel_reason'],
+                'refund_method' => $validatedData['refund_method']
+            ]);
+    
+            // Fetch all payments related to this booking and user
+            $payments = Payment::where('booking_id', $booking->booking_id)
+                               ->where('user_id', $booking->user_id)
+                               ->get();
+    
+            if ($payments->isEmpty()) {
+                // Log if no payment is found
+                Log::warning('No payment found for booking_id', ['booking_id' => $booking_id]);
+                return redirect()->route('booking.history')->with('error', 'No payments found for this booking.');
+            }
+    
+            // Calculate the total paid amount
+            $totalPaid = $payments->sum('paid');
+    
+            // Determine refund amount based on days difference and payment type
+            if ($payments->last()->payment_type == 'advance') {
+                $refundAmount = 0; // No refund for advance payment
+            } else {
+                if ($daysDifference > 20) {
+                    $refundAmount = $totalPaid;
+                } elseif ($daysDifference > 0 && $daysDifference <= 20) {
+                    $refundAmount = $totalPaid * 0.80; // 20% cancellation fee
+                } else {
+                    $refundAmount = $totalPaid * 0.80; // 20% cancellation fee if the booking date is today or less than a day
+                }
+            }
+    
+            // Update payment(s) with refund details
+            foreach ($payments as $payment) {
+                $payment->payment_status = 'refundprocess';
+                $payment->canceled_at = now();
+                $payment->cancel_reason = $validatedData['cancel_reason'];
+                $payment->refund_method = $validatedData['refund_method'];
+                $payment->refund_amount = $refundAmount;
+                $payment->save();
+            }
+    
+            // Update booking with cancellation details
+            $booking->status = 'canceled';
+            $booking->payment_status = 'refundprocess';
+            $booking->pooja_status = 'canceled';
+            $booking->save();
+    
+            // Log booking cancellation
+            Log::info('Booking canceled successfully', [
+                'booking_id' => $booking->booking_id,
+                'refund_amount' => $refundAmount
+            ]);
+    
+            return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . sprintf('%.2f', $refundAmount));
+        } catch (\Exception $e) {
+            Log::error('Booking cancellation failed: ' . $e->getMessage());
+            return redirect()->route('booking.history')->with('error', 'Failed to cancel booking. Please try again.');
         }
-
-        $validatedData = $validator->validated();
-
-        // Log the booking details and cancellation request
-        Log::info('Booking cancellation requested', [
-            'booking_id' => $booking->id,
-            'booking_date' => $booking->booking_date,
-            'today' => $today,
-            'days_difference' => $daysDifference,
-            'cancel_reason' => $validatedData['cancel_reason'],
-            'refund_method' => $validatedData['refund_method']
-        ]);
-
-        if ($daysDifference > 20) {
-            $refundAmount = $booking->pooja_fee;
-        } elseif ($daysDifference > 1 && $daysDifference <= 20) {
-            $refundAmount = $booking->paid * 0.80; // 20% cancellation fee
-        } else {
-            $refundAmount = 0; // No refund
-        }
-
-        $booking->status = 'canceled';
-        $booking->payment_status = 'process';
-        $booking->application_status = 'canceled';
-        $booking->canceled_at = now();
-        $booking->cancel_reason = $validatedData['cancel_reason'];
-        $booking->refund_method = $validatedData['refund_method'];
-        $booking->refund_amount = $refundAmount;
-        $booking->save();
-
-        // Log booking cancellation
-        Log::info('Booking canceled successfully', [
-            'booking_id' => $booking->id,
-            'refund_amount' => $refundAmount
-        ]);
-
-        return response()->json(['success' => 'Booking canceled successfully!', 'booking' => $booking], 200);
-    } catch (\Exception $e) {
-        Log::error('Booking cancellation failed: ' . $e->getMessage());
-        return response()->json(['error' => 'Failed to cancel booking. Please try again.'], 500);
     }
-}
+    
 
 
     
