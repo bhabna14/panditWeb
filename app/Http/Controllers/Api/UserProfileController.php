@@ -345,7 +345,9 @@ public function deletePhoto()
 
         // Log if no photo found for deletion
         \Log::info('No photo found for deletion for User ID ' . $user->userid);
-        return response()->json(['message' => 'No photo found for deletion'], 404);
+        return response()->json([
+            'success' => 200,
+            'message' => 'No photo found for deletion'], 404);
     }
 
     
