@@ -45,9 +45,9 @@ class UserProfileController extends Controller
     public function updateUserProfile(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'string|max:255',
             // 'phonenumber' => 'required|string|max:15',
-            'email' => 'required|email|max:255',
+            'email' => 'email|max:255',
             // 'dob' => 'nullable|date',
             'about' => 'nullable|string',
             'gender' => 'nullable|string',
