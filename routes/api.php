@@ -34,15 +34,15 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Route::controller(PanditLoginController::class)->group(function() {
-//     Route::post('/pandit-send-otp',  'sendOtp');
-//     Route::post('/pandit-verify-otp', 'verifyOtp');
-// });
-
-Route::controller(LoginController::class)->group(function() {
-    Route::post('/pandit-send-otp',  'storeLoginData');
-    Route::post('/pandit-verify-otp', 'checkOtp');
+Route::controller(PanditLoginController::class)->group(function() {
+    Route::post('/pandit-send-otp',  'sendOtp');
+    Route::post('/pandit-verify-otp', 'verifyOtp');
 });
+
+// Route::controller(LoginController::class)->group(function() {
+//     Route::post('/pandit-send-otp',  'storeLoginData');
+//     Route::post('/pandit-verify-otp', 'checkOtp');
+// });
 
 Route::controller(AreaController::class)->group(function() {
     Route::get('/get-districts/{stateCode}', 'getDistrict');

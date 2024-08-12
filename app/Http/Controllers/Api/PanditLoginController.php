@@ -111,7 +111,7 @@ class PanditLoginController extends Controller
                 $token = $pandit->createToken('API Token')->plainTextToken;
     
                 return response()->json([
-                    'message' => 'User authenticated successfully.', 
+                    'message' => 'Pandit authenticated successfully.', 
                     'user' => $pandit,
                     'token' => $token, 
                     'token_type' => 'Bearer'], 200);
