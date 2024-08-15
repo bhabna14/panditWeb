@@ -125,6 +125,43 @@ class PanditLoginController extends Controller
             return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
         }
     }
+
+    public function panditLogout()
+    {
+        // Retrieve the pandit ID using the 'pandits' auth guard.
+        $pandit_id = Auth::guard('sanctum')->user()->pandit_id;
     
+        if (!$pandit_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pandit ID not found.',
+            ], 404);
+        }
+    
+        // Retrieve the PanditLogin record for the logged-in Pandit.
+        $panditLogin = PanditLogin::where('pandit_id', $pandit_id)->first();
+    
+        if (!$panditLogin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pandit login record not found.',
+            ], 404);
+        }
+    
+        $panditLogin->status = 'inactive';
+    
+        if ($panditLogin->save()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pandit logged out successfully.',
+                'status' => $panditLogin->status, 
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to logout Pandit.',
+            ], 500);
+        }
+    }
     
 }

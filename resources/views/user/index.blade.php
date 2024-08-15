@@ -215,7 +215,7 @@
               <div class="swiper-slide">
                 <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40">
                   
-                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;I recently used 33Crores Pandit to book a pandit for my housewarming ceremony, and the experience was fantastic. The booking process was smooth and hassle-free. The pandit was highly knowledgeable and performed the rituals with great devotion and precision. I appreciated the punctuality and professionalism. Highly recommend this service!&quot;</p>
+                  <p class="testimonials__text lh-18 fw-500 text-dark-1">I recently used 33Crores Pandit to book a pandit for my housewarming ceremony, and the experience was fantastic. The booking process was smooth and hassle-free. The pandit was highly knowledgeable and performed the rituals with great devotion and precision. I appreciated the punctuality and professionalism. Highly recommend this service!</p>
   
                   <div class="pt-20 mt-28 border-top-light">
                     <div class="row x-gap-20 y-gap-20 items-center">
@@ -235,7 +235,7 @@
               <div class="swiper-slide">
                 <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40">
                   
-                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;Booking a pandit for my daughter’s wedding through 33Crores Pandit was one of the best decisions. The website is user-friendly, and the customer service team is very responsive. The pandit arrived on time and conducted the ceremony beautifully, explaining the significance of each ritual. It was a truly memorable experience. Five stars!&quot;</p>
+                  <p class="testimonials__text lh-18 fw-500 text-dark-1">Booking a pandit for my daughter’s wedding through 33Crores Pandit was one of the best decisions. The website is user-friendly, and the customer service team is very responsive. The pandit arrived on time and conducted the ceremony beautifully, explaining the significance of each ritual. It was a truly memorable experience. Five stars!</p>
   
                   <div class="pt-20 mt-28 border-top-light">
                     <div class="row x-gap-20 y-gap-20 items-center">
@@ -255,7 +255,7 @@
               <div class="swiper-slide">
                 <div class="testimonials -type-1 bg-white rounded-4 pt-40 pb-30 px-40">
                   
-                  <p class="testimonials__text lh-18 fw-500 text-dark-1">&quot;I used 33Crores Pandit to arrange a Navgraha Puja, and I couldn't be more satisfied. The whole process, from booking to the actual puja, was seamless. The pandit was extremely knowledgeable and performed the puja with utmost dedication. It was a great convenience to book online and have everything taken care of professionally.&quot;</p>
+                  <p class="testimonials__text lh-18 fw-500 text-dark-1">I used 33Crores Pandit to arrange a Navgraha Puja, and I couldn't be more satisfied. The whole process, from booking to the actual puja, was seamless. The pandit was extremely knowledgeable and performed the puja with utmost dedication. It was a great convenience to book online and have everything taken care of professionally.</p>
   
                   <div class="pt-20 mt-28 border-top-light">
                     <div class="row x-gap-20 y-gap-20 items-center">
@@ -286,7 +286,7 @@
     <div class="container">
     <div class="section-title text-center">
     <p class="subtitle">How We Can Assist</p>
-    <h4 class="title">Expert Pandits Ready to Assist    </h4>
+    <h4 class="title">We Are Ready To Assist    </h4>
     </div>
     <div class="row align-items-center position-relative">
       <div class="col-md-6">
