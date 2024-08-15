@@ -102,13 +102,20 @@ class PanditLoginController extends Controller
                 $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
     
                 if (!$pandit) {
+                    // Create a new PanditLogin record if it doesn't exist
                     $pandit = PanditLogin::create([
                         'pandit_id' => 'PANDIT' . rand(10000, 99999),
                         'mobile_no' => $phoneNumber,
                         'order_id' => $orderId,
+                        'status' => 'active', // Set status to active for new record
                     ]);
+                } else {
+                    // If Pandit already exists, update the status to active
+                    $pandit->status = 'active';
+                    $pandit->save();
                 }
     
+                // Generate token
                 $token = $pandit->createToken('API Token')->plainTextToken;
     
                 return response()->json([
