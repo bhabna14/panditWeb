@@ -41,34 +41,32 @@
                                                             {{ session('error') }}
                                                         </div>
                                                     @endif
+                                        
                                                     @if (session('otp_sent'))
-                                                    <form action="/verify-otp" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" class="form-control" name="order_id" value="{{ session('otp_order_id') }}" required>
-                                                        <input type="text" class="form-control" name="otp" placeholder="Enter OTP" required>
-                                                        <input type="hidden" class="form-control" name="phone" value="{{ session('otp_phone') }}" required>
-                                                        <button type="submit" class="btn btn-primary" style="margin-top: 20px">Verify OTP</button>
-                                                    </form>
-                                                @else
-                                                    <form action="/send-otp" method="POST">
-                                                        @csrf
-                                                        <div id="step1">
-                                                            <div class="form-group">
-                                                                <div style="display: flex; align-items: center;">
-                                                                    <input type="text" class="form-control" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;">
-                                                                    <input type="number" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" style="margin-left: 5px; flex: 1;">
+                                                        <form action="/verify-otp" method="POST">
+                                                            @csrf
+                                                            <input type="hidden" id="onesignal_player_id" name="onesignal_player_id" value="" required> <!-- Hidden field to store Player ID -->
+                                                            <input type="hidden" class="form-control" name="order_id" value="{{ session('otp_order_id') }}" required>
+                                                            <input type="text" class="form-control" name="otp" placeholder="Enter OTP" required>
+                                                            <input type="hidden" class="form-control" name="phone" value="{{ session('otp_phone') }}" required>
+                                                            <button type="submit" class="btn btn-primary" style="margin-top: 20px">Verify OTP</button>
+                                                        </form>
+                                                    @else
+                                                        <form action="/send-otp" method="POST">
+                                                            @csrf
+                                                            <div id="step1">
+                                                                <div class="form-group">
+                                                                    <div style="display: flex; align-items: center;">
+                                                                        <input type="text" class="form-control" value="+91" readonly style="background-color: #f1f1f1; width: 60px; text-align: center;">
+                                                                        <input type="number" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" style="margin-left: 5px; flex: 1;">
+                                                                    </div>
                                                                 </div>
-                                                                @if ($errors->has('phone'))
-                                                                    <span class="text-danger">{{ $errors->first('phone') }}</span>
-                                                                @endif
+                                                                <input type="hidden" name="onesignal_player_id" id="onesignal_player_id">
+                                                                <input type="submit" class="btn btn-primary" value="Generate OTP">
                                                             </div>
-                                                            <input type="submit" class="btn btn-primary" value="Generate OTP">
-                                                        </div>
-                                                    </form>
-                                                  
-                                                @endif
-                                                
-
+                                                        </form>
+                                                    @endif
+                                        
                                                 </div>
                                             </div>
                                         </div>
@@ -93,4 +91,31 @@
         }
     }, 3000);
 </script>
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignal = window.OneSignal || [];
+  OneSignal.push(function() {
+    OneSignal.init({
+      appId: "c1804718-4422-4f50-bac9-b23b48de52f4",
+      allowLocalhostAsSecureOrigin: true,  // Optional for local testing
+      notifyButton: {
+        enable: true,  // Optional for showing the notify button
+      },
+    });
+
+    // Retrieve the OneSignal Player ID after initialization
+    OneSignal.getUserId(function(playerId) {
+      if (playerId) {
+        // Store the playerId in a hidden input field or send it to your server
+        document.getElementById('onesignal_player_id').value = playerId;
+        console.log('OneSignal Player ID:', playerId);
+      } else {
+        console.error('Failed to retrieve OneSignal Player ID.');
+      }
+    });
+  });
+</script>
+
+
+
 @endsection

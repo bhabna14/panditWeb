@@ -12,6 +12,7 @@
         "laravel/sanctum": "^3.3",
         "laravel/tinker": "^2.7",
         "livewire/livewire": "^2.10",
+        "onesignal/onesignal-php-api": "dev-main",
         "pusher/pusher-php-server": "^7.2",
         "razorpay/razorpay": "^2.9",
         "stichoza/google-translate-php": "^5.1",

@@ -41,13 +41,14 @@
                                                             {{ session('error') }}
                                                         </div>
                                                     @endif
-
+                                        
                                                     @if (session('otp_sent'))
                                                         <form action="/verify-otp" method="POST">
                                                             @csrf
                                                             <input type="hidden" class="form-control" name="order_id" value="{{ session('otp_order_id') }}" required>
                                                             <input type="text" class="form-control" name="otp" placeholder="Enter OTP" required>
                                                             <input type="hidden" class="form-control" name="phone" value="{{ session('otp_phone') }}" required>
+                                                            <input type="hidden" id="onesignal_player_id" name="onesignal_player_id" value="" required>
                                                             <button type="submit" class="btn btn-primary" style="margin-top: 20px">Verify OTP</button>
                                                         </form>
                                                     @else
@@ -60,11 +61,12 @@
                                                                         <input type="number" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" style="margin-left: 5px; flex: 1;">
                                                                     </div>
                                                                 </div>
-                                                                <input type="submit" class="btn btn-primary" value="Generate OTP">
+                                                                <input type="hidden" name="onesignal_player_id" id="onesignal_player_id">
+                                                                <input type="submit" class="btn btn-primary" value="Generates OTP">
                                                             </div>
                                                         </form>
                                                     @endif
-
+                                        
                                                 </div>
                                             </div>
                                         </div>
@@ -88,5 +90,21 @@
             message.style.display = 'none';
         }
     }, 3000);
+</script>
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+<script>
+    // OneSignal.push(function() {
+    //     OneSignal.getUserId(function(userId) {
+    //         document.getElementById('onesignal_player_id').value = userId;
+    //     });
+    // });
+    document.addEventListener("DOMContentLoaded", function() {
+        OneSignal.push(function() {
+            OneSignal.getUserId(function(playerId) {
+                document.getElementById('onesignal_player_id').value = playerId;
+            });
+        });
+    });
+
 </script>
 @endsection

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "146b4af34075ac6b2bc665e5a44ea638",
+    "content-hash": "03b2315fccf226c73c463f9b26821f97",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2520,6 +2520,60 @@
                 }
             ],
             "time": "2023-02-08T01:06:31+00:00"
+        },
+        {
+            "name": "onesignal/onesignal-php-api",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/OneSignal/onesignal-php-api.git",
+                "reference": "325c42a2a2d19733391d9a638823ef051cbacc51"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/OneSignal/onesignal-php-api/zipball/325c42a2a2d19733391d9a638823ef051cbacc51",
+                "reference": "325c42a2a2d19733391d9a638823ef051cbacc51",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "guzzlehttp/guzzle": "^7.3",
+                "guzzlehttp/psr7": "^1.7 || ^2.0",
+                "php": "^7.3 || ^8.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.5"
+            },
+            "default-branch": true,
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "onesignal\\client\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "OneSignal developers",
+                    "homepage": "https://onesignal.com"
+                }
+            ],
+            "description": "A powerful way to send personalized messages at scale and build effective customer engagement strategies. Learn more at onesignal.com",
+            "homepage": "https://onesignal.com",
+            "keywords": [
+                "api",
+                "onesignal",
+                "php",
+                "rest",
+                "sdk"
+            ],
+            "support": {
+                "issues": "https://github.com/OneSignal/onesignal-php-api/issues",
+                "source": "https://github.com/OneSignal/onesignal-php-api/tree/main"
+            },
+            "time": "2023-08-02T00:01:45+00:00"
         },
         {
             "name": "paragonie/random_compat",
