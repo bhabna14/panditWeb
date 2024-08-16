@@ -132,7 +132,7 @@ class PanditLoginController extends Controller
             return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
         }
     }
-
+    
     public function panditLogout()
     {
         // Retrieve the pandit ID using the 'pandits' auth guard.
