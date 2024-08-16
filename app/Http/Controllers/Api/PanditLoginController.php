@@ -30,7 +30,7 @@ class PanditLoginController extends Controller
         // $fullPhoneNumber = $countryCode . $phoneNumber;
     
         // Log the full phone number for debugging
-        Log::info("Sending OTP to: " . $fullPhoneNumber);
+        \Log::info("Sending OTP to: " . $fullPhoneNumber);
     
         $client = new Client();
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
