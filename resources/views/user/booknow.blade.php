@@ -6,6 +6,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     .ui-datepicker {
         font-size: 16px;
@@ -109,9 +110,19 @@
   <div class="container">
       <div class="row">
           <h4 class="mb-20">Book Now</h4>
-          @foreach ($errors->all() as $error)
-          <li>{{ $error }}</li>
+            @foreach ($errors->all() as $error)
+                 <li>{{ $error }}</li>
             @endforeach
+            @if (session('error'))
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: '{{ session('error') }}',
+                        confirmButtonText: 'Okay'
+                    });
+                </script>
+            @endif
           <div class="col-md-7">
             <form action="{{ route('booking.confirm') }}" method="POST" id="bookingForm" >
                 @csrf

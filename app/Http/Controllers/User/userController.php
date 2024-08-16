@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Bankdetail;
@@ -17,12 +18,15 @@ use App\Models\Poojadetails;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Rating;
+use App\Models\PanditDevice;
 use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+// use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use PDF;
 use DB;
 use Illuminate\Support\Facades\Hash;
+use OneSignal\OneSignal; // Add the necessary import for OneSignal SDK
+use GuzzleHttp\Client;
 
 
 class userController extends Controller
@@ -341,20 +345,173 @@ class userController extends Controller
     {
     return view('user.addfrontaddress');
     }
+// first cofirm function
+// public function confirmBooking(Request $request)
+// {
+//     try {
+//         // Validate incoming request data
+//         $validatedData = $request->validate([
+//             'pandit_id' => 'required|exists:pandit_profile,id',
+//             'pooja_id' => 'required|exists:pooja_list,id',
+//             'pooja_fee' => 'required|numeric',
+//             'advance_fee' => 'required|numeric',
+//             'booking_date' => 'required|date',
+            
+//             'address_id' => 'required',
+            
+//         ]);
+
+//         // Assign the authenticated user's ID to the booking
+//         $validatedData['user_id'] = Auth::guard('users')->user()->userid;
+//         $validatedData['application_status'] = 'pending';
+//         $validatedData['payment_status'] = 'pending';
+//         $validatedData['pooja_status'] = 'pending';
+//         $validatedData['status'] = 'pending';
+//         // Create a new booking record
+//         $booking = Booking::create($validatedData);
+//         // $userHasPaid = Payment::where('user_id', $user_id)
+//         // ->where('booking_id', $booking->id)
+//         // ->exists();
+
+//         // // Set booking status based on payment status
+//         // if ($userHasPaid) {
+//         // $booking->status = 'approved'; // Assuming paid bookings are automatically approved
+//         // } else {
+//         // $booking->status = 'pending';
+//         // }
+
+//         // $booking->save();
+
+//         // Log success message
+//         \Log::info('Booking created successfully.', ['data' => $validatedData]);
+
+//         // Redirect to a success page or return a response
+//         return redirect()->route('booking.success', ['booking' => $booking->id])->with('success', 'Booking confirmed successfully!');
+//     } catch (\Exception $e) {
+//         // Log the error
+//         \Log::error('Error creating booking: ' . $e->getMessage());
+
+//         // Redirect back or return with an error message
+//         return back()->with('error', 'Failed to confirm booking. Please try again.');
+//     }
+// }
+
+// added the booking_date validation
+// public function confirmBooking(Request $request)
+// {
+//     try {
+//         // Validate incoming request data
+//         $validatedData = $request->validate([
+//             'pandit_id' => 'required|exists:pandit_profile,id',
+//             'pooja_id' => 'required|exists:pooja_list,id',
+//             'pooja_fee' => 'required|numeric',
+//             'advance_fee' => 'required|numeric',
+//             'booking_date' => 'required|date_format:Y-m-d H:i',
+//             'address_id' => 'required',
+//         ]);
+
+//         // Check if the pandit is already booked for the given date and time
+//         $existingBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
+//             ->where('booking_date', $validatedData['booking_date'])
+//             ->exists();
+//     // dd($existingBooking);
+//         if ($existingBooking) {
+//             return back()->with('error', 'The Pandit is already booked for the selected date and time. Please choose a different time or date.');
+//         }
+
+//         // Assign the authenticated user's ID to the booking
+//         $validatedData['user_id'] = Auth::guard('users')->user()->userid;
+//         $validatedData['application_status'] = 'pending';
+//         $validatedData['payment_status'] = 'pending';
+//         $validatedData['pooja_status'] = 'pending';
+//         $validatedData['status'] = 'pending';
+
+//         // Create a new booking record
+//         $booking = Booking::create($validatedData);
+
+//         // Log success message
+//         \Log::info('Booking created successfully.', ['data' => $validatedData]);
+
+//         // Redirect to a success page or return a response
+//         return redirect()->route('booking.success', ['booking' => $booking->id])->with('success', 'Booking confirmed successfully!');
+//     } catch (\Exception $e) {
+//         // Log the error
+//         \Log::error('Error creating booking: ' . $e->getMessage());
+
+//         // Redirect back or return with an error message
+//         return back()->with('error', 'Failed to confirm booking. Please try again.');
+//     }
+// }
+
+
+// added the booking_date validation and pooja_duration
 public function confirmBooking(Request $request)
 {
     try {
         // Validate incoming request data
         $validatedData = $request->validate([
             'pandit_id' => 'required|exists:pandit_profile,id',
-            'pooja_id' => 'required|exists:pooja_list,id',
+            'pooja_id' => 'required|exists:pandit_poojadetails,pooja_id',
             'pooja_fee' => 'required|numeric',
             'advance_fee' => 'required|numeric',
-            'booking_date' => 'required|date',
-            
+            'booking_date' => 'required|date_format:Y-m-d H:i',
             'address_id' => 'required',
-            
         ]);
+
+        // Get the pooja duration from the Poojadetails model
+        $pooja = Poojadetails::where('pooja_id', $validatedData['pooja_id'])->firstOrFail();
+        $poojaDurationString = $pooja->pooja_duration; // Example: "3 Hour"
+
+        // Convert the duration string to total minutes
+        $poojaDurationMinutes = $this->convertDurationToMinutes($poojaDurationString);
+
+        // Calculate the end time of the new pooja
+        $newPoojaStartTime = Carbon::parse($validatedData['booking_date']);
+        $newPoojaEndTime = $newPoojaStartTime->copy()->addMinutes($poojaDurationMinutes);
+
+        // Check if the pandit is booked with the 'pending' status
+        $pendingBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
+            ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
+                      ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                          $query->where('booking_date', '<=', $newPoojaStartTime)
+                                ->whereRaw('DATE_ADD(booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
+                      });
+            })
+            ->where(function($query) {
+                $query->where('status', 'pending')
+                      ->where('payment_status', 'pending')
+                      ->where('application_status', 'approved')
+                      ->where('pooja_status', 'pending');
+            })
+            ->exists();
+
+        if ($pendingBookingExists) {
+            $nextAvailableTime = $newPoojaEndTime->format('Y-m-d h:i A'); // Format as 12-hour time
+            return back()->with('error', "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}.");
+        }
+
+        // If no pending bookings, check for 'paid' status
+        $paidBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
+            ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
+                      ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                          $query->where('booking_date', '<=', $newPoojaStartTime)
+                                ->whereRaw('DATE_ADD(booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
+                      });
+            })
+            ->where(function($query) {
+                $query->where('status', 'paid')
+                      ->where('payment_status', 'paid')
+                      ->where('application_status', 'approved')
+                      ->where('pooja_status', 'pending');
+            })
+            ->exists();
+
+        if ($paidBookingExists) {
+            $nextAvailableTime = $newPoojaEndTime->format('Y-m-d h:i A'); // Format as 12-hour time
+            return back()->with('error', "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}.");
+        }
 
         // Assign the authenticated user's ID to the booking
         $validatedData['user_id'] = Auth::guard('users')->user()->userid;
@@ -362,20 +519,9 @@ public function confirmBooking(Request $request)
         $validatedData['payment_status'] = 'pending';
         $validatedData['pooja_status'] = 'pending';
         $validatedData['status'] = 'pending';
+
         // Create a new booking record
         $booking = Booking::create($validatedData);
-        // $userHasPaid = Payment::where('user_id', $user_id)
-        // ->where('booking_id', $booking->id)
-        // ->exists();
-
-        // // Set booking status based on payment status
-        // if ($userHasPaid) {
-        // $booking->status = 'approved'; // Assuming paid bookings are automatically approved
-        // } else {
-        // $booking->status = 'pending';
-        // }
-
-        // $booking->save();
 
         // Log success message
         \Log::info('Booking created successfully.', ['data' => $validatedData]);
@@ -390,6 +536,147 @@ public function confirmBooking(Request $request)
         return back()->with('error', 'Failed to confirm booking. Please try again.');
     }
 }
+
+/**
+ * Convert a duration string (e.g., "3 Hour") to total minutes.
+ *
+ * @param string $durationString
+ * @return int
+ */
+private function convertDurationToMinutes($durationString)
+{
+    $totalMinutes = 0;
+
+    // Split by commas to handle multiple parts (e.g., "2 Hour, 45 Minute")
+    $parts = explode(',', $durationString);
+
+    foreach ($parts as $part) {
+        $part = trim($part);
+        if (strpos($part, 'Hour') !== false) {
+            $hours = (int) filter_var($part, FILTER_SANITIZE_NUMBER_INT);
+            $totalMinutes += $hours * 60;
+        } elseif (strpos($part, 'Minute') !== false) {
+            $minutes = (int) filter_var($part, FILTER_SANITIZE_NUMBER_INT);
+            $totalMinutes += $minutes;
+        } elseif (strpos($part, 'Day') !== false) {
+            $days = (int) filter_var($part, FILTER_SANITIZE_NUMBER_INT);
+            $totalMinutes += $days * 24 * 60;
+        }
+    }
+
+    return $totalMinutes;
+}
+
+
+// for notification
+// public function confirmBooking(Request $request)
+// {
+//     try {
+//         // Validate incoming request data
+//         $validatedData = $request->validate([
+//             'pandit_id' => 'required|exists:pandit_profile,id',
+//             'pooja_id' => 'required|exists:pooja_list,id',
+//             'pooja_fee' => 'required|numeric',
+//             'advance_fee' => 'required|numeric',
+//             'booking_date' => 'required|date',
+//             'address_id' => 'required',
+//         ]);
+
+//         // Assign the authenticated user's ID to the booking
+//         $validatedData['user_id'] = Auth::guard('users')->user()->userid;
+//         $validatedData['application_status'] = 'pending';
+//         $validatedData['payment_status'] = 'pending';
+//         $validatedData['pooja_status'] = 'pending';
+//         $validatedData['status'] = 'pending';
+
+//         // Create a new booking record
+//         $booking = Booking::create($validatedData);
+
+//         // Send notification to the pandit using OneSignal
+//         $this->sendPanditNotification($booking->id);
+
+//         // Log success message
+//         \Log::info('Booking created successfully.', ['data' => $validatedData]);
+
+//         // Redirect to a success page or return a response
+//         return redirect()->route('booking.success', ['booking' => $booking->id])->with('success', 'Booking confirmed successfully!');
+//     } catch (\Exception $e) {
+//         // Log the error
+//         \Log::error('Error creating booking: ' . $e->getMessage());
+
+//         // Redirect back or return with an error message
+//         return back()->with('error', 'Failed to confirm booking. Please try again.');
+//     }
+// }
+
+/**
+ * Send notification to the Pandit's dashboard
+ */
+// private function sendPanditNotification($bookingId)
+// {
+//     $client = new Client();
+
+//     // Retrieve the pandit_id from the booking
+//     $booking = Booking::find($bookingId);
+//     if (!$booking) {
+//         \Log::error('Booking not found for ID: ' . $bookingId);
+//         return;
+//     }
+
+//     // Retrieve the pandit profile based on the pandit_id in the booking
+//     $panditProfile = Profile::find($booking->pandit_id);
+//     if (!$panditProfile) {
+//         \Log::error('Pandit profile not found for ID: ' . $booking->pandit_id);
+//         return;
+//     }
+
+//     // Fetch the pandit's devices
+//     $panditDevices = PanditDevice::where('pandit_id', $panditId)->pluck('device_id')->map(function ($deviceId) {
+//         return trim($deviceId);
+//     })->filter(function ($deviceId) {
+//         // Validate that the device_id is a valid UUID
+//         return preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/', $deviceId);
+//     })->toArray();
+
+//     // Check if there are valid devices
+//     if (empty($panditDevices)) {
+//         \Log::error('No valid device IDs found for the pandit.');
+//         return back()->with('error', 'No valid devices found for the pandit.');
+//     }
+
+//     // Prepare the notification data
+//     $notificationData = [
+//         'app_id' => env('ONESIGNAL_APP_ID'), // Your OneSignal app ID
+//         'include_player_ids' => $panditDevices, // Array of valid recipient device IDs
+//         'headings' => [
+//             'en' => 'New Booking Received'
+//         ],
+//         'contents' => [
+//             'en' => 'You have a new booking. Please check your dashboard.'
+//         ],
+//         'data' => [
+//             'booking_id' => $bookingId,
+//         ],
+//         'android_sound' => 'notification_sound', // Optional: Specify a custom sound
+//         'ios_sound' => 'notification_sound',     // Optional: Specify a custom sound
+//     ];
+
+
+//     // Send the notification via OneSignal API
+//     try {
+//         $response = $client->post('https://onesignal.com/api/v1/notifications', [
+//             'headers' => [
+//                 'Authorization' => 'Basic ' . env('ONESIGNAL_REST_API_KEY'), // Your OneSignal REST API key
+//                 'Content-Type' => 'application/json',
+//             ],
+//             'json' => $notificationData,
+//         ]);
+
+//         \Log::info('Notification sent to pandit.', ['response' => $response->getBody()->getContents()]);
+//     } catch (\Exception $e) {
+//         \Log::error('Failed to send notification: ' . $e->getMessage());
+//     }
+// }
 
 
    
