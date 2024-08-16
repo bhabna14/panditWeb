@@ -30,7 +30,7 @@ class PanditLoginController extends Controller
         // $fullPhoneNumber = $countryCode . $phoneNumber;
     
         // Log the full phone number for debugging
-        Log::info("Sending OTP to: " . $fullPhoneNumber);
+        \Log::info("Sending OTP to: " . $fullPhoneNumber);
     
         $client = new Client();
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
@@ -102,13 +102,20 @@ class PanditLoginController extends Controller
                 $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
     
                 if (!$pandit) {
+                    // Create a new PanditLogin record if it doesn't exist
                     $pandit = PanditLogin::create([
                         'pandit_id' => 'PANDIT' . rand(10000, 99999),
                         'mobile_no' => $phoneNumber,
                         'order_id' => $orderId,
+                        'status' => 'active', // Set status to active for new record
                     ]);
+                } else {
+                    // If Pandit already exists, update the status to active
+                    $pandit->status = 'active';
+                    $pandit->save();
                 }
     
+                // Generate token
                 $token = $pandit->createToken('API Token')->plainTextToken;
     
                 return response()->json([
@@ -126,5 +133,42 @@ class PanditLoginController extends Controller
         }
     }
     
+    public function panditLogout()
+    {
+        // Retrieve the pandit ID using the 'pandits' auth guard.
+        $pandit_id = Auth::guard('sanctum')->user()->pandit_id;
+    
+        if (!$pandit_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pandit ID not found.',
+            ], 404);
+        }
+    
+        // Retrieve the PanditLogin record for the logged-in Pandit.
+        $panditLogin = PanditLogin::where('pandit_id', $pandit_id)->first();
+    
+        if (!$panditLogin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pandit login record not found.',
+            ], 404);
+        }
+    
+        $panditLogin->status = 'inactive';
+    
+        if ($panditLogin->save()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Pandit logged out successfully.',
+                'status' => $panditLogin->status, 
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to logout Pandit.',
+            ], 500);
+        }
+    }
     
 }
