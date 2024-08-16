@@ -45,9 +45,9 @@
                                                     @if (session('otp_sent'))
                                                         <form action="/verify-otp" method="POST">
                                                             @csrf
-                                                            <input type="hidden" id="onesignal_player_id" name="device_id" value="" required> <!-- Hidden field to store Player ID -->
+                                                            {{-- <input type="hidden" id="device_id" name="device_id" value="" required>
                                                             <input type="hidden" id="platform" name="platform" value="" required> <!-- Hidden field to store Platform -->
-                                                        
+                                                         --}}
                                                             <input type="hidden" class="form-control" name="order_id" value="{{ session('otp_order_id') }}" required>
                                                             <input type="text" class="form-control" name="otp" placeholder="Enter OTP" required>
                                                             <input type="hidden" class="form-control" name="phone" value="{{ session('otp_phone') }}" required>
@@ -97,26 +97,33 @@
 <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Assuming you're using OneSignal
         OneSignal.push(function() {
+            // Retrieve the OneSignal user ID (device ID)
             OneSignal.getUserId(function(playerId) {
-                document.getElementById('onesignal_player_id').value = playerId;
-            });
-            OneSignal.getDeviceState().then(function(deviceState) {
-                // Set platform based on the device type
-                var platform = 'web'; // Default to 'web'
-                if (OneSignal.isPushNotificationsSupported()) {
-                    if (deviceState.platform === 1) { // Android
-                        platform = 'android';
-                    } else if (deviceState.platform === 2) { // iOS
-                        platform = 'ios';
-                    }
+                console.log('playerId', playerId);
+                if (playerId) {
+                    document.getElementById('device_id').value = playerId;
                 }
-                document.getElementById('platform').value = platform;
             });
+
+            // Detect the platform based on user-agent (for web detection)
+            var platform = 'web'; // Default to 'web'
+
+            if (navigator.userAgent) {
+                var userAgent = navigator.userAgent.toLowerCase();
+                if (userAgent.indexOf('android') > -1) {
+                    platform = 'android';
+                } else if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) {
+                    platform = 'ios';
+                }
+            }
+
+            document.getElementById('platform').value = platform;
         });
     });
 </script>
+
+
 
 
 

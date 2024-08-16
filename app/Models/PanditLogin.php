@@ -23,5 +23,10 @@ class PanditLogin extends Authenticatable
     protected $hidden = [
         'otp',
     ];
+
+    public function devices()
+    {
+        return $this->hasMany(PanditDevice::class, 'pandit_id');
+    }
     // Add any other model-specific logic here
 }
