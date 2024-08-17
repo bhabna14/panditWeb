@@ -460,7 +460,7 @@ public function confirmBooking(Request $request)
 
         // Get the pooja duration from the Poojadetails model
         $pooja = Poojadetails::where('pooja_id', $validatedData['pooja_id'])->firstOrFail();
-        $poojaDurationString = $pooja->pooja_duration; // Example: "3 Hour"
+        $poojaDurationString = $pooja->pooja_duration; // Example: "3 Hour, 30 Minute"
 
         // Convert the duration string to total minutes
         $poojaDurationMinutes = $this->convertDurationToMinutes($poojaDurationString);
@@ -473,11 +473,13 @@ public function confirmBooking(Request $request)
         $isPanditBooked = Booking::join('pandit_poojadetails', 'bookings.pooja_id', '=', 'pandit_poojadetails.pooja_id')
             ->where('bookings.pandit_id', $validatedData['pandit_id'])
             ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
-                $query->whereBetween('bookings.booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                      ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
-                          $query->where('bookings.booking_date', '<=', $newPoojaStartTime)
-                                ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL pandit_poojadetails.pooja_duration MINUTE) >= ?', [$newPoojaStartTime]);
-                      });
+                $query->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                    $query->whereBetween('bookings.booking_date', [$newPoojaStartTime, $newPoojaEndTime])
+                          ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                              $query->where('bookings.booking_date', '<=', $newPoojaStartTime)
+                                    ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
+                          });
+                });
             })
             ->where(function($query) {
                 $query->where('bookings.status', 'pending')
@@ -537,6 +539,7 @@ private function convertDurationToMinutes($durationString)
 
     return $totalMinutes;
 }
+
 
 
 
