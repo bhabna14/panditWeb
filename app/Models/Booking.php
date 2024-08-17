@@ -19,6 +19,7 @@ class Booking extends Model
         'pooja_fee',
         'advance_fee',
         'booking_date',
+        'booking_end_time',
         'status',
         'payment_status',
         'application_status',
