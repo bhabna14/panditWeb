@@ -469,8 +469,8 @@ public function confirmBooking(Request $request)
         $newPoojaStartTime = Carbon::parse($validatedData['booking_date']);
         $newPoojaEndTime = $newPoojaStartTime->copy()->addMinutes($poojaDurationMinutes);
 
-        // Check if the pandit is booked with the 'pending' status
-        $pendingBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
+        // Check if the Pandit is already booked for the requested time slot
+        $isPanditBooked = Booking::where('pandit_id', $validatedData['pandit_id'])
             ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
                 $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
                       ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
@@ -480,35 +480,11 @@ public function confirmBooking(Request $request)
             })
             ->where(function($query) {
                 $query->where('status', 'pending')
-                      ->where('payment_status', 'pending')
-                      ->where('application_status', 'approved')
-                      ->where('pooja_status', 'pending');
+                      ->orWhere('status', 'paid');
             })
             ->exists();
 
-        if ($pendingBookingExists) {
-            $nextAvailableTime = $newPoojaEndTime->format('Y-m-d h:i A'); // Format as 12-hour time
-            return back()->with('error', "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}.");
-        }
-
-        // If no pending bookings, check for 'paid' status
-        $paidBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
-            ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
-                $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                      ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
-                          $query->where('booking_date', '<=', $newPoojaStartTime)
-                                ->whereRaw('DATE_ADD(booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
-                      });
-            })
-            ->where(function($query) {
-                $query->where('status', 'paid')
-                      ->where('payment_status', 'paid')
-                      ->where('application_status', 'approved')
-                      ->where('pooja_status', 'pending');
-            })
-            ->exists();
-
-        if ($paidBookingExists) {
+        if ($isPanditBooked) {
             $nextAvailableTime = $newPoojaEndTime->format('Y-m-d h:i A'); // Format as 12-hour time
             return back()->with('error', "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}.");
         }
@@ -566,6 +542,7 @@ private function convertDurationToMinutes($durationString)
 
     return $totalMinutes;
 }
+
 
 
 // for notification
