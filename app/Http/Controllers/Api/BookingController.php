@@ -79,7 +79,7 @@ class BookingController extends Controller
                 'pooja_id' => 'required|exists:pandit_poojadetails,pooja_id',
                 'pooja_fee' => 'required|numeric',
                 'advance_fee' => 'required|numeric',
-                'booking_date' => 'required|date_format:Y-m-d H:i',
+                'booking_date' => 'required',
                 'address_id' => 'required',
             ]);
     
