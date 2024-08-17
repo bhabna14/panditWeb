@@ -178,7 +178,11 @@
                             </div>
                             <div class="pooja-head">
                                 <h5>{{$otherpooja->pooja_name}}</h5>
-                                <p>{{$otherpooja->short_description}}</p>
+                                <div class="pooja-description">
+                                  <p class="short-description">{{ Str::limit($otherpooja->short_description, 200, '...') }}</p>
+                                  <p class="full-description" style="display:none;">{{ $otherpooja->short_description }}</p>
+                                  <a href="javascript:void(0);" class="read-more-toggle">Read more</a>
+                                </div>
                                 <div style="text-align: center">
                                     {{-- <h6>(12-03-2024)</h6> --}}
                                 </div>
@@ -405,5 +409,22 @@
             time: 2000 // increased time
         });
     });
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const readMoreToggle = document.querySelector('.read-more-toggle');
+      const shortDescription = document.querySelector('.short-description');
+      const fullDescription = document.querySelector('.full-description');
+      
+      readMoreToggle.addEventListener('click', function() {
+          if (fullDescription.style.display === 'none') {
+              fullDescription.style.display = 'block';
+              readMoreToggle.textContent = 'Read less';
+          } else {
+              fullDescription.style.display = 'none';
+              readMoreToggle.textContent = 'Read more';
+          }
+      });
+  });
 </script>
 @endsection
