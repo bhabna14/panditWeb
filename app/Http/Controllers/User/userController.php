@@ -470,17 +470,18 @@ public function confirmBooking(Request $request)
         $newPoojaEndTime = $newPoojaStartTime->copy()->addMinutes($poojaDurationMinutes);
 
         // Check if the Pandit is already booked for the requested time slot
-        $isPanditBooked = Booking::where('pandit_id', $validatedData['pandit_id'])
+        $isPanditBooked = Booking::join('pandit_poojadetails', 'bookings.pooja_id', '=', 'pandit_poojadetails.pooja_id')
+            ->where('bookings.pandit_id', $validatedData['pandit_id'])
             ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
-                $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
+                $query->whereBetween('bookings.booking_date', [$newPoojaStartTime, $newPoojaEndTime])
                       ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
-                          $query->where('booking_date', '<=', $newPoojaStartTime)
-                                ->whereRaw('DATE_ADD(booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
+                          $query->where('bookings.booking_date', '<=', $newPoojaStartTime)
+                                ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL pandit_poojadetails.pooja_duration MINUTE) >= ?', [$newPoojaStartTime]);
                       });
             })
             ->where(function($query) {
-                $query->where('status', 'pending')
-                      ->orWhere('status', 'paid');
+                $query->where('bookings.status', 'pending')
+                      ->orWhere('bookings.status', 'paid');
             })
             ->exists();
 
@@ -490,7 +491,7 @@ public function confirmBooking(Request $request)
         }
 
         // Assign the authenticated user's ID to the booking
-        $validatedData['user_id'] = Auth::guard('users')->user()->userid;
+        $validatedData['user_id'] = Auth::guard('sanctum')->user()->userid;
         $validatedData['application_status'] = 'pending';
         $validatedData['payment_status'] = 'pending';
         $validatedData['pooja_status'] = 'pending';
