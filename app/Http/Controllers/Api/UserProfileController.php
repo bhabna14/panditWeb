@@ -486,7 +486,7 @@ public function deletePhoto()
             $address->pincode = $request->pincode;
             $address->area = $request->area;
             $address->address_type = $request->address_type;
-            $addressData->status = 'active';
+            $address->status = 'active';
             // $addressdata->default = '0';
             $address->save();
 
