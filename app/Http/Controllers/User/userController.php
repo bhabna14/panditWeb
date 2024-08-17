@@ -490,7 +490,7 @@ public function confirmBooking(Request $request)
         }
 
         // Assign the authenticated user's ID to the booking
-        $validatedData['user_id'] = Auth::guard('users')->user()->userid;
+        $validatedData['user_id'] = Auth::guard('sanctum')->user()->userid;
         $validatedData['application_status'] = 'pending';
         $validatedData['payment_status'] = 'pending';
         $validatedData['pooja_status'] = 'pending';
@@ -513,12 +513,6 @@ public function confirmBooking(Request $request)
     }
 }
 
-/**
- * Convert a duration string (e.g., "3 Hour") to total minutes.
- *
- * @param string $durationString
- * @return int
- */
 private function convertDurationToMinutes($durationString)
 {
     $totalMinutes = 0;
@@ -542,6 +536,7 @@ private function convertDurationToMinutes($durationString)
 
     return $totalMinutes;
 }
+
 
 
 
