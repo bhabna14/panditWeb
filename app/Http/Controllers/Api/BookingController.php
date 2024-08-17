@@ -98,16 +98,16 @@ class BookingController extends Controller
             $pendingBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
                 ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
                     $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                        ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                        ->orWhere(function($query) use ($newPoojaStartTime) {
                             $query->where('booking_date', '<=', $newPoojaStartTime)
-                                    ->whereRaw('DATE_ADD(booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
+                                  ->whereRaw('DATE_ADD(booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
                         });
                 })
                 ->where(function($query) {
                     $query->where('status', 'pending')
-                        ->where('payment_status', 'pending')
-                        ->where('application_status', 'approved')
-                        ->where('pooja_status', 'pending');
+                          ->where('payment_status', 'pending')
+                          ->where('application_status', 'approved')
+                          ->where('pooja_status', 'pending');
                 })
                 ->exists();
 
@@ -123,16 +123,16 @@ class BookingController extends Controller
             $paidBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
                 ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
                     $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                        ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                        ->orWhere(function($query) use ($newPoojaStartTime) {
                             $query->where('booking_date', '<=', $newPoojaStartTime)
-                                    ->whereRaw('DATE_ADD(booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
+                                  ->whereRaw('DATE_ADD(booking_date, INTERVAL (SELECT pooja_duration FROM pandit_poojadetails WHERE pooja_id = bookings.pooja_id) MINUTE) >= ?', [$newPoojaStartTime]);
                         });
                 })
                 ->where(function($query) {
                     $query->where('status', 'paid')
-                        ->where('payment_status', 'paid')
-                        ->where('application_status', 'approved')
-                        ->where('pooja_status', 'pending');
+                          ->where('payment_status', 'paid')
+                          ->where('application_status', 'approved')
+                          ->where('pooja_status', 'pending');
                 })
                 ->exists();
 
@@ -165,10 +165,10 @@ class BookingController extends Controller
                 'success' => true,
                 'message' => 'Booking confirmed successfully!',
                 'booking' => $booking
-            ], 201); // 201 Created
+            ], 200); // 200 OK
         } catch (\Exception $e) {
             // Log the error
-            \Log::error('Error creating booking: ' . $e->getMessage());
+            Log::error('Error creating booking: ' . $e->getMessage());
 
             // Return a JSON error response
             return response()->json([
