@@ -209,7 +209,7 @@
 }
 .special-pooja-bg {
   /* background-color: #e5f0fd; */
-  background-image: linear-gradient(rgb(172 1 0) 0%, rgb(249 186 115 / 51%) 100%), url(../img/masthead/bg.jpeg);
+  background-image: linear-gradient(rgb(172 1 0) 0%, rgb(249 186 115 / 51%) 100%), url(../img/masthead/cbg.jpg);
   background-position: center;
   background-size: cover;
   /* margin-top: 100px; */
