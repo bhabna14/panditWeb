@@ -96,9 +96,9 @@ class BookingController extends Controller
     
             // Check if the pandit is booked with the 'pending' status
             $pendingBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
-                ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime, $poojaDurationMinutes) {
                     $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                        ->orWhere(function($query) use ($newPoojaStartTime) {
+                        ->orWhere(function($query) use ($newPoojaStartTime, $poojaDurationMinutes) {
                             $query->where('booking_date', '<=', $newPoojaStartTime)
                                   ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$poojaDurationMinutes, $newPoojaStartTime]);
                         });
@@ -121,9 +121,9 @@ class BookingController extends Controller
     
             // If no pending bookings, check for 'paid' status
             $paidBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
-                ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime, $poojaDurationMinutes) {
                     $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                        ->orWhere(function($query) use ($newPoojaStartTime) {
+                        ->orWhere(function($query) use ($newPoojaStartTime, $poojaDurationMinutes) {
                             $query->where('booking_date', '<=', $newPoojaStartTime)
                                   ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$poojaDurationMinutes, $newPoojaStartTime]);
                         });
@@ -201,6 +201,7 @@ class BookingController extends Controller
     
         return $totalMinutes;
     }
+    
     
 
 
