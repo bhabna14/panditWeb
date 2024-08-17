@@ -86,7 +86,7 @@
                         <div class="pooja-head">
                             <h5>{{$allpooja->pooja_name}}</h5>
                             <div class="pooja-description">
-                                <p class="short-description">{{ Str::limit($allpooja->short_description, 200, '...') }}</p>
+                                <p class="short-description">{{ Str::limit($allpooja->short_description, 190, '...') }}</p>
                                 {{-- <p class="full-description" style="display:none;">{{ $allpooja->short_description }}</p>
                                 <a href="javascript:void(0);" class="read-more-toggle">Read more</a> --}}
                               </div>
