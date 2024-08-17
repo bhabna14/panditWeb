@@ -79,13 +79,13 @@ class BookingController extends Controller
                 'pooja_id' => 'required|exists:pandit_poojadetails,pooja_id',
                 'pooja_fee' => 'required|numeric',
                 'advance_fee' => 'required|numeric',
-                'booking_date' => 'required|date_format:Y-m-d H:i',
+                'booking_date' => 'required',
                 'address_id' => 'required',
             ]);
     
             // Get the pooja duration from the Poojadetails model
             $pooja = Poojadetails::where('pooja_id', $validatedData['pooja_id'])->firstOrFail();
-            $poojaDurationString = $pooja->pooja_duration; // Example: "3 Hour, 30 Minute"
+            $poojaDurationString = $pooja->pooja_duration;
     
             // Convert the duration string to total minutes
             $poojaDurationMinutes = $this->convertDurationToMinutes($poojaDurationString);
@@ -95,7 +95,7 @@ class BookingController extends Controller
             $newPoojaEndTime = $newPoojaStartTime->copy()->addMinutes($poojaDurationMinutes);
     
             // Check for conflicting bookings with 'pending' status
-            $conflictingBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
+            $pendingBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
                 ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime, $poojaDurationMinutes) {
                     $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
                         ->orWhere(function($query) use ($newPoojaStartTime, $poojaDurationMinutes) {
@@ -105,18 +105,39 @@ class BookingController extends Controller
                 })
                 ->where(function($query) {
                     $query->where('status', 'pending')
-                          ->orWhere('status', 'paid')
                           ->where('payment_status', 'pending')
-                          ->orWhere('payment_status', 'paid')
                           ->where('application_status', 'approved')
                           ->where('pooja_status', 'pending');
                 })
                 ->first();
     
-            if ($conflictingBooking) {
-                // Get the booking_end_time from the conflicting booking
-                $nextAvailableTime = Carbon::parse($conflictingBooking->booking_end_time)->format('Y-m-d h:i A');
+            if ($pendingBooking) {
+                $nextAvailableTime = Carbon::parse($pendingBooking->booking_end_time)->format('Y-m-d h:i A');
+                return response()->json([
+                    'success' => false,
+                    'message' => "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}."
+                ], 409); // 409 Conflict
+            }
     
+            // Check for conflicting bookings with 'paid' status
+            $paidBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
+                ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime, $poojaDurationMinutes) {
+                    $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
+                        ->orWhere(function($query) use ($newPoojaStartTime, $poojaDurationMinutes) {
+                            $query->where('booking_date', '<=', $newPoojaStartTime)
+                                  ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$poojaDurationMinutes, $newPoojaStartTime]);
+                        });
+                })
+                ->where(function($query) {
+                    $query->where('status', 'paid')
+                          ->where('payment_status', 'paid')
+                          ->where('application_status', 'approved')
+                          ->where('pooja_status', 'pending');
+                })
+                ->first();
+    
+            if ($paidBooking) {
+                $nextAvailableTime = Carbon::parse($paidBooking->booking_end_time)->format('Y-m-d h:i A');
                 return response()->json([
                     'success' => false,
                     'message' => "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}."
@@ -129,7 +150,7 @@ class BookingController extends Controller
             $validatedData['payment_status'] = 'pending';
             $validatedData['status'] = 'pending';
             $validatedData['pooja_status'] = 'pending';
-            $validatedData['booking_end_time'] = $newPoojaEndTime; // Save the end time
+            $validatedData['booking_end_time'] = $newPoojaEndTime;
     
             // Create a new booking record
             $booking = Booking::create($validatedData);
@@ -157,6 +178,7 @@ class BookingController extends Controller
             ], 500); // 500 Internal Server Error
         }
     }
+    
     
     
     private function convertDurationToMinutes($durationString)

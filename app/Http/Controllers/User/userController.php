@@ -469,19 +469,27 @@ public function confirmBooking(Request $request)
         $newPoojaStartTime = Carbon::parse($validatedData['booking_date']);
         $newPoojaEndTime = $newPoojaStartTime->copy()->addMinutes($poojaDurationMinutes);
 
-        // Check if the Pandit is already booked for the requested time slot and get the conflicting booking
-        $conflictingBooking = Booking::join('pandit_poojadetails', 'bookings.pooja_id', '=', 'pandit_poojadetails.pooja_id')
-            ->where('bookings.pandit_id', $validatedData['pandit_id'])
+        // Check if the Pandit is already booked for the requested time slot
+        $conflictingBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
             ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
-                $query->whereBetween('bookings.booking_date', [$newPoojaStartTime, $newPoojaEndTime])
+                $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
                       ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
-                          $query->where('bookings.booking_date', '<=', $newPoojaStartTime)
-                                ->where('bookings.booking_end_time', '>=', $newPoojaStartTime);
+                          $query->where('booking_date', '<=', $newPoojaStartTime)
+                                ->where('booking_end_time', '>=', $newPoojaStartTime);
                       });
             })
             ->where(function($query) {
-                $query->where('bookings.status', 'pending')
-                      ->orWhere('bookings.status', 'paid');
+                $query->where(function($query) {
+                    $query->where('status', 'pending')
+                          ->where('payment_status', 'pending')
+                          ->where('application_status', 'approved')
+                          ->where('pooja_status', 'pending');
+                })->orWhere(function($query) {
+                    $query->where('status', 'paid')
+                          ->where('payment_status', 'paid')
+                          ->where('application_status', 'approved')
+                          ->where('pooja_status', 'pending');
+                });
             })
             ->first();
 
@@ -516,6 +524,7 @@ public function confirmBooking(Request $request)
         return back()->with('error', 'Failed to confirm booking. Please try again.');
     }
 }
+
 
 
 private function convertDurationToMinutes($durationString)
