@@ -13430,7 +13430,7 @@ table.table-5 td {
   background-position: center;
 }
 .search-bg-pooja{
-  background-image:linear-gradient(rgba(0,0,0,0.5) 0%,rgba(0,0,0,0.5) 100%), url("/front-assets/img/masthead/2/bg2.jpg");
+  background-image:linear-gradient(rgba(0,0,0,0.5) 0%,rgba(0,0,0,0.5) 100%), url("/front-assets/img/masthead/poojasearch.jpg");
   background-size: cover;
   background-position: center;
 }
