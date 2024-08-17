@@ -79,13 +79,13 @@ class BookingController extends Controller
                 'pooja_id' => 'required|exists:pandit_poojadetails,pooja_id',
                 'pooja_fee' => 'required|numeric',
                 'advance_fee' => 'required|numeric',
-                'booking_date' => 'required',
+                'booking_date' => 'required|date_format:Y-m-d H:i',
                 'address_id' => 'required',
             ]);
     
             // Get the pooja duration from the Poojadetails model
             $pooja = Poojadetails::where('pooja_id', $validatedData['pooja_id'])->firstOrFail();
-            $poojaDurationString = $pooja->pooja_duration; // Example: "3 Hour"
+            $poojaDurationString = $pooja->pooja_duration; // Example: "3 Hour, 30 Minute"
     
             // Convert the duration string to total minutes
             $poojaDurationMinutes = $this->convertDurationToMinutes($poojaDurationString);
@@ -98,9 +98,9 @@ class BookingController extends Controller
             $pendingBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
                 ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
                     $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                        ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                        ->orWhere(function($query) use ($newPoojaStartTime) {
                             $query->where('booking_date', '<=', $newPoojaStartTime)
-                                  ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$this->getPoojaDurationInMinutes(), $newPoojaStartTime]);
+                                  ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$poojaDurationMinutes, $newPoojaStartTime]);
                         });
                 })
                 ->where(function($query) {
@@ -123,9 +123,9 @@ class BookingController extends Controller
             $paidBookingExists = Booking::where('pandit_id', $validatedData['pandit_id'])
                 ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
                     $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                        ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                        ->orWhere(function($query) use ($newPoojaStartTime) {
                             $query->where('booking_date', '<=', $newPoojaStartTime)
-                                  ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$this->getPoojaDurationInMinutes(), $newPoojaStartTime]);
+                                  ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$poojaDurationMinutes, $newPoojaStartTime]);
                         });
                 })
                 ->where(function($query) {
@@ -177,20 +177,14 @@ class BookingController extends Controller
             ], 500); // 500 Internal Server Error
         }
     }
-
-    /**
-     * Convert a duration string (e.g., "3 Hour") to total minutes.
-     *
-     * @param string $durationString
-     * @return int
-     */
+    
     private function convertDurationToMinutes($durationString)
     {
         $totalMinutes = 0;
-
+    
         // Split by commas to handle multiple parts (e.g., "2 Hour, 45 Minute")
         $parts = explode(',', $durationString);
-
+    
         foreach ($parts as $part) {
             $part = trim($part);
             if (strpos($part, 'Hour') !== false) {
@@ -204,9 +198,10 @@ class BookingController extends Controller
                 $totalMinutes += $days * 24 * 60;
             }
         }
-
+    
         return $totalMinutes;
     }
+    
 
 
     // public function processPayment(Request $request, $booking_id)
