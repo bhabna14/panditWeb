@@ -28,9 +28,28 @@ class PodcastController extends Controller
         ]);
 
         // Handle the file upload
+        \Log::info('File Upload Failed for Image:', [
+            'file' => $request->file('image'),
+            'path' => storage_path('app/public/images')
+        ]);
+        
+        \Log::info('File Upload Failed for Music:', [
+            'file' => $request->file('music'),
+            'path' => storage_path('app/public/music')
+        ]);
+        
         $imagePath = $request->file('image')->store('images', 'public');
         $musicPath = $request->file('music')->store('music', 'public');
-        dd($imagePath, $musicPath);
+        
+        if (!$imagePath || !$musicPath) {
+            \Log::error('File upload failed for one or both files.', [
+                'imagePath' => $imagePath,
+                'musicPath' => $musicPath,
+            ]);
+            return redirect()->back()->with('error', 'File upload failed.');
+        }
+        
+        // dd($imagePath, $musicPath);
         // Create a new podcast record
         $podcast = new Podcast();
         $podcast->name = $request->name;
