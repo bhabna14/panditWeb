@@ -30,7 +30,7 @@ class PodcastController extends Controller
         // Handle the file upload
         $imagePath = $request->file('image')->store('images', 'public');
         $musicPath = $request->file('music')->store('music', 'public');
-
+        dd($imagePath, $musicPath);
         // Create a new podcast record
         $podcast = new Podcast();
         $podcast->name = $request->name;
