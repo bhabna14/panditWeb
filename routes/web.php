@@ -296,11 +296,24 @@ Route::controller(PanditOtpController::class)->group(function() {
 });
 
 /// pandit routes
+// Route::group(['prefix' => 'pandit'], function () {
+//     Route::controller(PanditController::class)->group(function() {
+//         Route::get('/panditlogin', 'panditlogin')->name('panditlogin');
+//         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
+//         Route::get('/booking/details/{id}', 'getDetails')->name('bookingdetails');
+//         Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
+//         Route::post('/booking/reject/{id}', 'rejectBooking')->name('pandit.booking.reject');
+//         Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');
+//         Route::post('/panditlogout', 'panditlogout')->name('pandit.logout');
+//     });
+// });
+
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PanditController::class)->group(function() {
         Route::get('/panditlogin', 'panditlogin')->name('panditlogin');
         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
         Route::get('/booking/details/{id}', 'getDetails')->name('bookingdetails');
+        Route::get('/calender/pooja/{date}','calenderPooja');
         Route::post('/booking/approve/{id}', 'approveBooking')->name('pandit.booking.approve');
         Route::post('/booking/reject/{id}', 'rejectBooking')->name('pandit.booking.reject');
         Route::get('/dashboard', 'index')->name('pandit.dashboard')->middleware('auth:pandits');

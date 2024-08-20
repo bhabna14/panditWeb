@@ -8,9 +8,102 @@
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- SweetAlert css -->
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.3.0/dist/sweetalert2.min.css" rel="stylesheet" />
+
+    <!-- FullCalendar CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+
+    <style>
+     
+     .request-count {
+    color: black;
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 5px;
+    
+}
+/* Container for the event */
+.fc-h-event {
+    width: 50px !important;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* background-color: rgb(1, 240, 81); Add background color if needed */
+    color: white  !important; /* Text color */
+    position: absolute; /* Use absolute positioning */
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, 10%); /* Adjust the element position */
+    cursor: pointer;
+}
+/* .fc-h-event: */
+
+
+/* Title container styling */
+.fc-h-event .fc-event-title-container {
+    border-radius: 50%;
+    height: 50px;
+width: 50px;
+    border: none;
+    color: white  !important;
+    /* background-color: rgb(142, 251, 148); */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%; /* Ensure it takes full width */
+    cursor: pointer;
+}
+
+        /* Calendar Container */
+        #calendar {
+            width: 90%;
+            margin: 0 auto;
+            position: relative;
+            top: 20px;
+        }
+
+        /* Event Count Styling */
+        .fc-daygrid-day .event-count {
+            background-color: #7e33ff;
+            color: white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 14px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            text-align: center;
+            font-weight: bold;
+            width: 80px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        /* Event Title Font Size */
+  
+        .fc-event-title {
+        font-size: 14px; /* Adjust font size as needed */
+        color: #fff; /* Adjust text color as needed */
+        padding: 5px;
+    }
+
+        /* Day Number Font Size */
+        .fc-daygrid-day-number {
+            font-size: 20px;
+        }
+
+        /* Day Name Font Size */
+        .fc-daygrid-day-top {
+            font-size: 20px;
+        }
+    </style>
 @endsection
 
 
@@ -196,11 +289,6 @@
 
     </div>
 
-
-    <!-- </div> -->
-    </div>
-    <!-- row closed -->
-
     <!-- row  -->
     <div class="row">
         <div class="col-12 col-sm-12">
@@ -241,7 +329,13 @@
             </div>
         </div>
     </div>
-
+    <div class="row">
+        <div class="col-12 col-sm-12">
+            <div class="card">
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="full-screen" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen" role="document" style="width: 1200px">
@@ -293,7 +387,26 @@
                 </div>
             </div>
         </div>
+    </div> 
+
+
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="eventModalLabel">Pooja Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- The dynamic content will be inserted here by JavaScript -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
     </div>
+    
     <!-- /row closed -->
 @endsection
 
@@ -409,5 +522,112 @@
             setInterval(updateTime, 1000); // Update every second
             updateTime(); // Initial call to set the time immediately
         </script>
+         <script src="{{ asset('assets/plugins/chartjs/Chart.bundle.min.js') }}"></script>
+
+         <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+         <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/js/bootstrap.min.js"></script>
+
+<script>
+ document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+
+    // Convert the PHP collection to a JavaScript object
+    var requestCountMap = @json($requestCounts->toArray()).reduce((map, item) => {
+        map[item.date] = { count: item.count, details: item.details };
+        return map;
+    }, {});
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: function(fetchInfo, successCallback, failureCallback) {
+    var events = [];
+    for (var date in requestCountMap) {
+        var count = requestCountMap[date].count;
+        if (count > 0) {
+            events.push({
+                title:   count,
+                start: date,
+                allDay: true,
+                extendedProps: {
+                    details: requestCountMap[date].details
+                }
+            });
+        }
+    }
+    console.log('Events:', events); // Log the events array
+    successCallback(events);
+},
+
+eventClick: function(info) {
+    var details = info.event.extendedProps.details;
+
+    if (details && details.length > 0) {
+        const date = info.event.startStr;
+        const url = `/pandit/calender/pooja/${date}`;
+        console.log('Fetch URL:', url);
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                let modalBodyContent = '';
+                let serialNo = 1; // Initialize serial number counter
+
+           data.forEach(booking => {
+                 modalBodyContent += `
+                        <tr>
+                             <th>Sl No</th>
+                             <td style="font-weight: bold;font-size: 15px">${serialNo++}</td>
+                        </tr>
+                        <tr>
+                            <th>Pooja Name</th>
+                            <td>${booking.pooja?.pooja_name || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Date and Time</th>
+                            <td>${booking.booking_time || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Payment Status</th>
+                            <td>${booking.payment_status || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Address</th>
+                            <td>
+                                Country: ${booking.address?.country || 'N/A'}<br>
+                                State: ${booking.address?.state || 'N/A'}<br>
+                                City: ${booking.address?.city || 'N/A'}<br>
+                                Area: ${booking.address?.area || 'N/A'}<br>
+                                Pincode: ${booking.address?.pincode || 'N/A'}<br>
+                                Address Type: ${booking.address?.address_type || 'N/A'}
+                            </td>
+                        </tr>
+                        <tr><td colspan="2"><hr></td></tr>
+                    `;
+                });
+
+                document.getElementById('modalBody').innerHTML = `
+                    <table class="table table-striped">
+                        <tbody>${modalBodyContent}</tbody>
+                    </table>`;
+            })
+            .catch(error => console.error('Error fetching booking details:', error));
+    } else {
+        console.error('No details available for this event');
+    }
+
+    var eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+    eventModal.show();
+}
+
+    });
+
+    calendar.render();
+});
+
+
+</script>
+
+    
 @endsection
 

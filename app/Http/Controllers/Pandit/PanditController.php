@@ -56,7 +56,7 @@ class PanditController extends Controller
                                       ->first();
     }
 
-    $pooja_status = DB::table('pooja_status')
+                     $pooja_status = DB::table('pooja_status')
                     ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
                     ->join('bookings', 'bookings.booking_id', '=', 'pooja_status.booking_id') // Adjusted to join with bookings table
                     ->where('pooja_status.status', 'active')
@@ -71,14 +71,36 @@ class PanditController extends Controller
                     )
                     ->orderBy('pooja_status.id', 'desc')
                     ->get();
-                    // dd($pooja_status);
-    $pooja_request = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
+
+                    $pooja_request = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
                     ->where('pandit_id', $pandit_details->id) // Use id from profile
                     ->orderBy('created_at', 'desc')
                     ->get();
-
+                    
+                    $requestCounts = Booking::select(DB::raw('DATE(booking_date) as date'), DB::raw('COUNT(*) as count'))
+                    ->where('pandit_id', $pandit_details->id)
+                    ->where('payment_status', 'paid')
+                    ->where('application_status', 'approved')
+                    ->where('pooja_status', 'pending')
+                    ->where('pandit_id', $pandit_details->id)
+                    ->whereDate('booking_date', '>=', Carbon::now()->subMonth())
+                    ->groupBy(DB::raw('DATE(booking_date)'))
+                    ->get()
+                    ->map(function($item) {
+                        $details = DB::table('bookings')
+                            ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
+                            ->whereDate('bookings.booking_date', $item->date)
+                            ->select('bookings.booking_id as booking_id', 'pooja_list.pooja_name as pooja')
+                            ->get();
                         
-    return view('pandit.dashboard', compact('bookings', 'today', 'pooja_status','pooja_request'));
+                        return [
+                            'date' => $item->date,
+                            'count' => $item->count,
+                            'details' => $details->toArray() // Ensure details is an array
+                        ];
+                    });
+                
+    return view('pandit.dashboard', compact('bookings', 'today', 'pooja_status','pooja_request','requestCounts'));
 }
 public function poojarequest()
 {
@@ -295,4 +317,53 @@ public function poojarequest()
             return response()->json(['message' => 'An error occurred while fetching the booking details.', 'error' => $e->getMessage()], 500);
         }
     }
+
+    public function calenderPooja($date)
+    {
+        try {
+            // Convert the input date to 'YYYY-MM-DD' format
+            $formattedDate = \Carbon\Carbon::parse($date)->format('Y-m-d');
+    
+            // Fetch bookings where the date part of 'booking_date' matches the formatted date
+            $bookings = Booking::with(['pooja', 'user', 'address'])
+                ->where('payment_status', 'paid')
+                ->where('application_status', 'approved')
+                ->where('pooja_status', 'pending')
+                ->where('status', 'paid')
+                ->whereDate('booking_date', $formattedDate)
+                ->get();
+    
+            if ($bookings->isEmpty()) {
+                return response()->json(['message' => 'No bookings found for this date.'], 404);
+            }
+    
+            $data = $bookings->map(function ($booking) {
+                return [
+                    'user' => [
+                        'name' => $booking->user->name,
+                    ],
+                    'pooja' => [
+                        'pooja_name' => $booking->pooja->pooja_name,
+                    ],
+                    'booking_time' => $booking->booking_date,
+                    'payment_status' => $booking->payment_status,
+                    'address' => [
+                        'country' => $booking->address->country,
+                        'state' => $booking->address->state,
+                        'city' => $booking->address->city,
+                        'area' => $booking->address->area,
+                        'address_type' => $booking->address->address_type,
+                        'pincode' => $booking->address->pincode,
+                    ],
+                ];
+            });
+            
+    
+            return response()->json($data, 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'An error occurred while fetching the booking details.', 'error' => $e->getMessage()], 500);
+        }
+    }
+    
+    
 }
