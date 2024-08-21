@@ -106,7 +106,7 @@ class PanditLoginController extends Controller
                 if (!$pandit) {
                     // Create a new PanditLogin record if it doesn't exist
                     $pandit = PanditLogin::create([
-                        'pandit_id' => 'PANDIT' . rand(10000, 99999),
+                        'pandit_id' => 'PANDIT' . rand(10000, 99999), // Generate new pandit_id
                         'mobile_no' => $phoneNumber,
                         'order_id' => $orderId,
                         'status' => 'active', // Set status to active for new record
@@ -119,9 +119,11 @@ class PanditLoginController extends Controller
     
                 // Update or insert device info
                 $pandit->devices()->updateOrCreate(
-                    ['pandit_id' => $pandit->pandit_id],
                     ['device_id' => $deviceId],
-                    ['platform' => $platform]
+                    [
+                        'platform' => $platform,
+                        'pandit_id' => $pandit->pandit_id // Store pandit_id in pandit_devices
+                    ]
                 );
     
                 // Generate token
@@ -129,7 +131,12 @@ class PanditLoginController extends Controller
     
                 return response()->json([
                     'message' => 'Pandit authenticated successfully.',
-                    'user' => $pandit,
+                    'user' => [
+                        'pandit_id' => $pandit->pandit_id, // Include pandit_id in the response
+                        'mobile_no' => $pandit->mobile_no,
+                        'order_id' => $pandit->order_id,
+                        'status' => $pandit->status,
+                    ],
                     'token' => $token,
                     'token_type' => 'Bearer'
                 ], 200);
@@ -142,6 +149,7 @@ class PanditLoginController extends Controller
             return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
         }
     }
+    
     
     public function panditLogout()
     {
