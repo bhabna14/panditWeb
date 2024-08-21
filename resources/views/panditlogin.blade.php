@@ -96,35 +96,36 @@
 </script>
 <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        OneSignal.push(function() {
-            // Retrieve the OneSignal user ID (device ID)
-            OneSignal.getUserId(function(playerId) {
-                console.log('playerId', playerId);
-                if (playerId) {
-                    document.getElementById('device_id').value = playerId;
-                }
-            });
-
-            // Detect the platform based on user-agent (for web detection)
-            var platform = 'web'; // Default to 'web'
-
-            if (navigator.userAgent) {
-                var userAgent = navigator.userAgent.toLowerCase();
-                if (userAgent.indexOf('android') > -1) {
-                    platform = 'android';
-                } else if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) {
-                    platform = 'ios';
-                }
-            }
-
-            document.getElementById('platform').value = platform;
-        });
+  window.OneSignal = window.OneSignal || [];
+  OneSignal.push(function() {
+    // Initialize OneSignal
+    OneSignal.init({
+      appId: "c1804718-4422-4f50-bac9-b23b48de52f4", // Replace with your OneSignal App ID
+      notifyButton: {
+        enable: true, // Enable the notification bell
+      },
     });
+
+    // Retrieve the OneSignal user ID (device ID)
+    OneSignal.getUserId(function(playerId) {
+      if (playerId) {
+        document.getElementById('device_id').value = playerId;
+        console.log('playerId', playerId);
+      }
+    });
+
+    // Detect the platform based on user-agent
+    var platform = 'web'; // Default to 'web'
+    if (navigator.userAgent) {
+      var userAgent = navigator.userAgent.toLowerCase();
+      if (userAgent.indexOf('android') > -1) {
+        platform = 'android';
+      } else if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) {
+        platform = 'ios';
+      }
+    }
+    document.getElementById('platform').value = platform;
+  });
 </script>
-
-
-
-
 
 @endsection
