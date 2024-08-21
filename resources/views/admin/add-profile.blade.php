@@ -109,8 +109,8 @@
                                     <select class="form-control select2" id="language" name="language[]"
                                         multiple="multiple" required>
                                         @foreach ($languages as $language)
-                                            <option value="{{ $language->lang_name }}">
-                                                {{ $language->lang_name }}</option>
+                                            <option value="{{ $language }}">
+                                                {{ $language }}</option>
                                         @endforeach
                                     </select>
                                 </div>
