@@ -102,9 +102,20 @@
     await OneSignal.init({
       appId: "7ab47447-1b98-4fb4-a48e-e1c8cb4a691c",
     });
-    console.log(OneSignal);
+
+    // Get the OneSignal user ID
+    const userId = await OneSignal.getUserId();
+    console.log("OneSignal User ID:", userId);
+
+    // Populate the hidden input fields with the userId (device_id)
+    if (userId) {
+        document.getElementById('device_id').value = userId;
+    }
+
+    // Determine the platform
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const platform = isMobile ? 'mobile' : 'web';
+    document.getElementById('platform').value = platform;
   });
 </script>
-
-
 @endsection
