@@ -86,6 +86,25 @@
 @endsection
 
 @section('scripts')
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignal = window.OneSignal || [];
+  OneSignal.push(function() {
+    OneSignal.init({
+      appId: "7ab47447-1b98-4fb4-a48e-e1c8cb4a691c",
+    });
+
+    OneSignal.push(function() {
+      OneSignal.getUserId().then(function(userId) {
+        console.log("OneSignal User ID:", userId);
+      }).catch(function(error) {
+        console.error("Error fetching OneSignal User ID:", error);
+      });
+    });
+  });
+</script>
+{{-- 
 <script>
     setTimeout(function() {
         var message = document.querySelector('.alert');
@@ -123,6 +142,6 @@
       });
     });
   });
-</script>
+</script> --}}
 @endsection
 
