@@ -98,12 +98,13 @@
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignal = window.OneSignal || [];
+  
   OneSignal.push(function() {
     OneSignal.init({
       appId: "7ab47447-1b98-4fb4-a48e-e1c8cb4a691c",
     });
 
-    // Get the OneSignal user ID using the correct method
+    // Fetch the user ID once OneSignal is fully initialized
     OneSignal.push(function() {
       OneSignal.getUserId().then(function(userId) {
         console.log("OneSignal User ID:", userId);
@@ -124,3 +125,4 @@
   });
 </script>
 @endsection
+
