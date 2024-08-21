@@ -97,25 +97,30 @@
 
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
+  window.OneSignal = window.OneSignal || [];
+  OneSignal.push(function() {
+    OneSignal.init({
       appId: "7ab47447-1b98-4fb4-a48e-e1c8cb4a691c",
     });
 
-    // Get the OneSignal user ID
-    const userId = await OneSignal.getUserId();
-    console.log("OneSignal User ID:", userId);
+    // Get the OneSignal user ID using the correct method
+    OneSignal.push(function() {
+      OneSignal.getUserId().then(function(userId) {
+        console.log("OneSignal User ID:", userId);
 
-    // Populate the hidden input fields with the userId (device_id)
-    if (userId) {
-        document.getElementById('device_id').value = userId;
-    }
+        // Populate the hidden input fields with the userId (device_id)
+        if (userId) {
+            document.getElementById('device_id').value = userId;
+        }
 
-    // Determine the platform
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    const platform = isMobile ? 'mobile' : 'web';
-    document.getElementById('platform').value = platform;
+        // Determine the platform
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        const platform = isMobile ? 'mobile' : 'web';
+        document.getElementById('platform').value = platform;
+      }).catch(function(error) {
+        console.error("Error fetching OneSignal User ID:", error);
+      });
+    });
   });
 </script>
 @endsection
