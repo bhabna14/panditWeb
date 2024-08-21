@@ -73,6 +73,8 @@ class PanditLoginController extends Controller
         $orderId = $request->input('orderId');
         $otp = $request->input('otp');
         $phoneNumber = $request->input('phoneNumber');
+        $deviceId = $request->input('device_id'); // Received from the client
+        $platform = $request->input('platform'); // 'web', 'android', or 'ios'
     
         // Log the inputs for debugging
         Log::info("Verifying OTP for Order ID: " . $orderId . ", Phone Number: " . $phoneNumber . ", OTP: " . $otp);
@@ -115,14 +117,21 @@ class PanditLoginController extends Controller
                     $pandit->save();
                 }
     
+                // Update or insert device info
+                $pandit->devices()->updateOrCreate(
+                    ['device_id' => $deviceId],
+                    ['platform' => $platform]
+                );
+    
                 // Generate token
                 $token = $pandit->createToken('API Token')->plainTextToken;
     
                 return response()->json([
-                    'message' => 'Pandit authenticated successfully.', 
+                    'message' => 'Pandit authenticated successfully.',
                     'user' => $pandit,
-                    'token' => $token, 
-                    'token_type' => 'Bearer'], 200);
+                    'token' => $token,
+                    'token_type' => 'Bearer'
+                ], 200);
             } else {
                 $message = $body['message'] ?? 'Invalid OTP';
                 return response()->json(['message' => $message], 400);

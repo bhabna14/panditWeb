@@ -128,10 +128,11 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::get('/cancel-pooja/{id}', [PaymentController::class, 'showCancelForm'])->name('cancelForm');
     Route::post('/cancel-pooja/{booking_id}', [PaymentController::class, 'cancelBooking'])->name('cancelBooking');
 
+    Route::post('/payment/pay-remaining/{booking_id}', [PaymentController::class, 'processRemainingPayment'])->name('payment.processRemainingPayment');
 
     Route::get('/pay-remaining-amount/{booking_id}', [PaymentController::class, 'payRemainingAmount'])->name('payRemainingAmount');
+    // // Route::post('/process-remaining-payment/{booking_id}', [PaymentController::class, 'processRemainingPayment'])->name('processRemainingPayment');
     // Route::post('/process-remaining-payment/{booking_id}', [PaymentController::class, 'processRemainingPayment'])->name('processRemainingPayment');
-    Route::post('/process-remaining-payment/{booking_id}', [PaymentController::class, 'processRemainingPayment'])->name('processRemainingPayment');
 
 });
 

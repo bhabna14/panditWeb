@@ -710,10 +710,10 @@ private function convertDurationToMinutes($durationString)
            
             default:
                 // No filter applied, show all bookings with status 'paid' or 'rejected'
-                $bookingsQuery->whereNotIn('status', ['pending'])
-                            ->whereNotIn('payment_status',  ['pending'])
-                            ->whereNotIn('application_status',  ['pending']);
-                            // ->whereNotIn('pooja_status',  ['pending']);
+                // $bookingsQuery->whereNotIn('status', ['pending'])
+                //             ->whereNotIn('payment_status',  ['pending'])
+                //             ->whereNotIn('application_status',  ['pending']);
+                //             // ->whereNotIn('pooja_status',  ['pending']);
 
                 break;
         }
