@@ -396,52 +396,6 @@ class userController extends Controller
 //     }
 // }
 
-// added the booking_date validation
-// public function confirmBooking(Request $request)
-// {
-//     try {
-//         // Validate incoming request data
-//         $validatedData = $request->validate([
-//             'pandit_id' => 'required|exists:pandit_profile,id',
-//             'pooja_id' => 'required|exists:pooja_list,id',
-//             'pooja_fee' => 'required|numeric',
-//             'advance_fee' => 'required|numeric',
-//             'booking_date' => 'required|date_format:Y-m-d H:i',
-//             'address_id' => 'required',
-//         ]);
-
-//         // Check if the pandit is already booked for the given date and time
-//         $existingBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
-//             ->where('booking_date', $validatedData['booking_date'])
-//             ->exists();
-//     // dd($existingBooking);
-//         if ($existingBooking) {
-//             return back()->with('error', 'The Pandit is already booked for the selected date and time. Please choose a different time or date.');
-//         }
-
-//         // Assign the authenticated user's ID to the booking
-//         $validatedData['user_id'] = Auth::guard('users')->user()->userid;
-//         $validatedData['application_status'] = 'pending';
-//         $validatedData['payment_status'] = 'pending';
-//         $validatedData['pooja_status'] = 'pending';
-//         $validatedData['status'] = 'pending';
-
-//         // Create a new booking record
-//         $booking = Booking::create($validatedData);
-
-//         // Log success message
-//         \Log::info('Booking created successfully.', ['data' => $validatedData]);
-
-//         // Redirect to a success page or return a response
-//         return redirect()->route('booking.success', ['booking' => $booking->id])->with('success', 'Booking confirmed successfully!');
-//     } catch (\Exception $e) {
-//         // Log the error
-//         \Log::error('Error creating booking: ' . $e->getMessage());
-
-//         // Redirect back or return with an error message
-//         return back()->with('error', 'Failed to confirm booking. Please try again.');
-//     }
-// }
 
 
 // added the booking_date validation and pooja_duration

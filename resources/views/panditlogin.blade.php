@@ -45,9 +45,9 @@
                                                     @if (session('otp_sent'))
                                                         <form action="/verify-otp" method="POST">
                                                             @csrf
-                                                            {{-- <input type="hidden" id="device_id" name="device_id" value="" required>
+                                                            <input type="hidden" id="device_id" name="device_id" value="" required>
                                                             <input type="hidden" id="platform" name="platform" value="" required> <!-- Hidden field to store Platform -->
-                                                         --}}
+                                                        
                                                             <input type="hidden" class="form-control" name="order_id" value="{{ session('otp_order_id') }}" required>
                                                             <input type="text" class="form-control" name="otp" placeholder="Enter OTP" required>
                                                             <input type="hidden" class="form-control" name="phone" value="{{ session('otp_phone') }}" required>

@@ -51,71 +51,15 @@ class PanditOtpController extends Controller
         }
     }
 
-    public function verifyOtp(Request $request)
-    {
-        $orderId = session('otp_order_id');
-        $otp = $request->input('otp');
-        $phoneNumber = session('otp_phone');
-    
-        $client = new Client();
-        $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
-    
-        try {
-            $response = $client->post($url, [
-                'headers' => [
-                    'Content-Type'  => 'application/json',
-                    'clientId'      => $this->clientId,
-                    'clientSecret'  => $this->clientSecret,
-                ],
-                'json' => [
-                    'orderId' => $orderId,
-                    'otp' => $otp,
-                    'phoneNumber' => $phoneNumber,
-                ],
-            ]);
-    
-            $body = json_decode($response->getBody(), true);
-    
-            if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
-                $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
-    
-                if ($pandit) {
-                    // Pandit already exists, log in and redirect to dashboard
-                    Auth::guard('pandits')->login($pandit);
-                    return redirect()->route('pandit.dashboard')->with('success', 'User authenticated successfully.');
-                } else {
-                    // Pandit does not exist, create a new user
-                    $pandit = PanditLogin::create([
-                        'pandit_id' => 'PANDIT' . rand(10000, 99999),
-                        'mobile_no' => $phoneNumber,
-                        'order_id' => $orderId,
-                    ]);
-    
-                    // Log the new pandit in and redirect to profile page
-                    Auth::guard('pandits')->login($pandit);
-                    return redirect()->route('pandit.profile')->with('success', 'User authenticated successfully.');
-                }
-            } else {
-                $message = $body['message'] ?? 'Invalid OTP';
-                return redirect()->back()->with('message', $message);
-            }
-        } catch (RequestException $e) {
-            return redirect()->back()->with('message', 'Failed to verify OTP due to an error.');
-        }
-    }
-
     // public function verifyOtp(Request $request)
     // {
     //     $orderId = session('otp_order_id');
     //     $otp = $request->input('otp');
     //     $phoneNumber = session('otp_phone');
-    //     $deviceId = $request->input('device_id'); // Received from the client
-    //     $platform = $request->input('platform'); // 'web', 'android', or 'ios'
-        
-    //     // OTP verification logic
+    
     //     $client = new Client();
     //     $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
-        
+    
     //     try {
     //         $response = $client->post($url, [
     //             'headers' => [
@@ -129,34 +73,25 @@ class PanditOtpController extends Controller
     //                 'phoneNumber' => $phoneNumber,
     //             ],
     //         ]);
-        
+    
     //         $body = json_decode($response->getBody(), true);
-        
+    
     //         if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
     //             $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
-        
+    
     //             if ($pandit) {
-    //                 // Update or insert device info
-    //                 $pandit->devices()->updateOrCreate(
-    //                     ['device_id' => $deviceId, 'platform' => $platform],
-    //                     ['pandit_id' => $pandit->id]
-    //                 );
-        
+    //                 // Pandit already exists, log in and redirect to dashboard
     //                 Auth::guard('pandits')->login($pandit);
     //                 return redirect()->route('pandit.dashboard')->with('success', 'User authenticated successfully.');
     //             } else {
+    //                 // Pandit does not exist, create a new user
     //                 $pandit = PanditLogin::create([
     //                     'pandit_id' => 'PANDIT' . rand(10000, 99999),
     //                     'mobile_no' => $phoneNumber,
     //                     'order_id' => $orderId,
     //                 ]);
-        
-    //                 // Create new device record
-    //                 $pandit->devices()->create([
-    //                     'device_id' => $deviceId,
-    //                     'platform' => $platform,
-    //                 ]);
-        
+    
+    //                 // Log the new pandit in and redirect to profile page
     //                 Auth::guard('pandits')->login($pandit);
     //                 return redirect()->route('pandit.profile')->with('success', 'User authenticated successfully.');
     //             }
@@ -168,6 +103,71 @@ class PanditOtpController extends Controller
     //         return redirect()->back()->with('message', 'Failed to verify OTP due to an error.');
     //     }
     // }
+
+    public function verifyOtp(Request $request)
+    {
+        $orderId = session('otp_order_id');
+        $otp = $request->input('otp');
+        $phoneNumber = session('otp_phone');
+        $deviceId = $request->input('device_id'); // Received from the client
+        $platform = $request->input('platform'); // 'web', 'android', or 'ios'
+        
+        // OTP verification logic
+        $client = new Client();
+        $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
+        
+        try {
+            $response = $client->post($url, [
+                'headers' => [
+                    'Content-Type'  => 'application/json',
+                    'clientId'      => $this->clientId,
+                    'clientSecret'  => $this->clientSecret,
+                ],
+                'json' => [
+                    'orderId' => $orderId,
+                    'otp' => $otp,
+                    'phoneNumber' => $phoneNumber,
+                ],
+            ]);
+        
+            $body = json_decode($response->getBody(), true);
+        
+            if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
+                $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
+        
+                if ($pandit) {
+                    // Update or insert device info
+                    $pandit->devices()->updateOrCreate(
+                        ['device_id' => $deviceId, 'platform' => $platform],
+                        ['pandit_id' => $pandit->pandit_id]
+                    );
+        
+                    Auth::guard('pandits')->login($pandit);
+                    return redirect()->route('pandit.dashboard')->with('success', 'User authenticated successfully.');
+                } else {
+                    $pandit = PanditLogin::create([
+                        'pandit_id' => 'PANDIT' . rand(10000, 99999),
+                        'mobile_no' => $phoneNumber,
+                        'order_id' => $orderId,
+                    ]);
+        
+                    // Create new device record
+                    $pandit->devices()->create([
+                        'device_id' => $deviceId,
+                        'platform' => $platform,
+                    ]);
+        
+                    Auth::guard('pandits')->login($pandit);
+                    return redirect()->route('pandit.profile')->with('success', 'User authenticated successfully.');
+                }
+            } else {
+                $message = $body['message'] ?? 'Invalid OTP';
+                return redirect()->back()->with('message', $message);
+            }
+        } catch (RequestException $e) {
+            return redirect()->back()->with('message', 'Failed to verify OTP due to an error.');
+        }
+    }
     
     
 
