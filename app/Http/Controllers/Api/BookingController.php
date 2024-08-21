@@ -390,8 +390,18 @@ class BookingController extends Controller
         }
     
         try {
-            // Fetch the booking record
-            $booking = Booking::findOrFail($booking_id);
+            // Attempt to find the booking by its ID and user ID
+            $booking = Booking::where('booking_id', $booking_id)
+                              ->where('user_id', $user->userid)
+                              ->first();
+    
+            if (!$booking) {
+                // If the booking is not found, return an error response
+                Log::warning('Booking not found', ['booking_id' => $booking_id, 'user_id' => $user->userid]);
+                return response()->json(['error' => 'Booking not found.'], 404);
+            }
+    
+            // Proceed with the rest of the cancellation logic
             $today = Carbon::today();
             $bookingDate = Carbon::parse($booking->booking_date);
             $daysDifference = $bookingDate->diffInDays($today);
@@ -414,12 +424,12 @@ class BookingController extends Controller
     
             // Fetch all payments related to this booking and user
             $payments = Payment::where('booking_id', $booking->booking_id)
-                                ->where('user_id', $user->id) // Ensure payments are filtered by the authenticated user
-                                ->get();
+                               ->where('user_id', $user->userid)
+                               ->get();
     
             if ($payments->isEmpty()) {
                 Log::warning('No payment found for booking_id', ['booking_id' => $booking_id]);
-                return redirect()->route('booking.history')->with('error', 'No payments found for this booking.');
+                return response()->json(['error' => 'No payments found for this booking.'], 404);
             }
     
             // Calculate the total paid amount
@@ -427,14 +437,14 @@ class BookingController extends Controller
     
             // Determine refund amount based on days difference and payment type
             if ($payments->last()->payment_type == 'advance') {
-                $refundAmount = 0;
+                $refundAmount = 0; // No refund for advance payment
             } else {
                 if ($daysDifference > 20) {
                     $refundAmount = $totalPaid;
                 } elseif ($daysDifference > 0 && $daysDifference <= 20) {
-                    $refundAmount = $totalPaid * 0.80;
+                    $refundAmount = $totalPaid * 0.80; // 20% cancellation fee
                 } else {
-                    $refundAmount = $totalPaid * 0.80;
+                    $refundAmount = $totalPaid * 0.80; // 20% cancellation fee if the booking date is today or less than a day
                 }
             }
     
@@ -460,12 +470,18 @@ class BookingController extends Controller
                 'refund_amount' => $refundAmount
             ]);
     
-            return redirect()->route('booking.history')->with('success', 'Booking canceled successfully! Refund Amount: ₹' . sprintf('%.2f', $refundAmount));
+            return response()->json([
+                'success' => true,
+                'message' => 'Booking canceled successfully!',
+                'refund_amount' => '₹' . sprintf('%.2f', $refundAmount)
+            ], 200);
+    
         } catch (\Exception $e) {
             Log::error('Booking cancellation failed: ' . $e->getMessage());
-            return redirect()->route('booking.history')->with('error', 'Failed to cancel booking. Please try again.');
+            return response()->json(['error' => 'Failed to cancel booking. Please try again.'], 500);
         }
     }
+    
     
 
 
