@@ -45,9 +45,9 @@
                                                     @if (session('otp_sent'))
                                                         <form action="/verify-otp" method="POST">
                                                             @csrf
-                                                            <input type="hidden" id="device_id" name="device_id" value="" required>
+                                                            {{-- <input type="hidden" id="device_id" name="device_id" value="" required>
                                                             <input type="hidden" id="platform" name="platform" value="" required> <!-- Hidden field to store Platform -->
-                                                        
+                                                         --}}
                                                             <input type="hidden" class="form-control" name="order_id" value="{{ session('otp_order_id') }}" required>
                                                             <input type="text" class="form-control" name="otp" placeholder="Enter OTP" required>
                                                             <input type="hidden" class="form-control" name="phone" value="{{ session('otp_phone') }}" required>
@@ -86,59 +86,45 @@
 @endsection
 
 @section('scripts')
-
+<script>
+    setTimeout(function() {
+        var message = document.querySelector('.alert');
+        if (message) {
+            message.style.display = 'none';
+        }
+    }, 3000);
+</script>
 <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  var deviceIdElement = document.getElementById('device_id');
-  if (!deviceIdElement) {
-    console.error('Device ID input element not found.');
-    return;
-  }
+    document.addEventListener("DOMContentLoaded", function() {
+        OneSignal.push(function() {
+            // Retrieve the OneSignal user ID (device ID)
+            OneSignal.getUserId(function(playerId) {
+                console.log('playerId', playerId);
+                if (playerId) {
+                    document.getElementById('device_id').value = playerId;
+                }
+            });
 
-  window.OneSignal = window.OneSignal || [];
-  OneSignal.push(function() {
-    OneSignal.init({
-      appId: "c1804718-4422-4f50-bac9-b23b48de52f4", // Your OneSignal App ID
-      notifyButton: {
-        enable: true,
-      },
-      serviceWorkerPath: 'OneSignalSDKWorker.js',
+            // Detect the platform based on user-agent (for web detection)
+            var platform = 'web'; // Default to 'web'
+
+            if (navigator.userAgent) {
+                var userAgent = navigator.userAgent.toLowerCase();
+                if (userAgent.indexOf('android') > -1) {
+                    platform = 'android';
+                } else if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) {
+                    platform = 'ios';
+                }
+            }
+
+            document.getElementById('platform').value = platform;
+        });
     });
-
-    OneSignal.isPushNotificationsEnabled(function(isEnabled) {
-      if (!isEnabled) {
-        OneSignal.showSlidedownPrompt();
-      }
-    });
-
-    OneSignal.getUserId().then(function(playerId) {
-      if (playerId) {
-        deviceIdElement.value = playerId;
-        console.log('playerId:', playerId);
-        alert('Device ID: ' + playerId);
-      } else {
-        console.log('Failed to retrieve playerId.');
-        alert('Failed to retrieve Device ID.');
-      }
-    }).catch(function(error) {
-      console.error('Error retrieving playerId:', error);
-    });
-
-    // Detect the platform based on user-agent
-    var platform = 'web';
-    var userAgent = navigator.userAgent.toLowerCase();
-    if (userAgent.indexOf('android') > -1) {
-      platform = 'android';
-    } else if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) {
-      platform = 'ios';
-    }
-    document.getElementById('platform').value = platform;
-  });
-});
-
-
 </script>
 
-@endsection
 
+
+
+
+@endsection
