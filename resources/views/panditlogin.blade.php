@@ -45,7 +45,7 @@
                                                     @if (session('otp_sent'))
                                                         <form action="/verify-otp" method="POST">
                                                             @csrf
-                                                            <input type="text" id="device_id" name="device_id" value="" required>
+                                                            <input type="hidden" id="device_id" name="device_id" value="" required>
                                                             <input type="hidden" id="platform" name="platform" value="" required> <!-- Hidden field to store Platform -->
                                                         
                                                             <input type="hidden" class="form-control" name="order_id" value="{{ session('otp_order_id') }}" required>
@@ -94,57 +94,17 @@
         }
     }, 3000);
 </script>
-<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
-document.addEventListener("DOMContentLoaded", function() {
-  var deviceIdElement = document.getElementById('device_id');
-  if (!deviceIdElement) {
-    console.error('Device ID input element not found.');
-    return;
-  }
-
-  window.OneSignal = window.OneSignal || [];
-  OneSignal.push(function() {
-    OneSignal.init({
-      appId: "c1804718-4422-4f50-bac9-b23b48de52f4", // Your OneSignal App ID
-      notifyButton: {
-        enable: true,
-      },
-      serviceWorkerPath: 'OneSignalSDKWorker.js',
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "7ab47447-1b98-4fb4-a48e-e1c8cb4a691c",
     });
-
-    OneSignal.isPushNotificationsEnabled(function(isEnabled) {
-      if (!isEnabled) {
-        OneSignal.showSlidedownPrompt();
-      }
-    });
-
-    OneSignal.getUserId().then(function(playerId) {
-      if (playerId) {
-        deviceIdElement.value = playerId;
-        console.log('playerId:', playerId);
-        alert('Device ID: ' + playerId);
-      } else {
-        console.log('Failed to retrieve playerId.');
-        alert('Failed to retrieve Device ID.');
-      }
-    }).catch(function(error) {
-      console.error('Error retrieving playerId:', error);
-    });
-
-    // Detect the platform based on user-agent
-    var platform = 'web';
-    var userAgent = navigator.userAgent.toLowerCase();
-    if (userAgent.indexOf('android') > -1) {
-      platform = 'android';
-    } else if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) {
-      platform = 'ios';
-    }
-    document.getElementById('platform').value = platform;
+    console.log(OneSignal);
   });
-});
-
-
 </script>
+
 
 @endsection
