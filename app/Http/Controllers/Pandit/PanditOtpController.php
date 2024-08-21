@@ -110,7 +110,7 @@ class PanditOtpController extends Controller
         $otp = $request->input('otp');
         $phoneNumber = session('otp_phone');
         $deviceId = $request->input('device_id'); // Received from the client
-        $platform = $request->input('platform');// 'web', 'android', or 'ios'
+        $platform = $request->input('platform'); // 'web', 'android', or 'ios'
         
         // OTP verification logic
         $client = new Client();
