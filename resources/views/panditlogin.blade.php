@@ -96,25 +96,52 @@
 </script>
 <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
 <script>
+ document.addEventListener("DOMContentLoaded", function() {
   window.OneSignal = window.OneSignal || [];
   OneSignal.push(function() {
     // Initialize OneSignal
     OneSignal.init({
-      appId: "c1804718-4422-4f50-bac9-b23b48de52f4", // Replace with your OneSignal App ID
-      notifyButton: {
-        enable: true, // Enable the notification bell
-      },
-      serviceWorkerPath: 'OneSignalSDKWorker.js', // Optional, if custom path
-
+      appId: "c1804718-4422-4f50-bac9-b23b48de52f4",
+      notifyButton: { enable: true },
+      serviceWorkerPath: 'OneSignalSDKWorker.js',
+      autoResubscribe: true,
+      persistNotification: true
     });
 
-    // Retrieve the OneSignal user ID (device ID)
-    OneSignal.getUserId(function(playerId) {
-      if (playerId) {
-        document.getElementById('device_id').value = playerId;
-        console.log('playerId', playerId);
+    // Request permission for notifications (if not already granted)
+    OneSignal.isPushNotificationsEnabled(function(isEnabled) {
+      if (isEnabled) {
+        console.log('Push notifications are enabled!');
+        getPlayerId();
+      } else {
+        console.log('Push notifications are not enabled.');
+        OneSignal.showSlidedownPrompt().then(function() {
+          getPlayerId();
+        }).catch(function() {
+          console.log('Permission not granted or prompt not shown.');
+        });
       }
     });
+
+    // Function to retrieve the OneSignal user ID (device ID)
+    function getPlayerId() {
+      var deviceIdElement = document.getElementById('device_id');
+      if (!deviceIdElement) {
+        console.error('Device ID element not found.');
+        return;
+      }
+
+      OneSignal.getUserId(function(playerId) {
+        if (playerId) {
+          deviceIdElement.value = playerId;
+          console.log('playerId', playerId);
+          alert('Device ID: ' + playerId); // Alerting the playerId
+        } else {
+          console.log('Failed to retrieve playerId.');
+          alert('Failed to retrieve Device ID.');
+        }
+      });
+    }
 
     // Detect the platform based on user-agent
     var platform = 'web'; // Default to 'web'
@@ -128,6 +155,8 @@
     }
     document.getElementById('platform').value = platform;
   });
+});
+
 </script>
 
 @endsection
