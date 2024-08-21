@@ -98,20 +98,17 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         OneSignal.push(function() {
-            // Initialize OneSignal
-            OneSignal.init({
-                appId: "c1804718-4422-4f50-bac9-b23b48de52f4", // Replace with your OneSignal App ID
-                notifyButton: {
-                    enable: true, // Enable the default notification button
-                },
-                serviceWorkerPath: '/OneSignalSDKWorker.js', // Adjust this path if necessary
-                serviceWorkerOption: {
-                    scope: '/',
-                },
-                allowLocalhostAsSecureOrigin: true, // This is optional for local development
+            // Retrieve the OneSignal user ID (device ID)
+            OneSignal.getUserId(function(playerId) {
+                console.log('playerId', playerId);
+                if (playerId) {
+                    document.getElementById('device_id').value = playerId;
+                }
             });
-            
+
+            // Detect the platform based on user-agent (for web detection)
             var platform = 'web'; // Default to 'web'
+
             if (navigator.userAgent) {
                 var userAgent = navigator.userAgent.toLowerCase();
                 if (userAgent.indexOf('android') > -1) {
@@ -120,29 +117,8 @@
                     platform = 'ios';
                 }
             }
-            // Check for notification permission
-            OneSignal.getNotificationPermission(function(permission) {
-                if (permission === 'default') {
-                    console.log('Notification permission not yet requested.');
-                    // Prompt user to allow notifications
-                    OneSignal.push(function() {
-                        OneSignal.showNativePrompt(); // Show the native browser prompt for notifications
-                    });
-                } else if (permission === 'granted') {
-                    console.log('Notification permission granted.');
-                    // You can now safely call OneSignal.getUserId() to get the playerId
-                    OneSignal.getUserId(function(playerId) {
-                        if (playerId) {
-                            console.log('Device ID found:', playerId);
-                            // Perform actions with playerId
-                        } else {
-                            console.error('Device ID not found.');
-                        }
-                    });
-                } else if (permission === 'denied') {
-                    console.log('Notification permission denied.');
-                }
-            });
+
+            document.getElementById('platform').value = platform;
         });
     });
 </script>

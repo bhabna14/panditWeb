@@ -26,8 +26,8 @@ use PDF;
 use DB;
 use Illuminate\Support\Facades\Hash;
 use OneSignal\OneSignal; // Add the necessary import for OneSignal SDK
-use GuzzleHttp\Client;
-
+// use GuzzleHttp\Client;
+use Twilio\Rest\Client;
 
 class userController extends Controller
 {
@@ -464,6 +464,29 @@ public function confirmBooking(Request $request)
 
         // Create a new booking record
         $booking = Booking::create($validatedData);
+
+        // Twilio setup
+        $sid = env('TWILIO_ACCOUNT_SID');
+        $token = env('TWILIO_AUTH_TOKEN');
+        $fromNumber = env('TWILIO_WHATSAPP_NUMBER');
+        $twilio = new Client($sid, $token);
+// dd($twilio);
+        // Prepare WhatsApp message
+        $user = Auth::guard('users')->user();
+        $whatsappNumber = $user->mobile_number; // Ensure this field is available in your user model
+        $message = "Dear {$user->mobile_number}, your booking for pooja has been confirmed successfully. Booking ID: {$booking->booking_id}. Thank you for choosing us.";
+
+        try {
+            $twilio->messages->create(
+                "whatsapp:$whatsappNumber",
+                [
+                    'from' => $fromNumber,
+                    'body' => $message
+                ]
+            );
+        } catch (\Exception $e) {
+            Log::error('Error sending WhatsApp message: ' . $e->getMessage());
+        }
 
         // Log success message
         \Log::info('Booking created successfully.', ['data' => $validatedData]);
