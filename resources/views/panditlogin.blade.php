@@ -105,16 +105,39 @@
         enable: true, // Enable the notification bell
       },
       serviceWorkerPath: 'OneSignalSDKWorker.js', // Optional, if custom path
-
+      autoResubscribe: true, // Automatically resubscribe the user when they revisit the site
+      persistNotification: true // Keep the notification visible until the user interacts with it
     });
 
-    // Retrieve the OneSignal user ID (device ID)
-    OneSignal.getUserId(function(playerId) {
-      if (playerId) {
-        document.getElementById('device_id').value = playerId;
-        console.log('playerId', playerId);
-      }
+    // Request permission for notifications (if not already granted)
+    OneSignal.push(function() {
+      OneSignal.isPushNotificationsEnabled(function(isEnabled) {
+        if (isEnabled) {
+          console.log('Push notifications are enabled!');
+          getPlayerId();
+        } else {
+          console.log('Push notifications are not enabled.');
+          // Show the notification prompt and then get the playerId
+          OneSignal.showSlidedownPrompt().then(function() {
+            getPlayerId();
+          }).catch(function() {
+            console.log('Permission not granted or prompt not shown.');
+          });
+        }
+      });
     });
+
+    // Function to retrieve the OneSignal user ID (device ID)
+    function getPlayerId() {
+      OneSignal.getUserId(function(playerId) {
+        if (playerId) {
+          document.getElementById('device_id').value = playerId;
+          console.log('playerId', playerId);
+        } else {
+          console.log('Failed to retrieve playerId.');
+        }
+      });
+    }
 
     // Detect the platform based on user-agent
     var platform = 'web'; // Default to 'web'
@@ -129,5 +152,6 @@
     document.getElementById('platform').value = platform;
   });
 </script>
+
 
 @endsection
