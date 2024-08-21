@@ -104,6 +104,10 @@
                 notifyButton: {
                     enable: true, // Enable the default notification button
                 },
+                serviceWorkerPath: '/OneSignalSDKWorker.js', // Adjust this path if necessary
+                serviceWorkerOption: {
+                    scope: '/',
+                },
                 allowLocalhostAsSecureOrigin: true, // This is optional for local development
             });
             
