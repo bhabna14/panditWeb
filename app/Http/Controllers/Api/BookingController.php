@@ -381,6 +381,14 @@ class BookingController extends Controller
 
     public function cancelBooking(Request $request, $booking_id)
     {
+        // Get the authenticated user
+        $user = Auth::guard('sanctum')->user();
+    
+        // Check if the user is authenticated
+        if (!$user) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+    
         try {
             // Fetch the booking record
             $booking = Booking::findOrFail($booking_id);
@@ -406,11 +414,10 @@ class BookingController extends Controller
     
             // Fetch all payments related to this booking and user
             $payments = Payment::where('booking_id', $booking->booking_id)
-                               ->where('user_id', $booking->user_id)
-                               ->get();
+                                ->where('user_id', $user->id) // Ensure payments are filtered by the authenticated user
+                                ->get();
     
             if ($payments->isEmpty()) {
-                // Log if no payment is found
                 Log::warning('No payment found for booking_id', ['booking_id' => $booking_id]);
                 return redirect()->route('booking.history')->with('error', 'No payments found for this booking.');
             }
@@ -420,14 +427,14 @@ class BookingController extends Controller
     
             // Determine refund amount based on days difference and payment type
             if ($payments->last()->payment_type == 'advance') {
-                $refundAmount = 0; // No refund for advance payment
+                $refundAmount = 0;
             } else {
                 if ($daysDifference > 20) {
                     $refundAmount = $totalPaid;
                 } elseif ($daysDifference > 0 && $daysDifference <= 20) {
-                    $refundAmount = $totalPaid * 0.80; // 20% cancellation fee
+                    $refundAmount = $totalPaid * 0.80;
                 } else {
-                    $refundAmount = $totalPaid * 0.80; // 20% cancellation fee if the booking date is today or less than a day
+                    $refundAmount = $totalPaid * 0.80;
                 }
             }
     
