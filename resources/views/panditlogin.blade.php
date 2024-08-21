@@ -104,6 +104,8 @@
       notifyButton: {
         enable: true, // Enable the notification bell
       },
+      serviceWorkerPath: 'OneSignalSDKWorker.js', // Optional, if custom path
+
     });
 
     // Retrieve the OneSignal user ID (device ID)
