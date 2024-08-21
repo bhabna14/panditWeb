@@ -30,7 +30,7 @@ class PanditLoginController extends Controller
         // $fullPhoneNumber = $countryCode . $phoneNumber;
     
         // Log the full phone number for debugging
-        \Log::info("Sending OTP to: " . $fullPhoneNumber);
+        Log::info("Sending OTP to: " . $fullPhoneNumber);
     
         $client = new Client();
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
@@ -73,8 +73,6 @@ class PanditLoginController extends Controller
         $orderId = $request->input('orderId');
         $otp = $request->input('otp');
         $phoneNumber = $request->input('phoneNumber');
-        $deviceId = $request->input('device_id'); // Received from the client
-        $platform = $request->input('platform'); // 'web', 'android', or 'ios'
     
         // Log the inputs for debugging
         Log::info("Verifying OTP for Order ID: " . $orderId . ", Phone Number: " . $phoneNumber . ", OTP: " . $otp);
@@ -104,42 +102,20 @@ class PanditLoginController extends Controller
                 $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
     
                 if (!$pandit) {
-                    // Create a new PanditLogin record if it doesn't exist
                     $pandit = PanditLogin::create([
-                        'pandit_id' => 'PANDIT' . rand(10000, 99999), // Generate new pandit_id
+                        'pandit_id' => 'PANDIT' . rand(10000, 99999),
                         'mobile_no' => $phoneNumber,
                         'order_id' => $orderId,
-                        'status' => 'active', // Set status to active for new record
                     ]);
-                } else {
-                    // If Pandit already exists, update the status to active
-                    $pandit->status = 'active';
-                    $pandit->save();
                 }
     
-                // Update or insert device info
-                $pandit->devices()->updateOrCreate(
-                    ['device_id' => $deviceId],
-                    [
-                        'platform' => $platform,
-                        'pandit_id' => $pandit->pandit_id // Store pandit_id in pandit_devices
-                    ]
-                );
-    
-                // Generate token
                 $token = $pandit->createToken('API Token')->plainTextToken;
     
                 return response()->json([
-                    'message' => 'Pandit authenticated successfully.',
-                    'user' => [
-                        'pandit_id' => $pandit->pandit_id, // Include pandit_id in the response
-                        'mobile_no' => $pandit->mobile_no,
-                        'order_id' => $pandit->order_id,
-                        'status' => $pandit->status,
-                    ],
-                    'token' => $token,
-                    'token_type' => 'Bearer'
-                ], 200);
+                    'message' => 'Pandit authenticated successfully.', 
+                    'user' => $pandit,
+                    'token' => $token, 
+                    'token_type' => 'Bearer'], 200);
             } else {
                 $message = $body['message'] ?? 'Invalid OTP';
                 return response()->json(['message' => $message], 400);
@@ -149,6 +125,7 @@ class PanditLoginController extends Controller
             return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
         }
     }
+    
     
     
     public function panditLogout()
