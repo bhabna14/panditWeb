@@ -470,7 +470,7 @@ public function confirmBooking(Request $request)
         $token = env('TWILIO_AUTH_TOKEN');
         $fromNumber = env('TWILIO_WHATSAPP_NUMBER');
         $twilio = new Client($sid, $token);
-// dd($twilio);
+        // dd($twilio);
         // Prepare WhatsApp message
         $user = Auth::guard('users')->user();
         $whatsappNumber = $user->mobile_number; // Ensure this field is available in your user model

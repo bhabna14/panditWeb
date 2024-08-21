@@ -64,7 +64,7 @@
                
                 <p>Process for Refund</p>
             
-              @elseif($booking->payment->payment_status == 'refunded')
+              @elseif($booking->payment_status == 'paid')
                 <p>By {{ $booking->payment->refund_method ?? 'N/A' }}</p>
               @else
                 <p>Payment Not Done Yet</p>
