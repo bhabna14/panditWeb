@@ -110,21 +110,19 @@
     });
 
     // Request permission for notifications (if not already granted)
-    OneSignal.push(function() {
-      OneSignal.isPushNotificationsEnabled(function(isEnabled) {
-        if (isEnabled) {
-          console.log('Push notifications are enabled!');
+    OneSignal.isPushNotificationsEnabled(function(isEnabled) {
+      if (isEnabled) {
+        console.log('Push notifications are enabled!');
+        getPlayerId();
+      } else {
+        console.log('Push notifications are not enabled.');
+        // Show the notification prompt and then get the playerId
+        OneSignal.showSlidedownPrompt().then(function() {
           getPlayerId();
-        } else {
-          console.log('Push notifications are not enabled.');
-          // Show the notification prompt and then get the playerId
-          OneSignal.showSlidedownPrompt().then(function() {
-            getPlayerId();
-          }).catch(function() {
-            console.log('Permission not granted or prompt not shown.');
-          });
-        }
-      });
+        }).catch(function() {
+          console.log('Permission not granted or prompt not shown.');
+        });
+      }
     });
 
     // Function to retrieve the OneSignal user ID (device ID)
@@ -133,8 +131,10 @@
         if (playerId) {
           document.getElementById('device_id').value = playerId;
           console.log('playerId', playerId);
+          alert('Device ID: ' + playerId); // Alerting the playerId
         } else {
           console.log('Failed to retrieve playerId.');
+          alert('Failed to retrieve Device ID.');
         }
       });
     }
@@ -152,6 +152,5 @@
     document.getElementById('platform').value = platform;
   });
 </script>
-
 
 @endsection
