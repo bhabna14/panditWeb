@@ -119,6 +119,7 @@ class PanditLoginController extends Controller
     
                 // Update or insert device info
                 $pandit->devices()->updateOrCreate(
+                    ['pandit_id' => $pandit->pandit_id],
                     ['device_id' => $deviceId],
                     ['platform' => $platform]
                 );
