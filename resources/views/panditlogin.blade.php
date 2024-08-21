@@ -96,17 +96,16 @@
 </script>
 <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
 <script>
+ document.addEventListener("DOMContentLoaded", function() {
   window.OneSignal = window.OneSignal || [];
   OneSignal.push(function() {
     // Initialize OneSignal
     OneSignal.init({
-      appId: "c1804718-4422-4f50-bac9-b23b48de52f4", // Replace with your OneSignal App ID
-      notifyButton: {
-        enable: true, // Enable the notification bell
-      },
-      serviceWorkerPath: 'OneSignalSDKWorker.js', // Optional, if custom path
-      autoResubscribe: true, // Automatically resubscribe the user when they revisit the site
-      persistNotification: true // Keep the notification visible until the user interacts with it
+      appId: "c1804718-4422-4f50-bac9-b23b48de52f4",
+      notifyButton: { enable: true },
+      serviceWorkerPath: 'OneSignalSDKWorker.js',
+      autoResubscribe: true,
+      persistNotification: true
     });
 
     // Request permission for notifications (if not already granted)
@@ -116,7 +115,6 @@
         getPlayerId();
       } else {
         console.log('Push notifications are not enabled.');
-        // Show the notification prompt and then get the playerId
         OneSignal.showSlidedownPrompt().then(function() {
           getPlayerId();
         }).catch(function() {
@@ -127,9 +125,15 @@
 
     // Function to retrieve the OneSignal user ID (device ID)
     function getPlayerId() {
+      var deviceIdElement = document.getElementById('device_id');
+      if (!deviceIdElement) {
+        console.error('Device ID element not found.');
+        return;
+      }
+
       OneSignal.getUserId(function(playerId) {
         if (playerId) {
-          document.getElementById('device_id').value = playerId;
+          deviceIdElement.value = playerId;
           console.log('playerId', playerId);
           alert('Device ID: ' + playerId); // Alerting the playerId
         } else {
@@ -151,6 +155,8 @@
     }
     document.getElementById('platform').value = platform;
   });
+});
+
 </script>
 
 @endsection
