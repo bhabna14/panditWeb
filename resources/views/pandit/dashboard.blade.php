@@ -28,7 +28,7 @@
 }
 /* Container for the event */
 .fc-h-event {
-    width: 50px !important;
+    width: 30px !important;
     border: none;
     border-radius: 50%;
     display: flex;
@@ -39,7 +39,7 @@
     position: absolute; /* Use absolute positioning */
     top: 50%; /* Center vertically */
     left: 50%; /* Center horizontally */
-    transform: translate(-50%, 10%); /* Adjust the element position */
+    transform: translate(-50%, -10%); /* Adjust the element position */
     cursor: pointer;
 }
 /* .fc-h-event: */
@@ -48,8 +48,8 @@
 /* Title container styling */
 .fc-h-event .fc-event-title-container {
     border-radius: 50%;
-    height: 50px;
-width: 50px;
+    height: 30px;
+width: 30px;
     border: none;
     color: white  !important;
     /* background-color: rgb(142, 251, 148); */
@@ -96,12 +96,12 @@ width: 50px;
 
         /* Day Number Font Size */
         .fc-daygrid-day-number {
-            font-size: 20px;
+            font-size: 14px;
         }
 
         /* Day Name Font Size */
         .fc-daygrid-day-top {
-            font-size: 20px;
+            font-size: 14px;
         }
     </style>
 @endsection
@@ -123,87 +123,123 @@ width: 50px;
  
     <!-- row -->
     <div class="row">
-        <!-- Bookings Section -->
-        <div class="col-xl-7 col-lg-12 col-md-12 col-sm-12">
-            <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
-                    <div class="card">
-                        <div class="text-center pt-4">
-                            <h3
-                                style="text-shadow: 8px 8px 20px rgba(0,0,0,0.7);font-weight: bold; font-family: Copperplate, Papyrus, fantasy; font-size: 40px">
-                                {{ $today }}
-                            </h3>
-                            <h3 style="text-shadow: 3px 3px 10px rgba(0,0,0,0.4);color: #B7070A;font-family: 'Trebuchet MS', sans-serif; font-size: 20px;"
-                                id="liveTime"></h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                @foreach ($bookings as $booking)
-                                <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
-                                    <div class="card text-center p-3">
-                                        <h5 class="text-dark font-weight-semibold mb-2">
-                                            {{ $booking->pooja_name }}
-                                            ({{ \Carbon\Carbon::parse($booking->booking_date)->format('H:i') }})
-                                        </h5>
-                                        <div class="d-flex justify-content-center">
-                                            @if ($booking->status)
-                                                @if ($booking->status->start_time && !$booking->status->end_time)
-                                                    <!-- If started but not ended, show End button -->
-                                                    <form action="{{ route('pooja.end') }}" method="POST">
-                                                        @csrf
-                                                        <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-                                                        <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
-                                                        <button type="submit" class="btn btn-success mb-2">End</button>
-                                                    </form>
-                                                @elseif (!$booking->status->start_time)
-                                                    <!-- If not started, show Start button -->
-                                                    <form action="{{ route('pooja.start') }}" method="POST" class="mr-2">
-                                                        @csrf
-                                                        <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-                                                        <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
-                                                        <button type="submit" class="btn btn-primary mb-2">Start</button>
-                                                    </form>
-                                                @else
-                                                    <!-- If started and ended, show Completed button -->
-                                                    <button class="btn btn-secondary mb-2" disabled>Pooja Completed</button>
-                                                @endif
-                                            @else
-                                                <!-- If no status record, show both Start and End buttons -->
-                                                <form action="{{ route('pooja.start') }}" method="POST" class="mr-2">
-                                                    @csrf
-                                                    <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-                                                    <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
-                                                    <button type="submit" class="btn btn-primary mb-2">Start</button>
-                                                </form>
-                                                <form action="{{ route('pooja.end') }}" method="POST">
-                                                    @csrf
-                                                    <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
-                                                    <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
-                                                    <button type="submit" class="btn btn-success mb-2" style="margin-left: 10px">End</button>
-                                                </form>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                            
 
+        @if ($completionPercentage < 95)
+    <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-xl-9 col-lg-7 col-md-6 col-sm-12">
+                        <div class="text-justified align-items-center">
+                            <h3 class="text-dark font-weight-semibold mb-2 mt-0">Hi, Welcome Back <span class="text-primary">{{ $panditProfile->name }}!</span></h3>
+                            <p class="text-dark tx-14 mb-3 lh-3"> You have used {{ number_format($completionPercentage, 2) }}% of your profile completion. Please complete your profile to access more features.</p>
+                            <a class="btn btn-primary shadow" href="{{ url('pandit/manageprofile') }}">Complete Profile</a>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-lg-5 col-md-6 col-sm-12 d-flex align-items-center justify-content-center">
+                        <div class="chart-circle float-md-end mt-4 mt-md-0" data-value="{{ $completionPercentage / 100 }}" data-thickness="12" data-color="">
+                            <canvas width="100" height="100"></canvas>
+                            <div class="chart-circle-value circle-style">
+                                <div class="tx-18 font-weight-semibold">{{ number_format($completionPercentage, 2) }}%</div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+@endif
+{{-- today pooja --}}
+    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+        <div class="row">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
+                <div class="card">
+                    
+                    <div class="text-center pt-4">
+                        <h3
+                            style="text-shadow: 8px 8px 20px rgba(0,0,0,0.7);font-weight: bold; font-family: Copperplate, Papyrus, fantasy; font-size: 40px">
+                            {{ $today }}
+                        </h3>
+                        <h3 style="text-shadow: 3px 3px 10px rgba(0,0,0,0.4);color: #B7070A;font-family: 'Trebuchet MS', sans-serif; font-size: 20px;"
+                            id="liveTime"></h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            @foreach ($bookings as $booking)
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 mb-4">
+                                <div class="card text-center p-3">
+                                    <h5 class="text-dark font-weight-semibold mb-2">
+                                        {{ $booking->pooja_name }}
+                                        ({{ \Carbon\Carbon::parse($booking->booking_date)->format('H:i') }})
+                                    </h5>
+                                    <div class="d-flex justify-content-center">
+                                        @if ($booking->status)
+                                            @if ($booking->status->start_time && !$booking->status->end_time)
+                                                <!-- If started but not ended, show End button -->
+                                                <form action="{{ route('pooja.end') }}" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
+                                                    <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
+                                                    <button type="submit" class="btn btn-success mb-2">End</button>
+                                                </form>
+                                            @elseif (!$booking->status->start_time)
+                                                <!-- If not started, show Start button -->
+                                                <form action="{{ route('pooja.start') }}" method="POST" class="mr-2">
+                                                    @csrf
+                                                    <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
+                                                    <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
+                                                    <button type="submit" class="btn btn-primary mb-2">Start</button>
+                                                </form>
+                                            @else
+                                                <!-- If started and ended, show Completed button -->
+                                                <button class="btn btn-secondary mb-2" disabled>Pooja Completed</button>
+                                            @endif
+                                        @else
+                                            <!-- If no status record, show both Start and End buttons -->
+                                            <form action="{{ route('pooja.start') }}" method="POST" class="mr-2">
+                                                @csrf
+                                                <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
+                                                <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
+                                                <button type="submit" class="btn btn-primary mb-2">Start</button>
+                                            </form>
+                                            <form action="{{ route('pooja.end') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
+                                                <input type="hidden" name="pooja_id" value="{{ $booking->pooja_id }}">
+                                                <button type="submit" class="btn btn-success mb-2" style="margin-left: 10px">End</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                        
 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        
+    
+            {{-- pooja calendar --}}
 
-        <!-- Profile Section -->
-
+            <div  class="col-xl-7 col-lg-12 col-md-12 col-sm-12">
+                <div class="card">
+                    <div class="text-center pt-4">
+                        <h3 style="font-family: fantasy;letter-spacing: 1px">POOJA CALENDAR</h3>
+                    </div>
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        <!-- Pooja Request -->
         <div class="col-xl-5 col-lg-12 col-md-12 col-sm-12">
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
                     <div class="card">
                         <div class="text-center pt-4">
-                            <h3>POOJA REQUEST</h3>
+                            <h3 style="font-family: fantasy;letter-spacing: 1px">POOJA REQUEST</h3>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -289,7 +325,8 @@ width: 50px;
 
     </div>
 
-    <!-- row  -->
+
+    {{-- pooja summary table --}}
     <div class="row">
         <div class="col-12 col-sm-12">
             <div class="card">
@@ -329,14 +366,8 @@ width: 50px;
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-12 col-sm-12">
-            <div class="card">
-                <div id="calendar"></div>
-            </div>
-        </div>
-    </div>
 
+  
     <div class="modal fade" id="full-screen" tabindex="-1" aria-labelledby="fullScreenModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-fullscreen" role="document" style="width: 1200px">
             <div class="modal-content modal-content-demo">

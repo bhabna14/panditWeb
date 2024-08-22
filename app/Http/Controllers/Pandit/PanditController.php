@@ -28,80 +28,139 @@ class PanditController extends Controller
 { 
 
     public function index()
-{
-    $today = Carbon::today()->toDateString();
-   
-
-    $pandit = Auth::guard('pandits')->user();
-
-    // Fetch the pandit's profile details using their pandit_id
-    $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
-
-    // Fetch bookings for today with application status approved and join with pooja_list to get the pooja name
-    $bookings = DB::table('bookings')
-                  ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
-                  ->where('bookings.pandit_id', $pandit_details->id)
-                  ->where('bookings.payment_status', 'paid')
-                  ->where('bookings.application_status', 'approved')
-                  ->where('bookings.pooja_status','!=','canceled')
-                  ->whereDate('bookings.booking_date', $today)
-                  ->orderBy('bookings.booking_date', 'asc') // Order by booking_date ascending
-                  ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
-                  ->get();
-
-    // Retrieve the status for each booking
-    foreach ($bookings as $booking) {
-        $booking->status = Poojastatus::where('booking_id', $booking->booking_id)
-                                      ->where('pooja_id', $booking->pooja_id)
-                                      ->first();
+    {
+        $today = Carbon::today()->toDateString();
+        $pandit = Auth::guard('pandits')->user();
+        $panditId = $pandit->pandit_id;
+    
+        // Get related data from other tables
+        $panditProfile = DB::table('pandit_profile')->where('pandit_id', $panditId)->first();
+        $panditCareer = DB::table('pandit_career')->where('pandit_id', $panditId)->first();
+        $panditEducation = DB::table('pandit_education')->where('pandit_id', $panditId)->first();
+        $panditIdcard = DB::table('pandit_idcard')->where('pandit_id', $panditId)->first();
+        $panditVedit = DB::table('pandit_vedic')->where('pandit_id', $panditId)->first();
+    
+        // List of fields to check
+        $fieldsToCheck = [
+            'title', 'name', 'slug', 'email', 'whatsappno', 'bloodgroup', 
+            'profile_photo', 'maritalstatus', 'about_pandit', 'language', 'pandit_status'
+        ];
+        $careerFields = ['qualification', 'total_experience'];
+        $educationFields = ['education_type', 'upload_education'];
+        $idcardFields = ['id_type', 'upload_id'];
+        $vedicFields = ['vedic_type', 'upload_vedic'];
+    
+        // Initialize counts
+        $totalFields = count($fieldsToCheck) + count($careerFields) + count($educationFields) + count($idcardFields) + count($vedicFields);
+        $filledFields = 0;
+    
+        // Check filled fields in pandit_profile
+        foreach ($fieldsToCheck as $field) {
+            if (!empty($panditProfile->$field)) {
+                $filledFields++;
+            }
+        }
+    
+        // Check filled fields in pandit_career
+        foreach ($careerFields as $field) {
+            if (!empty($panditCareer->$field)) {
+                $filledFields++;
+            }
+        }
+    
+        // Check filled fields in pandit_education
+        foreach ($educationFields as $field) {
+            if (!empty($panditEducation->$field)) {
+                $filledFields++;
+            }
+        }
+    
+        // Check filled fields in pandit_idcard
+        foreach ($idcardFields as $field) {
+            if (!empty($panditIdcard->$field)) {
+                $filledFields++;
+            }
+        }
+    
+        // Check filled fields in pandit_vedit
+        foreach ($vedicFields as $field) {
+            if (!empty($panditVedit->$field)) {
+                $filledFields++;
+            }
+        }
+    
+        // Calculate percentage
+        $completionPercentage = ($filledFields / $totalFields) * 100;
+    
+        // Fetch the pandit's profile details using their pandit_id
+        $pandit_details = Profile::where('pandit_id', $panditId)->first();
+    
+        // Fetch bookings for today with application status approved and join with pooja_list to get the pooja name
+        $bookings = DB::table('bookings')
+            ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
+            ->where('bookings.pandit_id', $pandit_details->id)
+            ->where('bookings.payment_status', 'paid')
+            ->where('bookings.application_status', 'approved')
+            ->where('bookings.pooja_status', '!=', 'canceled')
+            ->whereDate('bookings.booking_date', $today)
+            ->orderBy('bookings.booking_date', 'asc')
+            ->select('bookings.*', 'pooja_list.pooja_name as pooja_name')
+            ->get();
+    
+        // Retrieve the status for each booking
+        foreach ($bookings as $booking) {
+            $booking->status = Poojastatus::where('booking_id', $booking->booking_id)
+                ->where('pooja_id', $booking->pooja_id)
+                ->first();
+        }
+    
+        $pooja_status = DB::table('pooja_status')
+            ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
+            ->join('bookings', 'bookings.booking_id', '=', 'pooja_status.booking_id')
+            ->where('pooja_status.status', 'active')
+            ->where('bookings.pandit_id', $pandit_details->id)
+            ->select(
+                'pooja_status.start_time',
+                'pooja_status.end_time',
+                'pooja_list.pooja_name',
+                'pooja_status.pooja_status',
+                'pooja_status.pooja_duration as pooja_duration',
+                'pooja_status.booking_id as booking_id'
+            )
+            ->orderBy('pooja_status.id', 'desc')
+            ->get();
+    
+        $pooja_request = Booking::with(['user', 'pooja', 'address'])
+            ->where('pandit_id', $pandit_details->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    
+        $requestCounts = Booking::select(DB::raw('DATE(booking_date) as date'), DB::raw('COUNT(*) as count'))
+            ->where('pandit_id', $pandit_details->id)
+            ->where('payment_status', 'paid')
+            ->where('application_status', 'approved')
+            ->where('pooja_status', 'pending')
+            ->whereDate('booking_date', '>=', Carbon::now()->subMonth())
+            ->groupBy(DB::raw('DATE(booking_date)'))
+            ->get()
+            ->map(function ($item) {
+                $details = DB::table('bookings')
+                    ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
+                    ->whereDate('bookings.booking_date', $item->date)
+                    ->select('bookings.booking_id as booking_id', 'pooja_list.pooja_name as pooja')
+                    ->get();
+    
+                return [
+                    'date' => $item->date,
+                    'count' => $item->count,
+                    'details' => $details->toArray(),
+                ];
+            });
+    
+        return view('pandit.dashboard', compact('bookings', 'today', 'pooja_status', 'pooja_request', 'requestCounts', 'completionPercentage','panditProfile'));
     }
 
-                     $pooja_status = DB::table('pooja_status')
-                    ->join('pooja_list', 'pooja_status.pooja_id', '=', 'pooja_list.id')
-                    ->join('bookings', 'bookings.booking_id', '=', 'pooja_status.booking_id') // Adjusted to join with bookings table
-                    ->where('pooja_status.status', 'active')
-                    ->where('bookings.pandit_id', $pandit_details->id) // Filter by pandit_id
-                    ->select(
-                        'pooja_status.start_time',
-                        'pooja_status.end_time',
-                        'pooja_list.pooja_name',
-                        'pooja_status.pooja_status',
-                        'pooja_status.pooja_duration as pooja_duration',
-                        'pooja_status.booking_id as booking_id' // Include booking_id in the result
-                    )
-                    ->orderBy('pooja_status.id', 'desc')
-                    ->get();
 
-                    $pooja_request = Booking::with(['user', 'pooja', 'address']) // Load relationships to get user, pooja, and address details
-                    ->where('pandit_id', $pandit_details->id) // Use id from profile
-                    ->orderBy('created_at', 'desc')
-                    ->get();
-                    
-                    $requestCounts = Booking::select(DB::raw('DATE(booking_date) as date'), DB::raw('COUNT(*) as count'))
-                    ->where('pandit_id', $pandit_details->id)
-                    ->where('payment_status', 'paid')
-                    ->where('application_status', 'approved')
-                    ->where('pooja_status', 'pending')
-                    ->where('pandit_id', $pandit_details->id)
-                    ->whereDate('booking_date', '>=', Carbon::now()->subMonth())
-                    ->groupBy(DB::raw('DATE(booking_date)'))
-                    ->get()
-                    ->map(function($item) {
-                        $details = DB::table('bookings')
-                            ->join('pooja_list', 'bookings.pooja_id', '=', 'pooja_list.id')
-                            ->whereDate('bookings.booking_date', $item->date)
-                            ->select('bookings.booking_id as booking_id', 'pooja_list.pooja_name as pooja')
-                            ->get();
-                        
-                        return [
-                            'date' => $item->date,
-                            'count' => $item->count,
-                            'details' => $details->toArray() // Ensure details is an array
-                        ];
-                    });
-                
-    return view('pandit.dashboard', compact('bookings', 'today', 'pooja_status','pooja_request','requestCounts'));
-}
 public function poojarequest()
 {
     $pandit = Auth::guard('pandits')->user();
