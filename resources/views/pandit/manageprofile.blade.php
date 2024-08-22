@@ -194,6 +194,28 @@
                                     <div class="form-group ">
                                         <div class="row row-sm">
                                             <div class="col-md-3">
+                                                <label class="form-label">Gotra</label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control" name="gotra"
+                                                    value="{{ $pandit_profile->gotra }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group ">
+                                        <div class="row row-sm">
+                                            <div class="col-md-3">
+                                                <label class="form-label">Bruti</label>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <input type="text" class="form-control" name="bruti"
+                                                    value="{{ $pandit_profile->bruti }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group ">
+                                        <div class="row row-sm">
+                                            <div class="col-md-3">
                                                 <label class="form-label">Photo Change</label>
                                             </div>
                                             <div class="col-md-9">

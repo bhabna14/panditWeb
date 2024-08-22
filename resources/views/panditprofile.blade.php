@@ -20,8 +20,8 @@
                             <div class="main-card-signin d-md-flex">
                                 <div class="wd-100p">
                                     <div class="d-flex mb-4" style="justify-content: center;">
-                                        <a href="#"><img src="{{ asset('assets/img/brand/logo.png') }}"
-                                                class="sign-favicon ht-40" alt="logo"></a>
+                                        <a href="#"><img src="{{ asset('assets/img/brand/logo.png') }}" class="sign-favicon ht-40" alt="logo"></a>
+                                               
                                     </div>
                                     <div class="">
                                         <div class="main-signup-header">
@@ -130,6 +130,26 @@
                                                                             <label for="exampleInputPassword1">Profile Photo <span style="color: red">*</span></label>
                                                                             <input type="file" name="profile_photo"
                                                                                 class="form-control" id="profile_photo" required>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="gotra">
+                                                                                Gotra<span style="color: red">*</span></label>
+                                                                            <input type="text" class="form-control"
+                                                                                id="gotra" name="gotra"
+                                                                                placeholder="Enter your gotra">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <div class="form-group">
+                                                                            <label for="bruti">
+                                                                                 Bruti</label>
+                                                                            <input type="text" class="form-control"
+                                                                                id="bruti" name="bruti"
+                                                                                placeholder="Enter your bruti" required>
                                                                         </div>
                                                                     </div>
                                                                 </div>
