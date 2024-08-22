@@ -23,7 +23,7 @@
         <div class="row dashboard-row">
           <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <div class="row">
-              <div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                 <div class="card">
                   <div class="card-body">
                     <div class="row">
@@ -49,7 +49,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                 <div class="card sales-card">
                   <div class="row">
                     <div class="col-8">
@@ -75,7 +75,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                 <div class="card sales-card">
                   <div class="row">
                     <div class="col-8">
@@ -101,7 +101,7 @@
                   </div>
                 </div>
               </div>
-              <div class="col-xl-2 col-lg-12 col-md-12 col-xs-12">
+              <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                 <div class="card sales-card">
                   <div class="row">
                     <div class="col-8">
