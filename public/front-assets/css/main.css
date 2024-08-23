@@ -13422,8 +13422,8 @@ table.table-5 td {
   transition: 0.3s;
 }
 .pay-button-bg{
-  margin-bottom: 10px;
-  background-color: #008009;
+  margin-bottom: 10px !important;
+  background-color: #008009 !important;
   color:#fff;
 }
 
