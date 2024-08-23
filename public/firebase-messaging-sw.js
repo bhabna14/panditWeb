@@ -5,15 +5,18 @@
 
 // Firebase configuration (same as in your service worker)
 
+
+
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
+    apiKey: "AIzaSyDnr12fJbycTY67cj3q78PEAMG_0D74jTc",
+    authDomain: "pandit-cd507.firebaseapp.com",
+    projectId: "pandit-cd507",
+    storageBucket: "pandit-cd507.appspot.com",
+    messagingSenderId: "696430656576",
+    appId: "1:696430656576:web:0b5462793e668b0abe33a5",
+    measurementId: "G-X7N1W6XCDJ"
 };
+
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -70,5 +73,10 @@ messaging.onMessage(function(payload) {
         // Play custom sound
         const audio = new Audio('/var/www/panditWeb/public/Ghanti.mp3');
         audio.play();
+
+        notification.onclick = function(event) {
+            event.preventDefault(); // Prevent the browser from focusing the Notification's tab
+            window.open(payload.data.url, '_blank'); // Open the URL in a new tab
+        };
     }
 });
