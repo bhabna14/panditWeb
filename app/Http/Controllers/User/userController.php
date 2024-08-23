@@ -520,7 +520,8 @@ public function confirmBooking(Request $request)
             'booking_id' => $booking->booking_id,
             'user_id' => Auth::guard('users')->user()->userid,
             'pooja_id' => $validatedData['pooja_id'],
-            'message' => 'A new booking has been confirmed for you.'
+            'message' => 'A new booking has been confirmed for you.',
+            'url' => route('pandit.dashboard')
         ]);
 
     // Send the notification
