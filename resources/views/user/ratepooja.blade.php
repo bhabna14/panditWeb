@@ -30,7 +30,7 @@
                 @if(isset($rating))
                     <input type="hidden" name="rating_id" value="{{ $rating->id }}">
                 @endif
-                <input type="hidden" name="booking_id" value="{{ $booking->id }}">
+                <input type="hidden" name="booking_id" value="{{ $booking->booking_id }}">
                 
                 <!-- Rating Selection -->
                 <div class="rating-container mt-20">

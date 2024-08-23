@@ -1044,7 +1044,7 @@ private function convertDurationToMinutes($durationString)
     {
         // Validate incoming request data
         $validatedData = $request->validate([
-            'booking_id' => 'required|exists:bookings,id',
+            'booking_id' => 'required',
             'rating' => 'required|integer|between:1,5',
             'feedback_message' => 'nullable|string',
             'audioFile' => 'nullable|file|mimes:audio/mpeg,mpga,mp3,wav,aac',
