@@ -72,7 +72,7 @@ class Booking extends Model
     }
     public function ratings()
     {
-        return $this->hasMany(Rating::class, 'booking_id');
+        return $this->hasMany(Rating::class, 'booking_id' ,'booking_id');
     }
 
     public function payment()
