@@ -64,7 +64,7 @@
                                                                     </div>
                                                                 </div>
                                                                 {{-- <input type="hidden" name="onesignal_player_id" id="onesignal_player_id"> --}}
-                                                                <input type="submit" class="btn btn-primary" value="Generate ">
+                                                                <input type="submit" class="btn btn-primary" value="Generate OTP">
                                                             </div>
                                                         </form>
                                                     @endif
