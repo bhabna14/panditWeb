@@ -111,17 +111,17 @@ class PanditOtpController extends Controller
         $phoneNumber = session('otp_phone');
         $deviceId = $request->input('device_id'); // Received from the client
         $platform = $request->input('platform'); // 'web', 'android', or 'ios'
-        
+    
         // OTP verification logic
         $client = new Client();
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
-        
+    
         try {
             $response = $client->post($url, [
                 'headers' => [
-                    'Content-Type'  => 'application/json',
-                    'clientId'      => $this->clientId,
-                    'clientSecret'  => $this->clientSecret,
+                    'Content-Type' => 'application/json',
+                    'clientId' => $this->clientId,
+                    'clientSecret' => $this->clientSecret,
                 ],
                 'json' => [
                     'orderId' => $orderId,
@@ -129,19 +129,28 @@ class PanditOtpController extends Controller
                     'phoneNumber' => $phoneNumber,
                 ],
             ]);
-        
+    
             $body = json_decode($response->getBody(), true);
-        
+    
             if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
                 $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
-        
+    
                 if ($pandit) {
-                    // Update or insert device info
-                    $pandit->devices()->updateOrCreate(
-                        ['device_id' => $deviceId, 'platform' => $platform],
-                        ['pandit_id' => $pandit->pandit_id]
-                    );
-        
+                    // Check if a device record exists for this pandit_id and device_id
+                    $device = $pandit->devices()->where('device_id', $deviceId)->first();
+    
+                    if ($device) {
+                        // Update existing device record
+                        $device->update(['platform' => $platform]);
+                    } else {
+                        // Create a new device record
+                        $pandit->devices()->create([
+                            'device_id' => $deviceId,
+                            'platform' => $platform,
+                            'pandit_id' => $pandit->pandit_id
+                        ]);
+                    }
+    
                     Auth::guard('pandits')->login($pandit);
                     return redirect()->route('pandit.dashboard')->with('success', 'User authenticated successfully.');
                 } else {
@@ -150,13 +159,13 @@ class PanditOtpController extends Controller
                         'mobile_no' => $phoneNumber,
                         'order_id' => $orderId,
                     ]);
-        
+    
                     // Create new device record
                     $pandit->devices()->create([
                         'device_id' => $deviceId,
                         'platform' => $platform,
                     ]);
-        
+    
                     Auth::guard('pandits')->login($pandit);
                     return redirect()->route('pandit.profile')->with('success', 'User authenticated successfully.');
                 }
@@ -168,7 +177,6 @@ class PanditOtpController extends Controller
             return redirect()->back()->with('message', 'Failed to verify OTP due to an error.');
         }
     }
-    
     
 
 

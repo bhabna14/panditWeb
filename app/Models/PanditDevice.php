@@ -15,8 +15,9 @@ class PanditDevice extends Model
     ];
 
     // Define the relationship back to PanditLogin
+ 
     public function pandit()
     {
-        return $this->belongsTo(PanditLogin::class, 'pandit_id');
+        return $this->belongsTo(PanditLogin::class, 'pandit_id', 'pandit_id');
     }
 }

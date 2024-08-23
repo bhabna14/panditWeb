@@ -29,6 +29,12 @@ use OneSignal\OneSignal; // Add the necessary import for OneSignal SDK
 // use GuzzleHttp\Client;
 use Twilio\Rest\Client;
 
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\Messaging;
+
+
 class userController extends Controller
 {
     //
@@ -399,6 +405,7 @@ class userController extends Controller
 
 
 // added the booking_date validation and pooja_duration
+
 public function confirmBooking(Request $request)
 {
     try {
@@ -465,13 +472,12 @@ public function confirmBooking(Request $request)
         // Create a new booking record
         $booking = Booking::create($validatedData);
 
-        // Twilio setup
+        // Send WhatsApp message
         $sid = env('TWILIO_ACCOUNT_SID');
         $token = env('TWILIO_AUTH_TOKEN');
         $fromNumber = env('TWILIO_WHATSAPP_NUMBER');
         $twilio = new Client($sid, $token);
-        // dd($twilio);
-        // Prepare WhatsApp message
+
         $user = Auth::guard('users')->user();
         $whatsappNumber = $user->mobile_number; // Ensure this field is available in your user model
         $message = "Dear {$user->mobile_number}, your booking for pooja has been confirmed successfully. Booking ID: {$booking->booking_id}. Thank you for choosing us.";
@@ -488,6 +494,44 @@ public function confirmBooking(Request $request)
             Log::error('Error sending WhatsApp message: ' . $e->getMessage());
         }
 
+        // Send FCM notification to the pandit
+        $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+        $messaging = $factory->createMessaging();
+
+        // Retrieve pandit's device token
+
+        $panditProfile = Profile::findOrFail($validatedData['pandit_id']);
+        $panditId = $panditProfile->pandit_id;
+
+        $device = PanditDevice::where('pandit_id', $panditId)->first();
+        if (!$device) {
+            throw new \Exception('Pandit device token not found.');
+        }
+
+        $deviceToken = $device->device_id;
+
+        // Prepare notification message
+        $message = CloudMessage::withTarget('token', $device->device_id)
+        ->withNotification(Notification::create(
+            'New Booking Confirmed',
+            "A new booking has been confirmed with ID: {$booking->booking_id}. Please check your dashboard for details."
+        ))
+        ->withData([
+            'booking_id' => $booking->booking_id,
+            'user_id' => Auth::guard('users')->user()->userid,
+            'pooja_id' => $validatedData['pooja_id'],
+            'message' => 'A new booking has been confirmed for you.'
+        ]);
+
+    // Send the notification
+    $messaging->send($message);
+
+        try {
+            $messaging->send($message);
+        } catch (\Exception $e) {
+            Log::error('Error sending FCM notification: ' . $e->getMessage());
+        }
+
         // Log success message
         \Log::info('Booking created successfully.', ['data' => $validatedData]);
 
@@ -501,6 +545,7 @@ public function confirmBooking(Request $request)
         return back()->with('error', 'Failed to confirm booking. Please try again.');
     }
 }
+
 
 
 

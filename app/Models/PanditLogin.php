@@ -24,9 +24,10 @@ class PanditLogin extends Authenticatable
         'otp',
     ];
 
+
     public function devices()
     {
-        return $this->hasMany(PanditDevice::class, 'pandit_id');
+        return $this->hasMany(PanditDevice::class, 'pandit_id', 'pandit_id');
     }
     // Add any other model-specific logic here
 }
