@@ -55,6 +55,19 @@
         </div>
 
 		@include('pandit.layouts.components.custom-scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+            console.log('Notification permission granted.');
+            // You can now proceed to subscribe the user to push notifications
+        } else {
+            console.log('Unable to get permission to notify.');
+        }
+    });
+});
 
+</script>
     </body>
+
 </html>
