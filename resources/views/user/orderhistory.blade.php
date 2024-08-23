@@ -144,6 +144,10 @@
                       <p>Duration: {{ $booking->pooja->pooja_duration }}</p>
                   </div>
                   <div class="col-md-4">
+                        @if ($booking->status == "pending" && $booking->payment_status == "pending" && $booking->application_status == "approved"  && $booking->pooja_status == "pending" )
+                        <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">Pay</a>
+
+                        @endif
                     
                       @if ($booking->status == "paid" && $booking->payment_status == "paid" && $booking->application_status == "approved"  && $booking->pooja_status == "completed" )
                       <span class="status-text"><i class="fa fa-circle comp-dot" aria-hidden="true"></i>Completed on {{ $booking->booking_date }}</span>
