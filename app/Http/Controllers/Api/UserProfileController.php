@@ -9,6 +9,8 @@ use App\Models\Booking;
 use App\Models\Payment;
 
 use App\Models\Profile;
+use App\Models\Rating;
+
 use App\Models\Poojalist;
 
 use App\Models\UserAddress;
