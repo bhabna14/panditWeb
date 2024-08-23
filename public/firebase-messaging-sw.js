@@ -68,7 +68,7 @@ messaging.onMessage(function(payload) {
         new Notification(notificationTitle, notificationOptions);
 
         // Play custom sound
-        const audio = new Audio('D:/xampp/htdocs/33crores/panditWeb/public/Ghanti.mp3');
+        const audio = new Audio('/var/www/panditWeb/public/Ghanti.mp3');
         audio.play();
     }
 });
