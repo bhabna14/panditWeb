@@ -73,25 +73,17 @@ class RatingController extends Controller
         $rating->rating = $validatedData['rating'];
         $rating->feedback_message = $validatedData['feedback_message'];
 
-        // Handle audio file upload
-        if ($request->hasFile('audioFile')) {
-            // Delete old audio file if exists
-            if ($rating->audio_file) {
-                Storage::disk('public')->delete($rating->audio_file);
-            }
-            $audioPath = $request->file('audioFile')->store('audio', 'public');
-            $rating->audio_file = $audioPath;
-        }
+       // Handle audio file upload if present
+    if ($request->hasFile('audioFile')) {
+        $audioPath = $request->file('audioFile')->store('audio', 'public');
+        $rating->audio_file = $audioPath;
+    }
 
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            // Delete old image file if exists
-            if ($rating->image_path) {
-                Storage::disk('public')->delete($rating->image_path);
-            }
-            $imagePath = $request->file('image')->store('images', 'public');
-            $rating->image_path = $imagePath;
-        }
+    // Handle image upload if present
+    if ($request->hasFile('image')) {
+        $imagePath = $request->file('image')->store('images', 'public');
+        $rating->image_path = $imagePath;
+    }
 
         $rating->save();
 
