@@ -80,3 +80,32 @@ messaging.onMessage(function(payload) {
         };
     }
 });
+
+
+
+messaging.setBackgroundMessageHandler(function(payload) {
+    console.log('[firebase-messaging-sw.js] Received background message ', payload);
+
+    const notificationTitle = payload.notification.title;
+    const notificationOptions = {
+        body: payload.notification.body,
+        icon: payload.notification.icon || '/firebase-logo.png',
+        data: {
+            url: payload.data.url
+        }
+    };
+
+    self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Handle notification click event
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close(); // Close the notification
+
+    if (event.notification.data.url) {
+        event.waitUntil(
+            clients.openWindow(event.notification.data.url) // Open the URL when the notification is clicked
+        );
+    }
+});
+
