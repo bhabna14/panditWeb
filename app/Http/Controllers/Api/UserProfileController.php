@@ -188,12 +188,13 @@ public function orderHistory(Request $request)
     // Get the authenticated user
     $user = Auth::guard('sanctum')->user();
 
-    // Fetch recent bookings for the user
-    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address', 'ratings'])
+    // Fetch recent bookings for the user without loading ratings
+    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address'])
                         ->where('user_id', $user->userid)
                         ->orderByDesc('created_at')
                         ->get();
 
+    // Fetch and attach ratings to each booking
     $bookings->each(function ($booking) {
         // Append URLs for pooja_photo in poojalist
         if ($booking->pooja && $booking->pooja->poojalist) {
@@ -207,8 +208,8 @@ public function orderHistory(Request $request)
             $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
         }
 
-        // Handle ratings independently for each booking
-        $rating = $booking->ratings ? $booking->ratings->first() : null;
+        // Fetch the rating for the current booking
+        $rating = Rating::where('booking_id', $booking->booking_id)->first(); // Get the rating for the booking
 
         if ($rating) {
             $rating->rating_date = $rating->created_at->format('Y-m-d');
@@ -220,9 +221,6 @@ public function orderHistory(Request $request)
         } else {
             $booking->rating_details = null; // No ratings available
         }
-
-        // Remove the ratings relationship to avoid redundancy
-        unset($booking->ratings);
 
         // Fetch the latest payment directly
         $latestPayment = Payment::where('booking_id', $booking->booking_id)
@@ -246,6 +244,7 @@ public function orderHistory(Request $request)
         'bookings' => $bookings,
     ], 200);
 }
+
 
 
 
