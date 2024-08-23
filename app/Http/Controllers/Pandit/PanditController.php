@@ -43,7 +43,7 @@ class PanditController extends Controller
         // List of fields to check
         $fieldsToCheck = [
             'title', 'name', 'slug', 'email', 'whatsappno', 'bloodgroup', 
-            'profile_photo', 'maritalstatus', 'about_pandit', 'language', 'pandit_status'
+            'profile_photo','gotra','bruti', 'maritalstatus', 'about_pandit', 'language', 'pandit_status'
         ];
         $careerFields = ['qualification', 'total_experience'];
         $educationFields = ['education_type', 'upload_education'];

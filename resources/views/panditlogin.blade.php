@@ -45,9 +45,8 @@
                                                     @if (session('otp_sent'))
                                                         <form action="/verify-otp" method="POST">
                                                             @csrf
-                                                            {{-- <input type="hidden" id="device_id" name="device_id" value="" required>
-                                                            <input type="hidden" id="platform" name="platform" value="" required> <!-- Hidden field to store Platform -->
-                                                         --}}
+                                                            <input type="hidden" id="device_id" name="device_id" value="" required>
+                                                             <input type="hidden" id="platform" name="platform" value="web" required>
                                                             <input type="hidden" class="form-control" name="order_id" value="{{ session('otp_order_id') }}" required>
                                                             <input type="text" class="form-control" name="otp" placeholder="Enter OTP" required>
                                                             <input type="hidden" class="form-control" name="phone" value="{{ session('otp_phone') }}" required>
@@ -87,44 +86,39 @@
 
 @section('scripts')
 <script>
-    setTimeout(function() {
-        var message = document.querySelector('.alert');
-        if (message) {
-            message.style.display = 'none';
-        }
-    }, 3000);
-</script>
-<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        OneSignal.push(function() {
-            // Retrieve the OneSignal user ID (device ID)
-            OneSignal.getUserId(function(playerId) {
-                console.log('playerId', playerId);
-                if (playerId) {
-                    document.getElementById('device_id').value = playerId;
-                }
-            });
+    // Your Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDnr12fJbycTY67cj3q78PEAMG_0D74jTc",
+    authDomain: "pandit-cd507.firebaseapp.com",
+    projectId: "pandit-cd507",
+    storageBucket: "pandit-cd507.appspot.com",
+    messagingSenderId: "696430656576",
+    appId: "1:696430656576:web:0b5462793e668b0abe33a5",
+    measurementId: "G-X7N1W6XCDJ"
+    };
 
-            // Detect the platform based on user-agent (for web detection)
-            var platform = 'web'; // Default to 'web'
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
 
-            if (navigator.userAgent) {
-                var userAgent = navigator.userAgent.toLowerCase();
-                if (userAgent.indexOf('android') > -1) {
-                    platform = 'android';
-                } else if (userAgent.indexOf('iphone') > -1 || userAgent.indexOf('ipad') > -1) {
-                    platform = 'ios';
-                }
-            }
+    // Initialize Firebase Cloud Messaging
+    const messaging = firebase.messaging();
 
-            document.getElementById('platform').value = platform;
-        });
+    // Request permission and get device token
+    Notification.requestPermission().then((permission) => {
+      if (permission === 'granted') {
+        console.log('Notification permission granted.');
+        return messaging.getToken();
+      } else {
+        console.log('Unable to get permission to notify.');
+      }
+    }).then((token) => {
+      if (token) {
+        console.log('Device token:', token);
+        document.getElementById('device_id').value = token; // Set the device_id field with token
+      }
+    }).catch((err) => {
+      console.error('An error occurred while retrieving token. ', err);
     });
-</script>
-
-
-
-
+  </script>
 
 @endsection

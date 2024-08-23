@@ -18,5 +18,8 @@
         "postcss": "^8.1.14",
         "sass": "^1.49.7",
         "sass-loader": "^12.1.0"
+    },
+    "dependencies": {
+        "firebase": "^10.13.0"
     }
 }
