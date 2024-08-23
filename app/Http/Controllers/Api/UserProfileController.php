@@ -203,26 +203,22 @@ public function orderHistory(Request $request)
         }
 
         // Append URL for profile_photo
-        if ($booking->pandit->profile_photo) {
+        if ($booking->pandit && $booking->pandit->profile_photo) {
             $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
         }
 
-        // Include ratings and their media file URLs as an object
-        if ($booking->ratings) {
-            $rating = $booking->ratings->first(); // Assuming only one rating per booking
+        // Handle ratings independently for each booking
+        $rating = $booking->ratings ? $booking->ratings->first() : null;
 
-            if ($rating) {
-                $rating->rating_date = $rating->created_at->format('Y-m-d');
-                $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
-                $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
+        if ($rating) {
+            $rating->rating_date = $rating->created_at->format('Y-m-d');
+            $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
+            $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
 
-                // Append rating details as an object in the booking
-                $booking->rating_details = $rating->toArray();
-            } else {
-                $booking->rating_details = null; // No ratings available
-            }
+            // Append rating details as an object in the booking
+            $booking->rating_details = $rating->toArray();
         } else {
-            $booking->rating_details = null; // No ratings relationship
+            $booking->rating_details = null; // No ratings available
         }
 
         // Remove the ratings relationship to avoid redundancy
