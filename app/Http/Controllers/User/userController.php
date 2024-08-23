@@ -525,9 +525,9 @@ public function confirmBooking(Request $request)
 
     // Send the notification
     $messaging->send($message);
-
         try {
             $messaging->send($message);
+            Log::info('FCM notification sent successfully to Pandit ID: ' .  $panditId);
         } catch (\Exception $e) {
             Log::error('Error sending FCM notification: ' . $e->getMessage());
         }
