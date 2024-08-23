@@ -66,5 +66,9 @@ messaging.onMessage(function(payload) {
     // Display notification
     if (Notification.permission === 'granted') {
         new Notification(notificationTitle, notificationOptions);
+
+        // Play custom sound
+        const audio = new Audio('D:/xampp/htdocs/33crores/panditWeb/public/Ghanti.mp3');
+        audio.play();
     }
 });
