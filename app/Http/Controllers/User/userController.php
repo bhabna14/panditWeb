@@ -1033,7 +1033,7 @@ private function convertDurationToMinutes($durationString)
         $booking = Booking::findOrFail($id); // Ensure the booking exists
     
         // Check if the user has already rated this booking
-        $rating = Rating::where('booking_id', $id)
+        $rating = Rating::where('booking_id', $booking->booking_id)
                         ->where('user_id', Auth::guard('users')->user()->userid)
                         ->first();
     
