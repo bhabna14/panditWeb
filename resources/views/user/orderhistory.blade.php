@@ -145,7 +145,7 @@
                   </div>
                   <div class="col-md-4">
                         @if ($booking->status == "pending" && $booking->payment_status == "pending" && $booking->application_status == "approved"  && $booking->pooja_status == "pending" )
-                        <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 bg-dark-4 h-50 text-white">Pay</a>
+                        <a href="{{ route('payment.page', ['booking_id' => $booking->id]) }}" class="button px-10 fw-400 text-14 -blue-1 pay-button-bg h-50 text-white">Pay</a>
 
                         @endif
                     

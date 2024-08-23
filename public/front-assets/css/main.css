@@ -13421,6 +13421,11 @@ table.table-5 td {
   font-family: "Jost", sans-serif;
   transition: 0.3s;
 }
+.pay-button-bg{
+  margin-bottom: 10px;
+  background-color: #008009;
+  color:#fff;
+}
 
 /* booking search background */
 .search-bg {
