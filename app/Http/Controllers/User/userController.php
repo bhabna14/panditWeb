@@ -1085,7 +1085,7 @@ private function convertDurationToMinutes($durationString)
 
         $rating->save();
 
-        return redirect()->route('orderhistory')
+        return redirect()->route('booking.history')
                         ->with('success', 'Rating submitted successfully!')
                         ->with('rating', $rating);
     }
