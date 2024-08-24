@@ -15,6 +15,8 @@
     
         <!-- Firebase Messaging -->
         <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-messaging-compat.js"></script>
+        
+<link rel="shortcut icon" href="//cdn.shopify.com/s/files/1/0654/9789/1030/files/MicrosoftTeams-image_471_32x32.png?v=1660732431" type="image/png">
     </head>
 		@include('pandit.layouts.components.custom-styles')
 
