@@ -1,4 +1,3 @@
-// Initialize Firebase in your main application
 // Firebase configuration (same as in your service worker)
 const firebaseConfig = {
     apiKey: "AIzaSyDnr12fJbycTY67cj3q78PEAMG_0D74jTc",
@@ -51,11 +50,18 @@ function requestNotificationPermission() {
 // Handle incoming messages while the app is in the foreground
 messaging.onMessage(function(payload) {
     console.log('Message received. ', payload);
-    // Customize notification here
+
     const notificationTitle = payload.notification.title || "Default Title";
     const notificationOptions = {
         body: payload.notification.body || "Default body content.",
-        icon: payload.notification.icon || "/firebase-logo.png" // Ensure this path is correct
+        icon: payload.notification.icon || "/path/to/default/icon.png",
+        image: payload.data.image || "/var/www/panditWeb/public/front-assets/img/customer.png", // Pooja image URL
+        actions: [
+            {
+                action: 'open_url',
+                title: 'Go to Dashboard'
+            }
+        ]
     };
 
     // Display notification

@@ -1,8 +1,7 @@
-// Import and initialize Firebase in the service worker
 importScripts('https://www.gstatic.com/firebasejs/8.3.2/firebase-app.js');
 importScripts('https://www.gstatic.com/firebasejs/8.3.2/firebase-messaging.js');
 
-// Firebase configuration (same as in your main app)
+// Initialize Firebase
 firebase.initializeApp({
     apiKey: "AIzaSyDnr12fJbycTY67cj3q78PEAMG_0D74jTc",
     authDomain: "pandit-cd507.firebaseapp.com",
@@ -13,30 +12,34 @@ firebase.initializeApp({
     measurementId: "G-X7N1W6XCDJ"
 });
 
-// Retrieve an instance of Firebase Messaging so that it can handle background messages
 const messaging = firebase.messaging();
 
-// Handle background messages
 messaging.setBackgroundMessageHandler(function(payload) {
     console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
     const notificationTitle = payload.notification.title || "Default Title";
     const notificationOptions = {
         body: payload.notification.body || "Default body content.",
-        icon: payload.notification.icon || '/firebase-logo.png',
+        icon: payload.notification.icon || '/path/to/default/icon.png',
+        image: payload.data.image || '/var/www/panditWeb/public/front-assets/img/customer.png', // Pooja image URL
+        actions: [
+            {
+                action: 'open_url',
+                title: 'Go to Dashboard'
+            }
+        ],
         data: {
-            url: payload.data.url
+            url: payload.data.url // URL to open when notification is clicked
         }
     };
 
     return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Handle notification click event
 self.addEventListener('notificationclick', function(event) {
     event.notification.close(); // Close the notification
 
-    if (event.notification.data.url) {
+    if (event.action === 'open_url' && event.notification.data.url) {
         event.waitUntil(
             clients.openWindow(event.notification.data.url) // Open the URL when the notification is clicked
         );
