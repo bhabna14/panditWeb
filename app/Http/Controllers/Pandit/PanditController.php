@@ -356,7 +356,10 @@ public function poojarequest()
                     'pooja_name' => $booking->pooja->pooja_name,
                     'pooja_fee' => $booking->pooja->pooja_fee,
                 ],
-
+                'review' => $booking->ratings ? $booking->ratings->feedback_message : 'No feedback available', 
+                'image_path' => $booking->ratings ? $booking->ratings->image_path : null, // Fetch image path
+                'audio_path' => $booking->ratings ? $booking->ratings->audio_file : null, // Fetch audio path
+                
                 'booking_time' => $booking->booking_date,
                 'payment_status' => $booking->payment_status,
                 'pooja_status' => $booking->pooja_status,

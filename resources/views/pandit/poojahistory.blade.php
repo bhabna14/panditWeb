@@ -6,6 +6,7 @@
 
     <!--  smart photo master css -->
     <link href="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.css') }}" rel="stylesheet">
+   
 @endsection
 
 @section('content')
@@ -42,19 +43,21 @@
                                     <div class="row">
                                         <div class="col-10">
                                             <div class="cardtitle">
-                                                <div>
-                                                    <a href="javascript:void(0);"><i
-                                                            class="fa fa-star text-warning fs-16"></i></a>
-                                                    <a href="javascript:void(0);"><i
-                                                            class="fa fa-star text-warning fs-16"></i></a>
-                                                    <a href="javascript:void(0);"><i
-                                                            class="fa fa-star text-warning fs-16"></i></a>
-                                                    <a href="javascript:void(0);"><i
-                                                            class="fa fa-star-half text-warning fs-16"></i></a>
-                                                    <a href="javascript:void(0);"><i
-                                                            class="fa fa-star-o text-warning fs-16"></i></a>
+                                                <div class="rating-container">
+                                                    <div class="rating">
+                                                        <input type="radio" id="star5_{{ $pooja->booking_id }}" name="rating_{{ $pooja->booking_id }}" value="5" {{ isset($pooja->rating) && $pooja->rating->rating == 5 ? 'checked' : '' }}>
+                                                        <label for="star5_{{ $pooja->booking_id }}"></label>
+                                                        <input type="radio" id="star4_{{ $pooja->booking_id }}" name="rating_{{ $pooja->booking_id }}" value="4" {{ isset($pooja->rating) && $pooja->rating->rating == 4 ? 'checked' : '' }}>
+                                                        <label for="star4_{{ $pooja->booking_id }}"></label>
+                                                        <input type="radio" id="star3_{{ $pooja->booking_id }}" name="rating_{{ $pooja->booking_id }}" value="3" {{ isset($pooja->rating) && $pooja->rating->rating == 3 ? 'checked' : '' }}>
+                                                        <label for="star3_{{ $pooja->booking_id }}"></label>
+                                                        <input type="radio" id="star2_{{ $pooja->booking_id }}" name="rating_{{ $pooja->booking_id }}" value="2" {{ isset($pooja->rating) && $pooja->rating->rating == 2 ? 'checked' : '' }}>
+                                                        <label for="star2_{{ $pooja->booking_id }}"></label>
+                                                        <input type="radio" id="star1_{{ $pooja->booking_id }}" name="rating_{{ $pooja->booking_id }}" value="1" {{ isset($pooja->rating) && $pooja->rating->rating == 1 ? 'checked' : '' }}>
+                                                        <label for="star1_{{ $pooja->booking_id }}"></label>
+                                                    </div>
                                                 </div>
-                                                <a class="shop-title fs-18">{{ $pooja->poojaList->pooja_name }}</a>
+                                                <h5 class="shop-title fs-18">{{ $pooja->poojaList->pooja_name }}</h5>
                                             </div>
                                             <hr>
                                         </div>
@@ -158,60 +161,79 @@
                     @endif
                 @endforeach
                 <div class="modal fade" id="full-screen" tabindex="-1" aria-labelledby="fullScreenModalLabel"
-                    aria-hidden="true">
-                    <div class="modal-dialog modal-fullscreen" role="document" style="width: 1200px">
-                        <div class="modal-content modal-content-demo">
-                            <div class="modal-header">
-                                <h6 class="modal-title">Complete Pooja</h6>
-                                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
-                            </div>
-                            <div class="modal-body">
-                                <table class="table table-striped ">
-                                    <tbody>
-                                        <tr>
-                                            <th>Full Name</th>
-                                            <td id="modal-full-name">N/A</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Pooja Name</th>
-                                            <td id="modal-pooja-name">N/A</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Mobile Number</th>
-                                            <td id="modal-mobile-number">N/A</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Pooja Fee</th>
-                                            <td>₹ <span id="modal-pooja-fee">N/A</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Payment Status</th>
-                                            <td><span id="modal-payment-status">N/A</span></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Date and Time</th>
-                                            <td id="modal-date-time">N/A</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Address</th>
-                                            <td id="modal-address">N/A</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Pooja Status</th>
-                                            <td id="modal-pooja-status">N/A</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="modal-footer">
-                                <button class="btn ripple btn-secondary" data-bs-dismiss="modal"
-                                    type="button">Close</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen" role="document" style="width: 1200px">
+        <div class="modal-content modal-content-demo">
+            <div class="modal-header">
+                <h6 class="modal-title">Complete Pooja</h6>
+                <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped ">
+                    <tbody>
+                        <tr>
+                            <th>Full Name</th>
+                            <td id="modal-full-name">N/A</td>
+                        </tr>
+                        <tr>
+                            <th>Pooja Name</th>
+                            <td id="modal-pooja-name">N/A</td>
+                        </tr>
+                        <tr>
+                            <th>Mobile Number</th>
+                            <td id="modal-mobile-number">N/A</td>
+                        </tr>
+                        <tr>
+                            <th>Pooja Fee</th>
+                            <td>₹ <span id="modal-pooja-fee">N/A</span></td>
+                        </tr>
+                        <tr>
+                            <th>Payment Status</th>
+                            <td><span id="modal-payment-status">N/A</span></td>
+                        </tr>
+                        <tr>
+                            <th>Date and Time</th>
+                            <td id="modal-date-time">N/A</td>
+                        </tr>
+                        <tr>
+                            <th>Address</th>
+                            <td id="modal-address">N/A</td>
+                        </tr>
+                        <tr>
+                            <th>Pooja Status</th>
+                            <td id="modal-pooja-status">N/A</td>
+                        </tr>
+                        <tr>
+                            <th>Feedback Message</th>
+                            <td id="modal-feedback-message">N/A</td>
+                        </tr>
+                        <tr>
+                            <th>Review Image</th>
+                            <td>
+                                <img id="modal-image" src="" alt="Feedback Image" style="display: none; width: 60px; height: 70px; margin-top: 10px;" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Review Audio</th>
+                            <td>
+                                <audio id="modal-audio" controls style="display: none; width: 100%;">
+                                    <source id="audio-source" src="" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
             </div>
         </div>
     </div>
@@ -221,96 +243,88 @@
     <!-- Internal Select2 js-->
 
 
+   
     <script>
-        function addressFunction() {
-            if (document.getElementById("same").checked) {
-                document.getElementById("peraddress").value = document.getElementById("preaddress").value;
-                document.getElementById("perpost").value = document.getElementById("prepost").value;
-                document.getElementById("perdistri").value = document.getElementById("predistrict").value;
-                document.getElementById("perstate").value = document.getElementById("prestate").value;
-                document.getElementById("percountry").value = document.getElementById("precountry").value;
-                document.getElementById("perpincode").value = document.getElementById("prepincode").value;
-                document.getElementById("perlandmark").value = document.getElementById("prelandmark").value;
+     document.addEventListener('DOMContentLoaded', function() {
+    const viewButtons = document.querySelectorAll('[data-bs-target="#full-screen"]');
 
-            } else {
-                document.getElementById("peraddress").value = "";
-                document.getElementById("perpost").value = "";
-                document.getElementById("perdistri").value = "";
-                document.getElementById("perstate").value = "";
-                document.getElementById("percountry").value = "";
-                document.getElementById("perpincode").value = "";
-                document.getElementById("perlandmark").value = "";
-            }
-        }
-    </script>
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const bookingId = this.getAttribute('data-booking-id');
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const viewButtons = document.querySelectorAll('[data-bs-target="#full-screen"]');
+            // Fetch booking details using AJAX
+            fetch(`${baseUrl}/pandit/booking/details/${bookingId}`)  // Using the dynamic base URL
+                .then(response => response.json())
+                .then(data => {
+                    if (data) {
+                        // Mask the mobile number and name
+                        const maskedMobileNumber = maskMobileNumber(data.user?.mobile_number);
+                        const maskedName = maskName(data.user?.name);
 
-            viewButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const bookingId = this.getAttribute('data-booking-id');
+                        // Update modal content
+                        document.getElementById('modal-full-name').textContent = maskedName || 'N/A';
+                        document.getElementById('modal-pooja-name').textContent = data.pooja?.pooja_name || 'N/A';
+                        document.getElementById('modal-mobile-number').textContent = maskedMobileNumber || 'N/A';
+                        document.getElementById('modal-pooja-fee').textContent = data.pooja?.pooja_fee || 'N/A';
+                        document.getElementById('modal-payment-status').textContent = data.payment_status || 'N/A';
+                        document.getElementById('modal-date-time').textContent = data.booking_time || 'N/A';
+                        document.getElementById('modal-pooja-status').textContent = data.pooja_status || 'N/A';
+                        document.getElementById('modal-feedback-message').textContent = data.review || 'No feedback available';
 
-                    // Fetch booking details using AJAX
-                    fetch(`/pandit/booking/details/${bookingId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data) {
-                                // Mask the mobile number and name
-                                const maskedMobileNumber = maskMobileNumber(data.user
-                                    ?.mobile_number);
-                                const maskedName = maskName(data.user?.name);
+                        // Handle image display
+                        const modalImageElement = document.getElementById('modal-image');
+                        if (data.image_path) {
+                            modalImageElement.src = `${baseUrl}/storage/${data.image_path}`;  // Using dynamic base URL
+                            modalImageElement.style.display = 'block';
+                        } else {
+                            modalImageElement.style.display = 'none';
+                        }
 
-                                // Update modal content
-                                document.getElementById('modal-full-name').textContent =
-                                    maskedName || 'N/A';
-                                document.getElementById('modal-pooja-name').textContent = data
-                                    .pooja?.pooja_name || 'N/A';
-                                document.getElementById('modal-mobile-number').textContent =
-                                    maskedMobileNumber || 'N/A';
-                                document.getElementById('modal-pooja-fee').textContent = data
-                                    .pooja?.pooja_fee || 'N/A';
-                                document.getElementById('modal-payment-status').textContent =
-                                    data.payment_status || 'N/A';
-                                document.getElementById('modal-date-time').textContent = data
-                                    .booking_time || 'N/A';
-                                document.getElementById('modal-pooja-status').textContent = data
-                                    .pooja_status || 'N/A';
+                        // Handle audio display
+                        const modalAudioElement = document.getElementById('modal-audio');
+                        const audioSourceElement = document.getElementById('audio-source');
+                        if (data.audio_path) {
+                            audioSourceElement.src = `${baseUrl}/storage/${data.audio_path}`;  // Using dynamic base URL
+                            modalAudioElement.style.display = 'block';
+                            modalAudioElement.load(); // Reload audio element with new source
+                        } else {
+                            modalAudioElement.style.display = 'none';
+                        }
 
-                                document.getElementById('modal-address').innerHTML = `
-                                Country: ${data.address?.country || 'N/A'}<br>
-                                State: ${data.address?.state || 'N/A'}<br>                                    
-                                City: ${data.address?.city || 'N/A'}<br>
-                                Area: ${data.address?.area || 'N/A'}<br>
-                                Pincode: ${data.address?.pincode || 'N/A'}<br>
-                                Address Type: ${data.address?.address_type || 'N/A'}<br>
-                            `;
-                            }
-                        })
-                        .catch(error => console.error('Error fetching booking details:', error));
-                });
-            });
-
-            function maskMobileNumber(mobileNumber) {
-                if (!mobileNumber) return 'N/A';
-                return mobileNumber.slice(0, 5) + '*****';
-            }
-
-            function maskName(name) {
-                if (!name) return 'N/A';
-
-                return name.split(' ').map(word => {
-                    if (word.length <= 2) return word; // Handle short words
-
-                    const firstChar = word.charAt(0);
-                    const lastChar = word.charAt(word.length - 1);
-                    const maskedMiddle = '*'.repeat(word.length - 2);
-
-                    return `${firstChar}${maskedMiddle}${lastChar}`;
-                }).join(' ');
-            }
+                        document.getElementById('modal-address').innerHTML = `
+                            Country: ${data.address?.country || 'N/A'}<br>
+                            State: ${data.address?.state || 'N/A'}<br>
+                            City: ${data.address?.city || 'N/A'}<br>
+                            Area: ${data.address?.area || 'N/A'}<br>
+                            Pincode: ${data.address?.pincode || 'N/A'}<br>
+                            Address Type: ${data.address?.address_type || 'N/A'}<br>
+                        `;
+                    }
+                })
+                .catch(error => console.error('Error fetching booking details:', error));
         });
+    });
+
+
+        function maskMobileNumber(mobileNumber) {
+            if (!mobileNumber) return 'N/A';
+            return mobileNumber.slice(0, 5) + '*****';
+        }
+
+        function maskName(name) {
+            if (!name) return 'N/A';
+
+            return name.split(' ').map(word => {
+                if (word.length <= 2) return word; // Handle short words
+
+                const firstChar = word.charAt(0);
+                const lastChar = word.charAt(word.length - 1);
+                const maskedMiddle = '*'.repeat(word.length - 2);
+
+                return `${firstChar}${maskedMiddle}${lastChar}`;
+            }).join(' ');
+        }
+    });
     </script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
@@ -320,4 +334,9 @@
     <!-- smart photo master js -->
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
+       <!-- Include your JavaScript files, or scripts can go here -->
+       <script>
+        const baseUrl = document.querySelector('meta[name="base-url"]').getAttribute('content');
+    </script>
+
 @endsection

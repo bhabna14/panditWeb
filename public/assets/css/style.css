@@ -101561,3 +101561,38 @@ a.text-dark:hover, a.text-dark:focus {
 .btn-w-lg {
   min-width: 150px;
 }
+
+
+/* rating */
+.rating {
+  display: inline-block;
+  unicode-bidi: bidi-override;
+  direction: ltr;
+}
+ 
+.rating input {
+  display: none;
+}
+.rating label {
+  font-size: 30px;
+  color: #aaa;
+  float: right;
+}
+.rating label:before {
+  content: '★';
+  margin: 5px;
+}
+.rating input:checked ~ label {
+  color: #ffdd00;
+}
+.rating:not(:checked) > label:hover,
+.rating:not(:checked) > label:hover ~ label {
+  color: #ffdd00;
+}
+.rating input:checked + label:hover,
+.rating input:checked + label:hover ~ label,
+.rating input:checked ~ label:hover,
+.rating input:checked ~ label:hover ~ label,
+.rating label:hover ~ input:checked ~ label {
+  color: #ffdd00;
+}

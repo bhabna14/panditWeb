@@ -117,6 +117,7 @@ class PaymentController extends Controller
                 'payment_type' => $request->payment_type,
                 'payment_method' => 'razorpay',
             ]);
+            $booking = Booking::findOrFail($booking->booking_id);
 
             $poojaName = $booking->poojaList->name;
               // Send FCM notification to the pandit
