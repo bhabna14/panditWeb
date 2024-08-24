@@ -61,6 +61,17 @@
         if (permission === 'granted') {
             console.log('Notification permission granted.');
             // You can now proceed to subscribe the user to push notifications
+
+            const notification = new Notification(notificationTitle, notificationOptions);
+
+            // Play custom sound
+            const audio = new Audio('/var/www/panditWeb/public/Ghanti.mp3');
+            audio.play();
+
+            notification.onclick = function(event) {
+                event.preventDefault(); // Prevent the browser from focusing the Notification's tab
+                window.open(payload.data.url, '_blank'); // Open the URL in a new tab
+            };
         } else {
             console.log('Unable to get permission to notify.');
         }
