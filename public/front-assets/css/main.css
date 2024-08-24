@@ -685,9 +685,10 @@ p.blockquote:after {
 .upcoming-main-heading  p {
   font-weight: 600;
 }
-.poja-details-img img{
-    /* width: 62%; */
-    margin-top: 13px;
+.poja-details-img img {
+  /* width: 62%; */
+  margin-top: 13px;
+  border-radius: 5px;
 }
 .upcoming-event-img img{
  

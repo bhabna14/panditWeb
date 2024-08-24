@@ -54,7 +54,7 @@
                                 
                                                             <div id="step1">
                                                                 <div class="form-group">
-                                                                    <label>Phone Number</label> <input class="form-control" placeholder="Enter your Phone Number" name="phonenumber" value="+91" type="text">
+                                                                    <label>Phone Number</label> <input class="form-control" placeholder="Enter your Phone Number" name="phonenumber" value="" type="text">
                                                                 </div>
                                 
                                                                
