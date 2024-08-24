@@ -40,7 +40,15 @@
                            {{ $pandit_profile->title . ' ' . $pandit_profile->name }}</h4>
                         <p class="tx-13 text-muted ms-md-4 ms-0 mb-2 pb-2 ">
                             <span class="me-3"><i
-                                    class="far fa-address-card me-2"></i>{{ $pandit_profile->whatsappno }}</span>
+                                    class="far fa-address-card me-2"></i>Pandit Id :{{ $pandit_profile->pandit_id }}</span>
+                        </p>
+                        <p class="tx-13 text-muted ms-md-4 ms-0 mb-2 pb-2 ">
+                            <span class="me-3"><i
+                                    class="far fa-address-card me-2"></i>Whatsapp Number :{{ $pandit_profile->whatsappno }}</span>
+                        </p>
+                        <p class="tx-13 text-muted ms-md-4 ms-0 mb-2 pb-2 ">
+                            <span class="me-3"><i
+                                    class="far fa-address-card me-2"></i>Login Number :{{ $pandit_logindetails->mobile_no }}</span>
                         </p>
                     </div>
                 </div>
