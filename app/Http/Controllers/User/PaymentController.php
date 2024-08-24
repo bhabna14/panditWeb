@@ -118,6 +118,7 @@ class PaymentController extends Controller
                 'payment_method' => 'razorpay',
             ]);
 
+            $poojaName = $booking->poojaList->name;
               // Send FCM notification to the pandit
             $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
             $messaging = $factory->createMessaging();
@@ -136,14 +137,15 @@ class PaymentController extends Controller
 
               // Prepare notification message
             $message = CloudMessage::withTarget('token', $deviceToken)
-            ->withNotification(Notification::create(
-                'Booking Confirmed',
-                "A new booking has been confirmed with ID: {$booking->booking_id}. Please check your dashboard for details."
-            ))
+                ->withNotification(Notification::create(
+                    'Booking Confirmed',
+                    "A new booking for {$poojaName} has been confirmed with ID: {$booking->booking_id}. Please check your dashboard for details."
+                ))
             ->withData([
                 'booking_id' => $booking->booking_id,
                 'user_id' => $booking->user_id,
                 'pooja_id' => $booking->pooja_id,
+                'pooja_name' => $poojaName,
                 'message' => 'A new booking has been confirmed for you.',
                 'url' => route('pandit.dashboard')
             ]);
@@ -151,7 +153,7 @@ class PaymentController extends Controller
             $messaging->send($message);
             try {
                 $messaging->send($message);
-                Log::info('FCM notification sent successfully to Pandit ID: ' .  $panditId);
+                Log::info('FCM notification sent successfully to pooja name: ' .  $poojaName);
             } catch (\Exception $e) {
                 Log::error('Error sending FCM notification: ' . $e->getMessage());
             }

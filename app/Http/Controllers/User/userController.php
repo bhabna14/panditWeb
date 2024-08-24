@@ -513,14 +513,14 @@ public function confirmBooking(Request $request)
         // Prepare notification message
         $message = CloudMessage::withTarget('token', $device->device_id)
         ->withNotification(Notification::create(
-            'New Booking Confirmed',
-            "A new booking has been confirmed with ID: {$booking->booking_id}. Please check your dashboard for details."
+            'New Booking Request',
+            "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
         ))
         ->withData([
             'booking_id' => $booking->booking_id,
             'user_id' => Auth::guard('users')->user()->userid,
             'pooja_id' => $validatedData['pooja_id'],
-            'message' => 'A new booking has been confirmed for you.',
+            'message' => 'A new booking request for you.',
             'url' => route('pandit.dashboard')
         ]);
 
