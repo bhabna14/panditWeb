@@ -55,7 +55,7 @@
         </div>
 
 		@include('pandit.layouts.components.custom-scripts')
-<script>
+{{-- <script>
     document.addEventListener('DOMContentLoaded', function() {
     Notification.requestPermission().then((permission) => {
         if (permission === 'granted') {
@@ -78,7 +78,8 @@
     });
 });
 
-</script>
+</script> --}}
+<script src="{{ asset('js/firebase.js') }}"></script>
     </body>
 
 </html>
