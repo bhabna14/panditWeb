@@ -20,6 +20,8 @@ use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\Messaging;
 
+use DB;
+
 class PaymentController extends Controller
 {
     //
@@ -117,9 +119,11 @@ class PaymentController extends Controller
                 'payment_type' => $request->payment_type,
                 'payment_method' => 'razorpay',
             ]);
-            $booking = Booking::findOrFail($booking->booking_id);
-
-            $poojaName = $booking->poojaList->name;
+            $poojaName = DB::table('pooja_list')
+                    ->where('id', $booking->pooja_id)
+                    ->value('pooja_name'); // 
+            // Retrieve the pooja name using the relationship
+            $poojaName = $booking->pooja->pooja_name; 
               // Send FCM notification to the pandit
             $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
             $messaging = $factory->createMessaging();
@@ -140,7 +144,7 @@ class PaymentController extends Controller
             $message = CloudMessage::withTarget('token', $deviceToken)
                 ->withNotification(Notification::create(
                     'Booking Confirmed',
-                    "A new booking for {$poojaName} has been confirmed with ID: {$booking->booking_id}. Please check your dashboard for details."
+                    "A new booking for {$poojaName} has been confirmed with ID: {$booking->booking_id} and {$booking->booking_date}. Please check your dashboard for details."
                 ))
             ->withData([
                 'booking_id' => $booking->booking_id,

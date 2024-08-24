@@ -14,4 +14,8 @@ class Poojalist extends Model
     {
         return $this->hasMany(Poojadetails::class, 'pooja_id');
     }
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'pooja_id', 'id');
+    }
 }
