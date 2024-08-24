@@ -147,10 +147,14 @@ class PaymentController extends Controller
                 'message' => 'A new booking has been confirmed for you.',
                 'url' => route('pandit.dashboard')
             ]);
-
-    // Send notification
-    $messaging = app('firebase.messaging');
-    $messaging->send($message);
+            // Send the notification
+            $messaging->send($message);
+            try {
+                $messaging->send($message);
+                Log::info('FCM notification sent successfully to Pandit ID: ' .  $panditId);
+            } catch (\Exception $e) {
+                Log::error('Error sending FCM notification: ' . $e->getMessage());
+            }
 
             return redirect()->route('booking.success', ['booking' => $booking_id])->with('success', 'Payment successful and booking confirmed!');
         } catch (\Exception $e) {
