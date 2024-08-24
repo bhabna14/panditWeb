@@ -696,6 +696,33 @@ p.blockquote:after {
     height: 200px;
 
 }
+.media-group {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+.media-md {
+  width: 2.375rem;
+  height: 2.375rem;
+  font-size: .7916666667rem;
+}
+.media-middle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.media-circle {
+  border-radius: 50rem;
+}
+.media-group .media+.media-text {
+  margin-left: .625rem;
+}
+.media-text {
+  display: flex;
+  flex-direction: column;
+}
+.media img {
+  
 /* 
 .overlay {
   position: absolute;
