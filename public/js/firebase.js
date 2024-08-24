@@ -55,7 +55,7 @@ messaging.onMessage(function(payload) {
     const notificationOptions = {
         body: payload.notification.body || "Default body content.",
         icon: payload.notification.icon || "/path/to/default/icon.png",
-        image: payload.data.image || "/var/www/panditWeb/public/front-assets/img/customer.png", // Pooja image URL
+        image: payload.data.image || "https://pandit.33crores.com/uploads/profile_photo/1724323767.jpg", // Pooja image URL
         actions: [
             {
                 action: 'open_url',
