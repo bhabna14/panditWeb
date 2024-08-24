@@ -12,6 +12,13 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\Payment;
 use App\Models\Profile;
+use App\Models\PanditDevice;
+// use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\Messaging;
 
 class PaymentController extends Controller
 {
@@ -110,6 +117,40 @@ class PaymentController extends Controller
                 'payment_type' => $request->payment_type,
                 'payment_method' => 'razorpay',
             ]);
+
+              // Send FCM notification to the pandit
+            $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+            $messaging = $factory->createMessaging();
+
+            // Retrieve pandit's device token
+
+            $panditProfile = Profile::findOrFail($booking->pandit_id);
+            $panditId = $panditProfile->pandit_id;
+
+            $device = PanditDevice::where('pandit_id', $panditId)->first();
+            if (!$device) {
+                throw new \Exception('Pandit device token not found.');
+            }
+
+            $deviceToken = $device->device_id;
+
+              // Prepare notification message
+            $message = CloudMessage::withTarget('token', $deviceToken)
+            ->withNotification(Notification::create(
+                'Booking Confirmed',
+                "A new booking has been confirmed with ID: {$booking->booking_id}. Please check your dashboard for details."
+            ))
+            ->withData([
+                'booking_id' => $booking->booking_id,
+                'user_id' => $booking->user_id,
+                'pooja_id' => $booking->pooja_id,
+                'message' => 'A new booking has been confirmed for you.',
+                'url' => route('pandit.dashboard')
+            ]);
+
+    // Send notification
+    $messaging = app('firebase.messaging');
+    $messaging->send($message);
 
             return redirect()->route('booking.success', ['booking' => $booking_id])->with('success', 'Payment successful and booking confirmed!');
         } catch (\Exception $e) {
