@@ -12,7 +12,6 @@ use App\Models\VedicDetail;
 use App\Models\IdcardDetail;
 use App\Models\PanditIdCard;
 use App\Models\Booking;
-use App\Models\PanditLogin;
 
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
@@ -76,14 +75,13 @@ class AdminController extends Controller
         $pandit_profile = Profile::find($id);
         $pandtId = $pandit_profile->pandit_id;
 
-        $pandit_logindetails = PanditLogin::where('pandit_id', $pandtId)->where('status','active')->get();
         $pandit_careers = Career::where('pandit_id', $pandtId)->where('status','active')->get();
         $pandit_idcards = PanditIdCard::where('pandit_id', $pandtId)->where('status','active')->get();
         $pandit_vedics = PanditVedic::where('pandit_id', $pandtId)->where('status','active')->get();
         $pandit_educations = PanditEducation::where('pandit_id', $pandtId)->where('status','active')->get();
 
 
-        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations','pandit_logindetails'));
+        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations'));
 
     }
 
