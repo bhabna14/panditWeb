@@ -12,6 +12,7 @@ use App\Models\VedicDetail;
 use App\Models\IdcardDetail;
 use App\Models\PanditIdCard;
 use App\Models\Booking;
+use App\Models\PanditLogin;
 
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
