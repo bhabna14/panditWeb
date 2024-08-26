@@ -385,9 +385,14 @@ public function poojarequest()
         try {
             // Convert the input date to 'YYYY-MM-DD' format
             $formattedDate = \Carbon\Carbon::parse($date)->format('Y-m-d');
-    
+            $pandit = Auth::guard('pandits')->user();
+            $panditId = $pandit->pandit_id;
+
+            $pandit_details = Profile::where('pandit_id', $panditId)->first();
+            
             // Fetch bookings where the date part of 'booking_date' matches the formatted date
             $bookings = Booking::with(['pooja', 'user', 'address'])
+                 ->where('pandit_id', $pandit_details->id)
                 ->where('payment_status', 'paid')
                 ->where('application_status', 'approved')
                 ->where('pooja_status', 'pending')
