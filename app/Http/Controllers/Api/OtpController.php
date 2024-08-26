@@ -65,14 +65,26 @@ class OtpController extends Controller
 
     public function verifyOtp(Request $request)
     {
-        // dd("hi");
+        // Validate the required fields
+        $validator = Validator::make($request->all(), [
+            'otp' => 'required|digits:6', // Ensure OTP is exactly 6 digits
+            'device_id' => 'required|string', // Validate device_id
+            'platform' => 'required|string', // Validate platform
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 422);
+        }
+
         $orderId = $request->input('orderId');
         $otp = $request->input('otp');
         $phoneNumber = $request->input('phoneNumber');
+        $deviceId = $request->input('device_id');
+        $platform = $request->input('platform');
+
         $client = new Client();
-    
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
-   
+
         try {
             $response = $client->post($url, [
                 'headers' => [
@@ -86,14 +98,13 @@ class OtpController extends Controller
                     'phoneNumber' => $phoneNumber,
                 ],
             ]);
-    
+
             $body = json_decode($response->getBody(), true);
-    
             Log::info("Response Body: " . print_r($body, true));
-    
+
             if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
                 $user = User::where('mobile_number', $phoneNumber)->first();
-    
+
                 if (!$user) {
                     $user = User::create([
                         'userid' => 'USER' . rand(10000, 99999),
@@ -101,15 +112,24 @@ class OtpController extends Controller
                         'order_id' => $orderId,
                     ]);
                 }
-    
+
+                // Update or create a device record for the user
+                $user->devices()->updateOrCreate(
+                    [
+                        'device_id' => $deviceId,
+                        'platform' => $platform
+                    ], // Condition to find the existing record
+                    ['user_id' => $user->userid] // Data to update or create
+                );
+
                 $token = $user->createToken('API Token')->plainTextToken;
-                // $token = $user->createToken('auth_token')->plainTextToken;
-    
+
                 return response()->json([
-                    'message' => 'User authenticated successfully.', 
+                    'message' => 'User authenticated successfully.',
                     'user' => $user,
-                    'token' => $token, 
-                    'token_type' => 'Bearer'], 200);
+                    'token' => $token,
+                    'token_type' => 'Bearer'
+                ], 200);
             } else {
                 $message = $body['message'] ?? 'Invalid OTP';
                 return response()->json(['message' => $message], 400);
@@ -119,6 +139,7 @@ class OtpController extends Controller
             return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
         }
     }
+
     
     
 }

@@ -283,8 +283,11 @@ class OtplessLoginController extends Controller
     
                 // Save device_id and platform to user_devices table
                 $user->devices()->updateOrCreate(
-                    ['device_id' => $deviceId], // Condition to find the existing record
-                    ['platform' => $platform, 'user_id' => $user->userid] // Data to update or create
+                    [
+                        'device_id' => $deviceId,
+                        'platform' => $platform
+                    ], // Condition to find the existing record
+                    ['user_id' => $user->userid] // Data to update or create
                 );
     
                 // Log the user in using the custom guard
