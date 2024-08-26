@@ -749,7 +749,7 @@ private function convertDurationToMinutes($durationString)
             case 'pending':
                 $bookingsQuery->where('status', 'pending')
                                 ->where('payment_status', 'pending')
-                                ->where('application_status', 'pending')
+                                ->where('application_status', 'approved')
                                 ->where('pooja_status', 'pending');
                 break;
             case 'confirmed':
