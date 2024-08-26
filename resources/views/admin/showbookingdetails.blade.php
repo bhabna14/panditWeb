@@ -243,17 +243,22 @@
     </div>
 
     <!-- Rating Details Card -->
-    {{-- <div class="col-lg-6">
+    <div class="col-lg-6">
         <div class="card custom-card overflow-hidden">
             <div class="card-header">Rating Details</div>
             <div class="card-body">
-                @foreach($booking->ratings as $rating)
-                    <p><strong>Rating:</strong> {{ $rating->rating }}</p>
-                    <p><strong>Comment:</strong> {{ $rating->comment }}</p>
-                @endforeach
+                @if($booking->ratings && $booking->ratings->isNotEmpty())
+                    @foreach($booking->ratings as $rating)
+                        <p><strong>Rating:</strong> {{ $rating->rating }}</p>
+                        <p><strong>Comment:</strong> {{ $rating->comment }}</p>
+                    @endforeach
+                @else
+                    <p>No ratings available for this booking.</p>
+                @endif
             </div>
         </div>
-    </div> --}}
+    </div>
+    
 </div>
 
 @endsection
