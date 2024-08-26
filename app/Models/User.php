@@ -80,6 +80,7 @@ class User extends Authenticatable
      *
      * @var array
      */
+    // protected $primaryKey = 'userid'; 
     protected $fillable = [
         'userid', 'mobile_number', 'email', 'order_id', 'expiry', 'hash', 'client_id', 'client_secret', 'otp_length', 'channel', 'userphoto',
     ];
@@ -114,5 +115,9 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'user_id');
+    }
+    public function devices()
+    {
+        return $this->hasMany(UserDevice::class, 'user_id', 'userid');
     }
 }

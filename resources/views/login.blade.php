@@ -2,6 +2,10 @@
 
     @section('styles')
     <title> User Login</title>
+    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app-compat.js"></script>
+    
+    <!-- Firebase Messaging -->
+    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-messaging-compat.js"></script>
     @endsection
 
     @section('class')
@@ -62,6 +66,8 @@
                                                                 <form id="loginForm" action="/verify-otp-user" method="POST">
                                                                     @csrf
                                                                     <div id="step1">
+                                                                        <input type="hidden" id="device_id" name="device_id" value="" required>
+                                                                        <input type="hidden" id="platform" name="platform" value="web" required>
                                                                         <div class="form-group">
                                                                             <div style="display: flex; align-items: center;">
                                                                                 <input type="hidden" class="form-control" id="order_id" value="{{ session('otp_order_id') }}" name="order_id" required>
@@ -124,5 +130,41 @@
                 document.getElementById('step2').style.display = 'block';
             });
         </script>
+
+<script>
+    // Your Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDnr12fJbycTY67cj3q78PEAMG_0D74jTc",
+        authDomain: "pandit-cd507.firebaseapp.com",
+        projectId: "pandit-cd507",
+        storageBucket: "pandit-cd507.appspot.com",
+        messagingSenderId: "696430656576",
+        appId: "1:696430656576:web:0b5462793e668b0abe33a5",
+        measurementId: "G-X7N1W6XCDJ"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Initialize Firebase Cloud Messaging
+    const messaging = firebase.messaging();
+
+    // Request permission and get device token
+    Notification.requestPermission().then((permission) => {
+      if (permission === 'granted') {
+        console.log('Notification permission granted.');
+        return messaging.getToken();
+      } else {
+        console.log('Unable to get permission to notify.');
+      }
+    }).then((token) => {
+      if (token) {
+        console.log('Device token:', token);
+        document.getElementById('device_id').value = token; // Set the device_id field with token
+      }
+    }).catch((err) => {
+      console.error('An error occurred while retrieving token. ', err);
+    });
+  </script>
 
     @endsection

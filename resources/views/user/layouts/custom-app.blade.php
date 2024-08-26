@@ -9,11 +9,14 @@
 		<meta name="Author" content="Spruko Technologies Private Limited">
 		<meta name="Keywords" content="admin dashboard, admin dashboard laravel, admin panel template, blade template, blade template laravel, bootstrap template, dashboard laravel, laravel admin, laravel admin dashboard, laravel admin panel, laravel admin template, laravel bootstrap admin template, laravel bootstrap template, laravel template"/>
 
-		<!-- Title -->
-		<title> Pratihara Nijog Login </title>
-
+		
+        @yield('styles')
 		@include('layouts.components.custom-styles')
-
+        <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app-compat.js"></script>
+<link rel="shortcut icon" href="//cdn.shopify.com/s/files/1/0654/9789/1030/files/MicrosoftTeams-image_471_32x32.png?v=1660732431" type="image/png">
+    
+        <!-- Firebase Messaging -->
+        <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-messaging-compat.js"></script>
     </head>
 	<body class="ltr error-page1">
 

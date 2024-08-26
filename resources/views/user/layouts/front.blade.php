@@ -11,7 +11,10 @@
 
         @include('user.layouts.components.front-style')
         @yield('styles')
-
+        <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app-compat.js"></script>
+    
+        <!-- Firebase Messaging -->
+        <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-messaging-compat.js"></script>
 	</head>
 
 	<body>

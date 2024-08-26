@@ -229,12 +229,13 @@ class OtplessLoginController extends Controller
     //     }
     // }
     
-
     public function verifyOtp(Request $request)
     {
         // Validate the OTP length
         $validator = Validator::make($request->all(), [
             'otp' => 'required|digits:6', // Ensure OTP is exactly 6 digits
+            'device_id' => 'required|string', // Validate device_id
+            'platform' => 'required|string', // Validate platform
         ]);
     
         if ($validator->fails()) {
@@ -244,6 +245,8 @@ class OtplessLoginController extends Controller
         $orderId = $request->session()->get('otp_order_id');
         $otp = $request->input('otp');
         $phoneNumber = $request->session()->get('otp_phone');
+        $deviceId = $request->input('device_id');
+        $platform = $request->input('platform');
     
         $client = new Client();
     
@@ -277,6 +280,12 @@ class OtplessLoginController extends Controller
                         'order_id' => $orderId,
                     ]);
                 }
+    
+                // Save device_id and platform to user_devices table
+                $user->devices()->updateOrCreate(
+                    ['device_id' => $deviceId], // Condition to find the existing record
+                    ['platform' => $platform, 'user_id' => $user->userid] // Data to update or create
+                );
     
                 // Log the user in using the custom guard
                 Auth::guard('users')->login($user);
