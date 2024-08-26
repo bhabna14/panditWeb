@@ -335,7 +335,7 @@ class PoojaListController extends Controller
                     // Include the rating data
                     $booking->rating = $rating->toArray();
                 } else {
-                    $booking->rating = [];
+                    $booking->rating = null;
                 }
 
                 return $booking;
