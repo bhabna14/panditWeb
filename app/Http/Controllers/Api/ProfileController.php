@@ -10,6 +10,8 @@ use App\Models\PanditIdCard;
 use App\Models\PanditEducation;
 use App\Models\PanditVedic;
 use App\Models\PanditLogin;
+use App\Models\PanditTitle;
+
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -17,7 +19,22 @@ use Illuminate\Support\Str;
 
 class ProfileController extends Controller
 {
-  
+    public function panditTitles(){
+        $pandit_titles = PanditTitle::where('status', 'active')->get();
+        if ($pandit_titles->isEmpty()) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'No data found',
+                'data' => []
+            ], 200);
+        }
+        // return response()->json($pandit_titles);
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data retrieved successfully',
+            'data' => $pandit_titles
+        ], 200);
+    }
     public function saveProfile(Request $request)
     {
         // Retrieve the authenticated user

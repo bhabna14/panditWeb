@@ -57,6 +57,7 @@ Route::controller(AreaController::class)->group(function() {
 });
 
 Route::controller(ProfileController::class)->group(function() {
+    Route::get('/pandit-titles', 'panditTitles');
     Route::post('/profile/save', 'saveProfile');
     Route::post('/profile/updatepanditprofile','updateProfile');
     Route::get('/show-profile-details', 'showProfileDetails');
