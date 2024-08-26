@@ -114,5 +114,6 @@
       }
     </script>
     @yield('scripts')
+    <script src="{{ asset('js/firebase.js') }}"></script>
     </body>
 </html>
