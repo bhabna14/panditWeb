@@ -25,6 +25,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Models\UserDevice;
+use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\Messaging;
@@ -197,6 +198,11 @@ public function poojarequest()
             $booking->save();
 
             // Find the user's device token using user_id from the booking
+
+              // Send FCM notification to the pandit
+            $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+            $messaging = $factory->createMessaging();
+
             $userDevice = UserDevice::where('user_id', $booking->user_id)->first();
             
             if (!$userDevice) {
@@ -216,11 +222,11 @@ public function poojarequest()
                     'booking_id' => $booking->booking_id,
                     'user_id' => $booking->user_id,
                     'message' => 'Your booking has been approved.',
-                    'url' => route('user.bookingDetails', ['id' => $booking->booking_id])
+                    // 'url' => route('user.bookingDetails', ['id' => $booking->booking_id])
                 ]);
 
             // Get the Firebase Messaging instance
-            $messaging = app(Messaging::class);
+            $messaging->send($message);
             
             try {
                 $messaging->send($message);
