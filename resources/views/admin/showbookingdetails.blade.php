@@ -243,7 +243,7 @@
     </div>
 
     <!-- Rating Details Card -->
-    <div class="col-lg-6">
+    {{-- <div class="col-lg-6">
         <div class="card custom-card overflow-hidden">
             <div class="card-header">Rating Details</div>
             <div class="card-body">
@@ -253,7 +253,7 @@
                 @endforeach
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 
 @endsection
