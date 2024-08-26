@@ -10,25 +10,88 @@ use App\Models\Poojastatus;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\PanditCancel;
+use Illuminate\Support\Facades\Log;
+use App\Models\UserDevice;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\Messaging;
 
 use App\Events\BookingApproved;
 
 
 class PoojaStatusController extends Controller
 {
-    public function approveBooking($id)
+//     public function approveBooking($id)
+// {
+//     try {
+//         $booking = Booking::findOrFail($id);
+//         $booking->application_status = 'approved';
+//         $booking->save();
+
+//         // Broadcast the event
+//         event(new BookingApproved($booking));
+
+//         return response()->json([
+//             'status' => 200,
+//             'message' => 'Booking approved successfully!',
+//             'booking' => $booking
+//         ], 200);
+//     } catch (\Exception $e) {
+//         return response()->json([
+//             'status' => 500,
+//             'message' => 'Failed to approve booking.',
+//             'error' => $e->getMessage()
+//         ], 500);
+//     }
+// }
+
+public function approveBooking($id)
 {
     try {
+        // Find and approve the booking
         $booking = Booking::findOrFail($id);
         $booking->application_status = 'approved';
         $booking->save();
+
+        // Find the user's device token using user_id from the booking
+        $userDevice = UserDevice::where('user_id', $booking->user_id)->first();
+        
+        if ($userDevice) {
+            $deviceToken = $userDevice->device_id;
+
+            // Prepare the notification message
+            $message = CloudMessage::withTarget('token', $deviceToken)
+                ->withNotification(Notification::create(
+                    'Booking Approved',
+                    "Your booking with ID: {$booking->booking_id} has been approved. Please check your account for details."
+                ))
+                ->withData([
+                    'booking_id' => $booking->booking_id,
+                    'user_id' => $booking->user_id,
+                    'message' => 'Your booking has been approved.',
+                    'url' => route('user.bookingDetails', ['id' => $booking->booking_id])
+                ]);
+
+            // Get the Firebase Messaging instance
+            $messaging = app(Messaging::class);
+
+            try {
+                $messaging->send($message);
+                Log::info('FCM notification sent successfully to user ID: ' . $booking->user_id);
+            } catch (\Exception $e) {
+                Log::error('Error sending FCM notification: ' . $e->getMessage());
+                // Handle notification failure, you might want to notify the admin or take other actions
+            }
+        } else {
+            Log::warning('User device token not found for user ID: ' . $booking->user_id);
+        }
 
         // Broadcast the event
         event(new BookingApproved($booking));
 
         return response()->json([
             'status' => 200,
-            'message' => 'Booking approved successfully!',
+            'message' => 'Booking approved and user notified successfully!',
             'booking' => $booking
         ], 200);
     } catch (\Exception $e) {
