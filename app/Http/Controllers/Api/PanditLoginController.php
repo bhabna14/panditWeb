@@ -176,10 +176,18 @@ class PanditLoginController extends Controller
                 }
     
                 // Update or insert device info
+                // $pandit->devices()->updateOrCreate(
+                //     ['pandit_id' => $pandit->pandit_id],
+                //     ['device_id' => $deviceId],
+                //     ['platform' => $platform]
+                // );
+
                 $pandit->devices()->updateOrCreate(
-                    ['pandit_id' => $pandit->pandit_id],
-                    ['device_id' => $deviceId],
-                    ['platform' => $platform]
+                    ['pandit_id' => $pandit->pandit_id], // The "where" clause
+                    [                                     // The data to update or insert
+                        'device_id' => $deviceId,
+                        'platform' => $platform
+                    ]
                 );
     
                 // Generate token
