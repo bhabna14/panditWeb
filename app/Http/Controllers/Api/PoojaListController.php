@@ -10,6 +10,8 @@ use App\Models\Poojaitems;
 use App\Models\Poojalist;
 use App\Models\Profile;
 use App\Models\Booking;
+use App\Models\Rating;
+
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -270,40 +272,91 @@ class PoojaListController extends Controller
 
     
 
+    // public function approvedPoojaList()
+    // {
+    //     try {
+    //         $pandit = Auth::guard('sanctum')->user();
+
+    //         // Fetch pandit details
+    //         $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
+
+    //         // Fetch approved Pooja
+    //         $approved_pooja = Booking::with(['user', 'pooja', 'address'])
+    //             ->where('pandit_id', $pandit_details->id)
+    //             // ->where('status','!=', 'pending')
+    //             ->orderBy('created_at', 'desc')
+    //             ->get()
+    //             ->map(function ($booking) {
+    //                 $booking->pooja->pooja_photo_url = asset('assets/img/' . $booking->pooja->pooja_photo);
+    //                 return $booking;
+    //             });
+
+    //         return response()->json([
+    //             'status' => 200,
+    //             'message' => 'Pooja list fetched successfully.',
+    //             'data' => [
+    //                 'approved_pooja' => $approved_pooja,
+    //             ]
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => 500,
+    //             'message' => 'Failed to fetch pooja list.',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
     public function approvedPoojaList()
-    {
-        try {
-            $pandit = Auth::guard('sanctum')->user();
+{
+    try {
+        $pandit = Auth::guard('sanctum')->user();
 
-            // Fetch pandit details
-            $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
+        // Fetch pandit details
+        $pandit_details = Profile::where('pandit_id', $pandit->pandit_id)->first();
 
-            // Fetch approved Pooja
-            $approved_pooja = Booking::with(['user', 'pooja', 'address'])
-                ->where('pandit_id', $pandit_details->id)
-                // ->where('status','!=', 'pending')
-                ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($booking) {
-                    $booking->pooja->pooja_photo_url = asset('assets/img/' . $booking->pooja->pooja_photo);
-                    return $booking;
-                });
+        // Fetch approved Pooja
+        $approved_pooja = Booking::with(['user', 'pooja', 'address'])
+            ->where('pandit_id', $pandit_details->id)
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($booking) {
+                // Add pooja photo URL
+                $booking->pooja->pooja_photo_url = asset('assets/img/' . $booking->pooja->pooja_photo);
 
-            return response()->json([
-                'status' => 200,
-                'message' => 'Pooja list fetched successfully.',
-                'data' => [
-                    'approved_pooja' => $approved_pooja,
-                ]
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'Failed to fetch pooja list.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+                // Check if a rating exists for the booking
+                $rating = Rating::where('booking_id', $booking->booking_id)->first();
+
+                if ($rating) {
+                    // Add full URL for audio file and image path
+                    $rating->audio_file_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
+                    $rating->image_path_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
+
+                    // Include the rating data
+                    $booking->rating = $rating->toArray();
+                } else {
+                    $booking->rating = [];
+                }
+
+                return $booking;
+            });
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Pooja list fetched successfully.',
+            'data' => [
+                'approved_pooja' => $approved_pooja,
+            ]
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 500,
+            'message' => 'Failed to fetch pooja list.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
     
 
     
