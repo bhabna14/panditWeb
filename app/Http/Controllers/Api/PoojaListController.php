@@ -329,8 +329,8 @@ class PoojaListController extends Controller
 
                 if ($rating) {
                     // Add full URL for audio file and image path
-                    $rating->audio_file_url = $rating->audio_file ? asset($rating->audio_file) : null;
-                    $rating->image_path_url = $rating->image_path ? asset($rating->image_path) : null;
+                    $rating->audio_file_url = $rating->audio_file ? asset('storage/'.$rating->audio_file) : null;
+                    $rating->image_path_url = $rating->image_path ? asset('storage/'.$rating->image_path) : null;
 
                     // Include the rating data
                     $booking->rating = $rating->toArray();
