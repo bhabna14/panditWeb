@@ -35,6 +35,8 @@ class ProfileController extends Controller
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         $profile->bloodgroup = $request->bloodgroup;
+        $profile->gotra = $request->gotra;
+        $profile->bruti = $request->bruti;
         $profile->maritalstatus = $request->marital;
         $profile->about_pandit = $request->about;
     
