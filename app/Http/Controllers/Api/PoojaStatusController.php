@@ -49,20 +49,27 @@ class PoojaStatusController extends Controller
 public function approveBooking($id)
 {
     try {
+        Log::info('Attempting to approve booking with ID: ' . $id);
+
         // Find and approve the booking
         $booking = Booking::findOrFail($id);
+        Log::info('Booking found: ' . json_encode($booking));
+
         $booking->application_status = 'approved';
         $booking->save();
+        Log::info('Booking status updated to approved for booking ID: ' . $id);
 
         // Find the user's device token using user_id from the booking
-          // Send FCM notification to the pandit
-          $factory = (new Factory)->withServiceAccount(config('services.firebase.user.credentials'));
-          $messaging = $factory->createMessaging();
+        $factory = (new Factory)->withServiceAccount(config('services.firebase.user.credentials'));
+        $messaging = $factory->createMessaging();
+        Log::info('Firebase Messaging instance created successfully.');
 
         $userDevice = UserDevice::where('user_id', $booking->user_id)->first();
-        
+        Log::info('User device fetched: ' . json_encode($userDevice));
+
         if ($userDevice) {
             $deviceToken = $userDevice->device_id;
+            Log::info('Device token found: ' . $deviceToken);
 
             // Prepare the notification message
             $message = CloudMessage::withTarget('token', $deviceToken)
@@ -76,9 +83,7 @@ public function approveBooking($id)
                     'message' => 'Your booking has been approved.',
                     // 'url' => route('user.bookingDetails', ['id' => $booking->booking_id])
                 ]);
-
-            // Get the Firebase Messaging instance
-           $messaging->send($message);
+            Log::info('Notification message prepared: ' . json_encode($message));
 
             try {
                 $messaging->send($message);
@@ -93,6 +98,7 @@ public function approveBooking($id)
 
         // Broadcast the event
         event(new BookingApproved($booking));
+        Log::info('BookingApproved event broadcasted for booking ID: ' . $id);
 
         return response()->json([
             'status' => 200,
@@ -100,6 +106,7 @@ public function approveBooking($id)
             'booking' => $booking
         ], 200);
     } catch (\Exception $e) {
+        Log::error('Error in approveBooking method: ' . $e->getMessage());
         return response()->json([
             'status' => 500,
             'message' => 'Failed to approve booking.',
@@ -107,6 +114,7 @@ public function approveBooking($id)
         ], 500);
     }
 }
+
 public function rejectBooking(Request $request, $id)
     {
         try {
