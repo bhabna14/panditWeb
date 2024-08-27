@@ -12,11 +12,14 @@
 		
         @yield('styles')
 		@include('layouts.components.custom-styles')
+  
+        <link rel="shortcut icon" href="//cdn.shopify.com/s/files/1/0654/9789/1030/files/MicrosoftTeams-image_471_32x32.png?v=1660732431" type="image/png">
+            
         <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app-compat.js"></script>
-<link rel="shortcut icon" href="//cdn.shopify.com/s/files/1/0654/9789/1030/files/MicrosoftTeams-image_471_32x32.png?v=1660732431" type="image/png">
-    
+            
         <!-- Firebase Messaging -->
         <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-messaging-compat.js"></script>
+
     </head>
 	<body class="ltr error-page1">
 
@@ -54,6 +57,7 @@
         </div>
 
 		@include('layouts.components.custom-scripts')
+        <script src="{{ asset('js/user_firebase.js') }}"></script>
 
     </body>
 </html>

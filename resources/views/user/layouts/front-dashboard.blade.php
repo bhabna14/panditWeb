@@ -8,7 +8,10 @@
     <!-- Google fonts -->
 		<!-- Title -->
 		<title> Pandit Web</title>
-
+    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-app-compat.js"></script>
+    
+    <!-- Firebase Messaging -->
+    <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-messaging-compat.js"></script>
         @include('user.layouts.components.front-style')
         
         @yield('styles')
@@ -114,6 +117,7 @@
       }
     </script>
     @yield('scripts')
-    <script src="{{ asset('js/firebase.js') }}"></script>
+    <script src="{{ asset('js/user_firebase.js') }}"></script>
+
     </body>
 </html>

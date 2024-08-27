@@ -84,11 +84,15 @@
                                     <td>{{ $profile->pandit_status }}</td>
                                     <td>
                                         @if($profile->pandit_status == 'accepted')
-                                          
-                                            <span class="btn btn-success">Accepted</span>
+                                            <form action="{{ route('rejectPandit', $profile->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit" class="btn btn-danger">Reject</button>
+                                            </form>
                                         @elseif($profile->pandit_status == 'rejected')
-                                            
-                                            <span class="btn btn-danger">Rejected</span>
+                                            <form action="{{ route('acceptPandit', $profile->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit" class="btn btn-success">Accept</button>
+                                            </form>
                                         @elseif($profile->pandit_status == 'pending')
                                             <form action="{{ route('acceptPandit', $profile->id) }}" method="POST" style="display:inline;">
                                                 @csrf

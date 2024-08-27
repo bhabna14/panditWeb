@@ -53,6 +53,7 @@
           }
       }
     </script>
-    <script src="{{ asset('js/firebase.js') }}"></script>
+            <script src="{{ asset('js/user_firebase.js') }}"></script>
+
     </body>
 </html>
