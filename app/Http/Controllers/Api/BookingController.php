@@ -12,8 +12,15 @@ use App\Models\Poojadetails;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
+
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use App\Models\PanditDevice;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+use Kreait\Firebase\Messaging\Messaging;
+
 
 class BookingController extends Controller
 {
@@ -154,6 +161,46 @@ class BookingController extends Controller
     
             // Create a new booking record
             $booking = Booking::create($validatedData);
+
+             // Send FCM notification to the pandit
+        $factory = (new Factory)->withServiceAccount(config('services.firebase.pandit.credentials'));
+        $messaging = $factory->createMessaging();
+
+        // Retrieve pandit's device token
+
+        $panditProfile = Profile::findOrFail($validatedData['pandit_id']);
+        $panditId = $panditProfile->pandit_id;
+
+        $device = PanditDevice::where('pandit_id', $panditId)->first();
+        if (!$device) {
+            throw new \Exception('Pandit device token not found.');
+        }
+
+        $deviceToken = $device->device_id;
+
+        // Prepare notification message
+        $message = CloudMessage::withTarget('token', $device->device_id)
+        ->withNotification(Notification::create(
+            'New Booking Request',
+            "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
+        ))
+        ->withData([
+            'booking_id' => $booking->booking_id,
+            'user_id' => Auth::guard('users')->user()->userid,
+            'pooja_id' => $validatedData['pooja_id'],
+            'message' => 'A new booking request for you.',
+            'url' => route('pandit.dashboard')
+        ]);
+
+        // Send the notification
+        $messaging->send($message);
+            try {
+                $messaging->send($message);
+                Log::info('FCM notification sent successfully to Pandit ID: ' .  $panditId);
+            } catch (\Exception $e) {
+                Log::error('Error sending FCM notification: ' . $e->getMessage());
+            }
+
     
             // Load related data
             $booking->load(['user', 'pandit', 'poojalist', 'address']);
