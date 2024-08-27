@@ -56,7 +56,7 @@ public function approveBooking($id)
 
         // Find the user's device token using user_id from the booking
           // Send FCM notification to the pandit
-          $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+          $factory = (new Factory)->withServiceAccount(config('services.firebase.user.credentials'));
           $messaging = $factory->createMessaging();
 
         $userDevice = UserDevice::where('user_id', $booking->user_id)->first();
