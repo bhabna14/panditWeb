@@ -187,10 +187,10 @@ class BookingController extends Controller
         ))
         ->withData([
             'booking_id' => $booking->booking_id,
-            'user_id' => Auth::guard('users')->user()->userid,
+            'user_id' => Auth::guard('sanctum')->user()->userid,
             'pooja_id' => $validatedData['pooja_id'],
             'message' => 'A new booking request for you.',
-            'url' => route('pandit.dashboard')
+            // 'url' => route('pandit.dashboard')
         ]);
 
         // Send the notification
