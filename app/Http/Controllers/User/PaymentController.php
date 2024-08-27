@@ -125,7 +125,7 @@ class PaymentController extends Controller
             // Retrieve the pooja name using the relationship
             $poojaName = $booking->pooja->pooja_name; 
               // Send FCM notification to the pandit
-            $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+            $factory = (new Factory)->withServiceAccount(config('services.firebase.pandit.credentials'));
             $messaging = $factory->createMessaging();
 
             // Retrieve pandit's device token

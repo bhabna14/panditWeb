@@ -21,6 +21,7 @@ use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\Notification;
 use Kreait\Firebase\Messaging\Messaging;
+use DB;
 
 
 class BookingController extends Controller
@@ -349,6 +350,50 @@ class BookingController extends Controller
 
             // Fetch the updated payment details
             $payment = Payment::where('booking_id', $booking_id)->first();
+
+            $poojaName = DB::table('pooja_list')
+            ->where('id', $booking->pooja_id)
+            ->value('pooja_name'); // 
+                // Retrieve the pooja name using the relationship
+                $poojaName = $booking->pooja->pooja_name; 
+
+            $factory = (new Factory)->withServiceAccount(config('services.firebase.pandit.credentials'));
+            $messaging = $factory->createMessaging();
+
+            // Retrieve pandit's device token
+
+            $panditProfile = Profile::findOrFail($booking->pandit_id);
+            $panditId = $panditProfile->pandit_id;
+
+            $device = PanditDevice::where('pandit_id', $panditId)->first();
+            if (!$device) {
+                throw new \Exception('Pandit device token not found.');
+            }
+
+            $deviceToken = $device->device_id;
+
+              // Prepare notification message
+            $message = CloudMessage::withTarget('token', $deviceToken)
+                ->withNotification(Notification::create(
+                    'Booking Confirmed',
+                    "A new booking for {$poojaName} has been confirmed with ID: {$booking->booking_id} and {$booking->booking_date}. Please check your dashboard for details."
+                ))
+            ->withData([
+                'booking_id' => $booking->booking_id,
+                'user_id' => $booking->user_id,
+                'pooja_id' => $booking->pooja_id,
+                'pooja_name' => $poojaName,
+                'message' => 'A new booking has been confirmed for you.',
+                // 'url' => route('pandit.dashboard')
+            ]);
+            // Send the notification
+            $messaging->send($message);
+            try {
+                $messaging->send($message);
+                Log::info('FCM notification sent successfully to pooja name: ' .  $poojaName);
+            } catch (\Exception $e) {
+                Log::error('Error sending FCM notification: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'success' => 'Payment details saved successfully!',
