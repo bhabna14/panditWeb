@@ -495,7 +495,7 @@ public function confirmBooking(Request $request)
         }
 
         // Send FCM notification to the pandit
-        $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
+        $factory = (new Factory)->withServiceAccount(config('services.firebase.pandit.credentials'));
         $messaging = $factory->createMessaging();
 
         // Retrieve pandit's device token

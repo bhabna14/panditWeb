@@ -38,8 +38,17 @@ return [
         'api_key' => env('SHOPIFY_API_KEY'),
         'api_password' => env('SHOPIFY_API_PASSWORD'),
     ],
+    // 'firebase' => [
+    //     'credentials' => env('FIREBASE_CREDENTIALS_PATH'),
+    // ],
+
     'firebase' => [
-        'credentials' => env('FIREBASE_CREDENTIALS_PATH'),
+        'pandit' => [
+            'credentials' => env('FIREBASE_PANDIT_CREDENTIALS_PATH'),
+        ],
+        'user' => [
+            'credentials' => env('FIREBASE_USER_CREDENTIALS_PATH'),
+        ],
     ],
 
 

@@ -17,7 +17,7 @@ const messaging = firebase.messaging();
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    navigator.serviceWorker.register('/firebase-user-messaging-sw.js')
     .then(function(registration) {
         console.log('Service Worker registered with scope:', registration.scope);
         messaging.useServiceWorker(registration);
