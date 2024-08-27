@@ -22,6 +22,7 @@ class PanditController extends Controller
 
             // Fetch the related pooja details for this pandit
             $panditPujas = Poojadetails::where('pandit_id', $singlePandit->pandit_id)
+                 ->where('status','active')
                 ->with('poojalist') // Load the poojalist relationship
                 ->get();
 
