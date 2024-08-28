@@ -405,6 +405,146 @@ class userController extends Controller
 
 
 // added the booking_date validation and pooja_duration
+//  public function confirmBooking(Request $request)
+//         {
+//             try {
+//                 // Validate incoming request data
+//                 $validatedData = $request->validate([
+//                     'pandit_id' => 'required|exists:pandit_profile,id',
+//                     'pooja_id' => 'required|exists:pandit_poojadetails,pooja_id',
+//                     'pooja_fee' => 'required|numeric',
+//                     'advance_fee' => 'required|numeric',
+//                     'booking_date' => 'required|date_format:Y-m-d H:i',
+//                     'address_id' => 'required',
+//                 ]);
+
+//                 // Get the pooja duration from the Poojadetails model
+//                 $pooja = Poojadetails::where('pooja_id', $validatedData['pooja_id'])->firstOrFail();
+//                 $poojaDurationString = $pooja->pooja_duration; // Example: "3 Hour"
+
+//                 // Convert the duration string to total minutes
+//                 $poojaDurationMinutes = $this->convertDurationToMinutes($poojaDurationString);
+
+//                 // Calculate the end time of the new pooja
+//                 $newPoojaStartTime = Carbon::parse($validatedData['booking_date']);
+//                 $newPoojaEndTime = $newPoojaStartTime->copy()->addMinutes($poojaDurationMinutes);
+
+//                 // Check if the Pandit is already booked for the requested time slot
+//                 $conflictingBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
+//                     ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+//                         $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
+//                             ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+//                                 $query->where('booking_date', '<=', $newPoojaStartTime)
+//                                         ->where('booking_end_time', '>=', $newPoojaStartTime);
+//                             });
+//                     })
+//                     ->where(function($query) {
+//                         $query->where(function($query) {
+//                             $query->where('status', 'pending')
+//                                 ->where('payment_status', 'pending')
+//                                 ->where('application_status', 'approved')
+//                                 ->where('pooja_status', 'pending');
+//                         })->orWhere(function($query) {
+//                             $query->where('status', 'paid')
+//                                 ->where('payment_status', 'paid')
+//                                 ->where('application_status', 'approved')
+//                                 ->where('pooja_status', 'pending');
+//                         });
+//                     })
+//                     ->first();
+
+//                 if ($conflictingBooking) {
+//                     // Get the booking_end_time from the conflicting booking
+//                     $nextAvailableTime = Carbon::parse($conflictingBooking->booking_end_time)->format('Y-m-d h:i A'); 
+
+//                     return back()->with('error', "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}.");
+//                 }
+
+//                 // Assign the authenticated user's ID to the booking
+//                 $validatedData['user_id'] = Auth::guard('users')->user()->userid;
+//                 $validatedData['application_status'] = 'pending';
+//                 $validatedData['payment_status'] = 'pending';
+//                 $validatedData['pooja_status'] = 'pending';
+//                 $validatedData['status'] = 'pending';
+//                 $validatedData['booking_end_time'] = $newPoojaEndTime; // Save the end time
+
+//                 // Create a new booking record
+//                 $booking = Booking::create($validatedData);
+
+//                 // Send WhatsApp message
+//                 $sid = env('TWILIO_ACCOUNT_SID');
+//                 $token = env('TWILIO_AUTH_TOKEN');
+//                 $fromNumber = env('TWILIO_WHATSAPP_NUMBER');
+//                 $twilio = new Client($sid, $token);
+
+//                 $user = Auth::guard('users')->user();
+//                 $whatsappNumber = $user->mobile_number; // Ensure this field is available in your user model
+//                 $message = "Dear {$user->mobile_number}, your booking for pooja has been confirmed successfully. Booking ID: {$booking->booking_id}. Thank you for choosing us.";
+
+//                 try {
+//                     $twilio->messages->create(
+//                         "whatsapp:$whatsappNumber",
+//                         [
+//                             'from' => $fromNumber,
+//                             'body' => $message
+//                         ]
+//                     );
+//                 } catch (\Exception $e) {
+//                     Log::error('Error sending WhatsApp message: ' . $e->getMessage());
+//                 }
+
+//                 // Send FCM notification to the pandit
+//                 $factory = (new Factory)->withServiceAccount(config('services.firebase.pandit.credentials'));
+//                 $messaging = $factory->createMessaging();
+
+//                 // Retrieve pandit's device token
+
+//                 $panditProfile = Profile::findOrFail($validatedData['pandit_id']);
+//                 $panditId = $panditProfile->pandit_id;
+
+//                 $device = PanditDevice::where('pandit_id', $panditId)->first();
+//                 if (!$device) {
+//                     throw new \Exception('Pandit device token not found.');
+//                 }
+
+//                 $deviceToken = $device->device_id;
+
+//                 // Prepare notification message
+//                 $message = CloudMessage::withTarget('token', $device->device_id)
+//                 ->withNotification(Notification::create(
+//                     'New Booking Request',
+//                     "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
+//                 ))
+//                 ->withData([
+//                     'booking_id' => $booking->booking_id,
+//                     'user_id' => Auth::guard('users')->user()->userid,
+//                     'pooja_id' => $validatedData['pooja_id'],
+//                     'message' => 'A new booking request for you.',
+//                     'url' => route('pandit.dashboard')
+//                 ]);
+
+//             // Send the notification
+//             $messaging->send($message);
+//                 try {
+//                     $messaging->send($message);
+//                     Log::info('FCM notification sent successfully to Pandit ID: ' .  $panditId);
+//                 } catch (\Exception $e) {
+//                     Log::error('Error sending FCM notification: ' . $e->getMessage());
+//                 }
+
+//                 // Log success message
+//                 \Log::info('Booking created successfully.', ['data' => $validatedData]);
+
+//                 // Redirect to a success page or return a response
+//                 return redirect()->route('booking.success', ['booking' => $booking->id])->with('success', 'Booking confirmed successfully!');
+//             } catch (\Exception $e) {
+//                 // Log the error
+//                 \Log::error('Error creating booking: ' . $e->getMessage());
+
+//                 // Redirect back or return with an error message
+//                 return back()->with('error', 'Failed to confirm booking. Please try again.');
+//             }
+// }
 
 public function confirmBooking(Request $request)
 {
@@ -472,65 +612,44 @@ public function confirmBooking(Request $request)
         // Create a new booking record
         $booking = Booking::create($validatedData);
 
-        // Send WhatsApp message
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $fromNumber = env('TWILIO_WHATSAPP_NUMBER');
-        $twilio = new Client($sid, $token);
-
-        $user = Auth::guard('users')->user();
-        $whatsappNumber = $user->mobile_number; // Ensure this field is available in your user model
-        $message = "Dear {$user->mobile_number}, your booking for pooja has been confirmed successfully. Booking ID: {$booking->booking_id}. Thank you for choosing us.";
-
-        try {
-            $twilio->messages->create(
-                "whatsapp:$whatsappNumber",
-                [
-                    'from' => $fromNumber,
-                    'body' => $message
-                ]
-            );
-        } catch (\Exception $e) {
-            Log::error('Error sending WhatsApp message: ' . $e->getMessage());
-        }
-
         // Send FCM notification to the pandit
         $factory = (new Factory)->withServiceAccount(config('services.firebase.pandit.credentials'));
         $messaging = $factory->createMessaging();
 
-        // Retrieve pandit's device token
-
+        // Retrieve all pandit's device tokens
+       
         $panditProfile = Profile::findOrFail($validatedData['pandit_id']);
         $panditId = $panditProfile->pandit_id;
+        $panditDevices = PanditDevice::where('pandit_id', $panditId)->get();
 
-        $device = PanditDevice::where('pandit_id', $panditId)->first();
-        if (!$device) {
-            throw new \Exception('Pandit device token not found.');
+        if ($panditDevices->isEmpty()) {
+            throw new \Exception('Pandit device tokens not found.');
         }
 
-        $deviceToken = $device->device_id;
+        // Send notifications to all devices
+        foreach ($panditDevices as $device) {
+            $deviceToken = $device->device_id;
 
-        // Prepare notification message
-        $message = CloudMessage::withTarget('token', $device->device_id)
-        ->withNotification(Notification::create(
-            'New Booking Request',
-            "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
-        ))
-        ->withData([
-            'booking_id' => $booking->booking_id,
-            'user_id' => Auth::guard('users')->user()->userid,
-            'pooja_id' => $validatedData['pooja_id'],
-            'message' => 'A new booking request for you.',
-            'url' => route('pandit.dashboard')
-        ]);
+            // Prepare notification message
+            $message = CloudMessage::withTarget('token', $deviceToken)
+                ->withNotification(Notification::create(
+                    'New Booking Request',
+                    "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
+                ))
+                ->withData([
+                    'booking_id' => $booking->booking_id,
+                    'user_id' => Auth::guard('users')->user()->userid,
+                    'pooja_id' => $validatedData['pooja_id'],
+                    'message' => 'A new booking request for you.',
+                    'url' => route('pandit.dashboard')
+                ]);
 
-    // Send the notification
-    $messaging->send($message);
-        try {
-            $messaging->send($message);
-            Log::info('FCM notification sent successfully to Pandit ID: ' .  $panditId);
-        } catch (\Exception $e) {
-            Log::error('Error sending FCM notification: ' . $e->getMessage());
+            try {
+                $messaging->send($message);
+                Log::info('FCM notification sent successfully to device token: ' . $deviceToken);
+            } catch (\Exception $e) {
+                Log::error('Error sending FCM notification to device token ' . $deviceToken . ': ' . $e->getMessage());
+            }
         }
 
         // Log success message
@@ -546,6 +665,7 @@ public function confirmBooking(Request $request)
         return back()->with('error', 'Failed to confirm booking. Please try again.');
     }
 }
+
 
 
 
