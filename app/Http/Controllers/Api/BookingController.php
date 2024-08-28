@@ -279,7 +279,8 @@ class BookingController extends Controller
         if ($conflictingBooking) {
             $nextAvailableTime = Carbon::parse($conflictingBooking->booking_end_time)->format('Y-m-d h:i A');
             return response()->json([
-                'error' => "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}."
+                'success' => false,
+                'message' => "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}."
             ], 409);
         }
 
