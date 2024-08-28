@@ -133,6 +133,7 @@ class PanditLoginController extends Controller
         $phoneNumber = $request->input('phoneNumber');
         $deviceId = $request->input('device_id'); // Received from the client
         $platform = $request->input('platform'); // 'web', 'android', or 'ios'
+        $device_model = $request->input('device_model');
     
         // Log the inputs for debugging
         Log::info("Verifying OTP for Order ID: " . $orderId . ", Phone Number: " . $phoneNumber . ", OTP: " . $otp);
@@ -185,7 +186,8 @@ class PanditLoginController extends Controller
                 $pandit->devices()->create([
                     'pandit_id' => $pandit->pandit_id,
                     'device_id' => $deviceId,
-                    'platform' => $platform
+                    'platform' => $platform,
+                    'device_model' => $device_model
                 ]);
     
     
