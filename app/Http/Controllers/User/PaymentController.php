@@ -130,37 +130,42 @@ class PaymentController extends Controller
 
             // Retrieve pandit's device token
 
-            $panditProfile = Profile::findOrFail($booking->pandit_id);
+            $panditProfile = Profile::findOrFail($validatedData['pandit_id']);
             $panditId = $panditProfile->pandit_id;
-
-            $device = PanditDevice::where('pandit_id', $panditId)->first();
-            if (!$device) {
-                throw new \Exception('Pandit device token not found.');
+            $panditDevices = PanditDevice::where('pandit_id', $panditId)->get();
+    
+            if ($panditDevices->isEmpty()) {
+                throw new \Exception('Pandit device tokens not found.');
             }
+            // if (!$device) {
+            //     throw new \Exception('Pandit device token not found.');
+            // }
+            // Send notifications to all devices
+            foreach ($panditDevices as $device) {
+                $deviceToken = $device->device_id;
 
-            $deviceToken = $device->device_id;
-
-              // Prepare notification message
-            $message = CloudMessage::withTarget('token', $deviceToken)
-                ->withNotification(Notification::create(
-                    'Booking Confirmed',
-                    "A new booking for {$poojaName} has been confirmed with ID: {$booking->booking_id} and {$booking->booking_date}. Please check your dashboard for details."
-                ))
-            ->withData([
-                'booking_id' => $booking->booking_id,
-                'user_id' => $booking->user_id,
-                'pooja_id' => $booking->pooja_id,
-                'pooja_name' => $poojaName,
-                'message' => 'A new booking has been confirmed for you.',
-                'url' => route('pandit.dashboard')
-            ]);
-            // Send the notification
-            $messaging->send($message);
-            try {
+                // Prepare notification message
+                $message = CloudMessage::withTarget('token', $deviceToken)
+                    ->withNotification(Notification::create(
+                        'Booking Confirmed',
+                        "A new booking for {$poojaName} has been confirmed with ID: {$booking->booking_id} and {$booking->booking_date}. Please check your dashboard for details."
+                    ))
+                ->withData([
+                    'booking_id' => $booking->booking_id,
+                    'user_id' => $booking->user_id,
+                    'pooja_id' => $booking->pooja_id,
+                    'pooja_name' => $poojaName,
+                    'message' => 'A new booking has been confirmed for you.',
+                    'url' => route('pandit.dashboard')
+                ]);
+                // Send the notification
                 $messaging->send($message);
-                Log::info('FCM notification sent successfully to pooja name: ' .  $poojaName);
-            } catch (\Exception $e) {
-                Log::error('Error sending FCM notification: ' . $e->getMessage());
+                try {
+                    $messaging->send($message);
+                    Log::info('FCM notification sent successfully to pooja name: ' .  $poojaName);
+                } catch (\Exception $e) {
+                    Log::error('Error sending FCM notification: ' . $e->getMessage());
+                }
             }
 
             return redirect()->route('booking.success', ['booking' => $booking_id])->with('success', 'Payment successful and booking confirmed!');
