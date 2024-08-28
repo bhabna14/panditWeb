@@ -56,6 +56,7 @@ class ProfileController extends Controller
         $profile->bruti = $request->bruti;
         $profile->maritalstatus = $request->marital;
         $profile->about_pandit = $request->about;
+        $profile->agree = $request->agree;
     
         // Handle the language input
         $pandilang = $request->input('language');
