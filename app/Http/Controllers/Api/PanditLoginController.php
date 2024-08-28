@@ -252,8 +252,15 @@ class PanditLoginController extends Controller
 
     public function panditLogout(Request $request)
     {
-        $pandit = Auth::guard('sanctum')->user(); // Get the authenticated pandit
+        // Get the authenticated pandit
+        $pandit = Auth::guard('sanctum')->user(); 
         $deviceId = $request->input('device_id'); // Received from the client
+    
+        // Log the pandit ID and device ID for debugging
+        Log::info("Pandit Logout Attempt:", [
+            'pandit_id' => $pandit->pandit_id, 
+            'device_id' => $deviceId
+        ]);
     
         try {
             // Manually find the device entry by pandit_id and device_id without using the relationship
@@ -262,24 +269,47 @@ class PanditLoginController extends Controller
                 ->first();
     
             if ($device) {
+                // Log that the device was found
+                Log::info("Device found. Proceeding with logout.", [
+                    'device_id' => $deviceId
+                ]);
+    
                 // Delete the device entry
                 $device->delete();
     
                 // Revoke all tokens for the pandit (logout from all devices)
                 $pandit->tokens()->delete();
     
+                // Log successful logout
+                Log::info("Pandit logged out successfully and device removed.", [
+                    'pandit_id' => $pandit->pandit_id, 
+                    'device_id' => $deviceId
+                ]);
+    
                 return response()->json([
                     'status' => 200,
                     'message' => 'Pandit logged out successfully and device removed.'
                 ], 200);
             } else {
+                // Log that the device was not found
+                Log::warning("Device not found for logout.", [
+                    'pandit_id' => $pandit->pandit_id, 
+                    'device_id' => $deviceId
+                ]);
+    
                 return response()->json([
-                    'status' => 400,
+                    'status' => 404,
                     'message' => 'Device not found.'
                 ], 404);
             }
         } catch (\Exception $e) {
-            Log::error('An error occurred while logging out the pandit.', ['error' => $e->getMessage()]);
+            // Log the error details
+            Log::error('An error occurred while logging out the pandit.', [
+                'pandit_id' => $pandit->pandit_id, 
+                'device_id' => $deviceId,
+                'error' => $e->getMessage()
+            ]);
+    
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while logging out.',
@@ -287,6 +317,7 @@ class PanditLoginController extends Controller
             ], 500);
         }
     }
+    
     
     
 }
