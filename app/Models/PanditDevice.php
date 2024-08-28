@@ -11,7 +11,7 @@ class PanditDevice extends Model
     protected $table = 'pandit_devices';
 
     protected $fillable = [
-        'pandit_id', 'device_id', 'platform',
+        'pandit_id', 'device_id', 'platform','device_model'
     ];
 
     // Define the relationship back to PanditLogin
