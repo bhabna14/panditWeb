@@ -209,42 +209,78 @@ class PanditLoginController extends Controller
     }
     
     
-    public function panditLogout()
+    // public function panditLogout()
+    // {
+    //     // Retrieve the pandit ID using the 'pandits' auth guard.
+    //     $pandit_id = Auth::guard('sanctum')->user()->pandit_id;
+    
+    //     if (!$pandit_id) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Pandit ID not found.',
+    //         ], 404);
+    //     }
+    
+    //     // Retrieve the PanditLogin record for the logged-in Pandit.
+    //     $panditLogin = PanditLogin::where('pandit_id', $pandit_id)->first();
+    
+    //     if (!$panditLogin) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Pandit login record not found.',
+    //         ], 404);
+    //     }
+    
+    //     $panditLogin->status = 'inactive';
+    
+    //     if ($panditLogin->save()) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => 'Pandit logged out successfully.',
+    //             'status' => $panditLogin->status, 
+    //         ], 200);
+    //     } else {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to logout Pandit.',
+    //         ], 500);
+    //     }
+    // }
+
+    public function panditLogout(Request $request)
     {
-        // Retrieve the pandit ID using the 'pandits' auth guard.
-        $pandit_id = Auth::guard('sanctum')->user()->pandit_id;
+        $pandit = Auth::guard('sanctum')->user(); // Get the authenticated pandit
+        $deviceId = $request->input('device_id'); // Received from the client
     
-        if (!$pandit_id) {
+        try {
+            // Manually find the device entry by pandit_id and device_id without using the relationship
+            $device = PanditDevice::where('pandit_id', $pandit->pandit_id)
+                ->where('device_id', $deviceId)
+                ->first();
+    
+            if ($device) {
+                // Delete the device entry
+                $device->delete();
+    
+                // Revoke all tokens for the pandit (logout from all devices)
+                $pandit->tokens()->delete();
+    
+                return response()->json([
+                    'message' => 'Pandit logged out successfully and device removed.'
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'Device not found.'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            Log::error('An error occurred while logging out the pandit.', ['error' => $e->getMessage()]);
             return response()->json([
-                'success' => false,
-                'message' => 'Pandit ID not found.',
-            ], 404);
-        }
-    
-        // Retrieve the PanditLogin record for the logged-in Pandit.
-        $panditLogin = PanditLogin::where('pandit_id', $pandit_id)->first();
-    
-        if (!$panditLogin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Pandit login record not found.',
-            ], 404);
-        }
-    
-        $panditLogin->status = 'inactive';
-    
-        if ($panditLogin->save()) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Pandit logged out successfully.',
-                'status' => $panditLogin->status, 
-            ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to logout Pandit.',
+                'message' => 'An error occurred while logging out.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }
+    
     
 }
