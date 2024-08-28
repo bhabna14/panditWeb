@@ -172,37 +172,37 @@ class BookingController extends Controller
 
         $panditProfile = Profile::findOrFail($validatedData['pandit_id']);
         $panditId = $panditProfile->pandit_id;
-        $panditDevices = PanditDevice::where('pandit_id', $panditId)->get();
 
-        if ($panditDevices->isEmpty()) {
-            throw new \Exception('Pandit device tokens not found.');
+        $device = PanditDevice::where('pandit_id', $panditId)->first();
+        if (!$device) {
+            throw new \Exception('Pandit device token not found.');
         }
 
-        // Send notifications to all devices
-        foreach ($panditDevices as $device) {
-            $deviceToken = $device->device_id;
+        $deviceToken = $device->device_id;
 
-            // Prepare notification message
-            $message = CloudMessage::withTarget('token', $deviceToken)
-                ->withNotification(Notification::create(
-                    'New Booking Request',
-                    "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
-                ))
-                ->withData([
-                    'booking_id' => $booking->booking_id,
-                    'user_id' => Auth::guard('sanctum')->user()->userid,
-                    'pooja_id' => $validatedData['pooja_id'],
-                    'message' => 'A new booking request for you.',
-                   
-                ]);
+        // Prepare notification message
+        $message = CloudMessage::withTarget('token', $device->device_id)
+        ->withNotification(Notification::create(
+            'New Booking Request',
+            "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
+        ))
+        ->withData([
+            'booking_id' => $booking->booking_id,
+            'user_id' => Auth::guard('sanctum')->user()->userid,
+            'pooja_id' => $validatedData['pooja_id'],
+            'message' => 'A new booking request for you.',
+            // 'url' => route('pandit.dashboard')
+        ]);
 
+        // Send the notification
+        $messaging->send($message);
             try {
                 $messaging->send($message);
-                Log::info('FCM notification sent successfully to device token: ' . $deviceToken);
+                Log::info('FCM notification sent successfully to Pandit ID: ' .  $panditId);
             } catch (\Exception $e) {
-                Log::error('Error sending FCM notification to device token ' . $deviceToken . ': ' . $e->getMessage());
+                Log::error('Error sending FCM notification: ' . $e->getMessage());
             }
-        }
+
     
             // Load related data
             $booking->load(['user', 'pandit', 'poojalist', 'address']);
