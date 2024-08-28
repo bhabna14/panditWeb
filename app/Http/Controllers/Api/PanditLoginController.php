@@ -274,12 +274,14 @@ class PanditLoginController extends Controller
                 ], 200);
             } else {
                 return response()->json([
+                    'status' => 400,
                     'message' => 'Device not found.'
                 ], 404);
             }
         } catch (\Exception $e) {
             Log::error('An error occurred while logging out the pandit.', ['error' => $e->getMessage()]);
             return response()->json([
+                'status' => 500,
                 'message' => 'An error occurred while logging out.',
                 'error' => $e->getMessage()
             ], 500);
