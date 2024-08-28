@@ -59,41 +59,42 @@ public function approveBooking($id)
         $booking->save();
         Log::info('Booking status updated to approved for booking ID: ' . $id);
 
-        // Find the user's device token using user_id from the booking
+        // Find all user devices using user_id from the booking
         $factory = (new Factory)->withServiceAccount(config('services.firebase.user.credentials'));
         $messaging = $factory->createMessaging();
         Log::info('Firebase Messaging instance created successfully.');
 
-        $userDevice = UserDevice::where('user_id', $booking->user_id)->first();
-        Log::info('User device fetched: ' . json_encode($userDevice));
+        $userDevices = UserDevice::where('user_id', $booking->user_id)->get();
+        Log::info('User devices fetched: ' . json_encode($userDevices));
 
-        if ($userDevice) {
-            $deviceToken = $userDevice->device_id;
-            Log::info('Device token found: ' . $deviceToken);
+        if ($userDevices->isNotEmpty()) {
+            foreach ($userDevices as $userDevice) {
+                $deviceToken = $userDevice->device_id;
+                Log::info('Sending notification to device token: ' . $deviceToken);
 
-            // Prepare the notification message
-            $message = CloudMessage::withTarget('token', $deviceToken)
-                ->withNotification(Notification::create(
-                    'Booking Approved',
-                    "Your booking with ID: {$booking->booking_id} has been approved. Please check your account for details."
-                ))
-                ->withData([
-                    'booking_id' => $booking->booking_id,
-                    'user_id' => $booking->user_id,
-                    'message' => 'Your booking has been approved.',
-                    // 'url' => route('user.bookingDetails', ['id' => $booking->booking_id])
-                ]);
-            Log::info('Notification message prepared: ' . json_encode($message));
+                // Prepare the notification message
+                $message = CloudMessage::withTarget('token', $deviceToken)
+                    ->withNotification(Notification::create(
+                        'Booking Approved',
+                        "Your booking with ID: {$booking->booking_id} has been approved. Please check your account for details."
+                    ))
+                    ->withData([
+                        'booking_id' => $booking->booking_id,
+                        'user_id' => $booking->user_id,
+                        'message' => 'Your booking has been approved.',
+                        // 'url' => route('user.bookingDetails', ['id' => $booking->booking_id])
+                    ]);
+                Log::info('Notification message prepared: ' . json_encode($message));
 
-            try {
-                $messaging->send($message);
-                Log::info('FCM notification sent successfully to user ID: ' . $booking->user_id);
-            } catch (\Exception $e) {
-                Log::error('Error sending FCM notification: ' . $e->getMessage());
-                // Handle notification failure, you might want to notify the admin or take other actions
+                try {
+                    $messaging->send($message);
+                    Log::info('FCM notification sent successfully to device token: ' . $deviceToken);
+                } catch (\Exception $e) {
+                    Log::error('Error sending FCM notification to device token ' . $deviceToken . ': ' . $e->getMessage());
+                }
             }
         } else {
-            Log::warning('User device token not found for user ID: ' . $booking->user_id);
+            Log::warning('No device tokens found for user ID: ' . $booking->user_id);
         }
 
         // Broadcast the event
@@ -102,7 +103,7 @@ public function approveBooking($id)
 
         return response()->json([
             'status' => 200,
-            'message' => 'Booking approved and user notified successfully!',
+            'message' => 'Booking approved and user(s) notified successfully!',
             'booking' => $booking
         ], 200);
     } catch (\Exception $e) {
@@ -114,6 +115,7 @@ public function approveBooking($id)
         ], 500);
     }
 }
+
 
 public function rejectBooking(Request $request, $id)
     {
