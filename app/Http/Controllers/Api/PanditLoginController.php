@@ -269,6 +269,7 @@ class PanditLoginController extends Controller
                 $pandit->tokens()->delete();
     
                 return response()->json([
+                    'status' => 200,
                     'message' => 'Pandit logged out successfully and device removed.'
                 ], 200);
             } else {
