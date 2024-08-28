@@ -103,50 +103,39 @@ class BookingController extends Controller
             $newPoojaStartTime = Carbon::parse($validatedData['booking_date']);
             $newPoojaEndTime = $newPoojaStartTime->copy()->addMinutes($poojaDurationMinutes);
     
-            // Check for conflicting bookings with 'pending' status
-            $pendingBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
-                ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime, $poojaDurationMinutes) {
-                    $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                        ->orWhere(function($query) use ($newPoojaStartTime, $poojaDurationMinutes) {
-                            $query->where('booking_date', '<=', $newPoojaStartTime)
-                                  ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$poojaDurationMinutes, $newPoojaStartTime]);
-                        });
-                })
-                ->where(function($query) {
+                   // Check if the Pandit is already booked for the requested time slot
+            $conflictingBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
+            ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
+                    ->orWhere(function($query) use ($newPoojaStartTime, $newPoojaEndTime) {
+                        $query->where('booking_date', '<=', $newPoojaStartTime)
+                                ->where('booking_end_time', '>=', $newPoojaStartTime);
+                    });
+            })
+            ->where(function($query) {
+                $query->where(function($query) {
                     $query->where('status', 'pending')
-                          ->where('payment_status', 'pending')
-                          ->where('application_status', 'approved')
-                          ->where('pooja_status', 'pending');
-                })
-                ->first();
-    
-            if ($pendingBooking) {
-                $nextAvailableTime = Carbon::parse($pendingBooking->booking_end_time)->format('Y-m-d h:i A');
-                return response()->json([
-                    'success' => false,
-                    'message' => "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}."
-                ], 409); // 409 Conflict
-            }
-    
-            // Check for conflicting bookings with 'paid' status
-            $paidBooking = Booking::where('pandit_id', $validatedData['pandit_id'])
-                ->where(function($query) use ($newPoojaStartTime, $newPoojaEndTime, $poojaDurationMinutes) {
-                    $query->whereBetween('booking_date', [$newPoojaStartTime, $newPoojaEndTime])
-                        ->orWhere(function($query) use ($newPoojaStartTime, $poojaDurationMinutes) {
-                            $query->where('booking_date', '<=', $newPoojaStartTime)
-                                  ->whereRaw('DATE_ADD(bookings.booking_date, INTERVAL ? MINUTE) >= ?', [$poojaDurationMinutes, $newPoojaStartTime]);
-                        });
-                })
-                ->where(function($query) {
+                        ->where('payment_status', 'pending')
+                        ->where('application_status', 'approved')
+                        ->where('pooja_status', 'pending');
+                })->orWhere(function($query) {
                     $query->where('status', 'paid')
-                          ->where('payment_status', 'paid')
-                          ->where('application_status', 'approved')
-                          ->where('pooja_status', 'pending');
-                })
-                ->first();
+                        ->where('payment_status', 'paid')
+                        ->where('application_status', 'approved')
+                        ->where('pooja_status', 'pending');
+                });
+            })
+            ->first();
+
+            // if ($conflictingBooking) {
+            //     // Get the booking_end_time from the conflicting booking
+            //     $nextAvailableTime = Carbon::parse($conflictingBooking->booking_end_time)->format('Y-m-d h:i A'); 
+
+            //     return back()->with('error', "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}.");
+            // }
     
-            if ($paidBooking) {
-                $nextAvailableTime = Carbon::parse($paidBooking->booking_end_time)->format('Y-m-d h:i A');
+            if ($conflictingBooking) {
+                $nextAvailableTime = Carbon::parse($conflictingBooking->booking_end_time)->format('Y-m-d h:i A');
                 return response()->json([
                     'success' => false,
                     'message' => "The Pandit is already booked for the selected date and time. Please choose a different time or date after {$nextAvailableTime}."
@@ -163,45 +152,46 @@ class BookingController extends Controller
     
             // Create a new booking record
             $booking = Booking::create($validatedData);
+            // Send FCM notification to the pandit
+            $factory = (new Factory)->withServiceAccount(config('services.firebase.pandit.credentials'));
+            $messaging = $factory->createMessaging();
 
-             // Send FCM notification to the pandit
-        $factory = (new Factory)->withServiceAccount(config('services.firebase.pandit.credentials'));
-        $messaging = $factory->createMessaging();
+            // Retrieve all pandit's device tokens
+            
+            $panditProfile = Profile::findOrFail($validatedData['pandit_id']);
+            $panditId = $panditProfile->pandit_id;
+            $panditDevices = PanditDevice::where('pandit_id', $panditId)->get();
 
-        // Retrieve pandit's device token
-
-        $panditProfile = Profile::findOrFail($validatedData['pandit_id']);
-        $panditId = $panditProfile->pandit_id;
-
-        $device = PanditDevice::where('pandit_id', $panditId)->first();
-        if (!$device) {
-            throw new \Exception('Pandit device token not found.');
-        }
-
-        $deviceToken = $device->device_id;
-
-        // Prepare notification message
-        $message = CloudMessage::withTarget('token', $device->device_id)
-        ->withNotification(Notification::create(
-            'New Booking Request',
-            "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
-        ))
-        ->withData([
-            'booking_id' => $booking->booking_id,
-            'user_id' => Auth::guard('sanctum')->user()->userid,
-            'pooja_id' => $validatedData['pooja_id'],
-            'message' => 'A new booking request for you.',
-            // 'url' => route('pandit.dashboard')
-        ]);
-
-        // Send the notification
-        $messaging->send($message);
-            try {
-                $messaging->send($message);
-                Log::info('FCM notification sent successfully to Pandit ID: ' .  $panditId);
-            } catch (\Exception $e) {
-                Log::error('Error sending FCM notification: ' . $e->getMessage());
+            if ($panditDevices->isEmpty()) {
+                throw new \Exception('Pandit device tokens not found.');
             }
+
+            // Send notifications to all devices
+            foreach ($panditDevices as $device) {
+                $deviceToken = $device->device_id;
+
+                // Prepare notification message
+                $message = CloudMessage::withTarget('token', $deviceToken)
+                    ->withNotification(Notification::create(
+                        'New Booking Request',
+                        "A new booking request with ID: {$booking->booking_id}. Please check your dashboard for details."
+                    ))
+                    ->withData([
+                        'booking_id' => $booking->booking_id,
+                        'user_id' => Auth::guard('sanctum')->user()->userid,
+                        'pooja_id' => $validatedData['pooja_id'],
+                        'message' => 'A new booking request for you.',
+                     
+                    ]);
+
+                try {
+                    $messaging->send($message);
+                    Log::info('FCM notification sent successfully to device token: ' . $deviceToken);
+                } catch (\Exception $e) {
+                    Log::error('Error sending FCM notification to device token ' . $deviceToken . ': ' . $e->getMessage());
+                }
+            }
+
 
     
             // Load related data
