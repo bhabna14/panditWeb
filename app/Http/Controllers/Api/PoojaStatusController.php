@@ -145,6 +145,44 @@ public function rejectBooking(Request $request, $id)
                 'booking_id' => $booking->booking_id,  // Save the booking_id
                 'pandit_cancel_reason' => $validatedData['pandit_cancel_reason'],
             ]);
+
+              // Find all user devices using user_id from the booking
+        $factory = (new Factory)->withServiceAccount(config('services.firebase.user.credentials'));
+        $messaging = $factory->createMessaging();
+        Log::info('Firebase Messaging instance created successfully.');
+
+        $userDevices = UserDevice::where('user_id', $booking->user_id)->get();
+        Log::info('User devices fetched: ' . json_encode($userDevices));
+
+        if ($userDevices->isNotEmpty()) {
+            foreach ($userDevices as $userDevice) {
+                $deviceToken = $userDevice->device_id;
+                Log::info('Sending notification to device token: ' . $deviceToken);
+
+                // Prepare the notification message
+                $message = CloudMessage::withTarget('token', $deviceToken)
+                    ->withNotification(Notification::create(
+                        'Booking Rejected',
+                        "Your booking with ID: {$booking->booking_id} has been Rejected. Please check your booking details."
+                    ))
+                    ->withData([
+                        'booking_id' => $booking->booking_id,
+                        'user_id' => $booking->user_id,
+                        'message' => 'Your booking has been Rejected.',
+                        // 'url' => route('user.bookingDetails', ['id' => $booking->booking_id])
+                    ]);
+                Log::info('Notification message prepared: ' . json_encode($message));
+
+                try {
+                    $messaging->send($message);
+                    Log::info('FCM notification sent successfully to device token: ' . $deviceToken);
+                } catch (\Exception $e) {
+                    Log::error('Error sending FCM notification to device token ' . $deviceToken . ': ' . $e->getMessage());
+                }
+            }
+        } else {
+            Log::warning('No device tokens found for user ID: ' . $booking->user_id);
+        }
         
             // Return a success response
             return response()->json(['message' => 'Booking rejected successfully!'], 200);
