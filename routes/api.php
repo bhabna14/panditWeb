@@ -37,7 +37,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::controller(PanditLoginController::class)->group(function() {
     Route::post('/pandit-send-otp',  'sendOtp');
     Route::post('/pandit-verify-otp', 'verifyOtp');
-    Route::post('/panditlogout','panditLogout');
+    Route::middleware('auth:sanctum')->post('/panditlogout','panditLogout');
 });
 
 // Route::controller(LoginController::class)->group(function() {
