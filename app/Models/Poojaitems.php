@@ -23,6 +23,10 @@ class Poojaitems extends Model
         return $this->belongsTo(Poojalist::class, 'pooja_id', 'id');
     }
 
+    public function item() {
+        return $this->belongsTo(Poojaitemlists::class, 'item_id');
+    }
+
     public function variant()
     {
         return $this->belongsTo(Variant::class, 'variant_id', 'id');

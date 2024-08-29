@@ -332,10 +332,13 @@
                                                         <td>{{ $pandit_puja->pooja_photo ? $pandit_puja->pooja_photo : 'No photo' }}</td>
                                                         <td>{{ $pandit_puja->pooja_video ? $pandit_puja->pooja_video : 'No video' }}</td>
                                                         <td>
-                                                            @if($pandit_puja->samagri && $pandit_puja->samagri->isNotEmpty())
+                                                            @php
+                                                                $pooja_samagri = $samagri_items->where('pooja_id', $pandit_puja->poojalist->id);
+                                                            @endphp
+                                                            @if($pooja_samagri->isNotEmpty())
                                                                 <ul>
-                                                                    @foreach($pandit_puja->samagri as $samagri)
-                                                                        <li>{{ $samagri->item->name }} ({{ $samagri->variant->name }})</li>
+                                                                    @foreach($pooja_samagri as $item)
+                                                                        <li>{{ $item->item->item_name }} ({{ $item->variant->title }}) = {{ $item->variant->price }} </li>
                                                                     @endforeach
                                                                 </ul>
                                                             @else

@@ -13,6 +13,7 @@ use App\Models\IdcardDetail;
 use App\Models\PanditIdCard;
 use App\Models\Booking;
 use App\Models\Poojadetails;
+use App\Models\Poojaitems;
 
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
@@ -89,10 +90,13 @@ class AdminController extends Controller
         ->where('status','active')
             ->with('poojalist') // Load the poojalist relationship
             ->get();
+        // Fetch the samagri items separately from the Poojaitems table
+        $samagri_items = Poojaitems::where('pandit_id', $single_pandit->pandit_id)
+            ->with(['item', 'variant']) // Load the related pooja and variant
+            ->get();
 
 
-
-        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations','pandit_pujas'));
+        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations','pandit_pujas','samagri_items'));
 
     }
 
