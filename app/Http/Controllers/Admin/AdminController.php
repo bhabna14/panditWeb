@@ -88,12 +88,12 @@ class AdminController extends Controller
  
         // Fetch the related pooja details for this pandit
         $pandit_pujas = Poojadetails::where('pandit_id', $single_pandit->pandit_id)
-        ->where('status','active')
+            ->where('status','active')
             ->with('poojalist') // Load the poojalist relationship
             ->get();
         // Fetch the samagri items separately from the Poojaitems table
         $samagri_items = Poojaitems::where('pandit_id', $single_pandit->pandit_id)
-        ->where('status','active')
+            ->where('status','active')
             ->with(['item', 'variant']) // Load the related pooja and variant
             ->get();
 
