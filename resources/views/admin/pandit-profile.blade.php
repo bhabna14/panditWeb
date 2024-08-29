@@ -55,6 +55,7 @@
                             <a class="nav-link  mb-2 mt-2 active" data-bs-toggle="tab" href="#profile">About</a>
                             <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career">career</a>
                             <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#listpooja">List of Pooja</a>
+                            <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#logindevice">Login Devices</a>
                         </nav>
                     </div>
                 </div>
@@ -346,6 +347,41 @@
                                                             @endif
                                                         </td>
                                                     </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- main-profile-body -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="main-content-body  tab-pane border-top-0" id="logindevice">
+                        <div class="border-0">
+                            <div class="main-content-body main-content-body-profile">
+                                <div class="main-profile-body p-0">
+                                    <div class="row row-sm">
+                                        <div class="col-12">
+                                            <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="border-bottom-0">#</th>
+                                                        <th class="border-bottom-0">Device Id</th>
+                                                        <th class="border-bottom-0">Device Model</th>
+                                                        <th class="border-bottom-0">Platform</th>
+                                                        <th class="border-bottom-0">Login Time</th>
+                                                      
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($pandit_logins as $index => $pandit_login)
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td>{{ Str::limit($pandit_login->device_id, 15, '...') }}</td>
+                                                        <td>{{  $pandit_login->device_model }}</td>
+                                                        <td>{{  $pandit_login->platform }}</td>
+                                                        <td>{{  $pandit_login->created_at }}</td>
+
                                                     @endforeach
                                                 </tbody>
                                             </table>

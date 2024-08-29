@@ -14,6 +14,7 @@ use App\Models\PanditIdCard;
 use App\Models\Booking;
 use App\Models\Poojadetails;
 use App\Models\Poojaitems;
+use App\Models\PanditDevice;
 
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
@@ -95,8 +96,8 @@ class AdminController extends Controller
             ->with(['item', 'variant']) // Load the related pooja and variant
             ->get();
 
-
-        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations','pandit_pujas','samagri_items'));
+        $pandit_logins = PanditDevice::where('pandit_id', $pandtId)->get();
+        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations','pandit_pujas','samagri_items','pandit_logins'));
 
     }
 
