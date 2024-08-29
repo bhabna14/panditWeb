@@ -15,6 +15,7 @@ use App\Models\Booking;
 use App\Models\Poojadetails;
 use App\Models\Poojaitems;
 use App\Models\PanditDevice;
+use App\Models\UserDevice;
 
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
@@ -289,9 +290,9 @@ if ($profileSaved && $careerSaved) {
         // dd();
         $bookings = Booking::with(['pooja', 'pandit', 'address', 'user', 'poojaStatus', 'ratings'])
                             ->where('user_id', $user->userid)->get();
-    
+        $user_logins = UserDevice::where('user_id', $user->userid)->get();
         // Pass the data to the view
-        return view('admin.user-profile', compact('user', 'bookings'));
+        return view('admin.user-profile', compact('user', 'bookings','user_logins'));
     }
     
    
