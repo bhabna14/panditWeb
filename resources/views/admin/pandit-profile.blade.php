@@ -44,6 +44,10 @@
                         </p>
                         <p class="tx-13 text-muted ms-md-4 ms-0 mb-2 pb-2 ">
                             <span class="me-3"><i
+                                    class="far fa-address-card me-2"></i>Login Number :{{ $pandit_login_detail->mobile_no ?? "null" }}</span>
+                        </p>
+                        <p class="tx-13 text-muted ms-md-4 ms-0 mb-2 pb-2 ">
+                            <span class="me-3"><i
                                     class="far fa-address-card me-2"></i>Whatsapp Number :{{ $pandit_profile->whatsappno }}</span>
                         </p>
                       
