@@ -83,6 +83,7 @@ class OtpController extends Controller
         $phoneNumber = $request->input('phoneNumber');
         $deviceId = $request->input('device_id');
         $platform = $request->input('platform');
+        $device_model = $request->input('device_model');
 
         $client = new Client();
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
@@ -116,13 +117,21 @@ class OtpController extends Controller
                 }
 
                 // Update or create a device record for the user
-                $user->devices()->updateOrCreate(
-                    [
-                        'device_id' => $deviceId,
-                        'platform' => $platform
-                    ], // Condition to find the existing record
-                    ['user_id' => $user->userid] // Data to update or create
-                );
+                // $user->devices()->updateOrCreate(
+                //     [
+                //         'device_id' => $deviceId,
+                //         'platform' => $platform
+                //     ], // Condition to find the existing record
+                //     ['user_id' => $user->userid] // Data to update or create
+                // );
+
+                $user->devices()->create([
+                    'user_id' => $user->userid,
+                    'device_id' => $deviceId,
+                    'platform' => $platform,
+                    'device_model' => $device_model
+                ]);
+    
 
                 $token = $user->createToken('API Token')->plainTextToken;
 
