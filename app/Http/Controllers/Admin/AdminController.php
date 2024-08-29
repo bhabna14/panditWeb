@@ -12,6 +12,7 @@ use App\Models\VedicDetail;
 use App\Models\IdcardDetail;
 use App\Models\PanditIdCard;
 use App\Models\Booking;
+use App\Models\Poojadetails;
 
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
@@ -81,7 +82,17 @@ class AdminController extends Controller
         $pandit_educations = PanditEducation::where('pandit_id', $pandtId)->where('status','active')->get();
 
 
-        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations'));
+        $single_pandit = Profile::where('pandit_id', $pandtId)->firstOrFail();
+ 
+        // Fetch the related pooja details for this pandit
+        $pandit_pujas = Poojadetails::where('pandit_id', $single_pandit->pandit_id)
+        ->where('status','active')
+            ->with('poojalist') // Load the poojalist relationship
+            ->get();
+
+
+
+        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations','pandit_pujas'));
 
     }
 

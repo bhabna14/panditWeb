@@ -54,6 +54,7 @@
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0	">
                             <a class="nav-link  mb-2 mt-2 active" data-bs-toggle="tab" href="#profile">About</a>
                             <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career">career</a>
+                            <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#listpooja">List of Pooja</a>
                         </nav>
                     </div>
                 </div>
@@ -300,6 +301,57 @@
                         </div>
 
 
+                    </div>
+                    <div class="main-content-body  tab-pane border-top-0" id="listpooja">
+                        <div class="border-0">
+                            <div class="main-content-body main-content-body-profile">
+                                <div class="main-profile-body p-0">
+                                    <div class="row row-sm">
+                                        <div class="col-12">
+                                            <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="border-bottom-0">#</th>
+                                                        <th class="border-bottom-0">Pooja Name</th>
+                                                        <th class="border-bottom-0">Pooja Duration</th>
+                                                        <th class="border-bottom-0">Pooja Fee</th>
+                                                        <th class="border-bottom-0">Pooja Done</th>
+                                                        <th class="border-bottom-0">Pooja Photo</th>
+                                                        <th class="border-bottom-0">Pooja Video</th>
+                                                        <th class="border-bottom-0">List of Samagri</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($pandit_pujas as $index => $pandit_puja)
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                        <td>{{  $pandit_puja->poojalist->pooja_name }}</td>
+                                                        <td>{{  $pandit_puja->pooja_duration}}</td>
+                                                        <td>{{ $pandit_puja->pooja_fee}}</td>
+                                                        <td>{{  $pandit_puja->pooja_done}}</td>
+                                                        <td>{{ $pandit_puja->pooja_photo ? $pandit_puja->pooja_photo : 'No photo' }}</td>
+                                                        <td>{{ $pandit_puja->pooja_video ? $pandit_puja->pooja_video : 'No video' }}</td>
+                                                        <td>
+                                                            @if($pandit_puja->samagri && $pandit_puja->samagri->isNotEmpty())
+                                                                <ul>
+                                                                    @foreach($pandit_puja->samagri as $samagri)
+                                                                        <li>{{ $samagri->item->name }} ({{ $samagri->variant->name }})</li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @else
+                                                                No samagri available
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- main-profile-body -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
