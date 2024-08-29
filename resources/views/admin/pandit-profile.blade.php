@@ -376,12 +376,13 @@
                                                 </thead>
                                                 <tbody>
                                                     @foreach ($pandit_logins as $index => $pandit_login)
+                                                    <tr>
                                                         <td>{{ $index + 1 }}</td>
                                                         <td>{{ Str::limit($pandit_login->device_id, 15, '...') }}</td>
                                                         <td>{{  $pandit_login->device_model }}</td>
                                                         <td>{{  $pandit_login->platform }}</td>
                                                         <td>{{  $pandit_login->created_at }}</td>
-
+                                                    </tr>
                                                     @endforeach
                                                 </tbody>
                                             </table>
