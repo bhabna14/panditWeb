@@ -156,6 +156,7 @@ Route::get('/pooja/{slug}', [PanditController::class, 'poojadetails']);
 
 Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
 Route::post('/verify-otpless', [OtpController::class, 'verifyOtp'])->name('api.verify-otp');
+Route::middleware('auth:sanctum')->post('/userLogout', [OtpController::class, 'userLogout']);
 
 Route::middleware('auth:sanctum')->get('/order-history', [UserProfileController::class, 'orderHistory']);
 

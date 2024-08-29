@@ -43,6 +43,7 @@ Route::get('/otplogin', [OtplessLoginController::class, 'otplogin'])->name('otpl
 Route::post('/send-otp-user', [OtplessLoginController::class, 'sendOtp']);
 Route::post('/verify-otp-user', [OtplessLoginController::class, 'verifyOtp']);
 
+
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
