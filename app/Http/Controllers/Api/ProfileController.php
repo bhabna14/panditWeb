@@ -116,6 +116,7 @@ class ProfileController extends Controller
         // Update the scalar fields
        
         $profile->name = $request->name;
+        $profile->slug = Str::slug($request->name, '-');
         $profile->email = $request->email;
         $profile->whatsappno = $request->whatsappno;
         
