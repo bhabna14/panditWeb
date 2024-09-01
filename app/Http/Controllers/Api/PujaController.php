@@ -39,7 +39,12 @@ class PujaController extends Controller
         }
 
         //Get 9 pandits 
-        $pandits = Profile::where('pandit_status', 'accepted')->get();
+        $pandits = Profile::where('pandit_status', 'accepted')
+                        ->whereHas('poojadetails', function($query) {
+                            $query->where('status', 'active');
+                        })
+                        ->get();
+
         foreach ($pandits as $pandit) {
             $pandit->profile_photo = asset($pandit->profile_photo);
         }
