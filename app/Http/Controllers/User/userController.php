@@ -276,12 +276,22 @@ class userController extends Controller
         return view('user.pandit-details', compact('pooja', 'pandit', 'poojaDetail'));
     }
 
-    public function panditlist(){
-        $pandits = Profile::where('pandit_status', 'accepted')
-                            ->paginate(12);
-            return view('user/panditlist', compact('pandits'));
+    // public function panditlist(){
+    //     $pandits = Profile::where('pandit_status', 'accepted')
+    //                         ->paginate(12);
+    //         return view('user/panditlist', compact('pandits'));
        
-     }
+    //  }
+    public function panditlist()
+    {
+        $pandits = Profile::where('pandit_status', 'accepted')
+                            ->whereHas('poojadetails', function($query) {
+                                $query->where('status', 'active');
+                            })
+                            ->paginate(12);
+
+        return view('user/panditlist', compact('pandits'));
+    }
 
      public function list($pooja_id , $pandit_id)
      {
