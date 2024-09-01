@@ -33,9 +33,9 @@
                             <a class="nav-link mb-2 mt-2" href="{{ url('pandit/poojaskill') }}"
                                 onclick="changeColor(this)">Pooja & Expertise</a>
                             <a class="nav-link mb-2 mt-2" href="{{ url('pandit/poojadetails') }}"
-                                onclick="changeColor(this)">Add Details of Puja</a>
+                                onclick="changeColor(this)">Add Details of Pooja</a>
                             <a class="nav-link mb-2 mt-2 active" href="{{ url('pandit/poojalist') }}"
-                                onclick="changeColor(this)">Puja Item List</a>
+                                onclick="changeColor(this)">Pooja Item List</a>
                             <a class="nav-link mb-2 mt-2" href="{{ url('pandit/poojaarea') }}"
                                 onclick="changeColor(this)">Areas of Service</a>
                         </nav>
@@ -105,7 +105,7 @@
                             <thead>
                                 <tr>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Slno</th>
-                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Puja Name
+                                    <th style="color: white;background-color: #f74f75;" class="border-bottom-0">Pooja Name
                                     </th>
                                     <th style="color: white;background-color: #f74f75;" class="border-bottom-0">List Name
                                     </th>
@@ -147,7 +147,7 @@
                                     <label for="list_name">List Name</label>
                                     <select class="form-control chosen-select" name="list_name" id="list_name" required
                                         disabled>
-                                        <option value="">Select Puja List</option>
+                                        <option value="">Select Pooja List</option>
                                         @foreach ($Poojaitemlist as $pujalist)
                                             <option value="{{ $pujalist->id }}"
                                                 data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">

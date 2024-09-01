@@ -32,9 +32,9 @@
                             <a class="nav-link mb-2 mt-2" href="{{ url('pandit/poojaskill') }}"
                                 onclick="changeColor(this)">Pooja & Expertise</a>
                             <a class="nav-link mb-2 mt-2" href="{{ url('pandit/poojadetails') }}"
-                                onclick="changeColor(this)">Add Details of Puja</a>
+                                onclick="changeColor(this)">Add Details of Pooja</a>
                                 <a class="nav-link mb-2 mt-2" href="{{ url('pandit/poojaitemlist') }}"
-                                onclick="changeColor(this)">Puja Item List</a>
+                                onclick="changeColor(this)">Pooja Item List</a>
                             <a class="nav-link mb-2 mt-2 active" href="{{ url('pandit/poojaarea') }}"
                                 onclick="changeColor(this)">Areas of Service</a>
                         </nav>

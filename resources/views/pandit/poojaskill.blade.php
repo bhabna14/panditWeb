@@ -30,8 +30,8 @@
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
                             <a class="nav-link mb-2 mt-2 active"  href="{{url('pandit/poojaskill')}}" onclick="changeColor(this)">Pooja & Expertise</a>
-                            <a class="nav-link mb-2 mt-2"  href="{{url('pandit/poojadetails')}}" onclick="changeColor(this)">Add Details of Puja</a>
-                            <a class="nav-link mb-2 mt-2"  href="{{url('pandit/poojaitemlist')}}"  onclick="changeColor(this)">Puja Item List</a>
+                            <a class="nav-link mb-2 mt-2"  href="{{url('pandit/poojadetails')}}" onclick="changeColor(this)">Add Details of Pooja</a>
+                            <a class="nav-link mb-2 mt-2"  href="{{url('pandit/poojaitemlist')}}"  onclick="changeColor(this)">Pooja Item List</a>
                             <a class="nav-link mb-2 mt-2" href="{{url('pandit/poojaarea')}}" onclick="changeColor(this)">Areas of Service</a>
                         </nav>
                     </div>
@@ -86,7 +86,7 @@
                                                     {{ $pooja->pooja_name }}
                                                 </div>
                                                 <div class="form-check mt-3 text-center">
-                                                    <input class="form-check-input checks" type="checkbox" id="checkbox{{ $pooja->id }}"
+                                                    <input style="width: 30px;height:30px" class="form-check-input checks" type="checkbox" id="checkbox{{ $pooja->id }}"
                                                         name="poojas[{{ $pooja->id }}][id]" value="{{ $pooja->id }}"
                                                         @if (in_array($pooja->id, $selectedPoojas)) checked @endif>
                                                     <input type="hidden" name="poojas[{{ $pooja->id }}][name]"

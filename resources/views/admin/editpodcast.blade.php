@@ -51,13 +51,22 @@
                     <div class="card-body">
                        
                         <div class="row">
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Podcast Name</label>
                                     <input type="text" value="{{$podcast->name}}" class="form-control" id="puja_name" name="name" placeholder="Enter Podcast Name">
                                 </div>
                             </div>
-                           
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="language">Language</label>
+                                    <select class="form-control" id="language" name="language" required>
+                                        <option value="odia" {{ $podcast->language == 'odia' ? 'selected' : '' }}>Odia</option>
+                                        <option value="english" {{ $podcast->language == 'english' ? 'selected' : '' }}>English</option>
+                                        <option value="hindi" {{ $podcast->language == 'hindi' ? 'selected' : '' }}>Hindi</option>
+                                    </select>
+                                </div>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-md-6">

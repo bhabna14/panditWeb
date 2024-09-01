@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Podcast;
 
-
 class PodcastController extends Controller
 {
     //
@@ -15,7 +14,10 @@ class PodcastController extends Controller
         return view('admin/managepodcast',compact('podcasts'));
     }
     public function addpodcast(){
-        return view('admin/addpodcast');
+
+        $podcasts = Podcast::all();
+
+        return view('admin/addpodcast',compact('podcasts'));
     }
     public function savepodcast(Request $request)
     {
@@ -24,74 +26,83 @@ class PodcastController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'required',
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
-            // 'music' => 'required|mimes:mp3,wav|max:10000'
+            'music' => 'required|mimes:mp3,wav|max:30000', // Added validation for music file size
+            'podcast_id' => 'nullable|string', // Ensure validation is set for podcast_id
         ]);
-
+    
+        // Determine whether to use an existing podcast ID or create a new one
+        if (trim($request->podcast_id) !== '') {
+            // Existing podcast selected
+            $podcastId = $request->podcast_id;
+        } else {
+            // No podcast selected, generate a new podcast ID
+            $podcastId = 'PODCAST' . rand(10000, 99999);
+        }
+    
         // Handle the file upload
-        \Log::info('File Upload Failed for Image:', [
-            'file' => $request->file('image'),
-            'path' => storage_path('app/public/images')
-        ]);
-        
-        \Log::info('File Upload Failed for Music:', [
-            'file' => $request->file('music'),
-            'path' => storage_path('app/public/music')
-        ]);
-        
-        $imagePath = $request->file('image')->store('images', 'public');
-        $musicPath = $request->file('music')->store('music', 'public');
-        
-        if (!$imagePath || !$musicPath) {
-            \Log::error('File upload failed for one or both files.', [
-                'imagePath' => $imagePath,
-                'musicPath' => $musicPath,
-            ]);
+        if ($request->hasFile('image') && $request->hasFile('music')) {
+            $imagePath = $request->file('image')->store('images', 'public');
+            $musicPath = $request->file('music')->store('music', 'public');
+        } else {
             return redirect()->back()->with('error', 'File upload failed.');
         }
-        
-        // dd($imagePath, $musicPath);
+    
         // Create a new podcast record
         $podcast = new Podcast();
         $podcast->name = $request->name;
+        $podcast->podcast_id = $podcastId; // Ensure this is saved correctly
+        $podcast->language = $request->language;
         $podcast->description = $request->description;
         $podcast->image = $imagePath;
         $podcast->music = $musicPath;
         $podcast->save();
-
+    
         return redirect()->route('addpodcast')->with('success', 'Podcast created successfully.');
     }
-    // public function editpodcast(Request $request, $id){
-    //     // $podcastinfo = Podcast::where('id', $id)->first();
-    //     return view('admin/editpodcast',compact('id'));
-
-    // }
+    
+    
+    
     public function editpodcast(Podcast $podcast)
     {
         return view('admin/editpodcast', compact('podcast'));
     }
+
     public function updatepodcast(Request $request, Podcast $podcast)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'music' => 'nullable|mimes:mp3,WAV|max:100000000'
-        ]);
+{
+    // Validate the incoming request data
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'required',
+        'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+        'music' => 'nullable|mimes:mp3,wav|max:100000000',
+        'language' => 'required|string|in:odia,english,hindi', // Validate language input
+    ]);
 
-        if ($request->hasFile('image') && $request->file('image')->isValid()) {
-            $imagePath = $request->file('image')->store('images', 'public');
-            $podcast->image = $imagePath;
-        }
-
-        if ($request->hasFile('music') && $request->file('music')->isValid()) {
-            $musicPath = $request->file('music')->store('music', 'public');
-            $podcast->music = $musicPath;
-        }
-
-        $podcast->update($request->only(['name', 'description']));
-
-        return redirect()->route('managepodcast')->with('success', 'Podcast updated successfully');
+    // Handle image file upload if it exists
+    if ($request->hasFile('image') && $request->file('image')->isValid()) {
+        $imagePath = $request->file('image')->store('images', 'public');
+        $podcast->image = $imagePath;
     }
+
+    // Handle music file upload if it exists
+    if ($request->hasFile('music') && $request->file('music')->isValid()) {
+        $musicPath = $request->file('music')->store('music', 'public');
+        $podcast->music = $musicPath;
+    }
+
+    // Update the language field and other fields
+    $podcast->language = $request->language;
+
+    // Update the podcast with the validated data
+    $podcast->update($request->only(['name', 'description']));
+
+    // Save the podcast model after updating fields directly
+    $podcast->save();
+
+    // Redirect with success message
+    return redirect()->route('managepodcast')->with('success', 'Podcast updated successfully');
+}
+
     public function destroy(Podcast $podcast)
     {
         $podcast->delete();

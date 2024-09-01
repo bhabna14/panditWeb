@@ -108,7 +108,7 @@
                                                                                 <option value="10th">10th</option>
                                                                                 <option value="+2">+2</option>
                                                                                 <option value="+3">+3</option>
-                                                                                <option value="Master Degree">Master Degree</option>
+                                                                                <option value="Master_Degree">Master Degree</option>
                                                                             </select>
                                                                         </div>
                                                                     </div>

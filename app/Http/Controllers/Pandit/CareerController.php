@@ -42,45 +42,64 @@ class CareerController extends Controller
             'id_type.*' => 'required|string|in:adhar,voter,pan,DL,health card',
             'upload_id.*' => 'required|file|mimes:jpeg,png,pdf|max:2048',
             'education_type.*' => 'nullable|string',
-        'upload_edu.*' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
-        'vedic_type.*' => 'nullable|string',
-        'upload_vedic.*' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
-                ]);
-                
-
-        $career = new Career();
-
-        $career->pandit_id = Auth::guard('pandits')->user()->pandit_id;
-        $career->qualification = $request->qualification;
-        $career->total_experience = $request->experience;
-
-         // Pandit Career Photo Upload
-
-         foreach ($request->id_type as $key => $id_type) {
-            $file = $request->file('upload_id')[$key];
-            $fileName = time().'_'.$file->getClientOriginalName();
-            $filePath = $file->move(public_path('uploads/id_proof'), $fileName);
-
-            // Save form data to the database
-            $iddata = new IdcardDetail();
-        $iddata->pandit_id = Auth::guard('pandits')->user()->pandit_id;
-            $iddata->id_type =  $id_type;
-            $iddata->upload_id = $fileName; // Save file path in the database
-            $iddata->save();
+            'upload_edu.*' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
+            'vedic_type.*' => 'nullable|string',
+            'upload_vedic.*' => 'nullable|file|mimes:jpeg,png,pdf|max:2048',
+        ]);
+    
+        // Get the authenticated pandit ID
+        $pandit_id = Auth::guard('pandits')->user()->pandit_id;
+    
+        // Check if there is an existing career record for this pandit
+        $existingCareer = Career::where('pandit_id', $pandit_id)->first();
+    
+        if (!$existingCareer) {
+            // If no existing career record, proceed with saving new career data
+            $career = new Career();
+            $career->pandit_id = $pandit_id;
+            $career->qualification = $request->qualification;
+            $career->total_experience = $request->experience;
+            $career->save();
         }
-
-        //Pandit Education Photo Upload
-
+    
+        // Pandit Career Photo Upload
+        foreach ($request->id_type as $key => $id_type) {
+            // Check if an ID card of this type already exists for this pandit
+            $existingIdCard = IdcardDetail::where('pandit_id', $pandit_id)
+                            ->where('id_type', $id_type)
+                            ->first();
+    
+            if (!$existingIdCard) {
+                // If no existing ID card of this type, save the new one
+                $file = $request->file('upload_id')[$key];
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/id_proof'), $fileName);
+    
+                // Save form data to the database
+                $iddata = new IdcardDetail();
+                $iddata->pandit_id = $pandit_id;
+                $iddata->id_type = $id_type;
+                $iddata->upload_id = $fileName; // Save file path in the database
+                $iddata->save();
+            }
+        }
+    
+        // Pandit Education Photo Upload
         if ($request->has('education_type') && $request->has('upload_edu')) {
             foreach ($request->education_type as $key => $education_type) {
-                if ($education_type) { // Ensure education_type is not empty
+                // Check if an education record of this type already exists for this pandit
+                $existingEduDetail = EduDetail::where('pandit_id', $pandit_id)
+                                  ->where('education_type', $education_type)
+                                  ->first();
+    
+                if ($education_type && !$existingEduDetail) { // Ensure education_type is not empty and doesn't already exist
                     $file = $request->file('upload_edu')[$key];
-                    $fileName = time().'_'.$file->getClientOriginalName();
-                    $filePath = $file->move(public_path('uploads/edu_details'), $fileName);
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('uploads/edu_details'), $fileName);
     
                     // Save form data to the database
                     $edudata = new EduDetail();
-                    $edudata->pandit_id = Auth::guard('pandits')->user()->pandit_id;
+                    $edudata->pandit_id = $pandit_id;
                     $edudata->education_type = $education_type;
                     $edudata->upload_education = $fileName; // Save file path in the database
                     $edudata->save();
@@ -91,26 +110,29 @@ class CareerController extends Controller
         // Pandit Vedic Photo Upload
         if ($request->has('vedic_type') && $request->has('upload_vedic')) {
             foreach ($request->vedic_type as $key => $vedic_type) {
-                if ($vedic_type) { // Ensure vedic_type is not empty
+                // Check if a vedic record of this type already exists for this pandit
+                $existingVedicDetail = VedicDetail::where('pandit_id', $pandit_id)
+                                    ->where('vedic_type', $vedic_type)
+                                    ->first();
+    
+                if ($vedic_type && !$existingVedicDetail) { // Ensure vedic_type is not empty and doesn't already exist
                     $file = $request->file('upload_vedic')[$key];
-                    $fileName = time().'_'.$file->getClientOriginalName();
-                    $filePath = $file->move(public_path('uploads/vedic_details'), $fileName);
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $file->move(public_path('uploads/vedic_details'), $fileName);
     
                     // Save form data to the database
                     $vedicdata = new VedicDetail();
-                    $vedicdata->pandit_id = Auth::guard('pandits')->user()->pandit_id;
+                    $vedicdata->pandit_id = $pandit_id;
                     $vedicdata->vedic_type = $vedic_type;
                     $vedicdata->upload_vedic = $fileName; // Save file path in the database
                     $vedicdata->save();
                 }
             }
         }
-        if ($career->save()) {
-            return redirect("pandit/dashboard")->with('success', 'Data saved successfully.');
-        } else {
-            return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
-        }
+    
+        return redirect("pandit/dashboard")->with('success', 'Data saved successfully.');
     }
+    
 
     public function deletIdproof($id)
     {
@@ -226,6 +248,5 @@ class CareerController extends Controller
                         return redirect()->back()->with('error', 'Failed to update data.');
                     }
                 }
-                
-   
+
 }

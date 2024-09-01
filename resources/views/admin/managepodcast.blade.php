@@ -60,11 +60,9 @@
                                                 <tr>
                                                 
                                                     <th class="border-bottom-0">Sl No.</th>
-                                                    <th class="border-bottom-0">Podcast Name</th>
-                                                    {{-- <th class="border-bottom-0">Description</th> --}}
-                                                   
+                                                    <th class="border-bottom-0">Podcast Name</th> 
+                                                    <th class="border-bottom-0">Language</th>                                                   
                                                     <th class="border-bottom-0">View Image</th>
-                                                   
                                                     <th class="border-bottom-0">View Audio</th>
                                                     <th class="border-bottom-0">Action</th>
 
@@ -77,6 +75,7 @@
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
                                                     <td class="border-bottom-0">{{ $podcast->name }}</td>
+                                                    <td class="border-bottom-0">{{ $podcast->language }}</td>
                                                     <td>
 
                                                         <a href="{{ asset('storage/' . $podcast->image) }}" target="_blank"

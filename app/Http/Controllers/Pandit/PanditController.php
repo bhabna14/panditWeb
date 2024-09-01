@@ -200,7 +200,7 @@ public function poojarequest()
             // Find the user's device token using user_id from the booking
 
               // Send FCM notification to the pandit
-            $factory = (new Factory)->withServiceAccount(config('services.firebase.user.credentials'));
+            $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
             $messaging = $factory->createMessaging();
 
             $userDevice = UserDevice::where('user_id', $booking->user_id)->first();
@@ -237,15 +237,6 @@ public function poojarequest()
 
             return redirect()->back()->with('success', 'Booking approved and user notified successfully!');
         }
-
-        // public function approveBooking($id)
-        // {
-        //     $booking = Booking::findOrFail($id);
-        //     $booking->application_status = 'approved';
-        //     $booking->save();
-       
-        //     return redirect()->back()->with('success', 'Booking approved successfully!');
-        // }
 
         public function rejectBooking(Request $request, $id)
         {
@@ -467,6 +458,7 @@ public function poojarequest()
                     ],
                     'booking_time' => $booking->booking_date,
                     'payment_status' => $booking->payment_status,
+                    'pooja_status' => $booking->pooja_status,
                     'address' => [
                         'country' => $booking->address->country,
                         'state' => $booking->address->state,
