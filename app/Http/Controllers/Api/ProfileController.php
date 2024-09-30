@@ -66,15 +66,34 @@ class ProfileController extends Controller
             $langString = $pandilang; // Assuming it's already a string if not an array
         }
         $profile->language = $langString;
-    
-        // Handle profile photo upload if provided
-        if ($request->hasFile('profile_photo')) {
-            $file = $request->file('profile_photo');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $filePath = 'uploads/profile_photo/' . $filename;
-            $file->move(public_path('uploads/profile_photo'), $filename);
-            $profile->profile_photo = $filePath;
-        }
+   // Handle profile photo upload if provided as base64
+if ($request->has('profile_photo')) {
+    $imageBase64 = $request->input('profile_photo'); // get the base64 string
+
+    // Extract the base64 data (assuming the string is in the format: data:image/png;base64,...)
+    $imageParts = explode(";base64,", $imageBase64);
+    if (count($imageParts) == 2) {
+        $imageTypeAux = explode("image/", $imageParts[0]);
+        $imageType = $imageTypeAux[1]; // get the image extension (e.g., png, jpg)
+        $imageBase64Decoded = base64_decode($imageParts[1]); // decode base64 to binary
+
+        // Generate a unique filename
+        $filename = time() . '.' . $imageType;
+
+        // Define the path where you want to save the image
+        $filePath = 'uploads/profile_photo/' . $filename;
+        $fullPath = public_path($filePath);
+
+        // Save the decoded image to the specified path
+        file_put_contents($fullPath, $imageBase64Decoded);
+
+        // Save the file path to the database
+        $profile->profile_photo = $filePath;
+    } else {
+        return response()->json(['error' => 'Invalid base64 image format'], 400);
+    }
+}
+
     
         $iddata = new IdcardDetail();
         $iddata->pandit_id = $pandit->pandit_id;
