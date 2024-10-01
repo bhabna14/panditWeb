@@ -3,6 +3,8 @@
 @section('styles')
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+
 @endsection
 
 @section('class')
@@ -128,10 +130,21 @@
                                                                     <div class="col-md-6">
                                                                         <div class="form-group">
                                                                             <label for="exampleInputPassword1">Profile Photo <span style="color: red">*</span></label>
-                                                                            <input type="file" name="profile_photo"
-                                                                                class="form-control" id="profile_photo" required>
+                                                                            <input type="file" name="profile_photo" class="form-control" id="profile_photo" required>
                                                                         </div>
+                                                                    
+                                                                        <!-- Image preview area -->
+                                                                        <div class="img-container" style="display: none;">
+                                                                            <img id="image"  />
+                                                                        </div>
+                                                                        
+                                                                        <!-- Button to trigger crop -->
+                                                                        <button type="button" id="cropButton" class="btn btn-primary" style="display: none;">Crop Photo</button>
+                                                                        
+                                                                        <!-- Hidden input to hold cropped image -->
+                                                                        <input type="hidden" id="croppedImage" name="croppedImage">
                                                                     </div>
+                                                                    
                                                                 </div>
                                                                 <div class="row">
                                                                     <div class="col-md-6">
@@ -221,6 +234,64 @@
         <script src="{{ asset('assets/js/login.js') }}"></script>
         <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
         <script src="{{ asset('assets/js/select2.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+<script>
+    document.getElementById('profile_photo').addEventListener('change', function(event) {
+    var files = event.target.files;
+    var done = function (url) {
+        document.getElementById('image').src = url;
+        document.querySelector('.img-container').style.display = 'block';
+        document.getElementById('cropButton').style.display = 'block';
+    };
+    
+    var reader;
+    var file;
+    var url;
+
+    if (files && files.length > 0) {
+        file = files[0];
+        
+        // Use FileReader if available
+        if (URL) {
+            done(URL.createObjectURL(file));
+        } else if (FileReader) {
+            reader = new FileReader();
+            reader.onload = function (event) {
+                done(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Initialize cropper
+    var image = document.getElementById('image');
+    var cropper = new Cropper(image, {
+        aspectRatio: 1, // For a square crop (you can adjust this for different aspect ratios)
+        viewMode: 2,
+        minCropBoxWidth: 200,
+        minCropBoxHeight: 200
+    });
+
+    // Handle crop button click
+    document.getElementById('cropButton').addEventListener('click', function() {
+        var canvas = cropper.getCroppedCanvas({
+            width: 200,
+            height: 200
+        });
+        
+        canvas.toBlob(function(blob) {
+            // Convert blob to base64 and set it to the hidden input
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = function() {
+                var base64data = reader.result;
+                document.getElementById('croppedImage').value = base64data;
+            };
+        });
+    });
+});
+
+</script>
         <script>
             setTimeout(function(){
                 document.getElementById('Message').style.display = 'none';
