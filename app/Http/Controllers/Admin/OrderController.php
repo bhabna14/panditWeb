@@ -38,4 +38,14 @@ class OrderController extends Controller
          
         return view('admin/showbookingdetails', compact('booking','pandit_login'));
     }
+    public function deleteBooking($id)
+{
+    // Find the booking by ID and delete it
+    $booking = Booking::findOrFail($id);
+    $booking->delete();
+
+    // Redirect back with a success message
+    return redirect()->route('manageorders')->with('success', 'Booking deleted successfully.');
+}
+
 }

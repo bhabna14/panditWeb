@@ -240,6 +240,7 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/manage-orders', 'manageorders')->name('manageorders');
         Route::get('/booking/{id}','showbooking')->name('admin.booking.show');
         // Route::get('/savelocation', 'savelocation')->name('savelocation');
+        Route::delete('/dltbooking/{id}', 'deleteBooking')->name('admin.booking.delete');
     });
 
     Route::controller(PodcastController::class)->group(function() {

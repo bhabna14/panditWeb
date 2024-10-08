@@ -44,6 +44,17 @@
                                         <h6 class="main-content-label mb-1">File export Datatables</h6>
                                         <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
                                     </div> -->
+                                    @if (session()->has('success'))
+                                    <div class="alert alert-success" id="Message">
+                                        {{ session()->get('success') }}
+                                    </div>
+                                    @endif
+
+                                    @if ($errors->has('danger'))
+                                    <div class="alert alert-danger" id="Message">
+                                        {{ $errors->first('danger') }}
+                                    </div>
+                                    @endif
                                     <div class="table-responsive  export-table">
                                         <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
                                             <thead>
@@ -115,8 +126,15 @@
                                                         
                                                         <td>
                                                             <a href="{{url('admin/booking/'. $booking->id)}}"><i class="fas fa-eye"></i></a> | 
-                                                            <a href="{{url('admin/editsebayat/')}}"><i class="fa fa-edit"></i></a> | 
-                                                            <a href="{{url('admin/dltsebayat/')}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
+                                                           
+                                                            <form action="{{ route('admin.booking.delete', $booking->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure to delete?');">
+                                                                @csrf
+                                                                @method('DELETE') <!-- This will be used to spoof the DELETE method -->
+                                                                <button type="submit" style="border: none; background: none; color: red; cursor: pointer;">
+                                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                                </button>
+                                                            </form>
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                                 

@@ -17,6 +17,7 @@ use App\Models\Poojaitems;
 use App\Models\PanditDevice;
 use App\Models\UserDevice;
 use App\Models\PanditLogin;
+use App\Models\Bankdetail;
 
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
@@ -86,6 +87,8 @@ class AdminController extends Controller
         $pandit_educations = PanditEducation::where('pandit_id', $pandtId)->where('status','active')->get();
 
         $pandit_login_detail = PanditLogin::where('pandit_id', $pandtId)->first();
+        $pandit_bankdetails = Bankdetail::where('pandit_id', $pandtId)->get();
+
         $single_pandit = Profile::where('pandit_id', $pandtId)->firstOrFail();
  
         // Fetch the related pooja details for this pandit
@@ -100,7 +103,7 @@ class AdminController extends Controller
             ->get();
 
         $pandit_logins = PanditDevice::where('pandit_id', $pandtId)->get();
-        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations','pandit_pujas','samagri_items','pandit_logins','pandit_login_detail'));
+        return view('admin/pandit-profile', compact('pandit_profile','pandit_careers','pandit_idcards','pandit_vedics','pandit_educations','pandit_pujas','samagri_items','pandit_logins','pandit_login_detail','pandit_bankdetails'));
 
     }
 
