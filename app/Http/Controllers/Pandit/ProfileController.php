@@ -13,6 +13,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Rules\WordCount;
+use Illuminate\Support\Facades\Log;
 
 
 class ProfileController extends Controller
@@ -60,13 +61,39 @@ class ProfileController extends Controller
             $profile->language = $langString;
 
         // Handle profile photo upload if provided
+        // if ($request->hasFile('profile_photo')) {
+        //     $file = $request->file('profile_photo');
+        //     $filename = time() . '.' . $file->getClientOriginalExtension();
+        //     $filePath = 'uploads/profile_photo/' . $filename;
+        //     $file->move(public_path('uploads/profile_photo'), $filename);
+        //     $profile->profile_photo = $filePath;
+        // }
+
         if ($request->hasFile('profile_photo')) {
-            $file = $request->file('profile_photo');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $filePath = 'uploads/profile_photo/' . $filename;
-            $file->move(public_path('uploads/profile_photo'), $filename);
-            $profile->profile_photo = $filePath;
+            try {
+                // Get the file from the request
+                $file = $request->file('profile_photo');
+        
+                // Generate a unique filename
+                $filename = time() . '.' . $file->getClientOriginalExtension();
+        
+                // Define the file path for saving
+                $filePath = 'uploads/profile_photo/' . $filename;
+                
+                // Move the file to the designated directory
+                $file->move(public_path('uploads/profile_photo'), $filename);
+        
+                // Save the file path to the profile
+                $profile->profile_photo = $filePath;
+        
+            } catch (\Exception $e) {
+                // Return a user-friendly error message if something goes wrong
+                return back()->withErrors(['profile_photo' => 'Failed to upload the profile photo. Please try again.']);
+            }
         }
+        
+        
+        
 
         if ($profile->save()) {
             return redirect("pandit/career")->with('success', 'Data saved successfully.');

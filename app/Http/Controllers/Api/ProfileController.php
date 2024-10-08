@@ -66,15 +66,15 @@ class ProfileController extends Controller
             $langString = $pandilang; // Assuming it's already a string if not an array
         }
         $profile->language = $langString;
-    
-        // Handle profile photo upload if provided
-        if ($request->hasFile('profile_photo')) {
-            $file = $request->file('profile_photo');
-            $filename = time() . '.' . $file->getClientOriginalExtension();
-            $filePath = 'uploads/profile_photo/' . $filename;
-            $file->move(public_path('uploads/profile_photo'), $filename);
-            $profile->profile_photo = $filePath;
-        }
+    // Handle profile photo upload if provided
+    if ($request->hasFile('profile_photo')) {
+        $file = $request->file('profile_photo');
+        $filename = time() . '.' . $file->getClientOriginalExtension();
+        $filePath = 'uploads/profile_photo/' . $filename;
+        $file->move(public_path('uploads/profile_photo'), $filename);
+        $profile->profile_photo = $filePath;
+    }
+
     
         $iddata = new IdcardDetail();
         $iddata->pandit_id = $pandit->pandit_id;

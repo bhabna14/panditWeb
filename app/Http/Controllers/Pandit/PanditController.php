@@ -190,53 +190,68 @@ public function poojarequest()
 }
 
     
-        public function approveBooking($id)
-        {
-            // Find and update the booking status
-            $booking = Booking::findOrFail($id);
-            $booking->application_status = 'approved';
-            $booking->save();
+public function approveBooking($id)
+{
+    try {
+        Log::info('Attempting to approve booking with ID: ' . $id);
 
-            // Find the user's device token using user_id from the booking
+        // Find and approve the booking
+        $booking = Booking::findOrFail($id);
+        Log::info('Booking found: ' . json_encode($booking));
 
-              // Send FCM notification to the pandit
-            $factory = (new Factory)->withServiceAccount(config('services.firebase.credentials'));
-            $messaging = $factory->createMessaging();
+        $booking->application_status = 'approved';
+        $booking->save();
+        Log::info('Booking status updated to approved for booking ID: ' . $id);
 
-            $userDevice = UserDevice::where('user_id', $booking->user_id)->first();
-            
-            if (!$userDevice) {
-                Log::error('User device token not found for user ID: ' . $booking->user_id);
-                return redirect()->back()->with('error', 'Unable to send notification: User device token not found.');
+        // Find all user devices using user_id from the booking
+        $factory = (new Factory)->withServiceAccount(config('services.firebase.user.credentials'));
+        $messaging = $factory->createMessaging();
+        Log::info('Firebase Messaging instance created successfully.');
+
+        $userDevices = UserDevice::where('user_id', $booking->user_id)->get();
+        Log::info('User devices fetched: ' . json_encode($userDevices));
+
+        if ($userDevices->isNotEmpty()) {
+            foreach ($userDevices as $userDevice) {
+                $deviceToken = $userDevice->device_id;
+                Log::info('Sending notification to device token: ' . $deviceToken);
+
+                // Prepare the notification message
+                $message = CloudMessage::withTarget('token', $deviceToken)
+                    ->withNotification(Notification::create(
+                        'Booking Approved',
+                        "Your booking with ID: {$booking->booking_id} has been approved. Please check your account for details."
+                    ))
+                    ->withData([
+                        'booking_id' => $booking->booking_id,
+                        'user_id' => $booking->user_id,
+                        'message' => 'Your booking has been approved.',
+                    ]);
+                Log::info('Notification message prepared: ' . json_encode($message));
+
+                try {
+                    $messaging->send($message);
+                    Log::info('FCM notification sent successfully to device token: ' . $deviceToken);
+                } catch (\Exception $e) {
+                    Log::error('Error sending FCM notification to device token ' . $deviceToken . ': ' . $e->getMessage());
+                }
             }
-
-            $deviceToken = $userDevice->device_id;
-            
-            // Prepare the notification message
-            $message = CloudMessage::withTarget('token', $deviceToken)
-                ->withNotification(Notification::create(
-                    'Booking Approved',
-                    "Your booking with ID: {$booking->booking_id} has been approved. Please check your account for details."
-                ))
-                ->withData([
-                    'booking_id' => $booking->booking_id,
-                    'user_id' => $booking->user_id,
-                    'message' => 'Your booking has been approved.',
-                    // 'url' => route('user.bookingDetails', ['id' => $booking->booking_id])
-                ]);
-
-            // Get the Firebase Messaging instance
-            $messaging->send($message);
-            
-            try {
-                $messaging->send($message);
-                Log::info('FCM notification sent successfully to user ID: ' . $booking->user_id);
-            } catch (\Exception $e) {
-                Log::error('Error sending FCM notification: ' . $e->getMessage());
-            }
-
-            return redirect()->back()->with('success', 'Booking approved and user notified successfully!');
+        } else {
+            Log::warning('No device tokens found for user ID: ' . $booking->user_id);
+            return redirect()->back()->with('error', 'Unable to send notification: User device token not found.');
         }
+
+        // Broadcast the event (optional, if needed for real-time updates)
+        event(new BookingApproved($booking));
+        Log::info('BookingApproved event broadcasted for booking ID: ' . $id);
+
+        return redirect()->back()->with('success', 'Booking approved and user notified successfully!');
+    } catch (\Exception $e) {
+        Log::error('Error in approveBooking method: ' . $e->getMessage());
+        return redirect()->back()->with('error', 'Failed to approve booking.');
+    }
+}
+
 
         public function rejectBooking(Request $request, $id)
         {
