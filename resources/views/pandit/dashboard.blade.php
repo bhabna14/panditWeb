@@ -420,7 +420,6 @@ width: 30px;
         </div>
     </div> 
 
-
     <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -655,7 +654,6 @@ eventClick: function(info) {
 
     calendar.render();
 });
-
 
 </script>
 
