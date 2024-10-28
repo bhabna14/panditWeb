@@ -250,9 +250,16 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/editpodcast/{podcast}', 'editpodcast')->name('editpodcast');
         Route::post('/updatepodcast/{podcast}', 'updatepodcast')->name('updatepodcast');
         Route::get('/dltpodcast/{podcast}', 'destroy')->name('destroy');
+
+
+        Route::get('/manage-podcast-category', 'managepodcastcategory')->name('managepodcastcategory');
+        Route::post('/savecategory', 'saveCategory')->name('savecategory');
+
     });
+    Route::put('updatecategory', [PodcastController::class, 'updateCategory'])->name('updatecategory');
 
-
+    // Delete a category
+    Route::get('deletecategory/{id}', [PodcastController::class, 'deleteCategory'])->name('deletecategory');
     Route::controller(BannerController::class)->group(function() {
         Route::get('/manage-app-banner', 'manageappbanner')->name('manageappbanner');
         Route::get('/add-app-banner', 'addbanner')->name('addbanner');

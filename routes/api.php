@@ -128,6 +128,7 @@ Route::controller(AddressController::class)->group(function() {
 
 Route::controller(PodcastController::class)->group(function() {
     Route::get('podcasts', 'podcasts');
+    Route::get('/podcasthomepage',  'podcasthomepage');
 });
 Route::controller(YoutubeUrlController::class)->group(function() {
 
