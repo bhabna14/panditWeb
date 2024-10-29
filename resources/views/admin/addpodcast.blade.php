@@ -55,7 +55,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="podcast">Podcast</label>
-                                    <select class="form-control" id="podcast_id" name="podcast_id" required>
+                                    <select class="form-control" id="podcast_id" name="podcast_id" >
                                         <option value="">Select podcast</option>
                                         @foreach ($podcasts as $podcast)
                                             <option value="{{ $podcast->podcast_id }}">{{ $podcast->name }}</option>
