@@ -123,7 +123,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="youtube_url">YouTube Video URL</label>
-                                    <input type="url" class="form-control" id="youtube_url" name="youtube_url" placeholder="Enter YouTube Video URL" required>
+                                    <input type="text" class="form-control" id="youtube_url" name="youtube_url" placeholder="Enter YouTube Video URL">
                                 </div>
                             </div>
                         </div>
