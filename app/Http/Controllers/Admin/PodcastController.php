@@ -30,7 +30,7 @@ class PodcastController extends Controller
         'music' => 'required|mimes:mp3,wav|max:30000', // Added validation for music file size
         'podcast_id' => 'nullable|string', // Ensure validation is set for podcast_id
         'category_id' => 'required|exists:podcast_categories,id', // New validation
-        'youtube_url' => 'required|url', // New validation for YouTube URL
+        'youtube_url' => 'nullable|string', // New validation for YouTube URL
         'upload_date' => 'required|date', // New validation for upload date
         'publish_date' => 'required|date|after_or_equal:upload_date', // Ensure publish date is not before upload date
     ]);
@@ -60,7 +60,7 @@ class PodcastController extends Controller
     $podcast->description = $request->description;
     $podcast->image = $imagePath;
     $podcast->music = $musicPath;
-    $podcast->category_id = $request->category_id; // Save category ID
+    $podcast->podcast_category_id = $request->category_id; // Save category ID
     $podcast->youtube_url = $request->youtube_url; // Save YouTube URL
     $podcast->upload_date = $request->upload_date; // Save upload date
     $podcast->publish_date = $request->publish_date; // Save publish date
