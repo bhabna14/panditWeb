@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PodcastController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\YoutubeController;
+use App\Http\Controllers\Admin\ProductController;
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -170,6 +171,14 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
 ## admin routes
 Route::prefix('admin')->middleware(['admin'])->group(function () {
+    Route::get('/add-product', [ProductController::class, 'addproduct']);
+    Route::get('/manage-product',  [ProductController::class, 'manageproduct'])->name('manageproduct');
+
+    Route::post('/create-product', [ProductController::class, 'createProduct'])->name('admin.products.store');
+    Route::post('/subscribe', [ProductController::class, 'purchaseSubscription']);
+    Route::post('/deactivate-expired-subscriptions', [ProductController::class, 'deactivateExpiredSubscriptions']);
+
+
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');

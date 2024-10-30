@@ -29,11 +29,12 @@ use App\Http\Controllers\Api\PujaController;
 use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\OtpController;
+use App\Http\Controllers\Api\ProductController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
+Route::get('/products', [ProductController::class, 'getActiveProducts']);
 Route::controller(PanditLoginController::class)->group(function() {
     Route::post('/pandit-send-otp',  'sendOtp');
     Route::post('/pandit-verify-otp', 'verifyOtp');
