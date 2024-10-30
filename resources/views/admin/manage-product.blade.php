@@ -58,7 +58,7 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Product Name</th>
-                                                    
+                                                    <th>Image</th>
                                                     <th>Price</th>
                                                     <th>Stock</th>
                                                     <th>Category</th>
@@ -71,14 +71,18 @@
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
                                                         <td>{{ $product->name }}</td>
+                                                        <td>
+                                                            <img src="{{ asset($product->product_image ? 'storage/' . $product->product_image : 'front-assets/img/images.jfif') }}" alt="user" style="widows: 100px;height:100px">
+
+                                                        </td>
                                                         <td>Rs. {{ number_format($product->price, 2) }}</td>
                                                         <td>{{ $product->stock }}</td>
                                                         <td>{{ $product->category }}</td>
                                                         <td>{{ ucfirst($product->status) }}</td>
                                                         <td>
-                                                            <a href="{{ url('admin/edit-product/'.$product->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                                            <a href="{{ url('admin/edit-product/'.$product->id) }}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
                                                             <a href="{{ url('admin/delete-product/'.$product->id) }}" class="btn btn-sm btn-danger" 
-                                                               onclick="return confirm('Are you sure you want to delete this product?');">Delete</a>
+                                                               onclick="return confirm('Are you sure you want to delete this product?');"><i class="fa fa-trash"></i></a>
                                                         </td>
                                                     </tr>
                                                 @endforeach
