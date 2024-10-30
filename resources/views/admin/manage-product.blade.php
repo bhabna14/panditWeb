@@ -58,6 +58,7 @@
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Product Name</th>
+                                                    
                                                     <th>Price</th>
                                                     <th>Stock</th>
                                                     <th>Category</th>

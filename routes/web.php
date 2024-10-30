@@ -175,9 +175,12 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::get('/manage-product',  [ProductController::class, 'manageproduct'])->name('manageproduct');
 
     Route::post('/create-product', [ProductController::class, 'createProduct'])->name('admin.products.store');
-    Route::post('/subscribe', [ProductController::class, 'purchaseSubscription']);
+    Route::post('/purchaseSubscription', [ProductController::class, 'purchaseSubscription']);
     Route::post('/deactivate-expired-subscriptions', [ProductController::class, 'deactivateExpiredSubscriptions']);
-
+    Route::get('/edit-product/{id}', [ProductController::class, 'editProduct'])->name('admin.edit-product');
+    Route::post('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
+    Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
+    
 
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');

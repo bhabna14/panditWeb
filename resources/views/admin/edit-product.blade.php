@@ -9,14 +9,14 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">ADD Product</span>
+            <span class="main-content-title mg-b-0 mg-b-lg-1">Edit Product</span>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
                 <li class="breadcrumb-item tx-15"><a href="{{ url('admin/manage-product') }}"
                         class="btn btn-warning text-dark">Manage Product</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active tx-15" aria-current="page">ADD Product</li>
+                <li class="breadcrumb-item active tx-15" aria-current="page">Edit Product</li>
             </ol>
         </div>
     </div>
@@ -44,65 +44,69 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.products.store') }}" method="post" enctype="multipart/form-data">
+    <form action="{{ route('admin.update-product', $product->id) }}" method="post" enctype="multipart/form-data">
         @csrf
         <div class="row">
             <!-- Product Name -->
             <div class="col-md-6 mb-3">
                 <label for="name" class="form-label">Product Name</label>
-                <input type="text" name="name" class="form-control" id="name" placeholder="Enter product name" required>
+                <input type="text" name="name" class="form-control" id="name" value="{{ $product->name }}" required>
             </div>
-
+    
             <!-- Price -->
             <div class="col-md-6 mb-3">
                 <label for="price" class="form-label">Price (Rs.)</label>
-                <input type="number" name="price" class="form-control" id="price" placeholder="Enter product price" required>
+                <input type="number" name="price" class="form-control" id="price" value="{{ $product->price }}" required>
             </div>
-
+    
             <!-- Description -->
             <div class="col-md-12 mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea name="description" class="form-control" id="description" rows="4" placeholder="Enter product description" required></textarea>
+                <textarea name="description" class="form-control" id="description" rows="4" required>{{ $product->description }}</textarea>
             </div>
-
+    
             <!-- Category -->
             <div class="col-md-6 mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select name="category" id="category" class="form-control select2" required>
-                    <option value="" disabled selected>Select Category</option>
-                    <option value="Puja Item">Puja Item</option>
-                    <option value="Subscription">Subscription</option>
+                    <option value="Puja Item" {{ $product->category == 'Puja Item' ? 'selected' : '' }}>Puja Item</option>
+                    <option value="Subscription" {{ $product->category == 'Subscription' ? 'selected' : '' }}>Subscription</option>
                     <!-- Add other categories as needed -->
                 </select>
             </div>
-
+    
             <!-- Stock -->
             <div class="col-md-6 mb-3">
                 <label for="stock" class="form-label">Stock</label>
-                <input type="number" name="stock" class="form-control" id="stock" placeholder="Enter stock quantity" required>
+                <input type="number" name="stock" class="form-control" id="stock" value="{{ $product->stock }}" required>
             </div>
-
+    
             <!-- Subscription Duration -->
             <div class="col-md-6 mb-3">
                 <label for="duration" class="form-label">Subscription Duration (Months)</label>
                 <select name="duration" id="duration" class="form-control select2" required>
-                    <option value="1">1 Month</option>
-                    <option value="3">3 Months</option>
-                    <option value="6">6 Months</option>
+                    <option value="1" {{ $product->duration == 1 ? 'selected' : '' }}>1 Month</option>
+                    <option value="3" {{ $product->duration == 3 ? 'selected' : '' }}>3 Months</option>
+                    <option value="6" {{ $product->duration == 6 ? 'selected' : '' }}>6 Months</option>
                 </select>
             </div>
-
+    
+            <!-- Product Image -->
             <div class="col-md-6 mb-3">
                 <label for="product_image" class="form-label">Product Image</label>
-                <input type="file" name="product_image" class="form-control" id="product_image" placeholder="Enter stock quantity" required>
+                <input type="file" name="product_image" class="form-control" id="product_image">
+                @if($product->product_image)
+                    <img src="{{ asset('storage/' . $product->product_image) }}" alt="Product Image" width="100" class="mt-2">
+                @endif
             </div>
-
+    
             <!-- Submit Button -->
             <div class="col-md-12 mt-4">
-                <button type="submit" class="btn btn-primary">Add Product</button>
+                <button type="submit" class="btn btn-primary">Update Product</button>
             </div>
         </div>
     </form>
+    
 @endsection
 
 @section('modal')
