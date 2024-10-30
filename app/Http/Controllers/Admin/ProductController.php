@@ -31,7 +31,7 @@ class ProductController extends Controller
         if ($request->hasFile('product_image')) {
             $imagePath = $request->file('product_image')->store('product_images', 'public'); // store in 'public/product_images' folder
         }
-        $productId = 'COM' . mt_rand(1000000, 9999999);
+        $productId = 'FLOW' . mt_rand(1000000, 9999999);
         // Create the product with image path
         $product = FlowerProduct::create([
             'product_id' => $productId,
