@@ -48,7 +48,7 @@ class FlowerBookingController extends Controller
         try {
             $order = Order::create([
                 'order_id' => $orderId,
-                'product_id' => $product->id,
+                'product_id' => $product->product_id,
                 'user_id' => $user->userid,
                 'quantity' => 1,
                 'total_price' => $product->price,
