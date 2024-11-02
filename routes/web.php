@@ -193,7 +193,7 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::post('admin/pandit/reject/{id}', 'rejectPandit')->name('rejectPandit');
         Route::get('pandit-profile/{id}',  'showProfile')->name('panditProfile');
 
-        Route::get('/deletIdproofs/{id}', 'deletIdproof')->name('deletIdproof');
+        // Route::get('/deletIdproofs/{id}', 'deletIdproof')->name('deletIdproof');
         Route::get('/deletEducations/{id}', 'deletEducation')->name('deletEducation');
         Route::get('/deletVedics/{id}', 'deletVedic')->name('deletVedic');
         Route::get('/add-panditProfile', 'addProfile')->name('addProfile');
