@@ -25,7 +25,7 @@ use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Pandit\AddressController;
 use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\Pandit\PoojaListController;
-// use App\Http\Controllers\Pandit\PanditLoginController; 
+use App\Http\Controllers\Pandit\PanditLoginController; 
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
@@ -193,13 +193,13 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::post('admin/pandit/reject/{id}', 'rejectPandit')->name('rejectPandit');
         Route::get('pandit-profile/{id}',  'showProfile')->name('panditProfile');
 
-        // Route::get('/deletIdproofs/{id}', 'deletIdproof')->name('deletIdproof');
-        // Route::get('/deletEducations/{id}', 'deletEducation')->name('deletEducation');
-        // Route::get('/deletVedics/{id}', 'deletVedic')->name('deletVedic');
-        // Route::get('/add-panditProfile', 'addProfile')->name('addProfile');
-        // Route::get('/add-panditCareer', 'addCareer')->name('addCareer');
-        // Route::post('/save-profile', 'saveprofile');
-        // Route::post('/save-career', 'savecareer');
+        Route::get('/deletIdproofs/{id}', 'deletIdproof')->name('deletIdproof');
+        Route::get('/deletEducations/{id}', 'deletEducation')->name('deletEducation');
+        Route::get('/deletVedics/{id}', 'deletVedic')->name('deletVedic');
+        Route::get('/add-panditProfile', 'addProfile')->name('addProfile');
+        Route::get('/add-panditCareer', 'addCareer')->name('addCareer');
+        Route::post('/save-profile', 'saveprofile');
+        Route::post('/save-career', 'savecareer');
     });
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
@@ -307,9 +307,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 //     Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
 // }); 
 
-// Route::controller(PanditLoginController::class)->group(function() {
-//     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
-// });
+Route::controller(PanditLoginController::class)->group(function() {
+    Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
+});
 
 
 Route::controller(PanditOtpController::class)->group(function() {

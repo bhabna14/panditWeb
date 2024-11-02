@@ -8,6 +8,8 @@ use Illuminate\Support\Str;
 use App\Models\Order;
 use App\Models\Subscription;
 use App\Models\FlowerProduct;
+use App\Models\FlowerRequest;
+
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\FlowerPayment;
@@ -109,6 +111,38 @@ class FlowerBookingController extends Controller
             'end_date' => $endDate,
             'order_id' => $orderId,
         ]);
+    }
+    public function storerequest(Request $request)
+    {
+        try {
+            // Validate the incoming request
+          
+            // Get the authenticated user
+            $user = Auth::guard('sanctum')->user();
+    
+            // Create the flower request
+            $flowerRequest = FlowerRequest::create([
+                'product_id' => $request->product_id,
+                'user_id' => $user->userid,
+                'address_id' => $request->address_id,
+                'description' => $request->description,
+                'suggestion' => $request->suggestion,
+                'status' => 'pending'
+            ]);
+    
+            return response()->json([
+                'message' => 'Flower request created successfully',
+                'data' => $flowerRequest,
+            ], 201);
+        } catch (\Exception $e) {
+            // Log the exception
+            \Log::error('Error creating flower request: ' . $e->getMessage());
+    
+            return response()->json([
+                'message' => 'Failed to create flower request',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
     
     
