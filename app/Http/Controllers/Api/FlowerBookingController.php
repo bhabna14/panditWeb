@@ -18,7 +18,6 @@ class FlowerBookingController extends Controller
 
         public function purchaseSubscription(Request $request)
         {
-            dd("hi");
             $product = FlowerProduct::findOrFail($request->product_id);
             $user = Auth::guard('sanctum')->user();
 
