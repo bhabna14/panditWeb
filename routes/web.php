@@ -158,7 +158,7 @@ Route::controller(SuperAdminController::class)->group(function() {
 ##super admin routes
 Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::controller(SuperAdminController::class)->group(function() {
-        Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/dashboard', 'dashboard')->name('dashboard');
     });
 
     Route::get('/addadmin', [SuperAdminController::class, 'addadmin']);
