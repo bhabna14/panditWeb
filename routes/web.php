@@ -194,12 +194,12 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('pandit-profile/{id}',  'showProfile')->name('panditProfile');
 
         // Route::get('/deletIdproofs/{id}', 'deletIdproof')->name('deletIdproof');
-        Route::get('/deletEducations/{id}', 'deletEducation')->name('deletEducation');
-        Route::get('/deletVedics/{id}', 'deletVedic')->name('deletVedic');
-        Route::get('/add-panditProfile', 'addProfile')->name('addProfile');
-        Route::get('/add-panditCareer', 'addCareer')->name('addCareer');
-        Route::post('/save-profile', 'saveprofile');
-        Route::post('/save-career', 'savecareer');
+        // Route::get('/deletEducations/{id}', 'deletEducation')->name('deletEducation');
+        // Route::get('/deletVedics/{id}', 'deletVedic')->name('deletVedic');
+        // Route::get('/add-panditProfile', 'addProfile')->name('addProfile');
+        // Route::get('/add-panditCareer', 'addCareer')->name('addCareer');
+        // Route::post('/save-profile', 'saveprofile');
+        // Route::post('/save-career', 'savecareer');
     });
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
