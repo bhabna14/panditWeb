@@ -94,9 +94,9 @@ class FlowerBookingController extends Controller
                 'order_id' => $orderId,
                 'payment_id' => $request->payment_id,
                 'user_id' => $user->userid,
-                'payment_method' => $request->payment_method,
+                'payment_method' => "Razorpay",
                 'paid_amount' => $request->paid_amount, // Use the paid amount directly from the request
-                'payment_status' => $request->payment_status,
+                'payment_status' => "paid",
             ]);
             \Log::info('Payment recorded successfully');
         } catch (\Exception $e) {
