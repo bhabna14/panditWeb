@@ -21,13 +21,12 @@ class FlowerBookingController extends Controller
         // Log the incoming request data
         \Log::info('Purchase subscription called', ['request' => $request->all()]);
     
-        // Attempt to find the product
-        try {
-            $product = FlowerProduct::findOrFail($request->product_id);
+        // Directly fetch the product without validation
+        $product = FlowerProduct::find($request->product_id); // Use find() instead of findOrFail()
+        if (!$product) {
+            \Log::warning('Product not found, proceeding with null value', ['product_id' => $request->product_id]);
+        } else {
             \Log::info('Product found', ['product' => $product]);
-        } catch (\Exception $e) {
-            \Log::error('Product not found', ['product_id' => $request->product_id, 'error' => $e->getMessage()]);
-            return response()->json(['message' => 'Product not found'], 404);
         }
     
         // Get the authenticated user
@@ -36,22 +35,22 @@ class FlowerBookingController extends Controller
             \Log::error('User not authenticated');
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        
+    
         // Generate a unique order ID in the specified format
         $orderId = 'ORD-' . strtoupper(Str::random(12));
         $addressId = $request->address_id;
     
         // Log the order creation attempt
-        \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $product->id, 'user_id' => $user->userid, 'address_id' => $addressId]);
+        \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $product ? $product->id : null, 'user_id' => $user->userid, 'address_id' => $addressId]);
     
         // Create the order
         try {
             $order = Order::create([
                 'order_id' => $orderId,
-                'product_id' => $product->product_id,
+                'product_id' => $product ? $product->id : null, // Use null if product not found
                 'user_id' => $user->userid,
                 'quantity' => 1,
-                'total_price' => $product->price,
+                'total_price' => $product ? $product->price : 0, // Set total_price to 0 if product not found
                 'address_id' => $addressId,
             ]);
             \Log::info('Order created successfully', ['order' => $order]);
@@ -62,16 +61,16 @@ class FlowerBookingController extends Controller
     
         // Calculate subscription start and end dates
         $startDate = now();
-        $endDate = now()->addMonths($product->duration);
+        $endDate = now()->addMonths($product ? $product->duration : 0); // Default duration to 0 if product not found
     
         // Log subscription creation
-        \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $product->id, 'start_date' => $startDate, 'end_date' => $endDate]);
+        \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $product ? $product->id : null, 'start_date' => $startDate, 'end_date' => $endDate]);
     
-        // Create the subscription
+        // Create the subscription without validation
         try {
             Subscription::create([
                 'user_id' => $user->userid,
-                'product_id' => $product->id,
+                'product_id' => $product ? $product->id : null, // Use null if product not found
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'is_active' => true,
@@ -88,7 +87,7 @@ class FlowerBookingController extends Controller
             'payment_id' => $request->payment_id,
             'user_id' => $user->userid,
             'payment_method' => $request->payment_method,
-            'paid_amount' => $product->price,
+            'paid_amount' => $product ? $product->price : 0, // Default to 0 if product not found
             'payment_status' => $request->payment_status,
         ]);
     
@@ -99,7 +98,7 @@ class FlowerBookingController extends Controller
                 'payment_id' => $request->payment_id,
                 'user_id' => $user->userid,
                 'payment_method' => $request->payment_method,
-                'paid_amount' => $product->price,
+                'paid_amount' => $product ? $product->price : 0, // Default to 0 if product not found
                 'payment_status' => $request->payment_status,
             ]);
             \Log::info('Payment recorded successfully');
@@ -114,5 +113,6 @@ class FlowerBookingController extends Controller
             'order_id' => $orderId,
         ]);
     }
+    
     
 }
