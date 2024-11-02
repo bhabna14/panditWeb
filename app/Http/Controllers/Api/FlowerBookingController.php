@@ -18,6 +18,7 @@ class FlowerBookingController extends Controller
 
         public function purchaseSubscription(Request $request)
         {
+            \Log::info('Purchase subscription called', ['request' => $request->all()]);
             $product = FlowerProduct::findOrFail($request->product_id);
             $user = Auth::guard('sanctum')->user();
 
