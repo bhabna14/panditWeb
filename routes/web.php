@@ -307,9 +307,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 //     Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
 // }); 
 
-Route::controller(PanditLoginController::class)->group(function() {
-    Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
-});
+// Route::controller(PanditLoginController::class)->group(function() {
+//     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
+// });
 
 
 Route::controller(PanditOtpController::class)->group(function() {
