@@ -16,6 +16,7 @@ class Order extends Model
         'quantity',
         'total_price',
         'order_id',  // Add this line
-        'address_id'
+        'address_id',
+        'suggestion'
     ];
 }

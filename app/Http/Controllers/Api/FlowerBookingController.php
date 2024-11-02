@@ -34,6 +34,7 @@ class FlowerBookingController extends Controller
         // Generate a unique order ID in the specified format
         $orderId = 'ORD-' . strtoupper(Str::random(12));
         $addressId = $request->address_id;
+        $suggestion = $request->suggestion;
     
         // Log the order creation attempt
         \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
@@ -47,6 +48,7 @@ class FlowerBookingController extends Controller
                 'quantity' => 1,
                 'total_price' => $request->paid_amount, // Use the paid amount directly from the request
                 'address_id' => $addressId,
+                'suggestion' => $suggestion,
             ]);
             \Log::info('Order created successfully', ['order' => $order]);
         } catch (\Exception $e) {
