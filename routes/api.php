@@ -20,6 +20,8 @@ use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\PanditLoginController;
 use App\Http\Controllers\Api\CheckController;
 use App\Http\Controllers\Api\PoojaStatusController;
+use App\Http\Controllers\Api\FlowerBookingController;
+
 
 
 
@@ -195,3 +197,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/update-rating', [RatingController::class, 'updateRating']);
     Route::get('/rating/{id}', [RatingController::class, 'showRating']);
 });
+
+Route::middleware('auth:sanctum')->post('/purchase-subscription', [FlowerBookingController::class, 'purchaseSubscription']);
