@@ -198,4 +198,4 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rating/{id}', [RatingController::class, 'showRating']);
 });
 
-Route::middleware('auth:sanctum')->get('/purchase-subscription', [FlowerBookingController::class, 'purchaseSubscription']);
+Route::middleware('auth:sanctum')->post('/purchase-subscription', [FlowerBookingController::class, 'purchaseSubscription']);
