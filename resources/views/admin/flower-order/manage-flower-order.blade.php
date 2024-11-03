@@ -19,13 +19,13 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Bookings</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Flower Order</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
                             {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Bookings</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Flower Order</li>
                         </ol>
                     </div>
                 </div>
@@ -60,8 +60,9 @@
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
-                                                    <th>User ID</th>
-                                                    <th>Product ID</th>
+                                                    <th>User Details</th>
+                                                    <th>Product Details</th>
+                                                    <th>Address Details</th>
                                                     <th>Total Price</th>
                                                     <th>Actions</th>
                                                 </tr>
@@ -70,8 +71,16 @@
                                                 @foreach($orders as $order)
                                                 <tr>
                                                     <td>{{ $order->order_id }}</td>
-                                                    <td>{{ $order->user_id }}</td>
-                                                    <td>{{ $order->product_id }}</td>
+                                                    <td>Name: {{ $order->user->name }} <br>
+                                                        Number : {{ $order->user->mobile_number }}
+                                                    </td>
+                                                    <td>{{ $order->flowerProduct->name }}</td>
+                                                    <td>
+                                                        <strong>Address:</strong> {{ $order->address->area ?? "" }}<br>
+                                                        <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
+                                                        <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
+                                                        <strong>Zip Code:</strong> {{ $order->address->pincode ?? "" }}
+                                                    </td>
                                                     <td>{{ $order->total_price }}</td>
                                                     <td>
                                                         <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>

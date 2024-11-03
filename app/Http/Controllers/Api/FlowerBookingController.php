@@ -156,8 +156,18 @@ class FlowerBookingController extends Controller
         // Fetch standalone orders for the authenticated user (orders without request_id)
         $subscriptionsOrder = Order::whereNull('request_id')
         ->where('user_id', $userId)
-        ->with(['subscription', 'flowerPayments'])
+        ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address'])
         ->get();
+    
+    // Map to add the product_image_url to each order's flowerProduct
+    $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
+        if ($order->flowerProduct) {
+            // Ensure flowerProduct exists before accessing product_image
+            $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image); // Generate full URL for the photo
+        }
+        return $order;
+    });
+    
 
         // Fetch related orders for the authenticated user (orders with request_id)
         $requestedOrders = FlowerRequest::where('user_id', $userId)

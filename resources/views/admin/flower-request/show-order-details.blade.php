@@ -19,7 +19,7 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
             max-width: 400px;
-            margin: 20px auto;
+            /* margin: 20px auto; */
             font-family: Arial, sans-serif;
         }
     
@@ -98,73 +98,82 @@
     </div>
 </div>
 <div class="container">
-    <div class="subscription-card">
-        <div class="card-header">Order & Subscription Summary</div>
-        <div class="details">
-            <div class="info-row">
-                <span class="info-label">Order ID:</span>
-                <span class="info-value">{{ $order->order_id }}</span>
+   <div class="row">
+        <div class="col-md-5">
+            <div class="subscription-card">
+                <div class="card-header">Order & Subscription Summary</div>
+                <div class="details">
+                    <div class="info-row">
+                        <span class="info-label">Order ID:</span>
+                        <span class="info-value">{{ $order->order_id }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Product:</span>
+                        <span class="info-value">{{ $order->flowerProduct->name }}</span>
+                    </div>
+                    <div class="info-row price-row">
+                        <span class="info-label">Total Price:</span>
+                        <span class="info-value">₹ {{ number_format($order->total_price, 2) }}</span>
+                    </div>
+            
+                    <div class="divider"></div>
+            
+                    @if($order->subscription)
+                        <div class="info-row">
+                            <span class="info-label">Start Date:</span>
+                            <span class="info-value">{{ \Carbon\Carbon::parse($order->subscription->start_date)->format('d M, Y') }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">End Date:</span>
+                            <span class="info-value">{{ \Carbon\Carbon::parse($order->subscription->end_date)->format('d M, Y') }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Status:</span>
+                            <span class="status-badge {{ $order->subscription->is_active ? 'status-running' : 'status-expired' }}">
+                                {{ $order->subscription->is_active ? 'Running' : 'Expired' }}
+                            </span>
+                        </div>
+                    @else
+                        <div class="info-row">
+                            <span class="info-label">Subscription:</span>
+                            <span class="status-badge status-expired">No active subscription</span>
+                        </div>
+                    @endif
+                </div>
             </div>
-            <div class="info-row">
-                <span class="info-label">Product ID:</span>
-                <span class="info-value">{{ $order->product_id }}</span>
-            </div>
-            <div class="info-row price-row">
-                <span class="info-label">Total Price:</span>
-                <span class="info-value">₹ {{ number_format($order->total_price, 2) }}</span>
-            </div>
-    
-            <div class="divider"></div>
-    
-            @if($order->subscription)
-                <div class="info-row">
-                    <span class="info-label">Start Date:</span>
-                    <span class="info-value">{{ \Carbon\Carbon::parse($order->subscription->start_date)->format('d M, Y') }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">End Date:</span>
-                    <span class="info-value">{{ \Carbon\Carbon::parse($order->subscription->end_date)->format('d M, Y') }}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Status:</span>
-                    <span class="status-badge {{ $order->subscription->is_active ? 'status-running' : 'status-expired' }}">
-                        {{ $order->subscription->is_active ? 'Running' : 'Expired' }}
-                    </span>
-                </div>
-            @else
-                <div class="info-row">
-                    <span class="info-label">Subscription:</span>
-                    <span class="status-badge status-expired">No active subscription</span>
-                </div>
-            @endif
         </div>
-    </div>
+        <div class="col-md-7">
+            <div class="">
+                <h5>Related Orders</h5>
+                <table class="table table-bordered text-nowrap key-buttons border-bottom">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>Description</th>
+                            <th>Total Price</th>
+                            <th>Payment Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($relatedOrders as $relatedOrder)
+                        <tr>
+                            <td>{{ $relatedOrder->order_id }}</td>
+                            <td>{{ $relatedOrder->flowerRequest->description }}</td>
+                            <td>{{ $relatedOrder->total_price }}</td>
+                            <td>{{ $relatedOrder->status }}</td>
+                            <td><a href="{{ route('admin.orders.show', $relatedOrder->id) }}" class="btn btn-primary">View</a></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+   </div>
     
   
 
-    <div class="mt-4">
-        <h5>Related Orders</h5>
-        <table class="table table-bordered text-nowrap key-buttons border-bottom">
-            <thead>
-                <tr>
-                    <th>Order ID</th>
-                    <th>Request ID</th>
-                    <th>Total Price</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($relatedOrders as $relatedOrder)
-                <tr>
-                    <td>{{ $relatedOrder->order_id }}</td>
-                    <td>{{ $relatedOrder->request_id }}</td>
-                    <td>{{ $relatedOrder->total_price }}</td>
-                    <td><a href="{{ route('admin.orders.show', $relatedOrder->id) }}" class="btn btn-primary">View</a></td>
-                </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
+   
 </div>
 @endsection
 

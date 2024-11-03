@@ -15,16 +15,16 @@ class FlowerOrderController extends Controller
     //
     public function showOrders()
     {
-       
-    
-      
-            $orders = Order::whereNull('request_id')->get();
-            return view('admin.flower-order.manage-flower-order', compact('orders'));
-        
+        $orders = Order::whereNull('request_id')
+                       ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address'])
+                       ->get();
+                       
+        return view('admin.flower-order.manage-flower-order', compact('orders'));
     }
+    
     public function show($id)
 {
-    $order = Order::with('subscription')->findOrFail($id);
+    $order = Order::with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address'])->findOrFail($id);
     $relatedOrders = Order::where('user_id', $order->user_id)
                           ->whereNotNull('request_id')
                           ->get();
