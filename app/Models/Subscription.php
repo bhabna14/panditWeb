@@ -13,6 +13,7 @@ class Subscription extends Model
 
     // Add all fields you want to allow for mass assignment
     protected $fillable = [
+        'order_id',
         'user_id',
         'product_id',
         'start_date',
