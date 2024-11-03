@@ -69,6 +69,7 @@ class FlowerBookingController extends Controller
         try {
             Subscription::create([
                 'user_id' => $user->userid,
+                'order_id' => $orderId,
                 'product_id' => $productId, // Store product_id as provided in the request
                 'start_date' => $startDate,
                 'end_date' => $endDate,
