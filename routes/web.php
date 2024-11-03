@@ -188,9 +188,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
 
 
-    Route::get('/orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+    Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
 
-Route::get('/orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
+Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');

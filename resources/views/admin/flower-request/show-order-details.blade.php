@@ -111,7 +111,7 @@
             </div>
             <div class="info-row price-row">
                 <span class="info-label">Total Price:</span>
-                <span class="info-value">${{ number_format($order->total_price, 2) }}</span>
+                <span class="info-value">₹ {{ number_format($order->total_price, 2) }}</span>
             </div>
     
             <div class="divider"></div>
