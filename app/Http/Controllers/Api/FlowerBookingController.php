@@ -147,5 +147,44 @@ class FlowerBookingController extends Controller
         }
     }
     
-    
+    public function ordersList()
+{
+    try {
+        // Get the authenticated user's ID
+        $userId = Auth::guard('sanctum')->user()->userid;
+
+        // Fetch standalone orders for the authenticated user (orders without request_id)
+        $subscriptionsOrder = Order::whereNull('request_id')
+        ->where('user_id', $userId)
+        ->with(['subscription', 'flowerPayments'])
+        ->get();
+
+        // Fetch related orders for the authenticated user (orders with request_id)
+        $requestedOrders = FlowerRequest::where('user_id', $userId)
+            ->with(['order' => function ($query) {
+                $query->with(['flowerPayments']);
+            }])
+            ->get();
+
+
+   
+        // Combine both into a single response
+        return response()->json([
+            'success' => 200,
+            'data' => [
+                'subscriptions_order' => $subscriptionsOrder,
+                'requested_orders' => $requestedOrders,
+            ],
+        ], 200);
+    } catch (\Exception $e) {
+        // Log the error for debugging
+        \Log::error('Failed to fetch orders list: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve orders list.',
+        ], 500);
+    }
+}
+
 }

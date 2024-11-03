@@ -28,5 +28,9 @@ class Order extends Model
 {
     return $this->hasOne(Subscription::class, 'order_id', 'order_id');
 }
+public function flowerPayments()
+{
+    return $this->hasMany(FlowerPayment::class, 'order_id', 'order_id');
+}
 
 }
