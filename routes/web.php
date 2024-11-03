@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\YoutubeController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\FlowerRequestController;
+use App\Http\Controllers\Admin\FlowerOrderController;
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -181,7 +183,14 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::post('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
     Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
     
+    Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower-request');
+    Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
+    Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
 
+
+    Route::get('/orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+
+Route::get('/orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');

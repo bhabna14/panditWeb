@@ -99,42 +99,7 @@ public function manageproduct()
     return view('admin.manage-product', compact('products'));
 }
 
-public function purchaseSubscription(Request $request)
-{
-    $product = FlowerProduct::findOrFail($request->product_id);
 
-    $order = Order::create([
-        'product_id' => $product->id,
-        'user_id' => auth()->id(),
-        'quantity' => 1,
-        'total_price' => $product->price,
-    ]);
 
-    $startDate = now();
-    $endDate = now()->addMonths($product->duration); // Calculate end date based on product duration
-
-    Subscription::create([
-        'user_id' => auth()->id(),
-        'product_id' => $product->id,
-        'start_date' => $startDate,
-        'end_date' => $endDate,
-        'is_active' => true,
-    ]);
-
-    return response()->json(['message' => 'Subscription activated successfully', 'end_date' => $endDate]);
-}
-
-    public function deactivateExpiredSubscriptions()
-{
-    $subscriptions = Subscription::where('end_date', '<', now())
-        ->where('is_active', true)
-        ->get();
-
-    foreach ($subscriptions as $subscription) {
-        $subscription->update(['is_active' => false]);
-    }
-
-    return response()->json(['message' => 'Expired subscriptions deactivated']);
-}
 
 }

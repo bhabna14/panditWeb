@@ -119,9 +119,10 @@ class FlowerBookingController extends Controller
           
             // Get the authenticated user
             $user = Auth::guard('sanctum')->user();
-    
+            $requestId = 'REQ-' . strtoupper(Str::random(12));
             // Create the flower request
             $flowerRequest = FlowerRequest::create([
+                'request_id' => $requestId,
                 'product_id' => $request->product_id,
                 'user_id' => $user->userid,
                 'address_id' => $request->address_id,

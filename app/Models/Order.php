@@ -11,6 +11,7 @@ class Order extends Model
     protected $table = 'orders';
 
     protected $fillable = [
+        'request_id',
         'product_id',
         'user_id',
         'quantity',
@@ -19,4 +20,13 @@ class Order extends Model
         'address_id',
         'suggestion'
     ];
+    public function flowerRequest()
+    {
+        return $this->belongsTo(FlowerRequest::class, 'request_id', 'request_id');
+    }
+    public function subscription()
+{
+    return $this->hasOne(Subscription::class, 'order_id', 'order_id');
+}
+
 }
