@@ -171,10 +171,39 @@ class FlowerBookingController extends Controller
 
         // Fetch related orders for the authenticated user (orders with request_id)
         $requestedOrders = FlowerRequest::where('user_id', $userId)
-            ->with(['order' => function ($query) {
-                $query->with(['flowerPayments']);
-            }])
-            ->get();
+        ->with([
+            'order' => function ($query) {
+                $query->with('flowerPayments');
+            },
+            'flowerProduct',
+            'user',
+            'address'
+        ])
+        ->get()
+        ->map(function ($request) {
+            // Check if 'order' relationship exists and has 'flower_payments'
+            if ($request->order) {
+                // If 'flower_payments' is empty, set it to an empty object
+                if ($request->order->flowerPayments->isEmpty()) {
+                    $request->order->flower_payments = (object)[];
+                } else {
+                    // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
+                    $request->order->flower_payments = $request->order->flowerPayments;
+                }
+                // Remove the 'flowerPayments' property to avoid duplication
+                unset($request->order->flowerPayments);
+            }
+    
+            // Map product image URL
+            if ($request->flowerProduct) {
+                // Generate full URL for the product image
+                $request->flowerProduct->product_image_url = asset('storage/' . $request->flowerProduct->product_image);
+            }
+    
+            return $request;
+        });
+    
+    
 
 
    

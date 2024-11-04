@@ -26,11 +26,23 @@ class FlowerOrderController extends Controller
     public function show($id)
 {
     $order = Order::with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address'])->findOrFail($id);
-    $relatedOrders = Order::where('user_id', $order->user_id)
-                          ->whereNotNull('request_id')
-                          ->get();
+    // $relatedOrders = Order::where('user_id', $order->user_id)
+    //                       ->whereNotNull('request_id')
+    //                       ->get();
 
-    return view('admin.flower-request.show-order-details', compact('order', 'relatedOrders'));
+    return view('admin.flower-request.show-order-details', compact('order'));
+}
+
+public function showRequestOrders()
+{
+    // Retrieve all FlowerRequest records with their associated orders and flower payments
+    $requestedOrders = FlowerRequest::with(['order' => function ($query) {
+        $query->with('flowerPayments','address'); // Load related flowerPayments for each order
+    }])
+    ->get();
+
+    // Pass all requested orders to the view
+    return view('admin.flower-order.manage-request-orders', compact('requestedOrders'));
 }
 
 }

@@ -19,7 +19,7 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
             max-width: 400px;
-            /* margin: 20px auto; */
+            margin: 20px auto;
             font-family: Arial, sans-serif;
         }
     
@@ -98,8 +98,8 @@
     </div>
 </div>
 <div class="container">
-   <div class="row">
-        <div class="col-md-5">
+   {{-- <div class="row">
+        <div class="col-md-5"> --}}
             <div class="subscription-card">
                 <div class="card-header">Order & Subscription Summary</div>
                 <div class="details">
@@ -140,35 +140,9 @@
                         </div>
                     @endif
                 </div>
-            </div>
-        </div>
-        <div class="col-md-7">
-            <div class="">
-                <h5>Related Orders</h5>
-                <table class="table table-bordered text-nowrap key-buttons border-bottom">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Description</th>
-                            <th>Total Price</th>
-                            <th>Payment Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($relatedOrders as $relatedOrder)
-                        <tr>
-                            <td>{{ $relatedOrder->order_id }}</td>
-                            <td>{{ $relatedOrder->flowerRequest->description }}</td>
-                            <td>{{ $relatedOrder->total_price }}</td>
-                            <td>{{ $relatedOrder->status }}</td>
-                            <td><a href="{{ route('admin.orders.show', $relatedOrder->id) }}" class="btn btn-primary">View</a></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            {{-- </div>
+        </div> --}}
+       
    </div>
     
   

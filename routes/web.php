@@ -189,6 +189,8 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+    Route::get('/flower-request-orders', [FlowerOrderController::class, 'showRequestOrders'])->name('admin.requestorder.index');
+
 
 Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
     Route::controller(AdminController::class)->group(function() {

@@ -39,9 +39,9 @@
                             <div class="card-footer py-0">
                                 <div class="profile-tab tab-menu-heading border-bottom-0">
                                     <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
-                                        <a class="nav-link mb-2 mt-2 {{ Request::is('admin/flower-orders') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}"
+                                        <a class="nav-link mb-2 mt-2 " href="{{ route('admin.orders.index') }}"
                                             onclick="changeColor(this)">Subscription Orders</a>
-                                        <a class="nav-link mb-2 mt-2" href="{{ route('admin.requestorder.index') }}"
+                                        <a class="nav-link mb-2 mt-2 {{ Request::is('admin/flower-request-orders') ? 'active' : '' }}" href="{{ route('admin.requestorder.index') }}"
                                             onclick="changeColor(this)">Request Orders</a>
                                        
                                     </nav>
@@ -78,35 +78,42 @@
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
-                                                    <th>User Details</th>
-                                                    <th>Product Details</th>
-                                                    <th>Address Details</th>
-                                                    <th>Total Price</th>
-                                                    <th>Actions</th>
+                                                    <th>Order Date</th>
+                                                    <th>Payment Status</th>
+                                                    <th>User Name</th>
+                                                    <th>Flower Product</th>
+                                                    <th>Address</th>
+                                                    <!-- Add any additional columns needed for your data -->
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($orders as $order)
-                                                <tr>
-                                                    <td>{{ $order->order_id }}</td>
-                                                    <td>Name: {{ $order->user->name }} <br>
-                                                        Number : {{ $order->user->mobile_number }}
-                                                    </td>
-                                                    <td>{{ $order->flowerProduct->name }}</td>
-                                                    <td>
-                                                        <strong>Address:</strong> {{ $order->address->area ?? "" }}<br>
-                                                        <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
-                                                        <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
-                                                        <strong>Zip Code:</strong> {{ $order->address->pincode ?? "" }}
-                                                    </td>
-                                                    <td>{{ $order->total_price }}</td>
-                                                    <td>
-                                                        <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>
-                                                    </td>
-                                                </tr>
+                                                @foreach($requestedOrders as $request)
+                                                    @if($request->order)
+                                                        <tr>
+                                                            <td>{{ $request->order->order_id }}</td>
+                                                            <td>{{ $request->order->created_at->format('Y-m-d') }}</td>
+                                                            <td>
+                                                                @if($request->order->flowerPayments->isNotEmpty())
+                                                                    {{ $request->order->flowerPayments->first()->status }}
+                                                                @else
+                                                                    No Payment
+                                                                @endif
+                                                            </td>
+                                                            <td>{{ $request->order->user->name ?? 'N/A' }}</td>
+                                                            <td>{{ $request->order->flowerProduct->name ?? 'N/A' }}</td>
+                                                            <td>
+                                                                <strong>Address:</strong> {{ $order->address->area ?? "" }}<br>
+                                                                <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
+                                                                <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
+                                                                <strong>Zip Code:</strong> {{ $order->address->pincode ?? "" }}
+                                                            </td>
+                                                            <!-- Add more data fields if necessary -->
+                                                        </tr>
+                                                    @endif
                                                 @endforeach
                                             </tbody>
                                         </table>
+                                        
                                         
                                     </div>
                                 </div>
