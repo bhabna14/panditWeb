@@ -36,9 +36,14 @@ class FlowerOrderController extends Controller
 public function showRequestOrders()
 {
     // Retrieve all FlowerRequest records with their associated orders and flower payments
-    $requestedOrders = FlowerRequest::with(['order' => function ($query) {
-        $query->with('flowerPayments','address'); // Load related flowerPayments for each order
-    }])
+    $requestedOrders = FlowerRequest::with([
+        'order' => function ($query) {
+            $query->with('flowerPayments');
+        },
+        'flowerProduct',
+        'user',
+        'address'
+    ])
     ->get();
 
     // Pass all requested orders to the view

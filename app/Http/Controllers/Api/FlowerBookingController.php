@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Subscription;
 use App\Models\FlowerProduct;
 use App\Models\FlowerRequest;
+use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Auth;
 
@@ -148,82 +149,110 @@ class FlowerBookingController extends Controller
     }
     
     public function ordersList()
-{
-    try {
-        // Get the authenticated user's ID
-        $userId = Auth::guard('sanctum')->user()->userid;
+    {
+        try {
+            // Get the authenticated user's ID
+            $userId = Auth::guard('sanctum')->user()->userid;
 
-        // Fetch standalone orders for the authenticated user (orders without request_id)
-        $subscriptionsOrder = Order::whereNull('request_id')
-        ->where('user_id', $userId)
-        ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address'])
-        ->get();
-    
-    // Map to add the product_image_url to each order's flowerProduct
-    $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
-        if ($order->flowerProduct) {
-            // Ensure flowerProduct exists before accessing product_image
-            $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image); // Generate full URL for the photo
-        }
-        return $order;
-    });
-    
-
-        // Fetch related orders for the authenticated user (orders with request_id)
-        $requestedOrders = FlowerRequest::where('user_id', $userId)
-        ->with([
-            'order' => function ($query) {
-                $query->with('flowerPayments');
-            },
-            'flowerProduct',
-            'user',
-            'address'
-        ])
-        ->get()
-        ->map(function ($request) {
-            // Check if 'order' relationship exists and has 'flower_payments'
-            if ($request->order) {
-                // If 'flower_payments' is empty, set it to an empty object
-                if ($request->order->flowerPayments->isEmpty()) {
-                    $request->order->flower_payments = (object)[];
-                } else {
-                    // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
-                    $request->order->flower_payments = $request->order->flowerPayments;
-                }
-                // Remove the 'flowerPayments' property to avoid duplication
-                unset($request->order->flowerPayments);
+            // Fetch standalone orders for the authenticated user (orders without request_id)
+            $subscriptionsOrder = Order::whereNull('request_id')
+            ->where('user_id', $userId)
+            ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address'])
+            ->get();
+        
+        // Map to add the product_image_url to each order's flowerProduct
+        $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
+            if ($order->flowerProduct) {
+                // Ensure flowerProduct exists before accessing product_image
+                $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image); // Generate full URL for the photo
             }
-    
-            // Map product image URL
-            if ($request->flowerProduct) {
-                // Generate full URL for the product image
-                $request->flowerProduct->product_image_url = asset('storage/' . $request->flowerProduct->product_image);
-            }
-    
-            return $request;
+            return $order;
         });
+        
+
+            // Fetch related orders for the authenticated user (orders with request_id)
+            $requestedOrders = FlowerRequest::where('user_id', $userId)
+            ->with([
+                'order' => function ($query) {
+                    $query->with('flowerPayments');
+                },
+                'flowerProduct',
+                'user',
+                'address'
+            ])
+            ->get()
+            ->map(function ($request) {
+                // Check if 'order' relationship exists and has 'flower_payments'
+                if ($request->order) {
+                    // If 'flower_payments' is empty, set it to an empty object
+                    if ($request->order->flowerPayments->isEmpty()) {
+                        $request->order->flower_payments = (object)[];
+                    } else {
+                        // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
+                        $request->order->flower_payments = $request->order->flowerPayments;
+                    }
+                    // Remove the 'flowerPayments' property to avoid duplication
+                    unset($request->order->flowerPayments);
+                }
+        
+                // Map product image URL
+                if ($request->flowerProduct) {
+                    // Generate full URL for the product image
+                    $request->flowerProduct->product_image_url = asset('storage/' . $request->flowerProduct->product_image);
+                }
+        
+                return $request;
+            });
+        
+        
+
+
     
-    
+            // Combine both into a single response
+            return response()->json([
+                'success' => 200,
+                'data' => [
+                    'subscriptions_order' => $subscriptionsOrder,
+                    'requested_orders' => $requestedOrders,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Failed to fetch orders list: ' . $e->getMessage());
 
-
-   
-        // Combine both into a single response
-        return response()->json([
-            'success' => 200,
-            'data' => [
-                'subscriptions_order' => $subscriptionsOrder,
-                'requested_orders' => $requestedOrders,
-            ],
-        ], 200);
-    } catch (\Exception $e) {
-        // Log the error for debugging
-        \Log::error('Failed to fetch orders list: ' . $e->getMessage());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to retrieve orders list.',
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve orders list.',
+            ], 500);
+        }
     }
+
+
+public function pause(Request $request, $id)
+{
+    // Validate the request
+    $request->validate([
+        'pause_start_date' => 'required|date|after_or_equal:today',
+        'pause_end_date' => 'required|date|after:pause_start_date',
+    ]);
+
+    // Find the subscription by ID
+    $subscription = Subscription::findOrFail($id);
+
+    // Calculate the number of days to extend
+    $pauseStartDate = Carbon::parse($request->pause_start_date);
+    $pauseEndDate = Carbon::parse($request->pause_end_date);
+    $pausedDays = $pauseEndDate->diffInDays($pauseStartDate);
+
+    // Extend the subscription end date
+    $subscription->end_date = Carbon::parse($subscription->end_date)->addDays($pausedDays);
+    $subscription->is_active = true; // Assuming you want to set it active again
+
+    // Save the changes
+    $subscription->save();
+
+    return redirect()->back()->with('success', 'Subscription paused successfully and end date extended.');
 }
+
 
 }
