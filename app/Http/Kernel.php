@@ -71,4 +71,12 @@ class Kernel extends HttpKernel
         'pandits' => \App\Http\Middleware\PanditMiddleware::class,
 
     ];
+
+    protected function schedule(Schedule $schedule)
+{
+    $schedule->call(function () {
+        Subscription::expireIfEnded();
+    })->daily();
+}
+
 }
