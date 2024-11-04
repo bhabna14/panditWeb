@@ -27,7 +27,7 @@ use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Pandit\AddressController;
 use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\Pandit\PoojaListController;
-use App\Http\Controllers\Pandit\PanditLoginController; 
+// use App\Http\Controllers\Pandit\PanditLoginController; 
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;

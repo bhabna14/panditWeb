@@ -19,5 +19,7 @@ class Subscription extends Model
         'start_date',
         'end_date',
         'is_active',
+        'pause_start_date',
+        'pause_end_date',
     ];
 }
