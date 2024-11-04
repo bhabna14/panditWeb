@@ -10,6 +10,7 @@ use App\Models\Subscription;
 use App\Models\FlowerProduct;
 use App\Models\FlowerRequest;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
 
 use Illuminate\Support\Facades\Auth;
 
@@ -228,31 +229,59 @@ class FlowerBookingController extends Controller
     }
 
 
-public function pause(Request $request, $id)
-{
-    // Validate the request
-    $request->validate([
-        'pause_start_date' => 'required|date|after_or_equal:today',
-        'pause_end_date' => 'required|date|after:pause_start_date',
-    ]);
-
-    // Find the subscription by ID
-    $subscription = Subscription::findOrFail($id);
-
-    // Calculate the number of days to extend
-    $pauseStartDate = Carbon::parse($request->pause_start_date);
-    $pauseEndDate = Carbon::parse($request->pause_end_date);
-    $pausedDays = $pauseEndDate->diffInDays($pauseStartDate);
-
-    // Extend the subscription end date
-    $subscription->end_date = Carbon::parse($subscription->end_date)->addDays($pausedDays);
-    $subscription->is_active = true; // Assuming you want to set it active again
-
-    // Save the changes
-    $subscription->save();
-
-    return redirect()->back()->with('success', 'Subscription paused successfully and end date extended.');
-}
+  
+    
+    public function pause(Request $request, $id)
+    {
+        // Validate the request
+        $request->validate([
+            'pause_start_date' => 'required|date|after_or_equal:today',
+            'pause_end_date' => 'required|date|after:pause_start_date',
+        ]);
+    
+        try {
+            // Find the subscription by ID
+            $subscription = Subscription::findOrFail($id);
+            
+            // Log the subscription being paused
+            Log::info('Pausing subscription', [
+                'subscription_id' => $id,
+                'user_id' => $subscription->user_id, // Assuming there's a user_id in the subscription
+                'pause_start_date' => $request->pause_start_date,
+                'pause_end_date' => $request->pause_end_date,
+            ]);
+    
+            // Calculate the number of days to extend
+            $pauseStartDate = Carbon::parse($request->pause_start_date);
+            $pauseEndDate = Carbon::parse($request->pause_end_date);
+            $pausedDays = $pauseEndDate->diffInDays($pauseStartDate);
+    
+            // Extend the subscription end date
+            $subscription->end_date = Carbon::parse($subscription->end_date)->addDays($pausedDays);
+            $subscription->is_active = true; // Assuming you want to set it active again
+    
+            // Save the changes
+            $subscription->save();
+    
+            // Log the successful pause
+            Log::info('Subscription paused successfully', [
+                'subscription_id' => $id,
+                'new_end_date' => $subscription->end_date,
+            ]);
+    
+            return redirect()->back()->with('success', 'Subscription paused successfully and end date extended.');
+    
+        } catch (\Exception $e) {
+            // Log any errors that occur during the process
+            Log::error('Error pausing subscription', [
+                'subscription_id' => $id,
+                'error_message' => $e->getMessage(),
+            ]);
+    
+            return redirect()->back()->with('error', 'An error occurred while pausing the subscription. Please try again.');
+        }
+    }
+    
 
 
 }
