@@ -265,8 +265,11 @@ class FlowerBookingController extends Controller
                 'new_end_date' => $subscription->end_date,
             ]);
     
-            return redirect()->back()->with('success', 'Subscription paused successfully and end date extended.');
-    
+            return response()->json([
+                'success' => true,
+                'message' => 'Subscription paused successfully.',
+                'subscription' => $subscription
+            ], 200);    
         } catch (\Exception $e) {
             // Log any errors that occur during the process
             Log::error('Error pausing subscription', [
