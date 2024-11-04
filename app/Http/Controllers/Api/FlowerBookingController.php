@@ -266,7 +266,7 @@ class FlowerBookingController extends Controller
             ]);
     
             return response()->json([
-                'success' => true,
+                'success' => 200,
                 'message' => 'Subscription paused successfully.',
                 'subscription' => $subscription
             ], 200);    
@@ -277,7 +277,11 @@ class FlowerBookingController extends Controller
                 'error_message' => $e->getMessage(),
             ]);
     
-            return redirect()->back()->with('error', 'An error occurred while pausing the subscription. Please try again.');
+            return response()->json([
+                'success' => 500,
+                'message' => 'An error occurred while pausing the subscription.',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
     
