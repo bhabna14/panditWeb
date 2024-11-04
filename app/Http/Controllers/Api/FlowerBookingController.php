@@ -53,6 +53,7 @@ class FlowerBookingController extends Controller
                 'total_price' => $request->paid_amount, // Use the paid amount directly from the request
                 'address_id' => $addressId,
                 'suggestion' => $suggestion,
+                
             ]);
             \Log::info('Order created successfully', ['order' => $order]);
         } catch (\Exception $e) {
@@ -76,6 +77,7 @@ class FlowerBookingController extends Controller
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'is_active' => true,
+                'status' => 'active'
             ]);
             \Log::info('Subscription created successfully');
         } catch (\Exception $e) {
@@ -246,6 +248,7 @@ class FlowerBookingController extends Controller
             ]);
     
             // Calculate the number of days to extend
+            $subscription->status = 'paused';
             $pauseStartDate = Carbon::parse($request->pause_start_date);
             $pauseEndDate = Carbon::parse($request->pause_end_date);
             $pausedDays = $pauseEndDate->diffInDays($pauseStartDate);

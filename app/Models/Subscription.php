@@ -21,5 +21,6 @@ class Subscription extends Model
         'is_active',
         'pause_start_date',
         'pause_end_date',
+        'status'
     ];
 }
