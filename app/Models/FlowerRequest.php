@@ -18,6 +18,7 @@ class FlowerRequest extends Model
         'address_id',
         'description',
         'suggestion',
+        'date',
         'status',
     ];
 

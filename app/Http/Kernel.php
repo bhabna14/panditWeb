@@ -72,11 +72,6 @@ class Kernel extends HttpKernel
 
     ];
 
-    protected function schedule(Schedule $schedule)
-{
-    $schedule->call(function () {
-        Subscription::expireIfEnded();
-    })->daily();
-}
+ 
 
 }

@@ -136,6 +136,7 @@ class FlowerBookingController extends Controller
                 'address_id' => $request->address_id,
                 'description' => $request->description,
                 'suggestion' => $request->suggestion,
+                'date' => $request->date,
                 'status' => 'pending'
             ]);
     
@@ -295,12 +296,7 @@ class FlowerBookingController extends Controller
     
     
     
-    public function expireIfEnded()
-    {
-        $expiredSubscriptions = Subscription::where('status', 'active')
-                                            ->whereDate('end_date', '<', now())
-                                            ->update(['status' => 'expired']);
-    }
+ 
     
 
 }
