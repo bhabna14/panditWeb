@@ -17,7 +17,7 @@ class FlowerOrderController extends Controller
     {
         $orders = Order::whereNull('request_id')
                        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address'])
-                       ->orderBy('created_at', 'asc')
+                       ->orderBy('id', 'desc')
                        ->get();
                        
         return view('admin.flower-order.manage-flower-order', compact('orders'));
