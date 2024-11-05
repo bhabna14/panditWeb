@@ -14,12 +14,19 @@ class FlowerRequestController extends Controller
 {
     //
     public function showRequests()
-{
-   
-
-    $pendingRequests = FlowerRequest::with('order')->where('status', 'pending')->get();
-    return view('admin.flower-request.manage-flower-request', compact('pendingRequests'));
-}
+    {
+        // $pendingRequests = FlowerRequest::with('order')->get();
+        $pendingRequests = FlowerRequest::with([
+            'order' => function ($query) {
+                $query->with('flowerPayments');
+            },
+            'flowerProduct',
+            'user',
+            'address'
+        ])
+        ->get();
+        return view('admin.flower-request.manage-flower-request', compact('pendingRequests'));
+    }
 public function saveOrder(Request $request, $id)
 {
     try {
@@ -40,6 +47,9 @@ public function saveOrder(Request $request, $id)
             'suggestion' => $flowerRequest->suggestion,
         ]);
 
+        $flowerRequest->status = 'approved';
+        $flowerRequest->save();
+        
         return redirect()->back()->with('success', 'Order saved successfully');
     } catch (\Exception $e) {
         return redirect()->back()->with('error', 'Failed to save order');

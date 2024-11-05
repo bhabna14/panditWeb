@@ -41,7 +41,7 @@
                                     <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
                                         <a class="nav-link mb-2 mt-2 {{ Request::is('admin/flower-orders') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}"
                                             onclick="changeColor(this)">Subscription Orders</a>
-                                        <a class="nav-link mb-2 mt-2" href="{{ route('admin.requestorder.index') }}"
+                                        <a class="nav-link mb-2 mt-2" href="{{ route('flower-request') }}"
                                             onclick="changeColor(this)">Request Orders</a>
                                        
                                     </nav>
