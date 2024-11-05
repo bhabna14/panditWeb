@@ -164,7 +164,7 @@ class FlowerBookingController extends Controller
             $subscriptionsOrder = Order::whereNull('request_id')
             ->where('user_id', $userId)
             ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address'])
-            ->orderBy('id', 'asc')
+            ->orderBy('id', 'desc')
             ->get();
         
         // Map to add the product_image_url to each order's flowerProduct
