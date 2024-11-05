@@ -62,8 +62,11 @@ class FlowerBookingController extends Controller
         }
     
         // Calculate subscription start and end dates
-        $startDate = now();
-        $endDate = now()->addMonths(1); // Assuming a default duration of 1 month for simplicity; adjust as needed
+        // $startDate = now();
+        // $endDate = now()->addMonths(1); // Assuming a default duration of 1 month for simplicity; adjust as needed
+    
+        $startDate = $request->start_date ? Carbon::parse($request->start_date) : now(); // Use start_date from request, default to now
+        $endDate = $startDate->copy()->addMonths(1); // Assuming a default duration of 1 month for simplicity
     
         // Log subscription creation
         \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $productId, 'start_date' => $startDate, 'end_date' => $endDate]);
