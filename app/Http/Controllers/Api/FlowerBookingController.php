@@ -159,12 +159,14 @@ class FlowerBookingController extends Controller
     
             // Prepare response data including flower details in FlowerRequest
             return response()->json([
+                'status' => 200,
                 'message' => 'Flower request created successfully',
                 'data' => $flowerRequest,
-            ], 201);
+            ], 200);
         } catch (\Exception $e) {
           
             return response()->json([
+                'status' => 500,
                 'message' => 'Failed to create flower request',
                 'error' => $e->getMessage(),
             ], 500);
