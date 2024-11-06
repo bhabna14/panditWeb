@@ -204,7 +204,8 @@ class FlowerBookingController extends Controller
                 },
                 'flowerProduct',
                 'user',
-                'address'
+                'address',
+                'flowerRequestItems' 
             ])
             ->orderBy('id', 'desc')
             ->get()

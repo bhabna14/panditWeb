@@ -79,7 +79,7 @@
                                                     <th>User Details</th>
                                                     <th>Product Name</th>
                                                   
-                                                    <th>Description</th>
+                                                    <th>Flower Items</th>
                                                     <th>Address</th>
                                                     <th>Status</th>
                                                     <th>Price</th>
@@ -94,7 +94,15 @@
                                                             Number : {{ $request->user->mobile_number }}
                                                         </td>
                                                         <td>{{ $request->flowerProduct->name }}</td>
-                                                        <td>{{ $request->description }}</td>
+                                                        <td>
+                                                            <ul>
+                                                                @foreach ($request->flowerRequestItems as $item)
+                                                                    <li>
+                                                                        {{ $item->flower_name }} - {{ $item->flower_quantity }} {{ $item->flower_unit }}
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </td>
                                                         <td>
                                                             <strong>Address:</strong> {{ $request->address->area ?? "" }}<br>
                                                             <strong>City:</strong> {{ $request->address->city ?? ""}}<br>

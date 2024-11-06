@@ -15,20 +15,22 @@ class FlowerRequestController extends Controller
     //
     public function showRequests()
     {
-        // $pendingRequests = FlowerRequest::with('order')->get();
+        // Eager load the necessary relationships, including flowerRequestItems
         $pendingRequests = FlowerRequest::with([
             'order' => function ($query) {
                 $query->with('flowerPayments');
             },
             'flowerProduct',
             'user',
-            'address'
+            'address',
+            'flowerRequestItems'  // Eager load flowerRequestItems
         ])
         ->orderBy('id', 'desc')
         ->get();
         
         return view('admin.flower-request.manage-flower-request', compact('pendingRequests'));
     }
+    
 public function saveOrder(Request $request, $id)
 {
     try {
