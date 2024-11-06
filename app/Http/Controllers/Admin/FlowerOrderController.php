@@ -44,7 +44,7 @@ public function showRequestOrders()
         'user',
         'address'
     ])
-    ->orderBy('id', 'desc')
+    ->orderBy('id', 'asc')
     ->get();
 
     // Pass all requested orders to the view
