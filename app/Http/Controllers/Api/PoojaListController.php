@@ -11,6 +11,8 @@ use App\Models\Poojalist;
 use App\Models\Profile;
 use App\Models\Booking;
 use App\Models\Rating;
+use App\Models\PoojaUnit;
+
 
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -359,5 +361,21 @@ class PoojaListController extends Controller
 
     
 
-    
+public function manageUnitApi()
+{
+    $poojaUnits = PoojaUnit::where('status', 'active')->get();
+
+    if ($poojaUnits->isEmpty()) {
+        return response()->json([
+            'status' => 200,
+            'message' => 'No active pooja units found'
+        ], 200);
+    }
+
+    return response()->json([
+        'status' => 200,
+        'data' => $poojaUnits
+    ], 200);
+}
+
 }

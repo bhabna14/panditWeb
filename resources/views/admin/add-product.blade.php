@@ -72,6 +72,7 @@
                     <option value="" disabled selected>Select Category</option>
                     <option value="Puja Item">Puja Item</option>
                     <option value="Subscription">Subscription</option>
+                    <option value="Flower">Flower</option>
                     <!-- Add other categories as needed -->
                 </select>
             </div>
@@ -79,16 +80,18 @@
             <!-- Stock -->
             <div class="col-md-6 mb-3">
                 <label for="stock" class="form-label">Stock</label>
-                <input type="number" name="stock" class="form-control" id="stock" placeholder="Enter stock quantity" required>
+                <input type="number" name="stock" class="form-control" id="stock" placeholder="Enter stock quantity" >
             </div>
 
             <!-- Subscription Duration -->
             <div class="col-md-6 mb-3">
                 <label for="duration" class="form-label">Subscription Duration (Months)</label>
-                <select name="duration" id="duration" class="form-control select2" required>
+                <select name="duration" id="duration" class="form-control select2" >
+                    <option value="" disabled selected>Select Package</option>
                     <option value="1">1 Month</option>
                     <option value="3">3 Months</option>
                     <option value="6">6 Months</option>
+                   
                 </select>
             </div>
 

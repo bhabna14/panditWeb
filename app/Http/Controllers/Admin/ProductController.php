@@ -22,9 +22,9 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'description' => 'required|string',
             'category' => 'required|string',
-            'stock' => 'required|integer',
-            'duration' => 'required|integer',
-            'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048', // image validation
+            // 'stock' => 'required|integer',
+            // 'duration' => 'required|integer',
+            'product_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10000', // image validation
         ]);
     
         // Handle the image upload
