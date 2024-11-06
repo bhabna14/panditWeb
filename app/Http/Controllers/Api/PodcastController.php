@@ -77,17 +77,31 @@ class PodcastController extends Controller
     ], 200);
 }
 
-public function podcastcategory(){
-    $categories = PodcastCategory::where('status', 'active')->get()->map(function ($category) {
-        $category->image_url = asset('storage/' . $category->category_img); // Assuming category_img is the field for the image path
-        return $category;
-    });
-    return response()->json([
-        'status' => 200,
-        'message' => 'Data retrieved successfully',
-        'data' => $categories
-    ], 200);
+public function podcastCategory()
+{
+    try {
+        $categories = PodcastCategory::where('status', 'active')->get()->map(function ($category) {
+            $category->image_url = $category->category_img 
+                ? asset('storage/' . $category->category_img)
+                : null; // Ensure there's a fallback if no image is available
+            return $category;
+        });
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data retrieved successfully',
+            'data' => $categories
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 500,
+            'message' => 'An error occurred while retrieving data',
+            'error' => $e->getMessage()
+        ], 500);
+    }
 }
+
 
     /**
      * Store a newly created resource in storage.
