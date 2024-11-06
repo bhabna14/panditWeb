@@ -11,7 +11,7 @@ use App\Models\FlowerProduct;
 use App\Models\FlowerRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
-
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\FlowerPayment;
@@ -298,43 +298,61 @@ class FlowerBookingController extends Controller
     
     
  
+    use Illuminate\Support\Facades\Log;
+    use Illuminate\Support\Facades\DB;
+    
     public function markPaymentApi(Request $request, $id)
-{
-    try {
-        // Find the order by flower request ID
-        $order = Order::where('request_id', $id)->firstOrFail();
-
-        // Create a new flower payment entry
-        FlowerPayment::create([
-            'order_id' => $order->order_id,
-            'payment_id' => $request->payment_id, // Can be set later if available
-            'user_id' => $order->user_id,
-            'payment_method' => 'Razorpay',
-            'paid_amount' => $order->total_price,
-            'payment_status' => 'paid',
-        ]);
-
-        // Update the status of the FlowerRequest to "paid"
-        $flowerRequest = FlowerRequest::findOrFail($id);
-
-        if ($flowerRequest->status === 'approved') {
-            $flowerRequest->status = 'paid';
-            $flowerRequest->save();
+    {
+        DB::beginTransaction();
+    
+        try {
+            // Find the order by flower request ID
+            $order = Order::where('request_id', $id)->firstOrFail();
+    
+            // Create a new flower payment entry
+            FlowerPayment::create([
+                'order_id' => $order->order_id,
+                'payment_id' => $request->payment_id, // Can be set later if available
+                'user_id' => $order->user_id,
+                'payment_method' => 'Razorpay',
+                'paid_amount' => $order->total_price,
+                'payment_status' => 'paid',
+            ]);
+    
+            // Update the status of the FlowerRequest to "paid" if currently "approved"
+            $flowerRequest = FlowerRequest::findOrFail($id);
+    
+            if ($flowerRequest->status === 'approved') {
+                $flowerRequest->status = 'paid';
+                $flowerRequest->save();
+            } else {
+                // Log if the status is not 'approved' as expected
+                Log::warning("FlowerRequest status is not 'approved' for request ID: $id. Current status: " . $flowerRequest->status);
+            }
+    
+            DB::commit();
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Payment marked as paid'
+            ], 200);
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+    
+            // Log the exception with detailed information
+            Log::error('Failed to mark payment as paid', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to mark payment as paid'
+            ], 500);
         }
-        
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Payment marked as paid'
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 500,
-            'message' => 'Failed to mark payment as paid'
-        ], 500);
     }
-}
+    
 
 
 }
