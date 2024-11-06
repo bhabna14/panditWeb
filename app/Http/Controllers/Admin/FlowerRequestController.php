@@ -71,6 +71,12 @@ public function markPayment(Request $request, $id)
             'paid_amount' => $order->total_price,
             'payment_status' => 'paid',
         ]);
+        $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
+
+        if ($flowerRequest->status === 'approved') {
+            $flowerRequest->status = 'paid';
+            $flowerRequest->save();
+        }
 
         return redirect()->back()->with('success', 'Payment marked as paid');
     } catch (\Exception $e) {
