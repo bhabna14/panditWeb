@@ -299,38 +299,46 @@ class FlowerBookingController extends Controller
     
  
     public function markPaymentApi(Request $request, $id)
-{
-    try {
-        // Find the order by flower request ID
-        $order = Order::where('flower_request_id', $id)->firstOrFail();
-
-        // Create a new flower payment entry
-        FlowerPayment::create([
-            'order_id' => $order->order_id,
-            'payment_id' => $request->payment_id, // Can be set later if available
-            'user_id' => $order->user_id,
-            'payment_method' => 'Razorpay',
-            'paid_amount' => $order->total_price,
-            'payment_status' => 'paid',
-        ]);
-
-        // Update the status of the FlowerRequest to "paid"
-        $flowerRequest = FlowerRequest::findOrFail($id);
-        $flowerRequest->status = 'paid';
-        $flowerRequest->save();
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Payment marked as paid'
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 500,
-            'message' => 'Failed to mark payment as paid'
-        ], 500);
+    {
+        try {
+            // Find the order by flower request ID
+            $order = Order::where('flower_request_id', $id)->firstOrFail();
+    
+            // Create a new flower payment entry
+            FlowerPayment::create([
+                'order_id' => $order->order_id,
+                'payment_id' => $request->payment_id, // Can be set later if available
+                'user_id' => $order->user_id,
+                'payment_method' => 'Razorpay',
+                'paid_amount' => $order->total_price,
+                'payment_status' => 'paid',
+            ]);
+    
+            // Update the status of the FlowerRequest to "paid"
+            $flowerRequest = FlowerRequest::findOrFail($id);
+            $flowerRequest->status = 'paid';
+            $flowerRequest->save();
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Payment marked as paid'
+            ], 200);
+    
+        } catch (\Exception $e) {
+            // Log the exception with a custom error message and details
+            Log::error('Failed to mark payment as paid', [
+                'status' => 500,
+                'message' => 'Failed to mark payment as paid',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+    
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to mark payment as paid'
+            ], 500);
+        }
     }
-}
-
+    
 
 }
