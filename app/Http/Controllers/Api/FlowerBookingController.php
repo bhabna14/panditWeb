@@ -302,7 +302,7 @@ class FlowerBookingController extends Controller
     {
         try {
             // Find the order by flower request ID
-            $order = Order::where('flower_request_id', $id)->firstOrFail();
+            $order = Order::where('request_id', $id)->firstOrFail();
     
             // Create a new flower payment entry
             FlowerPayment::create([

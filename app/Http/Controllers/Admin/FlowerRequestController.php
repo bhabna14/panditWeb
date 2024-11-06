@@ -61,7 +61,7 @@ public function saveOrder(Request $request, $id)
 public function markPayment(Request $request, $id)
 {
     try {
-        $order = Order::where('flower_request_id', $id)->firstOrFail();
+        $order = Order::where('request_id', $id)->firstOrFail();
 
         FlowerPayment::create([
             'order_id' => $order->order_id,
