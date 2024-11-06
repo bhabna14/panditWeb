@@ -298,8 +298,7 @@ class FlowerBookingController extends Controller
     
     
  
-    use Illuminate\Support\Facades\Log;
-    use Illuminate\Support\Facades\DB;
+
     
     public function markPaymentApi(Request $request, $id)
     {
