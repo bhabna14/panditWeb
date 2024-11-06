@@ -77,7 +77,7 @@ class PodcastController extends Controller
     ], 200);
 }
 
-public function podcastcategory()
+public function podcastCategory()
 {
     try {
         $categories = PodcastCategory::where('status', 'active')->get()->map(function ($category) {
