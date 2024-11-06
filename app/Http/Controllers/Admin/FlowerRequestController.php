@@ -24,7 +24,9 @@ class FlowerRequestController extends Controller
             'user',
             'address'
         ])
+        ->orderBy('id', 'desc')
         ->get();
+        
         return view('admin.flower-request.manage-flower-request', compact('pendingRequests'));
     }
 public function saveOrder(Request $request, $id)
