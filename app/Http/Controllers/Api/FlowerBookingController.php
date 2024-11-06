@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\FlowerPayment;
+use App\Models\FlowerRequestItem;
+
 class FlowerBookingController extends Controller
 {
     //
@@ -123,14 +125,15 @@ class FlowerBookingController extends Controller
     public function storerequest(Request $request)
     {
         try {
-            // Validate the incoming request
-          
             // Get the authenticated user
             $user = Auth::guard('sanctum')->user();
+            
+            // Generate the request_id
             $requestId = 'REQ-' . strtoupper(Str::random(12));
-            // Create the flower request
+    
+            // Create the flower request and store the request_id
             $flowerRequest = FlowerRequest::create([
-                'request_id' => $requestId,
+                'request_id' => $requestId,  // Store request_id in FlowerRequest
                 'product_id' => $request->product_id,
                 'user_id' => $user->userid,
                 'address_id' => $request->address_id,
@@ -140,14 +143,27 @@ class FlowerBookingController extends Controller
                 'status' => 'pending'
             ]);
     
+            // Loop through flower names, units, and quantities to create FlowerRequestItem entries
+            foreach ($request->flower_name as $index => $flowerName) {
+                // Create a FlowerRequestItem with flower_request_id set to the generated request_id
+                FlowerRequestItem::create([
+                    'flower_request_id' => $requestId,  // Use the generated request_id
+                    'flower_name' => $flowerName,
+                    'flower_unit' => $request->flower_unit[$index],
+                    'flower_quantity' => $request->flower_quantity[$index],
+                ]);
+            }
+    
+            // Eager load the flower_request_items relationship
+            $flowerRequest = $flowerRequest->load('flowerRequestItems');
+    
+            // Prepare response data including flower details in FlowerRequest
             return response()->json([
                 'message' => 'Flower request created successfully',
                 'data' => $flowerRequest,
             ], 201);
         } catch (\Exception $e) {
-            // Log the exception
-            \Log::error('Error creating flower request: ' . $e->getMessage());
-    
+          
             return response()->json([
                 'message' => 'Failed to create flower request',
                 'error' => $e->getMessage(),
