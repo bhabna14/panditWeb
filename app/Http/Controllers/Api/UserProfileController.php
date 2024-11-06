@@ -357,7 +357,10 @@ public function deletePhoto()
         }
 
         // Fetch managed addresses for the user
-        $addressData = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
+        $addressData = UserAddress::where('user_id', $user->userid)
+        ->where('status', 'active')
+        ->orderBy('id', 'desc')
+        ->get();
 
         return response()->json([
             'success' => 200,
