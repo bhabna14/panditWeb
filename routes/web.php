@@ -191,7 +191,10 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
     Route::get('/flower-request-orders', [FlowerOrderController::class, 'showRequestOrders'])->name('admin.requestorder.index');
 
-
+    Route::get('/active-subscriptions', [FlowerOrderController::class, 'showActiveSubscriptions'])->name('active.subscriptions');
+    Route::get('/paused-subscriptions', [FlowerOrderController::class, 'showPausedSubscriptions'])->name('paused.subscriptions');
+    Route::get('/orders-today', [FlowerOrderController::class, 'showOrdersToday'])->name('orders.today');
+    
 Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');

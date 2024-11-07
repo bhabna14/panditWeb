@@ -59,5 +59,22 @@ public function showRequestOrders()
     // Pass all requested orders to the view
     return view('admin.flower-order.manage-request-orders', compact('requestedOrders'));
 }
+public function showActiveSubscriptions()
+{
+    $activeSubscriptions = Subscription::where('status', 'active')->get();
+    return view('admin.flower-order.manage-active-subscriptions', compact('activeSubscriptions'));
+}
+
+public function showPausedSubscriptions()
+{
+    $pausedSubscriptions = Subscription::where('status', 'paused')->get();
+    return view('subscriptions.paused', compact('pausedSubscriptions'));
+}
+public function showOrdersToday()
+{
+    $today = \Carbon\Carbon::today();
+    $ordersRequestedToday = FlowerRequest::whereDate('date', $today)->get();
+    return view('orders.today', compact('ordersRequestedToday'));
+}
 
 }
