@@ -166,7 +166,7 @@
                                                         </td>
                                                         
                                                         <td>
-                                                            <form action="{{ route('admin.markPayment', $request->id) }}" method="POST" style="display: inline;">
+                                                            <form action="{{ route('admin.markPayment', $request->request_id) }}" method="POST" style="display: inline;">
                                                                 @csrf
                                                                 <button type="submit" class="btn btn-success mt-2" {{ $request->status === 'paid' ? 'disabled' : '' }}>Paid</button>
                                                             </form>
