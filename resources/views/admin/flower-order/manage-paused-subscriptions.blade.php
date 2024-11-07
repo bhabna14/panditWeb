@@ -62,6 +62,7 @@
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>User Name</th>
+                                                    <th>Address Details</th>
                                                     <th>Start Date</th>
                                                     <th>End Date</th>
                                                     <th>Pause Date</th>
@@ -71,8 +72,14 @@
                                                 @foreach($pausedSubscriptions as $subscription)
                                                     <tr>
                                                         <td>{{ $subscription->id }}</td>
-                                                        <td>Name: {{ $order->user->name }} <br>
-                                                            Number : {{ $order->user->mobile_number }}
+                                                        <td>Name: {{ $subscription->user->name }} <br>
+                                                            Number : {{ $subscription->user->mobile_number }}
+                                                        </td>
+                                                        <td>
+                                                            <strong>Address:</strong> {{ $subscription->address->area ?? "" }}<br>
+                                                            <strong>City:</strong> {{ $subscription->address->city ?? ""}}<br>
+                                                            <strong>State:</strong> {{ $subscription->address->state ?? ""}}<br>
+                                                            <strong>Zip Code:</strong> {{ $subscription->address->pincode ?? "" }}
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M, Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M, Y') }}</td>
