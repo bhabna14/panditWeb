@@ -62,9 +62,7 @@ public function showRequestOrders()
 public function showActiveSubscriptions()
 {
     $activeSubscriptions = Subscription::where('status', 'active')
-        ->with(['order' => function ($query) {
-            $query->with(['flowerRequest', 'flowerPayments', 'user', 'flowerProduct', 'address']);
-        }])
+        ->with(['relatedOrder.flowerRequest', 'relatedOrder.flowerPayments', 'relatedOrder.user', 'relatedOrder.flowerProduct', 'relatedOrder.address'])
         ->get();
 
     return view('admin.flower-order.manage-active-subscriptions', compact('activeSubscriptions'));
@@ -72,9 +70,7 @@ public function showActiveSubscriptions()
 public function showPausedSubscriptions()
 {
     $pausedSubscriptions = Subscription::where('status', 'paused')
-        ->with(['order' => function ($query) {
-            $query->with(['flowerRequest', 'flowerPayments', 'user', 'flowerProduct', 'address']);
-        }])
+        ->with(['relatedOrder.flowerRequest', 'relatedOrder.flowerPayments', 'relatedOrder.user', 'relatedOrder.flowerProduct', 'relatedOrder.address'])
         ->get();
 
     return view('admin.flower-order.manage-paused-subscriptions', compact('pausedSubscriptions'));
@@ -84,13 +80,10 @@ public function showOrdersToday()
 {
     $today = \Carbon\Carbon::today();
     $ordersRequestedToday = FlowerRequest::whereDate('date', $today)
-        ->with(['order' => function ($query) {
-            $query->with(['flowerPayments', 'user', 'flowerProduct', 'address']);
-        }])
+        ->with(['order.flowerPayments', 'order.user', 'order.flowerProduct', 'order.address'])
         ->get();
 
     return view('admin.flower-order.manage-today-requestorder', compact('ordersRequestedToday'));
 }
-
 
 }

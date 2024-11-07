@@ -50,5 +50,9 @@ public function pauseResumeLogs()
     return $this->hasMany(SubscriptionPauseResumeLog::class);
 }
 
+public function relatedOrder()
+{
+    return $this->belongsTo(Order::class, 'order_id'); // Adjust 'order_id' as per your actual foreign key.
+}
 
 }
