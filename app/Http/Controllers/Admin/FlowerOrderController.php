@@ -68,7 +68,7 @@ public function showActiveSubscriptions()
 public function showPausedSubscriptions()
 {
     $pausedSubscriptions = Subscription::where('status', 'paused')->get();
-    return view('subscriptions.paused', compact('pausedSubscriptions'));
+    return view('admin.flower-order.manage-paused-subscriptions', compact('pausedSubscriptions'));
 }
 public function showOrdersToday()
 {
