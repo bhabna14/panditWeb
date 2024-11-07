@@ -71,10 +71,10 @@
                                                 @foreach($activeSubscriptions as $subscription)
                                                     <tr>
                                                         <td>{{ $subscription->id }}</td>
-                                                        <td>
+                                                        {{-- <td>
                                                             Name: {{ $subscription->relatedOrder->user ? $subscription->relatedOrder->user->name : 'N/A' }} <br>
                                                             Number: {{ $subscription->relatedOrder->user ? $subscription->relatedOrder->user->mobile_number : 'N/A' }}
-                                                        </td>
+                                                        </td> --}}
                                                         
                                                         <td>
                                                             <strong>Address:</strong> {{ $subscription->relatedOrder->address->area ?? "" }}<br>
