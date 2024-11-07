@@ -151,10 +151,14 @@
                         @endif
                         <div class="info-row">
                             <span class="info-label">Status:</span>
-                            <span class="status-badge {{ $order->subscription->status ? 'status-running' : 'status-expired' }}">
-                                {{ $order->subscription->status }}
+                            <span class="status-badge 
+                                {{ $order->subscription->status === 'active' ? 'status-running bg-success' : '' }}
+                                {{ $order->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
+                                {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}">
+                                {{ ucfirst($order->subscription->status) }}
                             </span>
                         </div>
+                        
                     @else
                         <div class="info-row">
                             <span class="info-label">Subscription:</span>
