@@ -71,7 +71,9 @@
                                                 @foreach($pausedSubscriptions as $subscription)
                                                     <tr>
                                                         <td>{{ $subscription->id }}</td>
-                                                        <td>{{ $subscription->user->name }}</td>
+                                                        <td>Name: {{ $order->user->name }} <br>
+                                                            Number : {{ $order->user->mobile_number }}
+                                                        </td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M, Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M, Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->paused_at)->format('d M, Y') }}</td>
