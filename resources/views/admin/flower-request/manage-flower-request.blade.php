@@ -132,7 +132,9 @@
                                                         <td>Name: {{ $request->user->name }} <br>
                                                             Number : {{ $request->user->mobile_number }}
                                                         </td>
-                                                        <td>{{ $request->flowerProduct->name }}</td>
+                                                        <td>{{ $request->flowerProduct->name }} <br>
+                                                            {{ $request->date }}
+                                                        </td>
                                                         <td>
                                                             <ul>
                                                                 @foreach ($request->flowerRequestItems as $item)
