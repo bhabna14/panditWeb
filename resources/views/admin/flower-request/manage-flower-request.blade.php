@@ -49,7 +49,46 @@
                     </div>
                 </div>
 
-                  
+                <div class="row">
+                    <!-- Active Subscriptions Card -->
+                    <div class="col-md-4">
+                        <div class="card bg-success text-dark mb-3">
+                            <div class="card-header">
+                                <i class="fas fa-check-circle"></i> Active Subscriptions
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title text-white">{{ $activeSubscriptions }}</h5>
+                                <p class="card-text text-white">Users with an active subscription</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Paused Subscriptions Card -->
+                    <div class="col-md-4">
+                        <div class="card bg-warning text-dark mb-3">
+                            <div class="card-header">
+                                <i class="fas fa-pause-circle"></i> Paused Subscriptions
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $pausedSubscriptions }}</h5>
+                                <p class="card-text">Users with a paused subscription</p>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- Orders Requested Today Card -->
+                    <div class="col-md-4">
+                        <div class="card bg-info text-dark mb-3">
+                            <div class="card-header">
+                                <i class="fas fa-box"></i> Orders Requested Today
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ $ordersRequestedToday }}</h5>
+                                <p class="card-text">Requested Orders placed today</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                     <!-- Row -->
                     <div class="row row-sm">

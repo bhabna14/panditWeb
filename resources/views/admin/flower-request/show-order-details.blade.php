@@ -185,7 +185,7 @@
                                 <tr>
                                     <td>{{ $log->action }}</td>
                                     <td>{{ \Carbon\Carbon::parse($log->pause_start_date)->format('d M, Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($log->pause_end_date)->format('d M, Y') }}</td>
+                                    <td>{{ $log->pause_end_date ? \Carbon\Carbon::parse($log->pause_end_date)->format('d M, Y') : 'N/A'}}</td>
                                     <td>{{ $log->resume_date ? \Carbon\Carbon::parse($log->resume_date)->format('d M, Y') : 'N/A' }}</td>
                                     <td>{{ \Carbon\Carbon::parse($log->new_end_date)->format('d M, Y') }}</td>
                                     <td>{{ $log->paused_days }} days</td>

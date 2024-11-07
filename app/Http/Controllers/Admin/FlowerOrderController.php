@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\FlowerRequest;
 use App\Models\FlowerPayment;
+use App\Models\Subscription;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -19,13 +21,22 @@ class FlowerOrderController extends Controller
                        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address'])
                        ->orderBy('id', 'desc')
                        ->get();
+                       $activeSubscriptions = Subscription::where('status', 'active')->count();
+
+                       // Paused subscriptions count
+                       $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+               
+                       // Orders requested today
+                       $ordersRequestedToday = FlowerRequest::whereDate('date', Carbon::today())->count();
                        
-        return view('admin.flower-order.manage-flower-order', compact('orders'));
+        return view('admin.flower-order.manage-flower-order', compact('orders','activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
     }
     
     public function show($id)
     {
         $order = Order::with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address', 'pauseResumeLogs'])->findOrFail($id);
+
+    
     
         return view('admin.flower-request.show-order-details', compact('order'));
     }

@@ -9,7 +9,8 @@ use App\Models\FlowerPayment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-
+use App\Models\Subscription;
+use Carbon\Carbon;
 class FlowerRequestController extends Controller
 {
     //
@@ -27,8 +28,16 @@ class FlowerRequestController extends Controller
         ])
         ->orderBy('id', 'desc')
         ->get();
+
+        $activeSubscriptions = Subscription::where('status', 'active')->count();
+
+        // Paused subscriptions count
+        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+
+        // Orders requested today
+        $ordersRequestedToday = FlowerRequest::whereDate('date', Carbon::today())->count();
         
-        return view('admin.flower-request.manage-flower-request', compact('pendingRequests'));
+        return view('admin.flower-request.manage-flower-request', compact('pendingRequests', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
     }
     
 public function saveOrder(Request $request, $id)
