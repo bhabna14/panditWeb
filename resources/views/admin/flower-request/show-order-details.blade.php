@@ -19,7 +19,7 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
             max-width: 400px;
-            margin: 20px auto;
+            /* margin: 20px auto; */
             font-family: Arial, sans-serif;
         }
     
@@ -81,6 +81,18 @@
         .status-expired {
             background-color: #dc3545; /* Red */
         }
+        .note-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.text-warning {
+    color: #dc3545 !important;
+    font-weight: bold;
+}
+
     </style>
 @endsection
 
@@ -98,8 +110,8 @@
     </div>
 </div>
 <div class="container">
-   {{-- <div class="row">
-        <div class="col-md-5"> --}}
+    <div class="row">
+        <div class="col-md-5">
             <div class="subscription-card">
                 <div class="card-header">Order & Subscription Summary</div>
                 <div class="details">
@@ -127,10 +139,20 @@
                             <span class="info-label">End Date:</span>
                             <span class="info-value">{{ \Carbon\Carbon::parse($order->subscription->end_date)->format('d M, Y') }}</span>
                         </div>
+                          <!-- Check if subscription has been paused and resumed -->
+                        @if($order->pauseResumeLogs->count() > 0)
+                            <div class="info-row note-warning">
+                                <span class="info-label">Note:</span>
+                                <span class="info-value text-warning">
+                                    You paused or resumed the subscription, so your new extended end date is 
+                                    {{ \Carbon\Carbon::parse($order->subscription->new_date)->format('d M, Y') }}.
+                                </span>
+                            </div>
+                        @endif
                         <div class="info-row">
                             <span class="info-label">Status:</span>
-                            <span class="status-badge {{ $order->subscription->is_active ? 'status-running' : 'status-expired' }}">
-                                {{ $order->subscription->is_active ? 'Running' : 'Expired' }}
+                            <span class="status-badge {{ $order->subscription->status ? 'status-running' : 'status-expired' }}">
+                                {{ $order->subscription->status }}
                             </span>
                         </div>
                     @else
@@ -140,10 +162,44 @@
                         </div>
                     @endif
                 </div>
-            {{-- </div>
-        </div> --}}
-       
-   </div>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <!-- Displaying SubscriptionPauseResumeLog Data in a Table -->
+            @if($order->pauseResumeLogs->count() > 0)
+                <div class="card">
+                    <div class="card-header">Subscription Pause/Resume Logs</div>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Pause Start Date</th>
+                                <th>Pause End Date</th>
+                                <th>Resume Date</th>
+                                <th>New End Date</th>
+                                <th>Paused Days</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($order->pauseResumeLogs as $log)
+                                <tr>
+                                    <td>{{ $log->action }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($log->pause_start_date)->format('d M, Y') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($log->pause_end_date)->format('d M, Y') }}</td>
+                                    <td>{{ $log->resume_date ? \Carbon\Carbon::parse($log->resume_date)->format('d M, Y') : 'N/A' }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($log->new_end_date)->format('d M, Y') }}</td>
+                                    <td>{{ $log->paused_days }} days</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p>No pause/resume logs available.</p>
+            @endif
+        </div>
+    </div>
+    
     
   
 

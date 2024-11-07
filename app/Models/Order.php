@@ -44,4 +44,11 @@ public function address()
 {
     return $this->belongsTo(UserAddress::class, 'address_id');
 }
+// app/Models/Order.php
+
+public function pauseResumeLogs()
+{
+    return $this->hasMany(SubscriptionPauseResumeLog::class, 'order_id', 'order_id');
+}
+
 }

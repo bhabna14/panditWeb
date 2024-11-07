@@ -73,8 +73,8 @@
                                         {{ $errors->first('danger') }}
                                     </div>
                                     @endif
-                                    <div class="table-responsive  export-table">
-                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                    <div class="table-responsive ">
+                                        <table  class="table table-bordered text-nowrap key-buttons border-bottom">
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
@@ -92,7 +92,11 @@
                                                     <td>Name: {{ $order->user->name }} <br>
                                                         Number : {{ $order->user->mobile_number }}
                                                     </td>
-                                                    <td>{{ $order->flowerProduct->name }}</td>
+                                                    <td>{{ $order->flowerProduct->name }} <br>
+                                                        {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }} - {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }}
+
+
+                                                    </td>
                                                     <td>
                                                         <strong>Address:</strong> {{ $order->address->area ?? "" }}<br>
                                                         <strong>City:</strong> {{ $order->address->city ?? ""}}<br>

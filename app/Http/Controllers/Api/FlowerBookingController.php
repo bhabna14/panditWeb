@@ -9,6 +9,8 @@ use App\Models\Order;
 use App\Models\Subscription;
 use App\Models\FlowerProduct;
 use App\Models\FlowerRequest;
+use App\Models\SubscriptionPauseResumeLog;
+
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
 
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 
 use App\Models\FlowerPayment;
 use App\Models\FlowerRequestItem;
+
 
 class FlowerBookingController extends Controller
 {
@@ -27,8 +30,8 @@ class FlowerBookingController extends Controller
         // Log the incoming request data
         \Log::info('Purchase subscription called', ['request' => $request->all()]);
     
-        // Extract the product_id from the request
-        $productId = $request->product_id; // Use the product_id directly from the request
+        // Extract the product_id and other necessary fields from the request
+        $productId = $request->product_id; 
         $user = Auth::guard('sanctum')->user();
     
         // Check if the user is authenticated
@@ -37,7 +40,7 @@ class FlowerBookingController extends Controller
             return response()->json(['message' => 'Unauthorized'], 401);
         }
     
-        // Generate a unique order ID in the specified format
+        // Generate a unique order ID
         $orderId = 'ORD-' . strtoupper(Str::random(12));
         $addressId = $request->address_id;
         $suggestion = $request->suggestion;
@@ -49,13 +52,12 @@ class FlowerBookingController extends Controller
         try {
             $order = Order::create([
                 'order_id' => $orderId,
-                'product_id' => $productId, // Store product_id as provided in the request
+                'product_id' => $productId, 
                 'user_id' => $user->userid,
                 'quantity' => 1,
-                'total_price' => $request->paid_amount, // Use the paid amount directly from the request
+                'total_price' => $request->paid_amount,
                 'address_id' => $addressId,
                 'suggestion' => $suggestion,
-                
             ]);
             \Log::info('Order created successfully', ['order' => $order]);
         } catch (\Exception $e) {
@@ -64,21 +66,35 @@ class FlowerBookingController extends Controller
         }
     
         // Calculate subscription start and end dates
-        // $startDate = now();
-        // $endDate = now()->addMonths(1); // Assuming a default duration of 1 month for simplicity; adjust as needed
-    
-        $startDate = $request->start_date ? Carbon::parse($request->start_date) : now(); // Use start_date from request, default to now
-        $endDate = $startDate->copy()->addMonths(1); // Assuming a default duration of 1 month for simplicity
+        $startDate = $request->start_date ? Carbon::parse($request->start_date) : now(); // Default to now if no start date is provided
+        $duration = $request->duration; // Duration is 1 for 30 days, 3 for 60 days, 6 for 90 days
+        
+        // Calculate end date based on subscription duration
+        if ($duration == 1) {
+            $endDate = $startDate->copy()->addDays(29); // For 1, add 30 days
+        } else if ($duration == 3) {
+            $endDate = $startDate->copy()->addDays(59); // For 3, add 60 days
+        } else if ($duration == 6) {
+            $endDate = $startDate->copy()->addDays(89); // For 6, add 90 days
+        }
+        else {
+            // Handle unexpected duration value
+            \Log::error('Invalid subscription duration', ['duration' => $duration]);
+            return response()->json(['message' => 'Invalid subscription duration'], 400);
+        }
+        
     
         // Log subscription creation
         \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $productId, 'start_date' => $startDate, 'end_date' => $endDate]);
     
-        // Create the subscription without validation
+        // Create the subscription
+        $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
         try {
             Subscription::create([
+                'subscription_id' => $subscriptionId,
                 'user_id' => $user->userid,
                 'order_id' => $orderId,
-                'product_id' => $productId, // Store product_id as provided in the request
+                'product_id' => $productId,
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'is_active' => true,
@@ -90,24 +106,14 @@ class FlowerBookingController extends Controller
             return response()->json(['message' => 'Failed to create subscription'], 500);
         }
     
-        // Log payment details
-        \Log::info('Processing payment', [
-            'order_id' => $orderId,
-            'payment_id' => $request->payment_id,
-            'user_id' => $user->userid,
-            'payment_method' => "Razorpay",
-            'paid_amount' => $request->paid_amount, // Use the paid amount directly from the request
-            'payment_status' => "paid",
-        ]);
-    
-        // Create the payment record
+        // Process payment details and create payment record
         try {
             FlowerPayment::create([
                 'order_id' => $orderId,
                 'payment_id' => $request->payment_id,
                 'user_id' => $user->userid,
                 'payment_method' => "Razorpay",
-                'paid_amount' => $request->paid_amount, // Use the paid amount directly from the request
+                'paid_amount' => $request->paid_amount,
                 'payment_status' => "paid",
             ]);
             \Log::info('Payment recorded successfully');
@@ -122,6 +128,7 @@ class FlowerBookingController extends Controller
             'order_id' => $orderId,
         ]);
     }
+    
     public function storerequest(Request $request)
     {
         try {
@@ -272,28 +279,43 @@ class FlowerBookingController extends Controller
                 'pause_start_date' => $request->pause_start_date,
                 'pause_end_date' => $request->pause_end_date,
             ]);
-    
-            // Calculate the number of days to extend
-            $subscription->status = 'paused';
+        
+            // Calculate the number of days to extend (include both start and end date)
             $pauseStartDate = Carbon::parse($request->pause_start_date);
             $pauseEndDate = Carbon::parse($request->pause_end_date);
-            $pausedDays = $pauseEndDate->diffInDays($pauseStartDate);
+            $pausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1; // Include both dates
+        
+            // Store the new paused end date in the new_date field
+            $newEndDate = Carbon::parse($subscription->end_date)->addDays($pausedDays);
     
-            // Update the subscription end date and pause dates
-            $subscription->end_date = Carbon::parse($subscription->end_date)->addDays($pausedDays);
+            // Update the subscription status and dates
+            $subscription->status = 'paused';
             $subscription->pause_start_date = $pauseStartDate;
             $subscription->pause_end_date = $pauseEndDate;
+            $subscription->new_date = $newEndDate; // Store the new end date after pausing
             $subscription->is_active = true;
-    
+        
             // Save the changes
             $subscription->save();
-    
+        
             // Log the successful pause
             Log::info('Subscription paused successfully', [
                 'order_id' => $order_id,
-                'new_end_date' => $subscription->end_date,
+                'new_end_date' => $newEndDate,
             ]);
-    
+        
+            // Log the pause action
+            SubscriptionPauseResumeLog::create([
+                'subscription_id' => $subscription->subscription_id,
+                'order_id' => $order_id,
+                'action' => 'paused',
+                'pause_start_date' => $pauseStartDate,
+                'pause_end_date' => $pauseEndDate,
+                'paused_days' => $pausedDays,
+                'new_end_date' => $subscription->new_date,
+
+            ]);
+        
             return response()->json([
                 'success' => 200,
                 'message' => 'Subscription paused successfully.',
@@ -305,7 +327,7 @@ class FlowerBookingController extends Controller
                 'order_id' => $order_id,
                 'error_message' => $e->getMessage(),
             ]);
-    
+        
             return response()->json([
                 'success' => 500,
                 'message' => 'An error occurred while pausing the subscription.',
@@ -313,6 +335,7 @@ class FlowerBookingController extends Controller
             ], 500);
         }
     }
+    
     
     
     
@@ -351,6 +374,91 @@ class FlowerBookingController extends Controller
         return response()->json([
             'status' => 500,
             'message' => 'Failed to mark payment as paid'
+        ], 500);
+    }
+}
+public function resume(Request $request, $order_id)
+{
+    try {
+        // Find the subscription by order_id
+        $subscription = Subscription::where('order_id', $order_id)->firstOrFail();
+
+        // Validate that the subscription is currently paused
+        if ($subscription->status !== 'paused') {
+            return response()->json([
+                'success' => 400,
+                'message' => 'Subscription is not in a paused state.'
+            ], 400);
+        }
+
+        // Log the resume attempt
+        Log::info('Resuming subscription', [
+            'order_id' => $order_id,
+            'user_id' => $subscription->user_id,
+            'pause_start_date' => $subscription->pause_start_date,
+            'pause_end_date' => $subscription->pause_end_date,
+        ]);
+
+        // Parse the dates
+        $resumeDate = Carbon::parse($request->resume_date);
+        $pauseStartDate = Carbon::parse($subscription->pause_start_date);
+        $startDate = Carbon::parse($subscription->end_date);
+
+        // Ensure the resume date is within the pause period
+        if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt(Carbon::parse($subscription->pause_end_date))) {
+            return response()->json([
+                'success' => 400,
+                'message' => 'Resume date must be within the pause period.'
+            ], 400);
+        }
+
+        // Calculate the days paused up to the resume date
+        $pausedDays = $resumeDate->diffInDays($pauseStartDate) + 1; // Include the start date
+
+        // Calculate the new end date
+        $newEndDate = $startDate->addDays($pausedDays);
+
+        // Update the subscription status and add resume_date
+        $subscription->status = 'active';
+        $subscription->pause_start_date = null;
+        $subscription->pause_end_date = null;
+        // $subscription->resume_date = $resumeDate; // Add the resume date
+        $subscription->new_date = $newEndDate;
+        $subscription->save();
+
+        // Log the resume action
+        SubscriptionPauseResumeLog::create([
+            'subscription_id' => $subscription->subscription_id,
+            'order_id' => $order_id,
+            'action' => 'resumed',
+            'pause_start_date' => $pauseStartDate,
+            'resume_date' => $resumeDate, // Log the resume date
+            'new_end_date' => $newEndDate,
+            'paused_days' => $pausedDays,
+        ]);
+
+        // Log the successful resume
+        Log::info('Subscription resumed successfully', [
+            'order_id' => $order_id,
+            'new_end_date' => $newEndDate,
+        ]);
+
+        return response()->json([
+            'success' => 200,
+            'message' => 'Subscription resumed successfully.',
+            'subscription' => $subscription
+        ], 200);
+    } catch (\Exception $e) {
+        // Log any errors that occur during the process
+        Log::error('Error resuming subscription', [
+            'order_id' => $order_id,
+            'error_message' => $e->getMessage(),
+        ]);
+
+        return response()->json([
+            'success' => 500,
+            'message' => 'An error occurred while resuming the subscription.',
+            'error' => $e->getMessage()
         ], 500);
     }
 }

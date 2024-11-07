@@ -13,6 +13,7 @@ class Subscription extends Model
 
     // Add all fields you want to allow for mass assignment
     protected $fillable = [
+        'subscription_id',
         'order_id',
         'user_id',
         'product_id',
@@ -44,5 +45,10 @@ public static function expireIfEnded()
         ]);
     }
 }
+public function pauseResumeLogs()
+{
+    return $this->hasMany(SubscriptionPauseResumeLog::class);
+}
+
 
 }
