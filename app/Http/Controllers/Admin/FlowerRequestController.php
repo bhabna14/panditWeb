@@ -74,14 +74,17 @@ public function markPayment(Request $request, $id)
     try {
         $order = Order::where('request_id', $id)->firstOrFail();
 
+        // Create a new flower payment entry
         FlowerPayment::create([
             'order_id' => $order->order_id,
-            'payment_id' => null, // Can be set later if available
+            'payment_id' => NULL, // Can be set later if available
             'user_id' => $order->user_id,
             'payment_method' => 'Razorpay',
             'paid_amount' => $order->total_price,
             'payment_status' => 'paid',
         ]);
+
+        // Update the status of the FlowerRequest to "paid"
         $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
 
         if ($flowerRequest->status === 'approved') {
