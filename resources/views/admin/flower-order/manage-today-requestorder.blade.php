@@ -19,13 +19,13 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Paused Subscription</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Today Request Order</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
                             {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Paused Subscription</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Today Request Order</li>
                         </ol>
                     </div>
                 </div>
@@ -60,21 +60,19 @@
                                         <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
                                             <thead>
                                                 <tr>
-                                                    <th>ID</th>
+                                                    <th>Order ID</th>
                                                     <th>User Name</th>
-                                                    <th>Start Date</th>
-                                                    <th>End Date</th>
-                                                    <th>Pause Date</th>
+                                                    <th>Total Price</th>
+                                                    <th>Order Date</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @foreach($pausedSubscriptions as $subscription)
+                                                @foreach($ordersRequestedToday as $order)
                                                     <tr>
-                                                        <td>{{ $subscription->id }}</td>
-                                                        <td>{{ $subscription->user->name }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M, Y') }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M, Y') }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->paused_at)->format('d M, Y') }}</td>
+                                                        <td>{{ $order->id }}</td>
+                                                        <td>{{ $order->user->name }}</td>
+                                                        <td>₹ {{ number_format($order->total_price, 2) }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($order->created_at)->format('d M, Y') }}</td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

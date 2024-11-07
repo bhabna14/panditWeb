@@ -74,7 +74,7 @@ public function showOrdersToday()
 {
     $today = \Carbon\Carbon::today();
     $ordersRequestedToday = FlowerRequest::whereDate('date', $today)->get();
-    return view('orders.today', compact('ordersRequestedToday'));
+    return view('admin.flower-order.manage-today-requestorder', compact('ordersRequestedToday'));
 }
 
 }
