@@ -71,14 +71,16 @@
                                                 @foreach($activeSubscriptions as $subscription)
                                                     <tr>
                                                         <td>{{ $subscription->id }}</td>
-                                                        <td>Name: {{ $subscription->user->name }} <br>
-                                                            Number : {{ $subscription->user->mobile_number }}
-                                                        </td>
                                                         <td>
-                                                            <strong>Address:</strong> {{ $subscription->address->area ?? "" }}<br>
-                                                            <strong>City:</strong> {{ $subscription->address->city ?? ""}}<br>
-                                                            <strong>State:</strong> {{ $subscription->address->state ?? ""}}<br>
-                                                            <strong>Zip Code:</strong> {{ $subscription->address->pincode ?? "" }}
+                                                            Name: {{ $subscription->relatedOrder->user ? $subscription->relatedOrder->user->name : 'N/A' }} <br>
+                                                            Number: {{ $subscription->relatedOrder->user ? $subscription->relatedOrder->user->mobile_number : 'N/A' }}
+                                                        </td>
+                                                        
+                                                        <td>
+                                                            <strong>Address:</strong> {{ $subscription->relatedOrder->address->area ?? "" }}<br>
+                                                            <strong>City:</strong> {{ $subscription->relatedOrder->address->city ?? ""}}<br>
+                                                            <strong>State:</strong> {{ $subscription->relatedOrder->address->state ?? ""}}<br>
+                                                            <strong>Zip Code:</strong> {{ $subscription->relatedOrder->address->pincode ?? "" }}
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M, Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M, Y') }}</td>
