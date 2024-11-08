@@ -557,7 +557,6 @@ class FlowerBookingController extends Controller
 //         ], 500);
 //     }
 // }
-
 public function resume(Request $request, $order_id)
 {
     try {
@@ -597,8 +596,10 @@ public function resume(Request $request, $order_id)
         // Calculate the days actually paused until the resume date
         $actualPausedDays = $resumeDate->diffInDays($pauseStartDate) + 1; // Include start date
 
-        // Calculate remaining days to adjust if resuming early
-        $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1; // Total planned paused days
+        // Calculate total planned paused days
+        $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1;
+
+        // Calculate the remaining paused days to adjust if resuming early
         $remainingPausedDays = $totalPausedDays - $actualPausedDays;
 
         // Adjust the new end date by subtracting the remaining paused days if necessary
@@ -651,5 +652,6 @@ public function resume(Request $request, $order_id)
         ], 500);
     }
 }
+
 
 }
