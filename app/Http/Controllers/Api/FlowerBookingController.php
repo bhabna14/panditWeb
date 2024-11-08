@@ -147,6 +147,7 @@ class FlowerBookingController extends Controller
                 'description' => $request->description,
                 'suggestion' => $request->suggestion,
                 'date' => $request->date,
+                'time' => $request->time,
                 'status' => 'pending'
             ]);
     

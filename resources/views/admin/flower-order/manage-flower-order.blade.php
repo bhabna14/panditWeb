@@ -10,7 +10,21 @@
     <!-- INTERNAL Select2 css -->
     <link href="{{asset('assets/plugins/select2/css/select2.min.css')}}" rel="stylesheet" />
 <style>
+     .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            color: #fff;
+            text-align: center;
+        }
     
+        .status-running {
+            background-color: #28a745; /* Green */
+        }
+    
+        .status-expired {
+            background-color: #dc3545; /* Red */
+        }
 </style>
 @endsection
 
@@ -52,7 +66,6 @@
                 </div>
                 <div class="row">
                     <div class="col-md-4">
-                        <a href="{{ route('active.subscriptions') }}">
                             <div class="card bg-success text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-check-circle"></i> Active Subscriptions
@@ -62,11 +75,9 @@
                                     <p class="card-text text-white">Users with an active subscription</p>
                                 </div>
                             </div>
-                        </a>
                     </div>
                 
                     <div class="col-md-4">
-                        <a href="{{ route('paused.subscriptions') }}">
                             <div class="card bg-warning text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-pause-circle"></i> Paused Subscriptions
@@ -76,11 +87,9 @@
                                     <p class="card-text">Users with a paused subscription</p>
                                 </div>
                             </div>
-                        </a>
                     </div>
                 
                     <div class="col-md-4">
-                        <a href="{{ route('orders.today') }}">
                             <div class="card bg-info text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-box"></i>Subscription Placed today
@@ -90,7 +99,6 @@
                                     <p class="card-text">Subscription Placed today</p>
                                 </div>
                             </div>
-                        </a>
                     </div>
                 </div>
                 
@@ -123,20 +131,22 @@
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
-                                                    <th>User Details</th>
                                                     <th>Product Details</th>
                                                     <th>Address Details</th>
                                                     <th>Total Price</th>
+                                                    <th>Status</th>
+
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach($orders as $order)
                                                 <tr>
-                                                    <td>{{ $order->order_id }}</td>
-                                                    <td>Name: {{ $order->user->name }} <br>
+                                                    <td>{{ $order->order_id }} <br>
+                                                        Name: {{ $order->user->name }} <br>
                                                         Number : {{ $order->user->mobile_number }}
                                                     </td>
+                                                   
                                                     <td>{{ $order->flowerProduct->name }} <br>
                                                        ( {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }} - {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }} )
 
@@ -148,7 +158,17 @@
                                                         <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
                                                         <strong>Zip Code:</strong> {{ $order->address->pincode ?? "" }}
                                                     </td>
-                                                    <td>{{ $order->total_price }}</td>
+                                                    {{-- <td>{{ $order->total_price }}</td> --}}
+                                                    <td>{{ number_format($order->total_price, 2) }}</td>
+
+                                                    <td>
+                                                        <span class="status-badge 
+                                                        {{ $order->subscription->status === 'active' ? 'status-running bg-success' : '' }}
+                                                        {{ $order->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
+                                                        {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}">
+                                                        {{ ucfirst($order->subscription->status) }}
+                                                    </span>
+                                                    </td>
                                                     <td>
                                                         <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>
                                                     </td>
