@@ -316,7 +316,7 @@ public function getUserOrders($userId)
     });
 
     // Merge both sets of orders and reset the keys to ensure the response is an array
-    return  $subscriptionsOrder->merge($requestedOrders)->sortByDesc('id')->values()->toArray();
+    return  $requestedOrders->merge($subscriptionsOrder)->sortByDesc('id')->values()->toArray();
     
 }
 
