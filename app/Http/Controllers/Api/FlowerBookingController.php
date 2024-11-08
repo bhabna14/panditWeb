@@ -600,7 +600,7 @@ public function resume(Request $request, $order_id)
         $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1;
 
         // Calculate the remaining paused days to adjust if resuming early
-        $remainingPausedDays = $totalPausedDays - $actualPausedDays;
+        $remainingPausedDays = ($totalPausedDays - $actualPausedDays)+1;
 
         // Adjust the new end date by subtracting the remaining paused days if necessary
         if ($remainingPausedDays > 0) {
