@@ -64,6 +64,7 @@
                                                     <th class="border-bottom-0">Language</th>                                                   
                                                     <th class="border-bottom-0">View Image</th>
                                                     <th class="border-bottom-0">View Audio</th>
+                                                    <th class="border-bottom-0">Status</th>
                                                     <th class="border-bottom-0">Action</th>
 
                                                 </tr>
@@ -90,6 +91,8 @@
                                                             View Audio
                                                         </a>
                                                     </td>
+                                                    <td class="border-bottom-0">{{ $podcast->status }}</td>
+
                                                     <td>
                                                       
                                                         <a href="{{url('admin/editpodcast/'.$podcast->id)}}"><i class="fa fa-edit"></i></a> | 
