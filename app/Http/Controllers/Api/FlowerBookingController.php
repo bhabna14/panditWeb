@@ -264,7 +264,7 @@ class FlowerBookingController extends Controller
     //     }
     // }
 
-
+    
     public function ordersList()
 {
     try {
@@ -277,7 +277,7 @@ class FlowerBookingController extends Controller
         // Return response with the merged orders under the 'date' key
         return response()->json([
             'success' => 200,
-            'dates' => $mergedOrdersObject
+            'date' => $mergedOrdersObject
         ]);
     } catch (\Exception $e) {
         // Handle errors gracefully
@@ -297,16 +297,33 @@ private function getUserOrders($userId)
         ->orderBy('id', 'desc')
         ->get();
 
+    // Loop through the subscription orders and generate the full URL for flowerProduct->product_image
+    $subscriptionsOrder->transform(function ($order) {
+        if ($order->flowerProduct && $order->flowerProduct->product_image) {
+            // Generate the full URL for product_image
+            $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image);
+        }
+        return $order;
+    });
+
     // Fetch request-based orders with relations
     $requestedOrders = FlowerRequest::where('user_id', $userId)
         ->with(['order', 'flowerProduct', 'user', 'address'])
         ->orderBy('id', 'desc')
         ->get();
 
+    // Loop through the request-based orders and generate the full URL for flowerProduct->product_image
+    $requestedOrders->transform(function ($order) {
+        if ($order->flowerProduct && $order->flowerProduct->product_image) {
+            // Generate the full URL for product_image
+            $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image);
+        }
+        return $order;
+    });
+
     // Merge both sets of orders
     return $subscriptionsOrder->merge($requestedOrders)->sortByDesc('id');
 }
-
 
 
   
