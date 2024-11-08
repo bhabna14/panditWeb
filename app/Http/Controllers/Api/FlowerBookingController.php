@@ -277,7 +277,7 @@ class FlowerBookingController extends Controller
         // Return response with the merged orders under the 'date' key
         return response()->json([
             'success' => 200,
-            'date' => $mergedOrdersObject
+            'data' => $mergedOrdersObject
         ]);
     } catch (\Exception $e) {
         // Handle errors gracefully
