@@ -91,12 +91,17 @@
                                                             View Audio
                                                         </a>
                                                     </td>
-                                                    <td class="border-bottom-0">{{ $podcast->status }}</td>
+                                                    <td class="border-bottom-0">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                                                            <label class="form-check-label" for="flexSwitchCheckChecked">Checked switch checkbox input</label>
+                                                          </div>
+                                                        {{ $podcast->status }}</td>
 
                                                     <td>
                                                       
-                                                        <a href="{{url('admin/editpodcast/'.$podcast->id)}}"><i class="fa fa-edit"></i></a> | 
-                                                        <a href="{{url('admin/dltpodcast/'.$podcast->id)}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                                        <a href="{{url('admin/editpodcast/'.$podcast->id)}}" class="btn btn-success"><i class="fa fa-edit"></i></a> | 
+                                                        <a href="{{url('admin/dltpodcast/'.$podcast->id)}}" class="btn btn-danger" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                                     </td>
                                                     {{-- <td class="border-bottom-0">{{ $podcast->description }}</td> --}}
                                                 </tr>
