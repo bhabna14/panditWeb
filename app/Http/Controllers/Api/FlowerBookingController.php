@@ -181,144 +181,144 @@ class FlowerBookingController extends Controller
         }
     }
     
-    // public function ordersList()
-    // {
-    //     try {
-    //         // Get the authenticated user's ID
-    //         $userId = Auth::guard('sanctum')->user()->userid;
-
-    //         // Fetch standalone orders for the authenticated user (orders without request_id)
-    //         $subscriptionsOrder = Order::whereNull('request_id')
-    //         ->where('user_id', $userId)
-    //         ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address','pauseResumeLogs'])
-    //         ->orderBy('id', 'desc')
-    //         ->get();
-        
-    //     // Map to add the product_image_url to each order's flowerProduct
-    //     $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
-    //         if ($order->flowerProduct) {
-    //             // Ensure flowerProduct exists before accessing product_image
-    //             $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image); // Generate full URL for the photo
-    //         }
-    //         return $order;
-    //     });
-        
-
-    //         // Fetch related orders for the authenticated user (orders with request_id)
-    //         $requestedOrders = FlowerRequest::where('user_id', $userId)
-    //         ->with([
-    //             'order' => function ($query) {
-    //                 $query->with('flowerPayments');
-    //             },
-    //             'flowerProduct',
-    //             'user',
-    //             'address',
-    //             'flowerRequestItems' 
-    //         ])
-    //         ->orderBy('id', 'desc')
-    //         ->get()
-    //         // ->orderBy('id', 'desc')
-    //         ->map(function ($request) {
-    //             // Check if 'order' relationship exists and has 'flower_payments'
-    //             if ($request->order) {
-    //                 // If 'flower_payments' is empty, set it to an empty object
-    //                 if ($request->order->flowerPayments->isEmpty()) {
-    //                     $request->order->flower_payments = (object)[];
-    //                 } else {
-    //                     // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
-    //                     $request->order->flower_payments = $request->order->flowerPayments;
-    //                 }
-    //                 // Remove the 'flowerPayments' property to avoid duplication
-    //                 unset($request->order->flowerPayments);
-    //             }
-        
-    //             // Map product image URL
-    //             if ($request->flowerProduct) {
-    //                 // Generate full URL for the product image
-    //                 $request->flowerProduct->product_image_url = asset('storage/' . $request->flowerProduct->product_image);
-    //             }
-        
-    //             return $request;
-    //         });
-        
-        
-
-
-    
-    //         // Combine both into a single response
-    //         return response()->json([
-    //             'success' => 200,
-    //             'data' => [
-    //                 'subscriptions_order' => $subscriptionsOrder,
-    //                 'requested_orders' => $requestedOrders,
-    //             ],
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         // Log the error for debugging
-    //         \Log::error('Failed to fetch orders list: ' . $e->getMessage());
-
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to retrieve orders list.',
-    //         ], 500);
-    //     }
-    // }
-
-    
     public function ordersList()
-{
-    try {
-        // Fetch the user ID
-        $userId = Auth::guard('sanctum')->user()->userid;
+    {
+        try {
+            // Get the authenticated user's ID
+            $userId = Auth::guard('sanctum')->user()->userid;
 
-        // Get both subscription and request-based orders in a single query
-        $mergedOrdersObject = $this->getUserOrders($userId);
+            // Fetch standalone orders for the authenticated user (orders without request_id)
+            $subscriptionsOrder = Order::whereNull('request_id')
+            ->where('user_id', $userId)
+            ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address','pauseResumeLogs'])
+            ->orderBy('id', 'desc')
+            ->get();
+        
+        // Map to add the product_image_url to each order's flowerProduct
+        $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
+            if ($order->flowerProduct) {
+                // Ensure flowerProduct exists before accessing product_image
+                $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image); // Generate full URL for the photo
+            }
+            return $order;
+        });
+        
 
-        // Return response with the merged orders under the 'date' key
-        return response()->json([
-            'success' => 200,
-            'data' => $mergedOrdersObject
-        ]);
-    } catch (\Exception $e) {
-        // Handle errors gracefully
-        return response()->json([
-            'error' => 'Something went wrong',
-            'message' => $e->getMessage()
-        ], 500);
-    }
-}
-public function getUserOrders($userId)
-{
-    // Fetch subscription orders with relations
-    $subscriptionsOrder = Order::whereNull('request_id')
-        ->where('user_id', $userId)
-        ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address', 'pauseResumeLogs'])
-        ->orderBy('id', 'desc')
-        ->get();
-    $subscriptionsOrder->transform(function ($order) {
-        if ($order->flowerProduct && $order->flowerProduct->product_image) {
-            // Generate the full URL for product_image
-            $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image);
-        }
-        return $order;
-    });
-    // Fetch request-based orders with relations
-    $requestedOrders = FlowerRequest::where('user_id', $userId)
-        ->with(['order', 'flowerProduct', 'user', 'address'])
-        ->orderBy('id', 'desc')
-        ->get();
-        $requestedOrders->transform(function ($order) {
-        if ($order->flowerProduct && $order->flowerProduct->product_image) {
-            // Generate the full URL for product_image
-            $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image);
-        }
-        return $order;
-    });
+            // Fetch related orders for the authenticated user (orders with request_id)
+            $requestedOrders = FlowerRequest::where('user_id', $userId)
+            ->with([
+                'order' => function ($query) {
+                    $query->with('flowerPayments');
+                },
+                'flowerProduct',
+                'user',
+                'address',
+                'flowerRequestItems' 
+            ])
+            ->orderBy('id', 'desc')
+            ->get()
+            // ->orderBy('id', 'desc')
+            ->map(function ($request) {
+                // Check if 'order' relationship exists and has 'flower_payments'
+                if ($request->order) {
+                    // If 'flower_payments' is empty, set it to an empty object
+                    if ($request->order->flowerPayments->isEmpty()) {
+                        $request->order->flower_payments = (object)[];
+                    } else {
+                        // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
+                        $request->order->flower_payments = $request->order->flowerPayments;
+                    }
+                    // Remove the 'flowerPayments' property to avoid duplication
+                    unset($request->order->flowerPayments);
+                }
+        
+                // Map product image URL
+                if ($request->flowerProduct) {
+                    // Generate full URL for the product image
+                    $request->flowerProduct->product_image_url = asset('storage/' . $request->flowerProduct->product_image);
+                }
+        
+                return $request;
+            });
+        
+        
 
-    // Merge both sets of orders and reset the keys to ensure the response is an array
-    return  $requestedOrders->merge($subscriptionsOrder)->sortByDesc('id')->values()->toArray();
+
     
-}
+            // Combine both into a single response
+            return response()->json([
+                'success' => 200,
+                'data' => [
+                    'subscriptions_order' => $subscriptionsOrder,
+                    'requested_orders' => $requestedOrders,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Failed to fetch orders list: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve orders list.',
+            ], 500);
+        }
+    }
+
+    
+//     public function ordersList()
+// {
+//     try {
+//         // Fetch the user ID
+//         $userId = Auth::guard('sanctum')->user()->userid;
+
+//         // Get both subscription and request-based orders in a single query
+//         $mergedOrdersObject = $this->getUserOrders($userId);
+
+//         // Return response with the merged orders under the 'date' key
+//         return response()->json([
+//             'success' => 200,
+//             'data' => $mergedOrdersObject
+//         ]);
+//     } catch (\Exception $e) {
+//         // Handle errors gracefully
+//         return response()->json([
+//             'error' => 'Something went wrong',
+//             'message' => $e->getMessage()
+//         ], 500);
+//     }
+// }
+// public function getUserOrders($userId)
+// {
+//     // Fetch subscription orders with relations
+//     $subscriptionsOrder = Order::whereNull('request_id')
+//         ->where('user_id', $userId)
+//         ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address', 'pauseResumeLogs'])
+//         ->orderBy('id', 'desc')
+//         ->get();
+//     $subscriptionsOrder->transform(function ($order) {
+//         if ($order->flowerProduct && $order->flowerProduct->product_image) {
+//             // Generate the full URL for product_image
+//             $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image);
+//         }
+//         return $order;
+//     });
+//     // Fetch request-based orders with relations
+//     $requestedOrders = FlowerRequest::where('user_id', $userId)
+//         ->with(['order', 'flowerProduct', 'user', 'address'])
+//         ->orderBy('id', 'desc')
+//         ->get();
+//         $requestedOrders->transform(function ($order) {
+//         if ($order->flowerProduct && $order->flowerProduct->product_image) {
+//             // Generate the full URL for product_image
+//             $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image);
+//         }
+//         return $order;
+//     });
+
+//     // Merge both sets of orders and reset the keys to ensure the response is an array
+//     return  $requestedOrders->merge($subscriptionsOrder)->sortByDesc('id')->values()->toArray();
+    
+// }
 
 // private function getUserOrders($userId)
 // {
