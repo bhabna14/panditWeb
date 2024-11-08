@@ -472,6 +472,92 @@ class FlowerBookingController extends Controller
         ], 500);
     }
 }
+// public function resume(Request $request, $order_id)
+// {
+//     try {
+//         // Find the subscription by order_id
+//         $subscription = Subscription::where('order_id', $order_id)->firstOrFail();
+
+//         // Validate that the subscription is currently paused
+//         if ($subscription->status !== 'paused') {
+//             return response()->json([
+//                 'success' => 400,
+//                 'message' => 'Subscription is not in a paused state.'
+//             ], 400);
+//         }
+
+//         // Log the resume attempt
+//         Log::info('Resuming subscription', [
+//             'order_id' => $order_id,
+//             'user_id' => $subscription->user_id,
+//             'pause_start_date' => $subscription->pause_start_date,
+//             'pause_end_date' => $subscription->pause_end_date,
+//         ]);
+
+//         // Parse the dates
+//         $resumeDate = Carbon::parse($request->resume_date);
+//         $pauseStartDate = Carbon::parse($subscription->pause_start_date);
+//         $startDate = Carbon::parse($subscription->end_date);
+
+//         // Ensure the resume date is within the pause period
+//         if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt(Carbon::parse($subscription->pause_end_date))) {
+//             return response()->json([
+//                 'success' => 400,
+//                 'message' => 'Resume date must be within the pause period.'
+//             ], 400);
+//         }
+
+//         // Calculate the days paused up to the resume date
+//         $pausedDays = $resumeDate->diffInDays($pauseStartDate) + 1; // Include the start date
+
+//         // Calculate the new end date
+//         $newEndDate = $startDate->addDays($pausedDays);
+
+//         // Update the subscription status and add resume_date
+//         $subscription->status = 'active';
+//         $subscription->pause_start_date = null;
+//         $subscription->pause_end_date = null;
+//         // $subscription->resume_date = $resumeDate; // Add the resume date
+//         $subscription->new_date = $newEndDate;
+//         $subscription->save();
+
+//         // Log the resume action
+//         SubscriptionPauseResumeLog::create([
+//             'subscription_id' => $subscription->subscription_id,
+//             'order_id' => $order_id,
+//             'action' => 'resumed',
+//             'pause_start_date' => $pauseStartDate,
+//             'resume_date' => $resumeDate, // Log the resume date
+//             'new_end_date' => $newEndDate,
+//             'paused_days' => $pausedDays,
+//         ]);
+
+//         // Log the successful resume
+//         Log::info('Subscription resumed successfully', [
+//             'order_id' => $order_id,
+//             'new_end_date' => $newEndDate,
+//         ]);
+
+//         return response()->json([
+//             'success' => 200,
+//             'message' => 'Subscription resumed successfully.',
+//             'subscription' => $subscription
+//         ], 200);
+//     } catch (\Exception $e) {
+//         // Log any errors that occur during the process
+//         Log::error('Error resuming subscription', [
+//             'order_id' => $order_id,
+//             'error_message' => $e->getMessage(),
+//         ]);
+
+//         return response()->json([
+//             'success' => 500,
+//             'message' => 'An error occurred while resuming the subscription.',
+//             'error' => $e->getMessage()
+//         ], 500);
+//     }
+// }
+
 public function resume(Request $request, $order_id)
 {
     try {
@@ -497,27 +583,35 @@ public function resume(Request $request, $order_id)
         // Parse the dates
         $resumeDate = Carbon::parse($request->resume_date);
         $pauseStartDate = Carbon::parse($subscription->pause_start_date);
-        $startDate = Carbon::parse($subscription->end_date);
+        $pauseEndDate = Carbon::parse($subscription->pause_end_date);
+        $currentEndDate = $subscription->new_date ? Carbon::parse($subscription->new_date) : Carbon::parse($subscription->end_date);
 
         // Ensure the resume date is within the pause period
-        if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt(Carbon::parse($subscription->pause_end_date))) {
+        if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt($pauseEndDate)) {
             return response()->json([
                 'success' => 400,
                 'message' => 'Resume date must be within the pause period.'
             ], 400);
         }
 
-        // Calculate the days paused up to the resume date
-        $pausedDays = $resumeDate->diffInDays($pauseStartDate) + 1; // Include the start date
+        // Calculate the days actually paused until the resume date
+        $actualPausedDays = $resumeDate->diffInDays($pauseStartDate) + 1; // Include start date
 
-        // Calculate the new end date
-        $newEndDate = $startDate->addDays($pausedDays);
+        // Calculate remaining days to adjust if resuming early
+        $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1; // Total planned paused days
+        $remainingPausedDays = $totalPausedDays - $actualPausedDays;
 
-        // Update the subscription status and add resume_date
+        // Adjust the new end date by subtracting the remaining paused days if necessary
+        if ($remainingPausedDays > 0) {
+            $newEndDate = $currentEndDate->subDays($remainingPausedDays);
+        } else {
+            $newEndDate = $currentEndDate;
+        }
+
+        // Update the subscription status and clear pause dates
         $subscription->status = 'active';
         $subscription->pause_start_date = null;
         $subscription->pause_end_date = null;
-        // $subscription->resume_date = $resumeDate; // Add the resume date
         $subscription->new_date = $newEndDate;
         $subscription->save();
 
@@ -526,10 +620,9 @@ public function resume(Request $request, $order_id)
             'subscription_id' => $subscription->subscription_id,
             'order_id' => $order_id,
             'action' => 'resumed',
-            'pause_start_date' => $pauseStartDate,
-            'resume_date' => $resumeDate, // Log the resume date
+            'resume_date' => $resumeDate,
             'new_end_date' => $newEndDate,
-            'paused_days' => $pausedDays,
+            'paused_days' => $actualPausedDays,
         ]);
 
         // Log the successful resume
@@ -557,6 +650,5 @@ public function resume(Request $request, $order_id)
         ], 500);
     }
 }
-
 
 }
