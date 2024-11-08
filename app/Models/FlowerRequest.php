@@ -19,6 +19,7 @@ class FlowerRequest extends Model
         'description',
         'suggestion',
         'date',
+        'time',
         'status',
     ];
 

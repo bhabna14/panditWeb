@@ -616,7 +616,7 @@ public function resume(Request $request, $order_id)
         $subscription->new_date = $newEndDate;
         $subscription->save();
 
-        // Log the resume action
+        // Log the resume action 
         SubscriptionPauseResumeLog::create([
             'subscription_id' => $subscription->subscription_id,
             'order_id' => $order_id,
