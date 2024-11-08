@@ -27,7 +27,7 @@ class FlowerOrderController extends Controller
                        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
                
                        // Orders requested today
-                       $ordersRequestedToday = FlowerRequest::whereDate('date', Carbon::today())->count();
+                       $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
                        
         return view('admin.flower-order.manage-flower-order', compact('orders','activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
     }
@@ -79,7 +79,7 @@ public function showPausedSubscriptions()
 public function showOrdersToday()
 {
     $today = \Carbon\Carbon::today();
-    $ordersRequestedToday = FlowerRequest::whereDate('date', $today)
+    $ordersRequestedToday = Subscription::whereDate('start_date', $today)
         ->with(['order.flowerPayments', 'order.user', 'order.flowerProduct', 'order.address'])
         ->get();
 
