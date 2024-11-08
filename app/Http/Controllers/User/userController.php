@@ -18,6 +18,8 @@ use App\Models\Poojadetails;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Rating;
+use App\Models\FlowerProduct;
+
 use App\Models\PanditDevice;
 use Illuminate\Support\Facades\Log;
 // use Carbon\Carbon;
@@ -54,6 +56,22 @@ class userController extends Controller
                         ->take(6)
                         ->get();
         return view("user/index" , compact('upcomingPoojas','otherpoojas','pandits'));
+    }
+    public function flower(){
+        $upcomingPoojas = Poojalist::where('status', 'active')
+                        ->where('pooja_date', '>=', now())
+                        ->orderBy('pooja_date', 'asc')
+                        ->take(3)
+                        ->get();
+        $otherpoojas = Poojalist::where('status', 'active')
+                        ->where(function($query) {
+                            $query->whereNull('pooja_date');
+                         })
+                        ->take(9)
+                        ->get();
+        $products = FlowerProduct::where('status', 'active')
+        ->where('category','Subscription')->get();
+        return view("user/flower" , compact('upcomingPoojas','otherpoojas','products'));
     }
 
     // public function userlogin(){
