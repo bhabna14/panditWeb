@@ -604,7 +604,7 @@ public function resume(Request $request, $order_id)
 
         // Adjust the new end date by subtracting the remaining paused days if necessary
         if ($remainingPausedDays > 0) {
-            $newEndDate = $currentEndDate->subDays($remainingPausedDays);
+            $newEndDate = $currentEndDate->subDays($actualPausedDays);
         } else {
             $newEndDate = $currentEndDate;
         }
