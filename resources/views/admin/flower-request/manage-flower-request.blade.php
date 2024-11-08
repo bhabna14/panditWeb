@@ -119,25 +119,27 @@
                                             <thead>
                                                 <tr>
                                                     <th>Request ID</th>
-                                                    <th>User Details</th>
-                                                    <th>Product Name</th>
+                                                   
+                                                    <th>Delivery Date</th>
                                                   
                                                     <th>Flower Items</th>
-                                                    <th>Address</th>
+                                                   
                                                     <th>Status</th>
                                                     <th>Price</th>
                                                     <th>Actions</th>
+                                                    <th>Address</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 @foreach($pendingRequests as $request)
                                                     <tr>
-                                                        <td>{{ $request->request_id }}</td>
-                                                        <td>Name: {{ $request->user->name }} <br>
+                                                        <td>{{ $request->request_id }} <br>
+                                                            Name: {{ $request->user->name }} <br>
                                                             Number : {{ $request->user->mobile_number }}
                                                         </td>
-                                                        <td>{{ $request->flowerProduct->name }} <br>
-                                                           ( {{  \Carbon\Carbon::parse($request->date)->format('F j, Y') }} )
+                                                        
+                                                        <td>{{ $request->date }} 
+                                                           {{-- ( {{  \Carbon\Carbon::parse($request->date)->format('F j, Y') }} ) --}}
                                                         </td>
                                                         <td>
                                                             <ul>
@@ -148,13 +150,15 @@
                                                                 @endforeach
                                                             </ul>
                                                         </td>
-                                                        <td>
-                                                            <strong>Address:</strong> {{ $request->address->area ?? "" }}<br>
-                                                            <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
-                                                            <strong>State:</strong> {{ $request->address->state ?? ""}}<br>
-                                                            <strong>Zip Code:</strong> {{ $request->address->pincode ?? "" }}
+                                                     
+                                                        <td>@if ($request->status == 'pending')
+                                                            <p>Order Placed <br> Update the Price</p>
+                                                            @elseif($request->status == 'aprroved')
+                                                            <p>Payment Pending</p>
+                                                            @elseif($request->status == 'aprroved')
+                                                            <p>Payment Completed</p>
+                                                            @endif
                                                         </td>
-                                                        <td>{{ $request->status }}</td>
                                                         <td>
                                                             @if($request->order && $request->order->total_price)
                                                                 {{-- Display the saved price if it exists --}}
@@ -174,6 +178,12 @@
                                                                 @csrf
                                                                 <button type="submit" class="btn btn-success mt-2" {{ $request->status === 'paid' ? 'disabled' : '' }}>Paid</button>
                                                             </form>
+                                                        </td>
+                                                        <td>
+                                                            <strong>Address:</strong> {{ $request->address->area ?? "" }}<br>
+                                                            <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
+                                                            <strong>State:</strong> {{ $request->address->state ?? ""}}<br>
+                                                            <strong>Zip Code:</strong> {{ $request->address->pincode ?? "" }}
                                                         </td>
                                                     </tr>
                                                 @endforeach
