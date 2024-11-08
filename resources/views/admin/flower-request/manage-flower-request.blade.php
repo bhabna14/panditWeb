@@ -155,7 +155,7 @@
                                                             <p>Order Placed <br> Update the Price</p>
                                                             @elseif($request->status == 'aprroved')
                                                             <p>Payment Pending</p>
-                                                            @elseif($request->status == 'aprroved')
+                                                            @elseif($request->status == 'paid')
                                                             <p>Payment Completed</p>
                                                             @endif
                                                         </td>
