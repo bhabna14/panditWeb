@@ -83,11 +83,11 @@
                         <a href="{{ route('orders.today') }}">
                             <div class="card bg-info text-dark mb-3">
                                 <div class="card-header">
-                                    <i class="fas fa-box"></i> Orders Requested Today
+                                    <i class="fas fa-box"></i>Subscription Placed today
                                 </div>
                                 <div class="card-body">
                                     <h5 class="card-title">{{ $ordersRequestedToday }}</h5>
-                                    <p class="card-text">Requested Orders placed today</p>
+                                    <p class="card-text">Subscription Placed today</p>
                                 </div>
                             </div>
                         </a>
