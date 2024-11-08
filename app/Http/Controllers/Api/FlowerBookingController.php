@@ -621,6 +621,7 @@ public function resume(Request $request, $order_id)
             'order_id' => $order_id,
             'action' => 'resumed',
             'resume_date' => $resumeDate,
+            'pause_start_date' => $pauseStartDate,
             'new_end_date' => $newEndDate,
             'paused_days' => $actualPausedDays,
         ]);
