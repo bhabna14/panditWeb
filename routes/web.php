@@ -195,6 +195,8 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+    Route::get('/show-customer/{id}/details', [FlowerOrderController::class, 'showCustomerDetails'])->name('showCustomerDetails');
+
     Route::get('/flower-request-orders', [FlowerOrderController::class, 'showRequestOrders'])->name('admin.requestorder.index');
 
     Route::get('/active-subscriptions', [FlowerOrderController::class, 'showActiveSubscriptions'])->name('active.subscriptions');

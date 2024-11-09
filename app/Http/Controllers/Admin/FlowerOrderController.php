@@ -7,6 +7,9 @@ use App\Models\Order;
 use App\Models\FlowerRequest;
 use App\Models\FlowerPayment;
 use App\Models\Subscription;
+use App\Models\User;
+use App\Models\UserAddress;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +34,25 @@ class FlowerOrderController extends Controller
                        
         return view('admin.flower-order.manage-flower-order', compact('orders','activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
     }
+    public function showCustomerDetails($userid)
+    {
+        // Fetch user details by `userid` instead of `id`
+        $user = User::where('userid', $userid)->firstOrFail();
+        $addressdata = UserAddress::where('user_id', $userid)
+                                ->where('status','active')
+                                ->get();
+    
+        // Fetch user orders based on `userid`
+        $orders = Order::where('user_id', $userid)
+                       ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address'])
+                       ->orderBy('id', 'desc')
+                       ->get();
+    
+        // Return the view with user and orders data
+        return view('admin.flower-order.show-customer-details', compact('user','addressdata', 'orders'));
+    }
+    
+
     
     public function show($id)
     {

@@ -144,7 +144,10 @@
                                                 <tr>
                                                     <td>{{ $order->order_id }} <br>
                                                         Name: {{ $order->user->name }} <br>
-                                                        Number : {{ $order->user->mobile_number }}
+                                                        Number : {{ $order->user->mobile_number }} <br>
+
+                                                        <a href="{{ route('showCustomerDetails', $order->user->userid) }}" class="btn btn-sm btn-warning">View Customer</a>
+                                                    
                                                     </td>
                                                    
                                                     <td>{{ $order->flowerProduct->name }} <br>
