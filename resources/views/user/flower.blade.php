@@ -4,26 +4,83 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
 <style>
-  .card {
-    border: none;
-    border-radius: 10px;
+.product-card {
+    border-radius: 15px;
     overflow: hidden;
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+
+}
+/* 
+.product-card:hover {
+    transform: translateY(-10px) scale(1.03);
+} */
+
+.product-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
     transition: transform 0.3s;
 }
 
-.card:hover {
-    transform: translateY(-5px);
+.product-image-container:hover .product-image {
+    transform: scale(1.1);
 }
 
-.btn-primary {
-    background-color: #007bff;
+.badge-sale {
+    top: 10px;
+    left: 10px;
+    background-color: #ff5c5c;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.product-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.product-description {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+.product-price {
+    font-size: 20px;
+    color: #B90B0B;
+    font-weight: bold;
+}
+
+.btn-gradient {
+    background: linear-gradient(90deg, #B90B0B, #feb47b);
+    color: #fff;
     border: none;
-    transition: background-color 0.3s;
+    padding: 10px;
+    border-radius: 30px;
+    transition: background 0.3s;
+    letter-spacing: 1px
 }
 
-.btn-primary:hover {
-    background-color: #0056b3;
-}
+/* .btn-gradient:hover {
+    background: linear-gradient(90deg, #ff5c5c, #ff7e5f);
+} */
 
 </style>
 @endsection
@@ -58,15 +115,16 @@
           @if($products->isNotEmpty())
               @foreach($products as $product)
                   <div class="col-md-4 mb-4">
-                      <div class="card h-100 shadow-sm">
-                          <img src="{{ asset($product->image) }}" alt="{{ $product->name }}" class="card-img-top" style="height: 200px; object-fit: cover;">
-                          <div class="card-body d-flex flex-column">
-                              <h5 class="card-title">{{ $product->name }}</h5>
-                              <p class="card-text">{{ Str::limit($product->description, 100, '...') }}</p>
-                              <p class="card-text"><strong>Price:</strong> ${{ number_format($product->price, 2) }}</p>
-                              <div class="mt-auto">
-                                  <button class="btn btn-primary w-100">Buy Now</button>
-                              </div>
+                      <div class="product-card shadow-lg position-relative">
+                          <div class="product-image-container">
+                              <img src="{{ asset('storage/'.$product->product_image) }}" alt="{{ $product->name }}" class="product-image">
+                             
+                          </div>
+                          <div class="card-body text-center">
+                              <h5 class="product-title">{{ $product->name }}</h5>
+                              <p class="product-description">{{ Str::limit($product->description, 80, '...') }}</p>
+                              <p class="product-price">$ {{ number_format($product->price, 2) }}</p>
+                              <button class="btn btn-gradient w-100 mt-2">Buy Now</button>
                           </div>
                       </div>
                   </div>
