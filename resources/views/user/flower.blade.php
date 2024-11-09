@@ -77,6 +77,12 @@
     transition: background 0.3s;
     letter-spacing: 1px
 }
+.flower-package-heading h1{
+  color: #000;
+  text-align: center;
+  margin-bottom: 38px;
+  letter-spacing: 1px;
+}
 
 /* .btn-gradient:hover {
     background: linear-gradient(90deg, #ff5c5c, #ff7e5f);
@@ -111,7 +117,15 @@
  </section>
  <section>
   <div class="container">
-      <div class="row" style="margin-top: 60px; margin-bottom: 140px;">
+      <div class="row" style="margin-top: 30px;">
+        <div class="col-md-12">
+          <div class="flower-package-heading">
+              <h1>Flower Package</h1>
+             
+          </div>
+      </div>
+      </div>
+      <div class="row" style="margin-top: 20px; margin-bottom: 140px;">
           @if($products->isNotEmpty())
               @foreach($products as $product)
                   <div class="col-md-4 mb-4">
@@ -123,8 +137,19 @@
                           <div class="card-body text-center">
                               <h5 class="product-title">{{ $product->name }}</h5>
                               <p class="product-description">{{ Str::limit($product->description, 80, '...') }}</p>
-                              <p class="product-price">₹ {{ number_format($product->price, 2) }}</p>
-                              <button class="btn btn-gradient w-100 mt-2">Buy Now</button>
+                              <p class="product-price mb-3">₹ {{ number_format($product->price, 2) }}</p>
+                              @if(Auth::guard('users')->check())
+                              <!-- User is logged in -->
+                              <a href="{{ route('checkout', ['product_id' => $product->id]) }}" class="btn btn-gradient w-100 mt-2">
+                                  Buy Now
+                              </a>
+                            @else
+                                <!-- User is not logged in -->
+                                <a href="{{ route('userlogin') }}" class="btn btn-gradient w-100 mt-2">
+                                    Buy Now
+                                </a>
+                            @endif
+                          
                           </div>
                       </div>
                   </div>

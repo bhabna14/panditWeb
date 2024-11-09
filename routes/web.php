@@ -52,7 +52,12 @@ Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');
+    //flower routes
     Route::get('/flower', 'flower')->name('flower');
+    Route::get('/checkout/{product_id}',  'show')->name('checkout');
+
+
+
     Route::get('/pandit-list', 'panditlist')->name('panditlist');
 
     Route::get('/pandits/{pooja_id}/{pandit_id}',  'list')->name('pandit.list');
