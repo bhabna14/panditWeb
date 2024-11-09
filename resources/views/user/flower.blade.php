@@ -123,7 +123,7 @@
                           <div class="card-body text-center">
                               <h5 class="product-title">{{ $product->name }}</h5>
                               <p class="product-description">{{ Str::limit($product->description, 80, '...') }}</p>
-                              <p class="product-price">$ {{ number_format($product->price, 2) }}</p>
+                              <p class="product-price">₹ {{ number_format($product->price, 2) }}</p>
                               <button class="btn btn-gradient w-100 mt-2">Buy Now</button>
                           </div>
                       </div>
