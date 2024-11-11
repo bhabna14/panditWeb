@@ -69,7 +69,7 @@ class FlowerOrderController extends Controller
         ->get();
     
     // Step 2: For each flower request, check if an associated order exists
-    foreach ($flowerRequests as $request) {
+    foreach ($pendingRequests as $request) {
         $request->order = Order::where('request_id', $request->request_id)
             ->with('flowerPayments')
             ->first();
