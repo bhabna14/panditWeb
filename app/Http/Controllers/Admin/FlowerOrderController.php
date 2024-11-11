@@ -51,7 +51,7 @@ class FlowerOrderController extends Controller
         $orders = Order::where('user_id', $userid)
     ->whereHas('subscription', function ($query) {
         // This ensures that only orders with a related subscription are included
-        $query->whereColumn('orders.order_id', 'subscription.order_id');
+        $query->whereColumn('orders.order_id', 'subscriptions.order_id');
     })
     ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address'])
     ->orderBy('id', 'desc')
