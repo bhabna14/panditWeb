@@ -58,21 +58,25 @@ class FlowerOrderController extends Controller
     ->get();
 
 
-    $pendingRequests = FlowerRequest::whereHas('order', function ($query) use ($userid) {
-        $query->whereRaw("BINARY `flower_requests`.`request_id` = `orders`.`request_id`")
-              ->where('user_id', $userid);
-    })
-    ->with([
-        'order' => function ($query) {
-            $query->with('flowerPayments');
-        },
-        'flowerProduct',
-        'user',
-        'address',
-        'flowerRequestItems'
-    ])
-    ->orderBy('id', 'desc')
-    ->get();
+    $pendingRequests = FlowerRequest::where('user_id', $userid)
+        ->with([
+            'flowerProduct',
+            'user',
+            'address',
+            'flowerRequestItems' // Eager load flowerRequestItems
+        ])
+        ->orderBy('id', 'desc')
+        ->get();
+    
+    // Step 2: For each flower request, check if an associated order exists
+    foreach ($flowerRequests as $request) {
+        $request->order = Order::where('request_id', $request->request_id)
+            ->with('flowerPayments')
+            ->first();
+    }
+    
+    // Now $flowerRequests will have the associated order data if it exists
+    
     
 
         $totalOrders = Order::where('user_id', $userid)->count();
