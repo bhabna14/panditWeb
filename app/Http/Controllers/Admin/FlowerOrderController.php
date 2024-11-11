@@ -43,10 +43,20 @@ class FlowerOrderController extends Controller
                                 ->get();
     
         // Fetch user orders based on `userid`
+        // $orders = Order::where('user_id', $userid)
+        //                ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address'])
+        //                ->orderBy('id', 'desc')
+        //                ->get();
+
         $orders = Order::where('user_id', $userid)
-                       ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address'])
-                       ->orderBy('id', 'desc')
-                       ->get();
+    ->whereHas('subscription', function ($query) {
+        // This ensures that only orders with a related subscription are included
+        $query->whereColumn('orders.order_id', 'subscription.order_id');
+    })
+    ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address'])
+    ->orderBy('id', 'desc')
+    ->get();
+
 
         $totalOrders = Order::where('user_id', $userid)->count();
         $ongoingOrders = Order::where('user_id', $userid)
