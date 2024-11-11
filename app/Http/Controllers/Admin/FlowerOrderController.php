@@ -59,8 +59,8 @@ class FlowerOrderController extends Controller
 
 
     $pendingRequests = FlowerRequest::whereHas('order', function ($query) use ($userid) {
-        // Match user_id in the order table
-        $query->where('user_id', $userid);
+        $query->whereRaw("BINARY `flower_requests`.`request_id` = `orders`.`request_id`")
+              ->where('user_id', $userid);
     })
     ->with([
         'order' => function ($query) {
@@ -69,11 +69,11 @@ class FlowerOrderController extends Controller
         'flowerProduct',
         'user',
         'address',
-        'flowerRequestItems'  // Eager load flowerRequestItems
+        'flowerRequestItems'
     ])
     ->orderBy('id', 'desc')
     ->get();
-
+    
 
         $totalOrders = Order::where('user_id', $userid)->count();
         $ongoingOrders = Order::where('user_id', $userid)
