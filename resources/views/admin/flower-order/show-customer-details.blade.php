@@ -149,14 +149,14 @@
                                                                     <td>{{ $order->order_id }} 
                                                                        
                                                                     </td>
-                                                                    <td>{{ $order->subscription->start_date ?? "NA" }} 
+                                                                    {{-- <td>{{ $order->subscription->start_date ?? "NA" }} 
                                                                        
                                                                     </td>
                                                                     <td>{{ $order->flowerProduct->name }} <br>
                                                                        ( {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') ?? "NA"}} - {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }} )
                 
                 
-                                                                    </td>
+                                                                    </td> --}}
                                                                     <td>
                                                                         <strong>Address:</strong> {{ $order->address->area ?? "" }}<br>
                                                                         <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
