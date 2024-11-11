@@ -101596,3 +101596,19 @@ a.text-dark:hover, a.text-dark:focus {
 .rating label:hover ~ input:checked ~ label {
   color: #ffdd00;
 }
+
+ .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+            color: #fff;
+            text-align: center;
+        }
+    
+        .status-running {
+            background-color: #28a745; /* Green */
+        }
+    
+        .status-expired {
+            background-color: #dc3545; /* Red */
+        }

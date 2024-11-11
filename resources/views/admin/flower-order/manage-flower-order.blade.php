@@ -9,23 +9,7 @@
 
     <!-- INTERNAL Select2 css -->
     <link href="{{asset('assets/plugins/select2/css/select2.min.css')}}" rel="stylesheet" />
-<style>
-     .status-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.9em;
-            color: #fff;
-            text-align: center;
-        }
-    
-        .status-running {
-            background-color: #28a745; /* Green */
-        }
-    
-        .status-expired {
-            background-color: #dc3545; /* Red */
-        }
-</style>
+
 @endsection
 
 @section('content')

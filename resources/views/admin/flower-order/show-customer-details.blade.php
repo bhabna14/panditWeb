@@ -7,7 +7,16 @@
 
 	<!--  smart photo master css -->
 	<link href="{{asset('assets/plugins/SmartPhoto-master/smartphoto.css')}}" rel="stylesheet">
-
+<style>
+    .my-md-auto.mt-4.prof-details {
+    width: 220px;
+    margin-right: 15px;
+}
+.custom-size-icon{
+    font-size: 26px;
+    margin-bottom: 10px;
+}
+</style>
     @endsection
 
     @section('content')
@@ -48,11 +57,48 @@
                                         <span><i class="fa fa-venus-mars me-2"></i></span><span class="font-weight-semibold me-2">Gender:</span><span>{{ $user->gender }}</span>
                                     </p>
                                 </div>
+                                <div class="my-md-auto mt-4 prof-details">
+                                    <div class="card bg-light mb-2 shadow-sm">
+                                        <div class="card-body p-3 align-items-center">
+                                            
+                                            <div class="text-center">
+                                                <i class="fa fa-shopping-cart text-primary me-2 custom-size-icon"></i>
+                                                <h6 class="mb-1">Total Orders</h6>
+                                                <p class="mb-0 font-weight-bold">{{ $totalOrders }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-md-auto mt-4 prof-details">
+                                    <div class="card bg-light mb-2 shadow-sm">
+                                        <div class="card-body p-3 align-items-center">
+                                           
+                                            <div class="text-center">
+                                                <i class="fa fa-hourglass-half text-warning me-2 custom-size-icon"></i>
+                                                <h6 class="mb-1">Ongoing Subscriptiom</h6>
+                                                <p class="mb-0 font-weight-bold">{{ $ongoingOrders }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-md-auto mt-4 prof-details">
+                                    <div class="card bg-light mb-2 shadow-sm">
+                                        <div class="card-body p-3 align-items-center">
+                                            <div class="text-center">
+                                               
+                                                <i class="fa fa-rupee-sign text-success me-2 custom-size-icon"></i>
+                                                <h6 class="mb-1">Total Spend</h6>
+                                                <p class="mb-0 font-weight-bold">₹{{ number_format($totalSpend, 2) }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                               
                             </div>
                             <div class="card-footer py-0">
                                 <div class="profile-tab tab-menu-heading border-bottom-0">
                                     <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0">
-                                        <a class="nav-link mb-2 mt-2 active" data-bs-toggle="tab" href="#about">About</a>
+                                        {{-- <a class="nav-link mb-2 mt-2 active" data-bs-toggle="tab" href="#about">About</a> --}}
                                         <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#order">Orders</a>
                                         <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#address">Addresses</a>
                                     </nav>
@@ -66,7 +112,7 @@
                     <div class="col-lg-12 col-md-12">
                         <div class="custom-card main-content-body-profile">
                             <div class="tab-content">
-                                <div class="main-content-body tab-pane border-top-0 active" id="about">
+                                <div class="main-content-body tab-pane border-top-0 " id="about">
                                     <div class="card">
                                         <div class="card-body p-0 border-0 rounded-10">
                                             <div class="p-4">
@@ -78,7 +124,7 @@
                                     </div>
                                 </div>
                 
-                                <div class="main-content-body tab-pane border-top-0" id="order">
+                                <div class="main-content-body tab-pane border-top-0 active" id="order">
                                     <div class="border-0">
                                         <div class="main-content-body main-content-body-profile">
                                             <div class="main-profile-body p-0">
@@ -88,6 +134,7 @@
                                                             <thead>
                                                                 <tr>
                                                                     <th>Order ID</th>
+                                                                    <th>Start Date</th>
                                                                     <th>Product Details</th>
                                                                     <th>Address Details</th>
                                                                     <th>Total Price</th>
@@ -99,10 +146,12 @@
                                                             <tbody>
                                                                 @foreach($orders as $order)
                                                                 <tr>
-                                                                    <td>{{ $order->order_id }} <br>
+                                                                    <td>{{ $order->order_id }} 
                                                                        
                                                                     </td>
-                                                                   
+                                                                    <td>{{ $order->subscription->start_date }} 
+                                                                       
+                                                                    </td>
                                                                     <td>{{ $order->flowerProduct->name }} <br>
                                                                        ( {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }} - {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }} )
                 
@@ -144,28 +193,33 @@
                                         <div class="main-content-body main-content-body-profile">
                                             <div class="main-profile-body p-0">
                                                 <div class="row row-sm">
-                                                    <div class="col-12">
-                                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Address</th>
-                                                                    <th>City</th>
-                                                                    <th>State</th>
-                                                                    <th>ZIP</th>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                @foreach ($addressdata as $address)
-                                                                    <tr>
-                                                                        <td>{{ $address->street_address }}</td>
-                                                                        <td>{{ $address->city }}</td>
-                                                                        <td>{{ $address->state }}</td>
-                                                                        <td>{{ $address->zip_code }}</td>
-                                                                    </tr>
-                                                                @endforeach
-                                                            </tbody>
-                                                        </table>
-                                                    </div>
+                                                  
+                                                       
+
+                                                        @foreach ($addressdata as $address)
+                                                        <div class="col-3">
+                                                            <div class="card mb-3 shadow-sm border-secondary">
+                                                                <div class="card-body">
+                                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                                        <h5 class="card-title fw-bold">{{ $address->address_type ?? "N/A" }}</h5>
+                                                                        @if ($address->default == 1)
+                                                                            <span class="badge bg-success">Default</span>
+                                                                        @endif
+                                                                    </div>
+                                                                    <p class="card-text mb-2">
+                                                                        <strong>Address:</strong> {{ $address->area ?? "N/A" }}<br>
+                                                                        <strong>City:</strong> {{ $address->city ?? "N/A" }}<br>
+                                                                        <strong>State:</strong> {{ $address->state ?? "N/A" }}<br>
+                                                                        <strong>Zip Code:</strong> {{ $address->pincode ?? "N/A" }}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        @endforeach
+
+                                                        
+                                                       
+                                                   
                                                 </div>
                                             </div>
                                         </div>

@@ -47,9 +47,20 @@ class FlowerOrderController extends Controller
                        ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address'])
                        ->orderBy('id', 'desc')
                        ->get();
-    
+
+        $totalOrders = Order::where('user_id', $userid)->count();
+        $ongoingOrders = Order::where('user_id', $userid)
+                          ->whereHas('subscription', function ($query) {
+                              $query->where('status', 'active'); // Adjust status value as needed
+                          })
+                          ->count();
+
+    // Total spend
+    $totalSpend = Order::where('user_id', $userid)->sum('total_price'); // Adjust column name if necessary
+
+  
         // Return the view with user and orders data
-        return view('admin.flower-order.show-customer-details', compact('user','addressdata', 'orders'));
+        return view('admin.flower-order.show-customer-details', compact('user','addressdata', 'orders','totalOrders', 'ongoingOrders', 'totalSpend'));
     }
     
 
