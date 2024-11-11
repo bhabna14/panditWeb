@@ -139,16 +139,16 @@
                               <p class="product-description">{{ Str::limit($product->description, 80, '...') }}</p>
                               <p class="product-price mb-3">₹ {{ number_format($product->price, 2) }}</p>
                               @if(Auth::guard('users')->check())
-                              <!-- User is logged in -->
-                              <a href="{{ route('checkout', ['product_id' => $product->id]) }}" class="btn btn-gradient w-100 mt-2">
-                                  Buy Now
-                              </a>
-                            @else
-                                <!-- User is not logged in -->
-                                <a href="{{ route('userlogin') }}" class="btn btn-gradient w-100 mt-2">
+                                <!-- User is logged in -->
+                                <a href="{{ route('checkout', ['product_id' => $product->product_id]) }}" class="btn btn-gradient w-100 mt-2">
                                     Buy Now
                                 </a>
-                            @endif
+                              @else
+                                  <!-- User is not logged in -->
+                                  <a href="{{route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
+                                      Buy Now
+                                  </a>
+                              @endif
                           
                           </div>
                       </div>

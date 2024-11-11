@@ -46,7 +46,9 @@ Route::get('/otplogin', [OtplessLoginController::class, 'otplogin'])->name('otpl
 Route::post('/send-otp-user', [OtplessLoginController::class, 'sendOtp']);
 Route::post('/verify-otp-user', [OtplessLoginController::class, 'verifyOtp']);
 
-
+Route::get('/admin/switcherpage', function () {
+    return view('admin.switcherpage');
+});
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');

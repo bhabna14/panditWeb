@@ -1289,4 +1289,22 @@ private function convertDurationToMinutes($durationString)
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     }
+
+
+ 
+    public function show($product_id)
+    {
+        // dd($product_id);
+        // Retrieve the product details by product_id
+        // $product = FlowerProduct::findOrFail($product_id);
+        
+        $product = FlowerProduct::where('product_id', $product_id)->firstOrFail();
+       
+        $user = Auth::guard('users')->user();
+        $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
+        // Pass the product and subscription details to the view
+        return view('user.flower-subscription-checkout', compact('product','addresses'));
+    }
+
+
 }
