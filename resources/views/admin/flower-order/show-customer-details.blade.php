@@ -99,7 +99,9 @@
                                 <div class="profile-tab tab-menu-heading border-bottom-0">
                                     <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0">
                                         {{-- <a class="nav-link mb-2 mt-2 active" data-bs-toggle="tab" href="#about">About</a> --}}
-                                        <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#order">Orders</a>
+                                        <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#order">Subscription Orders</a>
+                                        <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#requestorder">Request Orders</a>
+
                                         <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#address">Addresses</a>
                                     </nav>
                                 </div>
@@ -178,6 +180,93 @@
                                                                         <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>
                                                                     </td>
                                                                 </tr>
+                                                                @endforeach
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="main-content-body tab-pane border-top-0 " id="requestorder">
+                                    <div class="border-0">
+                                        <div class="main-content-body main-content-body-profile">
+                                            <div class="main-profile-body p-0">
+                                                <div class="row row-sm">
+                                                    <div class="col-12">
+                                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Request ID</th>
+                                                                   
+                                                                    <th>Delivery Date</th>
+                                                                  
+                                                                    <th>Flower Items</th>
+                                                                   
+                                                                    <th>Status</th>
+                                                                    <th>Price</th>
+                                                                    <th>Actions</th>
+                                                                    <th>Address</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @foreach($pendingRequests as $request)
+                                                                    <tr>
+                                                                        <td>{{ $request->request_id }} <br>
+                                                                            Name: {{ $request->user->name }} <br>
+                                                                            Number : {{ $request->user->mobile_number }}
+                                                                        </td>
+                                                                        
+                                                                        <td>{{ $request->date }} 
+                                                                           {{-- ( {{  \Carbon\Carbon::parse($request->date)->format('F j, Y') }} ) --}}
+                                                                        </td>
+                                                                        <td>
+                                                                            <ul>
+                                                                                @foreach ($request->flowerRequestItems as $item)
+                                                                                    <li>
+                                                                                        {{ $item->flower_name }} - {{ $item->flower_quantity }} {{ $item->flower_unit }}
+                                                                                    </li>
+                                                                                @endforeach
+                                                                            </ul>
+                                                                        </td>
+                                                                     
+                                                                        <td>@if ($request->status == 'pending')
+                                                                            <p>Order Placed <br> Update the Price</p>
+                                                                            @elseif($request->status == 'approved')
+                                                                            <p>Payment Pending</p>
+                                                                            @elseif($request->status == 'paid')
+                                                                            <p>Payment Completed</p>
+                                                                            @endif
+                                                                        </td>
+                                                                        <td>
+                                                                            @if($request->order && $request->order->total_price)
+                                                                                {{-- Display the saved price if it exists --}}
+                                                                                <span>{{ $request->order->total_price }} </span>
+                                                                            @else
+                                                                                {{-- Show the input box and save button if no price is set --}}
+                                                                                <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST" style="display: inline;">
+                                                                                    @csrf
+                                                                                    <input type="number" name="price" class="form-control" placeholder="Enter Price" required>
+                                                                                    <button type="submit" class="btn btn-primary mt-2">Save</button>
+                                                                                </form>
+                                                                            @endif
+                                                                        </td>
+                                                                        
+                                                                        <td>
+                                                                            <form action="{{ route('admin.markPayment', $request->request_id) }}" method="POST" style="display: inline;">
+                                                                                @csrf
+                                                                                <button type="submit" class="btn btn-success mt-2" {{ $request->status === 'paid' ? 'disabled' : '' }}>Paid</button>
+                                                                            </form>
+                                                                        </td>
+                                                                        <td>
+                                                                            <strong>Address:</strong> {{ $request->address->area ?? "" }}<br>
+                                                                            <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
+                                                                            <strong>State:</strong> {{ $request->address->state ?? ""}}<br>
+                                                                            <strong>Zip Code:</strong> {{ $request->address->pincode ?? "" }}
+                                                                        </td>
+                                                                    </tr>
                                                                 @endforeach
                                                             </tbody>
                                                         </table>

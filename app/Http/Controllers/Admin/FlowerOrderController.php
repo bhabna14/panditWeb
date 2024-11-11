@@ -58,6 +58,23 @@ class FlowerOrderController extends Controller
     ->get();
 
 
+    $pendingRequests = FlowerRequest::whereHas('order', function ($query) use ($userid) {
+        // Match user_id in the order table
+        $query->where('user_id', $userid);
+    })
+    ->with([
+        'order' => function ($query) {
+            $query->with('flowerPayments');
+        },
+        'flowerProduct',
+        'user',
+        'address',
+        'flowerRequestItems'  // Eager load flowerRequestItems
+    ])
+    ->orderBy('id', 'desc')
+    ->get();
+
+
         $totalOrders = Order::where('user_id', $userid)->count();
         $ongoingOrders = Order::where('user_id', $userid)
                           ->whereHas('subscription', function ($query) {
@@ -70,7 +87,7 @@ class FlowerOrderController extends Controller
 
   
         // Return the view with user and orders data
-        return view('admin.flower-order.show-customer-details', compact('user','addressdata', 'orders','totalOrders', 'ongoingOrders', 'totalSpend'));
+        return view('admin.flower-order.show-customer-details', compact('user','addressdata','pendingRequests', 'orders','totalOrders', 'ongoingOrders', 'totalSpend'));
     }
     
 
@@ -85,23 +102,7 @@ class FlowerOrderController extends Controller
     }
     
 
-public function showRequestOrders()
-{
-    // Retrieve all FlowerRequest records with their associated orders and flower payments
-    $requestedOrders = FlowerRequest::with([
-        'order' => function ($query) {
-            $query->with('flowerPayments');
-        },
-        'flowerProduct',
-        'user',
-        'address'
-    ])
-    ->orderBy('id', 'asc')
-    ->get();
 
-    // Pass all requested orders to the view
-    return view('admin.flower-order.manage-request-orders', compact('requestedOrders'));
-}
 public function showActiveSubscriptions()
 {
     $activeSubscriptions = Subscription::where('status', 'active')
