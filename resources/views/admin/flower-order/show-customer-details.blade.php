@@ -206,7 +206,7 @@
                                                                     <th>Flower Items</th>
                                                                    
                                                                     <th>Status</th>
-                                                                    <th>Price</th>
+                                                                   
                                                                     <th>Actions</th>
                                                                     <th>Address</th>
                                                                 </tr>
@@ -240,25 +240,10 @@
                                                                             <p>Payment Completed</p>
                                                                             @endif
                                                                         </td>
-                                                                        <td>
-                                                                            @if($request->order && $request->order->total_price)
-                                                                                {{-- Display the saved price if it exists --}}
-                                                                                <span>{{ $request->order->total_price }} </span>
-                                                                            @else
-                                                                                {{-- Show the input box and save button if no price is set --}}
-                                                                                <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST" style="display: inline;">
-                                                                                    @csrf
-                                                                                    <input type="number" name="price" class="form-control" placeholder="Enter Price" required>
-                                                                                    <button type="submit" class="btn btn-primary mt-2">Save</button>
-                                                                                </form>
-                                                                            @endif
-                                                                        </td>
+                                                                        
                                                                         
                                                                         <td>
-                                                                            <form action="{{ route('admin.markPayment', $request->request_id) }}" method="POST" style="display: inline;">
-                                                                                @csrf
-                                                                                <button type="submit" class="btn btn-success mt-2" {{ $request->status === 'paid' ? 'disabled' : '' }}>Paid</button>
-                                                                            </form>
+                                                                           {{$request->status}}
                                                                         </td>
                                                                         <td>
                                                                             <strong>Address:</strong> {{ $request->address->area ?? "" }}<br>
