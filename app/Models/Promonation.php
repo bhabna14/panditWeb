@@ -9,5 +9,5 @@ class Promonation extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['promonation_image', 'date', 'description', 'status'];
+    protected $fillable = ['promonation_image', 'date','promo_heading' ,'description', 'status'];
 }

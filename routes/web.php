@@ -5,6 +5,8 @@ use App\Http\Controllers\User\userController;
 use App\Http\Controllers\User\FlowerUserBookingController;
 
 use App\Http\Controllers\User\PaymentController;
+use App\Http\Controllers\User\FlowerRegistrationController;
+
 use App\Http\Controllers\OtplessLoginController;
 
 
@@ -57,6 +59,16 @@ Route::get('/admin/switcherpage', function () {
 ## flowerregistration
 Route::controller(FlowerRegistrationController::class)->group(function() {
     Route::get('/flower-registration', 'flowerregistration')->name('flowerregistration');
+    Route::post('/send-otp-flower', 'sendOtpflower');
+    Route::post('/verify-otp-flower', 'verifyOtpflower');
+});
+Route::group(['middleware' => ['auth:users']], function () {
+    Route::controller(FlowerRegistrationController::class)->group(function() {
+
+    Route::get('/flower/address', 'floweruseraddress')->name('floweruseraddress');
+    Route::post('/flowersaveaddress', 'flowersaveaddress')->name('flowersaveaddress');
+    
+    });
 });
 ## user login
 Route::controller(userController::class)->group(function() {
@@ -111,10 +123,12 @@ Route::controller(FlowerUserBookingController::class)->group(function() {
 
 });
 //user middleware routes
+
 Route::group(['middleware' => ['auth:users']], function () {
         Route::controller(userController::class)->group(function() {
 
         Route::get('/user-dashboard', 'userdashboard')->name('userdashboard');
+        
         Route::get('/manage-address', 'mngaddress')->name('mngaddress');
         Route::get('/address/set-default/{id}', 'setDefault')->name('setDefaultAddress');
 
