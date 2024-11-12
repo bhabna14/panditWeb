@@ -17,7 +17,7 @@ class PujaController extends Controller
     public function homepage() {
 
         // Get  all banners 
-        $banners = AppBanner::all();
+        $banners = AppBanner::where('category', 'pandit')->get();
         foreach ($banners as $banner) {
             $banner->banner_img_url = asset('uploads/banner/' . $banner->banner_img);
         }
