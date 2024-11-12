@@ -21,6 +21,8 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\FlowerRequestController;
 use App\Http\Controllers\Admin\FlowerOrderController;
 use App\Http\Controllers\Admin\LocalityController;
+use App\Http\Controllers\Admin\PromonationController;
+
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -320,6 +322,15 @@ Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name(
         Route::get('/editlocality/{id}', 'editLocality')->name('editlocality');
         Route::post('/updatelocality/{id}', 'updateLocality')->name('updatelocality');
         Route::delete('/deletelocality/{id}', 'deleteLocality')->name('deletelocality');
+    });
+
+    Route::controller(PromonationController::class)->group(function() {
+        Route::get('/manage-promonation', 'managepromonation')->name('admin.managepromonation');
+        Route::get('/add-promonation', 'addpromonation')->name('admin.addpromonation');
+        Route::post('/savepromonation', 'savepromonation')->name('savepromonation');
+        Route::get('/editpromonation/{id}', 'editpromonation')->name('editpromonation');
+        Route::post('/updatepromonation/{id}', 'updatepromonation')->name('updatepromonation');
+        Route::delete('/deletepromonation/{id}', 'deletepromonation')->name('deletepromonation');
     });
 
 

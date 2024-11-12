@@ -351,12 +351,19 @@ public function deletePhoto()
     {
         $localities = Locality::where('status', 'active')->get();
         return response()->json([
-            'success' => true,
+            'success' => 200,
             'data' => $localities,
         ], 200);
     }
     
-    
+    public function managepromonation()
+    {
+        $promonations = Promonation::where('status', 'active')->get();
+        return response()->json([
+            'status' => 200,
+            'data' => $promonations
+        ], 200);
+    }
     public function manageAddress(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
@@ -489,19 +496,19 @@ public function deletePhoto()
                 $address->save();
     
                 return response()->json([
-                    'success' => true,
+                    'success' => 200,
                     'message' => 'Address updated successfully.',
                     'address' => $address
                 ], 200);
             } else {
                 return response()->json([
-                    'success' => false,
+                    'success' => 404,
                     'message' => 'Address not found.'
                 ], 404);
             }
         } catch (\Exception $e) {
             return response()->json([
-                'success' => false,
+                'success' => 500,
                 'message' => 'Failed to update the address. Error: ' . $e->getMessage()
             ], 500);
         }
