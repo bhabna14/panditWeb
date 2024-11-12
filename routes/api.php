@@ -176,7 +176,7 @@ Route::middleware('auth:sanctum')->post('/booking/cancel/{booking_id}', [Booking
 Route::middleware('auth:sanctum')->get('/mngaddress', [UserProfileController::class, 'manageAddress']);
 Route::get('/localities', [UserProfileController::class, 'getActiveLocalities']);
 
-Route::get('/promonations',  'managepromonation')->name('api.managepromonations');
+Route::get('/promonations', [UserProfileController::class, 'managepromonation'])->name('api.managepromonations');
 Route::middleware('auth:sanctum')->post('/saveaddress', [UserProfileController::class, 'saveAddress']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/update-address', [UserProfileController::class, 'updateAddress']);
