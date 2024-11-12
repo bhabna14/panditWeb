@@ -102,13 +102,13 @@
       <div id="homeBannerCarousel" class="owl-carousel owl-theme">
         <!-- Banner Image Item -->
         <div class="item">
-          <img src="{{asset('images/flower_banner1.png')}}" alt="Home Banner" class="img-fluid d-block w-100">
+          <img src="{{asset('images/4.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
         </div>
         <div class="item">
-          <img src="{{asset('images/flower_banner2.png')}}" alt="Home Banner" class="img-fluid d-block w-100">
+          <img src="{{asset('images/2.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
         </div>
         <div class="item">
-          <img src="{{asset('images/flower_banner1.png')}}" alt="Home Banner" class="img-fluid d-block w-100">
+          <img src="{{asset('images/1.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
         </div>
         <!-- You can add more images here by copying the above block -->
       </div>
@@ -205,62 +205,6 @@
         </div>
     </section>
 
- 
-  
-   
-   
-
-    <section class="special-pooja-bg layout-pt-md layout-pb-md">
-        <div class="container">
-            <div data-anim="" data-aos="fade-up" data-aos-delay="500" class="row y-gap-20 justify-between items-end">
-                <div class="col-auto">
-                    <div class="sectionTitle -md">
-                        <h2 class="sectionTitle__title">Customized Pujas</h2>
-                        <p class=" sectionTitle__text mt-5 sm:mt-0 text-white">Elevate your spiritual journey with our special pujas, conducted by experienced pandits for auspicious occasions.</p>
-                    </div>
-                </div>
-
-                <div class="col-auto md:d-none">
-
-                    <a href="{{ url('pooja-list')}}" class="button -md -blue-1 all-ppja-btn">
-                        View All Pooja <div class="icon-arrow-top-right ml-15"></div>
-                    </a>
-
-                </div>
-            </div>
-
-            <div class = "row" data-aos="fade-up" data-aos-delay="500">
-                @foreach ($otherpoojas as $otherpooja)
-                <div class="col-md-4 pandit-card">
-                    <a href="{{ route('pooja.show', $otherpooja->slug) }}"> 
-                        <div class="card" data-state="#pooja">
-                            <div class="card-header">
-                                <img class="card-pooja" src="{{ asset('assets/img/'.$otherpooja->pooja_photo) }}" alt="image">
-                            </div>
-                            <div class="pooja-head">
-                                <h5>{{$otherpooja->pooja_name}}</h5>
-                                <div class="pooja-description">
-                                  <p class="short-description">{{ Str::limit($otherpooja->short_description, 150, '...') }}</p>
-                                  {{-- <p class="full-description" style="display:none;">{{ $otherpooja->short_description }}</p>
-                                  <a href="javascript:void(0);" class="read-more-toggle">Read more</a> --}}
-                                </div>
-                                <div style="text-align: center">
-                                    {{-- <h6>(12-03-2024)</h6> --}}
-                                </div>
-                                {{-- <button class="contact-me">Book Now</button> --}}
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                @endforeach
-              
-            </div>
-
-           
-        </div>
-    </section>
-
- 
 
 
     <section class="testimonial-bg">
@@ -329,7 +273,7 @@
                       </div> --}}
   
                       <div class="col-auto">
-                        <div class="text-15 fw-500 lh-14">Barsa Das</div>
+                        <div class="text-15 fw-500 lh-14">Swati Das</div>
                         {{-- <div class="text-14 lh-14 text-light-1 mt-5">Web Designer</div> --}}
                       </div>
                     </div>
