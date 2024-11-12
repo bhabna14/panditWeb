@@ -56,6 +56,10 @@ Route::get('/admin/switcherpage', function () {
 });
 ## user login
 Route::controller(userController::class)->group(function() {
+    Route::get('/flower-registration', 'flowerregistration')->name('user-register');
+});
+## user login
+Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');

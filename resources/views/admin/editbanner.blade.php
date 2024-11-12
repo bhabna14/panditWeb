@@ -52,11 +52,21 @@
                        
                         <div class="row">
                             
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Banner Imgae</label>
                                     <input type="file" class="form-control" id="banner_img" name="banner_img">
                                     <img src="{{ asset('uploads/banner/' . $banner->banner_img) }}" alt="{{ $banner->name }} Image" width="100">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="category">Category <span style="color:red">*</span></label>
+                                    <select name="category" id="category" class="form-control">
+                                        <option value="podcast" {{ $banner->category == 'podcast' ? 'selected' : '' }}>Podcast</option>
+                                        <option value="flower" {{ $banner->category == 'flower' ? 'selected' : '' }}>Flower</option>
+                                        <option value="pandit" {{ $banner->category == 'pandit' ? 'selected' : '' }}>Pandit</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>

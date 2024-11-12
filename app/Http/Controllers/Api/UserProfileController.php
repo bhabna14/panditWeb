@@ -423,7 +423,7 @@ public function deletePhoto()
         return response()->json([
             'success' => 200,
             'message' => 'Address created successfully'
-        ], 201);
+        ], 200);
     } catch (\Exception $e) {
         // Handle any errors that occur during the save operation
         return response()->json([
