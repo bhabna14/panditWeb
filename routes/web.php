@@ -54,9 +54,9 @@ Route::post('/verify-otp-user', [OtplessLoginController::class, 'verifyOtp']);
 Route::get('/admin/switcherpage', function () {
     return view('admin.switcherpage');
 });
-## user login
-Route::controller(userController::class)->group(function() {
-    Route::get('/flower-registration', 'flowerregistration')->name('user-register');
+## flowerregistration
+Route::controller(FlowerRegistrationController::class)->group(function() {
+    Route::get('/flower-registration', 'flowerregistration')->name('flowerregistration');
 });
 ## user login
 Route::controller(userController::class)->group(function() {

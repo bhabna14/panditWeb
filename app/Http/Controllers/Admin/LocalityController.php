@@ -34,7 +34,7 @@ class LocalityController extends Controller
         Locality::create([
             'locality_name' => $request->locality_name,
             'pincode' => $request->pincode,
-            'unique_code' => $uniqueCode,
+            'unique_code' => $newCode,
             'status' => 'active',
         ]);
 
