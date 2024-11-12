@@ -26,10 +26,9 @@ class LocalityController extends Controller
         // Generate a unique code
         // $uniqueCode = uniqid('loc_');
          // Generate a unique 3-digit code
-    do {
-        $uniqueCode = str_pad(mt_rand(1, 999), 3, '0', STR_PAD_LEFT);
-    } while (Locality::where('unique_code', $uniqueCode)->exists());
-
+         $lastLocality = Locality::orderBy('id', 'desc')->first();
+         $lastCode = $lastLocality ? intval($lastLocality->unique_code) : 0;
+         $newCode = str_pad($lastCode + 1, 3, '0', STR_PAD_LEFT);
 
         // Save the data
         Locality::create([
