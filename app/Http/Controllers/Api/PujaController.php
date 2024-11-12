@@ -68,6 +68,7 @@ class PujaController extends Controller
                 'banner_img' => $banner->banner_img,
                 'title_text' => $banner->title_text,
                 'alt_text' => $banner->alt_text,
+                'category' => $banner->category,
                 'created_at' => $banner->created_at,
                 'updated_at' => $banner->updated_at,
                 
@@ -106,7 +107,22 @@ class PujaController extends Controller
             'data' => $data
         ], 200);
     }
+    public function manageAppBanner()
+    {
+        // Fetch all app banners
+        $banners = AppBanner::all();
 
+        // Optionally, add the full URL for the banner image
+        foreach ($banners as $banner) {
+            $banner->banner_img_url = asset('uploads/banner/' . $banner->banner_img); // Assuming banner_img is the field for the image name
+        }
+
+        // Return the banners in a JSON response
+        return response()->json([
+            'status' => 200,
+            'data' => $banners
+        ], 200);
+    }
 
 
     public function poojalists(){
