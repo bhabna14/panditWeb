@@ -462,52 +462,51 @@ public function deletePhoto()
 
     public function updateAddress(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:user_addresses,id',
-            // 'fullname' => 'required|string|max:255',
-            // 'number' => 'required|string|max:15',
-            'country' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'pincode' => 'required|string|max:10',
-            'area' => 'required|string|max:255',
-            'address_type' => 'required|string|max:255'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+        $user = Auth::guard('api')->user();
+    
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
         }
-
-        $address = UserAddress::find($request->id);
-
-        if ($address) {
-            // $address->fullname = $request->fullname;
-            // $address->number = $request->number;
-            $address->country = $request->country;
-            $address->state = $request->state;
-            $address->city = $request->city;
-            $address->pincode = $request->pincode;
-            $address->area = $request->area;
-            $address->address_type = $request->address_type;
-            $address->status = 'active';
-            // $addressdata->default = '0';
-            $address->save();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Address updated successfully.',
-                'address' => $address
-            ], 200);
-        } else {
+    
+        try {
+            $address = UserAddress::find($request->id);
+    
+            if ($address) {
+                // Update address fields
+                $address->country = $request->country;
+                $address->state = $request->state;
+                $address->city = $request->city;
+                $address->pincode = $request->pincode;
+                $address->area = $request->area;
+                $address->address_type = $request->address_type;
+                $address->locality = $request->locality;
+                $address->place_category = $request->place_category;
+                $address->apartment_flat_plot = $request->apartment_flat_plot;
+                $address->landmark = $request->landmark;
+                $address->status = 'active';
+    
+                // Save the updated address
+                $address->save();
+    
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Address updated successfully.',
+                    'address' => $address
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Address not found.'
+                ], 404);
+            }
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Address not found.'
-            ], 404);
+                'message' => 'Failed to update the address. Error: ' . $e->getMessage()
+            ], 500);
         }
     }
+    
     public function combinedSearch(Request $request)
     {
         $searchTerm = $request->input('searchTerm');
