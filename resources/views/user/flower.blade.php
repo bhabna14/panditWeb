@@ -136,7 +136,7 @@
                           </div>
                           <div class="card-body text-center">
                               <h5 class="product-title">{{ $product->name }}</h5>
-                              <p class="product-description">{{ Str::limit($product->description, 80, '...') }}</p>
+                              <p class="product-description">{{ $product->description }}</p>
                               <p class="product-price mb-3">₹ {{ number_format($product->price, 2) }}</p>
                               @if(Auth::guard('users')->check())
                                 <!-- User is logged in -->

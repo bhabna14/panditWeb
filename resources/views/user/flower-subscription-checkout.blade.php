@@ -128,7 +128,9 @@
             <div class="col-md-7">
                 <form action="{{ route('booking.flower.subscription') }}" method="POST" id="bookingForm">
                     @csrf
-
+                    <input type="hidden" name="duration" value="{{ $product->duration }}">
+                    <input type="hidden" name="price" value="{{ $product->price }}">
+                    <input type="hidden" name="product_id" value="{{ $product->product_id }}">
                     @if(!$addresses->isEmpty())
                     <div class="row">
                         <div class="form-input mt-20 col-md-12">
@@ -185,7 +187,7 @@
                                 {{-- <input type="hidden" class="form-control" name="product_id" value="{{ $product_id }}"> --}}
                                 
                                 <div class="text-16 lh-15 mt-5 fw-600">
-                                    Total Fee: ₹{{ sprintf('%.2f', $product->total_price) }}
+                                    Total Fee: ₹{{ sprintf('%.2f', $product->price) }}
                                 </div>
                             </div>
                         </div>
@@ -194,7 +196,7 @@
             </div>
         </div>
     </div>
-  </section>
+</section>
 
   
 <div id="addressModal" class="modal">
@@ -313,5 +315,55 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
 
 
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('payButton').onclick = function(e) {
+        e.preventDefault();
+    
+        console.log('Pay button clicked. Initializing Razorpay...');
+        var amount = {{ ($product->price) * 100 }}; // Amount in paise
+    
+        var options = {
+            "key": "{{ config('services.razorpay.key') }}",
+            "amount": amount,
+            "name": "33 Flower",
+            "description": "",
+            "image": "{{ asset('front-assets/img/brand/logo.png') }}",
+            "handler": function(response) {
+                console.log('Payment handler triggered.');
+                console.log('Payment ID:', response.razorpay_payment_id);
+    
+                // Check if the form exists and add hidden input for payment ID
+                var form = document.getElementById('bookingForm');
+                if (form) {
+                    console.log('Form found. Appending payment ID...');
+                    form.appendChild(createHiddenInput('razorpay_payment_id', response.razorpay_payment_id));
+                    console.log('Submitting form...');
+                    form.submit();
+                } else {
+                    console.error('Form not found!');
+                }
+            },
+            "prefill": {
+                "name": "{{ $user->name }}",
+                "contact": "{{ $user->phone_number }}"
+            },
+            "theme": {
+                "color": "#F37254"
+            }
+        };
+    
+        var rzp1 = new Razorpay(options);
+        console.log('Opening Razorpay checkout...');
+        rzp1.open();
+    };
+    
+    function createHiddenInput(name, value) {
+        var input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = name;
+        input.value = value;
+        return input;
+    }
+    </script>
 @endsection

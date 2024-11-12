@@ -57,22 +57,7 @@ class userController extends Controller
                         ->get();
         return view("user/index" , compact('upcomingPoojas','otherpoojas','pandits'));
     }
-    public function flower(){
-        $upcomingPoojas = Poojalist::where('status', 'active')
-                        ->where('pooja_date', '>=', now())
-                        ->orderBy('pooja_date', 'asc')
-                        ->take(3)
-                        ->get();
-        $otherpoojas = Poojalist::where('status', 'active')
-                        ->where(function($query) {
-                            $query->whereNull('pooja_date');
-                         })
-                        ->take(9)
-                        ->get();
-        $products = FlowerProduct::where('status', 'active')
-        ->where('category','Subscription')->get();
-        return view("user/flower" , compact('upcomingPoojas','otherpoojas','products'));
-    }
+   
 
     // public function userlogin(){
     //     return view("login");
@@ -1292,19 +1277,7 @@ private function convertDurationToMinutes($durationString)
 
 
  
-    public function show($product_id)
-    {
-        // dd($product_id);
-        // Retrieve the product details by product_id
-        // $product = FlowerProduct::findOrFail($product_id);
-        
-        $product = FlowerProduct::where('product_id', $product_id)->firstOrFail();
-       
-        $user = Auth::guard('users')->user();
-        $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
-        // Pass the product and subscription details to the view
-        return view('user.flower-subscription-checkout', compact('product','addresses'));
-    }
+
 
 
 }
