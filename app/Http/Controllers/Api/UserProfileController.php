@@ -360,6 +360,14 @@ public function deletePhoto()
     public function managepromonation()
     {
         $promonations = Promonation::where('status', 'active')->get();
+
+        // Map the image field to include the full URL
+        $promonations->transform(function($promonation) {
+            // Assuming 'promonation_image' is the field that contains the image filename
+            $promonation->promonation_image = url('images/promonations/' . $promonation->promonation_image);
+            return $promonation;
+        });
+
         return response()->json([
             'status' => 200,
             'data' => $promonations
