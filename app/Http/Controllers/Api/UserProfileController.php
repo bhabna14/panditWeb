@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Locality;
+use App\Models\Promonation;
 
 use App\Models\Profile;
 use App\Models\Rating;
