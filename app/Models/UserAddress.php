@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Locality;
 class UserAddress extends Model
 {
     use HasFactory;
@@ -25,5 +25,9 @@ class UserAddress extends Model
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'address_id', 'id');
+    }
+    public function localityDetails()
+    {
+        return $this->belongsTo(Locality::class, 'locality', 'unique_code');
     }
 }

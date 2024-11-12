@@ -376,23 +376,25 @@ public function deletePhoto()
     public function manageAddress(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
-
+    
         if (!$user) {
             return response()->json(['message' => 'User not authenticated'], 401);
         }
-
-        // Fetch managed addresses for the user
+    
+        // Fetch managed addresses for the user with locality details
         $addressData = UserAddress::where('user_id', $user->userid)
-        ->where('status', 'active')
-        ->orderBy('id', 'desc')
-        ->get();
-
+            ->where('status', 'active')
+            ->with('localityDetails') // Eager load the localityDetails relationship
+            ->orderBy('id', 'desc')
+            ->get();
+    
         return response()->json([
             'success' => 200,
             'message' => 'Address fetched successfully.',
             'addressData' => $addressData
         ], 200);
     }
+    
    public function saveAddress(Request $request)
 {
     $user = Auth::guard('api')->user();
