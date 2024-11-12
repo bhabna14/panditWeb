@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\YoutubeController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\FlowerRequestController;
 use App\Http\Controllers\Admin\FlowerOrderController;
+use App\Http\Controllers\Admin\LocalityController;
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -311,6 +312,17 @@ Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name(
         Route::post('/updatebanner/{id}', 'updatebanner')->name('updatebanner');
         Route::get('/deletebanner/{id}', 'deletebanner')->name('deletebanner');
     });
+
+    Route::controller(LocalityController::class)->group(function() {
+        Route::get('/manage-locality', 'managelocality')->name('admin.managelocality');
+        Route::get('/add-locality', 'addlocality')->name('admin.addlocality');
+        Route::post('/savelocality', 'savelocality')->name('savelocality');
+        Route::get('/editlocality/{id}', 'editLocality')->name('editlocality');
+        Route::post('/updatelocality/{id}', 'updateLocality')->name('updatelocality');
+        Route::delete('/deletelocality/{id}', 'deleteLocality')->name('deletelocality');
+    });
+
+
     Route::controller(YoutubeController::class)->group(function() {
         Route::get('/youtube', 'youTube')->name('youTube');
         Route::post('/save-youtube-url', 'store')->name('saveYoutubeUrl');

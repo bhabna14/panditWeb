@@ -174,7 +174,7 @@ Route::middleware('auth:sanctum')->post('/process-remaining-payment/{booking_id}
 Route::middleware('auth:sanctum')->post('/booking/cancel/{booking_id}', [BookingController::class, 'cancelBooking']);
 
 Route::middleware('auth:sanctum')->get('/mngaddress', [UserProfileController::class, 'manageAddress']);
-
+Route::get('/localities', [UserProfileController::class, 'getActiveLocalities']);
 Route::middleware('auth:sanctum')->post('/saveaddress', [UserProfileController::class, 'saveAddress']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/update-address', [UserProfileController::class, 'updateAddress']);

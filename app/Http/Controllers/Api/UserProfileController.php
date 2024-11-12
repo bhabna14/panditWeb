@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Locality;
 
 use App\Models\Profile;
 use App\Models\Rating;
@@ -346,7 +347,15 @@ public function deletePhoto()
             'success' => 200,
             'message' => 'No photo found for deletion'], 404);
     }
-
+    public function getActiveLocalities()
+    {
+        $localities = Locality::where('status', 'active')->get();
+        return response()->json([
+            'success' => true,
+            'data' => $localities,
+        ], 200);
+    }
+    
     
     public function manageAddress(Request $request)
     {
@@ -368,49 +377,46 @@ public function deletePhoto()
             'addressData' => $addressData
         ], 200);
     }
-    public function saveAddress(Request $request)
-    {
-        $user = Auth::guard('api')->user();
+   public function saveAddress(Request $request)
+{
+    $user = Auth::guard('api')->user();
 
-        if (!$user) {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
+    if (!$user) {
+        return response()->json(['message' => 'User not authenticated'], 401);
+    }
 
-        // Validate request data (optional but recommended)
-        $validatedData = $request->validate([
-            // 'fullname' => 'required|string|max:255',
-            // 'number' => 'required|string|max:20',
-            'country' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'pincode' => 'required|string|max:10',
-            'area' => 'required|string|max:255',
-            'address_type' => 'required|string|max:50',
-        ]);
-
+    try {
         // Create new UserAddress instance and populate data
         $addressData = new UserAddress();
         $addressData->user_id = $user->userid;
-        // $addressData->fullname = $validatedData['fullname'];
-        // $addressData->number = $validatedData['number'];
-        $addressData->country = $validatedData['country'];
-        $addressData->state = $validatedData['state'];
-        $addressData->city = $validatedData['city'];
-        $addressData->pincode = $validatedData['pincode'];
-        $addressData->area = $validatedData['area'];
-        $addressData->address_type = $validatedData['address_type'];
+        $addressData->country = $request->input('country');
+        $addressData->state = $request->input('state');
+        $addressData->city = $request->input('city');
+        $addressData->pincode = $request->input('pincode');
+        $addressData->area = $request->input('area');
+        $addressData->address_type = $request->input('address_type');
+        $addressData->locality = $request->input('locality');
+        $addressData->place_category = $request->input('place_category');
+        $addressData->apartment_flat_plot = $request->input('apartment_flat_plot');
+        $addressData->landmark = $request->input('landmark');
         $addressData->status = 'active';
-        // $addressdata->default = '0';
 
-        // Save the address
+        // Attempt to save the address
         $addressData->save();
 
         return response()->json([
             'success' => 200,
             'message' => 'Address created successfully'
-            ]
-            , 201);
+        ], 201);
+    } catch (\Exception $e) {
+        // Handle any errors that occur during the save operation
+        return response()->json([
+            'error' => 500,
+            'message' => 'Failed to save the address. Error: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 
     // public function removeAddress($id)
     // {
