@@ -18,7 +18,7 @@ class PodcastController extends Controller
     public function podcasts()
     {
         //
-        $podcasts = Podcast::where('status', 'active')->orderBy('created_at', 'desc')->get();
+        $podcasts = Podcast::where('status', 'active')->orderBy('id', 'desc')->get();
         foreach ($podcasts as $podcast) {
             $podcast->image_url = asset('storage/' . $podcast->image);
             $podcast->music_url = asset('storage/' . $podcast->music);
