@@ -31,7 +31,7 @@
     z-index: -1;  /* Place overlay behind the form */
 }
             </style>
-                    <style>
+                    {{-- <style>
                         .form-group label {
                             font-size: 1.1rem;
                         }
@@ -122,7 +122,7 @@
                             }
                         }
                     </style>
-            
+             --}}
  
     @endsection
 
@@ -138,21 +138,21 @@
                 <div class="container mt-5">
                     <div class="row justify-content-center" >
                         <div class="col-lg-8 col-md-10">
-                            <div class="card shadow-lg border-0 position-relative animate-card" style="border-radius: 20px; overflow: hidden;">
-                                <!-- Decorative flower images with animations -->
-                                <img src="https://pandit.33crores.com/images/DSC_2140-removebg-preview.png" alt="Flower" class="flower-animation" style="position: absolute; top: -20px; left: -20px; height: 120px; z-index: 1; opacity: 0.9;">
-                                <img src="https://pandit.33crores.com/images/DSC_2177-removebg-preview.png" alt="Flower" class="flower-animation" style="position: absolute; top: -20px; right: -20px; height: 120px; z-index: 1; opacity: 0.9;">
-                                <img src="https://pandit.33crores.com/images/DSC_2140-removebg-preview.png" alt="Flower" class="flower-animation" style="position: absolute; bottom: -20px; left: -20px; height: 120px; z-index: 1; opacity: 0.9;">
-                                <img src="https://pandit.33crores.com/images/DSC_2177-removebg-preview.png" alt="Flower" class="flower-animation" style="position: absolute; bottom: -20px; right: -20px; height: 120px; z-index: 1; opacity: 0.9;">
+                            <div class="card border-0 shadow-lg" style="border-radius: 15px; overflow: hidden; background: #ffffff; position: relative;">
+                                <!-- Decorative flower images for corners -->
+                                <img src="https://pandit.33crores.com/images/DSC_2140-removebg-preview.png" alt="Flower" class="corner-flower" style="position: absolute; top: -20px; left: -20px; height: 80px; z-index: 1; opacity: 0.7;">
+                                <img src="https://pandit.33crores.com/images/DSC_2177-removebg-preview.png" alt="Flower" class="corner-flower" style="position: absolute; top: -20px; right: -20px; height: 80px; z-index: 1; opacity: 0.7;">
+                                <img src="https://pandit.33crores.com/images/DSC_2140-removebg-preview.png" alt="Flower" class="corner-flower" style="position: absolute; bottom: -20px; left: -20px; height: 80px; z-index: 1; opacity: 0.7;">
+                                <img src="https://pandit.33crores.com/images/DSC_2177-removebg-preview.png" alt="Flower" class="corner-flower" style="position: absolute; bottom: -20px; right: -20px; height: 80px; z-index: 1; opacity: 0.7;">
                     
-                                <div class="card-header text-center animate-header" style="background-color: #fff; border-bottom: 2px solid #f3d2c1;">
-                                    <img src="{{ asset('assets/img/brand/logo.png') }}" alt="logo" style="height: 60px;">
-                                    <h3 class="mt-2" style="color: #d9534f; font-weight: bold;">Join Our Flower Campaign</h3>
+                                <div class="card-header text-center" style="background-color: #fff; padding: 20px; border-bottom: 1px solid #000;">
+                                    <img src="{{ asset('assets/img/brand/logo.png') }}" alt="logo" style="height: 50px; margin-bottom: 10px;">
+                                    <h3 class="mt-2" style="color: #000; font-weight: 600; font-family: 'Merriweather', serif;">Join Our Exclusive Flower Campaign</h3>
                                 </div>
                     
-                                <div class="card-body p-4" style="background: #fff; border-radius: 0 0 20px 20px;">
+                                <div class="card-body p-5" style="background: #ffffff;">
                                     @if ($errors->any())
-                                        <div class="alert alert-danger animate-alert">
+                                        <div class="alert alert-danger" style="font-size: 0.9rem; margin-bottom: 20px;">
                                             <ul>
                                                 @foreach ($errors->all() as $error)
                                                     <li>{{ $error }}</li>
@@ -163,36 +163,110 @@
                     
                                     <form action="" method="POST">
                                         @csrf
-                                        <!-- Name Field -->
-                                        <div class="form-group mb-4">
-                                            <label class="form-label" style="color: #b53c2f; font-weight: bold;">Name</label>
-                                            <input type="text" name="name" class="form-control" placeholder="Enter your name" required style="border: 1px solid #f5b7a9; border-radius: 8px;">
+                                         <!-- Name Field -->
+                                      <!-- Input Field Template -->
+                                        <div class="form-group mb-3 input-container">
+                                            <div class="input-icon-container">
+                                                <i class="fas fa-user icon"></i>
+                                                <input type="text" name="name" class="form-control single-line-input animated-input" placeholder="Name" required>
+                                            </div>
                                         </div>
-                    
-                                        <!-- Number Field -->
-                                        <div class="form-group mb-4">
-                                            <label class="form-label" style="color: #b53c2f; font-weight: bold;">Number</label>
-                                            <input type="tel" name="number" class="form-control" placeholder="Enter your mobile number" required style="border: 1px solid #f5b7a9; border-radius: 8px;">
+
+                                        <div class="form-group mb-3 input-container">
+                                            <div class="input-icon-container">
+                                                <i class="fas fa-phone-alt icon"></i>
+                                                <input type="tel" name="number" class="form-control single-line-input animated-input" placeholder="Mobile Number" required>
+                                            </div>
                                         </div>
+
                     
                                         <!-- OTP Field -->
                                         <div class="form-group mb-4">
-                                            <label class="form-label" style="color: #b53c2f; font-weight: bold;">OTP</label>
-                                            <input type="text" name="otp" class="form-control" placeholder="Enter OTP" required style="border: 1px solid #f5b7a9; border-radius: 8px;">
+                                            <label class="form-label" style="color: #000; font-weight: 500;">OTP</label>
+                                            <input type="text" name="otp" class="form-control" placeholder="Enter OTP" required style="border-radius: 8px; border: 1px solid #a89c9c; padding: 10px;">
                                         </div>
                     
                                         <!-- Apartment / Flat No. Field -->
                                         <div class="form-group mb-4">
-                                            <label class="form-label" style="color: #b53c2f; font-weight: bold;">Apartment / Flat No.</label>
-                                            <input type="text" name="apartment" class="form-control" placeholder="Enter your apartment/flat number" required style="border: 1px solid #f5b7a9; border-radius: 8px;">
+                                            <label class="form-label" style="color: #000; font-weight: 500;">Apartment / Flat No.</label>
+                                            <input type="text" name="apartment" class="form-control" placeholder="Enter your apartment or flat number" required style="border-radius: 8px; border: 1px solid #a89c9c; padding: 10px;">
                                         </div>
                     
-                                        <button type="submit" class="btn btn-primary w-100 mt-3 animate-button" style="background-color: #f28d89; border: none; border-radius: 8px; font-weight: bold;">Submit</button>
+                                        <button type="submit" class="btn btn-primary w-100 mt-3" style="background-color: #f28d89; border: none; border-radius: 8px; font-weight: 600; font-size: 1.1rem; padding: 10px 0;">Submit</button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Additional CSS -->
+                    <style>
+                        .form-control.single-line-input {
+        border: none;
+        border-bottom: 2px solid #e9b1b1;
+        border-radius: 0;
+        padding-left: 35px;
+        box-shadow: none;
+        transition: border-bottom 0.3s;
+    }
+    .form-control.single-line-input:focus {
+        border-bottom: 2px solid #e58c85;
+        outline: none;
+        animation: glowEffect 0.4s ease-in-out forwards;
+    }
+    .input-icon-container {
+        position: relative;
+    }
+    .input-icon-container .icon {
+        position: absolute;
+        top: 50%;
+        left: 5px;
+        transform: translateY(-50%);
+        color: #e58c85;
+        font-size: 1rem;
+    }
+    .input-container {
+        position: relative;
+    }
+     /* Keyframe animation for glowing border */
+     @keyframes glowEffect {
+        0% {
+            box-shadow: 0px 0px 0px #e58c85;
+        }
+        100% {
+            box-shadow: 0px 4px 10px rgba(229, 140, 133, 0.4);
+        }
+    }
+
+
+                        .form-control {
+                            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+                            transition: all 0.3s;
+                        }
+                    
+                        .form-control:focus {
+                            border-color: #e58c85;
+                            box-shadow: 0px 0px 10px rgba(245, 183, 169, 0.4);
+                        }
+                    
+                        button.btn-primary {
+                            transition: background-color 0.3s;
+                        }
+                    
+                        button.btn-primary:hover {
+                            background-color: #e5726a;
+                        }
+                    
+                        .corner-flower {
+                            animation: floatAnimation 8s ease-in-out infinite;
+                        }
+                    
+                        @keyframes floatAnimation {
+                            0%, 100% { transform: translateY(0); }
+                            50% { transform: translateY(-5px); }
+                        }
+                    </style>
+                    
                     
                     <!-- Additional CSS for styling and animations -->
             

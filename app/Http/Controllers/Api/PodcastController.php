@@ -18,7 +18,7 @@ class PodcastController extends Controller
     public function podcasts()
     {
         //
-        $podcasts = Podcast::orderBy('created_at', 'desc')->get();
+        $podcasts = Podcast::where('status', 'active')->orderBy('created_at', 'desc')->get();
         foreach ($podcasts as $podcast) {
             $podcast->image_url = asset('storage/' . $podcast->image);
             $podcast->music_url = asset('storage/' . $podcast->music);
@@ -48,7 +48,7 @@ class PodcastController extends Controller
     });
 
     // Step 2: Get the most recent podcast
-    $recentPodcast = Podcast::latest()->first(); // Retrieves the latest uploaded podcast
+    $recentPodcast = Podcast::where('status', 'active')->latest()->first(); // Retrieves the latest uploaded podcast
 
     // Step 3: Get podcasts published in the last 7 days
     $lastWeekPodcasts = Podcast::where('publish_date', '>=', Carbon::now()->subDays(7))->get();
