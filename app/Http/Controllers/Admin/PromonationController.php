@@ -23,9 +23,12 @@ class PromonationController extends Controller
     public function savepromonation(Request $request)
     {
         $request->validate([
-            'promonation_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5000',
+            'promonation_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'date' => 'required|date',
             'description' => 'required|string',
+            'promo_heading' => 'required|string',
+            'button_title' => 'required|string',
+
         ]);
 
         $imageName = time() . '.' . $request->promonation_image->extension();
@@ -35,6 +38,8 @@ class PromonationController extends Controller
             'promonation_image' => $imageName,
             'date' => $request->date,
             'description' => $request->description,
+            'promo_heading' => $request->promo_heading,
+            'button_title' => $request->button_title,
             'status' => 'active'
         ]);
 
@@ -53,6 +58,8 @@ class PromonationController extends Controller
             'promonation_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'date' => 'required|date',
             'description' => 'required|string',
+            'promo_heading' => 'required|string',
+            'button_title' => 'required|string',
         ]);
 
         $promonation = Promonation::findOrFail($id);
@@ -64,6 +71,8 @@ class PromonationController extends Controller
 
         $promonation->date = $request->date;
         $promonation->description = $request->description;
+        $promonation->promo_heading = $request->promo_heading;
+         $promonation->button_title = $request->button_title;
         $promonation->save();
 
         return redirect()->route('admin.managepromonation')->with('success', 'Promonation updated successfully!');
