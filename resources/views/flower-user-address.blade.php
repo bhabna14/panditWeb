@@ -94,6 +94,7 @@
     background-repeat: no-repeat;  /* Prevent repeating the image */
     padding: 40px;  /* Optional, for padding around the form */
     border-radius: 10px;  /* Optional, to make the container edges rounded */
+    height: 100vh;
 }
 
 .page-single:before {
@@ -145,78 +146,14 @@
                                         </div>
                                     @endif
                 
-                                    <form action="{{route('saveaddress')}}" method="POST">
+                                    <form action="" method="POST">
                                         @csrf
                                         <!-- Place Category -->
                                         <div class="form-group mb-4">
-                                            <label class="form-label">Type</label>
-                                            <div class="d-flex flex-wrap gap-3">
-                                                <div class="form-check custom-radio-button">
-                                                    <input type="radio" class="form-check-input" id="individual" name="place_category" value="Indivisual" required>
-                                                    <label class="form-check-label" for="individual">
-                                                        <span class="custom-radio"></span>
-                                                        Individual
-                                                    </label>
-                                                </div>
-                                                <div class="form-check custom-radio-button">
-                                                    <input type="radio" class="form-check-input" id="apartment" name="place_category" value="Apartment">
-                                                    <label class="form-check-label" for="apartment">
-                                                        <span class="custom-radio"></span>
-                                                        Apartment
-                                                    </label>
-                                                </div>
-                                                <div class="form-check custom-radio-button">
-                                                    <input type="radio" class="form-check-input" id="business" name="place_category" value="Business">
-                                                    <label class="form-check-label" for="business">
-                                                        <span class="custom-radio"></span>
-                                                        Business
-                                                    </label>
-                                                </div>
-                                                <div class="form-check custom-radio-button">
-                                                    <input type="radio" class="form-check-input" id="temple" name="place_category" value="Temple">
-                                                    <label class="form-check-label" for="temple">
-                                                        <span class="custom-radio"></span>
-                                                        Temple
-                                                    </label>
-                                                </div>
-                                            </div>
+                                            <label class="form-label">Name</label>
+                                           
                                         </div>
                                         
-                                        
-                                        <!-- Grouped Address Fields -->
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label for="apartment_flat_plot" class="form-label">Apartment/Flat/Plot</label>
-                                                <input type="text" class="form-control" id="apartment_flat_plot" name="apartment_flat_plot" placeholder="Enter details" required>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="landmark" class="form-label">Landmark</label>
-                                                <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Enter landmark" required>
-                                            </div>
-                                        </div>
-                
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label for="locality" class="form-label">Locality</label>
-                                                <input type="text" class="form-control" id="locality" name="locality" placeholder="Enter locality" required>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="pincode" class="form-label">Pincode</label>
-                                                <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required pattern="\d{6}">
-                                            </div>
-                                        </div>
-                
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label for="city" class="form-label">City</label>
-                                                <input type="text" class="form-control" id="city" name="city" placeholder="Enter city" required>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label for="state" class="form-label">State</label>
-                                                <input type="text" class="form-control" id="state" name="state" placeholder="Enter state" required>
-                                            </div>
-                                        </div>
-                
                                         <button type="submit" class="btn btn-primary w-100 mt-3">Submit</button>
                                     </form>
                                 </div>
@@ -238,21 +175,24 @@
 
   
 
-
-@if(isset($successMessage))
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: '{{ $successMessage }}',
-        showConfirmButton: true,
-        timer: 3000
-    }).then(() => {
-        // Redirect to the Play Store after the success message
-        window.location.href = '{{ $playStoreLink }}';
-    });
-</script>
-@endif
+        @if(isset($successMessage))
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '{{ $successMessage }}',
+                showConfirmButton: true,
+                timer: 5000  // This will automatically close the alert after 3 seconds (optional)
+            }).then((result) => {
+                // Check if the user clicked the "OK" button (or if it timed out)
+                if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                    // Redirect to the Play Store link after the user clicks "OK"
+                    window.location.href = '{{ $playStoreLink }}';
+                }
+            });
+        </script>
+        @endif
+        
 
     @endsection

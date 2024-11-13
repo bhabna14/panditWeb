@@ -61,13 +61,15 @@ Route::controller(FlowerRegistrationController::class)->group(function() {
     Route::get('/flower-registration', 'flowerregistration')->name('flowerregistration');
     Route::post('/send-otp-flower', 'sendOtpflower');
     Route::post('/verify-otp-flower', 'verifyOtpflower');
-});
-Route::group(['middleware' => ['auth:users']], function () {
-    Route::controller(FlowerRegistrationController::class)->group(function() {
 
     Route::get('/flower/address', 'floweruseraddress')->name('floweruseraddress');
     Route::post('/flowersaveaddress', 'flowersaveaddress')->name('flowersaveaddress');
     
+});
+Route::group(['middleware' => ['auth:users']], function () {
+    Route::controller(FlowerRegistrationController::class)->group(function() {
+
+   
     });
 });
 ## user login

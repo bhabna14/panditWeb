@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\UserAddress;
+
 use Illuminate\Support\Facades\Auth;
 
 use Illuminate\Support\Facades\Validator;
@@ -110,7 +112,7 @@ class FlowerRegistrationController extends Controller
        
         return view('flower-user-address');
     }
-    public function saveaddress(Request $request)
+    public function flowersaveaddress(Request $request)
     {
         $user = Auth::guard('users')->user();
         $userid = $user->userid;
@@ -122,15 +124,17 @@ class FlowerRegistrationController extends Controller
         // Create the new address
         $addressdata = new UserAddress();
         $addressdata->user_id = $userid;
-        $addressdata->country = $request->country;
+        $addressdata->country = 'India';
         $addressdata->state = $request->state;
         $addressdata->city = $request->city;
         $addressdata->pincode = $request->pincode;
-        $addressdata->area = $request->area;
-        $addressdata->address_type = $request->address_type;
+        $addressdata->area = "null";
+        $addressdata->address_type = "null";
         $addressdata->apartment_flat_plot = $request->apartment_flat_plot; // Add apartment/flat/plot field
         $addressdata->landmark = $request->landmark; // Add landmark field
         $addressdata->locality = $request->locality; // Add locality field
+        $addressdata->place_category = $request->place_category; // Add locality field
+
         $addressdata->status = 'active';
     
         // Set as default if it's the first address
@@ -142,7 +146,7 @@ class FlowerRegistrationController extends Controller
         $addressdata->save();
     
         // Return a view with SweetAlert script
-        return view('your_view_name')->with([
+        return view('flower-user-address')->with([
             'successMessage' => 'You have successfully registered for free flower!',
             'playStoreLink' => 'https://play.google.com/store/apps/details?id=com.yourapp' // Replace with your actual Play Store link
         ]);

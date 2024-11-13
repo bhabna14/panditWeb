@@ -6,6 +6,7 @@
     
     <!-- Firebase Messaging -->
     <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-messaging-compat.js"></script>
+
     @endsection
 
     @section('class')
