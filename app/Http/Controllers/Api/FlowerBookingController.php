@@ -190,7 +190,7 @@ class FlowerBookingController extends Controller
             // Fetch standalone orders for the authenticated user (orders without request_id)
             $subscriptionsOrder = Order::whereNull('request_id')
             ->where('user_id', $userId)
-            ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address','pauseResumeLogs'])
+            ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails','pauseResumeLogs'])
             ->orderBy('id', 'desc')
             ->get();
         
@@ -212,7 +212,7 @@ class FlowerBookingController extends Controller
                 },
                 'flowerProduct',
                 'user',
-                'address',
+                'address.localityDetails',
                 'flowerRequestItems' 
             ])
             ->orderBy('id', 'desc')

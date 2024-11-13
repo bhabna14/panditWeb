@@ -6,95 +6,17 @@
     
     <!-- Firebase Messaging -->
     <script src="https://www.gstatic.com/firebasejs/9.14.0/firebase-messaging-compat.js"></script>
-    <style>
-/* General Styling for Labels */
-.form-check-label {
-    font-size: 16px;
-    font-weight: 500;
-    color: #333;
-    padding-left: 35px; /* Space for custom radio */
-    position: relative;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-/* Container for Custom Radio Buttons */
-.custom-radio-button {
-    display: flex;
-    align-items: center;
-    position: relative;
-    margin-bottom: 15px;
-}
-
-/* Hide the default radio button */
-.custom-radio-button input[type="radio"] {
-    opacity: 0;
-    position: absolute;
-}
-
-/* Custom Styled Radio Button */
-.custom-radio {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #ddd;
-    border-radius: 50%;
-    background-color: #fff;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Hover Effect for Custom Radio */
-.custom-radio-button:hover .custom-radio {
-    border-color: #3f51b5; /* Swiggy or Flipkart Blue */
-}
-
-/* When Radio is Checked */
-.custom-radio-button input[type="radio"]:checked + .form-check-label .custom-radio {
-    background-color: #3f51b5;
-    border-color: #3f51b5;
-}
-
-.custom-radio-button input[type="radio"]:checked + .form-check-label .custom-radio::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
-    background-color: #fff;
-    border-radius: 50%;
-}
-
-/* Smooth Focus Effect */
-.custom-radio-button input[type="radio"]:focus + .form-check-label .custom-radio {
-    box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.4); /* Light blue glow on focus */
-}
-
-/* Smooth Transition for Label */
-.custom-radio-button:hover .form-check-label {
-    color: #3f51b5; /* Text color change on hover */
-}
-
-/* Active Effect for Button (Clicked) */
-.custom-radio-button input[type="radio"]:active + .form-check-label .custom-radio {
-    transform: scale(1.1); /* Slightly scale up the radio button when clicked */
-}
-.square-box {
-    display: none;
-}
-.page-single {
+              <!-- Additional CSS for custom styling -->
+              <style>
+             
+                .page-single {
     background-image: url('{{ asset('images/i_Stock_1436339978_min_3dc7188b09.jpg') }}'); /* Replace with your image path */
     background-size: cover;  /* Ensure the image covers the whole container */
     background-position: center center; /* Center the image */
     background-repeat: no-repeat;  /* Prevent repeating the image */
     padding: 40px;  /* Optional, for padding around the form */
     border-radius: 10px;  /* Optional, to make the container edges rounded */
-    height: 100vh;
+    /* height: 100vh; */
 }
 
 .page-single:before {
@@ -108,7 +30,100 @@
     border-radius: 10px;  /* Match container's border radius */
     z-index: -1;  /* Place overlay behind the form */
 }
-    </style>
+            </style>
+                    <style>
+                        .form-group label {
+                            font-size: 1.1rem;
+                        }
+                    
+                        .form-control {
+                            font-size: 1rem;
+                            padding: 10px;
+                        }
+                    
+                        .card-body {
+                            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                        }
+                    
+                        .flower-animation {
+                            animation: floatAnimation 5s infinite ease-in-out;
+                        }
+                    
+                        .animate-card {
+                            animation: fadeIn 1.5s ease-in-out;
+                        }
+                    
+                        .animate-header {
+                            animation: slideDown 1.5s ease-out;
+                        }
+                    
+                        .animate-button {
+                            animation: pulse 2s infinite;
+                        }
+                    
+                        .animate-alert {
+                            animation: shake 0.5s;
+                        }
+                    
+                        /* Keyframe animations */
+                        @keyframes floatAnimation {
+                            0%, 100% {
+                                transform: translateY(0);
+                            }
+                            50% {
+                                transform: translateY(-10px);
+                            }
+                        }
+                    
+                        @keyframes fadeIn {
+                            from {
+                                opacity: 0;
+                            }
+                            to {
+                                opacity: 1;
+                            }
+                        }
+                    
+                        @keyframes slideDown {
+                            from {
+                                transform: translateY(-20px);
+                                opacity: 0;
+                            }
+                            to {
+                                transform: translateY(0);
+                                opacity: 1;
+                            }
+                        }
+                    
+                        @keyframes pulse {
+                            0%, 100% {
+                                transform: scale(1);
+                            }
+                            50% {
+                                transform: scale(1.05);
+                            }
+                        }
+                    
+                        @keyframes shake {
+                            0% { transform: translateX(0); }
+                            25% { transform: translateX(-5px); }
+                            50% { transform: translateX(5px); }
+                            75% { transform: translateX(-5px); }
+                            100% { transform: translateX(0); }
+                        }
+                    
+                        @media (max-width: 576px) {
+                            .card-header h3 {
+                                font-size: 1.5rem;
+                            }
+                    
+                            .form-control {
+                                font-size: 0.9rem;
+                            }
+                        }
+                    </style>
+            
+ 
     @endsection
 
     @section('class')
@@ -121,23 +136,23 @@
         <div class="page-single">
             <div class="container">
                 <div class="container mt-5">
-                    <div class="row justify-content-center">
+                    <div class="row justify-content-center" >
                         <div class="col-lg-8 col-md-10">
-                            <div class="card shadow-lg border-0">
-                                <div class="card-header bg-white text-white text-center">
-                                    <img src="{{ asset('assets/img/brand/logo.png') }}" class="" alt="logo" style="height: 50px;">
-
-                                 
+                            <div class="card shadow-lg border-0 position-relative animate-card" style="border-radius: 20px; overflow: hidden;">
+                                <!-- Decorative flower images with animations -->
+                                <img src="https://pandit.33crores.com/images/DSC_2140-removebg-preview.png" alt="Flower" class="flower-animation" style="position: absolute; top: -20px; left: -20px; height: 120px; z-index: 1; opacity: 0.9;">
+                                <img src="https://pandit.33crores.com/images/DSC_2177-removebg-preview.png" alt="Flower" class="flower-animation" style="position: absolute; top: -20px; right: -20px; height: 120px; z-index: 1; opacity: 0.9;">
+                                <img src="https://pandit.33crores.com/images/DSC_2140-removebg-preview.png" alt="Flower" class="flower-animation" style="position: absolute; bottom: -20px; left: -20px; height: 120px; z-index: 1; opacity: 0.9;">
+                                <img src="https://pandit.33crores.com/images/DSC_2177-removebg-preview.png" alt="Flower" class="flower-animation" style="position: absolute; bottom: -20px; right: -20px; height: 120px; z-index: 1; opacity: 0.9;">
+                    
+                                <div class="card-header text-center animate-header" style="background-color: #fff; border-bottom: 2px solid #f3d2c1;">
+                                    <img src="{{ asset('assets/img/brand/logo.png') }}" alt="logo" style="height: 60px;">
+                                    <h3 class="mt-2" style="color: #d9534f; font-weight: bold;">Join Our Flower Campaign</h3>
                                 </div>
-                                <div class="card-body p-4">
-                                    {{-- @if (session('message'))
-                                        <div class="alert alert-success">{{ session('message') }}</div>
-                                    @elseif (session('error'))
-                                        <div class="alert alert-danger">{{ session('error') }}</div>
-                                    @endif --}}
-                
+                    
+                                <div class="card-body p-4" style="background: #fff; border-radius: 0 0 20px 20px;">
                                     @if ($errors->any())
-                                        <div class="alert alert-danger">
+                                        <div class="alert alert-danger animate-alert">
                                             <ul>
                                                 @foreach ($errors->all() as $error)
                                                     <li>{{ $error }}</li>
@@ -145,21 +160,45 @@
                                             </ul>
                                         </div>
                                     @endif
-                
+                    
                                     <form action="" method="POST">
                                         @csrf
-                                        <!-- Place Category -->
+                                        <!-- Name Field -->
                                         <div class="form-group mb-4">
-                                            <label class="form-label">Name</label>
-                                           
+                                            <label class="form-label" style="color: #b53c2f; font-weight: bold;">Name</label>
+                                            <input type="text" name="name" class="form-control" placeholder="Enter your name" required style="border: 1px solid #f5b7a9; border-radius: 8px;">
                                         </div>
-                                        
-                                        <button type="submit" class="btn btn-primary w-100 mt-3">Submit</button>
+                    
+                                        <!-- Number Field -->
+                                        <div class="form-group mb-4">
+                                            <label class="form-label" style="color: #b53c2f; font-weight: bold;">Number</label>
+                                            <input type="tel" name="number" class="form-control" placeholder="Enter your mobile number" required style="border: 1px solid #f5b7a9; border-radius: 8px;">
+                                        </div>
+                    
+                                        <!-- OTP Field -->
+                                        <div class="form-group mb-4">
+                                            <label class="form-label" style="color: #b53c2f; font-weight: bold;">OTP</label>
+                                            <input type="text" name="otp" class="form-control" placeholder="Enter OTP" required style="border: 1px solid #f5b7a9; border-radius: 8px;">
+                                        </div>
+                    
+                                        <!-- Apartment / Flat No. Field -->
+                                        <div class="form-group mb-4">
+                                            <label class="form-label" style="color: #b53c2f; font-weight: bold;">Apartment / Flat No.</label>
+                                            <input type="text" name="apartment" class="form-control" placeholder="Enter your apartment/flat number" required style="border: 1px solid #f5b7a9; border-radius: 8px;">
+                                        </div>
+                    
+                                        <button type="submit" class="btn btn-primary w-100 mt-3 animate-button" style="background-color: #f28d89; border: none; border-radius: 8px; font-weight: bold;">Submit</button>
                                     </form>
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Additional CSS for styling and animations -->
+            
+                    
+                    
+          
                 </div>
                 
                 
