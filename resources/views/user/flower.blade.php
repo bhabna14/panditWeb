@@ -95,34 +95,27 @@
 @section('content')
     
 
- <section class="" style="    margin-top: -17px;
-">
+<section class="" style="margin-top: -17px;">
   <div class="">
     <!-- Home Banner Section -->
     <div class="home-banner-section">
       <div id="homeBannerCarousel" class="owl-carousel owl-theme">
-        <!-- Banner Image Item -->
-        <div class="item">
-          <img src="{{asset('images/4.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
-        </div>
-        <div class="item">
-          <img src="{{asset('images/2.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
-        </div>
-        <div class="item">
-          <img src="{{asset('images/1.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
-        </div>
-        <!-- You can add more images here by copying the above block -->
+        @foreach ($banners as $banner)
+          <div class="item">
+            <img src="{{ $banner['banner_img'] }}" alt="{{ $banner['alt_text'] ?? 'Home Banner' }}" class="img-fluid d-block w-100">
+          </div>
+        @endforeach
       </div>
     </div>
   </div>
- </section>
- <section>
+</section>
+
+<section>
   <div class="container">
       <div class="row" style="margin-top: 30px;">
         <div class="col-md-12">
           <div class="flower-package-heading">
               <h1>Flower Package</h1>
-             
           </div>
       </div>
       </div>
@@ -132,25 +125,23 @@
                   <div class="col-md-4 mb-4">
                       <div class="product-card shadow-lg position-relative">
                           <div class="product-image-container">
-                              <img src="{{ asset('storage/'.$product->product_image) }}" alt="{{ $product->name }}" class="product-image">
-                             
+                              <img src="{{ $product['product_image'] }}" alt="{{ $product['name'] }}" class="product-image">
                           </div>
                           <div class="card-body text-center">
-                              <h5 class="product-title">{{ $product->name }}</h5>
-                              <p class="product-description">{{ $product->description }}</p>
-                              <p class="product-price mb-3">₹ {{ number_format($product->price, 2) }}</p>
+                              <h5 class="product-title">{{ $product['name'] }}</h5>
+                              <p class="product-description">{{ $product['description'] }}</p>
+                              <p class="product-price mb-3">₹ {{ number_format($product['price'], 2) }}</p>
                               @if(Auth::guard('users')->check())
                                 <!-- User is logged in -->
-                                <a href="{{ route('checkout', ['product_id' => $product->product_id]) }}" class="btn btn-gradient w-100 mt-2">
+                                <a href="{{ route('checkout', ['product_id' => $product['product_id']]) }}" class="btn btn-gradient w-100 mt-2">
                                     Buy Now
                                 </a>
                               @else
                                   <!-- User is not logged in -->
-                                  <a href="{{route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
+                                  <a href="{{ route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
                                       Buy Now
                                   </a>
                               @endif
-                          
                           </div>
                       </div>
                   </div>

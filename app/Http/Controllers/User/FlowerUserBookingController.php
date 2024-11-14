@@ -19,25 +19,45 @@ use App\Models\Poojalist;
 use App\Models\UserAddress;
 use App\Models\Profile;
 use App\Models\Poojadetails;
+use Illuminate\Support\Facades\Http;
 
 class FlowerUserBookingController extends Controller
 {
-    public function flower(){
+
+    public function flower() {
+        // Fetch banners from the external API
+        $response = Http::get('https://pandit.33crores.com/api/app-banners');
+        
+        // Check if the request was successful and parse the response
+        if ($response->successful()) {
+            $banners = collect($response->json())->filter(function ($banner) {
+                return isset($banner['category']) && $banner['category'] === 'flower';
+            });
+        } else {
+            $banners = collect(); // Empty collection if API call fails
+        }
+
+        $responseProducts = Http::get('https://pandit.33crores.com/api/products');
+        $products = $responseProducts->successful() ? collect($responseProducts->json())->filter(fn($product) => isset($product['category']) && $product['category'] === 'Subscription') : collect();
+    
+    
+        // Fetch other data for the view
         $upcomingPoojas = Poojalist::where('status', 'active')
                         ->where('pooja_date', '>=', now())
                         ->orderBy('pooja_date', 'asc')
                         ->take(3)
                         ->get();
         $otherpoojas = Poojalist::where('status', 'active')
-                        ->where(function($query) {
-                            $query->whereNull('pooja_date');
-                         })
+                        ->whereNull('pooja_date')
                         ->take(9)
                         ->get();
         $products = FlowerProduct::where('status', 'active')
-        ->where('category','Subscription')->get();
-        return view("user/flower" , compact('upcomingPoojas','otherpoojas','products'));
+                        ->where('category', 'Subscription')
+                        ->get();
+    
+        return view("user/flower", compact('upcomingPoojas', 'otherpoojas', 'products', 'banners'));
     }
+    
     public function show($product_id)
     {
         // dd($product_id);
