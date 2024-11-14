@@ -112,46 +112,47 @@
 
 <section>
   <div class="container">
-      <div class="row" style="margin-top: 30px;">
-        <div class="col-md-12">
-          <div class="flower-package-heading">
-              <h1>Flower Package</h1>
+    <div class="row" style="margin-top: 30px;">
+      <div class="col-md-12">
+        <div class="flower-package-heading">
+          <h1>Flower Package</h1>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="margin-top: 20px; margin-bottom: 140px;">
+      @if($products->isNotEmpty())
+        @foreach($products as $product)
+          <div class="col-md-4 mb-4">
+            <div class="product-card shadow-lg position-relative">
+              <div class="product-image-container">
+                <img src="{{ $product['product_image'] }}" alt="{{ $product['name'] }}" class="product-image">
+              </div>
+              <div class="card-body text-center">
+                <h5 class="product-title">{{ $product['name'] }}</h5>
+                <p class="product-description">{{ $product['description'] }}</p>
+                <p class="product-price mb-3">₹ {{ number_format($product['price'], 2) }}</p>
+                <p class="product-mrp text-muted">MRP: ₹ {{ number_format($product['mrp'], 2) }}</p>
+                @if(Auth::guard('users')->check())
+                  <a href="{{ route('checkout', ['product_id' => $product['product_id']]) }}" class="btn btn-gradient w-100 mt-2">
+                    Buy Now
+                  </a>
+                @else
+                  <a href="{{ route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
+                    Buy Now
+                  </a>
+                @endif
+              </div>
+            </div>
           </div>
-      </div>
-      </div>
-      <div class="row" style="margin-top: 20px; margin-bottom: 140px;">
-          @if($products->isNotEmpty())
-              @foreach($products as $product)
-                  <div class="col-md-4 mb-4">
-                      <div class="product-card shadow-lg position-relative">
-                          <div class="product-image-container">
-                            <img src="{{ asset($product['product_image']) }}" alt="{{ $product['name'] }}" class="product-image">
-                          </div>
-                          <div class="card-body text-center">
-                              <h5 class="product-title">{{ $product['name'] }}</h5>
-                              <p class="product-description">{{ $product['description'] }}</p>
-                              <p class="product-price mb-3">₹ {{ number_format($product['price'], 2) }}</p>
-                              @if(Auth::guard('users')->check())
-                                <!-- User is logged in -->
-                                <a href="{{ route('checkout', ['product_id' => $product['product_id']]) }}" class="btn btn-gradient w-100 mt-2">
-                                    Buy Now
-                                </a>
-                              @else
-                                  <!-- User is not logged in -->
-                                  <a href="{{ route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
-                                      Buy Now
-                                  </a>
-                              @endif
-                          </div>
-                      </div>
-                  </div>
-              @endforeach
-          @else
-              <p class="text-center">No products available at the moment.</p>
-          @endif
-      </div>
+        @endforeach
+      @else
+        <p class="text-center">No products available at the moment.</p>
+      @endif
+    </div>
   </div>
 </section>
+
+
 
 
     <section class="upcoming-bg">

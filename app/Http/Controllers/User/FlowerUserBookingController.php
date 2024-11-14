@@ -26,21 +26,22 @@ class FlowerUserBookingController extends Controller
 
     public function flower() {
         // Fetch banners from the external API
-        $response = Http::get('https://pandit.33crores.com/api/app-banners');
-        
-        // Check if the request was successful and parse the response
-        if ($response->successful()) {
-            $banners = collect($response->json())->filter(function ($banner) {
-                return isset($banner['category']) && $banner['category'] === 'flower';
-            });
-        } else {
-            $banners = collect(); // Empty collection if API call fails
-        }
+        $responseBanners = Http::get('https://pandit.33crores.com/api/app-banners');
 
-        $responseProducts = Http::get('https://pandit.33crores.com/api/products');
-        $products = $responseProducts->successful() ? collect($responseProducts->json())->filter(fn($product) => isset($product['category']) && $product['category'] === 'Subscription') : collect();
-    
-    
+        // Check if the response is successful and filter based on the 'flower' category
+        $banners = $responseBanners->successful() && isset($responseBanners->json()['data'])
+            ? collect($responseBanners->json()['data'])->filter(fn($banner) => isset($banner['category']) && strtolower($banner['category']) === 'flower')
+            : collect();
+            $responseProducts = Http::get('https://pandit.33crores.com/api/products');
+
+            // Check if the response is successful and filter based on the 'Subscription' category
+            $products = $responseProducts->successful() && isset($responseProducts->json()['data'])
+                ? collect($responseProducts->json()['data'])->filter(fn($product) => isset($product['category']) && $product['category'] === 'Subscription')
+                : collect();
+            
+            // // Verify the filtered data
+            // dd($products);
+            
         // Fetch other data for the view
         $upcomingPoojas = Poojalist::where('status', 'active')
                         ->where('pooja_date', '>=', now())
