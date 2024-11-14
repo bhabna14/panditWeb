@@ -17,7 +17,7 @@ class PodcastController extends Controller
 
         $podcasts = Podcast::all();
 
-        return view('admin/addpodcast',compact('podcasts'));
+        return view('admin/add-podcast',compact('podcasts'));
     }
     public function savepodcast(Request $request)
     {

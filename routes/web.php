@@ -50,14 +50,10 @@ Route::controller(userController::class)->group(function() {
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');
     Route::get('/pandit-list', 'panditlist')->name('panditlist');
-
     Route::get('/pandits/{pooja_id}/{pandit_id}',  'list')->name('pandit.list');
-
-
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
     Route::get('/pooja/{slug}', 'poojadetails')->name('pooja.show');
     Route::get('/pooja/{poojaSlug}/{panditSlug}', 'panditDetails')->name('pandit.details');
-
     Route::get('/our-pandit/{slug}', 'singlepanditDetails')->name('pandit.show');
     Route::get('/book-now/{panditSlug}/{poojaSlug}/{poojaFee}', 'bookNow')->name('book.now');
     Route::post('/booking/confirm',  'confirmBooking')->name('booking.confirm');
@@ -88,20 +84,16 @@ Route::get('/poojas', 'fetchPoojas')->name('fetchPoojas');
 //user middleware routes
 Route::group(['middleware' => ['auth:users']], function () {
         Route::controller(userController::class)->group(function() {
-
         Route::get('/user-dashboard', 'userdashboard')->name('userdashboard');
         Route::get('/manage-address', 'mngaddress')->name('mngaddress');
         Route::get('/address/set-default/{id}', 'setDefault')->name('setDefaultAddress');
-
         Route::get('/addaddress', 'addfrontaddress')->name('addfrontaddress');
         Route::get('/add-address', 'addaddress')->name('addaddress');
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
         Route::post('/savefrontaddress', 'savefrontaddress')->name('savefrontaddress');
-
         Route::get('editaddress/{id}',  'editAddress')->name('editAddress');
         Route::post('updateaddress', 'updateAddress')->name('updateaddress');
         Route::get('removeaddress/{id}',  'removeAddress')->name('removeaddress');
-
         Route::get('/booking-history', 'orderhistory')->name('booking.history');
         Route::get('/rate-pooja/{id}','ratePooja')->name('rate.pooja');
         // Route::post('submit-rating', 'submitRating')->name('submitRating');
