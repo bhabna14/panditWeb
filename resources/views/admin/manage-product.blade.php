@@ -59,7 +59,8 @@
                                                     <th>#</th>
                                                     <th>Product Name</th>
                                                     <th>Image</th>
-                                                    <th>Price</th>
+                                                    <th>MRP</th>
+                                                    <th>Sale Price</th>
                                                     <th>Stock</th>
                                                     <th>Category</th>
                                                     <th>Status</th>
@@ -75,6 +76,8 @@
                                                             <img src="{{ asset($product->product_image ? 'storage/' . $product->product_image : 'front-assets/img/images.jfif') }}" alt="user" style="widows: 100px;height:100px">
 
                                                         </td>
+                                                        <td>Rs. {{ number_format($product->mrp, 2) }}</td>
+
                                                         <td>Rs. {{ number_format($product->price, 2) }}</td>
                                                         <td>{{ $product->stock }}</td>
                                                         <td>{{ $product->category }}</td>

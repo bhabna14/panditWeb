@@ -37,6 +37,8 @@ class ProductController extends Controller
             'product_id' => $productId,
             'name' => $request->name,
             'price' => $request->price,
+            'mrp' => $request->mrp,
+
             'description' => $request->description,
             'category' => $request->category,
             'stock' => $request->stock,
@@ -62,14 +64,16 @@ class ProductController extends Controller
             'price' => 'required|numeric',
             'description' => 'required|string',
             'category' => 'required|string',
-            'stock' => 'required|integer',
-            'duration' => 'required|integer',
+            // 'stock' => '|integer',
+            // 'duration' => 'required|integer',
             'product_image' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
     
         // Update product details
         $product->update([
             'name' => $request->name,
+            'mrp' => $request->mrp,
+
             'price' => $request->price,
             'description' => $request->description,
             'category' => $request->category,
@@ -88,6 +92,8 @@ class ProductController extends Controller
     public function deleteProduct($id)
     {
         $product = FlowerProduct::findOrFail($id);
+        // dd($product);
+
         $product->update(['status' => 'deleted']);
     
         return redirect()->route('manageproduct')->with('success', 'Product deleted successfully.');

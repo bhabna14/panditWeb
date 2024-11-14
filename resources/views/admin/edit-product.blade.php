@@ -54,7 +54,11 @@
             </div>
     
             <!-- Price -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-3 mb-3">
+                <label for="price" class="form-label">MRP (Rs.)</label>
+                <input type="number" name="mrp" class="form-control" id="mrp" value="{{ $product->mrp }}" required>
+            </div>
+            <div class="col-md-3 mb-3">
                 <label for="price" class="form-label">Price (Rs.)</label>
                 <input type="number" name="price" class="form-control" id="price" value="{{ $product->price }}" required>
             </div>
@@ -69,8 +73,11 @@
             <div class="col-md-6 mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select name="category" id="category" class="form-control select2" required>
+                    <option value="" disabled selected>Select Category</option>
                     <option value="Puja Item" {{ $product->category == 'Puja Item' ? 'selected' : '' }}>Puja Item</option>
                     <option value="Subscription" {{ $product->category == 'Subscription' ? 'selected' : '' }}>Subscription</option>
+                    <option value="Flower" {{ $product->category == 'Flower' ? 'selected' : '' }}>Flower</option>
+                   
                     <!-- Add other categories as needed -->
                 </select>
             </div>
@@ -78,13 +85,14 @@
             <!-- Stock -->
             <div class="col-md-6 mb-3">
                 <label for="stock" class="form-label">Stock</label>
-                <input type="number" name="stock" class="form-control" id="stock" value="{{ $product->stock }}" required>
+                <input type="number" name="stock" class="form-control" id="stock" value="{{ $product->stock }}" >
             </div>
     
             <!-- Subscription Duration -->
             <div class="col-md-6 mb-3">
                 <label for="duration" class="form-label">Subscription Duration (Months)</label>
-                <select name="duration" id="duration" class="form-control select2" required>
+                <select name="duration" id="duration" class="form-control select2" >
+                    <option value="" disabled selected>Select Package</option>
                     <option value="1" {{ $product->duration == 1 ? 'selected' : '' }}>1 Month</option>
                     <option value="3" {{ $product->duration == 3 ? 'selected' : '' }}>3 Months</option>
                     <option value="6" {{ $product->duration == 6 ? 'selected' : '' }}>6 Months</option>

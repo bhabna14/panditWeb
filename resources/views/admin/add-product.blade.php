@@ -54,9 +54,13 @@
             </div>
 
             <!-- Price -->
-            <div class="col-md-6 mb-3">
-                <label for="price" class="form-label">Price (Rs.)</label>
-                <input type="number" name="price" class="form-control" id="price" placeholder="Enter product price" required>
+            <div class="col-md-3 mb-3">
+                <label for="price" class="form-label">MRP (Rs.)</label>
+                <input type="number" name="mrp" class="form-control" id="mrp" placeholder="Enter product mrp"  required>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="price" class="form-label">Sale Price (Rs.)</label>
+                <input type="number" name="price" class="form-control" id="price" placeholder="Enter product sale price" required>
             </div>
 
             <!-- Description -->
