@@ -130,12 +130,18 @@
             <script>
                 Swal.fire({
                     icon: 'success',
-                    title: 'Oops...',
+                    title: 'Subscription Activated Successfully',
                     text: '{{ session('success') }}',
                     confirmButtonText: 'Okay'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Redirect to the booking history page
+                        window.location.href = '{{ route('subscription.history') }}'; // Make sure to use the correct route name
+                    }
                 });
             </script>
-            @endif
+             @endif
+
             <div class="col-md-7">
                 <form action="{{ route('booking.flower.subscription') }}" method="POST" id="bookingForm">
                     @csrf

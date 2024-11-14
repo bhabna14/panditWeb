@@ -119,10 +119,15 @@ Route::get('/register', 'userregister')->name('user-register');
 Route::controller(FlowerUserBookingController::class)->group(function() {
         //flower routes
         Route::get('/flower', 'flower')->name('flower');
+});
+Route::group(['middleware' => ['auth:users']], function () {
+    Route::controller(FlowerUserBookingController::class)->group(function() {
+      
         Route::get('/checkout/{product_id}',  'show')->name('checkout');
         Route::post('/booking/flower/subscription', 'processBooking')->name('booking.flower.subscription');
-        Route::get('/flower-booking/success/{order_id}',  'showSuccessPage')->name('flower-booking.success');
-
+        Route::get('/subscription-history', 'subscriptionhistory')->name('subscription.history');
+        
+    });
 });
 //user middleware routes
 

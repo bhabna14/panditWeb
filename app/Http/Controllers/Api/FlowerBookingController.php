@@ -73,9 +73,9 @@ class FlowerBookingController extends Controller
         if ($duration == 1) {
             $endDate = $startDate->copy()->addDays(29); // For 1, add 30 days
         } else if ($duration == 3) {
-            $endDate = $startDate->copy()->addDays(59); // For 3, add 60 days
+            $endDate = $startDate->copy()->addDays(89); // For 3, add 90 days
         } else if ($duration == 6) {
-            $endDate = $startDate->copy()->addDays(89); // For 6, add 90 days
+            $endDate = $startDate->copy()->addDays(179); // For 6, add 180 days
         }
         else {
             // Handle unexpected duration value

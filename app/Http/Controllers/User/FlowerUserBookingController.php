@@ -32,15 +32,7 @@ class FlowerUserBookingController extends Controller
         $banners = $responseBanners->successful() && isset($responseBanners->json()['data'])
             ? collect($responseBanners->json()['data'])->filter(fn($banner) => isset($banner['category']) && strtolower($banner['category']) === 'flower')
             : collect();
-            $responseProducts = Http::get('https://pandit.33crores.com/api/products');
-
-            // Check if the response is successful and filter based on the 'Subscription' category
-            $products = $responseProducts->successful() && isset($responseProducts->json()['data'])
-                ? collect($responseProducts->json()['data'])->filter(fn($product) => isset($product['category']) && $product['category'] === 'Subscription')
-                : collect();
-            
-            // // Verify the filtered data
-            // dd($products);
+           
             
         // Fetch other data for the view
         $upcomingPoojas = Poojalist::where('status', 'active')
@@ -52,9 +44,9 @@ class FlowerUserBookingController extends Controller
                         ->whereNull('pooja_date')
                         ->take(9)
                         ->get();
-        // $products = FlowerProduct::where('status', 'active')
-        //                 ->where('category', 'Subscription')
-        //                 ->get();
+        $products = FlowerProduct::where('status', 'active')
+                        ->where('category', 'Subscription')
+                        ->get();
     
         return view("user/flower", compact('upcomingPoojas', 'otherpoojas', 'products', 'banners'));
     }
@@ -123,9 +115,9 @@ class FlowerUserBookingController extends Controller
         if ($duration == 1) {
             $endDate = $startDate->copy()->addDays(29); // For 1, add 30 days
         } else if ($duration == 3) {
-            $endDate = $startDate->copy()->addDays(59); // For 3, add 60 days
+            $endDate = $startDate->copy()->addDays(89); // For 3, add 90 days
         } else if ($duration == 6) {
-            $endDate = $startDate->copy()->addDays(89); // For 6, add 90 days
+            $endDate = $startDate->copy()->addDays(179); // For 6, add 180 days
         } else {
             // Handle unexpected duration value
             \Log::error('Invalid subscription duration', ['duration' => $duration]);
@@ -184,4 +176,31 @@ class FlowerUserBookingController extends Controller
     //     return view('user.flower-booking-success', compact('booking'));
     // }
 
+
+
+    public function subscriptionhistory() {
+        // Get the authenticated user ID using the 'api' guard
+        $userId = Auth::guard('users')->user()->userid;
+    
+        // Fetch standalone orders for the authenticated user (orders without request_id)
+        $subscriptionsOrder = Order::whereNull('request_id')
+            ->where('user_id', $userId)
+            ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails', 'pauseResumeLogs'])
+            ->orderBy('id', 'desc')
+            ->get();
+    
+        // Map to add the product_image_url to each order's flowerProduct
+        $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
+            if ($order->flowerProduct) {
+                // Ensure flowerProduct exists before accessing product_image
+                $order->flowerProduct->product_image_url = asset('storage/' . $order->flowerProduct->product_image); // Generate full URL for the photo
+            }
+            return $order;
+        });
+    
+        // Pass the orders to the view
+        return view('user.subscription-history', compact('subscriptionsOrder'));
+    }
+    
+    
 }
