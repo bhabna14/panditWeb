@@ -125,6 +125,17 @@
                     });
                 </script>
             @endif
+
+            @if (session('success'))
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Oops...',
+                    text: '{{ session('success') }}',
+                    confirmButtonText: 'Okay'
+                });
+            </script>
+            @endif
             <div class="col-md-7">
                 <form action="{{ route('booking.flower.subscription') }}" method="POST" id="bookingForm">
                     @csrf

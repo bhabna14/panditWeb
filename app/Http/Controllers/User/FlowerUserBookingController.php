@@ -173,16 +173,15 @@ class FlowerUserBookingController extends Controller
         // Redirect or respond as needed
         // return redirect()->route('flower-booking.success')->with('success', 'Booking successful');
 
-        return redirect()->route('flower-booking.success', ['order_id' => $orderId])
-        ->with('success', 'Booking successful');
+        return redirect()->back()->with('success', 'Booking successful');
     
     }
 
-    public function showSuccessPage($order_id)
-    {
-        $booking = Order::with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address'])->findOrFail($order_id);
-        // dd($booking);
-        return view('user.flower-booking-success', compact('booking'));
-    }
+    // public function showSuccessPage($order_id)
+    // {
+    //     $booking = Order::with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address'])->findOrFail($order_id);
+    //     // dd($booking);
+    //     return view('user.flower-booking-success', compact('booking'));
+    // }
 
 }
