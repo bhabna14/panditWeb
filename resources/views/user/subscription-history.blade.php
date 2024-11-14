@@ -82,7 +82,7 @@
                     <div class="row">
                         <div class="col-md-3">
                             SUBSCRIPTION START DATE <br>
-                            {{ \Carbon\Carbon::parse($order->created_at)->format('Y-m-d') }} <!-- Subscription start date -->
+                            {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('Y-m-d') }} <!-- Subscription start date -->
                         </div>
                         <div class="col-md-3">
                             SUBSCRIPTION END DATE <br>
