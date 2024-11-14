@@ -52,9 +52,9 @@ class FlowerUserBookingController extends Controller
                         ->whereNull('pooja_date')
                         ->take(9)
                         ->get();
-        $products = FlowerProduct::where('status', 'active')
-                        ->where('category', 'Subscription')
-                        ->get();
+        // $products = FlowerProduct::where('status', 'active')
+        //                 ->where('category', 'Subscription')
+        //                 ->get();
     
         return view("user/flower", compact('upcomingPoojas', 'otherpoojas', 'products', 'banners'));
     }

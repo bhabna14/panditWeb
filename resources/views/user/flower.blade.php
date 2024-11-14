@@ -14,6 +14,12 @@
     height: 600px;
 
 }
+
+.text-decoration-line-through {
+    text-decoration: line-through; /* Strikethrough for the MRP */
+    color: #aaa; /* Light grey for the crossed-out MRP */
+}
+
 /* 
 .product-card:hover {
     transform: translateY(-10px) scale(1.03);
@@ -54,7 +60,7 @@
     font-size: 18px;
     font-weight: bold;
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .product-description {
@@ -67,6 +73,7 @@
     font-size: 20px;
     color: #B90B0B;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .btn-gradient {
@@ -130,8 +137,12 @@
               <div class="card-body text-center">
                 <h5 class="product-title">{{ $product['name'] }}</h5>
                 <p class="product-description">{{ $product['description'] }}</p>
-                <p class="product-price mb-3">₹ {{ number_format($product['price'], 2) }}</p>
-                <p class="product-mrp text-muted">MRP: ₹ {{ number_format($product['mrp'], 2) }}</p>
+                <p class="product-price">
+                  <span class="text-decoration-line-through">₹ {{ number_format($product['mrp'], 2) }}</span> 
+                  ₹ {{ number_format($product['price'], 2) }}
+              </p>
+              
+                {{-- <p class="product-mrp text-muted">MRP: ₹ {{ number_format($product['mrp'], 2) }}</p> --}}
                 @if(Auth::guard('users')->check())
                   <a href="{{ route('checkout', ['product_id' => $product['product_id']]) }}" class="btn btn-gradient w-100 mt-2">
                     Buy Now
