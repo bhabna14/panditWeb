@@ -102,7 +102,7 @@
       <div id="homeBannerCarousel" class="owl-carousel owl-theme">
         @foreach ($banners as $banner)
           <div class="item">
-            <img src="{{ $banner['banner_img'] }}" alt="{{ $banner['alt_text'] ?? 'Home Banner' }}" class="img-fluid d-block w-100">
+            <img src="{{ $banner['banner_img_url'] }}" alt="{{ $banner['alt_text'] ?? 'Home Banner' }}" class="img-fluid d-block w-100">
           </div>
         @endforeach
       </div>
@@ -125,7 +125,7 @@
                   <div class="col-md-4 mb-4">
                       <div class="product-card shadow-lg position-relative">
                           <div class="product-image-container">
-                              <img src="{{ $product['product_image'] }}" alt="{{ $product['name'] }}" class="product-image">
+                            <img src="{{ asset($product['product_image']) }}" alt="{{ $product['name'] }}" class="product-image">
                           </div>
                           <div class="card-body text-center">
                               <h5 class="product-title">{{ $product['name'] }}</h5>
