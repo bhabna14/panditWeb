@@ -234,8 +234,8 @@ class OtplessLoginController extends Controller
         // Validate the OTP length
         $validator = Validator::make($request->all(), [
             'otp' => 'required|digits:6', // Ensure OTP is exactly 6 digits
-            'device_id' => 'required|string', // Validate device_id
-            'platform' => 'required|string', // Validate platform
+            // 'device_id' => 'required|string', // Validate device_id
+            // 'platform' => 'required|string', // Validate platform
         ]);
     
         if ($validator->fails()) {
