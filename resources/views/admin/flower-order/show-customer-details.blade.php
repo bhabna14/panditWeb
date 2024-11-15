@@ -132,7 +132,7 @@
                                             <div class="main-profile-body p-0">
                                                 <div class="row row-sm">
                                                     <div class="col-12">
-                                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                                        <table id="file-datatable" class="table table-bordered ">
                                                             <thead>
                                                                 <tr>
                                                                     <th>Order ID</th>
@@ -196,7 +196,7 @@
                                             <div class="main-profile-body p-0">
                                                 <div class="row row-sm">
                                                     <div class="col-12">
-                                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                                        <table id="file-datatable" class="table table-bordered ">
                                                             <thead>
                                                                 <tr>
                                                                     <th>Request ID</th>
@@ -246,10 +246,12 @@
                                                                            {{$request->status}}
                                                                         </td>
                                                                         <td>
-                                                                            <strong>Address:</strong> {{ $request->address->area ?? "" }}<br>
-                                                                            <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
-                                                                            <strong>State:</strong> {{ $request->address->state ?? ""}}<br>
-                                                                            <strong>Zip Code:</strong> {{ $request->address->pincode ?? "" }}
+                                                                            <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->locality ?? "" }}<br>
+                                                                            <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
+                    
+                                                                            <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
+                                                                            <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
+                                                                            <strong>Pin Code:</strong> {{ $order->address->pincode ?? "" }}
                                                                         </td>
                                                                     </tr>
                                                                 @endforeach

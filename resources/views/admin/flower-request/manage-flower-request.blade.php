@@ -115,7 +115,7 @@
                                     </div>
                                     @endif
                                     <div class="table-responsive  export-table">
-                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                        <table id="file-datatable" class="table table-bordered ">
                                             <thead>
                                                 <tr>
                                                     <th>Request ID</th>

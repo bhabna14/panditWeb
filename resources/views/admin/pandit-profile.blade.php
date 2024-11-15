@@ -315,7 +315,7 @@
                                 <div class="main-profile-body p-0">
                                     <div class="row row-sm">
                                         <div class="col-12">
-                                            <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                            <table id="file-datatable" class="table table-bordered ">
                                                 <thead>
                                                     <tr>
                                                         <th class="border-bottom-0">#</th>
@@ -369,7 +369,7 @@
                                 <div class="main-profile-body p-0">
                                     <div class="row row-sm">
                                         <div class="col-12">
-                                            <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                            <table id="file-datatable" class="table table-bordered ">
                                                 <thead>
                                                     <tr>
                                                         <th class="border-bottom-0">#</th>
@@ -405,7 +405,7 @@
                                 <div class="main-profile-body p-0">
                                     <div class="row row-sm">
                                         <div class="col-12">
-                                            <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                            <table id="file-datatable" class="table table-bordered ">
                                                 <thead>
                                                     <tr>
                                                         <th class="border-bottom-0">#</th>

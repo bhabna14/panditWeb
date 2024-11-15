@@ -50,7 +50,7 @@
                         <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
                     </div> -->
                     <div class="table-responsive export-table">
-                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                        <table id="file-datatable" class="table table-bordered ">
                             <thead>
                                 <tr>
                                     <th class="border-bottom-0">Slno</th>
