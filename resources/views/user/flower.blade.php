@@ -14,6 +14,16 @@
     height: 600px;
 
 }
+.product-car_cust {
+    border-radius: 15px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+    /* height: 600px; */
+
+}
 
 .text-decoration-line-through {
     text-decoration: line-through; /* Strikethrough for the MRP */
@@ -122,6 +132,60 @@
     <div class="row" style="margin-top: 30px;">
       <div class="col-md-12">
         <div class="flower-package-heading">
+          <h1>Customized Flower</h1>
+        </div>
+      </div>
+    </div>
+  
+    <div class="row" style="margin-top: 20px; margin-bottom: 140px;">
+      @if($customizedpps->isNotEmpty())
+          @foreach($customizedpps as $customizedpp)
+            <div class="product-car_cust row shadow-lg position-relative">
+              <div class="col-md-3 mb-4">
+                
+                      <div class="product-image-container">
+                          <img src="{{ asset('storage/'.$customizedpp->product_image) }}" alt="{{ $customizedpp->name }}" class="product-image">
+                         
+                      </div>
+                    
+                 
+              </div>
+              <div class="col-md-9">
+                <div class="card-body ">
+                  <h5 class="product-title">{{ $customizedpp->name }}</h5>
+                  <p class="product-description">{{ $customizedpp->description }}</p>
+                  <p class="product-price">
+                    {{ $customizedpp->immediate_price }}
+                  </p>
+                
+                  @if(Auth::guard('users')->check())
+                    <!-- User is logged in -->
+                    <a href="{{ route('cutsomized-checkout', ['product_id' => $customizedpp->product_id]) }}" class="btn btn-gradient w-100 mt-2">
+                        Order Now
+                    </a>
+                  @else
+                      <!-- User is not logged in -->
+                      <a href="{{route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
+                          Order Now
+                      </a>
+                  @endif
+              
+                </div>
+              </div>
+             </div>
+          @endforeach
+      @else
+          <p class="text-center">No products available at the moment.</p>
+      @endif
+  </div>
+  </div>
+</section>
+
+<section style="margin-top: -60px;">
+  <div class="container">
+    <div class="row" style="margin-top: 30px;">
+      <div class="col-md-12">
+        <div class="flower-package-heading">
           <h1>Flower Package</h1>
         </div>
       </div>
@@ -147,12 +211,12 @@
                           @if(Auth::guard('users')->check())
                             <!-- User is logged in -->
                             <a href="{{ route('checkout', ['product_id' => $product->product_id]) }}" class="btn btn-gradient w-100 mt-2">
-                                Buy Now
+                                Order Now
                             </a>
                           @else
                               <!-- User is not logged in -->
                               <a href="{{route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
-                                  Buy Now
+                                  Order Now
                               </a>
                           @endif
                       

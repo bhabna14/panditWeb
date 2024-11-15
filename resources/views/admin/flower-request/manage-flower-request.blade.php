@@ -180,10 +180,12 @@
                                                             </form>
                                                         </td>
                                                         <td>
-                                                            <strong>Address:</strong> {{ $request->address->area ?? "" }}<br>
-                                                            <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
-                                                            <strong>State:</strong> {{ $request->address->state ?? ""}}<br>
-                                                            <strong>Zip Code:</strong> {{ $request->address->pincode ?? "" }}
+                                                            <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->locality ?? "" }}<br>
+                                                            <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
+    
+                                                            <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
+                                                            <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
+                                                            <strong>Pin Code:</strong> {{ $order->address->pincode ?? "" }}
                                                         </td>
                                                     </tr>
                                                 @endforeach

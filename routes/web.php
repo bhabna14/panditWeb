@@ -124,6 +124,8 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::controller(FlowerUserBookingController::class)->group(function() {
       
         Route::get('/checkout/{product_id}',  'show')->name('checkout');
+        Route::get('/cutsomized-checkout/{product_id}',  'cutsomizedcheckout')->name('cutsomized-checkout');
+
         Route::post('/booking/flower/subscription', 'processBooking')->name('booking.flower.subscription');
         Route::get('/subscription-history', 'subscriptionhistory')->name('subscription.history');
         

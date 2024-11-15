@@ -77,6 +77,8 @@
                     <option value="Puja Item">Puja Item</option>
                     <option value="Subscription">Subscription</option>
                     <option value="Flower">Flower</option>
+                    <option value="Immediateproduct">Immediate Product</option>
+
                     <!-- Add other categories as needed -->
                 </select>
             </div>

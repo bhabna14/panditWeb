@@ -47,8 +47,11 @@ class FlowerUserBookingController extends Controller
         $products = FlowerProduct::where('status', 'active')
                         ->where('category', 'Subscription')
                         ->get();
+        $customizedpps = FlowerProduct::where('status', 'active')
+                        ->where('category', 'Immediateproduct')
+                        ->get();
     
-        return view("user/flower", compact('upcomingPoojas', 'otherpoojas', 'products', 'banners'));
+        return view("user/flower", compact('upcomingPoojas', 'otherpoojas', 'products', 'banners','customizedpps'));
     }
     
     public function show($product_id)
@@ -65,6 +68,22 @@ class FlowerUserBookingController extends Controller
 
         // Pass the product and subscription details to the view
         return view('user.flower-subscription-checkout', compact('product','addresses','user'));
+    }
+
+    public function cutsomizedcheckout($product_id)
+    {
+        // dd($product_id);
+        // Retrieve the product details by product_id
+        // $product = FlowerProduct::findOrFail($product_id);
+        
+        $product = FlowerProduct::where('product_id', $product_id)->firstOrFail();
+       
+        $user = Auth::guard('users')->user();
+        $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
+        // $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
+
+        // Pass the product and subscription details to the view
+        return view('user.flower-customized-checkout', compact('product','addresses','user'));
     }
     public function processBooking(Request $request)
     {

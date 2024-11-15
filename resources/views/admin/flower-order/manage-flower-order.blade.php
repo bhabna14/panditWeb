@@ -140,10 +140,12 @@
 
                                                     </td>
                                                     <td>
-                                                        <strong>Address:</strong> {{ $order->address->area ?? "" }}<br>
+                                                        <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->locality ?? "" }}<br>
+                                                        <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
+
                                                         <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
                                                         <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
-                                                        <strong>Zip Code:</strong> {{ $order->address->pincode ?? "" }}
+                                                        <strong>Pin Code:</strong> {{ $order->address->pincode ?? "" }}
                                                     </td>
                                                     {{-- <td>{{ $order->total_price }}</td> --}}
                                                     <td>{{ number_format($order->total_price, 2) }}</td>
