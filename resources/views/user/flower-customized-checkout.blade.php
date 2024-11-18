@@ -1,6 +1,7 @@
 @extends('user.layouts.front-flower')
 
 @section('styles')
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <!-- jQuery UI CSS for datepicker -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 
@@ -113,7 +114,7 @@
                             <div class="col-4">
                                 <label for="">Flower</label>
                                 <select name="item[]" class="form-control" required>
-                                    <option selected>Choose Item</option>
+                                  
                                     @foreach($singleflowers as $singleflower)
                                         <option value="{{ $singleflower->name }}">
                                             {{ $singleflower->name }}
@@ -127,7 +128,7 @@
                             </div>
                             <div class="col-4">
                                 <label for="">Unit</label>
-                                <select name="unit[]" class="form-control">
+                                <select name="unit[]" class="form-control" required>
                                     <option selected>Choose Unit</option>
                                     @foreach($Poojaunits as $Poojaunit)
                                         <option value="{{ $Poojaunit->unit_name }}">
@@ -144,17 +145,15 @@
                             <i class="fas fa-plus-circle" style="margin-right:5px"></i> Add More
                         </button>
                     </div>
-                
-                    @if(!$addresses->isEmpty())
                     <div class="row">
                         <div class="form-input mt-20 col-md-6">
                             <label for="date">Please Select the Date</label>
-                            <input type="text" name="date" required class="form-control" id="date">
+                            <input type="text" name="date" required class="form-control" id="date" required>
                         </div>
                         
                         <div class="form-input mt-20 col-md-6">
                             <label for="time">Please Select the Time</label>
-                            <input type="text" name="time" required class="form-control" id="time">
+                            <input type="text" name="time" required class="form-control" id="time" required>
                         </div>
                         
                 
@@ -163,27 +162,35 @@
                             <textarea name="suggestion" id="suggestion" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
-                    @endif
-                
+                    
                     <div class="row">
                         <div class="col-md-12">
-                            @foreach ($addresses as $address)
-                                <div class="your-address">
-                                    <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
-                                    <label for="address{{ $address->id }}">
-                                        <div class="address-type">{{ $address->address_type }}</div>
-                                        {{ $address->apartment_flat_plot ?? "" }}, {{ $address->localityDetails->locality_name ?? 'N/A' }},
-                                        {{ $address->landmark ?? "" }}<br>
-                                        {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
-                                        @if($address->default == 1)
-                                            <div class="default-badge">Default</div>
-                                        @endif
-                                    </label>
-                                </div>
-                            @endforeach
+                            <div class="your-address-list">
+                                @if($addresses->isEmpty())
+                                    <div class="alert alert-warning">
+                                        Please add an address to continue with your order.
+                                    </div>
+                                @else
+                                    @foreach ($addresses as $address)
+                                        <div class="your-address">
+                                            <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
+                                            <label for="address{{ $address->id }}">
+                                                <div class="address-type">{{ $address->address_type }}</div>
+                                                {{ $address->apartment_flat_plot ?? "" }}, {{ $address->localityDetails->locality_name ?? 'N/A' }},
+                                                {{ $address->landmark ?? "" }}<br>
+                                                {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
+                                                @if($address->default == 1)
+                                                    <div class="default-badge">Default</div>
+                                                @endif
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                @endif
+                            </div>
                         </div>
                     </div>
-                
+                    
+                    
                     <div class="row" style="margin-top:20px; margin-bottom: 24px;">
                         <div class="col-md-4">
                             <a href="#" class="add-address-btn" id="addAddressBtn"><i class="fa fa-plus"></i> Add Address</a>
@@ -220,134 +227,124 @@
         <span class="close" id="closeModal">&times;</span>
         <div class="row">
             <div class="col-md-12">
-                <form id="addressForm" action="{{ route('savefrontaddress') }}" method="post" enctype="multipart/form-data">
+                <form id="addressForm" method="POST">
                     @csrf
-
-                    <div class="row ">
-                      <div class="col-md-12">
-                          <div class="form-group">
-                              <label for="exampleInputEmail1">Type</label>
-                          </div>
-                      </div>
-                      <div class="col-md-2">
-                        <div class="form-check custom-radio-button">
-                          <input type="radio" class="form-check-input" id="individual" name="place_category" value="Indivisual" required>
-                          <label class="form-check-label" for="individual">
-                              <span class="custom-radio"></span>
-                              Individual
-                          </label>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Type</label>
+                            </div>
                         </div>
-                   
-                    
-                      </div>
-                      <div class="col-lg-2">
-                        <div class="form-check custom-radio-button">
-                          <input type="radio" class="form-check-input" id="apartment" name="place_category" value="Apartment">
-                          <label class="form-check-label" for="apartment">
-                              <span class="custom-radio"></span>
-                              Apartment
-                          </label>
-                      </div>
-                      </div>
-                      <div class="col-lg-2">
-                          
-                          <div class="form-check custom-radio-button">
-                            <input type="radio" class="form-check-input" id="business" name="place_category" value="Business">
-                            <label class="form-check-label" for="business">
-                                <span class="custom-radio"></span>
-                                Business
-                            </label>
-                          </div>
+                        <div class="col-md-2">
+                            <div class="form-check custom-radio-button">
+                                <input type="radio" class="form-check-input" id="individual" name="place_category" value="Indivisual" required>
+                                <label class="form-check-label" for="individual">
+                                    <span class="custom-radio"></span>
+                                    Individual
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-check custom-radio-button">
+                                <input type="radio" class="form-check-input" id="apartment" name="place_category" value="Apartment" required>
+                                <label class="form-check-label" for="apartment">
+                                    <span class="custom-radio"></span>
+                                    Apartment
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-check custom-radio-button">
+                                <input type="radio" class="form-check-input" id="business" name="place_category" value="Business" required>
+                                <label class="form-check-label" for="business">
+                                    <span class="custom-radio"></span>
+                                    Business
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-lg-2">
+                            <div class="form-check custom-radio-button">
+                                <input type="radio" class="form-check-input" id="temple" name="place_category" value="Temple" required>
+                                <label class="form-check-label" for="temple">
+                                    <span class="custom-radio"></span>
+                                    Temple
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-lg-2">
-                          
-                      <div class="form-check custom-radio-button">
-                        <input type="radio" class="form-check-input" id="temple" name="place_category" value="Temple">
-                        <label class="form-check-label" for="temple">
-                            <span class="custom-radio"></span>
-                            Temple
-                        </label>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row mt-2">
-                    <div class="col-md-6 ">
-                        <label for="apartment_flat_plot" class="form-label">Apartment/Flat/Plot</label>
-                        <input type="text" class="form-control" id="apartment_flat_plot" name="apartment_flat_plot" placeholder="Enter details" required>
-                    </div>
-                    <div class="col-md-6 ">
-                        <label for="landmark" class="form-label">Landmark</label>
-                        <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Enter landmark" required>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                  <div class="col-md-6">
-                      <label for="locality" class="form-label">Locality</label>
-                      <select class="form-control" id="locality" name="locality" required>
-                          <option value="">Select Locality</option>
-                          @foreach($localities as $locality)
-                              <option value="{{ $locality->unique_code }}" data-pincode="{{ $locality->pincode }}">
-                                  {{ $locality->locality_name }}
-                              </option>
-                          @endforeach
-                      </select>
-                  </div>
-                  <div class="col-md-6">
-                      <label for="pincode" class="form-label">Pincode</label>
-                      <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required pattern="\d{6}" readonly>
-                  </div>
-              </div>
-              
-                     
-                      <div class="row mt-2">
+                    <div class="row mt-2">
                         <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="exampleInputEmail1">Town/City   </label>
-                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="city" placeholder="Enter Town/City *" required>
-                          </div>
+                            <label for="apartment_flat_plot" class="form-label">Apartment/Flat/Plot</label>
+                            <input type="text" class="form-control" id="apartment_flat_plot" name="apartment_flat_plot" placeholder="Enter details" required>
                         </div>
                         <div class="col-md-6">
-                          <div class="form-group">
-                            <label for="exampleInputEmail1">State</label>
-                            <select name="state" class="form-control" id="">
-                              <option value="Odisha">Odisha</option>
+                            <label for="landmark" class="form-label">Landmark</label>
+                            <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Enter landmark" required>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label for="locality" class="form-label">Locality</label>
+                            <select class="form-control" id="locality" name="locality" required>
+                                <option value="">Select Locality</option>
+                                @foreach($localities as $locality)
+                                    <option value="{{ $locality->unique_code }}" data-pincode="{{ $locality->pincode }}">
+                                        {{ $locality->locality_name }}
+                                    </option>
+                                @endforeach
                             </select>
-                          </div>
                         </div>
-                      </div>
-                     
-                      
-
-                      <div class="row mt-2">
+                        <div class="col-md-6">
+                            <label for="pincode" class="form-label">Pincode</label>
+                            <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required pattern="\d{6}" readonly>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">Town/City</label>
+                                <input type="text" class="form-control" id="exampleInputEmail1" name="city" placeholder="Enter Town/City *" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="exampleInputEmail1">State</label>
+                                <select name="state" class="form-control" required>
+                                    <option value="Odisha">Odisha</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Address Type</label>
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <label class="rdiobox"><input name="address_type" type="radio" value="Home"> <span>Home</span></label>
+                            <label class="rdiobox">
+                                <input name="address_type" type="radio" value="Home" required> <span>Home</span>
+                            </label>
                         </div>
                         <div class="col-lg-2">
-                            <label class="rdiobox"><input name="address_type" type="radio" value="Work"> <span>Work</span></label>
+                            <label class="rdiobox">
+                                <input name="address_type" type="radio" value="Work" required> <span>Work</span>
+                            </label>
                         </div>
                         <div class="col-lg-2">
-                          <label class="rdiobox"><input checked name="address_type" type="radio" value="Other"> <span>Other</span></label>
-                      </div>
+                            <label class="rdiobox">
+                                <input name="address_type" type="radio" value="Other" required checked> <span>Other</span>
+                            </label>
+                        </div>
                     </div>
-                   
-                  
-                </div>
-              </div>
-
-              <div class="d-inline-block">
-
-                <button type="submit" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
-                  Save Address<div class="icon-arrow-top-right ml-15"></div>
-                </button>
-
-              </div>
-            
-            </form>
+                    <div class="d-inline-block">
+                        <button type="submit" id="saveAddressBtn" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
+                            Save Address
+                        </button>
+                        
+                    </div>
+                </form>
+                
             </div>
         </div>
     </div>
@@ -419,22 +416,92 @@
 
 });
 
+// Open address modal
+$("#addAddressBtn").click(function() {
+    $("#addressModal").show();
+});
 
-        // Modal logic
-        $("#addAddressBtn").click(function() {
-            $("#addressModal").show();
-        });
+// Close the modal
+$("#closeModal").click(function() {
+    $("#addressModal").hide();
+});
 
-        $("#closeModal").click(function() {
-            $("#addressModal").hide();
-        });
+// Close modal if clicked outside
+window.onclick = function(event) {
+    if (event.target == document.getElementById("addressModal")) {
+        $("#addressModal").hide();
+    }
+};
 
-        // Close modal if user clicks outside of it
-        window.onclick = function(event) {
-            if (event.target == document.getElementById("addressModal")) {
-                $("#addressModal").hide();
+// Handle address form submission
+// Handle address form submission
+$('#addressForm').on('submit', function (e) {
+    e.preventDefault(); // Prevent the form from submitting normally
+
+    var formData = new FormData(this); // Collect form data
+
+    // AJAX request to submit the form
+    $.ajax({
+        url: '{{ route('savefrontaddress') }}', // The route to handle form submission
+        type: 'POST',
+        data: formData,
+        processData: false, // Prevent jQuery from transforming the data
+        contentType: false, // Don't set content type for FormData
+        success: function (response) {
+            if (response.success) {
+                // Close the modal if the address was saved successfully
+                $('#addressModal').hide();
+
+                // Show success message with SweetAlert
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Address saved successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'Okay'
+                });
+
+                // Dynamically append the new address to the address list
+                var localityName = response.address.locality ? response.address.locality : 'N/A';
+                var newAddressHtml = '<div class="your-address">' +
+                                        '<input type="radio" name="address_id" id="address' + response.address.id + '" value="' + response.address.id + '" required>' +
+                                        '<label for="address' + response.address.id + '">' +
+                                            '<div class="address-type">' + response.address.address_type + '</div>' +
+                                            response.address.apartment_flat_plot + ', ' + localityName + ', ' +
+                                            response.address.city + ', ' + response.address.state + ', ' + response.address.country + ', ' + response.address.pincode +
+                                        '</label>' +
+                                    '</div>';
+
+                // Append the new address to the 'your-address-list' container
+                $('.your-address-list').append(newAddressHtml);
+
+                // Hide the empty warning message if there are now addresses
+                $('.alert-warning').hide();
+            } else {
+                // If there was an error saving the address, show an error message with SweetAlert
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'There was an error saving the address.',
+                    icon: 'error',
+                    confirmButtonText: 'Okay'
+                });
             }
-        };
+        },
+        error: function (xhr, status, error) {
+            // Show an error message if the AJAX request fails
+            Swal.fire({
+                title: 'Error!',
+                text: 'There was an error processing your request. Please try again later.',
+                icon: 'error',
+                confirmButtonText: 'Okay'
+            });
+        }
+    });
+});
+
+
+
+
+
     });
 </script>
 <script>
@@ -449,42 +516,7 @@
         }
     });
   </script>
-  <script>
-    $(document).ready(function() {
-    $('#addressForm').on('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
 
-        var formData = new FormData(this);
-
-        $.ajax({
-            url: $(this).attr('action'),
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                // SweetAlert to show success message
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success',
-                    text: response.message, // Display the message sent by the server
-                    confirmButtonText: 'OK'
-                });
-            },
-            error: function(xhr) {
-                // SweetAlert to show error message
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Failed to save address. Please try again.',
-                    confirmButtonText: 'OK'
-                });
-            }
-        });
-    });
-});
-
-  </script>
      <script>
         $(document).ready(function() {
             // Add new flower group

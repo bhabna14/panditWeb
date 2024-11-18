@@ -117,10 +117,16 @@ class FlowerAddressController extends Controller
             $addressdata->default = 1;
         }
     
-        $addressdata->save();
+        try {
+            $addressdata->save();
+            return response()->json(['success' => true, 'message' => 'Address saved successfully!'], 200);
+        } catch (\Exception $e) {
+            \Log::error('Error saving address: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Error saving address.']);
+        }
+        
     
-        // return redirect()->back()->with('success', 'Address created successfully.');
-        return response()->json(['message' => 'Address saved successfully!'], 200);
+      
 
     }
     

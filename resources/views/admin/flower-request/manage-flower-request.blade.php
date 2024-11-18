@@ -167,7 +167,8 @@
                                                                 {{-- Show the input box and save button if no price is set --}}
                                                                 <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST" style="display: inline;">
                                                                     @csrf
-                                                                    <input type="number" name="price" class="form-control" placeholder="Enter Price" required>
+                                                                    <input type="number" name="requested_flower_price" class="form-control" placeholder="Enter Price" required>
+                                                                    <input type="number" name="delivery_charge" class="form-control" placeholder="Enter Delivery Charge" required>
                                                                     <button type="submit" class="btn btn-primary mt-2">Save</button>
                                                                 </form>
                                                             @endif
