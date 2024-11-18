@@ -23,7 +23,7 @@ class FlowerRequestController extends Controller
             },
             'flowerProduct',
             'user',
-            'address',
+            'address.localityDetails',
             'flowerRequestItems'  // Eager load flowerRequestItems
         ])
         ->orderBy('id', 'desc')

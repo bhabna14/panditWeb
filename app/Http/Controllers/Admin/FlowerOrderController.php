@@ -21,7 +21,7 @@ class FlowerOrderController extends Controller
     public function showOrders()
     {
         $orders = Order::whereNull('request_id')
-                       ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address'])
+                       ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address.localityDetails'])
                        ->orderBy('id', 'desc')
                        ->get();
                        $activeSubscriptions = Subscription::where('status', 'active')->count();
@@ -53,7 +53,7 @@ class FlowerOrderController extends Controller
         // This ensures that only orders with a related subscription are included
         $query->whereColumn('orders.order_id', 'subscriptions.order_id');
     })
-    ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address'])
+    ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address.localityDetails'])
     ->orderBy('id', 'desc')
     ->get();
 

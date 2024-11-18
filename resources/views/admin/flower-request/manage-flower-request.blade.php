@@ -182,7 +182,7 @@
                                                         <td>
                                                             <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->locality ?? "" }}<br>
                                                             <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
-    
+
                                                             <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
                                                             <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
                                                             <strong>Pin Code:</strong> {{ $order->address->pincode ?? "" }}
