@@ -1,12 +1,12 @@
-@extends('user.layouts.front')
+@extends('user.layouts.front-flower')
 
 @section('styles')
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css">
+<!-- jQuery UI CSS for datepicker -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- jQuery Timepicker CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
+
 <style>
     .ui-datepicker {
         font-size: 16px;
@@ -17,9 +17,6 @@
     .ui-datepicker td a {
         cursor: pointer;
     }
-</style>
-<style>
-    /* Modal styles */
     .modal {
         display: none;
         position: fixed;
@@ -29,11 +26,9 @@
         width: 100%;
         height: 100%;
         overflow: auto;
-        background-color: rgb(0, 0, 0);
         background-color: rgba(0, 0, 0, 0.4);
         padding-top: 60px;
     }
-
     .modal-content {
         background-color: #fefefe;
         margin: 5% auto;
@@ -41,56 +36,28 @@
         border: 1px solid #888;
         width: 80%;
     }
-
     .close {
         color: #aaa;
         float: right;
         font-size: 28px;
         font-weight: bold;
     }
-
     .close:hover,
     .close:focus {
         color: black;
         text-decoration: none;
         cursor: pointer;
     }
-
     .form-group {
         margin-bottom: 15px;
     }
-
-    .form-control {
-        width: 100%;
-        padding: 10px;
-        margin: 5px 0 10px 0;
-        display: inline-block;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        box-sizing: border-box;
-    }
-
-    /* .button {
-        background-color: blue;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .button:hover {
-        background-color: darkblue;
-    } */
-
     .mt-10 {
         margin-top: 10px;
     }
-
     .pt-30 {
         padding-top: 30px;
     }
-</style>  
+</style>
 @endsection
 
 @section('content')
@@ -98,15 +65,10 @@
     <div class="container">
         <div class="row">
             <div class="contents-wrapper">
-                <div class="sc-gJqsIT bdDCMj logo" height="6rem" width="30rem">
-                    <div class="low-res-container">
-                    </div>
-                </div>
                 <h1 class="sc-7kepeu-0 kYnyFA description">BOOK NOW</h1>
             </div>
         </div>
 </section>
-
 
 <section class="booking-form mt-30 mb-30">
     <div class="container">
@@ -130,31 +92,33 @@
             <script>
                 Swal.fire({
                     icon: 'success',
-                    title: 'Subscription Activated Successfully',
+                    title: 'Flower request created successfully!',
                     text: '{{ session('success') }}',
                     confirmButtonText: 'Okay'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Redirect to the booking history page
-                        window.location.href = '{{ route('subscription.history') }}'; // Make sure to use the correct route name
+                        window.location.href = '{{ route('subscription.history') }}';
                     }
                 });
             </script>
-             @endif
+            @endif
 
             <div class="col-md-7">
-                <form action="{{ route('booking.flower.subscription') }}" method="POST" id="bookingForm">
+                <form action="{{ route('booking.flower.customizedstore') }}" method="POST" id="bookingForm">
                     @csrf
-                    <input type="hidden" name="duration" value="{{ $product->duration }}">
-                    <input type="hidden" name="price" value="{{ $product->price }}">
                     <input type="hidden" name="product_id" value="{{ $product->product_id }}">
+                    
                     <div id="flower-container">
                         <div class="row mb-3 flower-group">
                             <div class="col-4">
                                 <label for="">Flower</label>
-                                <select name="item[]" class="form-control">
-                                    <option value="Lotus">Lotus</option>
-                                    <!-- Add more options as needed -->
+                                <select name="item[]" class="form-control" required>
+                                    <option selected>Choose Item</option>
+                                    @foreach($singleflowers as $singleflower)
+                                        <option value="{{ $singleflower->name }}">
+                                            {{ $singleflower->name }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="col-4">
@@ -164,32 +128,42 @@
                             <div class="col-4">
                                 <label for="">Unit</label>
                                 <select name="unit[]" class="form-control">
-                                    <option value="Lotus">Lotus</option>
-                                    <!-- Add more options as needed -->
+                                    <option selected>Choose Unit</option>
+                                    @foreach($Poojaunits as $Poojaunit)
+                                        <option value="{{ $Poojaunit->unit_name }}">
+                                            {{ $Poojaunit->unit_name }}
+                                        </option>
+                                    @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3 mt-2">
-                                <button type="button" class="btn btn-primary add-more-btn">Add More</button>
-                            </div>
                         </div>
                     </div>
-                    
-                   
-                    
+                
+                    <div class="col-md-3 mt-3">
+                        <button type="button" class="button -md -blue-1 bg-dark-3 text-white mt-6 mb-15" id="addFlower" style="font-weight: bold; padding: 10px 20px;">
+                            <i class="fas fa-plus-circle" style="margin-right:5px"></i> Add More
+                        </button>
+                    </div>
+                
                     @if(!$addresses->isEmpty())
                     <div class="row">
-                        <div class="form-input mt-20 col-md-12">
-                            <label for="">Please Select the Date</label>
-                            <input type="date" name="start_date" required class="form-control" id="booking_date" placeholder="Select a date and time">
+                        <div class="form-input mt-20 col-md-6">
+                            <label for="date">Please Select the Date</label>
+                            <input type="text" name="date" required class="form-control" id="date">
                         </div>
-
+                        
+                        <div class="form-input mt-20 col-md-6">
+                            <label for="time">Please Select the Time</label>
+                            <input type="text" name="time" required class="form-control" id="time">
+                        </div>
+                        
+                
                         <div class="form-input mt-20 col-md-12">
-                            <label for="">Suggestions</label>
-                            <textarea name="suggestion" id="suggestion"  class="form-control"  rows="3"></textarea>
+                            <label for="suggestion">Suggestions</label>
+                            <textarea name="suggestion" id="suggestion" class="form-control" rows="3"></textarea>
                         </div>
                     </div>
-
-                     @endif
+                    @endif
                 
                     <div class="row">
                         <div class="col-md-12">
@@ -198,7 +172,9 @@
                                     <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
                                     <label for="address{{ $address->id }}">
                                         <div class="address-type">{{ $address->address_type }}</div>
-                                        {{ $address->area }}, {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
+                                        {{ $address->apartment_flat_plot ?? "" }}, {{ $address->localityDetails->locality_name ?? 'N/A' }},
+                                        {{ $address->landmark ?? "" }}<br>
+                                        {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
                                         @if($address->default == 1)
                                             <div class="default-badge">Default</div>
                                         @endif
@@ -207,33 +183,29 @@
                             @endforeach
                         </div>
                     </div>
-  
+                
                     <div class="row" style="margin-top:20px; margin-bottom: 24px;">
                         <div class="col-md-4">
                             <a href="#" class="add-address-btn" id="addAddressBtn"><i class="fa fa-plus"></i> Add Address</a>
                         </div>
                     </div>
-  
-                    <button type="button" id="payButton" class="button -md -blue-1 bg-dark-3 text-white mt-20">Pay with Razorpay</button>
-                   
+                
+                    <button type="submit" class="button -md -blue-1 bg-dark-3 text-white mt-20">Order Now</button>
                 </form>
+                
+           
             </div>
             <div class="col-xl-5 col-lg-5">
                 <div class="md:ml-0">
                     <div class="px-30 py-30 border-light rounded-4">
-                        <div class="text-20 fw-500 mb-30">Your Custpmization Details</div>
+                        <div class="text-20 fw-500 mb-30">Your Customization Details</div>
                         <div class="row x-gap-15 y-gap-20">
                             <div class="col-auto">
-                                <!-- Display the product or pandit's photo -->
                                 <img src="{{ asset('storage/'.$product->product_image ?? 'default-image.jpg') }}" alt="Subscription Image" class="size-140 rounded-4 object-cover">
                             </div>
                             <div class="col">
                                 <div class="lh-17 fw-500">{{ $product->name }}</div>
-                                {{-- <input type="hidden" class="form-control" name="product_id" value="{{ $product_id }}"> --}}
-                                
-                                <div class="text-16 lh-15 mt-5 fw-600">
-                                   {{  $product->immediate_price }}
-                                </div>
+                                <div class="text-16 lh-15 mt-5 fw-600">{{ $product->immediate_price }}</div>
                             </div>
                         </div>
                     </div>
@@ -243,66 +215,113 @@
     </div>
 </section>
 
-  
 <div id="addressModal" class="modal">
     <div class="modal-content">
         <span class="close" id="closeModal">&times;</span>
         <div class="row">
             <div class="col-md-12">
-                <form action="{{ route('savefrontaddress') }}" method="post" enctype="multipart/form-data">
+                <form id="addressForm" action="{{ route('savefrontaddress') }}" method="post" enctype="multipart/form-data">
                     @csrf
-                    {{-- <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="fullname" placeholder="Enter Your Full Name">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="number" placeholder="Enter Mobile number">
-                            </div>
-                        </div>
-                    </div> --}}
-                    <div class="row mt-10">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <select name="country" class="form-control">
-                                    <option value="India">India</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <select name="state" class="form-control">
-                                    <option value="Odisha">Odisha</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-10">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="city" placeholder="Enter Town/City *" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <input type="text" class="form-control" name="pincode" placeholder="Enter Pincode *" required pattern="\d{6}" maxlength="6" title="Pincode should be exactly 6 digits">
 
-                            </div>
+                    <div class="row ">
+                      <div class="col-md-12">
+                          <div class="form-group">
+                              <label for="exampleInputEmail1">Type</label>
+                          </div>
+                      </div>
+                      <div class="col-md-2">
+                        <div class="form-check custom-radio-button">
+                          <input type="radio" class="form-check-input" id="individual" name="place_category" value="Indivisual" required>
+                          <label class="form-check-label" for="individual">
+                              <span class="custom-radio"></span>
+                              Individual
+                          </label>
                         </div>
+                   
+                    
+                      </div>
+                      <div class="col-lg-2">
+                        <div class="form-check custom-radio-button">
+                          <input type="radio" class="form-check-input" id="apartment" name="place_category" value="Apartment">
+                          <label class="form-check-label" for="apartment">
+                              <span class="custom-radio"></span>
+                              Apartment
+                          </label>
+                      </div>
+                      </div>
+                      <div class="col-lg-2">
+                          
+                          <div class="form-check custom-radio-button">
+                            <input type="radio" class="form-check-input" id="business" name="place_category" value="Business">
+                            <label class="form-check-label" for="business">
+                                <span class="custom-radio"></span>
+                                Business
+                            </label>
+                          </div>
                     </div>
-                    <div class="row mt-10">
+                    <div class="col-lg-2">
+                          
+                      <div class="form-check custom-radio-button">
+                        <input type="radio" class="form-check-input" id="temple" name="place_category" value="Temple">
+                        <label class="form-check-label" for="temple">
+                            <span class="custom-radio"></span>
+                            Temple
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col-md-6 ">
+                        <label for="apartment_flat_plot" class="form-label">Apartment/Flat/Plot</label>
+                        <input type="text" class="form-control" id="apartment_flat_plot" name="apartment_flat_plot" placeholder="Enter details" required>
+                    </div>
+                    <div class="col-md-6 ">
+                        <label for="landmark" class="form-label">Landmark</label>
+                        <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Enter landmark" required>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                      <label for="locality" class="form-label">Locality</label>
+                      <select class="form-control" id="locality" name="locality" required>
+                          <option value="">Select Locality</option>
+                          @foreach($localities as $locality)
+                              <option value="{{ $locality->unique_code }}" data-pincode="{{ $locality->pincode }}">
+                                  {{ $locality->locality_name }}
+                              </option>
+                          @endforeach
+                      </select>
+                  </div>
+                  <div class="col-md-6">
+                      <label for="pincode" class="form-label">Pincode</label>
+                      <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required pattern="\d{6}" readonly>
+                  </div>
+              </div>
+              
+                     
+                      <div class="row mt-2">
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="exampleInputEmail1">Town/City   </label>
+                            <input type="text" class="form-control" id="exampleInputEmail1" value="" name="city" placeholder="Enter Town/City *" required>
+                          </div>
+                        </div>
+                        <div class="col-md-6">
+                          <div class="form-group">
+                            <label for="exampleInputEmail1">State</label>
+                            <select name="state" class="form-control" id="">
+                              <option value="Odisha">Odisha</option>
+                            </select>
+                          </div>
+                        </div>
+                      </div>
+                     
+                      
+
+                      <div class="row mt-2">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <textarea name="area" class="form-control" rows="5" placeholder="Enter Area, Street, Sector, Village *" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-10">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="address_type">Address Type *</label>
+                                <label for="exampleInputEmail1">Address Type</label>
                             </div>
                         </div>
                         <div class="col-md-2">
@@ -312,137 +331,207 @@
                             <label class="rdiobox"><input name="address_type" type="radio" value="Work"> <span>Work</span></label>
                         </div>
                         <div class="col-lg-2">
-                            <label class="rdiobox"><input checked name="address_type" type="radio" value="Other"> <span>Other</span></label>
-                        </div>
+                          <label class="rdiobox"><input checked name="address_type" type="radio" value="Other"> <span>Other</span></label>
+                      </div>
                     </div>
-                    <div class="d-inline-block pt-30">
-                        <button type="submit" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">Save Address</button>
-                    </div>
-                </form>
+                   
+                  
+                </div>
+              </div>
+
+              <div class="d-inline-block">
+
+                <button type="submit" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
+                  Save Address<div class="icon-arrow-top-right ml-15"></div>
+                </button>
+
+              </div>
+            
+            </form>
             </div>
         </div>
     </div>
 </div>
-
-
 @endsection
 
 @section('scripts')
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
- <!-- JavaScript -->
- <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const container = document.getElementById('flower-container');
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        if (container) {
-            container.addEventListener('click', function (e) {
-                if (e.target.classList.contains('add-more-btn')) {
-                    e.preventDefault();
-                    
-                    // Clone the flower-group and remove the "Add More" button
-                    let clone = e.target.closest('.flower-group').cloneNode(true);
-                    let addMoreButton = clone.querySelector('.add-more-btn');
-                    
-                    if (addMoreButton) {
-                        addMoreButton.textContent = 'Remove';
-                        addMoreButton.classList.remove('btn-primary', 'add-more-btn');
-                        addMoreButton.classList.add('btn-danger', 'remove-btn');
-                    }
+<!-- jQuery library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
-                    // Append the new clone to the container
-                    container.appendChild(clone);
-                }
+<!-- jQuery UI library for datepicker -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
-                // Remove the cloned group when the "Remove" button is clicked
-                if (e.target.classList.contains('remove-btn')) {
-                    e.preventDefault();
-                    e.target.closest('.flower-group').remove();
-                }
-            });
+<!-- jQuery Timepicker plugin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Initialize datepicker
+        $(document).ready(function() {
+    // Initialize datepicker
+    $("#date").datepicker({
+        dateFormat: "yy-mm-dd",
+        minDate: 0,
+        onSelect: function(dateText) {
+            console.log("Date selected: " + dateText);
+            // Update the time picker when a date is selected
+            $("#time").timepicker('option', 'minTime', getMinTime());
         }
     });
-</script>
 
-<script>
-    // Get the modal
-    var modal = document.getElementById("addressModal");
+    // Calculate current time + 2 hours and format it for the timepicker
+    function getMinTime() {
+        const now = new Date();
+        now.setHours(now.getHours() + 2);
+        now.setMinutes(0); // Round minutes to the nearest 15 if needed
 
-    // Get the button that opens the modal
-    var btn = document.getElementById("addAddressBtn");
+        // Format the time as HH:mm
+        let hours = now.getHours();
+        let minutes = now.getMinutes();
+        if (minutes < 10) minutes = '0' + minutes;
+        if (hours < 10) hours = '0' + hours;
 
-    // Get the <span> element that closes the modal
-    var span = document.getElementById("closeModal");
-
-    // When the user clicks the button, open the modal 
-    btn.onclick = function() {
-        modal.style.display = "block";
+        return `${hours}:${minutes}`;
     }
 
-    // When the user clicks on <span> (x), close the modal
-    span.onclick = function() {
-        modal.style.display = "none";
+    // Initialize timepicker
+    $(document).ready(function() {
+    // Initialize timepicker
+    $("#time").timepicker({
+        timeFormat: 'h:i A', // 12-hour format with AM/PM
+        step: 15, // Interval for selectable times
+        minTime: getMinTime(), // Start time is 2 hours from current time
+        maxTime: '23:59', // Optional: Set max time if needed
+        dynamic: false,
+        dropdown: true,
+        scrollbar: true
+    });
+
+    // Function to get minimum time 2 hours from current time
+    function getMinTime() {
+        let currentTime = new Date();
+        currentTime.setHours(currentTime.getHours() + 2);
+        return currentTime.getHours() + ':' + currentTime.getMinutes();
     }
+});
 
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+});
 
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-<script>
-    document.getElementById('payButton').onclick = function(e) {
-        e.preventDefault();
-    
-        console.log('Pay button clicked. Initializing Razorpay...');
-        var amount = {{ ($product->price) * 100 }}; // Amount in paise
-    
-        var options = {
-            "key": "{{ config('services.razorpay.key') }}",
-            "amount": amount,
-            "name": "33 Flower",
-            "description": "",
-            "image": "{{ asset('front-assets/img/brand/logo.png') }}",
-            "handler": function(response) {
-                console.log('Payment handler triggered.');
-                console.log('Payment ID:', response.razorpay_payment_id);
-    
-                // Check if the form exists and add hidden input for payment ID
-                var form = document.getElementById('bookingForm');
-                if (form) {
-                    console.log('Form found. Appending payment ID...');
-                    form.appendChild(createHiddenInput('razorpay_payment_id', response.razorpay_payment_id));
-                    console.log('Submitting form...');
-                    form.submit();
-                } else {
-                    console.error('Form not found!');
-                }
-            },
-            "prefill": {
-                "name": "{{ $user->name }}",
-                "contact": "{{ $user->phone_number }}"
-            },
-            "theme": {
-                "color": "#F37254"
+        // Modal logic
+        $("#addAddressBtn").click(function() {
+            $("#addressModal").show();
+        });
+
+        $("#closeModal").click(function() {
+            $("#addressModal").hide();
+        });
+
+        // Close modal if user clicks outside of it
+        window.onclick = function(event) {
+            if (event.target == document.getElementById("addressModal")) {
+                $("#addressModal").hide();
             }
         };
+    });
+</script>
+<script>
+    document.getElementById('locality').addEventListener('change', function() {
+        var selectedOption = this.options[this.selectedIndex];
+        var pincode = selectedOption.getAttribute('data-pincode');
+  
+        if (pincode) {
+            document.getElementById('pincode').value = pincode;
+        } else {
+            document.getElementById('pincode').value = '';
+        }
+    });
+  </script>
+  <script>
+    $(document).ready(function() {
+    $('#addressForm').on('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        var formData = new FormData(this);
+
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                // SweetAlert to show success message
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: response.message, // Display the message sent by the server
+                    confirmButtonText: 'OK'
+                });
+            },
+            error: function(xhr) {
+                // SweetAlert to show error message
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to save address. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        });
+    });
+});
+
+  </script>
+     <script>
+        $(document).ready(function() {
+            // Add new flower group
+            $("#addFlower").click(function() {
+                $("#flower-container").append(`
+                    <div class="row mb-3 input-wrapper">
+                        <div class="col-4">
+                            <label for="">Flower</label>
+                            <select name="item[]" class="form-control" required>
+                                <option selected>Choose Item</option>
+                                @foreach($singleflowers as $singleflower)
+                                <option value="{{ $singleflower->name }}">
+                                    {{ $singleflower->name }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label for="">Quantity</label>
+                            <input type="text" name="quantity[]" required class="form-control" placeholder="Enter quantity">
+                        </div>
+                        <div class="col-4">
+                            <label for="">Unit</label>
+                            <select name="unit[]" class="form-control">
+                                <option selected>Choose Unit</option>
+                                @foreach($Poojaunits as $Poojaunit)
+                                <option value="{{ $Poojaunit->unit_name }}">
+                                    {{ $Poojaunit->unit_name }}
+                                </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-12 mt-2 text-right">
+                            <button type="button" class="button -md -blue-1 bg-dark-3 text-white mt-6 removeChild" style="font-weight: bold; padding: 10px 20px;">
+                                <i class="fas fa-minus-circle" style="margin-right:5px"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                `);
+            });
     
-        var rzp1 = new Razorpay(options);
-        console.log('Opening Razorpay checkout...');
-        rzp1.open();
-    };
-    
-    function createHiddenInput(name, value) {
-        var input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value;
-        return input;
-    }
+            // Remove a flower group
+            $(document).on('click', '.removeChild', function() {
+                $(this).closest('.input-wrapper').remove(); // Remove the parent div with class input-wrapper
+            });
+        });
     </script>
+    
+
 @endsection

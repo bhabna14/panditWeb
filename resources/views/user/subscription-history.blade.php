@@ -1,4 +1,5 @@
-@extends('user.layouts.front-dashboard')
+@extends('user.layouts.front-flower-dashboard')
+
 
 @section('styles')
 <style>

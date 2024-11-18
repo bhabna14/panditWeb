@@ -10,7 +10,7 @@
               <style>
              
                 .page-single {
-    background-image: url('{{ asset('images/bg.jpg') }}'); /* Replace with your image path */
+    background-image: url('{{ asset('images/flowerbg.jpeg') }}'); /* Replace with your image path */
     background-size: cover;  /* Ensure the image covers the whole container */
     background-position: center center; /* Center the image */
     background-repeat: no-repeat;  /* Prevent repeating the image */
@@ -48,7 +48,7 @@
                         <div class="col-lg-8 col-md-10">
                             <div class="card border-0 shadow-lg" style="border-radius: 15px; overflow: hidden; background: #ffffff; position: relative;">
                                 <!-- Decorative flower images for corners -->
-                                <img src="{{asset('images/f1.png')}}" alt="Flower" class="corner-flower" style="
+                                {{-- <img src="{{asset('images/f1.png')}}" alt="Flower" class="corner-flower" style="
     position: absolute;
     top: -8px;
     left: -15px;
@@ -58,7 +58,7 @@
                                 <img src="{{asset('images/f2.png')}}" alt="Flower" class="corner-flower" style="position: absolute; top: -20px; right: -20px; height: 80px; z-index: 1; opacity: 0.7;">
                                 <img src="{{asset('images/f3.png')}}" alt="Flower" class="corner-flower" style="position: absolute; bottom: -20px; left: -20px; height: 80px; z-index: 1; opacity: 0.7;">
                                 <img src="{{asset('images/f4.png')}}" alt="Flower" class="corner-flower" style="position: absolute; bottom: -20px; right: -20px; height: 80px; z-index: 1; opacity: 0.7;">
-                    
+                     --}}
                                 <div class="card-header text-center" style="background-color: #fff; padding: 20px; border-bottom: 1px solid #000;">
                                     {{-- <img src="{{ asset('assets/img/brand/logo.png') }}" alt="logo" style="height: 50px; margin-bottom: 10px;"> --}}
                                     <h3 class="mt-2" style="color: #000; font-weight: 600; ">Get Flower For Your Pooja</h3>

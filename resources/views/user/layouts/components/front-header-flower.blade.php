@@ -6,8 +6,8 @@
       <div class="col-auto">
         <div class="d-flex items-center">
           <a href="{{url('/')}}" class="header-logo mr-50" data-x="header-logo" data-x-toggle="is-logo-dark">
-            <img src="{{asset('front-assets/img/brand/logo.png')}}" alt="image" >
-            <img src="{{asset('front-assets/img/brand/logo.png')}}" alt="image" >
+            <img src="{{asset('front-assets/img/brand/Logo_Black.png')}}" alt="image" >
+            <img src="{{asset('front-assets/img/brand/Logo_Black.png')}}" alt="image" >
           </a>
 
 
@@ -37,12 +37,12 @@
                        Pooja List
                     </a>
                   </li> --}}
-                  <li class="d-none xl:d-flex">
+                  {{-- <li class="d-none xl:d-flex">
                     <a href="{{route('panditlogin')}}" class="button px-10 fw-300 -blue-1 h-50 " style="   font-size: 15px;
                   color: #000;
                  text-transform: uppercase;" ><i class="d-flex items-center icon-user text-inherit text-21 mx-10" style="margin-right: 7px;"></i> Pandit Login</a>
           
-                  </li>
+                  </li> --}}
                   {{-- <li>
                     <a href="book-temple-sevayat-name.html">
                        Panji
@@ -118,13 +118,13 @@
                   <div class="bg-white sm:px-0 sm:py-15 rounded-4 text-center">
                       <div class="y-gap-5 js-results">
                           <div class="text-center js-search-option">
-                              <a href="{{ url('/user-dashboard') }}">Dashboard</a>
+                              <a href="{{ url('/user-flower-dashboard') }}">Dashboard</a>
                           </div>
                           <div class="text-center js-search-option">
                             <a href="{{ route('subscription.history') }}">Manage Subscription History</a>
                           </div>
                           <div class="text-center js-search-option">
-                              <a href="{{ url('manage-address') }}">Manage Address</a>
+                              <a href="{{ url('manage-user-address') }}">Manage Address</a>
                           </div>
                          
                           <div class="text-center js-search-option">

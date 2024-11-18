@@ -19,6 +19,11 @@ use App\Models\Poojalist;
 use App\Models\UserAddress;
 use App\Models\Profile;
 use App\Models\Poojadetails;
+use App\Models\Locality;
+use App\Models\PoojaUnit;
+use App\Models\FlowerRequest;
+use App\Models\FlowerRequestItem;
+
 use Illuminate\Support\Facades\Http;
 
 class FlowerUserBookingController extends Controller
@@ -75,7 +80,13 @@ class FlowerUserBookingController extends Controller
         // dd($product_id);
         // Retrieve the product details by product_id
         // $product = FlowerProduct::findOrFail($product_id);
-        
+        $singleflowers = FlowerProduct::where('status', 'active')
+                        ->where('category', 'Flower')
+                        ->get();
+        $Poojaunits = PoojaUnit::where('status', 'active')
+                       
+                        ->get();
+        $localities = Locality::where('status', 'active')->get();
         $product = FlowerProduct::where('product_id', $product_id)->firstOrFail();
        
         $user = Auth::guard('users')->user();
@@ -83,7 +94,7 @@ class FlowerUserBookingController extends Controller
         // $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
 
         // Pass the product and subscription details to the view
-        return view('user.flower-customized-checkout', compact('product','addresses','user'));
+        return view('user.flower-customized-checkout', compact('Poojaunits','singleflowers','product','addresses','user','localities'));
     }
     public function processBooking(Request $request)
     {
@@ -220,6 +231,47 @@ class FlowerUserBookingController extends Controller
         // Pass the orders to the view
         return view('user.subscription-history', compact('subscriptionsOrder'));
     }
-    
+    public function userflowerdashboard(){
+        return view('user.user-flower-dashboard');
+    }
+
+
+
+    // customized order
+    public function customizedstore(Request $request)
+    {
+        $user = Auth::guard('users')->user();
+
+        // Generate the request ID
+        $requestId = 'REQ-' . strtoupper(Str::random(12));
+
+        // Create the flower request and store the request ID
+        $flowerRequest = FlowerRequest::create([
+            'request_id' => $requestId,
+            'product_id' => $request->product_id,
+            'user_id' => $user->userid,
+            'address_id' => $request->address_id,
+            'description' => $request->description,
+            'suggestion' => $request->suggestion,
+            'date' => $request->date,
+            'time' => $request->time,
+            'status' => 'pending'
+        ]);
+
+        // Loop through flower names, units, and quantities to create FlowerRequestItem entries
+        foreach ($request->item as $index => $flowerName) {
+            FlowerRequestItem::create([
+                'flower_request_id' => $requestId,
+                'flower_name' => $flowerName,
+                'flower_unit' => $request->unit[$index],
+                'flower_quantity' => $request->quantity[$index],
+            ]);
+        }
+
+        // Return success message using SweetAlert and redirect
+        // return redirect()->route('flower.history')->with('success', 'Flower request created successfully!');
+        return redirect()->back()->with('success', 'Flower request created successfully!');
+
+    }
     
 }

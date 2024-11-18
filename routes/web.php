@@ -6,6 +6,8 @@ use App\Http\Controllers\User\FlowerUserBookingController;
 
 use App\Http\Controllers\User\PaymentController;
 use App\Http\Controllers\User\FlowerRegistrationController;
+use App\Http\Controllers\User\FlowerAddressController;
+
 
 use App\Http\Controllers\OtplessLoginController;
 
@@ -129,6 +131,31 @@ Route::group(['middleware' => ['auth:users']], function () {
         Route::post('/booking/flower/subscription', 'processBooking')->name('booking.flower.subscription');
         Route::get('/subscription-history', 'subscriptionhistory')->name('subscription.history');
         
+        // customized order route
+        Route::post('/booking/customized-order', 'customizedstore')->name('booking.flower.customizedstore');
+
+
+        Route::get('/user-flower-dashboard', 'userflowerdashboard')->name('userflowerdashboard');
+       
+
+    });
+    Route::controller(FlowerAddressController::class)->group(function() {
+      
+       
+        Route::get('/manage-user-address', 'mnguseraddress')->name('mnguseraddress');
+        Route::get('/useraddress/set-default/{id}', 'usersetDefault')->name('usersetDefaultAddress');
+        Route::get('/user-add-address', 'useraddaddress')->name('useraddaddress');
+
+        Route::get('/useraddaddress', 'useraddfrontaddress')->name('useraddfrontaddress');
+
+        Route::post('/saveuseraddress', 'saveuseraddress')->name('saveuseraddress');
+        Route::post('/savefrontaddress', 'savefrontaddress')->name('savefrontaddress');
+
+        Route::get('edituseraddress/{id}',  'edituseraddress')->name('edituseraddress');
+        Route::post('updateuseraddress', 'updateuseraddress')->name('updateuseraddress');
+        Route::get('removeaddress/{id}',  'removeAddress')->name('removeaddress');
+
+
     });
 });
 //user middleware routes
@@ -144,7 +171,7 @@ Route::group(['middleware' => ['auth:users']], function () {
         Route::get('/addaddress', 'addfrontaddress')->name('addfrontaddress');
         Route::get('/add-address', 'addaddress')->name('addaddress');
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
-        Route::post('/savefrontaddress', 'savefrontaddress')->name('savefrontaddress');
+        // Route::post('/savefrontaddress', 'savefrontaddress')->name('savefrontaddress');
 
         Route::get('editaddress/{id}',  'editAddress')->name('editAddress');
         Route::post('updateaddress', 'updateAddress')->name('updateaddress');

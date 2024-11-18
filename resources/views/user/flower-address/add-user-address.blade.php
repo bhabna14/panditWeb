@@ -1,4 +1,5 @@
-@extends('user.layouts.front-dashboard')
+@extends('user.layouts.front-flower-dashboard')
+
 
 @section('styles')
 <style>
@@ -53,7 +54,7 @@
                       </div>
                   @endif
               
-                  <form action="{{ route('saveaddress') }}" method="post" enctype="multipart/form-data">
+                  <form action="{{ route('saveuseraddress') }}" method="post" enctype="multipart/form-data">
                     @csrf
 
                     <div class="row ">
@@ -113,16 +114,24 @@
                         <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Enter landmark" required>
                     </div>
                 </div>
-                  <div class="row mt-2">
-                    <div class="col-md-6 ">
-                        <label for="locality" class="form-label">Locality</label>
-                        <input type="text" class="form-control" id="locality" name="locality" placeholder="Enter locality" required>
-                    </div>
-                    <div class="col-md-6 ">
-                        <label for="pincode" class="form-label">Pincode</label>
-                        <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required pattern="\d{6}">
-                    </div>
-                </div>
+                <div class="row mt-2">
+                  <div class="col-md-6">
+                      <label for="locality" class="form-label">Locality</label>
+                      <select class="form-control" id="locality" name="locality" required>
+                          <option value="">Select Locality</option>
+                          @foreach($localities as $locality)
+                              <option value="{{ $locality->unique_code }}" data-pincode="{{ $locality->pincode }}">
+                                  {{ $locality->locality_name }}
+                              </option>
+                          @endforeach
+                      </select>
+                  </div>
+                  <div class="col-md-6">
+                      <label for="pincode" class="form-label">Pincode</label>
+                      <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required pattern="\d{6}" readonly>
+                  </div>
+              </div>
+              
                      
                       <div class="row mt-2">
                         <div class="col-md-6">
@@ -185,5 +194,23 @@
 @endsection
 
 @section('scripts')
+<script>
+  setTimeout(function() {
+      document.getElementById('Message').style.display = 'none';
+  }, 3000);
+</script>
+<script>
+  document.getElementById('locality').addEventListener('change', function() {
+      var selectedOption = this.options[this.selectedIndex];
+      var pincode = selectedOption.getAttribute('data-pincode');
+
+      if (pincode) {
+          document.getElementById('pincode').value = pincode;
+      } else {
+          document.getElementById('pincode').value = '';
+      }
+  });
+</script>
+
 @endsection
 
