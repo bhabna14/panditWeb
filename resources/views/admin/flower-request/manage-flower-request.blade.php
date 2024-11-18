@@ -180,7 +180,13 @@
                                                         <td>
                                                             <form action="{{ route('admin.markPayment', $request->request_id) }}" method="POST" style="display: inline;">
                                                                 @csrf
-                                                                <button type="submit" class="btn btn-success mt-2" {{ $request->status === 'paid' ? 'disabled' : '' }}>Paid</button>
+                                                                @if ($request->status == 'pending' || $request->status == 'paid')
+                                                                    <!-- If status is 'pending' or 'paid', disable the button -->
+                                                                    <button type="submit" class="btn btn-success mt-2" disabled>Paid</button>
+                                                                @elseif ($request->status == 'approved')
+                                                                    <!-- If status is 'approved', enable the button -->
+                                                                    <button type="submit" class="btn btn-success mt-2">Paid</button>
+                                                                @endif
                                                             </form>
                                                         </td>
                                                         <td>
