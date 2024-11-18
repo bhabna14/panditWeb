@@ -167,8 +167,11 @@
                                                                 {{-- Show the input box and save button if no price is set --}}
                                                                 <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST" style="display: inline;">
                                                                     @csrf
-                                                                    <input type="number" name="requested_flower_price" class="form-control" placeholder="Enter Price" required>
+                                                                    <input type="number" name="requested_flower_price" class="form-control" placeholder="Enter Price" required style="margin-bottom: 13px;">
                                                                     <input type="number" name="delivery_charge" class="form-control" placeholder="Enter Delivery Charge" required>
+                                                                    <span class="form-text text-muted" style="font-size: 12px; margin-top: 5px;">
+                                                                        If the delivery charge is 0, please enter "0" instead of leaving it blank.
+                                                                    </span>
                                                                     <button type="submit" class="btn btn-primary mt-2">Save</button>
                                                                 </form>
                                                             @endif
@@ -181,12 +184,12 @@
                                                             </form>
                                                         </td>
                                                         <td>
-                                                            <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->locality ?? "" }}<br>
-                                                            <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
+                                                            <strong>Address:</strong> {{ $request->address->apartment_flat_plot ?? "" }}, {{ $request->address->locality ?? "" }}<br>
+                                                            <strong>Landmark:</strong> {{ $request->address->landmark ?? "" }}<br>
 
-                                                            <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
-                                                            <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
-                                                            <strong>Pin Code:</strong> {{ $order->address->pincode ?? "" }}
+                                                            <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
+                                                            <strong>State:</strong> {{ $request->address->state ?? ""}}<br>
+                                                            <strong>Pin Code:</strong> {{ $request->address->pincode ?? "" }}
                                                         </td>
                                                     </tr>
                                                 @endforeach
