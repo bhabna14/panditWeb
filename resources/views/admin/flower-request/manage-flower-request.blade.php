@@ -192,7 +192,7 @@
                                                             </form>
                                                         </td>
                                                         <td>
-                                                            <strong>Address:</strong> {{ $request->address->apartment_flat_plot ?? "" }}, {{ $request->address->locality ?? "" }}<br>
+                                                            <strong>Address:</strong> {{ $request->address->apartment_flat_plot ?? "" }}, {{ $request->address->locality_name ?? "" }}<br>
                                                             <strong>Landmark:</strong> {{ $request->address->landmark ?? "" }}<br>
 
                                                             <strong>City:</strong> {{ $request->address->city ?? ""}}<br>

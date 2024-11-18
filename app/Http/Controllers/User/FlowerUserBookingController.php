@@ -23,6 +23,7 @@ use App\Models\Locality;
 use App\Models\PoojaUnit;
 use App\Models\FlowerRequest;
 use App\Models\FlowerRequestItem;
+use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Http;
 
@@ -241,10 +242,16 @@ class FlowerUserBookingController extends Controller
     public function customizedstore(Request $request)
     {
         $user = Auth::guard('users')->user();
-
+    
+        // Log user data
+        Log::info('User Data:', ['user' => $user]);
+    
         // Generate the request ID
         $requestId = 'REQ-' . strtoupper(Str::random(12));
-
+    
+        // Log the generated request ID
+        Log::info('Generated Request ID:', ['request_id' => $requestId]);
+    
         // Create the flower request and store the request ID
         $flowerRequest = FlowerRequest::create([
             'request_id' => $requestId,
@@ -257,21 +264,28 @@ class FlowerUserBookingController extends Controller
             'time' => $request->time,
             'status' => 'pending'
         ]);
-
+    
+        // Log the created flower request
+        Log::info('Flower Request Created:', ['flower_request' => $flowerRequest]);
+    
         // Loop through flower names, units, and quantities to create FlowerRequestItem entries
         foreach ($request->item as $index => $flowerName) {
-            FlowerRequestItem::create([
+            $flowerRequestItem = FlowerRequestItem::create([
                 'flower_request_id' => $requestId,
                 'flower_name' => $flowerName,
                 'flower_unit' => $request->unit[$index],
                 'flower_quantity' => $request->quantity[$index],
             ]);
+    
+            // Log each created flower request item
+            Log::info('Flower Request Item Created:', ['flower_request_item' => $flowerRequestItem]);
         }
-
+    
         // Return success message using SweetAlert and redirect
-        // return redirect()->route('flower.history')->with('success', 'Flower request created successfully!');
-        return redirect()->back()->with('success', 'Flower request created successfully!');
-
+        // Log the successful creation of the flower request
+        Log::info('Flower request created successfully for request ID:', ['request_id' => $requestId]);
+    
+        return redirect()->back()->with('message', 'Flower request created successfully!');
     }
     
 }

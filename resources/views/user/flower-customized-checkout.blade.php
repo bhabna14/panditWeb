@@ -7,7 +7,7 @@
 
 <!-- jQuery Timepicker CSS -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <style>
     .ui-datepicker {
         font-size: 16px;
@@ -79,29 +79,29 @@
                 <li>{{ $error }}</li>
             @endforeach
             @if (session('error'))
-                <script>
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: '{{ session('error') }}',
-                        confirmButtonText: 'Okay'
-                    });
-                </script>
-            @endif
-
-            @if (session('success'))
             <script>
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Flower request created successfully!',
-                    text: '{{ session('success') }}',
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: '{{ session('error') }}',
                     confirmButtonText: 'Okay'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '{{ route('subscription.history') }}';
-                    }
                 });
             </script>
+            @endif
+            
+            @if (session('message'))
+                <script>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Flower request created successfully!',
+                        text: '{{ session('message') }}',
+                        confirmButtonText: 'Okay'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '{{ route('subscription.history') }}';
+                        }
+                    });
+                </script>
             @endif
 
             <div class="col-md-7">
@@ -352,7 +352,7 @@
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 <!-- jQuery library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
