@@ -162,7 +162,9 @@
                                                         <td>
                                                             @if($request->order && $request->order->total_price)
                                                                 {{-- Display the saved price if it exists --}}
-                                                                <span>{{ $request->order->total_price }} </span>
+                                                                <span>Total Price : {{ $request->order->total_price }} <br>
+                                                                    Price Of Flower : {{ $request->order->requested_flower_price }} <br>
+                                                                Delivery Charge : {{ $request->order->delivery_charge }} </span>
                                                             @else
                                                                 {{-- Show the input box and save button if no price is set --}}
                                                                 <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST" style="display: inline;">
