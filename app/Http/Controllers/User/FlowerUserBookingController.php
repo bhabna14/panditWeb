@@ -270,6 +270,25 @@ class FlowerUserBookingController extends Controller
         return view('user.requested-order-history', compact('requestedOrders'));
 
     }
+    public function requestedOrderDetails($id)
+{
+    $userId = Auth::guard('users')->user()->userid;
+    
+    // Fetch the requested order by ID and include its relationships
+    $requestedOrder = FlowerRequest::where('id', $id)
+        ->where('user_id', $userId)
+        ->with([
+            'order.flowerPayments',
+            'flowerProduct',
+            'user',
+            'address.localityDetails',
+            'flowerRequestItems'
+        ])
+        ->firstOrFail();
+
+    return view('user.view-requested-order-details', compact('requestedOrder'));
+}
+
     public function userflowerdashboard(){
         return view('user.user-flower-dashboard');
     }

@@ -139,7 +139,8 @@ Route::group(['middleware' => ['auth:users']], function () {
         Route::post('/booking/customized-order', 'customizedstore')->name('booking.flower.customizedstore');
         Route::post('/request-order/payment', 'RequestpaymentCallback')->name('request.order.payment.callback');
         Route::get('/requested-order-history', 'requestedorderhistory')->name('requested.order.history');
-      
+        Route::get('/requested-order/{id}/details', 'requestedOrderDetails')->name('requested.order.details');
+
         Route::get('/user-flower-dashboard', 'userflowerdashboard')->name('userflowerdashboard');
        
 

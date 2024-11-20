@@ -240,9 +240,11 @@
                           @endif
                           
                         
-                        <a href="#" class="button px-10 fw-400 text-14 pay-button-bg h-50 text-white">
-                          View Details
-                       </a>
+                          <a href="{{ route('requested.order.details', ['id' => $request->id]) }}" 
+                            class="button px-10 fw-400 text-14 pay-button-bg h-50 text-white">
+                            View Details
+                         </a>
+                         
                     </div>
                 </div>
             </div>
