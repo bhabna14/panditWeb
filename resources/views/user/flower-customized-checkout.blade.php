@@ -98,7 +98,7 @@
                         confirmButtonText: 'Okay'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            window.location.href = '{{ route('subscription.history') }}';
+                            window.location.href = '{{ route('requested.order.history') }}';
                         }
                     });
                 </script>
