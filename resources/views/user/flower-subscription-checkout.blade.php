@@ -152,7 +152,7 @@
                     <div class="row">
                         <div class="form-input mt-20 col-md-12">
                             <label for="">Please Select the Date</label>
-                            <input type="date" name="start_date" required class="form-control" id="booking_date" placeholder="Select a date and time">
+                            <input type="text" name="start_date" required class="form-control" id="date" placeholder="Select a date">
                         </div>
 
                         <div class="form-input mt-20 col-md-12">
@@ -166,17 +166,19 @@
                     <div class="row">
                         <div class="col-md-12">
                             @foreach ($addresses as $address)
-                                <div class="your-address">
-                                    <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
-                                    <label for="address{{ $address->id }}">
-                                        <div class="address-type">{{ $address->address_type }}</div>
-                                        {{ $address->area }}, {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
-                                        @if($address->default == 1)
-                                            <div class="default-badge">Default</div>
-                                        @endif
-                                    </label>
-                                </div>
-                            @endforeach
+                            <div class="your-address">
+                                <input type="radio" name="address_id" id="address{{ $address->id }}" value="{{ $address->id }}" required>
+                                <label for="address{{ $address->id }}">
+                                    <div class="address-type">{{ $address->address_type }}</div>
+                                    {{ $address->apartment_flat_plot ?? "" }}, {{ $address->localityDetails->locality_name ?? 'N/A' }},
+                                    {{ $address->landmark ?? "" }}<br>
+                                    {{ $address->city }}, {{ $address->state }}, {{ $address->country }}, {{ $address->pincode }}
+                                    @if($address->default == 1)
+                                        <div class="default-badge">Default</div>
+                                    @endif
+                                </label>
+                            </div>
+                        @endforeach
                         </div>
                     </div>
   
@@ -329,9 +331,29 @@
     }
 </script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
+<!-- jQuery UI library for datepicker -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
+<!-- jQuery Timepicker plugin -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
 
+<script>
+   
+        // Initialize datepicker
+        $(document).ready(function() {
+    // Initialize datepicker
+    $("#date").datepicker({
+        dateFormat: "yy-mm-dd",
+        minDate: 0,
+        onSelect: function(dateText) {
+            console.log("Date selected: " + dateText);
+            // Update the time picker when a date is selected
+            $("#time").timepicker('option', 'minTime', getMinTime());
+        }
+    });
+
+});
+</script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     document.getElementById('payButton').onclick = function(e) {
@@ -343,7 +365,7 @@
         var options = {
             "key": "{{ config('services.razorpay.key') }}",
             "amount": amount,
-            "name": "33 Flower",
+            "name": "33 Crores",
             "description": "",
             "image": "{{ asset('front-assets/img/brand/logo.png') }}",
             "handler": function(response) {

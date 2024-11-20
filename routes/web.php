@@ -126,15 +126,20 @@ Route::group(['middleware' => ['auth:users']], function () {
     Route::controller(FlowerUserBookingController::class)->group(function() {
       
         Route::get('/checkout/{product_id}',  'show')->name('checkout');
-        Route::get('/cutsomized-checkout/{product_id}',  'cutsomizedcheckout')->name('cutsomized-checkout');
 
         Route::post('/booking/flower/subscription', 'processBooking')->name('booking.flower.subscription');
         Route::get('/subscription-history', 'subscriptionhistory')->name('subscription.history');
-        
+        Route::post('/subscription/{order_id}/pause',  'pause')->name('subscription.pause');
+        Route::post('/subscription/{order_id}/resume',  'resume')->name('subscription.resume');
+
+        Route::get('/subscription-details/{order_id}',  'viewSubscriptionOrderDetails')->name('subscription.details');
         // customized order route
+        Route::get('/cutsomized-checkout/{product_id}',  'cutsomizedcheckout')->name('cutsomized-checkout');
+
         Route::post('/booking/customized-order', 'customizedstore')->name('booking.flower.customizedstore');
-
-
+        Route::post('/request-order/payment', 'RequestpaymentCallback')->name('request.order.payment.callback');
+        Route::get('/requested-order-history', 'requestedorderhistory')->name('requested.order.history');
+      
         Route::get('/user-flower-dashboard', 'userflowerdashboard')->name('userflowerdashboard');
        
 
