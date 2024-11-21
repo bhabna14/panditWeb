@@ -23,32 +23,31 @@ use Illuminate\Http\Request;
 use App\Models\PanditEducation;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Hash;
 
 
 class AdminController extends Controller
 {
     //
     public function adminlogin(){
+
         return view("adminlogin");
     }
     public function authenticate(Request $request)
     {
 
-        $request->validate([
-            'phonenumber' => 'required|string',
-            'otp' => 'required',
+        $credentials = $request->validate([
+            'email' => 'required',
+            'password' => 'required'
         ]);
-    
-        $phonenumber = $request->input('phonenumber');
-        $otp = $request->input('otp');
-    
-        $superadmin = Admin::where('phonenumber', $phonenumber)->first();
-    
-        if ($superadmin && $superadmin->otp === $otp) {
-            Auth::guard('admins')->login($superadmin);
+        // $credentials = $request->only('name', 'password');
+        if (Auth::guard('admins')->attempt($request->only('email', 'password'))) {
+           
             return redirect()->intended('/admin/dashboard');
-        } else {
+            
+        }
+    
+       else {
             return redirect()->back()->withInput()->withErrors(['login_error' => 'Invalid phone number or email']);
         }
     }
@@ -68,7 +67,7 @@ class AdminController extends Controller
     public function adminlogout()
     {
       
-        return view("panditlogin");
+        return view("adminlogin");
     }
 
     public function managepandit() {
