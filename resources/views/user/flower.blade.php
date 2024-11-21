@@ -11,7 +11,7 @@
     transition: transform 0.3s, box-shadow 0.3s;
     border: none;
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
-    height: 600px;
+    height: 735px;
 
 }
 .product-car_cust {
@@ -42,7 +42,7 @@
 
 .product-image {
     width: 100%;
-    height: 250px;
+    /* height: 250px; */
     object-fit: cover;
     transition: transform 0.3s;
 }
