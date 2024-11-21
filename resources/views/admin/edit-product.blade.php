@@ -77,7 +77,8 @@
                     <option value="Puja Item" {{ $product->category == 'Puja Item' ? 'selected' : '' }}>Puja Item</option>
                     <option value="Subscription" {{ $product->category == 'Subscription' ? 'selected' : '' }}>Subscription</option>
                     <option value="Flower" {{ $product->category == 'Flower' ? 'selected' : '' }}>Flower</option>
-                   
+                    <option value="Immediateproduct" {{ $product->category == 'Immediateproduct' ? 'selected' : '' }}>Immediate Product</option>
+
                     <!-- Add other categories as needed -->
                 </select>
             </div>
