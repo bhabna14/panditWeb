@@ -148,12 +148,12 @@
                     <div class="row">
                         <div class="form-input mt-20 col-md-6">
                             <label for="date">Please Select the Date</label>
-                            <input type="text" name="date" required class="form-control" id="date" required>
+                            <input type="text" name="date" required placeholder="Please Select The Date" class="form-control" id="date" required>
                         </div>
                         
                         <div class="form-input mt-20 col-md-6">
                             <label for="time">Please Select the Time</label>
-                            <input type="text" name="time" required class="form-control" id="time" required>
+                            <input type="text" name="time" required placeholder="Please Select The Time" class="form-control" id="time" required>
                         </div>
                         
                 

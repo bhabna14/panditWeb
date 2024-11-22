@@ -71,13 +71,13 @@ class FlowerUserBookingController extends Controller
         // $product = FlowerProduct::findOrFail($product_id);
         
         $product = FlowerProduct::where('product_id', $product_id)->firstOrFail();
-       
+        $localities = Locality::where('status', 'active')->get();
         $user = Auth::guard('users')->user();
         $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
         // $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
 
         // Pass the product and subscription details to the view
-        return view('user.flower-subscription-checkout', compact('product','addresses','user'));
+        return view('user.flower-subscription-checkout', compact('localities','product','addresses','user'));
     }
 
     public function cutsomizedcheckout($product_id)
