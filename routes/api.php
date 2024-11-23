@@ -20,6 +20,8 @@ use App\Http\Controllers\Api\RatingController;
 use App\Http\Controllers\Api\PanditLoginController;
 use App\Http\Controllers\Api\CheckController;
 use App\Http\Controllers\Api\PoojaStatusController;
+use App\Http\Controllers\Api\FlowerBookingController;
+
 
 
 
@@ -29,11 +31,12 @@ use App\Http\Controllers\Api\PujaController;
 use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\OtpController;
+use App\Http\Controllers\Api\ProductController;
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-
+Route::get('/products', [ProductController::class, 'getActiveProducts']);
 Route::controller(PanditLoginController::class)->group(function() {
     Route::post('/pandit-send-otp',  'sendOtp');
     Route::post('/pandit-verify-otp', 'verifyOtp');
@@ -103,6 +106,7 @@ Route::controller(PoojaListController::class)->group(function() {
     Route::post('/save-pooja-item-list', 'savePoojaItemList');
     Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
     Route::delete('/delete-pooja-items/{id}', 'deletePoojaItem');
+    Route::get('/manageunit',  'manageUnitApi');
    
 
 });
@@ -128,6 +132,8 @@ Route::controller(AddressController::class)->group(function() {
 
 Route::controller(PodcastController::class)->group(function() {
     Route::get('podcasts', 'podcasts');
+    Route::get('/podcasthomepage',  'podcasthomepage');
+    Route::get('/podcastcategory',  'podcastCategory');
 });
 Route::controller(YoutubeUrlController::class)->group(function() {
 
@@ -146,6 +152,7 @@ Route::controller(PujaController::class)->group(function() {
     Route::get('upcomingpoojalists', 'upcomingpoojalists'); 
     Route::get('homepage', 'homepage'); 
     Route::get('panditlists', 'panditlist'); 
+    Route::get('/app-banners', 'manageAppBanner');
 });
 
 // single page apis
@@ -168,7 +175,9 @@ Route::middleware('auth:sanctum')->post('/process-remaining-payment/{booking_id}
 Route::middleware('auth:sanctum')->post('/booking/cancel/{booking_id}', [BookingController::class, 'cancelBooking']);
 
 Route::middleware('auth:sanctum')->get('/mngaddress', [UserProfileController::class, 'manageAddress']);
+Route::get('/localities', [UserProfileController::class, 'getActiveLocalities']);
 
+Route::get('/promonations', [UserProfileController::class, 'managepromonation'])->name('api.managepromonations');
 Route::middleware('auth:sanctum')->post('/saveaddress', [UserProfileController::class, 'saveAddress']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/update-address', [UserProfileController::class, 'updateAddress']);
@@ -193,3 +202,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/update-rating', [RatingController::class, 'updateRating']);
     Route::get('/rating/{id}', [RatingController::class, 'showRating']);
 });
+
+Route::middleware('auth:sanctum')->post('/purchase-subscription', [FlowerBookingController::class, 'purchaseSubscription']);
+Route::middleware('auth:sanctum')->post('/subscription/pause/{order_id}', [FlowerBookingController::class, 'pause'])->name('subscription.pause');
+Route::middleware('auth:sanctum')->post('/subscription/resume/{order_id}', [FlowerBookingController::class, 'resume'])->name('subscription.resume');
+
+Route::middleware('auth:sanctum')->post('/make-payment/{id}', [FlowerBookingController::class, 'markPaymentApi']);
+
+
+Route::middleware('auth:sanctum')->post('/flower-requests', [FlowerBookingController::class, 'storerequest']);
+Route::middleware('auth:sanctum')->get('/orders-list', [FlowerBookingController::class, 'ordersList']);

@@ -55,8 +55,8 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="podcast">Podcast</label>
-                                    <select class="form-control" id="podcast_id" name="podcast_id" required>
-                                        <option value=" ">Select podcast</option>
+                                    <select class="form-control" id="podcast_id" name="podcast_id" >
+                                        <option value="">Next Part Of Podcast</option>
                                         @foreach ($podcasts as $podcast)
                                             <option value="{{ $podcast->podcast_id }}">{{ $podcast->name }}</option>
                                         @endforeach
@@ -64,13 +64,12 @@
                                 </div>
                             </div>
                         </div>
-
+    
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Podcast Name</label>
-                                    <input type="text" class="form-control" id="puja_name" name="name"
-                                        placeholder="Enter Podcast Name" required>
+                                    <input type="text" class="form-control" id="puja_name" name="name" placeholder="Enter Podcast Name" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -84,20 +83,18 @@
                                 </div>
                             </div>
                         </div>
-
+    
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="event_name">Podcast Imgae</label>
+                                    <label for="event_name">Podcast Image</label>
                                     <input type="file" class="form-control" id="puja_img" name="image" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="event_name">Podcast Music <span class="max-text">(maximum file size
-                                            30mb)</span></label>
-                                    <input type="file" class="form-control" id="puja_img" name="music" required>
-
+                                    <label for="event_name">Podcast Music <span class="max-text">(maximum file size 30mb)</span></label>
+                                    <input type="file" class="form-control" id="puja_music" name="music" required>
                                 </div>
                             </div>
                         </div>
@@ -109,7 +106,42 @@
                                 </div>
                             </div>
                         </div>
-
+    
+                        <!-- New Fields -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="podcast_category">Podcast Category</label>
+                                    <select class="form-control" id="podcast_category" name="category_id" required>
+                                        <option value="">Select Category</option>
+                                        @foreach ($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->category_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="youtube_url">YouTube Video URL</label>
+                                    <input type="text" class="form-control" id="youtube_url" name="youtube_url" placeholder="Enter YouTube Video URL">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="upload_date">Upload Date</label>
+                                    <input type="date" class="form-control" id="upload_date" name="upload_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="publish_date">Publish Date</label>
+                                    <input type="date" class="form-control" id="publish_date" name="publish_date" required>
+                                </div>
+                            </div>
+                        </div>
+    
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group" style="padding-top: 27px">
@@ -122,6 +154,7 @@
             </div>
         </div>
     </form>
+    
 @endsection
 
 @section('modal')
@@ -133,4 +166,25 @@
 
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Event listener for publish buttons
+        const publishButtons = document.querySelectorAll('.publish-btn');
+        const modalPodcastId = document.getElementById('modal_podcast_id');
+        const modalPodcastName = document.getElementById('modal_podcast_name');
+
+        publishButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const podcastId = this.getAttribute('data-podcast-id');
+                const podcastName = this.getAttribute('data-podcast-name');
+
+                // Populate modal fields with podcast data
+                modalPodcastId.value = podcastId;
+                modalPodcastName.value = podcastName;
+            });
+        });
+    });
+</script>
 @endsection

@@ -60,6 +60,8 @@
                             <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#career">career</a>
                             <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#listpooja">List of Pooja</a>
                             <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#logindevice">Login Devices</a>
+                            <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#bankdetails">Bank Details</a>
+
                         </nav>
                     </div>
                 </div>
@@ -386,6 +388,47 @@
                                                         <td>{{  $pandit_login->device_model }}</td>
                                                         <td>{{  $pandit_login->platform }}</td>
                                                         <td>{{  $pandit_login->created_at }}</td>
+                                                    </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- main-profile-body -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="main-content-body  tab-pane border-top-0" id="bankdetails">
+                        <div class="border-0">
+                            <div class="main-content-body main-content-body-profile">
+                                <div class="main-profile-body p-0">
+                                    <div class="row row-sm">
+                                        <div class="col-12">
+                                            <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                                <thead>
+                                                    <tr>
+                                                        <th class="border-bottom-0">#</th>
+                                                        <th class="border-bottom-0">Bank Name</th>
+                                                        <th class="border-bottom-0">Branch Name</th>
+                                                        <th class="border-bottom-0">IFSC Code</th>
+                                                        <th class="border-bottom-0">Holder Name</th>
+                                                        <th class="border-bottom-0">Account Number</th>
+                                                        <th class="border-bottom-0">UPI Number</th>
+                                                      
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach ($pandit_bankdetails as $index => $pandit_bankdetail)
+                                                    <tr>
+                                                        <td>{{ $index + 1 }}</td>
+                                                       
+                                                        <td>{{  $pandit_bankdetail->bankname }}</td>
+                                                        <td>{{  $pandit_bankdetail->branchname }}</td>
+                                                        <td>{{  $pandit_bankdetail->ifsccode }}</td>
+                                                        <td>{{  $pandit_bankdetail->accname }}</td>
+                                                        <td>{{  $pandit_bankdetail->accnumber }}</td>
+                                                        <td>{{  $pandit_bankdetail->upi_number }}</td>
                                                     </tr>
                                                     @endforeach
                                                 </tbody>

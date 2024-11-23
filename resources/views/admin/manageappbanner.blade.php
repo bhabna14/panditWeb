@@ -59,6 +59,7 @@
                                                     <th class="border-bottom-0">SlNo</th>
                                                     <th class="border-bottom-0">Title Text</th>
                                                     <th class="border-bottom-0">Banner Image</th>
+                                                    <th class="border-bottom-0">Category</th>
                                                     
                                                     <th class="border-bottom-0">Action</th>
                                                 </tr>
@@ -70,6 +71,7 @@
                                                 <tr>
                                                     <td>{{ $index + 1 }}</td>
                                                     <td class="border-bottom-0">{{ $banner->title_text }}</td>
+
                                                     <td>
 
                                                         <a href="{{ asset('uploads/banner/' . $banner->banner_img) }}" target="_blank"
@@ -77,6 +79,7 @@
                                                             View Image
                                                         </a>
                                                     </td>
+                                                    <td class="border-bottom-0">{{ $banner->category }}</td>
                                                    
                                                     
                                                     <td>

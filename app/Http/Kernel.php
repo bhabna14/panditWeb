@@ -71,4 +71,7 @@ class Kernel extends HttpKernel
         'pandits' => \App\Http\Middleware\PanditMiddleware::class,
 
     ];
+
+ 
+
 }

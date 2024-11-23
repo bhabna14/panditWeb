@@ -52,10 +52,22 @@
                        
                         <div class="row">
                             
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="event_name">Banner Imgae</label>
                                     <input type="file" class="form-control" id="banner_img" name="banner_img" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="category">Category<span style="color:red">*</span></label>
+                                    <select name="category" id="category" class="form-control">
+                                       <option selected>Choose</option>
+                                        <option value="podcast">Podcast</option>
+                                        <option value="flower">Flower</option>
+                                        <option value="pandit">Pandit</option>
+
+                                    </select>
                                 </div>
                             </div>
                         </div>

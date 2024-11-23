@@ -23,7 +23,7 @@
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                            <a href="{{url('admin/add-podcast')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Podcast</a>
+                            <a href="{{url('admin/podcast-create')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Podcast</a>
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Manage Podcast</li>
                         </ol>
@@ -64,6 +64,7 @@
                                                     <th class="border-bottom-0">Language</th>                                                   
                                                     <th class="border-bottom-0">View Image</th>
                                                     <th class="border-bottom-0">View Audio</th>
+                                                    <th class="border-bottom-0">Status</th>
                                                     <th class="border-bottom-0">Action</th>
 
                                                 </tr>
@@ -90,10 +91,17 @@
                                                             View Audio
                                                         </a>
                                                     </td>
+                                                    <td class="border-bottom-0">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                                                            <label class="form-check-label" for="flexSwitchCheckChecked">Active</label>
+                                                          </div>
+                                                        {{ $podcast->status }}</td>
+
                                                     <td>
                                                       
-                                                        <a href="{{url('admin/editpodcast/'.$podcast->id)}}"><i class="fa fa-edit"></i></a> | 
-                                                        <a href="{{url('admin/dltpodcast/'.$podcast->id)}}" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                                                        <a href="{{url('admin/editpodcast/'.$podcast->id)}}" class="btn btn-success"><i class="fa fa-edit"></i></a> | 
+                                                        <a href="{{url('admin/dltpodcast/'.$podcast->id)}}" class="btn btn-danger" onClick="return confirm('Are you sure to delete ?');"><i class="fa fa-trash" aria-hidden="true"></i></a>
                                                     </td>
                                                     {{-- <td class="border-bottom-0">{{ $podcast->description }}</td> --}}
                                                 </tr>

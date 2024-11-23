@@ -18,6 +18,8 @@ use App\Models\Poojadetails;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Rating;
+use App\Models\FlowerProduct;
+
 use App\Models\PanditDevice;
 use Illuminate\Support\Facades\Log;
 // use Carbon\Carbon;
@@ -55,6 +57,7 @@ class userController extends Controller
                         ->get();
         return view("user/index" , compact('upcomingPoojas','otherpoojas','pandits'));
     }
+   
 
     // public function userlogin(){
     //     return view("login");
@@ -1271,4 +1274,10 @@ private function convertDurationToMinutes($durationString)
             return response()->json(['error' => 'Internal Server Error'], 500);
         }
     }
+
+
+ 
+
+
+
 }

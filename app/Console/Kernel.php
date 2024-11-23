@@ -16,6 +16,10 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
+        $schedule->command('subscriptions:update-status')->daily();
+        $schedule->call(function () {
+            Subscription::expireIfEnded();
+        })->daily();
     }
 
     /**
@@ -29,4 +33,5 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+    
 }

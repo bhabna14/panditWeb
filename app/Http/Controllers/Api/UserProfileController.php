@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\Locality;
+use App\Models\Promonation;
 
 use App\Models\Profile;
 use App\Models\Rating;
@@ -191,7 +193,7 @@ public function orderHistory(Request $request)
     $user = Auth::guard('sanctum')->user();
 
     // Fetch recent bookings for the user without loading ratings
-    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address'])
+    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address.localityDetails'])
                         ->where('user_id', $user->userid)
                         ->orderByDesc('created_at')
                         ->get();
@@ -346,68 +348,93 @@ public function deletePhoto()
             'success' => 200,
             'message' => 'No photo found for deletion'], 404);
     }
-
+    public function getActiveLocalities()
+    {
+        $localities = Locality::where('status', 'active')->get();
+        return response()->json([
+            'success' => 200,
+            'data' => $localities,
+        ], 200);
+    }
     
+    public function managepromonation()
+    {
+        $promonations = Promonation::where('status', 'active')->get();
+
+        // Map the image field to include the full URL
+        $promonations->transform(function($promonation) {
+            // Assuming 'promonation_image' is the field that contains the image filename
+            $promonation->promonation_image = url('images/promonations/' . $promonation->promonation_image);
+            return $promonation;
+        });
+
+        return response()->json([
+            'status' => 200,
+            'data' => $promonations
+        ], 200);
+    }
     public function manageAddress(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
-
+    
         if (!$user) {
             return response()->json(['message' => 'User not authenticated'], 401);
         }
-
-        // Fetch managed addresses for the user
-        $addressData = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
-
+    
+        // Fetch managed addresses for the user with locality details
+        $addressData = UserAddress::where('user_id', $user->userid)
+            ->where('status', 'active')
+            ->with('localityDetails') // Eager load the localityDetails relationship
+            ->orderBy('id', 'desc')
+            ->get();
+    
         return response()->json([
             'success' => 200,
             'message' => 'Address fetched successfully.',
             'addressData' => $addressData
         ], 200);
     }
-    public function saveAddress(Request $request)
-    {
-        $user = Auth::guard('api')->user();
+    
+   public function saveAddress(Request $request)
+{
+    $user = Auth::guard('api')->user();
 
-        if (!$user) {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
+    if (!$user) {
+        return response()->json(['message' => 'User not authenticated'], 401);
+    }
 
-        // Validate request data (optional but recommended)
-        $validatedData = $request->validate([
-            // 'fullname' => 'required|string|max:255',
-            // 'number' => 'required|string|max:20',
-            'country' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'pincode' => 'required|string|max:10',
-            'area' => 'required|string|max:255',
-            'address_type' => 'required|string|max:50',
-        ]);
-
+    try {
         // Create new UserAddress instance and populate data
         $addressData = new UserAddress();
         $addressData->user_id = $user->userid;
-        // $addressData->fullname = $validatedData['fullname'];
-        // $addressData->number = $validatedData['number'];
-        $addressData->country = $validatedData['country'];
-        $addressData->state = $validatedData['state'];
-        $addressData->city = $validatedData['city'];
-        $addressData->pincode = $validatedData['pincode'];
-        $addressData->area = $validatedData['area'];
-        $addressData->address_type = $validatedData['address_type'];
+        $addressData->country = $request->input('country');
+        $addressData->state = $request->input('state');
+        $addressData->city = $request->input('city');
+        $addressData->pincode = $request->input('pincode');
+        $addressData->area = $request->input('area');
+        $addressData->address_type = $request->input('address_type');
+        $addressData->locality = $request->input('locality');
+        $addressData->place_category = $request->input('place_category');
+        $addressData->apartment_flat_plot = $request->input('apartment_flat_plot');
+        $addressData->landmark = $request->input('landmark');
         $addressData->status = 'active';
-        // $addressdata->default = '0';
 
-        // Save the address
+        // Attempt to save the address
         $addressData->save();
 
         return response()->json([
             'success' => 200,
             'message' => 'Address created successfully'
-            ]
-            , 201);
+        ], 200);
+    } catch (\Exception $e) {
+        // Handle any errors that occur during the save operation
+        return response()->json([
+            'error' => 500,
+            'message' => 'Failed to save the address. Error: ' . $e->getMessage()
+        ], 500);
     }
+}
+
 
     // public function removeAddress($id)
     // {
@@ -453,52 +480,51 @@ public function deletePhoto()
 
     public function updateAddress(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'id' => 'required|exists:user_addresses,id',
-            // 'fullname' => 'required|string|max:255',
-            // 'number' => 'required|string|max:15',
-            'country' => 'required|string|max:255',
-            'state' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'pincode' => 'required|string|max:10',
-            'area' => 'required|string|max:255',
-            'address_type' => 'required|string|max:255'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+        $user = Auth::guard('api')->user();
+    
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated'], 401);
         }
-
-        $address = UserAddress::find($request->id);
-
-        if ($address) {
-            // $address->fullname = $request->fullname;
-            // $address->number = $request->number;
-            $address->country = $request->country;
-            $address->state = $request->state;
-            $address->city = $request->city;
-            $address->pincode = $request->pincode;
-            $address->area = $request->area;
-            $address->address_type = $request->address_type;
-            $address->status = 'active';
-            // $addressdata->default = '0';
-            $address->save();
-
+    
+        try {
+            $address = UserAddress::find($request->id);
+    
+            if ($address) {
+                // Update address fields
+                $address->country = $request->country;
+                $address->state = $request->state;
+                $address->city = $request->city;
+                $address->pincode = $request->pincode;
+                $address->area = $request->area;
+                $address->address_type = $request->address_type;
+                $address->locality = $request->locality;
+                $address->place_category = $request->place_category;
+                $address->apartment_flat_plot = $request->apartment_flat_plot;
+                $address->landmark = $request->landmark;
+                $address->status = 'active';
+    
+                // Save the updated address
+                $address->save();
+    
+                return response()->json([
+                    'success' => 200,
+                    'message' => 'Address updated successfully.',
+                    'address' => $address
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => 404,
+                    'message' => 'Address not found.'
+                ], 404);
+            }
+        } catch (\Exception $e) {
             return response()->json([
-                'success' => true,
-                'message' => 'Address updated successfully.',
-                'address' => $address
-            ], 200);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Address not found.'
-            ], 404);
+                'success' => 500,
+                'message' => 'Failed to update the address. Error: ' . $e->getMessage()
+            ], 500);
         }
     }
+    
     public function combinedSearch(Request $request)
     {
         $searchTerm = $request->input('searchTerm');

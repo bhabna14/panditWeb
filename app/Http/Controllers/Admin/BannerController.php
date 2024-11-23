@@ -36,6 +36,7 @@ class BannerController extends Controller
        
         $bannerdata->title_text = $request->title_text;
         $bannerdata->alt_text = $request->alt_text;
+        $bannerdata->category = $request->category;
 
         $bannerdata->save();
         
@@ -72,7 +73,7 @@ class BannerController extends Controller
         // Update other banner properties
         $bannerdata->title_text = $request->title_text;
         $bannerdata->alt_text = $request->alt_text;
-
+        $bannerdata->category = $request->category;
         // Save the updated record
         $bannerdata->save();
 
