@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\User\userController;
+use App\Http\Controllers\User\FlowerUserBookingController;
+
 use App\Http\Controllers\User\PaymentController;
 use App\Http\Controllers\User\FlowerRegistrationController;
 
@@ -14,9 +16,21 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\TitleController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\PodcastController;
+use App\Http\Controllers\Admin\PodcastCreateController;
+use App\Http\Controllers\Admin\PodcastScriptController;
+use App\Http\Controllers\Admin\PodcastEditingController;
 use App\Http\Controllers\Admin\LanguageController;
 use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Admin\YoutubeController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\FlowerRequestController;
+use App\Http\Controllers\Admin\FlowerOrderController;
+use App\Http\Controllers\Admin\LocalityController;
+use App\Http\Controllers\Admin\PromonationController;
+use App\Http\Controllers\Admin\PodcastReportController;
+use App\Http\Controllers\Admin\PublishPodcastController;
+use App\Http\Controllers\Admin\PodcastMediaController;
+use App\Http\Controllers\Admin\PodcastSocialMediaController;
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -26,7 +40,7 @@ use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Pandit\AddressController;
 use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\Pandit\PoojaListController;
-use App\Http\Controllers\Pandit\PanditLoginController; 
+// use App\Http\Controllers\Pandit\PanditLoginController; 
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
@@ -45,12 +59,32 @@ Route::get('/otplogin', [OtplessLoginController::class, 'otplogin'])->name('otpl
 Route::post('/send-otp-user', [OtplessLoginController::class, 'sendOtp']);
 Route::post('/verify-otp-user', [OtplessLoginController::class, 'verifyOtp']);
 
+Route::get('/admin/switcherpage', function () {
+    return view('admin.switcherpage');
+});
+## flowerregistration
+Route::controller(FlowerRegistrationController::class)->group(function() {
+    Route::get('/flower-registration', 'flowerregistration')->name('flowerregistration');
+    Route::post('/send-otp-flower', 'sendOtpflower');
+    Route::post('/verify-otp-flower', 'verifyOtpflower');
 
+    Route::get('/flower/address', 'floweruseraddress')->name('floweruseraddress');
+    Route::post('/flowersaveaddress', 'flowersaveaddress')->name('flowersaveaddress');
+    
+});
+Route::group(['middleware' => ['auth:users']], function () {
+    Route::controller(FlowerRegistrationController::class)->group(function() {
+
+   
+    });
+});
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');
+   
+
     Route::get('/pandit-list', 'panditlist')->name('panditlist');
     Route::get('/pandits/{pooja_id}/{pandit_id}',  'list')->name('pandit.list');
     Route::get('/pooja-list', 'poojalist')->name('poojalist');
@@ -93,16 +127,17 @@ Route::controller(FlowerUserBookingController::class)->group(function() {
 
 });
 //user middleware routes
+
 Route::group(['middleware' => ['auth:users']], function () {
         Route::controller(userController::class)->group(function() {
         Route::get('/user-dashboard', 'userdashboard')->name('userdashboard');
+        
         Route::get('/manage-address', 'mngaddress')->name('mngaddress');
         Route::get('/address/set-default/{id}', 'setDefault')->name('setDefaultAddress');
         Route::get('/addaddress', 'addfrontaddress')->name('addfrontaddress');
         Route::get('/add-address', 'addaddress')->name('addaddress');
         Route::post('/saveaddress', 'saveaddress')->name('saveaddress');
         Route::post('/savefrontaddress', 'savefrontaddress')->name('savefrontaddress');
-
         Route::get('editaddress/{id}',  'editAddress')->name('editAddress');
         Route::post('updateaddress', 'updateAddress')->name('updateaddress');
         Route::get('removeaddress/{id}',  'removeAddress')->name('removeaddress');
@@ -161,7 +196,7 @@ Route::controller(SuperAdminController::class)->group(function() {
 ##super admin routes
 Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::controller(SuperAdminController::class)->group(function() {
-        Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
+        Route::get('/dashboard', 'dashboard')->name('dashboard');
     });
 
     Route::get('/addadmin', [SuperAdminController::class, 'addadmin']);
@@ -174,6 +209,31 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
 ## admin routes
 Route::prefix('admin')->middleware(['admin'])->group(function () {
+    Route::get('/add-product', [ProductController::class, 'addproduct']);
+    Route::get('/manage-product',  [ProductController::class, 'manageproduct'])->name('manageproduct');
+
+    Route::post('/create-product', [ProductController::class, 'createProduct'])->name('admin.products.store');
+    Route::post('/purchaseSubscription', [ProductController::class, 'purchaseSubscription']);
+    Route::post('/deactivate-expired-subscriptions', [ProductController::class, 'deactivateExpiredSubscriptions']);
+    Route::get('/edit-product/{id}', [ProductController::class, 'editProduct'])->name('admin.edit-product');
+    Route::post('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
+    Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
+    
+    Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower-request');
+    Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
+    Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
+
+
+    Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+    Route::get('/show-customer/{id}/details', [FlowerOrderController::class, 'showCustomerDetails'])->name('showCustomerDetails');
+
+    Route::get('/flower-request-orders', [FlowerOrderController::class, 'showRequestOrders'])->name('admin.requestorder.index');
+
+    Route::get('/active-subscriptions', [FlowerOrderController::class, 'showActiveSubscriptions'])->name('active.subscriptions');
+    Route::get('/paused-subscriptions', [FlowerOrderController::class, 'showPausedSubscriptions'])->name('paused.subscriptions');
+    Route::get('/orders-today', [FlowerOrderController::class, 'showOrdersToday'])->name('orders.today');
+    
+    Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');
@@ -244,18 +304,93 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/manage-orders', 'manageorders')->name('manageorders');
         Route::get('/booking/{id}','showbooking')->name('admin.booking.show');
         // Route::get('/savelocation', 'savelocation')->name('savelocation');
+        Route::delete('/dltbooking/{id}', 'deleteBooking')->name('admin.booking.delete');
     });
+    Route::controller(PodcastCreateController::class)->group(function() {
+        Route::get('/podcast-create', 'podcastCreate')->name('podcastCreate');
+        Route::post('/save-podcast-create', 'savePodcastCreate')->name('savePodcastCreate');
+    });
+
+    Route::controller(PodcastReportController::class)->group(function() {
+        Route::get('/podcast-report', 'podcastReport')->name('podcastReport');
+        Route::get('/podcast/script-details','getScriptDetails')->name('admin.podcast.scriptDetails');
+        Route::get('/podcast/recording-details', 'getRecordingDetails')->name('admin.podcast.recordingDetails');
+        Route::get('/podcast/editingDetails',  'getEditingDetails')->name('admin.podcast.editingDetails');
+        Route::get('/podcast/publishDetails', 'getPublishDetails')->name('admin.podcast.publishDetails');
+
+
+        });
+
+    Route::controller(PodcastEditingController::class)->group(function () {
+        Route::get('/podcast-editing', 'podcastEditing')->name('podcastEditing');
+        Route::post('/podcast/save-editing/{podcast_id}', 'saveEditing')->name('podcast.saveEditing');
+    
+        Route::post('/start-podcast-edit/{podcast_id}', 'startPodcastEdit')->name('startPodcastEdit');
+        Route::post('/cancel-podcast-edit/{podcast_id}', 'cancelPodcastEdit')->name('cancelPodcastEdit');
+        Route::post('/complete-podcast-edit/{podcast_id}', 'completePodcastEdit')->name('completePodcastEdit');
+
+        Route::get('/podcast-editing-verified', 'podcastEditingVerified')->name('podcastEditingVerified');
+        Route::post('/update-editing-verified/{podcast_id}', 'updateEditingVerified')->name('updateEditingVerified');
+
+        Route::post('/approve-editing-podcast/{podcast_id}', 'approvePodcastEditing')->name('approvePodcastEditing');
+        Route::post('/reject-editing-podcast/{podcast_id}','rejectPodcastEditing')->name('rejectPodcastEditing');
+
+    });
+    
+
+    Route::controller(PodcastScriptController::class)->group(function() {
+
+        Route::get('/podcast-script', 'podcastScript')->name('podcastScript');
+        Route::post('/update-podcast-script/{podcast_id}', 'updatePodcastScript')->name('updatePodcastScript');
+        Route::get('/podcast-recording', 'podcastRecording')->name('podcastRecording');
+
+        Route::post('/start-podcast/{podcast_id}',  'startPodcast')->name('startPodcast');
+        Route::post('/cancel-podcast/{podcast_id}', 'cancelPodcast')->name('cancelPodcast');
+        Route::post('/complete-podcast/{podcast_id}','completePodcast')->name('completePodcast');
+        Route::post('/save-complete-url/{podcast_id}','saveCompleteUrl')->name('saveCompleteUrl');
+
+        // script editor
+        Route::get('/script-editor/{podcast_id}','scriptEditor')->name('scriptEditor');
+        Route::post('/save-script-editor/{podcast_id}','saveScriptEditor')->name('saveScriptEditor');
+
+        Route::get('/podcast-script-verified', 'podcastScriptVerified')->name('podcastScriptVerified');
+        Route::post('/update-script-verified/{podcast_id}', 'updateScriptVerified')->name('updateScriptVerified');
+
+        Route::post('/approve-script-podcast/{podcast_id}', 'approvePodcastScript')->name('approvePodcastScript');
+        Route::post('/reject-script-podcast/{podcast_id}','rejectPodcastScript')->name('rejectPodcastScript');
+    });
+
+    Route::controller(PublishPodcastController::class)->group(function() {
+        Route::get('/publish-podcast', 'publishPodcast')->name('publishPodcast');
+        Route::post('/savePublishPodcast', 'savePublishPodcast')->name('savePublishPodcast');
+    });
+
+    Route::controller(PodcastMediaController::class)->group(function() {
+        Route::get('/podcast-media', 'podcastMedia')->name('podcastMedia');
+        Route::post('/admin/podcast/update/{podcast_id}', 'updatePodcastMedia')->name('updatePodcastMedia');
+    });
+
+    Route::controller(PodcastSocialMediaController::class)->group(function() {
+        Route::get('/social-media', 'PodcastSocialMedia')->name('PodcastSocialMedia');
+        Route::post('/update-podcast-social-media/{podcast_id}', 'updatePodcastSocialMedia')->name('updatePodcastSocialMedia');
+    });
+
+
 
     Route::controller(PodcastController::class)->group(function() {
         Route::get('/manage-podcast', 'managepodcast')->name('managepodcast');
-        Route::get('/add-podcast', 'addpodcast')->name('addpodcast');
         Route::post('/savepodcast', 'savepodcast')->name('savepodcast');
         Route::get('/editpodcast/{podcast}', 'editpodcast')->name('editpodcast');
         Route::post('/updatepodcast/{podcast}', 'updatepodcast')->name('updatepodcast');
         Route::get('/dltpodcast/{podcast}', 'destroy')->name('destroy');
+        Route::get('/manage-podcast-category', 'managepodcastcategory')->name('managepodcastcategory');
+        Route::post('/savecategory', 'saveCategory')->name('savecategory');
+
     });
+    Route::put('updatecategory', [PodcastController::class, 'updateCategory'])->name('updatecategory');
 
-
+    // Delete a category
+    Route::get('deletecategory/{id}', [PodcastController::class, 'deleteCategory'])->name('deletecategory');
     Route::controller(BannerController::class)->group(function() {
         Route::get('/manage-app-banner', 'manageappbanner')->name('manageappbanner');
         Route::get('/add-app-banner', 'addbanner')->name('addbanner');
@@ -264,6 +399,26 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::post('/updatebanner/{id}', 'updatebanner')->name('updatebanner');
         Route::get('/deletebanner/{id}', 'deletebanner')->name('deletebanner');
     });
+
+    Route::controller(LocalityController::class)->group(function() {
+        Route::get('/manage-locality', 'managelocality')->name('admin.managelocality');
+        Route::get('/add-locality', 'addlocality')->name('admin.addlocality');
+        Route::post('/savelocality', 'savelocality')->name('savelocality');
+        Route::get('/editlocality/{id}', 'editLocality')->name('editlocality');
+        Route::post('/updatelocality/{id}', 'updateLocality')->name('updatelocality');
+        Route::delete('/deletelocality/{id}', 'deleteLocality')->name('deletelocality');
+    });
+
+    Route::controller(PromonationController::class)->group(function() {
+        Route::get('/manage-promonation', 'managepromonation')->name('admin.managepromonation');
+        Route::get('/add-promonation', 'addpromonation')->name('admin.addpromonation');
+        Route::post('/savepromonation', 'savepromonation')->name('savepromonation');
+        Route::get('/editpromonation/{id}', 'editpromonation')->name('editpromonation');
+        Route::post('/updatepromonation/{id}', 'updatepromonation')->name('updatepromonation');
+        Route::delete('/deletepromonation/{id}', 'deletepromonation')->name('deletepromonation');
+    });
+
+
     Route::controller(YoutubeController::class)->group(function() {
         Route::get('/youtube', 'youTube')->name('youTube');
         Route::post('/save-youtube-url', 'store')->name('saveYoutubeUrl');
