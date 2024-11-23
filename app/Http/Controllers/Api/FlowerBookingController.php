@@ -89,6 +89,10 @@ class FlowerBookingController extends Controller
     
         // Create the subscription
         $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
+        $today = now()->format('Y-m-d');  // Format the date to match start_date format
+    
+        // Determine the status based on the start_date
+        $status = ($startDate->format('Y-m-d') === $today) ? 'active' : 'pending';
         try {
             Subscription::create([
                 'subscription_id' => $subscriptionId,
@@ -98,7 +102,7 @@ class FlowerBookingController extends Controller
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'is_active' => true,
-                'status' => 'active'
+                'status' => $status 
             ]);
             \Log::info('Subscription created successfully');
         } catch (\Exception $e) {
