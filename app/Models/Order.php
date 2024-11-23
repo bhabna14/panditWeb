@@ -16,6 +16,8 @@ class Order extends Model
         'user_id',
         'quantity',
         'total_price',
+        'requested_flower_price',
+        'delivery_charge',
         'order_id',  // Add this line
         'address_id',
         'suggestion'

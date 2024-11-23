@@ -20,6 +20,8 @@ $(function (e) {
   }); //______Basic Data Table
 
   $('#responsive-datatable').DataTable({
+    order: [[0, 'desc']], // Specifies the first column (index 0) in descending order
+
     responsive: true,
     language: {
       searchPlaceholder: 'Search...',
@@ -28,13 +30,19 @@ $(function (e) {
   }); //______File-Export Data Table
 
   var table = $('#file-datatable').DataTable({
+    order: [[0, 'desc']], // Ensure the correct column index is used
+    columnDefs: [
+        { type: 'num', targets: 0 } // Set column 0 to be treated as numeric data
+    ],
     buttons: ['copy', 'excel', 'pdf', 'colvis'],
     responsive: true,
     language: {
-      searchPlaceholder: 'Search...',
-      sSearch: ''
+        searchPlaceholder: 'Search...',
+        sSearch: ''
     }
-  });
+});
+
+
   table.buttons().container().appendTo('#file-datatable_wrapper .col-md-6:eq(0)'); //______Delete Data Table
 
   var table = $('#delete-datatable').DataTable({

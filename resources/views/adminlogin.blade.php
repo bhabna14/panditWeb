@@ -18,10 +18,10 @@
                         <div class="col-xl-5 col-lg-6 col-md-8 col-sm-8 col-xs-10 card-sigin-main mx-auto my-auto py-45 justify-content-center">
                             <div class="card-sigin mt-5 mt-md-0">
                                 <!-- Demo content-->
-                                <h2 class="text-center login-heading"> Admin</h2>
+                                {{-- <h2 class="text-center login-heading"> Admin</h2> --}}
                                 <div class="main-card-signin d-md-flex">
                                  
-                                    <div class="wd-100p"><div class="d-flex mb-4"><a href="#"><img src="{{asset('assets/img/brand/logo.png')}}" class="sign-favicon ht-40" alt="logo"></a></div>
+                                    <div class="wd-100p"><div class="d-flex mb-4"><a href="#"><img src="{{asset('assets/img/brand/Logo_Black.png')}}" class="sign-favicon ht-40" alt="logo"></a></div>
                                         <div class="">
                                             <div class="main-signup-header">
                                                 
@@ -30,7 +30,7 @@
                                                 <div class=" tab-menu-heading mb-2 border-bottom-0">
                                                     <div class="tabs-menu1">
                                                         <ul class="nav panel-tabs">
-                                                            <li class="me-2"><a href="#tab5" class="active" data-bs-toggle="tab">Login</a></li>
+                                                            <li class="me-2"><a href="#tab5" class="active" data-bs-toggle="tab">Admin Login</a></li>
                                                             <!-- <li><a href="#tab6" data-bs-toggle="tab" class="">Mobile no</a></li> -->
                                                         </ul>
                                                     </div>
@@ -54,25 +54,21 @@
                                 
                                                             <div id="step1">
                                                                 <div class="form-group">
-                                                                    <label>Phone Number</label> <input class="form-control" placeholder="Enter your Phone Number" name="phonenumber" value="" type="text">
+                                                                    <label>Email</label> <input class="form-control" name="email" placeholder="Enter your email" type="text">
                                                                 </div>
-                                
+                                                                <div class="form-group">
+                                                                    <label>Password</label> <input class="form-control" name="password" placeholder="Enter your password" type="password">
+                                                                </div>
                                                                
-                                                                        <button type="button" id="nextBtn" class="btn btn-primary">
-                                                                            {{ __('Generate Otp') }}
-                                                                        </button>
-                                                                   
+                                                                      
                                                             </div>
                                 
-                                                            <div id="step2" style="display: none;">
-                                                                <div class="form-group">
-                                                                    <label>otp</label> <input class="form-control" placeholder="Enter your otp" name="otp" type="text">
-                                                                </div>
+                                                           
                                 
                                                                
                                                                         <input type="submit" class="btn btn-primary" value="Login">
                                                                  
-                                                            </div>
+                                                            
                                                         </form>
                                                         </div>
                                                         <div class="tab-pane" id="tab6">

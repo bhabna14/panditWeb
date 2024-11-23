@@ -1,4 +1,4 @@
-@extends('user.layouts.front')
+@extends('user.layouts.front-flower')
 
 @section('styles')
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
@@ -11,9 +11,25 @@
     transition: transform 0.3s, box-shadow 0.3s;
     border: none;
     box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
-    height: 600px;
+    height: 735px;
 
 }
+.product-car_cust {
+    border-radius: 15px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ffffff, #f9f9f9);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none;
+    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+    /* height: 600px; */
+
+}
+
+.text-decoration-line-through {
+    text-decoration: line-through; /* Strikethrough for the MRP */
+    color: #aaa; /* Light grey for the crossed-out MRP */
+}
+
 /* 
 .product-card:hover {
     transform: translateY(-10px) scale(1.03);
@@ -26,7 +42,7 @@
 
 .product-image {
     width: 100%;
-    height: 250px;
+    /* height: 250px; */
     object-fit: cover;
     transition: transform 0.3s;
 }
@@ -54,7 +70,7 @@
     font-size: 18px;
     font-weight: bold;
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .product-description {
@@ -67,6 +83,7 @@
     font-size: 20px;
     color: #B90B0B;
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .btn-gradient {
@@ -95,72 +112,126 @@
 @section('content')
     
 
- <section class="" style="    margin-top: -17px;
-">
+<section class="" style="margin-top: -17px;">
   <div class="">
     <!-- Home Banner Section -->
     <div class="home-banner-section">
       <div id="homeBannerCarousel" class="owl-carousel owl-theme">
-        <!-- Banner Image Item -->
-        <div class="item">
-          <img src="{{asset('images/4.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
-        </div>
-        <div class="item">
-          <img src="{{asset('images/2.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
-        </div>
-        <div class="item">
-          <img src="{{asset('images/1.jpg')}}" alt="Home Banner" class="img-fluid d-block w-100">
-        </div>
-        <!-- You can add more images here by copying the above block -->
+        @foreach ($banners as $banner)
+          <div class="item">
+            <img src="{{ $banner['banner_img_url'] }}" alt="{{ $banner['alt_text'] ?? 'Home Banner' }}" class="img-fluid d-block w-100">
+          </div>
+        @endforeach
       </div>
     </div>
   </div>
- </section>
- <section>
+</section>
+
+<section>
   <div class="container">
-      <div class="row" style="margin-top: 30px;">
-        <div class="col-md-12">
-          <div class="flower-package-heading">
-              <h1>Flower Package</h1>
-             
-          </div>
+    <div class="row" style="margin-top: 30px;">
+      <div class="col-md-12">
+        <div class="flower-package-heading">
+          <h1>Customized Flower</h1>
+        </div>
       </div>
-      </div>
-      <div class="row" style="margin-top: 20px; margin-bottom: 140px;">
-          @if($products->isNotEmpty())
-              @foreach($products as $product)
-                  <div class="col-md-4 mb-4">
-                      <div class="product-card shadow-lg position-relative">
-                          <div class="product-image-container">
-                              <img src="{{ asset('storage/'.$product->product_image) }}" alt="{{ $product->name }}" class="product-image">
-                             
-                          </div>
-                          <div class="card-body text-center">
-                              <h5 class="product-title">{{ $product->name }}</h5>
-                              <p class="product-description">{{ $product->description }}</p>
-                              <p class="product-price mb-3">₹ {{ number_format($product->price, 2) }}</p>
-                              @if(Auth::guard('users')->check())
-                                <!-- User is logged in -->
-                                <a href="{{ route('checkout', ['product_id' => $product->product_id]) }}" class="btn btn-gradient w-100 mt-2">
-                                    Buy Now
-                                </a>
-                              @else
-                                  <!-- User is not logged in -->
-                                  <a href="{{route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
-                                      Buy Now
-                                  </a>
-                              @endif
-                          
-                          </div>
+    </div>
+  
+    <div class="row" style="margin-top: 20px; margin-bottom: 140px;">
+      @if($customizedpps->isNotEmpty())
+          @foreach($customizedpps as $customizedpp)
+            <div class="product-car_cust row shadow-lg position-relative">
+              <div class="col-md-3 mb-4">
+                
+                      <div class="product-image-container">
+                          <img src="{{ asset('storage/'.$customizedpp->product_image) }}" alt="{{ $customizedpp->name }}" class="product-image">
+                         
                       </div>
-                  </div>
-              @endforeach
-          @else
-              <p class="text-center">No products available at the moment.</p>
-          @endif
-      </div>
+                    
+                 
+              </div>
+              <div class="col-md-9">
+                <div class="card-body ">
+                  <h5 class="product-title">{{ $customizedpp->name }}</h5>
+                  <p class="product-description">{{ $customizedpp->description }}</p>
+                  <p class="product-price">
+                    {{ $customizedpp->immediate_price }}
+                  </p>
+                
+                  @if(Auth::guard('users')->check())
+                    <!-- User is logged in -->
+                    <a href="{{ route('cutsomized-checkout', ['product_id' => $customizedpp->product_id]) }}" class="btn btn-gradient w-100 mt-2">
+                        Order Now
+                    </a>
+                  @else
+                      <!-- User is not logged in -->
+                      <a href="{{route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
+                          Order Now
+                      </a>
+                  @endif
+              
+                </div>
+              </div>
+             </div>
+          @endforeach
+      @else
+          <p class="text-center">No products available at the moment.</p>
+      @endif
+  </div>
   </div>
 </section>
+
+<section style="margin-top: -60px;">
+  <div class="container">
+    <div class="row" style="margin-top: 30px;">
+      <div class="col-md-12">
+        <div class="flower-package-heading">
+          <h1>Flower Package</h1>
+        </div>
+      </div>
+    </div>
+  
+    <div class="row" style="margin-top: 20px; margin-bottom: 140px;">
+      @if($products->isNotEmpty())
+          @foreach($products as $product)
+              <div class="col-md-4 mb-4">
+                  <div class="product-card shadow-lg position-relative">
+                      <div class="product-image-container">
+                          <img src="{{ asset('storage/'.$product->product_image) }}" alt="{{ $product->name }}" class="product-image">
+                         
+                      </div>
+                      <div class="card-body text-center">
+                          <h5 class="product-title">{{ $product->name }}</h5>
+                          <p class="product-description">{{ $product->description }}</p>
+                          <p class="product-price">
+                            <span class="text-decoration-line-through">₹ {{ number_format($product['mrp'], 2) }}</span> 
+                            ₹ {{ number_format($product['price'], 2) }}
+                          </p>
+                        
+                          @if(Auth::guard('users')->check())
+                            <!-- User is logged in -->
+                            <a href="{{ route('checkout', ['product_id' => $product->product_id]) }}" class="btn btn-gradient w-100 mt-2">
+                                Order Now
+                            </a>
+                          @else
+                              <!-- User is not logged in -->
+                              <a href="{{route('userlogin', ['referer' => urlencode(url()->current())]) }}" class="btn btn-gradient w-100 mt-2">
+                                  Order Now
+                              </a>
+                          @endif
+                      
+                      </div>
+                  </div>
+              </div>
+          @endforeach
+      @else
+          <p class="text-center">No products available at the moment.</p>
+      @endif
+  </div>
+  </div>
+</section>
+
+
 
 
     <section class="upcoming-bg">

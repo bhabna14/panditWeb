@@ -46,37 +46,60 @@
     <form action="{{ route('updatepromonation', $promonation->id) }}" method="post" enctype="multipart/form-data">
         @csrf
         @method('POST')
+        <div class="row">
+            <div class="col-lg-12 col-md-">
+                <div class="card custom-card">
+                    <div class="card-body">
         
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="promonation_image">Promonation Image</label>
-                    <input type="file" class="form-control" id="promonation_image" name="promonation_image" 
-                           placeholder="Choose an image">
-                    <img src="{{ asset('images/promonations/' . $promonation->promonation_image) }}" alt="Current Image" width="150" class="mt-2">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    <label for="date">Date</label>
-                    <input type="date" class="form-control" id="date" name="date" value="{{ $promonation->date }}" required>
-                </div>
-            </div>
-        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="promonation_image">Promonation Image <span style="color: red;">*</span></label>
+                                    <input type="file" class="form-control" id="promonation_image" name="promonation_image" 
+                                        placeholder="Choose an image">
+                                    <img src="{{ asset('images/promonations/' . $promonation->promonation_image) }}" alt="Current Image" width="150" class="mt-2">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="date">Date <span style="color: red;">*</span></label>
+                                    <input type="date" class="form-control" id="date" name="date" value="{{ $promonation->date }}" required>
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="form-group">
-                    <label for="description">Description</label>
-                    <textarea name="description" class="form-control" id="description" rows="3" placeholder="Enter promotion description" required>{{ $promonation->description }}</textarea>
-                </div>
-            </div>
-        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="description">Description <span style="color: red;">*</span></label>
+                                    <textarea name="description" class="form-control" id="description" rows="3" placeholder="Enter promotion description" required>{{ $promonation->description }}</textarea>
+                                </div>
+                            </div>
+                        </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="form-group" style="padding-top: 27px">
-                    <input type="submit" class="btn btn-primary" value="Update">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="promo_heading">Promonation Heading <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" id="promo_heading" value="{{ $promonation->promo_heading }}" name="promo_heading" placeholder="Enter Promonation Heading" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="button_title">Button Title Text <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" id="button_title" value="{{ $promonation->button_title }}" name="button_title" placeholder="Enter Button Text" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group" style="padding-top: 27px">
+                                    <input type="submit" class="btn btn-primary" value="Update">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

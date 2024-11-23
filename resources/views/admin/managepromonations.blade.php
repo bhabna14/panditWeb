@@ -53,13 +53,15 @@
                                         <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
                                     </div> -->
                                     <div class="table-responsive  export-table">
-                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                        <table id="file-datatable" class="table table-bordered ">
                                             <thead>
                                                 <tr>
                                                     <th>Sl. No</th>
                                                     <th>Promonation Image</th>
                                                     <th>Date</th>
                                                     <th>Description</th>
+                                                    <th>Heading</th>
+                                                    {{-- <th>Status</th> --}}
                                                     <th>Action</th>
                                                 </tr>
                                             </thead>
@@ -68,20 +70,47 @@
                                                     <tr>
                                                         <td>{{ $key + 1 }}</td>
                                                         <td>
-                                                            <img src="{{ asset('images/promonations/' . $promonation->promonation_image) }}" alt="Promonation Image" width="100">
+                                                            {{-- <img src="{{ asset('images/promonations/' . $promonation->promonation_image) }}" alt="Promonation Image" width="100"> --}}
+                                                            <!-- View Image Button -->
+                                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#trustDocumentModal">
+                                                                View Image
+                                                            </button>
                                                         </td>
+                                                        
+                                                        <!-- Modal for displaying the image -->
+                                                        <div class="modal fade" id="trustDocumentModal" tabindex="-1" aria-labelledby="trustDocumentModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog modal-dialog-centered">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="trustDocumentModalLabel">Trust Document</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body text-center">
+                                                                        <img src="{{ asset('images/promonations/' . $promonation->promonation_image) }}" alt="Trust Document">
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        
                                                         <td>{{ $promonation->date }}</td>
                                                         <td>{{ Str::limit($promonation->description, 50) }}</td>
+                                                        <td>{{ $promonation->promo_heading }}</td>
+                                                        {{-- <td><span class="badge badge-success"> {{ $promonation->status }}</span> --}}
+                                                           </td>
+                                                        
                                                         <td>
                                                             <!-- Edit button -->
                                                             <a href="{{ route('editpromonation', $promonation->id) }}" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></a>
                                                             
                                                             <!-- Delete button (soft delete by changing status to 'deleted') -->
-                                                            <form action="{{ route('deletepromonation', $promonation->id) }}" method="POST" style="display:inline;">
+                                                            <form action="{{ route('deletepromonation', $promonation->id) }}" method="POST" style="display:inline;" onsubmit="return confirmDelete();">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit" class="btn btn-danger btn-sm"><i class="fa fa-trash"></i></button>
                                                             </form>
+                                                            
+                                                           
+                                                            
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -120,5 +149,10 @@
         setTimeout(function(){
             document.getElementById('Message').style.display = 'none';
         }, 3000);
+    </script>
+     <script>
+        function confirmDelete() {
+            return confirm('Are you sure you want to delete this promotion?');
+        }
     </script>
 @endsection

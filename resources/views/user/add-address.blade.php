@@ -29,7 +29,7 @@
         <div class="tabs -underline-2 js-tabs">
           
 
-          <div class="tabs__content pt-10 js-tabs-content">
+          <div class="tabs__content js-tabs-content">
             <div class="tabs__pane -tab-item-1 is-tab-el-active">
                   @if ($errors->any())
                   <div class="alert alert-danger">
@@ -55,53 +55,95 @@
               
                   <form action="{{ route('saveaddress') }}" method="post" enctype="multipart/form-data">
                     @csrf
-                     
-                      <div class="row mt-10">
-                        <div class="col-md-6">
+
+                    <div class="row ">
+                      <div class="col-md-12">
                           <div class="form-group">
-                            {{-- <label for="exampleInputEmail1">Country</label> --}}
-                            <select name="country" class="form-control" id="">
-                              <option value="India">India</option>
-                            </select>
+                              <label for="exampleInputEmail1">Type</label>
                           </div>
-                        </div>
-                        <div class="col-md-6">
-                        <div class="form-group">
-                          {{-- <label for="exampleInputEmail1">State</label> --}}
-                          <select name="state" class="form-control" id="">
-                            <option value="Odisha">Odisha</option>
-                          </select>
-                        </div>
-                        </div>
                       </div>
-                      <div class="row mt-10">
+                      <div class="col-md-2">
+                        <div class="form-check custom-radio-button">
+                          <input type="radio" class="form-check-input" id="individual" name="place_category" value="Indivisual" required>
+                          <label class="form-check-label" for="individual">
+                              <span class="custom-radio"></span>
+                              Individual
+                          </label>
+                        </div>
+                   
+                    
+                      </div>
+                      <div class="col-lg-2">
+                        <div class="form-check custom-radio-button">
+                          <input type="radio" class="form-check-input" id="apartment" name="place_category" value="Apartment">
+                          <label class="form-check-label" for="apartment">
+                              <span class="custom-radio"></span>
+                              Apartment
+                          </label>
+                      </div>
+                      </div>
+                      <div class="col-lg-2">
+                          
+                          <div class="form-check custom-radio-button">
+                            <input type="radio" class="form-check-input" id="business" name="place_category" value="Business">
+                            <label class="form-check-label" for="business">
+                                <span class="custom-radio"></span>
+                                Business
+                            </label>
+                          </div>
+                    </div>
+                    <div class="col-lg-2">
+                          
+                      <div class="form-check custom-radio-button">
+                        <input type="radio" class="form-check-input" id="temple" name="place_category" value="Temple">
+                        <label class="form-check-label" for="temple">
+                            <span class="custom-radio"></span>
+                            Temple
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mt-2">
+                    <div class="col-md-6 ">
+                        <label for="apartment_flat_plot" class="form-label">Apartment/Flat/Plot</label>
+                        <input type="text" class="form-control" id="apartment_flat_plot" name="apartment_flat_plot" placeholder="Enter details" required>
+                    </div>
+                    <div class="col-md-6 ">
+                        <label for="landmark" class="form-label">Landmark</label>
+                        <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Enter landmark" required>
+                    </div>
+                </div>
+                  <div class="row mt-2">
+                    <div class="col-md-6 ">
+                        <label for="locality" class="form-label">Locality</label>
+                        <input type="text" class="form-control" id="locality" name="locality" placeholder="Enter locality" required>
+                    </div>
+                    <div class="col-md-6 ">
+                        <label for="pincode" class="form-label">Pincode</label>
+                        <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required pattern="\d{6}">
+                    </div>
+                </div>
+                     
+                      <div class="row mt-2">
                         <div class="col-md-6">
                           <div class="form-group">
-                            {{-- <label for="exampleInputEmail1">Town/City   </label> --}}
+                            <label for="exampleInputEmail1">Town/City   </label>
                             <input type="text" class="form-control" id="exampleInputEmail1" value="" name="city" placeholder="Enter Town/City *" required>
                           </div>
                         </div>
                         <div class="col-md-6">
-                        <div class="form-group">
-                          {{-- <label for="exampleInputEmail1">Pincode</label> --}}
-                          <input type="text" class="form-control" name="pincode" placeholder="Enter Pincode *" required pattern="\d{6}" maxlength="6" title="Pincode should be exactly 6 digits">
-                        </div>
-                        </div>
-                      </div>
-
-                      <div class="row mt-10">
-                        
-                        <div class="col-md-12">
-                        <div class="form-group">
-                          {{-- <label for="exampleInputEmail1">Area, Street</label> --}}
-                          <textarea name="area" class="form-control" id=""  rows="15" placeholder="Enter Area, Street, Sector, Village *" required></textarea>
-                          {{-- <input type="text" class="form-control" id="exampleInputEmail1" value="" name="area" placeholder="Enter Area, Street, Sector, Village"> --}}
-                        </div>
+                          <div class="form-group">
+                            <label for="exampleInputEmail1">State</label>
+                            <select name="state" class="form-control" id="">
+                              <option value="Odisha">Odisha</option>
+                            </select>
+                          </div>
                         </div>
                       </div>
+                     
                       
 
-                      <div class="row mt-10">
+                      <div class="row mt-2">
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="exampleInputEmail1">Address Type</label>
@@ -122,7 +164,7 @@
                 </div>
               </div>
 
-              <div class="d-inline-block pt-30">
+              <div class="d-inline-block">
 
                 <button type="submit" class="button h-50 px-24 -dark-1 bg-blue-1 text-white">
                   Save Address<div class="icon-arrow-top-right ml-15"></div>
@@ -144,3 +186,4 @@
 
 @section('scripts')
 @endsection
+

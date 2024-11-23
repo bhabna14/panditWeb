@@ -115,7 +115,7 @@
                                     </div>
                                     @endif
                                     <div class="table-responsive  export-table">
-                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                        <table id="file-datatable" class="table table-bordered ">
                                             <thead>
                                                 <tr>
                                                     <th>Request ID</th>
@@ -162,12 +162,18 @@
                                                         <td>
                                                             @if($request->order && $request->order->total_price)
                                                                 {{-- Display the saved price if it exists --}}
-                                                                <span>{{ $request->order->total_price }} </span>
+                                                                <span>Total Price : {{ $request->order->total_price }} <br>
+                                                                    Price Of Flower : {{ $request->order->requested_flower_price }} <br>
+                                                                Delivery Charge : {{ $request->order->delivery_charge }} </span>
                                                             @else
                                                                 {{-- Show the input box and save button if no price is set --}}
                                                                 <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST" style="display: inline;">
                                                                     @csrf
-                                                                    <input type="number" name="price" class="form-control" placeholder="Enter Price" required>
+                                                                    <input type="number" name="requested_flower_price" class="form-control" placeholder="Enter Price" required style="margin-bottom: 13px;">
+                                                                    <input type="number" name="delivery_charge" class="form-control" placeholder="Enter Delivery Charge" required>
+                                                                    <span class="form-text text-muted" style="font-size: 12px; margin-top: 5px;">
+                                                                        If the delivery charge is 0, please enter "0" instead of leaving it blank.
+                                                                    </span>
                                                                     <button type="submit" class="btn btn-primary mt-2">Save</button>
                                                                 </form>
                                                             @endif
@@ -176,14 +182,22 @@
                                                         <td>
                                                             <form action="{{ route('admin.markPayment', $request->request_id) }}" method="POST" style="display: inline;">
                                                                 @csrf
-                                                                <button type="submit" class="btn btn-success mt-2" {{ $request->status === 'paid' ? 'disabled' : '' }}>Paid</button>
+                                                                @if ($request->status == 'pending' || $request->status == 'paid')
+                                                                    <!-- If status is 'pending' or 'paid', disable the button -->
+                                                                    <button type="submit" class="btn btn-success mt-2" disabled>Paid</button>
+                                                                @elseif ($request->status == 'approved')
+                                                                    <!-- If status is 'approved', enable the button -->
+                                                                    <button type="submit" class="btn btn-success mt-2">Paid</button>
+                                                                @endif
                                                             </form>
                                                         </td>
                                                         <td>
-                                                            <strong>Address:</strong> {{ $request->address->area ?? "" }}<br>
+                                                            <strong>Address:</strong> {{ $request->address->apartment_flat_plot ?? "" }}, {{ $request->address->locality_name ?? "" }}<br>
+                                                            <strong>Landmark:</strong> {{ $request->address->landmark ?? "" }}<br>
+
                                                             <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
                                                             <strong>State:</strong> {{ $request->address->state ?? ""}}<br>
-                                                            <strong>Zip Code:</strong> {{ $request->address->pincode ?? "" }}
+                                                            <strong>Pin Code:</strong> {{ $request->address->pincode ?? "" }}
                                                         </td>
                                                     </tr>
                                                 @endforeach

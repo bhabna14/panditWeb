@@ -52,43 +52,43 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="promonation_image">Promonation Image</label>
-                                    <input type="file" class="form-control" id="promonation_image" name="promonation_image"
-                                        placeholder="Choose an image" required>
+                                    <label for="promonation_image">Promonation Image <span style="color: red;">*</span></label>
+                                    <input type="file" class="form-control" id="promonation_image" name="promonation_image" placeholder="Choose an image" required>
+                                    <small style="color: red; font-size:13px">Note: Image size is not allowed to exceed 2MB.</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="date">Date</label>
+                                    <label for="date">Date <span style="color: red;">*</span></label>
                                     <input type="date" class="form-control" id="date" name="date" required>
                                 </div>
                             </div>
                         </div>
-
+                
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="promonation_image">Promonation Heading</label>
-                                    <input type="text" class="form-control" id="promo_heading" name="promo_heading"
-                                        placeholder="Enter Promonation Heading" required>
+                                    <label for="promo_heading">Promonation Heading <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" id="promo_heading" name="promo_heading" placeholder="Enter Promonation Heading" required>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="button_title">Button Title Text</label>
-                                    <input type="text" class="form-control" id="date" name="button_title" placeholder="Enter Button Text" required>
+                                    <label for="button_title">Button Title Text <span style="color: red;">*</span></label>
+                                    <input type="text" class="form-control" id="button_title" name="button_title" placeholder="Enter Button Text" required>
                                 </div>
                             </div>
                         </div>
-
+                
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="description">Description</label>
+                                    <label for="description">Description <span style="color: red;">*</span></label>
                                     <textarea name="description" class="form-control" id="description" rows="3" placeholder="Enter promotion description" required></textarea>
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group" style="padding-top: 27px">
@@ -98,6 +98,7 @@
                         </div>
                     </div>
                 </div>
+                
             </div>
         </div>
     </form>

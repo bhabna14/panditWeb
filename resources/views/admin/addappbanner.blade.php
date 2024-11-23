@@ -54,14 +54,16 @@
                             
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="event_name">Banner Imgae</label>
+                                    <label for="event_name">Banner Imgae <span style="color:red">*</span></label>
                                     <input type="file" class="form-control" id="banner_img" name="banner_img" required>
+                                    <small style="color: red; font-size:13px">Note: Image size is not allowed to exceed 2MB.</small>
+                                    
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="category">Category<span style="color:red">*</span></label>
-                                    <select name="category" id="category" class="form-control">
+                                    <label for="category">Category <span style="color:red">*</span></label>
+                                    <select name="category" id="category" class="form-control" required>
                                        <option selected>Choose</option>
                                         <option value="podcast">Podcast</option>
                                         <option value="flower">Flower</option>
@@ -75,8 +77,8 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="event_name">Title Text</label>
-                                    <input type="text" class="form-control" id="title_text" name="title_text">
+                                    <label for="event_name">Title Text <span style="color:red">*</span></label>
+                                    <input type="text" class="form-control" id="title_text" name="title_text" required>
 
                                 </div>
                             </div>

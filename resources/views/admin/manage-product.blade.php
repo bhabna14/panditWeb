@@ -53,13 +53,14 @@
                                         <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
                                     </div> -->
                                     <div class="table-responsive  export-table">
-                                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
+                                        <table id="file-datatable" class="table table-bordered ">
                                             <thead>
                                                 <tr>
                                                     <th>#</th>
                                                     <th>Product Name</th>
                                                     <th>Image</th>
-                                                    <th>Price</th>
+                                                    <th>MRP</th>
+                                                    <th>Sale Price</th>
                                                     <th>Stock</th>
                                                     <th>Category</th>
                                                     <th>Status</th>
@@ -75,6 +76,8 @@
                                                             <img src="{{ asset($product->product_image ? 'storage/' . $product->product_image : 'front-assets/img/images.jfif') }}" alt="user" style="widows: 100px;height:100px">
 
                                                         </td>
+                                                        <td>Rs. {{ number_format($product->mrp, 2) }}</td>
+
                                                         <td>Rs. {{ number_format($product->price, 2) }}</td>
                                                         <td>{{ $product->stock }}</td>
                                                         <td>{{ $product->category }}</td>

@@ -23,7 +23,7 @@ class FlowerRequestController extends Controller
             },
             'flowerProduct',
             'user',
-            'address',
+            'address.localityDetails',
             'flowerRequestItems'  // Eager load flowerRequestItems
         ])
         ->orderBy('id', 'desc')
@@ -56,7 +56,10 @@ public function saveOrder(Request $request, $id)
             'user_id' => $flowerRequest->user_id,
             'address_id' => $flowerRequest->address_id,
             'quantity' => 1,
-            'total_price' => $request->price,
+            'requested_flower_price' => $request->requested_flower_price,
+            'delivery_charge' => $request->delivery_charge,
+            'total_price' => ($request->requested_flower_price ?: 0) + ($request->delivery_charge ?: 0),
+
             'suggestion' => $flowerRequest->suggestion,
         ]);
 

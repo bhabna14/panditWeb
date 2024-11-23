@@ -73,9 +73,9 @@ class FlowerBookingController extends Controller
         if ($duration == 1) {
             $endDate = $startDate->copy()->addDays(29); // For 1, add 30 days
         } else if ($duration == 3) {
-            $endDate = $startDate->copy()->addDays(59); // For 3, add 60 days
+            $endDate = $startDate->copy()->addDays(89); // For 3, add 90 days
         } else if ($duration == 6) {
-            $endDate = $startDate->copy()->addDays(89); // For 6, add 90 days
+            $endDate = $startDate->copy()->addDays(179); // For 6, add 180 days
         }
         else {
             // Handle unexpected duration value
@@ -89,6 +89,10 @@ class FlowerBookingController extends Controller
     
         // Create the subscription
         $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
+        $today = now()->format('Y-m-d');  // Format the date to match start_date format
+    
+        // Determine the status based on the start_date
+        $status = ($startDate->format('Y-m-d') === $today) ? 'active' : 'pending';
         try {
             Subscription::create([
                 'subscription_id' => $subscriptionId,
@@ -98,7 +102,7 @@ class FlowerBookingController extends Controller
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'is_active' => true,
-                'status' => 'active'
+                'status' => $status 
             ]);
             \Log::info('Subscription created successfully');
         } catch (\Exception $e) {
@@ -433,47 +437,29 @@ class FlowerBookingController extends Controller
     public function pause(Request $request, $order_id)
     {
         try {
-            // Log the entry into the method
-            Log::info('Entered the pause method', ['order_id' => $order_id]);
-    
+           
             // Find the subscription by order_id
             $subscription = Subscription::where('order_id', $order_id)->firstOrFail();
-            Log::info('Subscription found', ['subscription_id' => $subscription->subscription_id]);
-    
-            // Log request details
-            Log::info('Pause request details', [
-                'pause_start_date' => $request->pause_start_date,
-                'pause_end_date' => $request->pause_end_date
-            ]);
-    
+          
             // Calculate pause start and end dates
             $pauseStartDate = Carbon::parse($request->pause_start_date);
             $pauseEndDate = Carbon::parse($request->pause_end_date);
             $pausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1; // Include both dates
     
-            // Log pause days calculation
-            Log::info('Paused days calculated', ['paused_days' => $pausedDays]);
-    
+           
             // Get the most recent new_end_date or default to the original end_date
             $lastNewEndDate = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
                 ->orderBy('id', 'desc')
                 ->value('new_end_date');
     
-            // Log the last new end date
-            Log::info('Last new end date', ['last_new_end_date' => $lastNewEndDate]);
-    
             // Use the most recent new_end_date for recalculating the new end date
             $currentEndDate = $lastNewEndDate ? Carbon::parse($lastNewEndDate) : Carbon::parse($subscription->end_date);
     
-            // Log the current end date being used
-            Log::info('Current end date being used for new calculation', ['current_end_date' => $currentEndDate]);
-    
+           
             // Calculate the new end date by adding paused days
             $newEndDate = $currentEndDate->addDays($pausedDays);
     
-            // Log the newly calculated end date
-            Log::info('New end date calculated', ['new_end_date' => $newEndDate]);
-    
+         
             // Update the subscription status and new date field
             $subscription->status = 'paused';
             $subscription->pause_start_date = $pauseStartDate;
@@ -483,12 +469,6 @@ class FlowerBookingController extends Controller
     
             // Save the changes
             $subscription->save();
-    
-            // Log successful save
-            Log::info('Subscription updated successfully', [
-                'subscription_id' => $subscription->subscription_id,
-                'new_end_date' => $newEndDate
-            ]);
     
             // Log the pause action
             SubscriptionPauseResumeLog::create([
@@ -688,7 +668,7 @@ public function resume(Request $request, $order_id)
         }
 
         // Calculate the days actually paused until the resume date
-        $actualPausedDays = $resumeDate->diffInDays($pauseStartDate) + 1; // Include start date
+        $actualPausedDays = $resumeDate->diffInDays($pauseStartDate); // Include start date
 
         // Calculate total planned paused days
         $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1;

@@ -4,7 +4,7 @@
 						<div class="main-header-left ">
 							<div class="responsive-logo">
 								<a href="{{url('index')}}" class="header-logo">
-									<img src="{{asset('assets/img/brand/logo.png')}}" class="mobile-logo logo-1" alt="logo">
+									<img src="{{asset('assets/img/brand/Logo_Black.png')}}" class="mobile-logo logo-1" alt="logo">
 									<img src="{{asset('assets/img/brand/logo-white.png')}}" class="mobile-logo dark-logo-1" alt="logo">
 								</a>
 							</div>
@@ -14,7 +14,7 @@
 							</div>
 							<div class="logo-horizontal">
 								<a href="{{url('index')}}" class="header-logo">
-									<img src="{{asset('assets/img/brand/logo.png')}}" class="mobile-logo logo-1" alt="logo">
+									<img src="{{asset('assets/img/brand/Logo_Black.png')}}" class="mobile-logo logo-1" alt="logo">
 									<img src="{{asset('assets/img/brand/logo-white.png')}}" class="mobile-logo dark-logo-1" alt="logo">
 								</a>
 							</div>
