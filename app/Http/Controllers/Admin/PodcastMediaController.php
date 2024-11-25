@@ -31,9 +31,9 @@ class PodcastMediaController extends Controller
                 $podcast->podcast_video_path = $request->input('podcast_video_path');
                 $podcast->podcast_audio_path = $request->input('podcast_audio_path');
                 $podcast->save();
-    
+
                 // Return success response
-                return redirect()->route('PodcastSocialMedia')->with('success', 'Podcast media updated successfully.');
+                return redirect()->route('publishPodcast')->with('success', 'Podcast media updated successfully.');
             } catch (\Exception $e) {
                 // Return error response
                 return redirect()->back()->with('error', 'Failed to update podcast media. Please try again.');

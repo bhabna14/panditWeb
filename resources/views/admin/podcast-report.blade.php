@@ -9,6 +9,7 @@
 @endsection
 
 @section('content')
+    
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">PUBLISH PODCAST</span>
@@ -31,7 +32,6 @@
                                 onclick="setActive(this)">Create Podcast</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-script') }}"
                                 onclick="setActive(this)">Script Of Podcast</a>
-
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
                                 href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
                                 Verified</a>
@@ -121,12 +121,9 @@
                                                         data-id="{{ $podcast->podcast_id }}">
                                                         <i class="fa fa-eye"></i>
                                                     </button>
-
                                                 </div>
-
                                             </td>
                                             <td>{{ $podcast->recording_date }}</td>
-
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
                                                     <span
@@ -136,7 +133,6 @@
                                                             class="fa fa-eye"></i></button>
                                                 </div>
                                             </td>
-
                                             <td>{{ $podcast->editing_date }}</td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
@@ -148,7 +144,7 @@
                                                             class="fa fa-eye"></i></button>
                                                 </div>
                                             </td>
-                                            <td>{{ $publish_data[$podcast->podcast_id] ?? 'N/A' }}</td> <!-- Publish Date -->
+                                            <td>{{ $publish_data[$podcast->podcast_id] ?? 'N/A' }}</td>
                                             <td>
                                                 <div class="d-flex align-items-center gap-2">
                                                     <span class="badge bg-dark p-2">{{ $podcast->podcast_status }}</span>
@@ -263,6 +259,28 @@
                                 <th>Recorded By</th>
                                 <td id="podcastRecordingBy">N/A</td>
                             </tr>
+                           
+
+                            <tr>
+                                <th>Recording Date</th>
+                                <td id="recordingDate">N/A</td>
+                            </tr>
+                            <tr>
+                                <th>Recording Complete URL</th>
+                                <td>
+                                    <a id="recordingCompleteUrl" href="#" target="_blank"
+                                        class="btn btn-warning">Open URL</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Recording Status</th>
+                                <td id="podcastRecordingStatus">N/A</td>
+                            </tr>
+
+                            <tr>
+                                <th colspan="2">PODCAST MEDIA</th>
+                            </tr>
+
                             <tr>
                                 <th>Image Path</th>
                                 <td>
@@ -283,22 +301,6 @@
                                     <a id="podcastAudioPath" href="#" target="_blank" class="btn btn-dark">Listen
                                         Audio</a>
                                 </td>
-                            </tr>
-
-                            <tr>
-                                <th>Recording Date</th>
-                                <td id="recordingDate">N/A</td>
-                            </tr>
-                            <tr>
-                                <th>Recording Complete URL</th>
-                                <td>
-                                    <a id="recordingCompleteUrl" href="#" target="_blank"
-                                        class="btn btn-warning">Open URL</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Recording Status</th>
-                                <td id="podcastRecordingStatus">N/A</td>
                             </tr>
                         </tbody>
                     </table>

@@ -14,7 +14,6 @@ class PodcastEditingController extends Controller
         ->whereIn('podcast_editing_status', ['PENDING', 'STARTED', 'EDITING COMPLETED'])
         ->get();
     
-    
         return view('admin/podcast-editing',compact('podcast_editing'));
     }
 
@@ -56,6 +55,7 @@ class PodcastEditingController extends Controller
             $podcast->update(['podcast_editing_status' => 'PENDING']);
     
             return redirect()->back()->with('success', 'Podcast canceled successfully.');
+
         } catch (\Exception $e) {
             \Log::error('Error canceling podcast: ' . $e->getMessage());
             return redirect()->back()->with('error', 'An error occurred while canceling the podcast.');
@@ -137,7 +137,7 @@ public function approvePodcastEditing($podcast_id)
         $podcast->save();
 
         // Redirect back with a success message
-        return redirect()->route('publishPodcast')->with('success', 'Podcast approved successfully.');
+        return redirect()->route('podcastMedia')->with('success', 'Podcast approved successfully.');
     } else {
         // Redirect back with an error message
         return redirect()->back()->with('error', 'Podcast not found.');
