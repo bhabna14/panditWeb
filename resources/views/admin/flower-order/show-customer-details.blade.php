@@ -136,6 +136,7 @@
                                                             <thead>
                                                                 <tr>
                                                                     <th>Order ID</th>
+                                                                    <th>Purchase Date</th>
                                                                     <th>Start Date</th>
                                                                     <th>Product Details</th>
                                                                     <th>Address Details</th>
@@ -151,6 +152,9 @@
                                                                     <td>{{ $order->order_id }} 
                                                                        
                                                                     </td>
+                                                                    <td>{{ $order->created_at }} 
+                                                                       
+                                                                    </td>
                                                                     <td>{{ $order->subscription->start_date ?? "NA" }} 
                                                                        
                                                                     </td>
@@ -159,12 +163,16 @@
                 
                 
                                                                     </td>
-                                                                    <td>
-                                                                        <strong>Address:</strong> {{ $order->address->area ?? "" }}<br>
-                                                                        <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
-                                                                        <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
-                                                                        <strong>Zip Code:</strong> {{ $order->address->pincode ?? "" }}
-                                                                    </td>
+                                                                    
+                                                                        <td>
+                                                                            <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->locality ?? "" }}<br>
+                                                                            <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
+                
+                                                                            <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
+                                                                            <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
+                                                                            <strong>Pin Code:</strong> {{ $order->address->pincode ?? "" }}
+                                                                        </td>
+                                                                   
                                                                     {{-- <td>{{ $order->total_price }}</td> --}}
                                                                     <td>{{ number_format($order->total_price, 2) }}</td>
                 
@@ -172,7 +180,9 @@
                                                                         <span class="status-badge 
                                                                         {{ $order->subscription->status === 'active' ? 'status-running bg-success' : '' }}
                                                                         {{ $order->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
-                                                                        {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}">
+                                                                        {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}
+                                                                         {{ $order->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                                                        
                                                                         {{ ucfirst($order->subscription->status) }}
                                                                     </span>
                                                                     </td>
