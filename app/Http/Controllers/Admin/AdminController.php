@@ -18,7 +18,7 @@ use App\Models\PanditDevice;
 use App\Models\UserDevice;
 use App\Models\PanditLogin;
 use App\Models\Bankdetail;
-
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
 use App\Http\Controllers\Controller;
@@ -61,8 +61,9 @@ class AdminController extends Controller
 
         $pandit_profiles = Profile::orderBy('id', 'desc')
                                     ->where('pandit_status', 'pending')                        
-                                    ->get(); // Fetch all profiles                  
-         return view('admin/dashboard', compact('pandit_profiles','totalPandit','pendingPandit','totalOrder','totalUser'));
+                                    ->get(); // Fetch all profiles        
+        $notifications = Notification::where('is_read', false)->latest()->get();          
+         return view('admin/dashboard', compact('notifications','pandit_profiles','totalPandit','pendingPandit','totalOrder','totalUser'));
     } 
     public function adminlogout()
     {

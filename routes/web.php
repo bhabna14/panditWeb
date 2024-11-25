@@ -223,6 +223,7 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
 
+    Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
     Route::get('/show-customer/{id}/details', [FlowerOrderController::class, 'showCustomerDetails'])->name('showCustomerDetails');
