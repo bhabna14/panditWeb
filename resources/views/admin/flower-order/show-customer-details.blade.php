@@ -180,8 +180,8 @@
                                                                         <span class="status-badge 
                                                                         {{ $order->subscription->status === 'active' ? 'status-running bg-success' : '' }}
                                                                         {{ $order->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
-                                                                        {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}">
-                                                                        {{ $order->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                                                        {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}
+                                                                         {{ $order->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
                                                                         
                                                                         {{ ucfirst($order->subscription->status) }}
                                                                     </span>
