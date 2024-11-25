@@ -115,6 +115,7 @@
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
+                                                    <th>Purchase Date</th>
                                                     <th>Product Details</th>
                                                     <th>Address Details</th>
                                                     <th>Total Price</th>
@@ -133,7 +134,9 @@
                                                         <a href="{{ route('showCustomerDetails', $order->user->userid) }}" class="btn btn-sm btn-warning">View Customer</a>
                                                     
                                                     </td>
-                                                   
+                                                    <td>{{ $order->created_at }} 
+                                                                       
+                                                    </td>
                                                     <td>{{ $order->flowerProduct->name }} <br>
                                                        ( {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }} - {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }} )
 
@@ -154,7 +157,9 @@
                                                         <span class="status-badge 
                                                         {{ $order->subscription->status === 'active' ? 'status-running bg-success' : '' }}
                                                         {{ $order->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
-                                                        {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}">
+                                                        {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}
+                                                         {{ $order->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                                        
                                                         {{ ucfirst($order->subscription->status) }}
                                                     </span>
                                                     </td>
