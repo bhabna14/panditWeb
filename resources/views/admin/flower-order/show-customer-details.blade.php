@@ -136,6 +136,7 @@
                                                             <thead>
                                                                 <tr>
                                                                     <th>Order ID</th>
+                                                                    <th>Purchase Date</th>
                                                                     <th>Start Date</th>
                                                                     <th>Product Details</th>
                                                                     <th>Address Details</th>
@@ -149,6 +150,9 @@
                                                                 @foreach($orders as $order)
                                                                 <tr>
                                                                     <td>{{ $order->order_id }} 
+                                                                       
+                                                                    </td>
+                                                                    <td>{{ $order->created_at }} 
                                                                        
                                                                     </td>
                                                                     <td>{{ $order->subscription->start_date ?? "NA" }} 
