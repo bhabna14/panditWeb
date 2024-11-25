@@ -123,10 +123,10 @@
                                                     <div class="input-group-text">
                                                         <i class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
                                                     </div>
-                                                    <input class="form-control" id="script_created_date"
-                                                        name="script_created_date" type="date" readonly>
+                                                    <input class="form-control script-created-date" name="script_created_date" type="date" readonly>
                                                 </div>
                                             </td>
+                                            
 
                                             <td>
                                                 <input type="text" class="form-control" id="story_source"
@@ -207,18 +207,16 @@
         });
     </script>
 
-
-
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get today's date in YYYY-MM-DD format
-            const today = new Date().toISOString().split('T')[0];
+       document.addEventListener('DOMContentLoaded', function() {
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split('T')[0];
 
-            // Set the value of the input field with today's date
-            const dateInput = document.getElementById('script_created_date');
-            if (dateInput) {
-                dateInput.value = today;
-            }
-        });
+    // Select all elements with the class 'script-created-date'
+    document.querySelectorAll('.script-created-date').forEach(input => {
+        input.value = today;
+    });
+});
     </script>
+    
 @endsection
