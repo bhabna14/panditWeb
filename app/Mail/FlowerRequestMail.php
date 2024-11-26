@@ -27,7 +27,7 @@ class FlowerRequestMail extends Mailable
 
     public function build()
     {
-        // Log::info('Building the email for flower request.', ['request_id' => $this->flowerRequest->request_id]);
+        Log::info('Building the email for flower request.', ['request_id' => $this->flowerRequest->request_id]);
 
         return $this->subject('New Flower Request Received')
             ->view('emails.flower_request');

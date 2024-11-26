@@ -216,10 +216,10 @@ class FlowerBookingController extends Controller
     
             // Log the alert for a new order
             // Log::alert('New order received! SOUND ALERT!');
-            // Log::info('New order created successfully.', ['request_id' => $requestId]);
+            Log::info('New order created successfully.', ['request_id' => $requestId]);
     
             // // Log before sending the email
-            // Log::info('Attempting to send email to multiple recipients.');
+            Log::info('Attempting to send email to multiple recipients.');
     
             // Array of email addresses to send the email
             $emails = [
@@ -234,10 +234,10 @@ class FlowerBookingController extends Controller
             // Send the email to all recipients and log success or failure
             Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
     
-            // Log::info('Email sent successfully to multiple recipients.', [
-            //     'request_id' => $requestId,
-            //     'user_id' => $user->userid,
-            // ]);
+            Log::info('Email sent successfully to multiple recipients.', [
+                'request_id' => $requestId,
+                'user_id' => $user->userid,
+            ]);
     
             // Prepare response data including flower details in FlowerRequest
             return response()->json([
