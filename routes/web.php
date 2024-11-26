@@ -55,16 +55,7 @@ use Twilio\Rest\Client;
 Route::fallback(function () {
     abort(404);
 });
-Route::get('/test-email', function () {
-    try {
-        Mail::raw('This is a test email.', function ($message) {
-            $message->to('bhabana.samantara@33crores.com')->subject('Test Email');
-        });
-        return 'Email sent!';
-    } catch (\Exception $e) {
-        return 'Failed to send email: ' . $e->getMessage();
-    }
-});
+
 
 Route::get('/otplogin', [OtplessLoginController::class, 'otplogin'])->name('otplogin');
 Route::post('/send-otp-user', [OtplessLoginController::class, 'sendOtp']);
