@@ -218,9 +218,6 @@ class FlowerBookingController extends Controller
                 // Log the alert for a new order
                 Log::info('New order created successfully.', ['request_id' => $requestId]);
             
-                // Log before attempting to send the email
-                Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
-            
                 // Array of email addresses to send the email
                 $emails = [
                     'bhabana.samantara@33crores.com',
@@ -230,7 +227,10 @@ class FlowerBookingController extends Controller
                     'starleen@33crores.com',
                 ];
             
-                // Send the email
+                // Log before attempting to send the email
+                Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
+            
+                // Send the email to all recipients
                 Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
             
                 // Log success
@@ -248,6 +248,7 @@ class FlowerBookingController extends Controller
                     'trace' => $e->getTraceAsString(),
                 ]);
             }
+            
             
             // Prepare response data including flower details in FlowerRequest
             return response()->json([
