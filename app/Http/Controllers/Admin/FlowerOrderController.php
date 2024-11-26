@@ -9,7 +9,7 @@ use App\Models\FlowerPayment;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserAddress;
-
+use App\Models\Notification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +34,14 @@ class FlowerOrderController extends Controller
                        
         return view('admin.flower-order.manage-flower-order', compact('orders','activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
     }
+
+    // In your Controller:
+public function showNotifications()
+{
+    $notifications = Notification::where('is_read', false)->latest()->get();
+    return view('admin.layouts.components.app-header', compact('notifications'));
+}
+
     public function showCustomerDetails($userid)
     {
         // Fetch user details by `userid` instead of `id`

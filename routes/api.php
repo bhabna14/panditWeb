@@ -22,7 +22,7 @@ use App\Http\Controllers\Api\CheckController;
 use App\Http\Controllers\Api\PoojaStatusController;
 use App\Http\Controllers\Api\FlowerBookingController;
 
-
+use App\Http\Controllers\Admin\NotificationController;
 
 
 /// controllers for frontend pages 
@@ -47,7 +47,7 @@ Route::controller(PanditLoginController::class)->group(function() {
 //     Route::post('/pandit-send-otp',  'storeLoginData');
 //     Route::post('/pandit-verify-otp', 'checkOtp');
 // });
-
+Route::get('/check-new-notifications', [NotificationController::class, 'checkNewNotifications']);
 Route::controller(AreaController::class)->group(function() {
     Route::get('/get-districts/{stateCode}', 'getDistrict');
     Route::get('/get-subdistricts/{districtCode}', 'getSubdistrict');

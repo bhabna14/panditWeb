@@ -143,7 +143,7 @@
 
                                                     </td>
                                                     <td>
-                                                        <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->locality ?? "" }}<br>
+                                                        <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->localityDetails->locality_name ?? "" }}<br>
                                                         <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
 
                                                         <strong>City:</strong> {{ $order->address->city ?? ""}}<br>

@@ -10,7 +10,7 @@ use App\Models\Subscription;
 use App\Models\FlowerProduct;
 use App\Models\FlowerRequest;
 use App\Models\SubscriptionPauseResumeLog;
-
+use App\Models\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
 
@@ -168,6 +168,18 @@ class FlowerBookingController extends Controller
     
             // Eager load the flower_request_items relationship
             $flowerRequest = $flowerRequest->load('flowerRequestItems');
+
+            Notification::create([
+                'type' => 'order',
+                'data' => [
+                    'message' => 'A new order has been placed!',
+                    'order_id' => $flowerRequest->id,
+                    'user_name' => $flowerRequest->user->name, // Assuming the order has a user relation
+                ],
+                'is_read' => false, // Mark as unread
+            ]);
+             // Log the alert for a new order
+            Log::alert('New order received! SOUND ALERT!');
     
             // Prepare response data including flower details in FlowerRequest
             return response()->json([
