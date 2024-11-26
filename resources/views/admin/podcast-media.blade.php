@@ -89,11 +89,10 @@
                                     <th class="border-bottom-0 bg-info text-white">SlNo</th>
                                     <th class="border-bottom-0 bg-info text-white">Podcast Name</th>
                                     <th class="border-bottom-0 bg-info text-white">View Script</th>
-                                    <th class="border-bottom-0 bg-info text-white">Image File Path</th>
-                                    <th class="border-bottom-0 bg-info text-white">Video File Path</th>
-                                    <th class="border-bottom-0 bg-info text-white">Audio File Path</th>
+                                    <th class="border-bottom-0 bg-info text-white">All Image File Path</th>
+                                    <th class="border-bottom-0 bg-info text-white">All Video File Path</th>
+                                    <th class="border-bottom-0 bg-info text-white">All Audio File Path</th>
                                     <th class="border-bottom-0 bg-info text-white">Action</th>
-
                                 </tr>
                             </thead>
                             <tbody>

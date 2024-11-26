@@ -28,7 +28,7 @@
                             <a class="nav-link mb-2 mt-2 bg-warning"
                                 style="  color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
                                 href="{{ url('admin/podcast-script') }}" onclick="setActive(this)">Script Of Podcast</a>
-                           
+
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
                                 href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
                                 Verified</a>
@@ -41,11 +41,11 @@
                                 Verified</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
                                 onclick="setActive(this)">Publish Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;"
-                                href="{{ url('admin/podcast-media') }}" onclick="setActive(this)">Podcast
+                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
+                                onclick="setActive(this)">Podcast
                                 Media</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
-                                onclick="setActive(this)">Social Media</a>    
+                                onclick="setActive(this)">Social Media</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
                                 onclick="setActive(this)">Report</a>
                         </nav>
@@ -114,7 +114,7 @@
                                             @csrf
                                             <td>
                                                 <input type="text" class="form-control" id="script_location"
-                                                    name="script_location" placeholder="Enter Script File Location"
+                                                    name="script_location" placeholder="Enter Script File Location" value="{{ $podcast->script_location}}"
                                                     required>
                                             </td>
 
@@ -123,18 +123,19 @@
                                                     <div class="input-group-text">
                                                         <i class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
                                                     </div>
-                                                    <input class="form-control script-created-date" name="script_created_date" type="date" readonly>
+                                                    <input class="form-control script-created-date"
+                                                        name="script_created_date" type="date" readonly>
                                                 </div>
                                             </td>
-                                            
+
 
                                             <td>
                                                 <input type="text" class="form-control" id="story_source"
-                                                    name="story_source" placeholder="Enter Source Of The Story" required>
+                                                    name="story_source" placeholder="Enter Source Of The Story" value="{{$podcast->story_source}}" required>
                                             </td>
                                             <td>
                                                 <input type="text" class="form-control" id="script_created_by"
-                                                    name="script_created_by" placeholder="Enter Script Created By"
+                                                    name="script_created_by" placeholder="Enter Script Created By"  value="{{$podcast->script_created_by}}" 
                                                     required>
                                             </td>
                                             <td>
@@ -179,7 +180,7 @@
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
 
     <script>
-        document.getElementById('script_location').addEventListener('input', function() {
+            document.getElementById('script_location').addEventListener('input', function() {
             const scriptLocation = this.value;
             const errorElement = document.getElementById('scriptLocationError');
 
@@ -208,15 +209,15 @@
     </script>
 
     <script>
-       document.addEventListener('DOMContentLoaded', function() {
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date().toISOString().split('T')[0];
 
-    // Select all elements with the class 'script-created-date'
-    document.querySelectorAll('.script-created-date').forEach(input => {
-        input.value = today;
-    });
-});
+            // Select all elements with the class 'script-created-date'
+            document.querySelectorAll('.script-created-date').forEach(input => {
+                input.value = today;
+            });
+        });
     </script>
     
 @endsection

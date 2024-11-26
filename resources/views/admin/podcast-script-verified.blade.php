@@ -27,7 +27,6 @@
                                 onclick="setActive(this)">Create Podcast</a>
                             <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-script') }}"
                                 onclick="setActive(this)">Script Of Podcast</a>
-                           
                             <a class="nav-link mb-2 mt-2 bg-warning"
                                 style="color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
                                 href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
@@ -193,9 +192,6 @@
                                 </div>
                             </div>
                         </div>
-
-
-
                     </div>
                 </div>
             </div>
@@ -215,18 +211,17 @@
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get today's date in YYYY-MM-DD format
-            const today = new Date().toISOString().split('T')[0];
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
 
-            // Set the value of the input field with today's date
-            const dateInput = document.getElementById('script_verified_date');
-            if (dateInput) {
-                dateInput.value = today;
-            }
+        // Select all elements with the class 'script-created-date'
+        document.querySelectorAll('#script_verified_date').forEach(input => {
+            input.value = today;
         });
-    </script>
+    });
+</script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -299,7 +294,6 @@
 
         });
     </script>
-
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const scriptEditorModal = document.getElementById('scriptEditorModal');

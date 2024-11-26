@@ -29,7 +29,7 @@
                                 onclick="setActive(this)">Create Podcast</a>
                             <a class="nav-link mb-2 mt-2" style="padding: 10px " href="{{ url('admin/podcast-script') }}"
                                 onclick="setActive(this)">Script Of Podcast</a>
-                          
+
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
                                 href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
                                 Verified</a>
@@ -43,7 +43,7 @@
                                 Verified</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
                                 onclick="setActive(this)">Publish Podcast</a>
-                                <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
+                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
                                 onclick="setActive(this)">Podcast
                                 Media</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
@@ -65,27 +65,27 @@
                     <div class="main-content-body tab-pane border-top-0 active" id="poojaskill">
 
                         @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    
-                    @if (session('success'))
-                        <div class="alert alert-success" id="Message">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-                    
-                    @if (session('error'))
-                        <div class="alert alert-danger" id="Message">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-                    
+                            <div class="alert alert-danger">
+                                <ul>
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        @if (session('success'))
+                            <div class="alert alert-success" id="Message">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        @if (session('error'))
+                            <div class="alert alert-danger" id="Message">
+                                {{ session('error') }}
+                            </div>
+                        @endif
+
 
                         <div class="row row-sm">
                             <div class="col-lg-12">
@@ -101,11 +101,13 @@
                                                         <th class="border-bottom-0 bg-info text-white">Recording URL</th>
                                                         <th class="border-bottom-0 bg-info text-white">Action</th>
                                                         <th class="border-bottom-0 bg-info text-white">Audio Edited By</th>
-                                                        <th class="border-bottom-0 bg-info text-white">Music Source</th>
+                                                        <th class="border-bottom-0 bg-info text-white">Music Source Url</th>
                                                         <th class="border-bottom-0 bg-info text-white">Editing Date</th>
                                                         <th class="border-bottom-0 bg-info text-white">Enter Complete URL
                                                         </th>
                                                         <th class="border-bottom-0 bg-info text-white">Save</th>
+                                                        <th class="border-bottom-0 bg-info text-white">Reject Reason</th>
+
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -157,24 +159,44 @@
                                                                 @endif
                                                             </td>
                                                             <td>
-                                                        <form action="{{ route('podcast.saveEditing', $podcast->podcast_id) }}"  method="POST">
-                                                                @csrf
-                                                                <input type="text" class="form-control" name="audio_edited_by"  placeholder="Audio Edited By" required>
+                                                                <form
+                                                                    action="{{ route('podcast.saveEditing', $podcast->podcast_id) }}"
+                                                                    method="POST">
+                                                                    @csrf
+                                                                    <input type="text" class="form-control"
+                                                                        name="audio_edited_by"
+                                                                        placeholder="Audio Edited By"
+                                                                        value="{{ $podcast->audio_edited_by }}" required>
                                                             </td>
                                                             <td>
-                                                                <input type="text" class="form-control" name="music_source" placeholder="Enter Music Source">
-                                                            </td>
-                                                            <td>
-                                                                <input type="date" class="form-control editing-date" name="editing_date" readonly>
-                                                            </td>
-                                                            <td>
-                                                                <input type="text" class="form-control" name="editing_complete_url"  placeholder="Enter Complete URL">
-                                                            </td>
-                                                            <td>
-                                                                <button type="submit" class="btn btn-success btn-md">Save</button>
-                                                            </td>
-                                                        </form>
+                                                                <textarea type="text" class="form-control"
+                                                                    name="music_source">
+                                                                    {{ $podcast->music_source }}</textarea>
 
+                                                            </td>
+                                                            <td>
+                                                                <input type="date" class="form-control editing-date"
+                                                                    name="editing_date"
+                                                                    value="{{ $podcast->editing_date }}" readonly>
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control"
+                                                                    name="editing_complete_url"
+                                                                    placeholder="Enter Complete URL"
+                                                                    value="{{ $podcast->editing_complete_url }}">
+                                                            </td>
+                                                            <td>
+                                                                <button type="submit"
+                                                                    class="btn btn-success btn-md">Save</button>
+                                                            </td>
+                                                            </form>
+                                                            <td>
+                                                                @if ($podcast->editing_reject_reason)
+                                                                    {{ $podcast->editing_reject_reason }}
+                                                                @else
+                                                                    Not Verified
+                                                                @endif
+                                                            </td>
                                                         </tr>
                                                     @empty
                                                         <tr>
@@ -330,13 +352,13 @@
     </script>
 
     <script>
-    setTimeout(function() {
-        let messageElement = document.getElementById('Message');
-        if (messageElement) {
-            messageElement.style.display = 'none';
-        }
-    }, 5000); // Hide after 5 seconds
-</script>
+        setTimeout(function() {
+            let messageElement = document.getElementById('Message');
+            if (messageElement) {
+                messageElement.style.display = 'none';
+            }
+        }, 5000); // Hide after 5 seconds
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

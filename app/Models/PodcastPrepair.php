@@ -43,6 +43,7 @@ class PodcastPrepair extends Model
         'editing_verified_date',
         'podcast_editing_status',
         'editing_complete_url',
+        'editing_reject_reason',
         'youtube_post_date',
         'facebook_post_date',
         'instagram_post_date',

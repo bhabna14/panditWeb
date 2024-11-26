@@ -93,6 +93,7 @@
                                     <th class="border-bottom-0 bg-info text-white">Editing Verified By</th>
                                     <th class="border-bottom-0 bg-info text-white">Editing Verified Date</th>
                                     <th class="border-bottom-0 bg-info text-white">Action</th>
+
                                 </tr>
                             </thead>
                             <tbody>
@@ -112,14 +113,16 @@
                                         </td>
                                         <td>
                                             @if ($podcast->music_source)
-                                                <a href="{{ $podcast->music_source }}" target="_blank"
-                                                    class="btn btn-dark btn-sm text-white">
-                                                    Music Source
-                                                </a>
+                                                @foreach (explode(',', $podcast->music_source) as $key => $url)
+                                                    <a href="{{ trim($url) }}" target="_blank" class="btn btn-dark btn-sm text-white mb-1">
+                                                        Music Source {{ $key + 1 }}
+                                                    </a>
+                                                @endforeach
                                             @else
                                                 <span class="text-muted">Not Available</span>
                                             @endif
                                         </td>
+                                        
 
                                         <form action="{{ route('updateEditingVerified', $podcast->podcast_id) }}"
                                             method="post" enctype="multipart/form-data">
@@ -196,18 +199,19 @@
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get today's date in YYYY-MM-DD format
-            const today = new Date().toISOString().split('T')[0];
 
-            // Set the value of the input field with today's date
-            const dateInput = document.getElementById('editing_verified_date');
-            if (dateInput) {
-                dateInput.value = today;
-            }
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date().toISOString().split('T')[0];
+
+        // Select all elements with the class 'script-created-date'
+        document.querySelectorAll('#editing_verified_date').forEach(input => {
+            input.value = today;
         });
-    </script>
+    });
+</script>
+
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

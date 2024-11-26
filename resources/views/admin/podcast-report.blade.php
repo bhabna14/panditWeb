@@ -573,37 +573,61 @@
     </script>
     {{-- editing modal --}}
     <script>
-    $(document).on('click', '.editing-details', function () {
-        const podcastId = $(this).data('id');
+ $(document).on('click', '.editing-details', function () {
+    const podcastId = $(this).data('id');
 
-        $.ajax({
-            url: '{{ route("admin.podcast.editingDetails") }}', // Update this route as per your backend
-            method: 'GET',
-            data: { podcast_id: podcastId },
-            success: function (response) {
-                // Populate modal fields
-                $('#editingDate').text(response.editing_date || 'N/A');
-                $('#musicSource').text(response.music_source || 'N/A');
-                $('#audioEditedBy').text(response.audio_edited_by || 'N/A');
-                $('#editingVerifiedBy').text(response.editing_verified_by || 'N/A');
-                $('#editingVerifiedDate').text(response.editing_verified_date || 'N/A');
-                $('#podcastEditingStatus').text(response.podcast_editing_status || 'N/A');
+    $.ajax({
+        url: '{{ route("admin.podcast.editingDetails") }}', // Update this route as per your backend
+        method: 'GET',
+        data: { podcast_id: podcastId },
+        success: function (response) {
+            // Populate modal fields
+            $('#editingDate').text(response.editing_date || 'N/A');
+            $('#audioEditedBy').text(response.audio_edited_by || 'N/A');
+            $('#editingVerifiedBy').text(response.editing_verified_by || 'N/A');
+            $('#editingVerifiedDate').text(response.editing_verified_date || 'N/A');
+            $('#podcastEditingStatus').text(response.podcast_editing_status || 'N/A');
 
-                // Handle URL field
-                if (response.editing_complete_url) {
-                    $('#editingCompleteUrl').attr('href', response.editing_complete_url).removeClass('disabled').text('Open URL');
-                } else {
-                    $('#editingCompleteUrl').attr('href', '#').addClass('disabled').text('N/A');
-                }
+            // Handle Music Source field
+            const musicSourceContainer = $('#musicSource');
+            musicSourceContainer.empty(); // Clear existing content before appending new links
 
-                // Show the modal
-                $('#editingDetailsModal').modal('show');
-            },
-            error: function () {
-                alert('Failed to fetch editing details. Please try again.');
+            if (response.music_source) {
+                const urls = response.music_source.split(','); // Split URLs by commas
+                urls.forEach((url, index) => {
+                    const trimmedUrl = url.trim(); // Remove extra spaces
+                    if (trimmedUrl) {
+                        musicSourceContainer.append(
+                            `<a href="${trimmedUrl}" target="_blank" class="btn btn-dark btn-sm text-white mb-1">Music Source ${index + 1}</a><br>`
+                        );
+                    }
+                });
+            } else {
+                musicSourceContainer.text('N/A');
             }
-        });
+
+            // Handle Editing Complete URL field
+            if (response.editing_complete_url) {
+                $('#editingCompleteUrl')
+                    .attr('href', response.editing_complete_url)
+                    .removeClass('disabled')
+                    .text('Open URL');
+            } else {
+                $('#editingCompleteUrl')
+                    .attr('href', '#')
+                    .addClass('disabled')
+                    .text('N/A');
+            }
+
+            // Show the modal
+            $('#editingDetailsModal').modal('show');
+        },
+        error: function () {
+            alert('Failed to fetch editing details. Please try again.');
+        }
     });
+});
+
     </script>
     {{-- publish podcast  --}}
     <script>

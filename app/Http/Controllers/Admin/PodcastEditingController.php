@@ -54,7 +54,7 @@ class PodcastEditingController extends Controller
     
             $podcast->update(['podcast_editing_status' => 'PENDING']);
     
-            return redirect()->back()->with('success', 'Podcast canceled successfully.');
+            return redirect()->route('podcastEditing')->with('success', 'Podcast canceled successfully.');
 
         } catch (\Exception $e) {
             \Log::error('Error canceling podcast: ' . $e->getMessage());
@@ -95,13 +95,25 @@ class PodcastEditingController extends Controller
             if (!$podcast) {
                 return redirect()->back()->with('error', 'Podcast not found.');
             }
-        
+    
+            // Validate the request
+            $request->validate([
+                'audio_edited_by' => 'required|string|max:255',
+                'music_source' => 'nullable|string',
+                'editing_complete_url' => 'nullable|url',
+            ]);
+    
+            // Process music_source input (optional: trim each URL and remove extra spaces)
+            $musicSources = $request->music_source
+                ? implode(',', array_map('trim', explode(',', $request->music_source)))
+                : null;
+    
             // Update the podcast record
             $podcast->update([
                 'audio_edited_by' => $request->audio_edited_by,
                 'editing_date' => $request->editing_date,
                 'editing_complete_url' => $request->editing_complete_url,
-                'music_source' => $request->music_source,
+                'music_source' => $musicSources,
                 'podcast_editing_status' => 'COMPLETED',
             ]);
     
@@ -116,6 +128,7 @@ class PodcastEditingController extends Controller
             return redirect()->back()->with('error', 'An error occurred while saving the details.');
         }
     }
+    
     
 
 public function podcastEditingVerified()
@@ -148,7 +161,7 @@ public function rejectPodcastEditing(Request $request, $podcast_id)
 {
     // Validate the input
     $request->validate([
-        'script_reject_reason' => 'required|string|max:255',
+        'editing_reject_reason' => 'required|string|max:255',
     ]);
 
     // Find the podcast by podcast_id
@@ -156,12 +169,12 @@ public function rejectPodcastEditing(Request $request, $podcast_id)
 
     if ($podcast) {
         // Update the rejection reason and set the status to 'PENDING'
-        $podcast->script_reject_reason = $request->script_reject_reason;
+        $podcast->editing_reject_reason = $request->editing_reject_reason;
         $podcast->podcast_editing_status = 'PENDING';
         $podcast->save();
 
         // Redirect back with a success message
-        return redirect()->back()->with('success', 'Podcast rejected successfully.');
+        return redirect()->route('podcastEditing')->with('success', 'Podcast rejected successfully.');
     } else {
         // Redirect back with an error message
         return redirect()->back()->with('error', 'Podcast not found.');
