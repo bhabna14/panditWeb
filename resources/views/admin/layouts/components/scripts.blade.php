@@ -60,7 +60,7 @@
 		document.getElementById('Message').style.display = 'none';
 	}, 3000);
 </script>
-<script>
+{{-- <script>
 	document.addEventListener('DOMContentLoaded', function () {
 		// Check for new notifications every 5 seconds
 		setInterval(checkNewNotifications, 5000);
@@ -108,5 +108,5 @@
 			notificationList.prepend(newNotification);
 		}
 	});
-</script>
+</script> --}}
 
