@@ -32,6 +32,8 @@ use App\Http\Controllers\Admin\PodcastReportController;
 use App\Http\Controllers\Admin\PublishPodcastController;
 use App\Http\Controllers\Admin\PodcastMediaController;
 use App\Http\Controllers\Admin\PodcastSocialMediaController;
+use App\Http\Controllers\Admin\RiderController;
+
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -241,13 +243,21 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::put('/update-temple-vendor/{id}', 'updateVendorDetails')->name('admin.updateVendorDetails');
     });
 
+    Route::controller(RiderController::class)->group(function() {
+        Route::get('/add-rider-details', 'addRiderDetails')->name('admin.addRiderDetails');
+        Route::post('/save-rider-details', 'saveRiderDetails')->name('admin.saveRiderDetails');
+        Route::get('/manage-rider-details', 'manageRiderDetails')->name('admin.manageRiderDetails');
+        Route::get('/delete-rider-details/{id}',  'deleteRiderDetails')->name('admin.deleteRiderDetails');
+        Route::get('/edit-temple-vendor/{id}', 'editRiderDetails')->name('admin.editRiderDetails');
+        Route::put('/update-temple-vendor/{id}', 'updateRiderDetails')->name('admin.updateRiderDetails');
+    });
+
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');
         Route::get('/pandit-profile', 'panditprofile')->name('panditprofile');
         Route::get('/manage-users', 'manageuser')->name('manageuser');
         Route::get('/user-profile/{id}', 'userProfile')->name('userprofile');
-
         Route::post('admin/pandit/accept/{id}', 'acceptPandit')->name('acceptPandit');
         Route::post('admin/pandit/reject/{id}', 'rejectPandit')->name('rejectPandit');
         Route::get('pandit-profile/{id}',  'showProfile')->name('panditProfile');

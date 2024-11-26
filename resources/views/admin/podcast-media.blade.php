@@ -39,12 +39,13 @@
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
                                 href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">Editing
                                 Verified</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
-                                onclick="setActive(this)">Publish Podcast</a>
+                           
                                 <a class="nav-link mb-2 mt-2 bg-warning"
                                 style="color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
                                 href="{{ url('admin/podcast-media') }}" onclick="setActive(this)">Podcast
                                 Media</a>  
+                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
+                                onclick="setActive(this)">Publish Podcast</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
