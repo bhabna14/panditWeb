@@ -13,7 +13,10 @@ use App\Models\SubscriptionPauseResumeLog;
 use App\Models\Notification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
+use App\Mail\FlowerRequestMail;
+use App\Mail\SubscriptionConfirmationMail;
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\FlowerPayment;
@@ -125,7 +128,32 @@ class FlowerBookingController extends Controller
             \Log::error('Failed to record payment', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Failed to record payment'], 500);
         }
-    
+      // Fetch the complete order details
+      $order = Order::with(['flowerProduct', 'user', 'address.localityDetails', 'flowerPayments', 'subscription'])
+      ->where('order_id', $orderId)
+      ->first();
+
+        if (!$order) {
+        \Log::error('Order not found for email sending');
+        return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        // Email recipients
+        $emails = [
+        'bhabana.samantara@33crores.com',
+        'pankaj.sial@33crores.com',
+        'basudha@33crores.com',
+        'priya@33crores.com',
+        'starleen@33crores.com'
+        ];
+
+        // Send the email
+        try {
+        Mail::to($emails)->send(new SubscriptionConfirmationMail($order));
+        \Log::info('Order details email sent successfully', ['emails' => $emails]);
+        } catch (\Exception $e) {
+        \Log::error('Failed to send order details email', ['error' => $e->getMessage()]);
+        }
         return response()->json([
             'message' => 'Subscription activated successfully',
             'end_date' => $endDate,
@@ -167,8 +195,15 @@ class FlowerBookingController extends Controller
             }
     
             // Eager load the flower_request_items relationship
-            $flowerRequest = $flowerRequest->load('flowerRequestItems');
-
+            // $flowerRequest = $flowerRequest->load('flowerRequestItems');
+            $flowerRequest = $flowerRequest->load([
+                'order',
+                'address.localityDetails', // Load localityDetails as a nested relationship
+                'user',
+                'flowerProduct',
+                'flowerRequestItems',
+            ]);
+    
             Notification::create([
                 'type' => 'order',
                 'data' => [
@@ -178,8 +213,31 @@ class FlowerBookingController extends Controller
                 ],
                 'is_read' => false, // Mark as unread
             ]);
-             // Log the alert for a new order
-            Log::alert('New order received! SOUND ALERT!');
+    
+            // Log the alert for a new order
+            // Log::alert('New order received! SOUND ALERT!');
+            // Log::info('New order created successfully.', ['request_id' => $requestId]);
+    
+            // // Log before sending the email
+            // Log::info('Attempting to send email to multiple recipients.');
+    
+            // Array of email addresses to send the email
+            $emails = [
+                'bhabana.samantara@33crores.com',
+                'pankaj.sial@33crores.com',
+                'basudha@33crores.com',
+                'priya@33crores.com',
+                'starleen@33crores.com'
+              
+            ];
+    
+            // Send the email to all recipients and log success or failure
+            Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+    
+            // Log::info('Email sent successfully to multiple recipients.', [
+            //     'request_id' => $requestId,
+            //     'user_id' => $user->userid,
+            // ]);
     
             // Prepare response data including flower details in FlowerRequest
             return response()->json([
@@ -188,7 +246,8 @@ class FlowerBookingController extends Controller
                 'data' => $flowerRequest,
             ], 200);
         } catch (\Exception $e) {
-          
+            // Log the error and return a response
+            Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
             return response()->json([
                 'status' => 500,
                 'message' => 'Failed to create flower request',

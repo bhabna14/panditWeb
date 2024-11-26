@@ -6,18 +6,18 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class FlowerRequestMail extends Mailable
+class SubscriptionConfirmationMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $flowerRequest; // Public property for the data
+    public $order; // Public property for the data
 
     /**
      * Create a new message instance.
      */
-    public function __construct($flowerRequest)
+    public function __construct($order)
     {
-        $this->flowerRequest = $flowerRequest; // Pass data to the Mailable
+        $this->order = $order; // Assign the order to the public property
     }
 
     /**
@@ -29,8 +29,8 @@ class FlowerRequestMail extends Mailable
     {
         // Log::info('Building the email for flower request.', ['request_id' => $this->flowerRequest->request_id]);
 
-        return $this->subject('New Flower Request Received')
-            ->view('emails.flower_request');
+        return $this->subject('New Flower Order Arrived')
+            ->view('emails.flower_subscription_order');
     }
     
 
