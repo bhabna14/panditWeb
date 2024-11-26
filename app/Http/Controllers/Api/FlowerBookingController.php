@@ -214,31 +214,41 @@ class FlowerBookingController extends Controller
                 'is_read' => false, // Mark as unread
             ]);
     
-            // Log the alert for a new order
-            // Log::alert('New order received! SOUND ALERT!');
-            Log::info('New order created successfully.', ['request_id' => $requestId]);
-    
-            // // Log before sending the email
-            Log::info('Attempting to send email to multiple recipients.');
-    
-            // Array of email addresses to send the email
-            $emails = [
-                'bhabana.samantara@33crores.com',
-                'pankaj.sial@33crores.com',
-                'basudha@33crores.com',
-                'priya@33crores.com',
-                'starleen@33crores.com'
-              
-            ];
-    
-            // Send the email to all recipients and log success or failure
-            Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
-    
-            Log::info('Email sent successfully to multiple recipients.', [
-                'request_id' => $requestId,
-                'user_id' => $user->userid,
-            ]);
-    
+            try {
+                // Log the alert for a new order
+                Log::info('New order created successfully.', ['request_id' => $requestId]);
+            
+                // Log before attempting to send the email
+                Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
+            
+                // Array of email addresses to send the email
+                $emails = [
+                    'bhabana.samantara@33crores.com',
+                    'pankaj.sial@33crores.com',
+                    'basudha@33crores.com',
+                    'priya@33crores.com',
+                    'starleen@33crores.com',
+                ];
+            
+                // Send the email
+                Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+            
+                // Log success
+                Log::info('Email sent successfully to multiple recipients.', [
+                    'request_id' => $requestId,
+                    'user_id' => $user->userid,
+                ]);
+            
+            } catch (\Exception $e) {
+                // Log the error with details
+                Log::error('Failed to send email.', [
+                    'request_id' => $requestId,
+                    'user_id' => $user->userid ?? 'N/A',
+                    'error_message' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ]);
+            }
+            
             // Prepare response data including flower details in FlowerRequest
             return response()->json([
                 'status' => 200,
