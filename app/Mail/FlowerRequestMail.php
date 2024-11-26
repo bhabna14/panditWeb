@@ -1,59 +1,38 @@
 <?php
-
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class FlowerRequestMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $flowerRequest; // Public property for the data
+
     /**
      * Create a new message instance.
-     *
-     * @return void
      */
-    public function __construct()
+    public function __construct($flowerRequest)
     {
-        //
+        $this->flowerRequest = $flowerRequest; // Pass data to the Mailable
     }
 
     /**
-     * Get the message envelope.
-     *
-     * @return \Illuminate\Mail\Mailables\Envelope
+     * Build the message.
      */
-    public function envelope()
-    {
-        return new Envelope(
-            subject: 'Flower Request Mail',
-        );
-    }
 
-    /**
-     * Get the message content definition.
-     *
-     * @return \Illuminate\Mail\Mailables\Content
-     */
-    public function content()
-    {
-        return new Content(
-            view: 'view.name',
-        );
-    }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array
-     */
-    public function attachments()
+    public function build()
     {
-        return [];
+        Log::info('Building the email for flower request.', ['request_id' => $this->flowerRequest->request_id]);
+
+        return $this->subject('New Flower Request Received')
+            ->view('emails.flower_request');
     }
+    
+
 }
+
