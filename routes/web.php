@@ -25,7 +25,6 @@ use App\Http\Controllers\Admin\YoutubeController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\FlowerRequestController;
 use App\Http\Controllers\Admin\FlowerOrderController;
-use App\Http\Controllers\Admin\FlowerVendorController;
 use App\Http\Controllers\Admin\LocalityController;
 use App\Http\Controllers\Admin\PromonationController;
 use App\Http\Controllers\Admin\PodcastReportController;
@@ -56,6 +55,17 @@ use Twilio\Rest\Client;
 Route::fallback(function () {
     abort(404);
 });
+Route::get('/test-email', function () {
+    try {
+        Mail::raw('This is a test email.', function ($message) {
+            $message->to('bhabana.samantara@33crores.com')->subject('Test Email');
+        });
+        return 'Email sent!';
+    } catch (\Exception $e) {
+        return 'Failed to send email: ' . $e->getMessage();
+    }
+});
+
 Route::get('/otplogin', [OtplessLoginController::class, 'otplogin'])->name('otplogin');
 Route::post('/send-otp-user', [OtplessLoginController::class, 'sendOtp']);
 Route::post('/verify-otp-user', [OtplessLoginController::class, 'verifyOtp']);
@@ -75,6 +85,8 @@ Route::controller(FlowerRegistrationController::class)->group(function() {
 });
 Route::group(['middleware' => ['auth:users']], function () {
     Route::controller(FlowerRegistrationController::class)->group(function() {
+
+   
     });
 });
 ## user login
@@ -210,12 +222,14 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::get('/add-product', [ProductController::class, 'addproduct']);
     Route::get('/manage-product',  [ProductController::class, 'manageproduct'])->name('manageproduct');
+
     Route::post('/create-product', [ProductController::class, 'createProduct'])->name('admin.products.store');
     Route::post('/purchaseSubscription', [ProductController::class, 'purchaseSubscription']);
     Route::post('/deactivate-expired-subscriptions', [ProductController::class, 'deactivateExpiredSubscriptions']);
     Route::get('/edit-product/{id}', [ProductController::class, 'editProduct'])->name('admin.edit-product');
     Route::post('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
     Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
+    
     Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower-request');
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
@@ -224,23 +238,14 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
     Route::get('/show-customer/{id}/details', [FlowerOrderController::class, 'showCustomerDetails'])->name('showCustomerDetails');
+
     Route::get('/flower-request-orders', [FlowerOrderController::class, 'showRequestOrders'])->name('admin.requestorder.index');
+
     Route::get('/active-subscriptions', [FlowerOrderController::class, 'showActiveSubscriptions'])->name('active.subscriptions');
     Route::get('/paused-subscriptions', [FlowerOrderController::class, 'showPausedSubscriptions'])->name('paused.subscriptions');
     Route::get('/orders-today', [FlowerOrderController::class, 'showOrdersToday'])->name('orders.today');
+    
     Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
-
-    // flower vendor controller
-
-    Route::controller(FlowerVendorController::class)->group(function() {
-        Route::get('/add-vendor-details', 'addVendorDetails')->name('admin.addVendorDetails');
-        Route::post('/save-vendor-details', 'saveVendorDetails')->name('admin.saveVendorDetails');
-        Route::get('/manage-vendor-details', 'manageVendorDetails')->name('admin.managevendor');
-        Route::post('/delete-temple-vendor/{imad}', 'deleteVendorDetails')->name('admin.deletevendor');
-        Route::get('/edit-temple-vendor/{id}', 'editVendorDetails')->name('admin.editvendor');
-        Route::put('/update-temple-vendor/{id}', 'updateVendorDetails')->name('admin.updateVendorDetails');
-    });
-
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');
@@ -331,13 +336,17 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::controller(PodcastEditingController::class)->group(function () {
         Route::get('/podcast-editing', 'podcastEditing')->name('podcastEditing');
         Route::post('/podcast/save-editing/{podcast_id}', 'saveEditing')->name('podcast.saveEditing');
+    
         Route::post('/start-podcast-edit/{podcast_id}', 'startPodcastEdit')->name('startPodcastEdit');
         Route::post('/cancel-podcast-edit/{podcast_id}', 'cancelPodcastEdit')->name('cancelPodcastEdit');
         Route::post('/complete-podcast-edit/{podcast_id}', 'completePodcastEdit')->name('completePodcastEdit');
+
         Route::get('/podcast-editing-verified', 'podcastEditingVerified')->name('podcastEditingVerified');
         Route::post('/update-editing-verified/{podcast_id}', 'updateEditingVerified')->name('updateEditingVerified');
+
         Route::post('/approve-editing-podcast/{podcast_id}', 'approvePodcastEditing')->name('approvePodcastEditing');
         Route::post('/reject-editing-podcast/{podcast_id}','rejectPodcastEditing')->name('rejectPodcastEditing');
+
     });
     
 
