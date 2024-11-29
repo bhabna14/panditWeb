@@ -274,7 +274,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::post('/save-order-assign', 'saveOrderAssign')->name('admin.saveOrderAssign');
         Route::get('/edit-order-assign/{id}', 'editOrderAssign')->name('admin.editOrderAssign');
         Route::put('/update-order-assign/{id}', 'updateOrderAssign')->name('admin.updateOrderAssign');
-        Route::get('/delete-order-assign/{id}', 'deleteOrderAssign')->name('admin.deleteOrderAssign');
+        Route::post('/delete-order-assign/{id}', 'deleteOrderAssign')->name('admin.deleteOrderAssign');
+        Route::get('/deactive-order-assign/{rider_id}',  'deactiveOrderAssign')->name('admin.deactiveOrderAssign');
+
     });
 
 

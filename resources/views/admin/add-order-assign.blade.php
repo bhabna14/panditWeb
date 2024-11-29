@@ -51,8 +51,7 @@
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="row">
-                        <div class="col-md-6">
-
+                        <div class="col-md-5">
                             <div class="form-group">
                                 <label for="rider_name">Rider Name</label>
                                 <select class="form-control  rider_name" name="rider_name" required>
@@ -63,9 +62,9 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <div class="form-group ">
-                                <label for="assign_date">Order Assign Date</label>
+                                <label for="assign_date">Apartment Assign Date</label>
                                 <input type="date" class="form-control" name="assign_date" required>
                             </div>
                         </div>

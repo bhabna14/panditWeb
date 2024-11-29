@@ -119,7 +119,6 @@ public function updateRiderDetails(Request $request, $id)
     return redirect()->route('admin.manageRiderDetails')->with('success', 'Rider details updated successfully.');
 }
 
-
 public function deleteRiderDetails($id)
 {
     try {
@@ -151,7 +150,6 @@ public function addOrderAssign()
     return view('admin.add-order-assign', compact('localities','apartments','rider_names'));
 }
 
-
 public function getApartments(Request $request)
 {
     $request->validate([
@@ -182,6 +180,7 @@ public function saveOrderAssign(Request $request)
         // Create a new row for each locality-apartment group
         RiderArea::create([
             'rider_id' => $request->rider_name,
+            'assign_date' => $request->assign_date,
             'locality_id' => $localityId,
             'apartment_id' => implode(',', $apartments), // Save apartments as comma-separated values
         ]);
@@ -195,8 +194,12 @@ public function manageOrderAssign()
 {
     // Fetch rider details along with locality and apartment names
     $rider_details = RiderArea::where('status', 'active')
-        ->with(['locality', 'apartment'])
-        ->get();
+        ->with(['locality', 'apartment', 'rider'])
+        ->get()
+        ->groupBy('rider.rider_name') // Group by rider name
+        ->map(function ($group) {
+            return $group->sortBy('assign_date'); // Sort each group by assign date
+        });
 
     return view('admin.manage-order-assign', compact('rider_details'));
 }
@@ -241,18 +244,35 @@ public function updateOrderAssign(Request $request, $id)
     return redirect()->route('admin.manageOrderAssign')->with('success', 'Order assignment updated successfully.');
 }
 
-
 public function deleteOrderAssign($id)
 {
-    // Find the rider area by ID
-    $rider = RiderArea::findOrFail($id);
-    
-    // Update status to 'deleted' or perform the deletion logic
-    $rider->status = 'deleted';
-    $rider->save();
+        // Find the rider area by ID
+        $rider = RiderArea::findOrFail($id);
 
-    // Redirect with a success message
-    return redirect()->route('admin.manageOrderAssign')->with('success', 'Order assignment deleted successfully.');
+        // Update status to 'deleted' (rather than deleting the record)
+        $rider->status = 'deleted';
+        $rider->save();
+
+        // Return JSON response for success
+        return redirect()->route('admin.manageOrderAssign')->with('success', 'Order assignment updated successfully.');
+
+}
+public function deactiveOrderAssign($rider_id)
+{
+    // Find all riders by rider_id
+    $riders = RiderArea::where('rider_id', $rider_id)->get();
+
+    // Check if there are any riders with the given rider_id
+    if ($riders->isNotEmpty()) {
+        // Update the status to 'deactive' for all matching records
+        RiderArea::where('rider_id', $rider_id)->update(['status' => 'deactive']);
+
+        // Redirect with success message
+        return redirect()->route('admin.manageOrderAssign')->with('success', 'Order assignments updated successfully to deactive.');
+    } else {
+        // If no riders exist with the given rider_id, return an error message
+        return redirect()->route('admin.manageOrderAssign')->with('error', 'No riders found for the given rider_id.');
+    }
 }
 
 

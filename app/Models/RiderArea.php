@@ -9,10 +9,11 @@ class RiderArea extends Model
 {
     use HasFactory;
     
-    protected $table = 'flower__order_assign';
+    protected $table = 'flower__apartment_assign';
 
     protected $fillable = [
         'rider_id',
+        'assign_date',
         'locality_id',
         'apartment_id',
     ];

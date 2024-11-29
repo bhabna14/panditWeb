@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Locality;
+use App\Models\Apartment;
+
 use App\Models\Promonation;
 
 use App\Models\Profile;
@@ -348,12 +350,47 @@ public function deletePhoto()
             'success' => 200,
             'message' => 'No photo found for deletion'], 404);
     }
+
+    // public function getActiveLocalities()
+    // {
+    //     $localities = Locality::where('status', 'active')->get();
+
+    //     return response()->json([
+    //         'success' => 200,
+    //         'data' => $localities,
+    //     ], 200);
+    // }
+    
     public function getActiveLocalities()
     {
-        $localities = Locality::where('status', 'active')->get();
+        // Fetch localities with their apartments
+        $localities = Locality::where('status', 'active')
+            ->with(['apartment' => function ($query) {
+                $query->select('id', 'locality_id', 'apartment_name'); // Fetch only necessary fields
+            }])
+            ->get();
+    
+        // Structure response
+        $response = $localities->map(function ($locality) {
+            return [
+                'locality_id' => $locality->id,
+                'locality_name' => $locality->locality_name,
+                'pincode' => $locality->pincode,
+                'unique_code' => $locality->unique_code,
+
+                'apartment' => $locality->apartment->map(function ($apartment) {
+                    return [
+                        'apartment_id' => $apartment->id,
+                        'apartment_name' => $apartment->apartment_name,
+                    ];
+                }),
+            ];
+        });
+    
+        // Return JSON response
         return response()->json([
             'success' => 200,
-            'data' => $localities,
+            'data' => $response,
         ], 200);
     }
     
