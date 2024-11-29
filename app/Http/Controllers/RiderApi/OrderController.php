@@ -12,7 +12,7 @@ class OrderController extends Controller
     {
         // dd('g');
         try {
-            $rider = Auth::guard('rider')->user();
+            $rider = Auth::guard('rider-api')->user();
             dd($rider->rider_id);
             if (!$rider) {
                 return response()->json([
@@ -25,7 +25,7 @@ class OrderController extends Controller
                 ->where('rider_id', $rider->rider_id)
                 ->orderBy('pickup_date', 'desc')
                 ->get();
-
+dd($orders);
             return response()->json([
                 'status' => true,
                 'message' => 'Assigned orders fetched successfully',
