@@ -161,6 +161,11 @@ class RiderLoginController extends Controller
                 ], 404);
             }
 
+            // Generate the full image URL
+            $riderDetails->rider_img = $riderDetails->rider_img 
+                ? url('storage/' . $riderDetails->rider_img) 
+                : null;
+
             return response()->json([
                 'status' => true,
                 'message' => 'Rider details fetched successfully',
