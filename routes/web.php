@@ -32,6 +32,8 @@ use App\Http\Controllers\Admin\PublishPodcastController;
 use App\Http\Controllers\Admin\PodcastMediaController;
 use App\Http\Controllers\Admin\PodcastSocialMediaController;
 use App\Http\Controllers\Admin\RiderController;
+use App\Http\Controllers\Admin\FlowerVendorController;
+use App\Http\Controllers\Admin\FlowerPickupController;
 
 
 use App\Http\Controllers\Pandit\AreaController;
@@ -250,7 +252,12 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/edit-temple-vendor/{id}', 'editVendorDetails')->name('admin.editvendor');
         Route::put('/update-temple-vendor/{id}', 'updateVendorDetails')->name('admin.updateVendorDetails');
     });
+    Route::controller(FlowerPickupController::class)->group(function() {
+        Route::get('/add-flower-pickup-details', 'addflowerpickupdetails')->name('admin.addflowerpickupdetails');
+        Route::get('/manage-flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
+        Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
 
+    });
     Route::controller(RiderController::class)->group(function() {
         Route::get('/add-rider-details', 'addRiderDetails')->name('admin.addRiderDetails');
         Route::post('/save-rider-details', 'saveRiderDetails')->name('admin.saveRiderDetails');
@@ -471,9 +478,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 //     Route::post('/pandit/check-otp', 'checkOtp')->name('check.otp');
 // }); 
 
-Route::controller(PanditLoginController::class)->group(function() {
-    Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
-});
+// Route::controller(PanditLoginController::class)->group(function() {
+//     Route::get('/pandit/panditotp','showOtpForm')->name('pandit.otp');
+// });
 
 
 Route::controller(PanditOtpController::class)->group(function() {

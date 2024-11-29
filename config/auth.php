@@ -60,6 +60,16 @@ return [
         'driver' => 'session',
         'provider' => 'admins',
     ],
+
+    'rider' => [
+        'driver' => 'session',
+        'provider' => 'riders',
+    ],
+    'rider-api' => [
+        'driver' => 'sanctum', // Or 'passport'/'sanctum' if you're using those for API
+        'provider' => 'riders',
+        'hash' => false, // Set to true if hashing tokens
+    ],
 ],
 
 
@@ -96,6 +106,10 @@ return [
     'pandits' => [
         'driver' => 'eloquent',
         'model' => App\Models\PanditLogin::class,
+    ],
+    'riders' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\RiderDetails::class,
     ],
 ],
 

@@ -32,6 +32,25 @@ use App\Http\Controllers\Api\UserProfileController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\RiderApi\OrderController;
+
+use App\Http\Controllers\RiderApi\RiderLoginController;
+
+// Routes for Rider Login
+Route::prefix('rider')->group(function () {
+    // Send OTP
+    Route::post('/send-otp', [RiderLoginController::class, 'sendOtp'])->name('rider.sendOtp');
+
+    // Verify OTP
+    Route::post('/verify-otp', [RiderLoginController::class, 'verifyOtp'])->name('rider.verifyOtp');
+});
+
+
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignOrders']);
+});
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
