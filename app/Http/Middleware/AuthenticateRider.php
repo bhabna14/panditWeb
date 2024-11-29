@@ -3,17 +3,16 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Auth\Middleware\Authenticate as Middleware;
+use Illuminate\Support\Facades\Auth;
 
-class AuthenticateRider extends Middleware
+class AuthenticateRider
 {
-    protected function authenticate($request, array $guards)
+    public function handle($request, Closure $next)
     {
-        if ($this->auth->guard('rider-api')->check()) {
-            return $this->auth->shouldUse('rider-api');
+        if (!Auth::guard('rider-api')->check()) {
+            return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
         }
-
-        $this->unauthenticated($request, ['rider-api']);
+        return $next($request);
     }
 }
 

@@ -61,14 +61,10 @@ return [
         'provider' => 'admins',
     ],
 
-    'rider' => [
-        'driver' => 'session',
-        'provider' => 'riders',
-    ],
     'rider-api' => [
-        'driver' => 'sanctum', // Or 'passport'/'sanctum' if you're using those for API
-        'provider' => 'riders',
-        'hash' => false, // Set to true if hashing tokens
+        'driver' => 'sanctum', // Ensure you are using Sanctum or Passport
+        'provider' => 'riders', // Matches your 'riders' provider
+        'hash' => false,        // Set to true only if using hashed tokens
     ],
 ],
 

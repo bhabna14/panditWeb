@@ -47,7 +47,7 @@ Route::prefix('rider')->group(function () {
 
 
 
-Route::middleware('auth:rider')->group(function () {
+Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignOrders']);
 });
 
