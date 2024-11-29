@@ -12,7 +12,7 @@ class OrderController extends Controller
     {
         // dd('g');
         try {
-            $rider = Auth::guard('rider-api')->user();
+            $rider = Auth::guard('rider')->user();
             dd($rider->rider_id);
             if (!$rider) {
                 return response()->json([
