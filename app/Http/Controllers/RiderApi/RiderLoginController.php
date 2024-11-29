@@ -138,5 +138,40 @@ class RiderLoginController extends Controller
         }
     }
     
+    public function getRiderDetails()
+    {
+        try {
+            // Get the authenticated rider
+            $rider = Auth::guard('rider-api')->user();
 
+            if (!$rider) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
+            // Retrieve rider details
+            $riderDetails = RiderDetails::where('rider_id', $rider->rider_id)->first();
+
+            if (!$riderDetails) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Rider details not found',
+                ], 404);
+            }
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Rider details fetched successfully',
+                'data' => $riderDetails,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }

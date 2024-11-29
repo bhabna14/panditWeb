@@ -73,8 +73,8 @@
                                         </td>
                                         <td>{{ $detail->pickup_date }}</td>
                                         <td>
-                                            @if ($detail->price)
-                                                ₹{{ $detail->price }}
+                                            @if ($detail->total_price)
+                                                ₹{{ $detail->total_price }}
                                             @else
                                                 <span class="text-warning">Pending</span>
                                             @endif
