@@ -88,9 +88,22 @@
                                         </td>
                                         <td>{{ $detail->status ?? 'N/A' }}</td>
                                         <td>
-                                            <button class="btn btn-primary btn-sm">Edit</button>
-                                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal{{ $detail->id }}">Payment</button>
+                                            <a href="{{ route('flower-pickup.edit', $detail->id) }}" class="btn btn-primary btn-sm">Edit</a>
+
+                                            
+                                            <!-- Check if the price is greater than 0 to enable the Payment button -->
+                                            <button 
+                                                class="btn btn-secondary btn-sm" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#paymentModal{{ $detail->id }}"
+                                                @if ($detail->price == 0 || !$detail->price) 
+                                                    disabled 
+                                                @endif
+                                            >
+                                                Payment
+                                            </button>
                                         </td>
+                                        
                                     </tr>
                                     <!-- Payment Modal -->
                                     <div class="modal fade" id="paymentModal{{ $detail->id }}" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
@@ -100,7 +113,7 @@
                                                     <h5 class="modal-title" id="paymentModalLabel">Add Payment</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
-                                                <form action="" method="POST">
+                                                <form action="{{ route('update.payment') }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="pickup_id" value="{{ $detail->id }}">
                                                     <div class="modal-body">

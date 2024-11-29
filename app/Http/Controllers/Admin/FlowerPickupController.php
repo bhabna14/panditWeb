@@ -40,7 +40,22 @@ class FlowerPickupController extends Controller
         return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('pickupDetails'));
     }
     
+    public function edit($id)
+    {
+        // Fetch the specific record with required relationships
+        $pickupDetail = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
+            ->findOrFail($id);
     
+        // Fetch all available flowers (if dropdown is needed)
+        $flowers = FlowerProduct::where('status', 'active')
+                        ->where('category', 'Flower')
+                        ->get();
+                        $units = PoojaUnit::where('status', 'active')->get();
+        // Pass the data to the view
+        return view('admin.flower-pickup-details.edit-flower-pickup-details', compact('pickupDetail', 'flowers','units'));
+    }
+    
+
     
     public function saveFlowerPickupDetails(Request $request)
     {
@@ -72,9 +87,7 @@ class FlowerPickupController extends Controller
             'payment_id' => null,
         ]);
     
-        $totalPrice = 0;
-    
-        // Save flower items
+      
         // Save flower items
         foreach ($request->flower_id as $index => $flower_id) {
             FlowerPickupItems::create([
