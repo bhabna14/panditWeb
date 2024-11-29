@@ -10,10 +10,10 @@ class OrderController extends Controller
 {
     public function getAssignOrders()
     {
-        dd('g');
+        // dd('g');
         try {
             $rider = Auth::guard('rider-api')->user();
-            // dd($rider->rider_id);
+            dd($rider->rider_id);
             if (!$rider) {
                 return response()->json([
                     'status' => false,
