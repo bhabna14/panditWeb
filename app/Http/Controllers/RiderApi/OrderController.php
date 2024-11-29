@@ -38,4 +38,31 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+    public function submitPickupPrice(Request $request, $id)
+    {
+        $rider = Auth::guard('rider-api')->user();
+
+        $request->validate([
+            'price' => 'required|numeric|min:0',
+        ]);
+
+        // Find the pickup assigned to the logged-in rider
+        $pickup = FlowerPickupDetails::where('id', $id)
+            ->where('rider_id', $rider->rider_id)
+            ->first();
+
+        // If not found, return an error
+        if (!$pickup) {
+            return response()->json(['error' => 'Pickup not found or not assigned to you.'], 404);
+        }
+
+        // Update the price and status
+        $pickup->update([
+            'price' => $request->price,
+            'status' => 'completed',
+        ]);
+
+        return response()->json(['message' => 'Pickup price submitted successfully.']);
+    }
 }

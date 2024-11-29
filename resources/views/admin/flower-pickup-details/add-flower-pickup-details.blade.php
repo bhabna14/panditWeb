@@ -28,46 +28,14 @@
 
 <div class="row">
     <div class="col-12 col-sm-12">
-        <div class="card">
-            <div class="card-body pt-0 pt-4">
-                <form method="POST" action="{{ route('admin.saveFlowerPickupDetails') }}">
-                    @csrf
-                
-                    <div id="flower-pickup-container">
-                        <div class="flower-pickup-row">
-                            <div class="row">
-
-                            
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="flower_id">Flower</label>
-                                    <select name="flower_id[]" class="form-control" required>
-                                        @foreach($flowers as $flower)
-                                            <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                
-                           <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="unit_id">Unit</label>
-                                    <select name="unit_id[]" class="form-control" required>
-                                        @foreach($units as $unit)
-                                            <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                           </div>
-                
-                           <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="quantity">Quantity</label>
-                                    <input type="number" name="quantity[]" class="form-control" required>
-                                </div>
-                           </div>
-                
-                           <div class="col-md-6">
+        <form method="POST" action="{{ route('admin.saveFlowerPickupDetails') }}">
+            @csrf
+            <div id="show_doc_item">
+                <div class="card">
+                    <div class="card-body pt-0 pt-4">
+                        <!-- Vendor and Pickup Date -->
+                        <div class="row">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="vendor_id">Vendor</label>
                                     <select name="vendor_id[]" class="form-control" required>
@@ -76,9 +44,51 @@
                                         @endforeach
                                     </select>
                                 </div>
-                           </div>
-                
-                           <div class="col-md-6">
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="pickup_date">Pickup Date</label>
+                                    <input type="date" name="pickup_date[]" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+        
+                        <!-- Flower Details -->
+                        <div id="add-flower-wrapper">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="flower_id">Flower</label>
+                                        <select name="flower_id[]" class="form-control" required>
+                                            @foreach($flowers as $flower)
+                                                <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="unit_id">Unit</label>
+                                        <select name="unit_id[]" class="form-control" required>
+                                            @foreach($units as $unit)
+                                                <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="quantity">Quantity</label>
+                                        <input type="number" name="quantity[]" class="form-control" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-success mt-2" id="addflower">Add More Flowers</button>
+        
+                        <!-- Rider Assignment -->
+                        <div class="row mt-3">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="rider_id">Assign to Rider</label>
                                     <select name="rider_id[]" class="form-control" required>
@@ -87,23 +97,17 @@
                                         @endforeach
                                     </select>
                                 </div>
-                           </div>
-                
-                            <div class="form-group">
-                                <label for="pickup_date">Date</label>
-                                <input type="date" name="pickup_date[]" class="form-control" required>
                             </div>
-                            </div>
-                            <button type="button" class="btn btn-danger remove-flower-pickup-row">Remove</button>
                         </div>
                     </div>
-                
-                    <button type="button" class="btn btn-secondary" id="add-more-flower-pickup">Add More</button>
-                    <button type="submit" class="btn btn-primary">Submit</button>
-                </form>
-                
+                </div>
             </div>
-        </div>
+        
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+        
+       
+                
     </div>
 </div>
 @endsection
@@ -132,5 +136,53 @@ document.addEventListener('click', function(e) {
 });
 
 </script>
+ <!-- Add Flower Script -->
+ <script>
+    $(document).ready(function() {
+        // Add More Flowers
+        $("#addflower").click(function() {
+            $("#add-flower-wrapper").append(`
+                <div class="remove-flower-wrapper">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="flower_id">Flower</label>
+                                <select name="flower_id[]" class="form-control" required>
+                                    @foreach($flowers as $flower)
+                                        <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="unit_id">Unit</label>
+                                <select name="unit_id[]" class="form-control" required>
+                                    @foreach($units as $unit)
+                                        <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="quantity">Quantity</label>
+                                <input type="number" name="quantity[]" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-danger mt-2 remove_flower">Remove</button>
+                </div>
+            `);
+        });
+
+        // Remove Flower
+        $(document).on('click', '.remove_flower', function() {
+            $(this).closest('.remove-flower-wrapper').remove();
+        });
+    });
+</script>
+
+
 @endsection
 
