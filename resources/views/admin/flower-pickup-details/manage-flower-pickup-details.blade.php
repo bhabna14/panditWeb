@@ -17,7 +17,7 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">Add Vendor</a></li>
+                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">Add Flower Pickup Details</a></li>
                 
                 <li class="breadcrumb-item active" aria-current="page">Flower Pickup Details</li>
             </ol>

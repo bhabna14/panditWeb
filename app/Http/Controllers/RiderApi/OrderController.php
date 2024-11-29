@@ -15,7 +15,7 @@ class OrderController extends Controller
             // dd($rider->rider_id);
             if (!$rider) {
                 return response()->json([
-                    'status' => false,
+                    'status' => 404,
                     'message' => 'Unauthorized',
                 ], 401);
             }
@@ -26,13 +26,13 @@ class OrderController extends Controller
                 ->get();
     
             return response()->json([
-                'status' => true,
+                'status' => 200,
                 'message' => 'Assigned orders fetched successfully',
                 'data' => $orders,
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => false,
+                'status' => 500,
                 'message' => 'Something went wrong',
                 'error' => $e->getMessage(),
             ], 500);
