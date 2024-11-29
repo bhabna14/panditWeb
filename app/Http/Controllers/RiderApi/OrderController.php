@@ -11,8 +11,8 @@ class OrderController extends Controller
     public function getAssignOrders()
     {
         try {
-            $rider = Auth::guard('rider')->user();
-
+            $rider = Auth::guard('rider-api')->user();
+            // dd($rider->rider_id);
             if (!$rider) {
                 return response()->json([
                     'status' => false,
