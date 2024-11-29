@@ -60,6 +60,12 @@ return [
         'driver' => 'session',
         'provider' => 'admins',
     ],
+
+    'rider-api' => [
+        'driver' => 'sanctum', // Ensure you are using Sanctum or Passport
+        'provider' => 'riders', // Matches your 'riders' provider
+        'hash' => false,        // Set to true only if using hashed tokens
+    ],
 ],
 
 
@@ -96,6 +102,10 @@ return [
     'pandits' => [
         'driver' => 'eloquent',
         'model' => App\Models\PanditLogin::class,
+    ],
+    'riders' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\RiderDetails::class,
     ],
 ],
 

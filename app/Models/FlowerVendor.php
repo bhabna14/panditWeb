@@ -28,7 +28,10 @@ class FlowerVendor extends Model
     {
         return $this->hasMany(FlowerVendorBank::class, 'vendor_id', 'vendor_id'); // Adjust as necessary
     }
-    
+    public function pickupDetails()
+    {
+        return $this->hasMany(FlowerPickupDetails::class,'vendor_id', 'vendor_id');
+    }
 
 }
 

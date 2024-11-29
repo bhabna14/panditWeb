@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\PodcastPrepair;
 use App\Models\PublishPodcast;
 use Illuminate\Support\Facades\Storage;
-
+use Illuminate\Support\Facades\Log;
 
 class PublishPodcastController extends Controller
 {
@@ -23,6 +23,7 @@ class PublishPodcastController extends Controller
         return view('admin.publish-podcast', compact('podcast_details', 'publishedPodcasts'));
     }
     
+ 
     public function savePublishPodcast(Request $request)
     {
         // Validate the input fields
@@ -35,33 +36,67 @@ class PublishPodcastController extends Controller
             'description' => 'required|string|max:1000',
         ]);
     
+        // \Log::info('Starting podcast publishing process', ['request_data' => $request->all()]);
+    
         try {
-            // Handle file uploads
-            $imagePath = $request->file('podcast_image')->store('images', 'public');
-            $musicPath = $request->file('podcast_music')->store('music', 'public');
+            $imagePath = null;
+            $musicPath = null;
+    
+            // Handle podcast image upload
+            if ($request->hasFile('podcast_image') && $request->file('podcast_image')->isValid()) {
+                // \Log::info('Uploading podcast image...');
+                $imagePath = $request->file('podcast_image')->store('images', 'public');
+                // \Log::info('Podcast image uploaded', ['path' => $imagePath]);
+            } else {
+                \Log::error('Podcast image upload failed');
+                return redirect()->back()->with('error', 'Invalid podcast image file');
+            }
+    
+            // Handle podcast music upload
+            if ($request->hasFile('podcast_music') && $request->file('podcast_music')->isValid()) {
+                // \Log::info('Uploading podcast music...');
+                $musicPath = $request->file('podcast_music')->store('music', 'public');
+                // \Log::info('Podcast music uploaded', ['path' => $musicPath]);
+            } else {
+                // \Log::error('Podcast music upload failed');
+                return redirect()->back()->with('error', 'Invalid podcast music file');
+            }
     
             // Save podcast details to the database
-            PublishPodcast::create([
+            $publishPodcast = PublishPodcast::create([
                 'podcast_id' => $request->podcast_id,
                 'podcast_image' => $imagePath,
                 'podcast_music' => $musicPath,
-                'podcast_video_url' => $request->podcast_video_url, // Corrected this line
+                'podcast_video_url' => $request->podcast_video_url,
                 'publish_date' => $request->publish_date,
                 'description' => $request->description,
             ]);
     
-            // Update the podcast_status and podcast_editing_status in PodcastPrepair model
+            // \Log::info('Podcast details saved successfully', ['publishPodcast' => $publishPodcast]);
+  
             PodcastPrepair::where('podcast_id', $request->podcast_id)
                           ->update([
                               'podcast_status' => 'PUBLISHED',
                               'podcast_editing_status' => 'COMPLETED' // Add this line to update the podcast_editing_status
                           ]);
+            $updateStatus = PodcastPrepair::where('podcast_id', $request->podcast_id)
+                ->update([
+                    'podcast_status' => 'PUBLISHED',
+                    'podcast_editing_status' => 'completed',
+                ]);
     
             return redirect()->route('PodcastSocialMedia')->with('success', 'Podcast published successfully!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'An error occurred while publishing the podcast: ' . $e->getMessage());
+            // Log the exception
+            \Log::error('An error occurred while publishing the podcast', [
+                'error_message' => $e->getMessage(),
+                'stack_trace' => $e->getTraceAsString(),
+            ]);
+    
+            return redirect()->back()->with('error', 'An error occurred while publishing the podcast. Please try again.');
         }
     }
+    
     
     
 }
