@@ -38,7 +38,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="vendor_id">Vendor</label>
-                                    <select name="vendor_id[]" class="form-control" required>
+                                    <select name="vendor_id" class="form-control" required>
                                         @foreach($vendors as $vendor)
                                             <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
                                         @endforeach
@@ -48,7 +48,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="pickup_date">Pickup Date</label>
-                                    <input type="date" name="pickup_date[]" class="form-control" required>
+                                    <input type="date" name="pickup_date" class="form-control" required>
                                 </div>
                             </div>
                         </div>
@@ -91,7 +91,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="rider_id">Assign to Rider</label>
-                                    <select name="rider_id[]" class="form-control" required>
+                                    <select name="rider_id" class="form-control" required>
                                         @foreach($riders as $rider)
                                             <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
                                         @endforeach

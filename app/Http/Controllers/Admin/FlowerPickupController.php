@@ -9,6 +9,7 @@ use App\Models\PoojaUnit;
 use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
 use App\Models\FlowerPickupDetails;
+use App\Models\FlowerPickupItems;
 
 class FlowerPickupController extends Controller
 {
@@ -30,55 +31,61 @@ class FlowerPickupController extends Controller
     
     public function manageflowerpickupdetails()
     {
-        $pickupDetails = FlowerPickupDetails::with(['flower', 'unit', 'vendor', 'rider'])
-            ->orderBy('pickup_date', 'desc')
+        // Fetch all pickup details with their related data
+        $pickupDetails = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
             ->get()
-            ->groupBy('pickup_date'); // Group by date
-    // dd($pickupDetails);
+            ->groupBy('pickup_date'); // Group by pickup date for easy separation in the view
+    
+        // Pass the organized data to the view
         return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('pickupDetails'));
     }
     
     
+    
     public function saveFlowerPickupDetails(Request $request)
     {
-        // Validate input to ensure all arrays have matching lengths
+        // Validate the request
         $request->validate([
-            'vendor_id' => 'required|array',
-            'vendor_id.*' => 'required|exists:flower__vendor_details,vendor_id', // Validate each vendor
-            'pickup_date' => 'required|array',
-            'pickup_date.*' => 'required|date',
+            'vendor_id' => 'required|exists:flower__vendor_details,vendor_id',
+            'pickup_date' => 'required|date',
+            'rider_id' => 'required|exists:flower__rider_details,rider_id',
             'flower_id' => 'required|array',
-            'flower_id.*' => 'required|exists:flower_products,product_id', // Validate each flower
+            'flower_id.*' => 'required|exists:flower_products,product_id',
             'unit_id' => 'required|array',
-            'unit_id.*' => 'required|exists:pooja_units,id', // Validate each unit
+            'unit_id.*' => 'required|exists:pooja_units,id',
             'quantity' => 'required|array',
             'quantity.*' => 'required|numeric|min:1',
-            'rider_id' => 'required|array',
-            'rider_id.*' => 'required|exists:flower__rider_details,rider_id', // Validate each rider
         ]);
     
-        // Iterate over the submitted data
+        // Generate unique pick_up_id
+        $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+    
+        // Save main flower pickup details
+        $pickup = FlowerPickupDetails::create([
+            'pick_up_id' => $pickUpId,
+            'vendor_id' => $request->vendor_id,
+            'pickup_date' => $request->pickup_date,
+            'rider_id' => $request->rider_id,
+            'total_price' => 0, // Will calculate later
+            'payment_method' => null,
+            'payment_status' => 'pending',
+            'payment_id' => null,
+        ]);
+    
+        $totalPrice = 0;
+    
+        // Save flower items
+        // Save flower items
         foreach ($request->flower_id as $index => $flower_id) {
-            // Check if all required arrays have a value at the current index
-            if (
-                isset($request->vendor_id[$index], $request->pickup_date[$index], 
-                      $request->unit_id[$index], $request->quantity[$index], 
-                      $request->rider_id[$index])
-            ) {
-                FlowerPickupDetails::create([
-                    'flower_id' => $flower_id,
-                    'unit_id' => $request->unit_id[$index],
-                    'quantity' => $request->quantity[$index],
-                    'vendor_id' => $request->vendor_id[$index],
-                    'rider_id' => $request->rider_id[$index],
-                    'pickup_date' => $request->pickup_date[$index],
-                    'status' => 'pending',
-                ]);
-            } else {
-                // Log or handle the missing index issue
-                return redirect()->back()->withErrors(['error' => 'Mismatched data arrays. Ensure all fields are filled out.']);
-            }
+            FlowerPickupItems::create([
+                'pick_up_id' => $pickUpId,
+                'flower_id' => $flower_id,
+                'unit_id' => $request->unit_id[$index],
+                'quantity' => $request->quantity[$index],
+                'price' => null, // Set price as null initially
+            ]);
         }
+
     
         return redirect()->back()->with('success', 'Flower pickup details saved successfully!');
     }

@@ -36,49 +36,105 @@
         <div class="col-lg-12">
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
-                    <div class="table-responsive export-table">
-                        <div class="row">
-                            @foreach ($pickupDetails as $date => $details)
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Pickup Date: {{ $date }}</h5>
-                                </div>
-                                <div class="card-body">
-                                    @foreach ($details as $detail)
-                                        <div class="row mb-3">
-                                            <div class="col-md-2">
-                                                <strong>Flower:</strong> {{ $detail->flower?->name ?? 'N/A' }}
-                                            </div>
-                                            <div class="col-md-2">
-                                                <strong>Unit:</strong> {{ $detail->unit?->name ?? 'N/A' }}
-                                            </div>
-                                            <div class="col-md-2">
-                                                <strong>Quantity:</strong> {{ $detail->quantity ?? 'N/A' }}
-                                            </div>
-                                            <div class="col-md-2">
-                                                <strong>Vendor:</strong> {{ $detail->vendor?->vendor_name ?? 'N/A' }}
-                                            </div>
-                                            <div class="col-md-2">
-                                                <strong>Rider:</strong> {{ $detail->rider?->rider_name ?? 'N/A' }}
-                                            </div>
-                                            <div class="col-md-2">
-                                                <strong>Price:</strong> ₹{{ $detail->price ?? 'N/A' }}
-                                            </div>
-                                            <div class="col-md-2">
-                                                <strong>Status:</strong> ₹{{ $detail->status ?? 'N/A' }}
+                    <div class="table-responsive  export-table">
+                        <table id="file-datatable" class="table table-bordered ">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Vendor</th>
+                                    <th>Rider</th>
+                                    <th>Flower Details</th>
+                                    <th>PickUp Date</th>
+                                    <th>Total Price</th>
+                                    <th>Payment Status</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($pickupDetails->flatten()->sortByDesc('created_at') as $index => $detail)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $detail->vendor?->vendor_name ?? 'N/A' }}</td>
+                                        <td>{{ $detail->rider?->rider_name ?? 'N/A' }}</td>
+                                        <td>
+                                            <ul>
+                                                @foreach ($detail->flowerPickupItems as $item)
+                                                    <li>
+                                                        <strong>Flower:</strong> {{ $item->flower?->name ?? 'N/A' }} <br>
+                                                        <strong>Quantity:</strong> {{ $item->quantity ?? 'N/A' }} {{ $item->unit?->unit_name ?? 'N/A' }} <br>
+                                                        <strong>Price:</strong> ₹{{ $item->price ?? 'N/A' }}
+                                                    </li>
+                                                    @if (!$loop->last)
+                                                        <hr>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        </td>
+                                        <td>{{ $detail->pickup_date }}</td>
+                                        <td>
+                                            @if ($detail->price)
+                                                ₹{{ $detail->price }}
+                                            @else
+                                                <span class="text-warning">Pending</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($detail->payment_status === 'Paid')
+                                                <span class="badge bg-success">Paid</span>
+                                            @else
+                                                <span class="badge bg-danger">Unpaid</span>
+                                            @endif
+                                        </td>
+                                        <td>{{ $detail->status ?? 'N/A' }}</td>
+                                        <td>
+                                            <button class="btn btn-primary btn-sm">Edit</button>
+                                            <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#paymentModal{{ $detail->id }}">Payment</button>
+                                        </td>
+                                    </tr>
+                                    <!-- Payment Modal -->
+                                    <div class="modal fade" id="paymentModal{{ $detail->id }}" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="paymentModalLabel">Add Payment</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <form action="" method="POST">
+                                                    @csrf
+                                                    <input type="hidden" name="pickup_id" value="{{ $detail->id }}">
+                                                    <div class="modal-body">
+                                                        <div class="mb-3">
+                                                            <label for="payment_method" class="form-label">Payment Method</label>
+                                                            <select class="form-control" name="payment_method" id="payment_method" required>
+                                                                <option value="Cash">Cash</option>
+                                                                <option value="Online">Online</option>
+                                                                <option value="Card">Card</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="payment_id" class="form-label">Payment ID</label>
+                                                            <input type="text" class="form-control" id="payment_id" name="payment_id" placeholder="Enter Payment ID" required>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                        <button type="submit" class="btn btn-primary">Save Payment</button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        @endforeach
-                        
-                        </div>
+                                    </div>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
+                    
                 </div>
             </div>
         </div>
     </div>
+    
 
 
 @endsection

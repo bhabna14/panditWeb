@@ -12,22 +12,35 @@ class OrderController extends Controller
     {
         try {
             $rider = Auth::guard('rider-api')->user();
-            // dd($rider->rider_id);
+    
             if (!$rider) {
                 return response()->json([
-                    'status' => 404,
+                    'status' => 401,
                     'message' => 'Unauthorized',
                 ], 401);
             }
     
-            $orders = FlowerPickupDetails::with(['flower', 'unit', 'vendor'])
+            // Fetch today's date
+            $today = now()->toDateString();
+    
+            // Fetch orders assigned to the logged-in rider for today
+            $orders = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor'])
                 ->where('rider_id', $rider->rider_id)
-                ->orderBy('pickup_date', 'desc')
+                ->whereDate('pickup_date', $today)
+                ->orderBy('created_at', 'desc') // Sort by most recently created first
                 ->get();
+    
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'No orders assigned for today',
+                    'data' => [],
+                ]);
+            }
     
             return response()->json([
                 'status' => 200,
-                'message' => 'Assigned orders fetched successfully',
+                'message' => 'Assigned orders for today fetched successfully',
                 'data' => $orders,
             ]);
         } catch (\Exception $e) {
@@ -38,6 +51,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    
 
     public function submitPickupPrice(Request $request, $id)
     {
