@@ -27,7 +27,6 @@
                                 onclick="setActive(this)">Create Podcast</a>
                             <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-script') }}"
                                 onclick="setActive(this)">Script Of Podcast</a>
-
                             <a class="nav-link mb-2 mt-2" style="padding: 10px;"
                                 href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
                                 Verified</a>
@@ -84,8 +83,9 @@
                                 {{ $errors->first('danger') }}
                             </div>
                         @endif
-                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
-                            <thead>
+
+  <div class="table-responsive">
+                            <table class="table table-bordered text-nowrap border-bottom" id="input-fields">                            <thead>
                                 <tr>
                                     <th class="border-bottom-0 bg-info text-white">SlNo</th>
                                     <th class="border-bottom-0 bg-info text-white">Podcast Name</th>
@@ -178,7 +178,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-
+                    </div>
 
 
                     </div>

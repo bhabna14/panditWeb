@@ -248,24 +248,35 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/add-vendor-details', 'addVendorDetails')->name('admin.addVendorDetails');
         Route::post('/save-vendor-details', 'saveVendorDetails')->name('admin.saveVendorDetails');
         Route::get('/manage-vendor-details', 'manageVendorDetails')->name('admin.managevendor');
-        Route::post('/delete-temple-vendor/{imad}', 'deleteVendorDetails')->name('admin.deletevendor');
-        Route::get('/edit-temple-vendor/{id}', 'editVendorDetails')->name('admin.editvendor');
-        Route::put('/update-temple-vendor/{id}', 'updateVendorDetails')->name('admin.updateVendorDetails');
+        Route::post('/delete-vendor-details/{imad}', 'deleteVendorDetails')->name('admin.deletevendor');
+        Route::get('/edit-vendor-details/{id}', 'editVendorDetails')->name('admin.editVendorDetails');
+        Route::put('/update-vendor-details/{id}', 'updateVendorDetails')->name('admin.updateVendorDetails');
     });
+
     Route::controller(FlowerPickupController::class)->group(function() {
         Route::get('/add-flower-pickup-details', 'addflowerpickupdetails')->name('admin.addflowerpickupdetails');
         Route::get('/manage-flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
 
     });
-    Route::controller(RiderController::class)->group(function() {
+   Route::controller(RiderController::class)->group(function() {
         Route::get('/add-rider-details', 'addRiderDetails')->name('admin.addRiderDetails');
         Route::post('/save-rider-details', 'saveRiderDetails')->name('admin.saveRiderDetails');
         Route::get('/manage-rider-details', 'manageRiderDetails')->name('admin.manageRiderDetails');
         Route::get('/delete-rider-details/{id}',  'deleteRiderDetails')->name('admin.deleteRiderDetails');
-        Route::get('/edit-temple-vendor/{id}', 'editRiderDetails')->name('admin.editRiderDetails');
-        Route::put('/update-temple-vendor/{id}', 'updateRiderDetails')->name('admin.updateRiderDetails');
+        Route::get('/edit-rider-details/{id}', 'editRiderDetails')->name('admin.editRiderDetails');
+        Route::put('/update-rider-details/{id}', 'updateRiderDetails')->name('admin.updateRiderDetails');
+
+        // flower order assign
+        Route::get('/manage-order-assign', 'manageOrderAssign')->name('admin.manageOrderAssign');
+        Route::get('/add-order-assign', 'addOrderAssign')->name('admin.addRiderDetails');
+        Route::get('/get-apartments', 'getApartments')->name('admin.getApartments');
+        Route::post('/save-order-assign', 'saveOrderAssign')->name('admin.saveOrderAssign');
+        Route::get('/edit-order-assign/{id}', 'editOrderAssign')->name('admin.editOrderAssign');
+        Route::put('/update-order-assign/{id}', 'updateOrderAssign')->name('admin.updateOrderAssign');
+        Route::get('/delete-order-assign/{id}', 'deleteOrderAssign')->name('admin.deleteOrderAssign');
     });
+
 
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
@@ -437,8 +448,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/add-locality', 'addlocality')->name('admin.addlocality');
         Route::post('/savelocality', 'savelocality')->name('savelocality');
         Route::get('/editlocality/{id}', 'editLocality')->name('editlocality');
-        Route::post('/updatelocality/{id}', 'updateLocality')->name('updatelocality');
+        Route::put('/updatelocality/{id}', 'updateLocality')->name('updatelocality');
         Route::delete('/deletelocality/{id}', 'deleteLocality')->name('deletelocality');
+
     });
 
     Route::controller(PromonationController::class)->group(function() {

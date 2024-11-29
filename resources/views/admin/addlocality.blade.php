@@ -46,7 +46,7 @@
     <form action="{{ route('savelocality') }}" method="post" enctype="multipart/form-data">
         @csrf
         <div class="row">
-            <div class="col-lg-12 col-md-">
+            <div class="col-lg-12">
                 <div class="card custom-card">
                     <div class="card-body">
                         <div class="row">
@@ -60,12 +60,27 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="pincode">Pincode</label>
-                                    <input type="text" class="form-control" id="pincode" name="pincode"
+                                    <input type="text" class="form-control" id="pincode" name="pincode" 
                                         placeholder="Enter 6-digit pincode" required pattern="\d{6}" title="Pincode must be a 6-digit number">
                                 </div>
                             </div>
                         </div>
     
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label>Apartment Names</label>
+                                <div id="apartment-wrapper">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <input type="text" class="form-control" name="apartment_name[]" 
+                                            placeholder="Enter Apartment name" required>
+                                        <button type="button" class="btn btn-success ms-2" id="add-apartment">
+                                            Add
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group" style="padding-top: 27px">
@@ -78,6 +93,7 @@
             </div>
         </div>
     </form>
+    
     
 @endsection
 
@@ -94,4 +110,24 @@
     </script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+    <script>
+      document.getElementById('add-apartment').addEventListener('click', function () {
+    const wrapper = document.getElementById('apartment-wrapper');
+    const newField = document.createElement('div');
+    newField.classList.add('d-flex', 'align-items-center', 'mb-3');
+    newField.innerHTML = `
+        <input type="text" class="form-control" name="apartment_name[]" placeholder="Enter Apartment name" required>
+        <button type="button" class="btn btn-danger ms-2 remove-apartment">Remove</button>
+    `;
+    wrapper.appendChild(newField);
+});
+
+// Event delegation for removing fields
+document.getElementById('apartment-wrapper').addEventListener('click', function (e) {
+    if (e.target && e.target.classList.contains('remove-apartment')) {
+        e.target.parentElement.remove();
+    }
+});
+
+    </script>
 @endsection

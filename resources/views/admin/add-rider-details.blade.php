@@ -13,7 +13,8 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                <li class="breadcrumb-item tx-15"><a href="{{ url('admin/manage-rider-details') }}" class="btn btn-warning text-dark">Manage Rider</a></li>
+                <li class="breadcrumb-item tx-15"><a href="{{ url('admin/manage-rider-details') }}"
+                        class="btn btn-warning text-dark">Manage Rider</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
                 <li class="breadcrumb-item active tx-15" aria-current="page">Rider</li>
             </ol>
@@ -31,7 +32,7 @@
         </div>
     @endif
 
-    @if(session()->has('success'))
+    @if (session()->has('success'))
         <div class="alert alert-success" id="Message">
             {{ session()->get('success') }}
         </div>
@@ -46,26 +47,28 @@
     <form action="{{ route('admin.saveRiderDetails') }}" method="post" enctype="multipart/form-data">
         @csrf
         <div class="row">
-            <div class="col-lg-12 col-md-">
+            <div class="col-lg-12">
                 <div class="card custom-card">
                     <div class="card-body">
-                       
+                        
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="rider_name">Rider Name</label>
-                                    <input type="text" class="form-control" id="rider_name" name="rider_name" placeholder="Enter Rider Name" required>
+                                    <input type="text" class="form-control" id="rider_name" name="rider_name"
+                                        placeholder="Enter Rider Name" required>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="phone_number">Phone Number</label>
-                                    <input type="number" class="form-control" id="phone_number" name="phone_number" placeholder="Enter Phone Number" >
+                                    <input type="number" class="form-control" id="phone_number" name="phone_number"
+                                        placeholder="Enter Phone Number" required>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="rider_img">Rider Imgae</label>
+                                    <label for="rider_img">Rider Image</label>
                                     <input type="file" class="form-control" id="rider_img" name="rider_img" required>
                                 </div>
                             </div>
@@ -74,19 +77,20 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="event_name">Description</label>
+                                    <label for="description">Description</label>
                                     <textarea class="form-control" id="description" name="description" placeholder="Enter Short Description" required></textarea>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="row">
+
+                        <div class="row mt-4">
                             <div class="col-md-4">
-                                <div class="form-group" style="padding-top: 27px">
+                                <div class="form-group">
                                     <input type="submit" class="btn btn-primary" value="Submit">
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -101,10 +105,20 @@
     <!-- Form-layouts js -->
     <script src="{{ asset('assets/js/form-layouts.js') }}"></script>
     <script>
-        setTimeout(function(){
+        setTimeout(function() {
             document.getElementById('Message').style.display = 'none';
         }, 3000);
     </script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+
+
+    <!-- Internal Select2 js-->
+    <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
+
+
+
+    <!--Internal  Form-elements js-->
+    <script src="{{ asset('assets/js/advanced-form-elements.js') }}"></script>
+    <script src="{{ asset('assets/js/select2.js') }}"></script>
 @endsection

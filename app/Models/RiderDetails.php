@@ -25,4 +25,6 @@ class RiderDetails extends Model
         return $this->hasMany(FlowerPickupDetails::class, 'rider_id','rider_id');
     }
 
+    
+
 }

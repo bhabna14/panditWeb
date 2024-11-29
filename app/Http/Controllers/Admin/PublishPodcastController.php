@@ -73,18 +73,17 @@ class PublishPodcastController extends Controller
             ]);
     
             // \Log::info('Podcast details saved successfully', ['publishPodcast' => $publishPodcast]);
-    
-            // Update the podcast_status and podcast_editing_status in PodcastPrepair model
+  
+            PodcastPrepair::where('podcast_id', $request->podcast_id)
+                          ->update([
+                              'podcast_status' => 'PUBLISHED',
+                              'podcast_editing_status' => 'COMPLETED' // Add this line to update the podcast_editing_status
+                          ]);
             $updateStatus = PodcastPrepair::where('podcast_id', $request->podcast_id)
                 ->update([
                     'podcast_status' => 'PUBLISHED',
                     'podcast_editing_status' => 'completed',
                 ]);
-    
-            // \Log::info('PodcastPrepair status updated', [
-            //     'podcast_id' => $request->podcast_id,
-            //     'updateStatus' => $updateStatus,
-            // ]);
     
             return redirect()->route('PodcastSocialMedia')->with('success', 'Podcast published successfully!');
         } catch (\Exception $e) {
