@@ -54,7 +54,7 @@ class PublishPodcastController extends Controller
             PodcastPrepair::where('podcast_id', $request->podcast_id)
                           ->update([
                               'podcast_status' => 'PUBLISHED',
-                              'podcast_editing_status' => 'completed' // Add this line to update the podcast_editing_status
+                              'podcast_editing_status' => 'COMPLETED' // Add this line to update the podcast_editing_status
                           ]);
     
             return redirect()->route('PodcastSocialMedia')->with('success', 'Podcast published successfully!');

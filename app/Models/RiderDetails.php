@@ -19,4 +19,6 @@ class RiderDetails extends Model
         'description',
     ];
 
+    
+
 }

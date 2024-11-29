@@ -24,11 +24,11 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Rider</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Order Assign</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                            <a href="{{url('admin/add-rider-details')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Rider</a>
+                            <a href="{{url('admin/add-order-assign')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Order</a>
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
                             <li class="breadcrumb-item active" aria-current="page">Rider</li>
                         </ol>
@@ -65,9 +65,8 @@
                                                 <tr>
                                                     <th>Sl No</th>
                                                     <th>Rider Name</th>
-                                                    <th>Phone Number</th>
-                                                    <th>Rider Image</th>
-                                                    <th>Description</th>
+                                                    <th>Locality Name</th>
+                                                    <th>Apartment Name</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -75,21 +74,36 @@
                                                 @foreach($rider_details as $rider)
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $rider->rider_name }}</td>
-                                                        <td>{{ $rider->phone_number }}</td>
+                                                        
+                                                        <!-- Rider Name -->
+                                                        <td>{{ $rider->rider->rider_name ?? 'N/A' }}</td>
+                                                        
+                                                        <!-- Locality Name -->
+                                                        <td>{{ $rider->locality->locality_name ?? 'N/A' }}</td>
+                                                        
+                                                        <!-- Apartments (UL List) -->
                                                         <td>
-                                                            @if($rider->rider_img)
-                                                                <a href="{{ Storage::url($rider->rider_img) }}" target="_blank" class="btn btn-info">View Image</a>
-                                                            @else
-                                                                No Image
-                                                            @endif
+                                                            @php
+                                                                $apartmentList = explode(',', $rider->apartment_id);
+                                                            @endphp
+                                                            <ul>
+                                                                @foreach($apartmentList as $apartmentId)
+                                                                    @php
+                                                                        $apartmentName = App\Models\Apartment::find($apartmentId)->apartment_name ?? 'N/A';
+                                                                    @endphp
+                                                                    <li>{{ $apartmentName }}</li>
+                                                                @endforeach
+                                                            </ul>
                                                         </td>
-                                                        <td>{{ $rider->description }}</td>
+                                                        
+                                                        <!-- Actions -->
                                                         <td>
-                                                            <a href="{{ url('admin/edit-rider-details/'.$rider->id) }}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
-                                                            <a href="{{ route('admin.deleteRiderDetails', $rider->id) }}" 
+                                                            <a href="{{ url('admin/edit-order-assign/'.$rider->id) }}" class="btn btn-sm btn-warning">
+                                                                <i class="fa fa-edit"></i>
+                                                            </a>
+                                                            <a href="{{ route('admin.deleteOrderAssign', $rider->id) }}" 
                                                                 class="btn btn-sm btn-danger"
-                                                                onclick="return confirm('Are you sure you want to delete this rider?');">
+                                                                onclick="return confirm('Are you sure you want to delete this Order?');">
                                                                 <i class="fa fa-trash"></i>
                                                             </a>
                                                         </td>
