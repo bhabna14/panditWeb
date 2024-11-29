@@ -9,19 +9,10 @@ class FlowerPickupDetails extends Model
 {
     protected $table = 'flower__pickup_details'; 
     protected $fillable = [
-        'flower_id', 'unit_id', 'vendor_id', 'rider_id', 'quantity', 'pickup_date', 'price', 'status',
+         'pick_up_id', 'vendor_id', 'rider_id', 'pickup_date', 'total_price', 'payment_method','payment_status','payment_id'
     ];
 
-    public function flower()
-    {
-        return $this->belongsTo(FlowerProduct::class, 'flower_id', 'product_id');
-    }
-    
-
-    public function unit() {
-        return $this->belongsTo(PoojaUnit::class,'unit_id');
-    }
-
+   
     public function vendor() {
         return $this->belongsTo(FlowerVendor::class,'vendor_id', 'vendor_id');
     }
@@ -29,4 +20,8 @@ class FlowerPickupDetails extends Model
     public function rider() {
         return $this->belongsTo(RiderDetails::class ,'rider_id', 'rider_id');
     }
+    public function flowerPickupItems()
+{
+    return $this->hasMany(FlowerPickupItems::class, 'pick_up_id', 'pick_up_id');
+}
 }
