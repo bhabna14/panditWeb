@@ -107,7 +107,7 @@ class OrderController extends Controller
     }
     
     //get assign order to rider
-    public function getAssignedOrders($riderId)
+    public function getAssignedOrders()
 {
     try {
         // Check if the rider is authenticated
@@ -121,7 +121,7 @@ class OrderController extends Controller
         }
 
         // Fetch active orders assigned to the rider
-        $orders = Order::where('rider_id', $riderId)
+        $orders = Order::where('rider_id', $rider->rider_id)
                         ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
                         ->whereHas('subscription', function($query) {
                             // Only fetch orders where the subscription is active
