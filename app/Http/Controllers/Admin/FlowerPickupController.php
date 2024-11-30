@@ -25,7 +25,7 @@ class FlowerPickupController extends Controller
                         ->get();
         $units = PoojaUnit::where('status', 'active')->get();
         $vendors = FlowerVendor::where('status', 'active')->get();
-        $riders = RiderDetails::all();
+        $riders = RiderDetails::where('status', 'active')->get();
     
         return view('admin.flower-pickup-details.add-flower-pickup-details', compact('flowers', 'units', 'vendors', 'riders'));
     }
