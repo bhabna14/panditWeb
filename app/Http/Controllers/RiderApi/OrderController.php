@@ -63,13 +63,15 @@ class OrderController extends Controller
                 'total_price' => 'required|numeric',
                 'flower_pickup_items' => 'required|array',
                 'flower_pickup_items.*.flower_id' => 'required|string',
-                'flower_pickup_items.*.price' => 'required|numeric', // Updated to match 'price'
+                'flower_pickup_items.*.price' => 'required|numeric', // Ensure correct price validation
             ]);
     
             // Find the pickup record by ID
             $pickup = FlowerPickupDetails::where('pick_up_id', $pickupId)->first();
     
             if (!$pickup) {
+                // Log if the pickup is not found
+                logger('Pickup not found', ['pick_up_id' => $pickupId]);
                 return response()->json(['message' => 'Pickup not found.'], 404);
             }
     
@@ -77,6 +79,7 @@ class OrderController extends Controller
             $pickup->total_price = $validated['total_price'];
             $pickup->status = 'PickupCompleted';
             $pickup->save();
+            logger('Pickup updated', ['pick_up_id' => $pickupId, 'total_price' => $pickup->total_price]);
     
             // Update prices for each flower in flower_pickup_items
             foreach ($validated['flower_pickup_items'] as $item) {
@@ -85,11 +88,25 @@ class OrderController extends Controller
                     ->first();
     
                 if ($flowerPickupItem) {
-                    $flowerPickupItem->price = $item['price']; // Use 'price' instead of 'total_price'
+                    // Log the flower item before updating
+                    logger('Updating flower price', [
+                        'flower_id' => $item['flower_id'],
+                        'old_price' => $flowerPickupItem->price,
+                        'new_price' => $item['price'],
+                    ]);
+    
+                    // Update the flower price
+                    $flowerPickupItem->price = $item['price'];
                     $flowerPickupItem->save();
+    
+                    // Log after the flower price is updated
+                    logger('Flower price updated', [
+                        'flower_id' => $item['flower_id'],
+                        'new_price' => $flowerPickupItem->price,
+                    ]);
                 } else {
-                    // Log or handle if flower is not found
-                    logger('Flower not found for update.', [
+                    // Log if the flower item is not found
+                    logger('Flower not found for update', [
                         'pick_up_id' => $pickupId,
                         'flower_id' => $item['flower_id'],
                     ]);
@@ -101,7 +118,12 @@ class OrderController extends Controller
                 'message' => 'Prices updated successfully.',
             ], 200);
         } catch (\Exception $e) {
-            // Catch any exception and return an error response
+            // Log the exception if something goes wrong
+            logger('Error occurred while updating prices', [
+                'error' => $e->getMessage(),
+                'exception' => $e,
+            ]);
+            // Return error response
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while updating prices.',
