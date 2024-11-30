@@ -5,6 +5,8 @@ namespace App\Http\Controllers\RiderApi;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FlowerPickupDetails;
+use App\Models\FlowerPickupItems;
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
@@ -53,30 +55,54 @@ class OrderController extends Controller
     }
     
 
-    public function submitPickupPrice(Request $request, $id)
-    {
-        $rider = Auth::guard('rider-api')->user();
-
-        $request->validate([
-            'price' => 'required|numeric|min:0',
+    public function updateFlowerPrices(Request $request, $pickupId)
+{
+    try {
+        
+        // Validate the incoming request
+        $validated = $request->validate([
+            'total_price' => 'required|numeric',
+            'flower_pickup_items' => 'required|array',
+            'flower_pickup_items.*.flower_id' => 'required|string',
+            'flower_pickup_items.*.total_price' => 'required|numeric',
         ]);
 
-        // Find the pickup assigned to the logged-in rider
-        $pickup = FlowerPickupDetails::where('id', $id)
-            ->where('rider_id', $rider->rider_id)
-            ->first();
+        // Find the pickup record by ID
+        $pickup = FlowerPickupDetails::where('pick_up_id', $pickupId)->first();
 
-        // If not found, return an error
         if (!$pickup) {
-            return response()->json(['error' => 'Pickup not found or not assigned to you.'], 404);
+            return response()->json(['message' => 'Pickup not found.'], 404);
         }
 
-        // Update the price and status
-        $pickup->update([
-            'price' => $request->price,
-            'status' => 'completed',
-        ]);
+        // Update the total price of the pickup
+        $pickup->total_price = $validated['total_price'];
+        $pickup->status = 'PickupCompleted';
+        $pickup->save();
 
-        return response()->json(['message' => 'Pickup price submitted successfully.']);
+        // Update prices for each flower in flower_pickup_items
+        foreach ($validated['flower_pickup_items'] as $item) {
+            $flowerPickupItem = FlowerPickupItems::where('pick_up_id', $pickupId)
+                ->where('flower_id', $item['flower_id'])
+                ->first();
+
+            if ($flowerPickupItem) {
+                $flowerPickupItem->price = $item['total_price'];
+                $flowerPickupItem->save();
+            }
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Prices updated successfully.'
+        ], 200);
+    } catch (\Exception $e) {
+        // Catch any exception and return an error response
+        return response()->json([
+            'status' => 500,
+            'message' => 'An error occurred while updating prices.',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 }

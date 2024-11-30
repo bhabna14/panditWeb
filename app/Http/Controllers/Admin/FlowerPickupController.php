@@ -103,6 +103,27 @@ class FlowerPickupController extends Controller
         return redirect()->back()->with('success', 'Flower pickup details saved successfully!');
     }
     
-    
+    public function update(Request $request, $id)
+{
+    $pickupDetail = FlowerPickupDetails::findOrFail($id);
+
+    // Update main details
+    $pickupDetail->update([
+        'vendor_id' => $request->vendor_id,
+        'rider_id' => $request->rider_id,
+        'pickup_date' => $request->pickup_date,
+    ]);
+
+    // Update flower pickup items
+    foreach ($request->flowers as $itemId => $data) {
+        FlowerPickupItems::where('id', $itemId)->update([
+            'quantity' => $data['quantity'],
+            'price' => $data['price'],
+        ]);
+    }
+
+    return redirect()->route('admin.manageflowerpickupdetails')->with('success', 'Pickup details updated successfully!');
+}
+
 
 }
