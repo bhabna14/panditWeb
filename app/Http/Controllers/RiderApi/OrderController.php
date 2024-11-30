@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
-use App\Models\Order;
+use App\Models\DeliveryHistory;
+use App\Models\Order;;
 
 use Illuminate\Http\Request;
 
@@ -110,9 +111,59 @@ class OrderController extends Controller
     
     //get assign order to rider
     public function getAssignedOrders()
+    {
+        try {
+            // Check if the rider is authenticated
+            $rider = Auth::guard('rider-api')->user();
+
+            if (!$rider) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
+            // Fetch active orders assigned to the rider
+            $orders = Order::where('rider_id', $rider->rider_id)
+                            ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                            ->whereHas('subscription', function($query) {
+                                // Only fetch orders where the subscription is active
+                                $query->where('status', 'active');
+                            })
+                            ->orderBy('id', 'desc')
+                            ->get();
+
+            // Check if the orders collection is empty
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'No orders assigned for today',
+                    'data' => [],
+                ]);
+            }
+
+            // Return the assigned orders if found
+            return response()->json([
+                'status' => 200,
+                'message' => 'Assigned orders fetched successfully',
+                'data' => $orders,
+            ]);
+            
+        } catch (\Exception $e) {
+            // Handle any exceptions and return a 500 server error response
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching orders.',
+                'error' => $e->getMessage(), // Optionally, you can log this error for debugging
+            ], 500);
+        }
+    }
+
+
+    public function markAsDelivered(Request $request, $order_id)
 {
     try {
-        // Check if the rider is authenticated
+        // Authenticate the rider
         $rider = Auth::guard('rider-api')->user();
 
         if (!$rider) {
@@ -122,38 +173,47 @@ class OrderController extends Controller
             ], 401);
         }
 
-        // Fetch active orders assigned to the rider
-        $orders = Order::where('rider_id', $rider->rider_id)
-                        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-                        ->whereHas('subscription', function($query) {
-                            // Only fetch orders where the subscription is active
-                            $query->where('status', 'active');
-                        })
-                        ->orderBy('id', 'desc')
-                        ->get();
+        // Validate the request for longitude and latitude
+        $validated = $request->validate([
+            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric',
+        ]);
 
-        // Check if the orders collection is empty
-        if ($orders->isEmpty()) {
+        // Check if the order is assigned to the rider and active
+        $order = Order::where('id', $order_id)
+                      ->where('rider_id', $rider->rider_id)
+                      ->whereHas('subscription', function ($query) {
+                          $query->where('status', 'active');
+                      })
+                      ->first();
+
+        if (!$order) {
             return response()->json([
-                'status' => 200,
-                'message' => 'No orders assigned for today',
-                'data' => [],
-            ]);
+                'status' => 404,
+                'message' => 'Order not found or not assigned to this rider',
+            ], 404);
         }
 
-        // Return the assigned orders if found
+        // Save delivery history
+        $deliveryHistory = DeliveryHistory::create([
+            'order_id' => $order->order_id,
+            'rider_id' => $rider->rider_id,
+            'delivery_status' => 'delivered',
+            'longitude' => $validated['longitude'],
+            'latitude' => $validated['latitude'],
+        ]);
+
         return response()->json([
             'status' => 200,
-            'message' => 'Assigned orders fetched successfully',
-            'data' => $orders,
+            'message' => 'Order marked as delivered successfully',
+            'data' => $deliveryHistory,
         ]);
-        
+
     } catch (\Exception $e) {
-        // Handle any exceptions and return a 500 server error response
         return response()->json([
             'status' => 500,
-            'message' => 'An error occurred while fetching orders.',
-            'error' => $e->getMessage(), // Optionally, you can log this error for debugging
+            'message' => 'An error occurred while marking the order as delivered.',
+            'error' => $e->getMessage(),
         ], 500);
     }
 }
