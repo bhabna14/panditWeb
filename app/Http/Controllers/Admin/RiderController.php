@@ -204,7 +204,6 @@ public function manageOrderAssign()
     return view('admin.manage-order-assign', compact('rider_details'));
 }
 
-
 public function editOrderAssign($id)
 {
     // Fetch rider details by ID for editing
@@ -213,7 +212,10 @@ public function editOrderAssign($id)
     // Fetch all riders, localities, and apartments for dropdowns
     $rider_names = RiderDetails::all();
     $localities = Locality::all();
-    $apartments = Apartment::all();
+    
+    // Get apartments filtered by selected locality(ies)
+    $selectedLocalities = explode(',', $rider->locality_id); // Assuming multiple locality IDs are stored as comma-separated values
+    $apartments = Apartment::whereIn('locality_id', $selectedLocalities)->get();
 
     return view('admin.edit-order-assign', compact('rider', 'rider_names', 'localities', 'apartments'));
 }

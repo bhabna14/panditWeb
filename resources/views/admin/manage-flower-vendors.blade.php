@@ -76,8 +76,6 @@
                                                 <button type="submit" class="btn btn-md btn-danger"><i class="fa fa-trash"></i></button>
                                                 <a href="{{ url('admin/edit-vendor-details', $vendor->id) }}" class="btn btn-md btn-primary"><i class="fa fa-edit"></i></a>
                                             </form>
-                                            <a href="{{ route('admin.editvendor', $vendor->id) }}" class="btn btn-md btn-primary"><i class="fa fa-edit"></i></a>
-
                                         </td>
                                     </tr>
                                 @endforeach

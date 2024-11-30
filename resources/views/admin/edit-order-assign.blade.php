@@ -104,12 +104,13 @@
                                     <select class="form-control select2 apartment_name" name="apartment_name[]" multiple="multiple" required>
                                         <option value="">Select Apartment</option>
                                         @foreach ($apartments as $apartment)
-                                            <option value="{{ $apartment->id }}" 
-                                                @if(in_array($apartment->id, explode(',', $rider->apartment_id))) selected @endif>
+                                            <option value="{{ $apartment->id }}"
+                                                @if (in_array($apartment->id, explode(',', $rider->apartment_id))) selected @endif>
                                                 {{ $apartment->apartment_name }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    
                                 </div>
                             </div>
                         </div>
@@ -153,69 +154,39 @@
     <script src="{{ asset('assets/js/advanced-form-elements.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script>
-        $(document).ready(function() {
-            let index = 1; // Tracks dynamic fields
+       $(document).on('change', '.locality_name', function () {
+    const localityId = $(this).val();
+    const apartmentDropdown = $(this).closest('.locality-apartment-group').find('.apartment_name');
 
-            // Add new locality-apartment group
-            $(document).on('click', '.add-locality-apartment', function() {
-                const clone = $('.locality-apartment-group:first').clone();
-                clone.find('.locality_name, .apartment_name').val(''); // Clear the values
-                clone.find('.apartment_name').attr('name',
-                `apartment_name[${index}][]`); // Update name attribute
-                clone.find('.remove-locality-apartment').show(); // Show the remove button
-                clone.find('.select2-container').remove(); // Remove existing Select2 container
-                clone.find('.apartment_name').removeAttr('data-select2-id').removeClass(
-                    'select2-hidden-accessible'); // Reset Select2
-                $('#locality-apartment-container').append(clone); // Append the cloned group
-                clone.find('.select2').select2(); // Reinitialize Select2 for the new group
-                index++;
-            });
+    apartmentDropdown.html('<option value="">Loading...</option>'); // Show loading text
 
-            // Remove a locality-apartment group
-            $(document).on('click', '.remove-locality-apartment', function() {
-                $(this).closest('.locality-apartment-group').remove();
-            });
-
-            // Dynamically fetch apartments based on locality
-            $(document).on('change', '.locality_name', function() {
-                const localityId = $(this).val();
-                const apartmentDropdown = $(this).closest('.locality-apartment-group').find(
-                    '.apartment_name');
-
-                apartmentDropdown.html('<option value="">Loading...</option>'); // Show loading text
-
-                if (localityId) {
-                    $.ajax({
-                        url: "{{ route('admin.getApartments') }}",
-                        type: "GET",
-                        data: {
-                            locality_id: localityId
-                        },
-                        success: function(response) {
-                            apartmentDropdown.empty(); // Clear the dropdown
-                            if (response.apartments && response.apartments.length > 0) {
-                                response.apartments.forEach(apartment => {
-                                    apartmentDropdown.append(
-                                        `<option value="${apartment.id}">${apartment.apartment_name}</option>`
-                                    );
-                                });
-                            } else {
-                                apartmentDropdown.append(
-                                    '<option value="">No Apartments Found</option>');
-                            }
-                        },
-                        error: function() {
-                            apartmentDropdown.html(
-                                '<option value="">Error Loading Apartments</option>');
-                        }
+    if (localityId) {
+        $.ajax({
+            url: "{{ route('admin.getApartments') }}",
+            type: "GET",
+            data: { locality_id: localityId },
+            success: function (response) {
+                apartmentDropdown.empty(); // Clear the dropdown
+                if (response.apartments && response.apartments.length > 0) {
+                    response.apartments.forEach(apartment => {
+                        apartmentDropdown.append(
+                            `<option value="${apartment.id}">${apartment.apartment_name}</option>`
+                        );
                     });
                 } else {
-                    apartmentDropdown.html('<option value="">Select Apartment</option>'); // Reset dropdown
+                    apartmentDropdown.append('<option value="">No Apartments Found</option>');
                 }
-            });
-
-            // Initialize Select2 on page load
-            $('.select2').select2();
+            },
+            error: function () {
+                apartmentDropdown.html('<option value="">Error Loading Apartments</option>');
+            }
         });
+    } else {
+        apartmentDropdown.html('<option value="">Select Apartment</option>'); // Reset dropdown
+    }
+});
+
     </script>
+
+    
 @endsection

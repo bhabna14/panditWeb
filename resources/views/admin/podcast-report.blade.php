@@ -490,47 +490,65 @@
 
     {{-- script modal javascript code --}}
     <script>
-        $(document).on('click', '.script-details', function() {
-            const podcastId = $(this).data('id');
-
+        $(document).on('click', '.script-details', function () {
+            const podcastId = $(this).data('id'); // Get the podcast ID from the button's data attribute
+    
+            // Ensure podcastId is not undefined or null
+            if (!podcastId) {
+                alert('Podcast ID is missing.');
+                return;
+            }
+    
             $.ajax({
-                url: '{{ route('admin.podcast.scriptDetails') }}',
+                url: '{{ route('admin.podcast.scriptDetails') }}', // Update to your actual route
                 method: 'GET',
                 data: {
-                    podcast_id: podcastId
+                    podcast_id: podcastId // Pass podcast ID to the server
                 },
-                success: function(response) {
+                success: function (response) {
+                    // Check if the response contains expected data
+                    if (!response) {
+                        alert('No data found for this podcast.');
+                        return;
+                    }
+    
                     // Helper function to remove HTML tags
                     function stripHtmlTags(html) {
                         return html ? html.replace(/<[^>]+>/g, '') : 'N/A';
                     }
-
+    
                     // Populate modal fields
                     const scriptLocation = response.script_location || '#';
                     $('#scriptLocation')
                         .attr('href', scriptLocation) // Set href dynamically
-                        .text('View Location') // Update button text (optional)
+                        .text('View Location') // Update button text
                         .toggleClass('disabled', scriptLocation === '#'); // Disable if no URL
-
-                    $('#storySource').text(response.story_source || 'N/A');
-                    $('#scriptVerifiedBy').text(response.script_verified_by || 'N/A');
-                    $('#scriptCreatedBy').text(response.script_created_by || 'N/A');
+    
+                    $('#storySource').text(stripHtmlTags(response.story_source) || 'N/A');
+                    $('#scriptVerifiedBy').text(stripHtmlTags(response.script_verified_by) || 'N/A');
+                    $('#scriptCreatedBy').text(stripHtmlTags(response.script_created_by) || 'N/A');
                     $('#scriptCreatedDate').text(response.script_created_date || 'N/A');
                     $('#scriptVerifiedDate').text(response.script_verified_date || 'N/A');
-                    $('#scriptRejectReason').text(response.script_reject_reason || 'N/A');
-                    $('#scriptEditor').text(stripHtmlTags(response
-                    .script_editor)); // Remove <p> or other tags
-                    $('#scriptStatus').text(response.podcast_script_status || 'N/A');
-
-                    // Show modal
+                    $('#scriptRejectReason').text(stripHtmlTags(response.script_reject_reason) || 'N/A');
+    
+                    // Clean up and populate script editor details
+                    const cleanedScriptDetails = (response.script_editor || '').replace(/(&nbsp;|\s+)/g, ' ').trim();
+                    $('#scriptEditor').text(cleanedScriptDetails || 'No script details available.');
+    
+                    // Populate script status
+                    $('#scriptStatus').text(stripHtmlTags(response.podcast_script_status) || 'N/A');
+    
+                    // Show the modal
                     $('#scriptDetailsModal').modal('show');
                 },
-                error: function() {
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
                     alert('Failed to fetch script details. Please try again.');
                 }
             });
         });
     </script>
+    
     {{-- recording modal --}}
     <script>
         $(document).on('click', '.recording-details', function() {
