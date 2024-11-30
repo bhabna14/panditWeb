@@ -21,11 +21,11 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Order Assign</span>
+            <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Apartment Assign</span>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                <a href="{{ url('admin/add-order-assign') }}" class="breadcrumb-item tx-15 btn btn-warning">Add Order</a>
+                <a href="{{ url('admin/add-order-assign') }}" class="breadcrumb-item tx-15 btn btn-warning">Add Apartment</a>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Rider</li>
             </ol>
@@ -53,30 +53,31 @@
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
                     <div class="table-responsive  export-table">
-                        <table id="file-datatable" class="table table-bordered">
+                        <table id="file-datatable" class="table table-bordered ">
                             <thead>
                                 <tr>
-                                    <th>Sl No</th>
-                                    <th>Assign Date</th>
-                                    <th>Locality Name</th>
-                                    <th>Apartment Name</th>
-                                    <th>Actions</th>
+                                    <th style="font-weight: bold">Sl No</th>
+                                    <th style="font-weight: bold">Assign Date</th>
+                                    <th style="font-weight: bold">Locality Name</th>
+                                    <th style="font-weight: bold">Apartment Name</th>
+                                    <th style="font-weight: bold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($rider_details as $riderName => $riders)
-                                <tr>
-                                    <td colspan="4" class="table-secondary">
-                                        <strong style="font-size: 20px">{{ $riderName }}</strong>
-                                    </td>
-                                
-                                    <td class="table-secondary text-right">
-                                        <button class="btn btn-sm btn-info deactive-button" style="font-size: 25px" data-id="{{ $riders->first()->rider_id }}">
-                                            <i class="icon ion-md-unlock"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                
+                                    <tr>
+                                        <td colspan="4" class="table-secondary">
+                                            <strong style="font-size: 20px">{{ $riderName }}</strong>
+                                        </td>
+
+                                        <td class="table-secondary text-right">
+                                            <button class="btn btn-sm btn-info deactive-button" style="font-size: 25px"
+                                                data-id="{{ $riders->first()->rider_id }}">
+                                                <i class="icon ion-md-unlock"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+
                                     @foreach ($riders as $key => $rider)
                                         <tr>
                                             <td>{{ $loop->iteration }}</td>
@@ -113,8 +114,6 @@
                                                         <i class="fa fa-trash"></i> Delete
                                                     </button>
                                                 </form>
-                                            </td>
-                                            ton>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -154,59 +153,60 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const deleteButtons = document.querySelectorAll('.delete-button');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deleteButtons = document.querySelectorAll('.delete-button');
 
-        deleteButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const id = this.getAttribute('data-id');
-                const form = document.getElementById('delete-form-' + id); // Get the associated form
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const form = document.getElementById('delete-form-' +
+                    id); // Get the associated form
 
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "You won't be able to revert this!",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Submit the form (DELETE request)
-                    }
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit(); // Submit the form (DELETE request)
+                        }
+                    });
                 });
             });
         });
-    });
-</script>
+    </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const deactiveButtons = document.querySelectorAll('.deactive-button');
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const deactiveButtons = document.querySelectorAll('.deactive-button');
 
-        deactiveButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const riderId = this.getAttribute('data-id');  // Get the rider_id
-                const url = `{{ url('admin/deactive-order-assign') }}/${riderId}`; // Create the URL for deactivation
+            deactiveButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const riderId = this.getAttribute('data-id'); // Get the rider_id
+                    const url =
+                    `{{ url('admin/deactive-order-assign') }}/${riderId}`; // Create the URL for deactivation
 
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Do you want to deactivate this order assignment?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#3085d6',
-                    cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, deactivate it!'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = url; // Redirect to the deactivation route
-                    }
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "Do you want to deactivate this order assignment?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, deactivate it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href =
+                            url; // Redirect to the deactivation route
+                        }
+                    });
                 });
             });
         });
-    });
-</script>
-
-
+    </script>
 @endsection

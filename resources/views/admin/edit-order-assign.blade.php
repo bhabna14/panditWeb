@@ -16,7 +16,7 @@
                 <li class="breadcrumb-item tx-15"><a href="{{ url('admin/manage-order-assign') }}"
                         class="btn btn-warning text-dark">Manage Order Assign</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active tx-15" aria-current="page">Order</li>
+                <li class="breadcrumb-item active tx-15" aria-current="page">Apartment</li>
             </ol>
         </div>
     </div>
