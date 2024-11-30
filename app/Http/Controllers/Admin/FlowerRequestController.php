@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\Subscription;
+use App\Models\RiderDetails;
+
 use Carbon\Carbon;
 class FlowerRequestController extends Controller
 {
@@ -36,8 +38,9 @@ class FlowerRequestController extends Controller
 
         // Orders requested today
         $ordersRequestedToday = FlowerRequest::whereDate('date', Carbon::today())->count();
-        
-        return view('admin.flower-request.manage-flower-request', compact('pendingRequests', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
+        $riders = RiderDetails::where('status', 'active')->get();
+        // dd($riders);
+        return view('admin.flower-request.manage-flower-request', compact('riders','pendingRequests', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
     }
     
 public function saveOrder(Request $request, $id)

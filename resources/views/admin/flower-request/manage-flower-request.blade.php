@@ -127,6 +127,7 @@
                                                     <th>Status</th>
                                                     <th>Price</th>
                                                     <th>Actions</th>
+                                                    <th>Assigned Rider</th>
                                                     <th>Address</th>
                                                 </tr>
                                             </thead>
@@ -190,6 +191,31 @@
                                                                     <button type="submit" class="btn btn-success mt-2">Paid</button>
                                                                 @endif
                                                             </form>
+                                                        </td>
+
+                                                        <td>
+                                                            @if ($request->status == 'approved')
+                                                                @if($request->order->rider_id)
+                                                                    <span>{{ $request->order->rider->rider_name }}</span>
+                                                                    <a href="{{ route('admin.orders.editRider', $request->order->id) }}" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editRiderModal">Edit Rider</a>
+                                                                    {{-- <a href="{{ route('admin.orders.editRider', $request->order->id) }}" class="btn btn-sm btn-info">Edit Rider</a> --}}
+                                                                @else
+                                                                    <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
+                                                                        @csrf
+                                                                        <select name="rider_id" class="form-control">
+                                                                            @foreach($riders as $rider)
+                                                                                <option value="{{ $rider->rider_id }}" {{ $request->order->rider_id == $rider->rider_id ? 'selected' : '' }}>
+                                                                                    {{ $rider->rider_name }}
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                        <button type="submit" class="btn btn-sm btn-success mt-2">Assign Rider</button>
+                                                                    </form>
+                                                                @endif
+                                                            @else
+                                                            <p>Need to Give the price</p>
+
+                                                            @endif
                                                         </td>
                                                         <td>
                                                             <strong>Address:</strong> {{ $request->address->apartment_flat_plot ?? "" }}, {{ $request->address->locality_name ?? "" }}<br>

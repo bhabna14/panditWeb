@@ -115,49 +115,62 @@ class OrderController extends Controller
         try {
             // Check if the rider is authenticated
             $rider = Auth::guard('rider-api')->user();
-
+    
             if (!$rider) {
                 return response()->json([
                     'status' => 401,
                     'message' => 'Unauthorized',
                 ], 401);
             }
-
-            // Fetch active orders assigned to the rider
-            $orders = Order::where('rider_id', $rider->rider_id)
-                            ->with(['flowerRequest', 'subscription','delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-                            ->whereHas('subscription', function($query) {
-                                // Only fetch orders where the subscription is active
-                                $query->where('status', 'active');
-                            })
-                            ->orderBy('id', 'desc')
-                            ->get();
-
-            // Check if the orders collection is empty
-            if ($orders->isEmpty()) {
+    
+            // Fetch active subscription-based orders assigned to the rider
+            $subscriptionOrders = Order::where('rider_id', $rider->rider_id)
+                ->with(['flowerRequest', 'subscription', 'delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                ->whereHas('subscription', function ($query) {
+                    $query->where('status', 'active');
+                })
+                ->orderBy('id', 'desc')
+                ->get();
+    
+            // Fetch today's requested orders
+            $today = Carbon::today();
+            $requestedOrders = Order::whereNotNull('request_id')
+                ->where('rider_id', $rider->rider_id)
+                ->with(['flowerRequest', 'subscription', 'delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                ->whereHas('flowerRequest', function ($query) use ($today) {
+                    $query->whereDate('date', $today);
+                })
+                ->orderBy('id', 'desc')
+                ->get();
+    
+            // Combine both subscription-based orders and today's requested orders
+            $allOrders = $subscriptionOrders->merge($requestedOrders);
+    
+            // Check if any orders are found
+            if ($allOrders->isEmpty()) {
                 return response()->json([
                     'status' => 200,
                     'message' => 'No orders assigned for today',
                     'data' => [],
                 ]);
             }
-
-            // Return the assigned orders if found
+    
+            // Return the combined orders
             return response()->json([
                 'status' => 200,
                 'message' => 'Assigned orders fetched successfully',
-                'data' => $orders,
+                'data' => $allOrders,
             ]);
-            
         } catch (\Exception $e) {
             // Handle any exceptions and return a 500 server error response
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while fetching orders.',
-                'error' => $e->getMessage(), // Optionally, you can log this error for debugging
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
+    
 
 
     public function markAsDelivered(Request $request, $order_id)
