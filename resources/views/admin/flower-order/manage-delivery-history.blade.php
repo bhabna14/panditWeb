@@ -19,13 +19,13 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Flower Order</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Delivery History</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
                             {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Flower Order</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Delivery History</li>
                         </ol>
                     </div>
                 </div>
@@ -33,23 +33,7 @@
 
                    
 
-                <div class="row">
-                    <div class="col-lg-12 col-md-12">
-                        <div class="card custom-card">
-                            <div class="card-footer py-0">
-                                <div class="profile-tab tab-menu-heading border-bottom-0">
-                                    <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
-                                        <a class="nav-link mb-2 mt-2 " href="{{ route('admin.orders.index') }}"
-                                            onclick="changeColor(this)">Subscription Orders</a>
-                                        <a class="nav-link mb-2 mt-2 {{ Request::is('admin/flower-request-orders') ? 'active' : '' }}" href="{{ route('admin.requestorder.index') }}"
-                                            onclick="changeColor(this)">Request Orders</a>
-                                       
-                                    </nav>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+              
 
                     <!-- Row -->
                     <div class="row row-sm">
@@ -89,7 +73,7 @@
                                                 @forelse($deliveryHistory as $history)
                                                     <tr>
                                                         <td>{{ $history->order->order_id ?? 'N/A' }}</td>
-                                                        <td>{{ $history->rider->name ?? 'N/A' }}</td>
+                                                        <td>{{ $history->rider->rider_name ?? 'N/A' }}</td>
                                                         <td>{{ ucfirst($history->delivery_status) }}</td>
                                                         <td>{{ $history->longitude }}</td>
                                                         <td>{{ $history->latitude }}</td>
