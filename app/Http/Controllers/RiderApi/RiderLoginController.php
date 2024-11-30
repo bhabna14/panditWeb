@@ -67,7 +67,6 @@ class RiderLoginController extends Controller
 
     public function verifyOtp(Request $request)
     {
-        // dd("hi");
         // Validate the required fields
         $validator = Validator::make($request->all(), [
             'otp' => 'required|digits:6', // Ensure OTP is exactly 6 digits
@@ -87,11 +86,12 @@ class RiderLoginController extends Controller
         $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
     
         try {
+            // Send OTP verification request to external API
             $response = $client->post($url, [
                 'headers' => [
-                    'Content-Type'  => 'application/json',
-                    'clientId'      => $this->clientId,
-                    'clientSecret'  => $this->clientSecret,
+                    'Content-Type' => 'application/json',
+                    'clientId' => $this->clientId,
+                    'clientSecret' => $this->clientSecret,
                 ],
                 'json' => [
                     'orderId' => $orderId,
@@ -103,26 +103,24 @@ class RiderLoginController extends Controller
             $body = json_decode($response->getBody(), true);
             Log::info("Response Body: " . print_r($body, true));
     
+            // Check if OTP is verified successfully
             if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
                 // Check if rider exists
                 $rider = RiderDetails::where('phone_number', $phoneNumber)->first();
     
                 if (!$rider) {
-                    // Create a new rider if not found
-                    $rider = RiderDetails::create([
-                        'rider_id' => 'RIDER' . rand(10000, 99999),
-                        'phone_number' => $phoneNumber,
-                        'rider_name' => null, // Placeholder, as it's required by your schema
-                        'rider_img' => null, // Default value
-                        'description' => null, // Default value
-                    ]);
+                    // Rider not found, return message without creating a new rider
+                    return response()->json([
+                        'status' => 404,
+                        'message' => 'You are not registered, contact admin.',
+                    ], 404);
                 }
     
                 // Generate a token
-                // $token = $rider->createToken('API Token')->plainTextToken;
                 $token = $rider->createToken('API Token')->plainTextToken;
     
                 return response()->json([
+                    'status' => 200,
                     'message' => 'Rider authenticated successfully.',
                     'rider' => $rider,
                     'token' => $token,
@@ -138,5 +136,46 @@ class RiderLoginController extends Controller
         }
     }
     
+    
+    public function getRiderDetails()
+    {
+        try {
+            // Get the authenticated rider
+            $rider = Auth::guard('rider-api')->user();
 
+            if (!$rider) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
+            // Retrieve rider details
+            $riderDetails = RiderDetails::where('rider_id', $rider->rider_id)->first();
+
+            if (!$riderDetails) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Rider details not found',
+                ], 404);
+            }
+
+            // Generate the full image URL
+            $riderDetails->rider_img = $riderDetails->rider_img 
+                ? url('storage/' . $riderDetails->rider_img) 
+                : null;
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Rider details fetched successfully',
+                'data' => $riderDetails,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Something went wrong',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 }
