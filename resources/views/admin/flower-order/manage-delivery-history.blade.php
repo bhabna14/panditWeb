@@ -62,31 +62,44 @@
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
+                                                    <th>User Name</th>
+                                                    <th>Product Name</th>
+                                                    <th>Payment Details</th>
+                                                    <th>Address</th>
                                                     <th>Rider Name</th>
                                                     <th>Delivery Status</th>
-                                                    <th>Longitude</th>
-                                                    <th>Latitude</th>
-                                                    <th>Delivery Date</th>
+                                                    <th>Delivered At</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                @forelse($deliveryHistory as $history)
+                                                @foreach($deliveryHistory as $history)
                                                     <tr>
-                                                        <td>{{ $history->order->order_id ?? 'N/A' }}</td>
-                                                        <td>{{ $history->rider->rider_name ?? 'N/A' }}</td>
-                                                        <td>{{ ucfirst($history->delivery_status) }}</td>
-                                                        <td>{{ $history->longitude }}</td>
-                                                        <td>{{ $history->latitude }}</td>
+                                                        <td>{{ $history->order->order_id }}</td>
+                                                        <td>{{ $history->order->user->name ?? 'N/A' }}</td>
+                                                        <td>{{ $history->order->flowerProduct->name ?? 'N/A' }}</td>
+                                                        <td>
+                                                            @foreach($history->order->flowerPayments as $payment)
+                                                                <p>{{ $payment->payment_type }} - ₹{{ $payment->amount }}</p>
+                                                            @endforeach
+                                                        </td>
+                                                        <td>
+                                                            <strong>Address:</strong> {{ $history->order->address->apartment_flat_plot ?? "" }}, {{ $history->order->address->localityDetails->locality_name ?? "" }}<br>
+                                                            <strong>Landmark:</strong> {{ $history->order->address->landmark ?? "" }}<br>
+    
+                                                            <strong>City:</strong> {{ $history->order->address->city ?? ""}}<br>
+                                                            <strong>State:</strong> {{ $history->order->address->state ?? ""}}<br>
+                                                            <strong>Pin Code:</strong> {{ $history->order->address->pincode ?? "" }}
+                                                        </td>
+                                                        </td>
+                                                        <td>{{ $history->rider->name ?? 'N/A' }}</td>
+                                                        <td>{{ $history->delivery_status }}</td>
                                                         <td>{{ $history->created_at->format('d-m-Y H:i:s') }}</td>
                                                     </tr>
-                                                @empty
-                                                    <tr>
-                                                        <td colspan="6" class="text-center">No delivery history found.</td>
-                                                    </tr>
-                                                @endforelse
+                                                @endforeach
                                             </tbody>
                                         </table>
                                     </div>
+                                    
                                     
                                 </div>
                             </div>
