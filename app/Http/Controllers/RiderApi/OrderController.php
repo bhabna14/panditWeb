@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
+use App\Models\Order;
+
 use Illuminate\Http\Request;
 
 class OrderController extends Controller
