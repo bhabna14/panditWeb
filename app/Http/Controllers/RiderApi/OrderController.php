@@ -125,7 +125,7 @@ class OrderController extends Controller
 
             // Fetch active orders assigned to the rider
             $orders = Order::where('rider_id', $rider->rider_id)
-                            ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                            ->with(['flowerRequest', 'subscription','delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
                             ->whereHas('subscription', function($query) {
                                 // Only fetch orders where the subscription is active
                                 $query->where('status', 'active');

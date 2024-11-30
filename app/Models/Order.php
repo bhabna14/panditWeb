@@ -23,6 +23,10 @@ class Order extends Model
         'address_id',
         'suggestion'
     ];
+    public function delivery()
+    {
+        return $this->belongsTo(RiderDetails::class, 'order_id', 'order_id');
+    }
     public function rider()
     {
         return $this->belongsTo(RiderDetails::class, 'rider_id', 'rider_id');
