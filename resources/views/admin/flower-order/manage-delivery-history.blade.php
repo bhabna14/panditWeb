@@ -55,8 +55,8 @@
                                         {{ $errors->first('danger') }}
                                     </div>
                                     @endif
-                                    <div class="table-responsive">
-                                        <table id="file-datatable" class="table table-bordered">
+                                    <div class="table-responsive ">
+                                        <table id="file-datatable" class="table table-bordered ">
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
@@ -84,8 +84,9 @@
                                                 @endforelse
                                             </tbody>
                                         </table>
+                                      
+
                                     </div>
-                                    
                                 </div>
                             </div>
                         </div>
