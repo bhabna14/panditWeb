@@ -232,6 +232,12 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+//rider assign by admin and update
+    Route::post('orders/{id}/assignRider', [FlowerOrderController::class, 'assignRider'])->name('admin.orders.assignRider');
+    Route::get('orders/{id}/editRider', [FlowerOrderController::class, 'editRider'])->name('admin.orders.editRider');
+    Route::post('orders/{id}/updateRider', [FlowerOrderController::class, 'updateRider'])->name('admin.orders.updateRider');
+
+
     Route::get('/show-customer/{id}/details', [FlowerOrderController::class, 'showCustomerDetails'])->name('showCustomerDetails');
 
     Route::get('/flower-request-orders', [FlowerOrderController::class, 'showRequestOrders'])->name('admin.requestorder.index');

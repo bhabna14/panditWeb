@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
+    // assign pickup details to rider
     public function getAssignOrders()
     {
         try {
@@ -54,7 +55,7 @@ class OrderController extends Controller
         }
     }
     
-
+    // update price of each item of pickup by Rider
     public function updateFlowerPrices(Request $request, $pickupId)
     {
         try {
