@@ -25,7 +25,7 @@ class Order extends Model
     ];
     public function delivery()
     {
-        return $this->belongsTo(RiderDetails::class, 'order_id', 'order_id');
+        return $this->belongsTo(DeliveryHistory::class, 'order_id', 'order_id');
     }
     public function rider()
     {
