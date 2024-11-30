@@ -134,18 +134,18 @@ class OrderController extends Controller
                 ->get();
     
             // Fetch today's requested orders
-            $today = Carbon::today();
-            $requestedOrders = Order::whereNotNull('request_id')
-                ->where('rider_id', $rider->rider_id)
-                ->with(['flowerRequest', 'subscription', 'delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-                ->whereHas('flowerRequest', function ($query) use ($today) {
-                    $query->whereDate('date', $today);
-                })
-                ->orderBy('id', 'desc')
-                ->get();
+            // $today = Carbon::today();
+            // $requestedOrders = Order::whereNotNull('request_id')
+            //     ->where('rider_id', $rider->rider_id)
+            //     ->with(['flowerRequest', 'subscription', 'delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+            //     ->whereHas('flowerRequest', function ($query) use ($today) {
+            //         $query->whereDate('date', $today);
+            //     })
+            //     ->orderBy('id', 'desc')
+            //     ->get();
     
-            // Combine both subscription-based orders and today's requested orders
-            $allOrders = $subscriptionOrders->merge($requestedOrders);
+            // // Combine both subscription-based orders and today's requested orders
+            // $allOrders = $subscriptionOrders->merge($requestedOrders);
     
             // Check if any orders are found
             if ($allOrders->isEmpty()) {
@@ -160,7 +160,7 @@ class OrderController extends Controller
             return response()->json([
                 'status' => 200,
                 'message' => 'Assigned orders fetched successfully',
-                'data' => $allOrders,
+                'data' => $subscriptionOrders,
             ]);
         } catch (\Exception $e) {
             // Handle any exceptions and return a 500 server error response
