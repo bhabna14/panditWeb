@@ -180,7 +180,7 @@ class OrderController extends Controller
         ]);
 
         // Check if the order is assigned to the rider and active
-        $order = Order::where('id', $order_id)
+        $order = Order::where('order_id', $order_id)
                       ->where('rider_id', $rider->rider_id)
                       ->whereHas('subscription', function ($query) {
                           $query->where('status', 'active');
