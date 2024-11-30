@@ -25,6 +25,6 @@ class DeliveryHistory extends Model
 
 public function rider()
 {
-    return $this->belongsTo(Rider::class,'rider_id', 'rider_id');
+    return $this->belongsTo(RiderDetails::class,'rider_id', 'rider_id');
 }
 }
