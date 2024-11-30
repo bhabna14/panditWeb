@@ -36,14 +36,14 @@ class OrderController extends Controller
             if ($orders->isEmpty()) {
                 return response()->json([
                     'status' => 200,
-                    'message' => 'No orders assigned for today',
+                    'message' => 'No pickups assigned for today',
                     'data' => [],
                 ]);
             }
     
             return response()->json([
                 'status' => 200,
-                'message' => 'Assigned orders for today fetched successfully',
+                'message' => 'Assigned pickups for today fetched successfully',
                 'data' => $orders,
             ]);
         } catch (\Exception $e) {
@@ -106,5 +106,55 @@ class OrderController extends Controller
         }
     }
     
+    //get assign order to rider
+    public function getAssignedOrders($riderId)
+{
+    try {
+        // Check if the rider is authenticated
+        $rider = Auth::guard('rider-api')->user();
+
+        if (!$rider) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        // Fetch active orders assigned to the rider
+        $orders = Order::where('rider_id', $riderId)
+                        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                        ->whereHas('subscription', function($query) {
+                            // Only fetch orders where the subscription is active
+                            $query->where('status', 'active');
+                        })
+                        ->orderBy('id', 'desc')
+                        ->get();
+
+        // Check if the orders collection is empty
+        if ($orders->isEmpty()) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'No orders assigned for today',
+                'data' => [],
+            ]);
+        }
+
+        // Return the assigned orders if found
+        return response()->json([
+            'status' => 200,
+            'message' => 'Assigned orders fetched successfully',
+            'data' => $orders,
+        ]);
+        
+    } catch (\Exception $e) {
+        // Handle any exceptions and return a 500 server error response
+        return response()->json([
+            'status' => 500,
+            'message' => 'An error occurred while fetching orders.',
+            'error' => $e->getMessage(), // Optionally, you can log this error for debugging
+        ], 500);
+    }
+}
+
 
 }

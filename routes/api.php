@@ -52,7 +52,9 @@ Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/get-assign-pickup', [OrderController::class, 'getAssignPickup']);
     Route::post('/rider/update-flower-prices/{pickup_id}', [OrderController::class, 'updateFlowerPrices']);
 
-    // Route::post('rider/submit-pickup-price/{id}', [OrderController::class, 'submitPickupPrice']);
+   // assign order to rider
+   Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignedOrders'])->name('rider.assignedOrders');
+
 });
 
 
