@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
     // assign pickup details to rider
-    public function getAssignOrders()
+    public function getAssignPickup()
     {
         try {
             $rider = Auth::guard('rider-api')->user();

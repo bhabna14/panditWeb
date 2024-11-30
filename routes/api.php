@@ -49,7 +49,7 @@ Route::prefix('rider')->group(function () {
 
 Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/details', [RiderLoginController::class, 'getRiderDetails']);
-    Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignOrders']);
+    Route::get('rider/get-assign-pickup', [OrderController::class, 'getAssignPickup']);
     Route::post('/rider/update-flower-prices/{pickup_id}', [OrderController::class, 'updateFlowerPrices']);
 
     // Route::post('rider/submit-pickup-price/{id}', [OrderController::class, 'submitPickupPrice']);
