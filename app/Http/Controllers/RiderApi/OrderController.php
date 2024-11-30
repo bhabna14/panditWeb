@@ -176,6 +176,8 @@ class OrderController extends Controller
 
     // Import the Log facade
 
+    // use Illuminate\Support\Facades\Log;
+
     public function markAsDelivered(Request $request, $order_id)
     {
         try {
@@ -183,11 +185,14 @@ class OrderController extends Controller
             $rider = Auth::guard('rider-api')->user();
     
             if (!$rider) {
+                Log::warning('Rider authentication failed', ['rider_id' => $rider->rider_id ?? 'None']);
                 return response()->json([
                     'status' => 401,
                     'message' => 'Unauthorized',
                 ], 401);
             }
+    
+            Log::info('Rider authenticated', ['rider_id' => $rider->rider_id]);
     
             // Validate the request for longitude and latitude
             $validated = $request->validate([
@@ -195,8 +200,14 @@ class OrderController extends Controller
                 'latitude' => 'required|numeric',
             ]);
     
+            Log::info('Delivery location validated', [
+                'longitude' => $validated['longitude'],
+                'latitude' => $validated['latitude']
+            ]);
+    
             // Today's date to match with the flower request
             $today = now()->toDateString();
+            Log::info('Today\'s date for flower request', ['date' => $today]);
     
             // Fetch the order with additional conditions
             $order = Order::where('order_id', $order_id)
@@ -213,11 +224,20 @@ class OrderController extends Controller
                           ->first();
     
             if (!$order) {
+                Log::warning('Order not found or not assigned to rider', [
+                    'order_id' => $order_id,
+                    'rider_id' => $rider->rider_id
+                ]);
                 return response()->json([
                     'status' => 404,
                     'message' => 'Order not found or not assigned to this rider',
                 ], 404);
             }
+    
+            Log::info('Order found and assigned to rider', [
+                'order_id' => $order->order_id,
+                'rider_id' => $rider->rider_id
+            ]);
     
             // Save delivery history
             $deliveryHistory = DeliveryHistory::create([
@@ -228,6 +248,12 @@ class OrderController extends Controller
                 'latitude' => $validated['latitude'],
             ]);
     
+            Log::info('Delivery history saved', [
+                'order_id' => $order->order_id,
+                'rider_id' => $rider->rider_id,
+                'delivery_status' => 'delivered'
+            ]);
+    
             return response()->json([
                 'status' => 200,
                 'message' => 'Order marked as delivered successfully',
@@ -235,6 +261,11 @@ class OrderController extends Controller
             ]);
     
         } catch (\Exception $e) {
+            Log::error('An error occurred while marking the order as delivered', [
+                'error_message' => $e->getMessage(),
+                'order_id' => $order_id,
+                'rider_id' => $rider->rider_id ?? 'None'
+            ]);
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while marking the order as delivered.',
@@ -242,6 +273,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    
     
     
 
