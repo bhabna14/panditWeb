@@ -125,5 +125,35 @@ class FlowerPickupController extends Controller
     return redirect()->route('admin.manageflowerpickupdetails')->with('success', 'Pickup details updated successfully!');
 }
 
+public function updatePayment(Request $request)
+{
+    try {
+        // Validate the input
+        $validated = $request->validate([
+            'pickup_id' => 'required|exists:flower_pickup_details,id',
+            'payment_method' => 'required|string|max:50',
+            'payment_id' => 'string|max:100',
+        ]);
+
+        // Find the record in the database
+        $pickupDetail = FlowerPickupDetails::find($validated['pickup_id']);
+
+        if (!$pickupDetail) {
+            return redirect()->back()->withErrors(['error' => 'Pickup detail not found.']);
+        }
+
+        // Update payment details
+        $pickupDetail->payment_status = 'Paid';
+        $pickupDetail->payment_method = $validated['payment_method'];
+        $pickupDetail->payment_id = $validated['payment_id'];
+        $pickupDetail->save();
+
+        // Redirect back with success message
+        return redirect()->back()->with('success', 'Payment details updated successfully.');
+    } catch (\Exception $e) {
+        // Handle any errors
+        return redirect()->back()->withErrors(['error' => 'Failed to update payment details: ' . $e->getMessage()]);
+    }
+}
 
 }

@@ -125,7 +125,7 @@
                                                         </div>
                                                         <div class="mb-3">
                                                             <label for="payment_id" class="form-label">Payment ID</label>
-                                                            <input type="text" class="form-control" id="payment_id" name="payment_id" placeholder="Enter Payment ID" required>
+                                                            <input type="text" class="form-control" id="payment_id" name="payment_id" placeholder="Enter Payment ID">
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -133,6 +133,7 @@
                                                         <button type="submit" class="btn btn-primary">Save Payment</button>
                                                     </div>
                                                 </form>
+                                                
                                             </div>
                                         </div>
                                     </div>
