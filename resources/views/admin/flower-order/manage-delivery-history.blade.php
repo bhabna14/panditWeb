@@ -73,24 +73,37 @@
                                         {{ $errors->first('danger') }}
                                     </div>
                                     @endif
-                                    <div class="table-responsive  export-table">
-                                        <table id="file-datatable" class="table table-bordered ">
+                                    <div class="table-responsive">
+                                        <table id="file-datatable" class="table table-bordered">
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
-                                                    <th>Order Date</th>
-                                                    <th>Payment Status</th>
-                                                    <th>User Name</th>
-                                                    <th>Flower Product</th>
-                                                    <th>Address</th>
-                                                    <!-- Add any additional columns needed for your data -->
+                                                    <th>Rider Name</th>
+                                                    <th>Delivery Status</th>
+                                                    <th>Longitude</th>
+                                                    <th>Latitude</th>
+                                                    <th>Delivery Date</th>
                                                 </tr>
                                             </thead>
-                                          
+                                            <tbody>
+                                                @forelse($deliveryHistory as $history)
+                                                    <tr>
+                                                        <td>{{ $history->order->order_id ?? 'N/A' }}</td>
+                                                        <td>{{ $history->rider->name ?? 'N/A' }}</td>
+                                                        <td>{{ ucfirst($history->delivery_status) }}</td>
+                                                        <td>{{ $history->longitude }}</td>
+                                                        <td>{{ $history->latitude }}</td>
+                                                        <td>{{ $history->created_at->format('d-m-Y H:i:s') }}</td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="6" class="text-center">No delivery history found.</td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
                                         </table>
-                                        
-                                        
                                     </div>
+                                    
                                 </div>
                             </div>
                         </div>
