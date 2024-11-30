@@ -64,7 +64,7 @@ class OrderController extends Controller
             'total_price' => 'required|numeric',
             'flower_pickup_items' => 'required|array',
             'flower_pickup_items.*.flower_id' => 'required|string',
-            'flower_pickup_items.*.total_price' => 'required|numeric',
+            'flower_pickup_items.*.price' => 'required|numeric',
         ]);
 
         // Find the pickup record by ID
@@ -86,7 +86,7 @@ class OrderController extends Controller
                 ->first();
 
             if ($flowerPickupItem) {
-                $flowerPickupItem->price = $item['total_price'];
+                $flowerPickupItem->price = $item['price'];
                 $flowerPickupItem->save();
             }
         }
