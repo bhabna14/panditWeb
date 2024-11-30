@@ -68,6 +68,7 @@
                                                     <th>Address</th>
                                                     <th>Rider Name</th>
                                                     <th>Delivery Status</th>
+                                                    <th>Location</th>
                                                     <th>Delivered At</th>
                                                 </tr>
                                             </thead>
@@ -75,11 +76,11 @@
                                                 @foreach($deliveryHistory as $history)
                                                     <tr>
                                                         <td>{{ $history->order->order_id }}</td>
-                                                        <td>{{ $history->order->user->name ?? 'N/A' }}</td>
+                                                        <td>{{ $history->order->user->mobile_number ?? 'N/A' }}</td>
                                                         <td>{{ $history->order->flowerProduct->name ?? 'N/A' }}</td>
                                                         <td>
                                                             @foreach($history->order->flowerPayments as $payment)
-                                                                <p>{{ $payment->payment_type }} - ₹{{ $payment->amount }}</p>
+                                                                <p> ₹{{ $payment->paid_amount }}</p>
                                                             @endforeach
                                                         </td>
                                                         <td>
@@ -91,8 +92,10 @@
                                                             <strong>Pin Code:</strong> {{ $history->order->address->pincode ?? "" }}
                                                         </td>
                                                         </td>
-                                                        <td>{{ $history->rider->name ?? 'N/A' }}</td>
+                                                        <td>{{ $history->rider->rider_name ?? 'N/A' }}</td>
                                                         <td>{{ $history->delivery_status }}</td>
+                                                        <td>{{ $history->longitude }} ,{{ $history->latitude }}</td>
+
                                                         <td>{{ $history->created_at->format('d-m-Y H:i:s') }}</td>
                                                     </tr>
                                                 @endforeach
