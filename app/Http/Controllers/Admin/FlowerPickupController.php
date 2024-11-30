@@ -10,6 +10,7 @@ use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
+use Illuminate\Support\Facades\Log;
 
 class FlowerPickupController extends Controller
 {
@@ -124,36 +125,29 @@ class FlowerPickupController extends Controller
 
     return redirect()->route('admin.manageflowerpickupdetails')->with('success', 'Pickup details updated successfully!');
 }
-
-public function updatePayment(Request $request)
+public function updatePayment(Request $request, $pickup_id)
 {
-    try {
-        // Validate the input
-        $validated = $request->validate([
-            'pickup_id' => 'required|exists:flower_pickup_details,id',
-            'payment_method' => 'required|string|max:50',
-            'payment_id' => 'string|max:100',
-        ]);
+    // Find the pickup detail by ID
+    $pickupDetail = FlowerPickupDetails::findOrFail($pickup_id);
 
-        // Find the record in the database
-        $pickupDetail = FlowerPickupDetails::find($validated['pickup_id']);
+    // Update the payment details
+    $pickupDetail->payment_status = 'Paid';
+    $pickupDetail->Status = 'Completed';
 
-        if (!$pickupDetail) {
-            return redirect()->back()->withErrors(['error' => 'Pickup detail not found.']);
-        }
+    $pickupDetail->payment_method = $request->input('payment_method');
+    $pickupDetail->payment_id = $request->input('payment_id');
+    $pickupDetail->save();
 
-        // Update payment details
-        $pickupDetail->payment_status = 'Paid';
-        $pickupDetail->payment_method = $validated['payment_method'];
-        $pickupDetail->payment_id = $validated['payment_id'];
-        $pickupDetail->save();
+    // Log the payment update
+    Log::info('Payment updated', [
+        'pickup_id' => $pickup_id,
+        'payment_method' => $request->input('payment_method'),
+        'payment_id' => $request->input('payment_id')
+    ]);
 
-        // Redirect back with success message
-        return redirect()->back()->with('success', 'Payment details updated successfully.');
-    } catch (\Exception $e) {
-        // Handle any errors
-        return redirect()->back()->withErrors(['error' => 'Failed to update payment details: ' . $e->getMessage()]);
-    }
+    return redirect()->back()->with('success', 'Payment details updated successfully');
 }
+
+
 
 }

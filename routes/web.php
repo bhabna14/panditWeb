@@ -265,7 +265,8 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/add-flower-pickup-details', 'addflowerpickupdetails')->name('admin.addflowerpickupdetails');
         Route::get('/manage-flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
-        Route::post('/update-payment', 'updatePayment')->name('update.payment');
+        Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');
+
 
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
         Route::put('/flower-pickup/update/{id}', 'update')->name('flower-pickup.update');
