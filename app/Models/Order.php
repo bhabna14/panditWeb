@@ -18,10 +18,19 @@ class Order extends Model
         'total_price',
         'requested_flower_price',
         'delivery_charge',
+        'rider_id',
         'order_id',  // Add this line
         'address_id',
         'suggestion'
     ];
+    public function delivery()
+    {
+        return $this->belongsTo(DeliveryHistory::class, 'order_id', 'order_id');
+    }
+    public function rider()
+    {
+        return $this->belongsTo(RiderDetails::class, 'rider_id', 'rider_id');
+    }
     public function flowerRequest()
     {
         return $this->belongsTo(FlowerRequest::class, 'request_id', 'request_id');

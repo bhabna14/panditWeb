@@ -120,7 +120,7 @@
                                                     <th>Address Details</th>
                                                     <th>Total Price</th>
                                                     <th>Status</th>
-
+                                                    <th>Assigned Rider</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -163,6 +163,26 @@
                                                         {{ ucfirst($order->subscription->status) }}
                                                     </span>
                                                     </td>
+                                                     <!-- Assign Rider Section -->
+                                                    <td>
+                                                        @if($order->rider_id)
+                                                            <span>{{ $order->rider->rider_name }}</span>
+                                                            <a href="{{ route('admin.orders.editRider', $order->id) }}" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editRiderModal">Edit Rider</a>
+                                                            {{-- <a href="{{ route('admin.orders.editRider', $order->id) }}" class="btn btn-sm btn-info">Edit Rider</a> --}}
+                                                        @else
+                                                            <form action="{{ route('admin.orders.assignRider', $order->id) }}" method="POST">
+                                                                @csrf
+                                                                <select name="rider_id" class="form-control">
+                                                                    @foreach($riders as $rider)
+                                                                        <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
+                                                                            {{ $rider->rider_name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                                <button type="submit" class="btn btn-sm btn-success mt-2">Assign Rider</button>
+                                                            </form>
+                                                        @endif
+                                                    </td>
                                                     <td>
                                                         <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>
                                                     </td>
@@ -170,7 +190,34 @@
                                                 @endforeach
                                             </tbody>
                                         </table>
-                                        
+                                        <!-- Add the modal for editing the rider -->
+<div class="modal fade" id="editRiderModal" tabindex="-1" aria-labelledby="editRiderModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRiderModalLabel">Change Rider</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ route('admin.orders.updateRider', $order->id) }}" method="POST">
+                    @csrf
+                    <div class="mb-3">
+                        <label for="rider_id" class="form-label">Select Rider</label>
+                        <select name="rider_id" id="rider_id" class="form-control">
+                            @foreach($riders as $rider)
+                                <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
+                                    {{ $rider->rider_name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
                                     </div>
                                 </div>
                             </div>

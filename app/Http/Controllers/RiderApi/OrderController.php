@@ -5,10 +5,16 @@ namespace App\Http\Controllers\RiderApi;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\FlowerPickupDetails;
+use App\Models\FlowerPickupItems;
+use App\Models\DeliveryHistory;
+use App\Models\Order;;
+
+use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function getAssignOrders()
+    // assign pickup details to rider
+    public function getAssignPickup()
     {
         try {
             $rider = Auth::guard('rider-api')->user();
@@ -33,14 +39,14 @@ class OrderController extends Controller
             if ($orders->isEmpty()) {
                 return response()->json([
                     'status' => 200,
-                    'message' => 'No orders assigned for today',
+                    'message' => 'No pickups assigned for today',
                     'data' => [],
                 ]);
             }
     
             return response()->json([
                 'status' => 200,
-                'message' => 'Assigned orders for today fetched successfully',
+                'message' => 'Assigned pickups for today fetched successfully',
                 'data' => $orders,
             ]);
         } catch (\Exception $e) {
@@ -52,31 +58,165 @@ class OrderController extends Controller
         }
     }
     
-
-    public function submitPickupPrice(Request $request, $id)
+    // update price of each item of pickup by Rider
+    public function updateFlowerPrices(Request $request, $pickupId)
     {
+        try {
+            // Validate the incoming request
+            $validated = $request->validate([
+                'total_price' => 'required|numeric',
+                'flower_pickup_items' => 'required|array',
+                'flower_pickup_items.*.flower_id' => 'required|string',
+                'flower_pickup_items.*.price' => 'required|numeric', // Ensure correct price validation
+            ]);
+    
+            // Find the pickup record by ID
+            $pickup = FlowerPickupDetails::where('pick_up_id', $pickupId)->first();
+    
+            if (!$pickup) {
+                return response()->json(['message' => 'Pickup not found.'], 404);
+            }
+    
+            // Update the total price of the pickup
+            $pickup->total_price = $validated['total_price'];
+            $pickup->status = 'PickupCompleted';
+            $pickup->save();
+    
+            // Update prices for each flower in flower_pickup_items
+            foreach ($validated['flower_pickup_items'] as $item) {
+                $flowerPickupItem = FlowerPickupItems::where('pick_up_id', $pickupId)
+                    ->where('flower_id', $item['flower_id'])
+                    ->first();
+    
+                if ($flowerPickupItem) {
+                    // Update the flower price
+                    $flowerPickupItem->price = $item['price'];
+                    $flowerPickupItem->save();
+                }
+            }
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Prices updated successfully.',
+            ], 200);
+        } catch (\Exception $e) {
+            // Return error response
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while updating prices.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    
+    //get assign order to rider
+    public function getAssignedOrders()
+    {
+        try {
+            // Check if the rider is authenticated
+            $rider = Auth::guard('rider-api')->user();
+
+            if (!$rider) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
+            // Fetch active orders assigned to the rider
+            $orders = Order::where('rider_id', $rider->rider_id)
+                            ->with(['flowerRequest', 'subscription','delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                            ->whereHas('subscription', function($query) {
+                                // Only fetch orders where the subscription is active
+                                $query->where('status', 'active');
+                            })
+                            ->orderBy('id', 'desc')
+                            ->get();
+
+            // Check if the orders collection is empty
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'No orders assigned for today',
+                    'data' => [],
+                ]);
+            }
+
+            // Return the assigned orders if found
+            return response()->json([
+                'status' => 200,
+                'message' => 'Assigned orders fetched successfully',
+                'data' => $orders,
+            ]);
+            
+        } catch (\Exception $e) {
+            // Handle any exceptions and return a 500 server error response
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching orders.',
+                'error' => $e->getMessage(), // Optionally, you can log this error for debugging
+            ], 500);
+        }
+    }
+
+
+    public function markAsDelivered(Request $request, $order_id)
+{
+    try {
+        // Authenticate the rider
         $rider = Auth::guard('rider-api')->user();
 
-        $request->validate([
-            'price' => 'required|numeric|min:0',
-        ]);
-
-        // Find the pickup assigned to the logged-in rider
-        $pickup = FlowerPickupDetails::where('id', $id)
-            ->where('rider_id', $rider->rider_id)
-            ->first();
-
-        // If not found, return an error
-        if (!$pickup) {
-            return response()->json(['error' => 'Pickup not found or not assigned to you.'], 404);
+        if (!$rider) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
         }
 
-        // Update the price and status
-        $pickup->update([
-            'price' => $request->price,
-            'status' => 'completed',
+        // Validate the request for longitude and latitude
+        $validated = $request->validate([
+            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric',
         ]);
 
-        return response()->json(['message' => 'Pickup price submitted successfully.']);
+        // Check if the order is assigned to the rider and active
+        $order = Order::where('order_id', $order_id)
+                      ->where('rider_id', $rider->rider_id)
+                      ->whereHas('subscription', function ($query) {
+                          $query->where('status', 'active');
+                      })
+                      ->first();
+
+        if (!$order) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Order not found or not assigned to this rider',
+            ], 404);
+        }
+
+        // Save delivery history
+        $deliveryHistory = DeliveryHistory::create([
+            'order_id' => $order->order_id,
+            'rider_id' => $rider->rider_id,
+            'delivery_status' => 'delivered',
+            'longitude' => $validated['longitude'],
+            'latitude' => $validated['latitude'],
+        ]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Order marked as delivered successfully',
+            'data' => $deliveryHistory,
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 500,
+            'message' => 'An error occurred while marking the order as delivered.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
+
 }

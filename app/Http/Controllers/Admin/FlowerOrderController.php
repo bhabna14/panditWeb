@@ -10,6 +10,8 @@ use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Notification;
+use App\Models\RiderDetails;
+
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,8 +33,10 @@ class FlowerOrderController extends Controller
                
                        // Orders requested today
                        $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
-                       
-        return view('admin.flower-order.manage-flower-order', compact('orders','activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
+        $riders = RiderDetails::where('status', 'active')
+                      
+                       ->get();           
+        return view('admin.flower-order.manage-flower-order', compact('riders','orders','activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
     }
 
     // In your Controller:
@@ -141,5 +145,23 @@ public function showOrdersToday()
 
     return view('admin.flower-order.manage-today-requestorder', compact('ordersRequestedToday'));
 }
+
+public function assignRider(Request $request, $orderId)
+{
+    $order = Order::findOrFail($orderId);
+    $order->rider_id = $request->rider_id;
+    $order->save();
+
+    return redirect()->back()->with('success', 'Rider assigned successfully.');
+}
+public function updateRider(Request $request, $orderId)
+{
+    $order = Order::findOrFail($orderId);
+    $order->rider_id = $request->rider_id;  // Update rider_id field
+    $order->save();  // Save the changes
+
+    return redirect()->back()->with('success', 'Rider updated successfully.');
+}
+
 
 }

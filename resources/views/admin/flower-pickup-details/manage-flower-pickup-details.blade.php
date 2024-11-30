@@ -96,9 +96,7 @@
                                                 class="btn btn-secondary btn-sm" 
                                                 data-bs-toggle="modal" 
                                                 data-bs-target="#paymentModal{{ $detail->id }}"
-                                                @if ($detail->price == 0 || !$detail->price) 
-                                                    disabled 
-                                                @endif
+                                               
                                             >
                                                 Payment
                                             </button>

@@ -49,8 +49,14 @@ Route::prefix('rider')->group(function () {
 
 Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/details', [RiderLoginController::class, 'getRiderDetails']);
-    Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignOrders']);
-    Route::post('rider/submit-pickup-price/{id}', [OrderController::class, 'submitPickupPrice']);
+    Route::get('rider/get-assign-pickup', [OrderController::class, 'getAssignPickup']);
+    Route::post('/rider/update-flower-prices/{pickup_id}', [OrderController::class, 'updateFlowerPrices']);
+
+   // assign order to rider
+   Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignedOrders'])->name('rider.assignedOrders');
+   Route::post('/rider/deliver/{order_id}', [OrderController::class, 'markAsDelivered'])
+   ->middleware('auth:rider-api');
+
 });
 
 
