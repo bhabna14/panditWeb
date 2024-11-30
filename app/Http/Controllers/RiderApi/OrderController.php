@@ -116,143 +116,108 @@ class OrderController extends Controller
         try {
             // Check if the rider is authenticated
             $rider = Auth::guard('rider-api')->user();
-    
+
             if (!$rider) {
                 return response()->json([
                     'status' => 401,
                     'message' => 'Unauthorized',
                 ], 401);
             }
-    
-            // Fetch active subscription-based orders assigned to the rider
-            $subscriptionOrders = Order::where('rider_id', $rider->rider_id)
-                ->with(['flowerRequest', 'subscription', 'delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-                ->whereHas('subscription', function ($query) {
-                    $query->where('status', 'active');
-                })
-                ->orderBy('id', 'desc')
-                ->get();
-    
-            // Fetch today's requested orders
-            // $today = Carbon::today();
-            // $requestedOrders = Order::whereNotNull('request_id')
-            //     ->where('rider_id', $rider->rider_id)
-            //     ->with(['flowerRequest', 'subscription', 'delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-            //     ->whereHas('flowerRequest', function ($query) use ($today) {
-            //         $query->whereDate('date', $today);
-            //     })
-            //     ->orderBy('id', 'desc')
-            //     ->get();
-    
-            // // Combine both subscription-based orders and today's requested orders
-            // $allOrders = $subscriptionOrders->merge($requestedOrders);
-    
-            // Check if any orders are found
-            if ($allOrders->isEmpty()) {
+
+            // Fetch active orders assigned to the rider
+            $orders = Order::where('rider_id', $rider->rider_id)
+                            ->with(['flowerRequest', 'subscription','delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                            ->whereHas('subscription', function($query) {
+                                // Only fetch orders where the subscription is active
+                                $query->where('status', 'active');
+                            })
+                            ->orderBy('id', 'desc')
+                            ->get();
+
+            // Check if the orders collection is empty
+            if ($orders->isEmpty()) {
                 return response()->json([
                     'status' => 200,
                     'message' => 'No orders assigned for today',
                     'data' => [],
                 ]);
             }
-    
-            // Return the combined orders
+
+            // Return the assigned orders if found
             return response()->json([
                 'status' => 200,
                 'message' => 'Assigned orders fetched successfully',
-                'data' => $subscriptionOrders,
+                'data' => $orders,
             ]);
+            
         } catch (\Exception $e) {
             // Handle any exceptions and return a 500 server error response
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while fetching orders.',
-                'error' => $e->getMessage(),
+                'error' => $e->getMessage(), // Optionally, you can log this error for debugging
             ], 500);
         }
     }
-    
 
-
-    // Import the Log facade
 
     public function markAsDelivered(Request $request, $order_id)
-    {
-        try {
-            // Authenticate the rider
-            $rider = Auth::guard('rider-api')->user();
-    
-            // Log the rider information
-            Log::info('Rider authentication attempted', ['rider_id' => $rider ? $rider->rider_id : 'N/A']);
-    
-            if (!$rider) {
-                Log::warning('Unauthorized access attempt', ['order_id' => $order_id]);
-                return response()->json([
-                    'status' => 401,
-                    'message' => 'Unauthorized',
-                ], 401);
-            }
-    
-            // Validate the request for longitude and latitude
-            $validated = $request->validate([
-                'longitude' => 'required|numeric',
-                'latitude' => 'required|numeric',
-            ]);
-    
-            // Log validated request data
-            Log::info('Delivery location validated', ['longitude' => $validated['longitude'], 'latitude' => $validated['latitude']]);
-    
-            // Check if the order is assigned to the rider and active
-            $order = Order::where('order_id', $order_id)
-                          ->where('rider_id', $rider->rider_id)
-                          ->whereHas('subscription', function ($query) {
-                              $query->where('status', 'active');
-                          })
-                          ->first();
-    
-            if (!$order) {
-                Log::warning('Order not found or not assigned', ['order_id' => $order_id, 'rider_id' => $rider->rider_id]);
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Order not found or not assigned to this rider',
-                ], 404);
-            }
-    
-            // Log successful order retrieval
-            Log::info('Order retrieved successfully for delivery', ['order_id' => $order->order_id]);
-    
-            // Save delivery history
-            $deliveryHistory = DeliveryHistory::create([
-                'order_id' => $order->order_id,
-                'rider_id' => $rider->rider_id,
-                'delivery_status' => 'delivered',
-                'longitude' => $validated['longitude'],
-                'latitude' => $validated['latitude'],
-            ]);
-    
-            // Log delivery history creation
-            Log::info('Delivery history created', ['delivery_history_id' => $deliveryHistory->id, 'order_id' => $order->order_id]);
-    
+{
+    try {
+        // Authenticate the rider
+        $rider = Auth::guard('rider-api')->user();
+
+        if (!$rider) {
             return response()->json([
-                'status' => 200,
-                'message' => 'Order marked as delivered successfully',
-                'data' => $deliveryHistory,
-            ]);
-    
-        } catch (\Exception $e) {
-            // Log the exception
-            Log::error('Error while marking order as delivered', [
-                'order_id' => $order_id,
-                'error' => $e->getMessage(),
-            ]);
-    
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred while marking the order as delivered.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
         }
+
+        // Validate the request for longitude and latitude
+        $validated = $request->validate([
+            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric',
+        ]);
+
+        // Check if the order is assigned to the rider and active
+        $order = Order::where('order_id', $order_id)
+                      ->where('rider_id', $rider->rider_id)
+                      ->whereHas('subscription', function ($query) {
+                          $query->where('status', 'active');
+                      })
+                      ->first();
+
+        if (!$order) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Order not found or not assigned to this rider',
+            ], 404);
+        }
+
+        // Save delivery history
+        $deliveryHistory = DeliveryHistory::create([
+            'order_id' => $order->order_id,
+            'rider_id' => $rider->rider_id,
+            'delivery_status' => 'delivered',
+            'longitude' => $validated['longitude'],
+            'latitude' => $validated['latitude'],
+        ]);
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Order marked as delivered successfully',
+            'data' => $deliveryHistory,
+        ]);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 500,
+            'message' => 'An error occurred while marking the order as delivered.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
     
 
 }
