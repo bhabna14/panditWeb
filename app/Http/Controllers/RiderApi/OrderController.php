@@ -110,6 +110,7 @@ class OrderController extends Controller
                         'pick_up_id' => $pickupId,
                         'flower_id' => $item['flower_id'],
                     ]);
+                    // Optionally, you can skip or handle the missing flower differently.
                 }
             }
     
