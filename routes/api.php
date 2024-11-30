@@ -54,7 +54,7 @@ Route::middleware('auth:rider-api')->group(function () {
 
    // assign order to rider
    Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignedOrders'])->name('rider.assignedOrders');
-   Route::post('/rider/deliver/{order_id}', [RiderController::class, 'markAsDelivered'])
+   Route::post('/rider/deliver/{order_id}', [OrderController::class, 'markAsDelivered'])
    ->middleware('auth:rider-api');
 
 });
