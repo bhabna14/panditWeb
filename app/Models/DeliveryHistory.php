@@ -18,4 +18,13 @@ class DeliveryHistory extends Model
         'longitude',
         'latitude',
     ];
+    public function order()
+{
+    return $this->belongsTo(Order::class, 'order_id','order_id');
+}
+
+public function rider()
+{
+    return $this->belongsTo(Rider::class,'rider_id', 'rider_id');
+}
 }
