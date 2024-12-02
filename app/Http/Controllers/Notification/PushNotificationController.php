@@ -29,7 +29,7 @@ class PushNotificationController extends Controller
 
              // Send welcome notification after saving the token
         $data = [
-            'registration_ids' => [$request->device_token],
+            'registration_ids' => [$request->device_id],
             'notification' => [
                 'title' => 'Welcome to Podcast!',
                 'body' => 'Thank you for downloading our app. Stay tuned for amazing content!',
