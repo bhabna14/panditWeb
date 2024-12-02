@@ -63,21 +63,19 @@ class FlowerUserBookingController extends Controller
                         // dd($hashedPassword);
         return view("user/flower", compact('upcomingPoojas', 'otherpoojas', 'products', 'banners','customizedpps'));
     }
-    
+
     public function show($product_id)
     {
-        // dd($product_id);
-        // Retrieve the product details by product_id
-        // $product = FlowerProduct::findOrFail($product_id);
-        
+       
         $product = FlowerProduct::where('product_id', $product_id)->firstOrFail();
-        $localities = Locality::where('status', 'active')->get();
+
+        $localities = Locality::where('status', 'active')->select('id', 'locality_name', 'pincode')->get();
+        $apartments = Apartment::where('status', 'active')->get();
+    
         $user = Auth::guard('users')->user();
         $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
-        // $addresses = UserAddress::where('user_id', $user->userid)->where('status', 'active')->get();
-
-        // Pass the product and subscription details to the view
-        return view('user.flower-subscription-checkout', compact('localities','product','addresses','user'));
+       
+        return view('user.flower-subscription-checkout', compact('localities','product','addresses','user','apartments'));
     }
 
     public function cutsomizedcheckout($product_id)

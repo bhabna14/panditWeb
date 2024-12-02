@@ -493,7 +493,6 @@
         $(document).on('click', '.script-details', function () {
             const podcastId = $(this).data('id'); // Get the podcast ID from the button's data attribute
     
-            // Ensure podcastId is not undefined or null
             if (!podcastId) {
                 alert('Podcast ID is missing.');
                 return;
@@ -506,7 +505,6 @@
                     podcast_id: podcastId // Pass podcast ID to the server
                 },
                 success: function (response) {
-                    // Check if the response contains expected data
                     if (!response) {
                         alert('No data found for this podcast.');
                         return;
@@ -517,12 +515,26 @@
                         return html ? html.replace(/<[^>]+>/g, '') : 'N/A';
                     }
     
-                    // Populate modal fields
+                    // Helper function to decode HTML entities
+                    function decodeHtmlEntities(text) {
+                        const txt = document.createElement('textarea');
+                        txt.innerHTML = text;
+                        return txt.value;
+                    }
+    
+                    // Clean up and populate script editor details
+                    const cleanedScriptDetails = decodeHtmlEntities(stripHtmlTags(response.script_editor || ''))
+                        .replace(/(&nbsp;|\s+)/g, ' ')
+                        .trim();
+    
+                    $('#scriptEditor').text(cleanedScriptDetails || 'No script details available.');
+    
+                    // Populate other fields
                     const scriptLocation = response.script_location || '#';
                     $('#scriptLocation')
-                        .attr('href', scriptLocation) // Set href dynamically
-                        .text('View Location') // Update button text
-                        .toggleClass('disabled', scriptLocation === '#'); // Disable if no URL
+                        .attr('href', scriptLocation)
+                        .text('View Location')
+                        .toggleClass('disabled', scriptLocation === '#');
     
                     $('#storySource').text(stripHtmlTags(response.story_source) || 'N/A');
                     $('#scriptVerifiedBy').text(stripHtmlTags(response.script_verified_by) || 'N/A');
@@ -530,12 +542,6 @@
                     $('#scriptCreatedDate').text(response.script_created_date || 'N/A');
                     $('#scriptVerifiedDate').text(response.script_verified_date || 'N/A');
                     $('#scriptRejectReason').text(stripHtmlTags(response.script_reject_reason) || 'N/A');
-    
-                    // Clean up and populate script editor details
-                    const cleanedScriptDetails = (response.script_editor || '').replace(/(&nbsp;|\s+)/g, ' ').trim();
-                    $('#scriptEditor').text(cleanedScriptDetails || 'No script details available.');
-    
-                    // Populate script status
                     $('#scriptStatus').text(stripHtmlTags(response.podcast_script_status) || 'N/A');
     
                     // Show the modal
@@ -549,7 +555,6 @@
         });
     </script>
     
-    {{-- recording modal --}}
     <script>
         $(document).on('click', '.recording-details', function() {
             const podcastId = $(this).data('id');
@@ -668,7 +673,6 @@
                         .attr('src', '')
                         .attr('alt', 'No Image Available');
                 }
-
                 // Set podcast music
                 if (response.podcast_music) {
                     $('#podcastMusic source')

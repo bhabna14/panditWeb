@@ -245,7 +245,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="exampleInputEmail1">Type</label>
+                                <label for="exampleInputEmail1">Address Type</label>
                             </div>
                         </div>
                         <div class="col-md-2">
@@ -295,21 +295,30 @@
                             <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Enter landmark" required>
                         </div>
                     </div>
+                 
                     <div class="row mt-2">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <label for="locality" class="form-label">Locality</label>
                             <select class="form-control" id="locality" name="locality" required>
                                 <option value="">Select Locality</option>
-                                @foreach($localities as $locality)
-                                    <option value="{{ $locality->unique_code }}" data-pincode="{{ $locality->pincode }}">
+                                @foreach ($localities as $locality)
+                                    <option value="{{ $locality->id }}" data-pincode="{{ $locality->pincode }}">
                                         {{ $locality->locality_name }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6">
+
+                        <div class="col-md-4">
+                            <label for="apartment_name">Apartment Name</label>
+                            <select class="form-control" id="apartment_name" name="apartment_name" required>
+                                <option value="">Select Apartment</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4">
                             <label for="pincode" class="form-label">Pincode</label>
-                            <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required pattern="\d{6}" readonly>
+                            <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Pincode" readonly>
                         </div>
                     </div>
                     <div class="row mt-2">
@@ -506,8 +515,33 @@ $('#addressForm').on('submit', function (e) {
 
 
 
+    });
+</script>
 
+<script>
+    const apartments = @json($apartments);
 
+    document.getElementById('locality').addEventListener('change', function () {
+        const localityId = this.value; // Get selected locality ID
+        const selectedOption = this.options[this.selectedIndex];
+
+        // Update the pincode field
+        const pincode = selectedOption.getAttribute('data-pincode');
+        document.getElementById('pincode').value = pincode || ''; // Set pincode or empty if not available
+
+        // Filter apartments based on the selected locality
+        const filteredApartments = apartments.filter(apartment => apartment.locality_id == localityId);
+
+        // Populate the apartment dropdown
+        const apartmentDropdown = document.getElementById('apartment_name');
+        apartmentDropdown.innerHTML = '<option value="">Select Apartment</option>'; // Reset dropdown
+
+        filteredApartments.forEach(apartment => {
+            const option = document.createElement('option');
+            option.value = apartment.id;
+            option.textContent = apartment.apartment_name;
+            apartmentDropdown.appendChild(option); // Add filtered apartments
+        });
     });
 </script>
 
