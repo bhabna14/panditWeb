@@ -10,5 +10,8 @@ class UserUnauthorisedDevices extends Model
     use HasFactory;
    
     protected $table = 'user_unauthorised_devices';
-   
+    protected $fillable = [
+        'device_id',
+        
+    ];
 }
