@@ -11,7 +11,7 @@ class UserUnauthorisedDevices extends Model
    
     protected $table = 'user_unauthorised_devices';
     protected $fillable = [
-        'device_id',
+        'device_id','device_model','platform'
         
     ];
 }
