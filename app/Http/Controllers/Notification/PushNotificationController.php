@@ -18,7 +18,7 @@ class PushNotificationController extends Controller
     
         try {
             // Use a transaction if needed for additional safety
-            UserDevice::updateOrCreate(
+            UserUnauthorisedDevices::updateOrCreate(
                 ['device_id' => $request->device_id],
                 [
                     'device_model' => $request->device_model,
