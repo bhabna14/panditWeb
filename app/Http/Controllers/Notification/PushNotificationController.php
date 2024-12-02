@@ -25,6 +25,20 @@ class PushNotificationController extends Controller
                     'platform' => $request->platform,
                 ]
             );
+
+             // Send welcome notification after saving the token
+        $data = [
+            'registration_ids' => [$request->device_token],
+            'notification' => [
+                'title' => 'Welcome to Podcast!',
+                'body' => 'Thank you for downloading our app. Stay tuned for amazing content!',
+                'sound' => 'default',
+            ],
+        ];
+
+        $response = Http::withToken(config('app.fcm_server_key'))
+            ->post('https://fcm.googleapis.com/fcm/send', $data);
+
     
             return response()->json(['message' => 'Device token saved successfully.'], 200);
         } catch (\Exception $e) {
