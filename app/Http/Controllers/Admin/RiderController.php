@@ -22,48 +22,50 @@ class RiderController extends Controller
 
         return view('admin.add-rider-details', compact('localities'));
     }
-
     public function saveRiderDetails(Request $request)
-{
-    // Validate the form inputs
-    $validatedData = $request->validate([
-        'rider_name' => 'required|string|max:255',
-        'phone_number' => 'nullable|numeric|digits_between:10,15',
-        'rider_img' => 'nullable|image|mimes:jpeg,png,jpg|max:3072', // Validate image
-        'description' => 'nullable|string',
-    ]);
-
-    try {
-        // Handle file upload
-        $imagePath = null;
-        if ($request->hasFile('rider_img')) {
-            // Store image in 'public/images' directory
-            $imagePath = $request->file('rider_img')->store('images', 'public');
-        }
-
-        // Generate unique Rider ID
-        $rider_id = 'RIDER' . rand(10000, 99999);
-
-        // Save rider details to the RiderDetails table
-        $rider = RiderDetails::create([
-            'rider_id' => $rider_id,
-            'rider_name' => $validatedData['rider_name'],
-            'phone_number' => $validatedData['phone_number'] ?? null,
-            'rider_img' => $imagePath, // Path of uploaded image
-            'description' => $validatedData['description'],
+    {
+        // Validate the form inputs
+        $validatedData = $request->validate([
+            'rider_name' => 'required|string|max:255',
+            'phone_number' => 'required|digits:10', // Ensure exactly 10 digits
+            'rider_img' => 'nullable|image|mimes:jpeg,png,jpg|max:3072', // Validate image
+            'description' => 'nullable|string',
         ]);
-
-        // Return success message
-        return redirect()->back()->with('success', 'Rider details and delivery locations saved successfully.');
-    } catch (\Exception $e) {
-        // Log the error for debugging
-        \Log::error('Failed to save rider details: ' . $e->getMessage());
-
-        // Handle exceptions and errors
-        return redirect()->back()->with('error', 'Failed to save rider details. Please try again.');
+    
+        try {
+            // Prepend +91 to the phone number
+            $phoneNumber = '+91' . $validatedData['phone_number'];
+    
+            // Handle file upload
+            $imagePath = null;
+            if ($request->hasFile('rider_img')) {
+                // Store image in 'public/images' directory
+                $imagePath = $request->file('rider_img')->store('images', 'public');
+            }
+    
+            // Generate unique Rider ID
+            $rider_id = 'RIDER' . rand(10000, 99999);
+    
+            // Save rider details to the RiderDetails table
+            $rider = RiderDetails::create([
+                'rider_id' => $rider_id,
+                'rider_name' => $validatedData['rider_name'],
+                'phone_number' => $phoneNumber,
+                'rider_img' => $imagePath, // Path of uploaded image
+                'description' => $validatedData['description'],
+            ]);
+    
+            // Return success message
+            return redirect()->back()->with('success', 'Rider details saved successfully.');
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Failed to save rider details: ' . $e->getMessage());
+    
+            // Handle exceptions and errors
+            return redirect()->back()->with('error', 'Failed to save rider details. Please try again.');
+        }
     }
-}
-
+    
     
 
 public function manageRiderDetails()
@@ -98,11 +100,12 @@ public function updateRiderDetails(Request $request, $id)
         'description' => 'required|string|max:1000',
     ]);
 
+
     $rider = RiderDetails::findOrFail($id);
 
     // Update basic details
     $rider->rider_name = $request->rider_name;
-    $rider->phone_number = $request->phone_number;
+    $rider->phone_number = '+91' . $request->phone_number; // Add +91 prefix
     $rider->description = $request->description;
 
     // Update image if provided
@@ -111,7 +114,8 @@ public function updateRiderDetails(Request $request, $id)
             // Delete the old image
             Storage::delete($rider->rider_img);
         }
-        $rider->rider_img = $request->file('rider_img')->store('rider_images');
+
+        $rider->rider_img = $request->file('rider_img')->store('images', 'public');
     }
 
     $rider->save();

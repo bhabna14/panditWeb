@@ -62,10 +62,14 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="phone_number">Phone Number</label>
-                                    <input type="number" class="form-control" id="phone_number" name="phone_number"
-                                        placeholder="Enter Phone Number" required>
+                                    <div class="input-group">
+                                        <span class="input-group-text">+91</span>
+                                        <input type="number" class="form-control" id="phone_number" name="phone_number"
+                                            placeholder="Enter Phone Number" required maxlength="10" oninput="this.value = this.value.slice(0, 10)">
+                                    </div>
                                 </div>
                             </div>
+                            
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="rider_img">Rider Image</label>

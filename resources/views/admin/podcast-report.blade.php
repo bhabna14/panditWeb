@@ -597,8 +597,8 @@
     </script>
     {{-- editing modal --}}
     <script>
- $(document).on('click', '.editing-details', function () {
-    const podcastId = $(this).data('id');
+     $(document).on('click', '.editing-details', function () {
+      const podcastId = $(this).data('id');
 
     $.ajax({
         url: '{{ route("admin.podcast.editingDetails") }}', // Update this route as per your backend
