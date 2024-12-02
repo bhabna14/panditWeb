@@ -33,7 +33,7 @@ class OrderController extends Controller
             // Fetch orders assigned to the logged-in rider for today
             $orders = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor'])
                 ->where('rider_id', $rider->rider_id)
-                ->whereDate('status', 'PickupCompleted')
+                ->whereDate('status', 'pending')
                 ->orderBy('created_at', 'desc') // Sort by most recently created first
                 ->get();
     
