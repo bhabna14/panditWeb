@@ -40,7 +40,7 @@ class PushNotificationController extends Controller
             ->post('https://fcm.googleapis.com/fcm/send', $data);
 
     
-            return response()->json(['message' => 'Device token saved successfully.'], 200);
+            return response()->json([  'message' => 'Device token saved successfully and welcome notification sent.',], 200);
         } catch (\Exception $e) {
             // Log the exception for debugging
             \Log::error('Error saving device token: ' . $e->getMessage());
