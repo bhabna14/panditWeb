@@ -10,6 +10,7 @@ use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
+use Illuminate\Support\Facades\Log;
 
 class FlowerPickupController extends Controller
 {
@@ -23,8 +24,8 @@ class FlowerPickupController extends Controller
                         ->where('category', 'Flower')
                         ->get();
         $units = PoojaUnit::where('status', 'active')->get();
-        $vendors = FlowerVendor::all();
-        $riders = RiderDetails::all();
+        $vendors = FlowerVendor::where('status', 'active')->get();
+        $riders = RiderDetails::where('status', 'active')->get();
     
         return view('admin.flower-pickup-details.add-flower-pickup-details', compact('flowers', 'units', 'vendors', 'riders'));
     }
@@ -124,6 +125,29 @@ class FlowerPickupController extends Controller
 
     return redirect()->route('admin.manageflowerpickupdetails')->with('success', 'Pickup details updated successfully!');
 }
+public function updatePayment(Request $request, $pickup_id)
+{
+    // Find the pickup detail by ID
+    $pickupDetail = FlowerPickupDetails::findOrFail($pickup_id);
+
+    // Update the payment details
+    $pickupDetail->payment_status = 'Paid';
+    $pickupDetail->Status = 'Completed';
+
+    $pickupDetail->payment_method = $request->input('payment_method');
+    $pickupDetail->payment_id = $request->input('payment_id');
+    $pickupDetail->save();
+
+    // Log the payment update
+    Log::info('Payment updated', [
+        'pickup_id' => $pickup_id,
+        'payment_method' => $request->input('payment_method'),
+        'payment_id' => $request->input('payment_id')
+    ]);
+
+    return redirect()->back()->with('success', 'Payment details updated successfully');
+}
+
 
 
 }

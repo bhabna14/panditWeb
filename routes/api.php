@@ -35,7 +35,10 @@ use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\RiderApi\OrderController;
 
 use App\Http\Controllers\RiderApi\RiderLoginController;
+use App\Http\Controllers\Notification\PushNotificationController;
 
+
+Route::post('/save-token', [PushNotificationController::class, 'saveToken']);
 // Routes for Rider Login
 Route::prefix('rider')->group(function () {
     // Send OTP

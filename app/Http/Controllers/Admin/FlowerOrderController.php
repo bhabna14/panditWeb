@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Notification;
 use App\Models\RiderDetails;
+use App\Models\DeliveryHistory;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -161,6 +162,23 @@ public function updateRider(Request $request, $orderId)
     $order->save();  // Save the changes
 
     return redirect()->back()->with('success', 'Rider updated successfully.');
+}
+
+public function mngdeliveryhistory()
+{
+    try {
+        $deliveryHistory = DeliveryHistory::with([
+            'order.user',                   // Fetch user details
+            'order.flowerProduct',          // Fetch product details
+            'order.flowerPayments',         // Fetch payment details
+            'order.address.localityDetails', // Fetch address details
+            'rider'                         // Fetch rider details
+        ])->orderBy('created_at', 'desc')->get();
+
+        return view('admin.flower-order.manage-delivery-history', compact('deliveryHistory'));
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
+    }
 }
 
 

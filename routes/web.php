@@ -232,7 +232,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
-//rider assign by admin and update
+    Route::get('/manage-delivery-history', [FlowerOrderController::class, 'mngdeliveryhistory'])->name('admin.managedeliveryhistory');
+
+    //rider assign by admin and update
     Route::post('orders/{id}/assignRider', [FlowerOrderController::class, 'assignRider'])->name('admin.orders.assignRider');
     Route::get('orders/{id}/editRider', [FlowerOrderController::class, 'editRider'])->name('admin.orders.editRider');
     Route::post('orders/{id}/updateRider', [FlowerOrderController::class, 'updateRider'])->name('admin.orders.updateRider');
@@ -263,7 +265,8 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/add-flower-pickup-details', 'addflowerpickupdetails')->name('admin.addflowerpickupdetails');
         Route::get('/manage-flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
-        Route::post('/update-payment', 'updatePayment')->name('update.payment');
+        Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');
+
 
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
         Route::put('/flower-pickup/update/{id}', 'update')->name('flower-pickup.update');

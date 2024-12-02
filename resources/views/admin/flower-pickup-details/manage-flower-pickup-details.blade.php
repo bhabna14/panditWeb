@@ -23,6 +23,21 @@
             </ol>
         </div>
     </div>
+    @if(session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
     <!-- Success Message -->
     @if (session('success'))
@@ -111,7 +126,7 @@
                                                     <h5 class="modal-title" id="paymentModalLabel">Add Payment</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
-                                                <form action="{{ route('update.payment') }}" method="POST">
+                                                <form action="{{ route('update.payment', $detail->id) }}" method="POST">
                                                     @csrf
                                                     <input type="hidden" name="pickup_id" value="{{ $detail->id }}">
                                                     <div class="modal-body">
@@ -125,7 +140,7 @@
                                                         </div>
                                                         <div class="mb-3">
                                                             <label for="payment_id" class="form-label">Payment ID</label>
-                                                            <input type="text" class="form-control" id="payment_id" name="payment_id" placeholder="Enter Payment ID" required>
+                                                            <input type="text" class="form-control" id="payment_id" name="payment_id" placeholder="Enter Payment ID">
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer">
@@ -133,6 +148,8 @@
                                                         <button type="submit" class="btn btn-primary">Save Payment</button>
                                                     </div>
                                                 </form>
+                                                
+                                                
                                             </div>
                                         </div>
                                     </div>
