@@ -139,7 +139,7 @@
                                                             Number : {{ $request->user->mobile_number }}
                                                         </td>
                                                         
-                                                        <td>{{ $request->date }} 
+                                                        <td>{{ $request->date }} {{ $request->time }}
                                                            {{-- ( {{  \Carbon\Carbon::parse($request->date)->format('F j, Y') }} ) --}}
                                                         </td>
                                                         <td>
