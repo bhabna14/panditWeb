@@ -62,14 +62,14 @@
                                             <thead>
                                                 <tr>
                                                     <th>Order ID</th>
-                                                    <th>User Name</th>
+                                                    <th>User Number</th>
                                                     <th>Product Name</th>
                                                     <th>Payment Details</th>
                                                     <th>Address</th>
                                                     <th>Rider Name</th>
                                                     <th>Delivery Status</th>
                                                     <th>Location</th>
-                                                    <th>Delivered At</th>
+                                                    <th>Delivery Time</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
