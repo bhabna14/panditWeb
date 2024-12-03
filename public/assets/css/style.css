@@ -16859,6 +16859,10 @@ pre {
     top: 10px;
     width: 103px;
   }
+  #google_translate_element select {
+   
+    display: none;
+}
 }
 .angle {
   color: #9ca2a9 !important;
