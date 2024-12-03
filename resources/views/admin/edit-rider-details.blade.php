@@ -47,7 +47,7 @@
                             <div class="form-group">
                                 <label for="phone_number">Phone Number</label>
                                 <input type="number" class="form-control" id="phone_number" name="phone_number"
-                                    value="{{ old('phone_number', $rider->phone_number) }}" required>
+                                    value="{{ $rider->phone_number }}" required>
                             </div>
                         </div>
 
@@ -67,7 +67,7 @@
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="description">Description</label>
-                                <textarea class="form-control" id="description" name="description" required>{{ old('description', $rider->description) }}</textarea>
+                                <textarea class="form-control" id="description" name="description">{{ old('description', $rider->description) }}</textarea>
                             </div>
                         </div>
                     </div>
