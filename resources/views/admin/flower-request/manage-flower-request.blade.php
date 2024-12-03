@@ -138,10 +138,7 @@
                                                             Name: {{ $request->user->name }} <br>
                                                             Number : {{ $request->user->mobile_number }}
                                                         </td>
-                                                        
-                                                        <td>{{ $request->date }} {{ $request->time }}
-                                                           {{-- ( {{  \Carbon\Carbon::parse($request->date)->format('F j, Y') }} ) --}}
-                                                        </td>
+                                                        <td>{{ $request->date }} {{ $request->time }}</td>
                                                         <td>
                                                             <ul>
                                                                 @foreach ($request->flowerRequestItems as $item)
@@ -151,23 +148,21 @@
                                                                 @endforeach
                                                             </ul>
                                                         </td>
-                                                     
-                                                        <td>@if ($request->status == 'pending')
-                                                            <p>Order Placed <br> Update the Price</p>
+                                                        <td>
+                                                            @if ($request->status == 'pending')
+                                                                <p>Order Placed <br> Update the Price</p>
                                                             @elseif($request->status == 'approved')
-                                                            <p>Payment Pending</p>
+                                                                <p>Payment Pending</p>
                                                             @elseif($request->status == 'paid')
-                                                            <p>Payment Completed</p>
+                                                                <p>Payment Completed</p>
                                                             @endif
                                                         </td>
                                                         <td>
                                                             @if($request->order && $request->order->total_price)
-                                                                {{-- Display the saved price if it exists --}}
                                                                 <span>Total Price : {{ $request->order->total_price }} <br>
                                                                     Price Of Flower : {{ $request->order->requested_flower_price }} <br>
-                                                                Delivery Charge : {{ $request->order->delivery_charge }} </span>
+                                                                    Delivery Charge : {{ $request->order->delivery_charge }} </span>
                                                             @else
-                                                                {{-- Show the input box and save button if no price is set --}}
                                                                 <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST" style="display: inline;">
                                                                     @csrf
                                                                     <input type="number" name="requested_flower_price" class="form-control" placeholder="Enter Price" required style="margin-bottom: 13px;">
@@ -179,26 +174,22 @@
                                                                 </form>
                                                             @endif
                                                         </td>
-                                                        
                                                         <td>
                                                             <form action="{{ route('admin.markPayment', $request->request_id) }}" method="POST" style="display: inline;">
                                                                 @csrf
                                                                 @if ($request->status == 'pending' || $request->status == 'paid')
-                                                                    <!-- If status is 'pending' or 'paid', disable the button -->
                                                                     <button type="submit" class="btn btn-success mt-2" disabled>Paid</button>
                                                                 @elseif ($request->status == 'approved')
-                                                                    <!-- If status is 'approved', enable the button -->
                                                                     <button type="submit" class="btn btn-success mt-2">Paid</button>
                                                                 @endif
                                                             </form>
                                                         </td>
-
+                                            
                                                         <td>
                                                             @if ($request->status == 'approved')
                                                                 @if($request->order->rider_id)
                                                                     <span>{{ $request->order->rider->rider_name }}</span>
-                                                                    <a href="{{ route('admin.orders.editRider', $request->order->id) }}" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editRiderModal">Edit Rider</a>
-                                                                    {{-- <a href="{{ route('admin.orders.editRider', $request->order->id) }}" class="btn btn-sm btn-info">Edit Rider</a> --}}
+                                                                    <a href="{{ route('admin.orders.editRider', $request->order->id) }}" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editRiderModal{{ $request->order->id }}">Edit Rider</a>
                                                                 @else
                                                                     <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
                                                                         @csrf
@@ -213,14 +204,13 @@
                                                                     </form>
                                                                 @endif
                                                             @else
-                                                            <p>Need to Give the price</p>
-
+                                                                <p>Need to Give the price</p>
                                                             @endif
                                                         </td>
+                                            
                                                         <td>
                                                             <strong>Address:</strong> {{ $request->address->apartment_flat_plot ?? "" }}, {{ $request->address->locality_name ?? "" }}<br>
                                                             <strong>Landmark:</strong> {{ $request->address->landmark ?? "" }}<br>
-
                                                             <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
                                                             <strong>State:</strong> {{ $request->address->state ?? ""}}<br>
                                                             <strong>Pin Code:</strong> {{ $request->address->pincode ?? "" }}
@@ -228,7 +218,39 @@
                                                     </tr>
                                                 @endforeach
                                             </tbody>
+                                            
                                         </table>
+
+                                          <!-- Add the modal for editing the rider -->
+                                          @foreach($pendingRequests as $order)
+                                          <div class="modal fade" id="editRiderModal{{ $order->id }}" tabindex="-1" aria-labelledby="editRiderModalLabel{{ $order->id }}" aria-hidden="true">
+                                              <div class="modal-dialog">
+                                                  <div class="modal-content">
+                                                      <div class="modal-header">
+                                                          <h5 class="modal-title" id="editRiderModalLabel{{ $order->id }}">Change Rider for Order #{{ $order->order_id }}</h5>
+                                                          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                      </div>
+                                                      <div class="modal-body">
+                                                          <form action="{{ route('admin.orders.updateRider', $order->id) }}" method="POST">
+                                                              @csrf
+                                                              <div class="mb-3">
+                                                                  <label for="rider_id{{ $order->id }}" class="form-label">Select Rider</label>
+                                                                  <select name="rider_id" id="rider_id{{ $order->id }}" class="form-control">
+                                                                      @foreach($riders as $rider)
+                                                                          <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
+                                                                              {{ $rider->rider_name }}
+                                                                          </option>
+                                                                      @endforeach
+                                                                  </select>
+                                                              </div>
+                                                              <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                          </form>
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      @endforeach
+                                      
                                         
                                         
                                     </div>

@@ -130,45 +130,33 @@
                                                     <td>{{ $order->order_id }} <br>
                                                         Name: {{ $order->user->name }} <br>
                                                         Number : {{ $order->user->mobile_number }} <br>
-
                                                         <a href="{{ route('showCustomerDetails', $order->user->userid) }}" class="btn btn-sm btn-warning">View Customer</a>
-                                                    
                                                     </td>
-                                                    <td>{{ $order->created_at }} 
-                                                                       
-                                                    </td>
+                                                    <td>{{ $order->created_at }}</td>
                                                     <td>{{ $order->flowerProduct->name }} <br>
                                                        ( {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }} - {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }} )
-
-
                                                     </td>
                                                     <td>
                                                         <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }}, {{ $order->address->localityDetails->locality_name ?? "" }}<br>
                                                         <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
-
                                                         <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
                                                         <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
                                                         <strong>Pin Code:</strong> {{ $order->address->pincode ?? "" }}
                                                     </td>
-                                                    {{-- <td>{{ $order->total_price }}</td> --}}
                                                     <td>{{ number_format($order->total_price, 2) }}</td>
-
                                                     <td>
                                                         <span class="status-badge 
                                                         {{ $order->subscription->status === 'active' ? 'status-running bg-success' : '' }}
                                                         {{ $order->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
                                                         {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}
-                                                         {{ $order->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
-                                                        
-                                                        {{ ucfirst($order->subscription->status) }}
-                                                    </span>
+                                                        {{ $order->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                                            {{ ucfirst($order->subscription->status) }}
+                                                        </span>
                                                     </td>
-                                                     <!-- Assign Rider Section -->
                                                     <td>
                                                         @if($order->rider_id)
                                                             <span>{{ $order->rider->rider_name }}</span>
-                                                            <a href="{{ route('admin.orders.editRider', $order->id) }}" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#editRiderModal">Edit Rider</a>
-                                                            {{-- <a href="{{ route('admin.orders.editRider', $order->id) }}" class="btn btn-sm btn-info">Edit Rider</a> --}}
+                                                            <a href="#editRiderModal{{ $order->id }}" class="btn btn-sm btn-info" data-bs-toggle="modal">Edit Rider</a>
                                                         @else
                                                             <form action="{{ route('admin.orders.assignRider', $order->id) }}" method="POST">
                                                                 @csrf
@@ -189,34 +177,38 @@
                                                 </tr>
                                                 @endforeach
                                             </tbody>
+                                            
                                         </table>
                                         <!-- Add the modal for editing the rider -->
-                                            <div class="modal fade" id="editRiderModal" tabindex="-1" aria-labelledby="editRiderModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="editRiderModalLabel">Change Rider</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form action="{{ route('admin.orders.updateRider', $order->id) }}" method="POST">
-                                                                @csrf
-                                                                <div class="mb-3">
-                                                                    <label for="rider_id" class="form-label">Select Rider</label>
-                                                                    <select name="rider_id" id="rider_id" class="form-control">
-                                                                        @foreach($riders as $rider)
-                                                                            <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
-                                                                                {{ $rider->rider_name }}
-                                                                            </option>
-                                                                        @endforeach
-                                                                    </select>
-                                                                </div>
-                                                                <button type="submit" class="btn btn-primary">Save Changes</button>
-                                                            </form>
-                                                        </div>
+                                        @foreach($orders as $order)
+                                        <div class="modal fade" id="editRiderModal{{ $order->id }}" tabindex="-1" aria-labelledby="editRiderModalLabel{{ $order->id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="editRiderModalLabel{{ $order->id }}">Change Rider for Order #{{ $order->order_id }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form action="{{ route('admin.orders.updateRider', $order->id) }}" method="POST">
+                                                            @csrf
+                                                            <div class="mb-3">
+                                                                <label for="rider_id{{ $order->id }}" class="form-label">Select Rider</label>
+                                                                <select name="rider_id" id="rider_id{{ $order->id }}" class="form-control">
+                                                                    @foreach($riders as $rider)
+                                                                        <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
+                                                                            {{ $rider->rider_name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                        @endforeach
+                                        
 
                                     </div>
                                 </div>

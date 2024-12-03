@@ -157,12 +157,22 @@ public function assignRider(Request $request, $orderId)
 }
 public function updateRider(Request $request, $orderId)
 {
-    $order = Order::findOrFail($orderId);
-    $order->rider_id = $request->rider_id;  // Update rider_id field
-    $order->save();  // Save the changes
+    // Validate the incoming data
+    $validated = $request->validate([
+        'rider_id' => 'required|exists:flower__rider_details,rider_id', // Ensure rider_id exists
+    ]);
 
+    // Find the order
+    $order = Order::findOrFail($orderId);
+
+    // Update the rider
+    $order->rider_id = $request->rider_id;
+    $order->save();
+
+    // Redirect back with a success message
     return redirect()->back()->with('success', 'Rider updated successfully.');
 }
+
 
 public function mngdeliveryhistory()
 {
