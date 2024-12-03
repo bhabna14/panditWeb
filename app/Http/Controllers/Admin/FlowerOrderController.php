@@ -181,5 +181,32 @@ public function mngdeliveryhistory()
     }
 }
 
+public function showRiderDetails($id)
+{
+    // Fetch rider details
+    $rider = RiderDetails::findOrFail($id);
+
+    // Fetch delivery history for the rider
+    $deliveryHistory = DeliveryHistory::with([
+        'order.user',
+        'order.flowerProduct',
+        'order.flowerPayments',
+        'order.address.localityDetails',
+        'rider'
+    ])->where('rider_id', $rider->rider_id)
+      ->orderBy('created_at', 'desc')
+      ->get();
+
+    // Calculate additional statistics (if needed)
+    $totalOrders = $deliveryHistory->count();
+    $ongoingOrders = $deliveryHistory->where('delivery_status', 'ongoing')->count();
+    $totalSpend = $deliveryHistory->sum(function ($history) {
+        return $history->order->flowerPayments->sum('paid_amount');
+    });
+
+    // Return to the Blade view
+    return view('admin.rider-all-details', compact('rider', 'deliveryHistory', 'totalOrders', 'ongoingOrders', 'totalSpend'));
+}
+
 
 }

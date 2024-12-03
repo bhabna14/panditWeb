@@ -75,7 +75,7 @@
                                                 @foreach($rider_details as $rider)
                                                     <tr>
                                                         <td>{{ $loop->iteration }}</td>
-                                                        <td>{{ $rider->rider_name }}</td>
+                                                        <td><a class="text-danger" href="{{ route('admin.riderAllDetails', $rider->id) }}">{{ $rider->rider_name }}</a></td>
                                                         <td>{{ $rider->phone_number }}</td>
                                                         <td>
                                                             @if($rider->rider_img)
