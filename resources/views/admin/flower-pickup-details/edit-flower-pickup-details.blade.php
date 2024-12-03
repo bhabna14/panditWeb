@@ -174,11 +174,15 @@ document.addEventListener('click', function(e) {
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="quantity">Quantity</label>
                                 <input type="number" name="quantity[]" class="form-control" required>
                             </div>
+                        </div>
+                         <div class="col-md-1 mt-3">
+                            <button type="button" class="btn btn-danger mt-2 remove_flower"><i class="fa fa-minus"></i></button>
+                            
                         </div>
                     </div>
                     <button type="button" class="btn btn-danger mt-2 remove_flower">Remove</button>
