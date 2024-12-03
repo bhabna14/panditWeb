@@ -162,6 +162,103 @@ class OrderController extends Controller
 
 
     public function markAsDelivered(Request $request, $order_id)
+    {
+        try {
+            // Authenticate the rider
+            $rider = Auth::guard('rider-api')->user();
+
+            if (!$rider) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
+            // Validate the request for longitude and latitude
+            $validated = $request->validate([
+                'longitude' => 'required|numeric',
+                'latitude' => 'required|numeric',
+            ]);
+
+            // Check if the order is assigned to the rider and active
+            $order = Order::where('order_id', $order_id)
+                        ->where('rider_id', $rider->rider_id)
+                        ->whereHas('subscription', function ($query) {
+                            $query->where('status', 'active');
+                        })
+                        ->first();
+
+            if (!$order) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Order not found or not assigned to this rider',
+                ], 404);
+            }
+
+            // Save delivery history
+            $deliveryHistory = DeliveryHistory::create([
+                'order_id' => $order->order_id,
+                'rider_id' => $rider->rider_id,
+                'delivery_status' => 'delivered',
+                'longitude' => $validated['longitude'],
+                'latitude' => $validated['latitude'],
+            ]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Order marked as delivered successfully',
+                'data' => $deliveryHistory,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while marking the order as delivered.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+
+
+    //get assign requested orders to rider
+
+    public function getTodayRequestedOrders()
+    {
+        try {
+            // Fetch today's orders based on flower_requests table
+            $today = Carbon::today();
+            $orders = Order::whereNotNull('request_id')
+                        ->whereHas('flowerRequest', function ($query) use ($today) {
+                            $query->whereDate('date', $today);
+                        })
+                        ->with(['flowerRequest','delivery', 'user', 'flowerProduct', 'address.localityDetails'])
+                        ->orderBy('id', 'desc')
+                        ->get();
+
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'No requested orders for today',
+                    'data' => [],
+                ]);
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Requested orders for today fetched successfully',
+                'data' => $orders,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while fetching requested orders.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function markAsRequestedDelivered(Request $request, $order_id)
 {
     try {
         // Authenticate the rider
@@ -180,22 +277,23 @@ class OrderController extends Controller
             'latitude' => 'required|numeric',
         ]);
 
-        // Check if the order is assigned to the rider and active
+        // Check if the requested order is assigned to the rider and has a flower request
         $order = Order::where('order_id', $order_id)
-                      ->where('rider_id', $rider->rider_id)
-                      ->whereHas('subscription', function ($query) {
-                          $query->where('status', 'active');
-                      })
-                      ->first();
+                    ->where('rider_id', $rider->rider_id)
+                    ->whereNotNull('request_id')
+                    ->whereHas('flowerRequest', function ($query) {
+                        $query->whereNotNull('date');
+                    })
+                    ->first();
 
         if (!$order) {
             return response()->json([
                 'status' => 404,
-                'message' => 'Order not found or not assigned to this rider',
+                'message' => 'Order not found, not assigned to this rider, or does not have a valid request',
             ], 404);
         }
 
-        // Save delivery history
+        // Save delivery history for requested order
         $deliveryHistory = DeliveryHistory::create([
             'order_id' => $order->order_id,
             'rider_id' => $rider->rider_id,
@@ -204,20 +302,24 @@ class OrderController extends Controller
             'latitude' => $validated['latitude'],
         ]);
 
+        // Update the order's status to delivered
+        $order->update(['status' => 'delivered']);
+
         return response()->json([
             'status' => 200,
-            'message' => 'Order marked as delivered successfully',
+            'message' => 'Requested order marked as delivered successfully',
             'data' => $deliveryHistory,
         ]);
 
     } catch (\Exception $e) {
         return response()->json([
             'status' => 500,
-            'message' => 'An error occurred while marking the order as delivered.',
+            'message' => 'An error occurred while marking the requested order as delivered.',
             'error' => $e->getMessage(),
         ], 500);
     }
 }
-    
+
+        
 
 }

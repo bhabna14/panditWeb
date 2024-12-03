@@ -60,6 +60,15 @@ Route::middleware('auth:rider-api')->group(function () {
    Route::post('/rider/deliver/{order_id}', [OrderController::class, 'markAsDelivered'])
    ->middleware('auth:rider-api');
 
+   // Route for fetching today's requested orders
+    Route::get('/rider/requested-today-orders', [OrderController::class, 'getTodayRequestedOrders'])
+    ->middleware('auth:rider-api');
+
+    // Route for marking an order as delivered
+    Route::post('/rider/requested-deliver/{order_id}', [OrderController::class, 'markAsRequestedDelivered'])
+    ->middleware('auth:rider-api');
+
+
 });
 
 
