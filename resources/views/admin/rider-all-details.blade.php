@@ -27,30 +27,70 @@
         </ol>
     </div>
 </div>
-
-
-
 <div class="row mt-4">
     <div class="col-lg-12">
         <div class="card custom-card">
-            <div class="card-body d-flex align-items-center flex-wrap">
-                <div class="profile-image-container me-4 mb-3 mb-md-0">
-                    <img 
-                        class="profile-image br-5" 
-                        src="{{ $rider->rider_img ? Storage::url($rider->rider_img) : asset('default-user.png') }}" 
-                        alt="Rider Image"
-                        style="width: 100px; height: 100px; object-fit: cover;"
-                    >
+            <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+                <!-- Rider Image and Details -->
+                <div class="d-flex align-items-center">
+                    <!-- Rider Image -->
+                    <div class="profile-image-container me-4 mb-3 mb-md-0">
+                        <img 
+                            class="profile-image br-5" 
+                            src="{{ $rider->rider_img ? Storage::url($rider->rider_img) : asset('default-user.png') }}" 
+                            alt="Rider Image"
+                            style="width: 100px; height: 100px; object-fit: cover;"
+                        >
+                    </div>
+
+                    <!-- Rider Details -->
+                    <div class="profile-details">
+                        <h4 class="mb-1">{{ $rider->rider_name }}</h4>
+                        <p class="mb-0 text-muted">
+                            <i class="fa fa-phone me-2"></i>Phone: {{ $rider->phone_number }}
+                        </p>
+                    </div>
                 </div>
-                <div class="profile-details">
-                    <h4 class="mb-1">{{ $rider->rider_name }}</h4>
-                    <p class="mb-0 text-muted"><i class="fa fa-phone me-2"></i>Phone: {{ $rider->phone_number }}</p>
+
+                <!-- Rider Statistics -->
+                <div class="d-flex flex-wrap align-items-center">
+                    <!-- Total Orders -->
+                    <div class="prof-details text-center me-4 mb-3 mb-md-0">
+                        <div class="card bg-light shadow-sm" style="min-width: 120px;">
+                            <div class="card-body p-3">
+                                <i class="fa fa-shopping-cart text-primary custom-size-icon"></i>
+                                <h6 class="mb-1">Total Orders</h6>
+                                <p class="mb-0 font-weight-bold">{{ $totalOrders }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Monthly Orders -->
+                    <div class="prof-details text-center me-4 mb-3 mb-md-0">
+                        <div class="card bg-light shadow-sm" style="min-width: 120px;">
+                            <div class="card-body p-3">
+                                <i class="fa fa-calendar-alt text-warning custom-size-icon"></i>
+                                <h6 class="mb-1">Current Monthly</h6>
+                                <p class="mb-0 font-weight-bold">{{ $monthlyOrders }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Refer -->
+                    <div class="prof-details text-center">
+                        <div class="card bg-light shadow-sm" style="min-width: 120px;">
+                            <div class="card-body p-3">
+                                <i class="fa fa-rupee-sign text-success custom-size-icon"></i>
+                                <h6 class="mb-1">Total Refer</h6>
+                                <p class="mb-0 font-weight-bold">₹{{ number_format($totalSpend, 2) }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 
 <div class="row">
     <div class="col-lg-12">

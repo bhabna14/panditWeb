@@ -180,7 +180,6 @@ public function mngdeliveryhistory()
         return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
     }
 }
-
 public function showRiderDetails($id)
 {
     // Fetch rider details
@@ -197,15 +196,25 @@ public function showRiderDetails($id)
       ->orderBy('created_at', 'desc')
       ->get();
 
-    // Calculate additional statistics (if needed)
+    // Calculate total orders
     $totalOrders = $deliveryHistory->count();
+
+    // Calculate ongoing orders
     $ongoingOrders = $deliveryHistory->where('delivery_status', 'ongoing')->count();
+
+    // Calculate monthly orders
+    $monthlyOrders = $deliveryHistory->whereBetween('created_at', [
+        now()->startOfMonth(),
+        now()->endOfMonth()
+    ])->count();
+
+    // Calculate total spend (optional)
     $totalSpend = $deliveryHistory->sum(function ($history) {
         return $history->order->flowerPayments->sum('paid_amount');
     });
 
     // Return to the Blade view
-    return view('admin.rider-all-details', compact('rider', 'deliveryHistory', 'totalOrders', 'ongoingOrders', 'totalSpend'));
+    return view('admin.rider-all-details', compact('rider', 'deliveryHistory', 'totalOrders', 'ongoingOrders', 'monthlyOrders', 'totalSpend'));
 }
 
 
