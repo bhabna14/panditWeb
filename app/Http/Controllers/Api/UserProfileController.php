@@ -432,7 +432,7 @@ public function deletePhoto()
         ], 200);
     }
     
-    public function saveUserAddressAPI(Request $request)
+    public function saveAddress(Request $request)
     {
         try {
             $user = Auth::guard('api')->user();
