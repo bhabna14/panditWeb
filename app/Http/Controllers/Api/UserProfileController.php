@@ -470,10 +470,14 @@ public function deletePhoto()
             }
     
             $addressdata->save();
-    
-            return response()->json(['success' => 'Address created successfully.', 'data' => $addressdata], 200);
+
+            return response()->json([
+                'success' => 200,
+                'message' => 'Address created successfully.'
+            ], 200);
+
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Something went wrong', 'message' => $e->getMessage()], 500);
+            return response()->json(['error' => 500, 'message' => $e->getMessage()], 500);
         }
     }
     
