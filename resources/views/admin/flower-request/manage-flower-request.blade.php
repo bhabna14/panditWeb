@@ -138,8 +138,10 @@
                                                             Name: {{ $request->user->name }} <br>
                                                             Number : {{ $request->user->mobile_number }}
                                                         </td>
-                                                        <td>{{ $request->created_at }}</td>
-                                                        <td>{{ $request->date }} {{ $request->time }}</td>
+                                                        <td>{{ $request->created_at ? \Carbon\Carbon::parse($request->created_at)->format('d-m-Y h:i A') : 'N/A' }}</td>
+
+                                                        <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }} {{ $request->time }}</td>
+
                                                         <td>
                                                             <ul>
                                                                 @foreach ($request->flowerRequestItems as $item)
