@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Podcast;
+use App\Models\PodcastPrepair;
+use App\Models\PublishPodcast;
 use App\Models\PodcastCategory;
+
 use Carbon\Carbon;
 
 class PodcastController extends Controller
@@ -17,12 +20,21 @@ class PodcastController extends Controller
      */
     public function podcasts()
     {
-        //
-        $podcasts = Podcast::where('status', 'active')->orderBy('id', 'desc')->get();
+        // Fetch data by joining PublishPodcast with PodcastPrepair
+        $podcasts = PublishPodcast::where('status', 'active')
+            ->orderBy('id', 'desc')
+            ->with(['podcastPrepair' => function ($query) {
+                $query->select('podcast_id', 'language', 'podcast_name', 'deity_category', 'festival_name');
+            }])
+            ->get();
+    
+        // Format the data (if needed)
         foreach ($podcasts as $podcast) {
-            $podcast->image_url = asset('storage/' . $podcast->image);
-            $podcast->music_url = asset('storage/' . $podcast->music);
+            $podcast->podcast_image = asset('storage/' . $podcast->podcast_image);
+            $podcast->podcast_music = asset('storage/' . $podcast->podcast_music);
         }
+    
+        // Check if no data is found
         if ($podcasts->isEmpty()) {
             return response()->json([
                 'status' => 404,
@@ -30,13 +42,38 @@ class PodcastController extends Controller
                 'data' => []
             ], 404);
         }
-        // return response()->json($podcasts);
+    
+        // Return the combined data
         return response()->json([
             'status' => 200,
             'message' => 'Data retrieved successfully',
             'data' => $podcasts
         ], 200);
     }
+    
+    
+    // public function podcasts()
+    // {
+    //     //
+    //     $podcasts = Podcast::where('status', 'active')->orderBy('id', 'desc')->get();
+    //     foreach ($podcasts as $podcast) {
+    //         $podcast->image_url = asset('storage/' . $podcast->image);
+    //         $podcast->music_url = asset('storage/' . $podcast->music);
+    //     }
+    //     if ($podcasts->isEmpty()) {
+    //         return response()->json([
+    //             'status' => 404,
+    //             'message' => 'No data found',
+    //             'data' => []
+    //         ], 404);
+    //     }
+    //     // return response()->json($podcasts);
+    //     return response()->json([
+    //         'status' => 200,
+    //         'message' => 'Data retrieved successfully',
+    //         'data' => $podcasts
+    //     ], 200);
+    // }
 
     public function podcasthomepage()
 {

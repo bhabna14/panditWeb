@@ -17,22 +17,27 @@ use App\Models\Apartment;
 use Carbon\Carbon; // Add this at the top of the controller
 use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
 
+use Illuminate\Support\Facades\DB;
 
 class UserManagementController extends Controller
 {
 
-public function demoOrderDetails(){
+public function demoOrderDetails()
+{
     $flowers = FlowerProduct::where('status', 'active')
-                        ->where('category', 'Subscription')
-                        ->get();
-                        
+        ->where('category', 'Subscription')
+        ->get();
+
+    // Group by only locality_name and fetch additional fields using aggregate functions
     $localities = Locality::where('status', 'active')
-    ->get();
-                
+        ->select('locality_name', DB::raw('MIN(unique_code) as unique_code'), DB::raw('MIN(pincode) as pincode'))
+        ->groupBy('locality_name')
+        ->get();
+
     $apartments = Apartment::where('status', 'active')
-    ->get();
-                
-    return view('demo-order-details', compact('localities','flowers','apartments'));
+        ->get();
+
+    return view('demo-order-details', compact('localities', 'flowers', 'apartments'));
 }
 
 

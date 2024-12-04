@@ -19,4 +19,10 @@ class PublishPodcast extends Model
         'publish_date',
         'description',
     ];
+
+    public function podcastPrepair()
+{
+    return $this->hasOne(PodcastPrepair::class, 'podcast_id', 'podcast_id');
+}
+
 }

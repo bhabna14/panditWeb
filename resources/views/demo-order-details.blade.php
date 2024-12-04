@@ -109,6 +109,7 @@
                     @endforeach
                 </select>
             </div>
+            
             <div class="col-md-4">
                 <label for="apartment_name" class="form-label">Apartment Name</label>
                 <select class="form-control" id="apartment_name" name="apartment_name" required>

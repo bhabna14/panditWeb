@@ -53,12 +53,13 @@ class PodcastPrepair extends Model
         'final_podcast_type',
         'final_podcast_url',
         'podcast_status',
-
     ];
 
+
     public function publishPodcast()
-    {
-        return $this->hasOne(PublishPodcast::class, 'podcast_id');
-    }
+{
+    return $this->belongsTo(PublishPodcast::class, 'podcast_id', 'podcast_id');
+}
+
    
 }
