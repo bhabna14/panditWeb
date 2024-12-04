@@ -29,8 +29,8 @@ class LocalityController extends Controller
         $request->validate([
             'locality_name' => 'required|string|max:255',
             'pincode' => 'required|digits:6',
-            'apartment_name' => 'required|array', // Ensure apartment_name is an array
-            'apartment_name.*' => 'required|string|max:255', // Validate each apartment name
+            'apartment_name' => 'nullable|array', // Ensure apartment_name is an array
+            'apartment_name.*' => 'nullable|string|max:255', // Validate each apartment name
         ]);
     
         // Generate a unique 3-digit code
