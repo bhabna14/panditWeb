@@ -125,7 +125,6 @@
                                                     <th>Flower Items</th>
                                                    
                                                     <th>Status</th>
-                                                    <th>Deliery Status</th>
                                                     <th>Price</th>
                                                     <th>Actions</th>
                                                     <th>Assigned Rider</th>
@@ -159,8 +158,6 @@
                                                                 <p>Payment Completed</p>
                                                             @endif
                                                         </td>
-                                                        <td>{{ $request->order->delivery->delivery_status }}</td>
-
                                                         <td>
                                                             @if($request->order && $request->order->total_price)
                                                                 <span>Total Price : {{ $request->order->total_price }} <br>
