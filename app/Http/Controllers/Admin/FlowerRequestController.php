@@ -21,8 +21,9 @@ class FlowerRequestController extends Controller
         // Eager load the necessary relationships, including flowerRequestItems
         $pendingRequests = FlowerRequest::with([
             'order' => function ($query) {
-                $query->with('flowerPayments');
+                $query->with('flowerPayments','delivery');
             },
+            
             'flowerProduct',
             'user',
             'address.localityDetails',

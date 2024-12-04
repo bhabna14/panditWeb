@@ -227,11 +227,22 @@ class OrderController extends Controller
     {
         try {
             // Fetch today's orders based on flower_requests table
+
+            $rider = Auth::guard('rider-api')->user();
+
+            if (!$rider) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
             $today = Carbon::today();
             $orders = Order::whereNotNull('request_id')
                         ->whereHas('flowerRequest', function ($query) use ($today) {
                             $query->whereDate('date', $today);
                         })
+                        ->where('rider_id', $rider->rider_id)
                         ->with(['flowerRequest','delivery', 'user', 'flowerProduct', 'address.localityDetails'])
                         ->orderBy('id', 'desc')
                         ->get();

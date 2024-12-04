@@ -147,6 +147,7 @@ public function update(Request $request, $id)
         'flower_id.*' => 'required',
         'unit_id.*' => 'required',
         'quantity.*' => 'required|numeric',
+        'price.*' => 'required|numeric',
         'rider_id' => 'required',
     ]);
 
@@ -159,19 +160,30 @@ public function update(Request $request, $id)
         'rider_id' => $request->rider_id,
     ]);
 
+    $totalPrice = 0;
+
     // Update flower items
     foreach ($request->flower_id as $index => $flowerId) {
+        $quantity = $request->quantity[$index];
+        $price = $request->price[$index];
+        $totalPrice +=  $price;
+
         FlowerPickupItems::updateOrCreate(
             ['pick_up_id' => $pickup->pick_up_id, 'flower_id' => $flowerId],
             [
                 'unit_id' => $request->unit_id[$index],
-                'quantity' => $request->quantity[$index],
+                'quantity' => $quantity,
+                'price' => $price,
             ]
         );
     }
 
+    // Update total price in the details table
+    $pickup->update(['total_price' => $totalPrice]);
+
     return redirect()->route('admin.manageflowerpickupdetails')->with('success', 'Flower Pickup updated successfully.');
 }
+
 
 public function updatePayment(Request $request, $pickup_id)
 {
