@@ -51,69 +51,53 @@ class PodcastController extends Controller
         ], 200);
     }
     
-    
-    // public function podcasts()
-    // {
-    //     //
-    //     $podcasts = Podcast::where('status', 'active')->orderBy('id', 'desc')->get();
-    //     foreach ($podcasts as $podcast) {
-    //         $podcast->image_url = asset('storage/' . $podcast->image);
-    //         $podcast->music_url = asset('storage/' . $podcast->music);
-    //     }
-    //     if ($podcasts->isEmpty()) {
-    //         return response()->json([
-    //             'status' => 404,
-    //             'message' => 'No data found',
-    //             'data' => []
-    //         ], 404);
-    //     }
-    //     // return response()->json($podcasts);
-    //     return response()->json([
-    //         'status' => 200,
-    //         'message' => 'Data retrieved successfully',
-    //         'data' => $podcasts
-    //     ], 200);
-    // }
-
+   
     public function podcasthomepage()
-{
-    // Step 1: Get active categories
-    // $categories = PodcastCategory::where('status', 'active')->get();
-    $categories = PodcastCategory::where('status', 'active')->get()->map(function ($category) {
-        $category->image_url = asset('storage/' . $category->category_img); // Assuming category_img is the field for the image path
-        return $category;
-    });
-
-    // Step 2: Get the most recent podcast
-    $recentPodcast = Podcast::where('status', 'active')->latest()->first(); // Retrieves the latest uploaded podcast
-
-    // Step 3: Get podcasts published in the last 7 days
-    $lastWeekPodcasts = Podcast::where('publish_date', '>=', Carbon::now()->subDays(7))->get();
-
-    // Step 4: Format URLs for image and music for the recent podcast
-    if ($recentPodcast) {
-        $recentPodcast->image_url = asset('storage/' . $recentPodcast->image);
-        $recentPodcast->music_url = asset('storage/' . $recentPodcast->music);
+    {
+        // Step 1: Get active categories with formatted image URLs
+        $categories = PodcastCategory::where('status', 'active')
+            ->get()
+            ->map(function ($category) {
+                $category->image_url = asset('storage/' . $category->category_img); // Format category image URL
+                return $category;
+            });
+    
+        // Step 2: Get the most recent podcast with related `podcastPrepair` details
+        $recentPodcast = PublishPodcast::where('status', 'active')
+            ->latest('publish_date') // Ensure ordering by publish date
+            ->with(['podcastPrepair' => function ($query) {
+                $query->select('podcast_id', 'language', 'podcast_name', 'deity_category', 'festival_name');
+            }])
+            ->first();
+    
+        // Step 3: Get podcasts published in the last 7 days with formatted image and music URLs
+        $lastWeekPodcasts = PublishPodcast::where('status', 'active')
+            ->where('publish_date', '>=', Carbon::now()->subDays(7)) // Only last 7 days
+            ->get()
+            ->map(function ($podcast) {
+                $podcast->podcast_image = asset('storage/' . $podcast->image); // Format podcast image URL
+                $podcast->podcast_music = asset('storage/' . $podcast->music); // Format podcast music URL
+                return $podcast;
+            });
+    
+        // Step 4: Format URLs for the most recent podcast (if it exists)
+        if ($recentPodcast) {
+            $recentPodcast->podcast_image = asset('storage/' . $recentPodcast->image);
+            $recentPodcast->podcast_music = asset('storage/' . $recentPodcast->music);
+        }
+    
+        // Step 5: Prepare the response data
+        return response()->json([
+            'status' => 200,
+            'message' => 'Data retrieved successfully',
+            'data' => [
+                'categories' => $categories, // List of categories
+                'recent_podcast' => $recentPodcast, // Most recent podcast with details
+                'last_week_podcasts' => $lastWeekPodcasts // Podcasts published in the last 7 days
+            ]
+        ], 200);
     }
-
-    // Step 5: Format URLs for image and music for the last week podcasts
-    foreach ($lastWeekPodcasts as $podcast) {
-        $podcast->image_url = asset('storage/' . $podcast->image);
-        $podcast->music_url = asset('storage/' . $podcast->music);
-    }
-
-    // Step 6: Prepare the response data
-    return response()->json([
-        'status' => 200,
-        'message' => 'Data retrieved successfully',
-        'data' => [
-            'categories' => $categories,
-            'recent_podcast' => $recentPodcast, // Single podcast object
-            'last_week_podcasts' => $lastWeekPodcasts
-        ]
-    ], 200);
-}
-
+    
 public function podcastCategory()
 {
     try {
