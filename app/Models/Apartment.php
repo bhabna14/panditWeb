@@ -15,7 +15,7 @@ class Apartment extends Model
     
     public function locality()
     {
-        return $this->belongsTo(Locality::class, 'locality_id', 'id');
+        return $this->belongsTo(Locality::class, 'locality_id', 'locality_id');
     }
     
 }
