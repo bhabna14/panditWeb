@@ -10,7 +10,6 @@ class Subscription extends Model
     use HasFactory;
 
     protected $table = 'subscriptions'; // Ensure this matches your actual table name
-
     // Add all fields you want to allow for mass assignment
     protected $fillable = [
         'subscription_id',

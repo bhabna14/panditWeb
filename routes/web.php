@@ -34,7 +34,7 @@ use App\Http\Controllers\Admin\PodcastSocialMediaController;
 use App\Http\Controllers\Admin\RiderController;
 use App\Http\Controllers\Admin\FlowerVendorController;
 use App\Http\Controllers\Admin\FlowerPickupController;
-
+use App\Http\Controllers\UserManagementController;
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -268,12 +268,11 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
         Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');
 
-
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
         Route::put('/flower-pickup/update/{id}', 'update')->name('flower-pickup.update');
-
-
     });
+
+
    Route::controller(RiderController::class)->group(function() {
         Route::get('/add-rider-details', 'addRiderDetails')->name('admin.addRiderDetails');
         Route::post('/save-rider-details', 'saveRiderDetails')->name('admin.saveRiderDetails');
@@ -487,6 +486,13 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/delete-youtube/{id}', 'destroy')->name('deleteYoutube');
         Route::get('/edit-youtube/{id}', 'edit')->name('editYoutube');
         Route::post('/update-youtube/{id}',  'update')->name('updateYoutube');
+    });
+
+    Route::controller(UserManagementController::class)->group(function() {
+        Route::get('/demo-order-details', 'demoOrderDetails')->name('demoOrderDetails');
+        Route::post('/save-demo-order-details', 'handleUserData')->name('saveDemoOrderDetails');
+
+       
     });
 
 
