@@ -61,7 +61,7 @@
                                 <div class="form-group">
                                     <label for="pincode">Pincode</label>
                                     <input type="text" class="form-control" id="pincode" name="pincode" 
-                                        placeholder="Enter 6-digit pincode" required pattern="\d{6}" title="Pincode must be a 6-digit number">
+                                        placeholder="Enter 6-digit pincode" pattern="\d{6}" title="Pincode must be a 6-digit number">
                                 </div>
                             </div>
                         </div>
