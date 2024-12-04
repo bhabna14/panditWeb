@@ -112,7 +112,7 @@
             
             <div class="col-md-4">
                 <label for="apartment_name" class="form-label">Apartment Name</label>
-                <select class="form-control" id="apartment_name" name="apartment_name" required>
+                <select class="form-control" id="apartment_name" name="apartment_name">
                     <option value="">Select Apartment</option>
                     @foreach ($apartments as $apartment)
                         <option value="{{ $apartment->apartment_name }}">{{ $apartment->apartment_name }}</option>

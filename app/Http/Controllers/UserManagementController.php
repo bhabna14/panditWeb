@@ -132,7 +132,7 @@ public function handleUserData(Request $request)
         Subscription::create([
             'subscription_id' => $subscriptionId,
             'user_id' => $user->userid,
-            'order_id' => $order->id,
+            'order_id' => $order->order_id,
             'product_id' => $validatedUserData['product_id'],
             'start_date' => $startDate,
             'end_date' => $endDate,

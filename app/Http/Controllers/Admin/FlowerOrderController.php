@@ -25,7 +25,7 @@ class FlowerOrderController extends Controller
     {
         $orders = Order::whereNull('request_id')
                        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address.localityDetails'])
-                       ->orderBy('id', 'desc')
+                       ->orderBy('created_at', 'desc')
                        ->get();
                        $activeSubscriptions = Subscription::where('status', 'active')->count();
 
