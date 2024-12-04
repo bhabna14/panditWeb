@@ -432,55 +432,115 @@ public function deletePhoto()
         ], 200);
     }
     
+    // public function saveAddress(Request $request)
+    // {
+    //     try {
+    //         $user = Auth::guard('api')->user();
+    
+    //         if (!$user) {
+    //             return response()->json(['error' => 'Unauthorized'], 401);
+    //         }
+    
+    //         $userid = $user->userid;
+    
+    //         // Check if the user already has addresses
+    //         $hasAddresses = UserAddress::where('user_id', $userid)
+    //                                     ->where('status', 'active')
+    //                                     ->exists();
+    
+    //         // Create the new address
+    //         $addressdata = new UserAddress();
+    //         $addressdata->user_id = $userid;
+    //         $addressdata->country = 'India';
+    //         $addressdata->state = $request->state;
+    //         $addressdata->city = $request->city;
+    //         $addressdata->pincode = $request->pincode;
+    //         $addressdata->area = $request->area;
+    //         $addressdata->address_type = $request->address_type;
+    //         $addressdata->locality = $request->locality;
+    //         $addressdata->apartment_name = $request->apartment_name;
+    //         $addressdata->place_category = $request->place_category;
+    //         $addressdata->apartment_flat_plot = $request->apartment_flat_plot;
+    //         $addressdata->landmark = $request->landmark;
+    //         $addressdata->status = 'active';
+    
+    //         // Set as default if it's the first address
+    //         if (!$hasAddresses) {
+    //             $addressdata->default = 1;
+    //         }
+    
+    //         $addressdata->save();
+
+    //         return response()->json([
+    //             'success' => 200,
+    //             'message' => 'Address created successfully.'
+    //         ], 200);
+
+    //     } catch (\Exception $e) {
+    //         return response()->json(['error' => 500, 'message' => $e->getMessage()], 500);
+    //     }
+    // }
+    
     public function saveAddress(Request $request)
-    {
-        try {
-            $user = Auth::guard('api')->user();
-    
-            if (!$user) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
-    
-            $userid = $user->userid;
-    
-            // Check if the user already has addresses
-            $hasAddresses = UserAddress::where('user_id', $userid)
-                                        ->where('status', 'active')
-                                        ->exists();
-    
-            // Create the new address
-            $addressdata = new UserAddress();
-            $addressdata->user_id = $userid;
-            $addressdata->country = 'India';
-            $addressdata->state = $request->state;
-            $addressdata->city = $request->city;
-            $addressdata->pincode = $request->pincode;
-            $addressdata->area = $request->area;
-            $addressdata->address_type = $request->address_type;
-            $addressdata->locality = $request->locality;
-            $addressdata->apartment_name = $request->apartment_name;
-            $addressdata->place_category = $request->place_category;
-            $addressdata->apartment_flat_plot = $request->apartment_flat_plot;
-            $addressdata->landmark = $request->landmark;
-            $addressdata->status = 'active';
-    
-            // Set as default if it's the first address
-            if (!$hasAddresses) {
-                $addressdata->default = 1;
-            }
-    
-            $addressdata->save();
+{
+    try {
+        $user = Auth::guard('api')->user();
 
-            return response()->json([
-                'success' => 200,
-                'message' => 'Address created successfully.'
-            ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => 500, 'message' => $e->getMessage()], 500);
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
+
+        $userid = $user->userid;
+
+        // Check if the user already has addresses
+        $hasAddresses = UserAddress::where('user_id', $userid)
+                                    ->where('status', 'active')
+                                    ->exists();
+
+        // Check if the apartment name exists in flower__apartment table
+        $apartment = Apartment::where('apartment_name', $request->apartment_name)->first();
+
+        if (!$apartment) {
+            // Save the new apartment if it doesn't exist
+            $apartment = Apartment::create([
+                'locality_id' => $request->locality, // Assuming locality is passed as an ID
+                'apartment_name' => $request->apartment_name,
+            ]);
+        }
+
+        // Create the new address
+        $addressdata = new UserAddress();
+        $addressdata->user_id = $userid;
+        $addressdata->country = 'India';
+        $addressdata->state = $request->state;
+        $addressdata->city = $request->city;
+        $addressdata->pincode = $request->pincode;
+        $addressdata->area = $request->area;
+        $addressdata->address_type = $request->address_type;
+        $addressdata->locality = $request->locality;
+        $addressdata->apartment_name = $request->apartment_name;
+        $addressdata->place_category = $request->place_category;
+        $addressdata->apartment_flat_plot = $request->apartment_flat_plot;
+        $addressdata->landmark = $request->landmark;
+        $addressdata->status = 'active';
+
+        // Set as default if it's the first address
+        if (!$hasAddresses) {
+            $addressdata->default = 1;
+        }
+
+        $addressdata->save();
+
+        return response()->json([
+            'success' => 200,
+            'message' => 'Address created successfully.',
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json(['error' => 500, 'message' => $e->getMessage()], 500);
     }
-    
+}
+
 
 
     // public function removeAddress($id)
