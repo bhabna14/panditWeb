@@ -64,6 +64,7 @@ public function handleUserData(Request $request)
             'product_id' => 'nullable',
             'start_date' => 'nullable|date',
             'paid_amount' => 'nullable|numeric',
+            'status' => 'nullable|string',
         ]);
 
         // Generate unique user ID
@@ -104,7 +105,7 @@ public function handleUserData(Request $request)
             'start_date' => $validatedUserData['start_date'],
             'address_id' => $address->id,
             'total_price' => $validatedUserData['paid_amount'],
-            'status' => 'pending',
+            
         ]);
 
         // Generate unique subscription ID
@@ -136,8 +137,8 @@ public function handleUserData(Request $request)
             'product_id' => $validatedUserData['product_id'],
             'start_date' => $startDate,
             'end_date' => $endDate,
-            'is_active' => true,
-            'status' => 'active',
+            // 'is_active' => true,
+            'status' => $validatedUserData['status'],
         ]);
 
         // Add flower payment
