@@ -18,10 +18,7 @@ class PushNotificationController extends Controller
         ]);
     
         try {
-            // Log the incoming request for debugging
-            \Log::info('Received saveToken request:', $request->all());
-    
-            // Save the device details
+            // Save device information
             UserUnauthorisedDevices::updateOrCreate(
                 ['device_id' => $request->device_id],
                 [
@@ -30,14 +27,7 @@ class PushNotificationController extends Controller
                 ]
             );
     
-            // Log the saved data
-            \Log::info('Device token saved:', [
-                'device_id' => $request->device_id,
-                'device_model' => $request->device_model,
-                'platform' => $request->platform,
-            ]);
-    
-            // Prepare the notification data
+            // Prepare notification data
             $data = [
                 'registration_ids' => [$request->device_id],
                 'notification' => [
@@ -47,24 +37,21 @@ class PushNotificationController extends Controller
                 ],
             ];
     
-            // Log the notification data being sent
-            \Log::info('Notification data being sent to FCM:', $data);
+            // Send notification
+            $response = Http::withHeaders([
+                'Authorization' => 'key=BCt0rMrAC1XfdBusFK51rf3UqSN28GjE7xTdOn4n1MGD1AABfz3KkjjJoLN6lZXILwu47XlpLxNklpUm6cqPWUI',
+                'Content-Type' => 'application/json',
+            ])->post('https://fcm.googleapis.com/fcm/send', $data);
+            
+            // Log the FCM response for debugging
+            Log::info('FCM Response Status:', ['status' => $response->status()]);
+            Log::info('FCM Response Body:', ['body' => $response->body()]);
+            
     
-            // Send the notification using Firebase Cloud Messaging (FCM)
-            $response = Http::withToken(config('app.fcm_server_key'))
-                ->post('https://fcm.googleapis.com/fcm/send', $data);
-    
-            // Log the FCM response
-            \Log::info('FCM response:', $response->json());
-    
-            return response()->json([
-                'message' => 'Device token saved successfully and welcome notification sent.',
-            ], 200);
+            return response()->json(['message' => 'Device token saved successfully and welcome notification sent.'], 200);
         } catch (\Exception $e) {
-            // Log the exception for debugging
-            \Log::error('Error saving device token:', ['error' => $e->getMessage()]);
+            Log::error('Error saving device token or sending notification: ' . $e->getMessage());
     
-            // Return a JSON response with an error message
             return response()->json([
                 'message' => 'Failed to save device token. Please try again.',
                 'error' => $e->getMessage(),
