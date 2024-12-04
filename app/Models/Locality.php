@@ -13,6 +13,6 @@ class Locality extends Model
 
     public function apartment()
     {
-        return $this->hasMany(Apartment::class, 'locality_id');
+        return $this->hasMany(Apartment::class, 'locality_id', 'locality_id');
     }
 }
