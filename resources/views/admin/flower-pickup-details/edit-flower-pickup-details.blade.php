@@ -36,7 +36,7 @@
                     <div class="card-body pt-0 pt-4">
                         <!-- Vendor and Pickup Date -->
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="vendor_id">Vendor</label>
                                     <select name="vendor_id" class="form-control" required>
@@ -48,19 +48,25 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="pickup_date">Pickup Date</label>
                                     <input type="date" name="pickup_date" class="form-control" value="{{ $detail->pickup_date }}" required>
                                 </div>
                             </div>
+                            <div class="row mt-4">
+                                <div class="col-md-12">
+                                    <h4 id="total_price">Total Price: {{ $detail->total_price }}</h4>
+                                </div>
+                            </div>
+                            
                         </div>
     
                         <!-- Flower Details -->
                         <div id="add-flower-wrapper">
                             @foreach($detail->flowerPickupItems as $item)
                                 <div class="row mb-2">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="flower_id">Flower</label>
                                             <select name="flower_id[]" class="form-control" required>
@@ -72,7 +78,7 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="unit_id">Unit</label>
                                             <select name="unit_id[]" class="form-control" required>
@@ -84,12 +90,19 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="quantity">Quantity</label>
                                             <input type="number" name="quantity[]" class="form-control" value="{{ $item->quantity }}" required>
                                         </div>
                                     </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label for="price">Price</label>
+                                            <input type="number" name="price[]" class="form-control" value="{{ $item->price }}" required>
+                                        </div>
+                                    </div>
+                                    
                                 </div>
                             @endforeach
                         </div>
@@ -154,7 +167,7 @@ document.addEventListener('click', function(e) {
             $("#add-flower-wrapper").append(`
                 <div class="remove-flower-wrapper">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="flower_id">Flower</label>
                                 <select name="flower_id[]" class="form-control" required>
@@ -164,7 +177,7 @@ document.addEventListener('click', function(e) {
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="unit_id">Unit</label>
                                 <select name="unit_id[]" class="form-control" required>
@@ -180,6 +193,12 @@ document.addEventListener('click', function(e) {
                                 <input type="number" name="quantity[]" class="form-control" required>
                             </div>
                         </div>
+                        <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="price">Price</label>
+                                            <input type="number" name="price[]" class="form-control" value="{{ $item->price }}" required>
+                                        </div>
+                                </div>
                          <div class="col-md-1 mt-3">
                             <button type="button" class="btn btn-danger mt-2 remove_flower"><i class="fa fa-minus"></i></button>
                             
@@ -237,6 +256,22 @@ document.addEventListener('click', function(e) {
         $(document).on('click', '.remove_flower', function () {
             $(this).closest('.remove-flower-wrapper').remove();
         });
+
+         // Update Total Price on Quantity or Price Change
+    $(document).on('input', '.quantity, .price', function () {
+        calculateTotalPrice();
+    });
+
+    // Calculate Total Price
+    function calculateTotalPrice() {
+        let totalPrice = 0;
+        $('.remove-flower-wrapper').each(function () {
+            const quantity = parseFloat($(this).find('.quantity').val()) || 0;
+            const price = parseFloat($(this).find('.price').val()) || 0;
+            totalPrice += quantity * price;
+        });
+        $('#total_price').text(`Total Price: ${totalPrice.toFixed(2)}`);
+    }
     });
 </script>
 
