@@ -56,7 +56,7 @@
                                 @foreach ($vendor_details as $index => $vendor)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td><a class="text-danger" href="{{ route('admin.vendorAllDetails', $vendor->id) }}">{{ $vendor->vendor_name }}</a></td>
+                                        <td><a class="text-danger" href="{{ route('admin.vendorAllDetails', $vendor->vendor_id) }}">{{ $vendor->vendor_name }}</a></td>
                                         <td>{{ $vendor->phone_no }}</td>
                                         <td>{{ $vendor->email_id }}</td>
                                         <td>{{ $vendor->vendor_category }}</td>

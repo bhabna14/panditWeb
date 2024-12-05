@@ -89,6 +89,7 @@ class FlowerVendorController extends Controller
         ->get()
         ->groupBy('pickup_date'); 
 
+
     return view('admin.vendor-all-details', compact('pickupDetails'));
     }
 

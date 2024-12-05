@@ -267,6 +267,8 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
         Route::get('/add-vendor-details', 'addVendorDetails')->name('admin.addVendorDetails');
         Route::post('/save-vendor-details', 'saveVendorDetails')->name('admin.saveVendorDetails');
         Route::get('/manage-vendor-details', 'manageVendorDetails')->name('admin.managevendor');
+        Route::get('/vendor-all-details/{id}', 'vendorAllDetails')->name('admin.vendorAllDetails');
+
         Route::post('/delete-vendor-details/{imad}', 'deleteVendorDetails')->name('admin.deletevendor');
         Route::get('/edit-vendor-details/{id}', 'editVendorDetails')->name('admin.editVendorDetails');
         Route::put('/update-vendor-details/{id}', 'updateVendorDetails')->name('admin.updateVendorDetails');

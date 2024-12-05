@@ -17,13 +17,13 @@
 
 <div class="breadcrumb-header justify-content-between">
     <div class="left-content d-flex align-items-center flex-nowrap">
-        <a class="btn btn-primary me-3" href="{{ url('admin/manage-rider-details') }}">BACK</a>
-        <span class="main-content-title" style="margin-top: 36px">RIDER PROFILE</span>
+        <a class="btn btn-primary me-3" href="{{ url('admin/manage-vendor-details') }}">BACK</a>
+        <span class="main-content-title" style="margin-top: 36px">VENDOR DETAILS</span>
     </div>
     <div class="justify-content-center mt-2">
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item"><a href="{{ url('admin/dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active">Rider Profile</li>
+            <li class="breadcrumb-item active">Vendor Details</li>
         </ol>
     </div>
 </div>
@@ -36,18 +36,18 @@
                     <!-- Rider Image -->
                     <div class="profile-image-container me-4 mb-3 mb-md-0">
                         <img 
-                            class="profile-image br-5" 
-                            src="{{ $vendor->rider_img ? Storage::url($rider->rider_img) : asset('default-user.png') }}" 
-                            alt="Rider Image"
-                            style="width: 100px; height: 100px; object-fit: cover;"
-                        >
+                        class="profile-image br-5" 
+                        src="{{ asset('images/profile.jpeg') }}" 
+                        alt="Vendor Image"
+                        style="width: 100px; height: 100px; object-fit: cover;"
+                    >
                     </div>
 
                     <!-- Rider Details -->
                     <div class="profile-details">
-                        <h4 class="mb-1">{{ $rider->rider_name }}</h4>
+                        <h4 class="mb-1">{{ optional($pickupDetails->first()->first()->vendor)->vendor_name ?? 'N/A' }}</h4>
                         <p class="mb-0 text-muted">
-                            <i class="fa fa-phone me-2"></i>Phone: {{ $rider->phone_number }}
+                            <i class="fa fa-phone me-2"></i>Phone: {{ optional($pickupDetails->first()->first()->vendor)->phone_no ?? 'N/A' }}
                         </p>
                     </div>
                 </div>
@@ -77,7 +77,6 @@
                             <th>Total Price</th>
                             <th>Payment Status</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -116,57 +115,11 @@
                                     @endif
                                 </td>
                                 <td>{{ $detail->status ?? 'N/A' }}</td>
-                                <td>
-                                    <a href="{{ route('flower-pickup.edit', $detail->id) }}" class="btn btn-primary btn-sm">Edit</a>
-
-                                    
-                                    <!-- Check if the price is greater than 0 to enable the Payment button -->
-                                    <button 
-                                        class="btn btn-secondary btn-sm" 
-                                        data-bs-toggle="modal" 
-                                        data-bs-target="#paymentModal{{ $detail->id }}"
-                                       
-                                    >
-                                        Payment
-                                    </button>
-                                </td>
+                                
                                 
                             </tr>
                             <!-- Payment Modal -->
-                            <div class="modal fade" id="paymentModal{{ $detail->id }}" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="paymentModalLabel">Add Payment</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <form action="{{ route('update.payment', $detail->id) }}" method="POST">
-                                            @csrf
-                                            <input type="hidden" name="pickup_id" value="{{ $detail->id }}">
-                                            <div class="modal-body">
-                                                <div class="mb-3">
-                                                    <label for="payment_method" class="form-label">Payment Method</label>
-                                                    <select class="form-control" name="payment_method" id="payment_method" required>
-                                                        <option value="Cash">Cash</option>
-                                                        <option value="Online">Online</option>
-                                                        <option value="Card">Card</option>
-                                                    </select>
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="payment_id" class="form-label">Payment ID</label>
-                                                    <input type="text" class="form-control" id="payment_id" name="payment_id" placeholder="Enter Payment ID">
-                                                </div>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                                <button type="submit" class="btn btn-primary">Save Payment</button>
-                                            </div>
-                                        </form>
-                                        
-                                        
-                                    </div>
-                                </div>
-                            </div>
+                         
                         @endforeach
                     </tbody>
                 </table>
