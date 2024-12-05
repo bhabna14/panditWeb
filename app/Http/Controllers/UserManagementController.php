@@ -66,6 +66,7 @@ public function handleUserData(Request $request)
             'landmark' => 'nullable|string',
             'product_id' => 'nullable',
             'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
             'paid_amount' => 'nullable|numeric',
             'status' => 'nullable|string',
         ]);
