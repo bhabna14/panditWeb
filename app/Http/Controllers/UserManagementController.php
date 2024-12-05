@@ -42,20 +42,7 @@ class UserManagementController extends Controller
     }
     
     
-    public function getApartmentslocallity($unique_code)
-    {
-        \Log::info('Fetching apartments for locality unique_code: ' . $unique_code);
-    
-        $apartments = Apartment::where('locality_id', $unique_code)
-            ->where('status', 'active')
-            ->get(['apartment_name']);
-    
-        \Log::info('Apartments found: ', $apartments->toArray());
-    
-        return response()->json($apartments);
-    }
-    
-    
+
 
 public function handleUserData(Request $request)
 {
