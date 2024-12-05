@@ -146,7 +146,7 @@ public function handleUserData(Request $request)
 
         // Add flower payment
         FlowerPayment::create([
-            'order_id' => $order->id,
+            'order_id' => $order->order_id,
             'payment_id' => 'NULL',
             'user_id' => $user->userid,
             'payment_method' => 'rozarpay',
