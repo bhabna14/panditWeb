@@ -69,7 +69,8 @@
         <div class="card custom-card mt-4">
             <div class="card-body">
                 <h5>Flower Pickup Report</h5>
-                <table class="table table-bordered">
+                <div class="table-responsive  export-table">
+                <table id="file-datatable" class="table table-bordered ">
                     <thead>
                         <tr>
                             <th>Pickup Date</th>
@@ -112,6 +113,7 @@
                         </tr>
                     </tfoot>
                 </table>
+                </div>
             </div>
         </div>
     @endif
