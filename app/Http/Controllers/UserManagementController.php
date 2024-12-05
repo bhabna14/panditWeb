@@ -22,31 +22,40 @@ use Illuminate\Support\Facades\DB;
 class UserManagementController extends Controller
 {
 
-public function demoOrderDetails()
-{
-    $flowers = FlowerProduct::where('status', 'active')
-        ->where('category', 'Subscription')
-        ->get();
-
-    // Group by only locality_name and fetch additional fields using aggregate functions
-    $localities = Locality::where('status', 'active')
-        ->select('locality_name', DB::raw('MIN(unique_code) as unique_code'), DB::raw('MIN(pincode) as pincode'))
-        ->groupBy('locality_name')
-        ->get();
-
-    $apartments = Apartment::where('status', 'active')
-        ->get();
-
-    return view('demo-order-details', compact('localities', 'flowers', 'apartments'));
-}
-public function getApartments($unique_code)
+    public function demoOrderDetails()
     {
+        $flowers = FlowerProduct::where('status', 'active')
+            ->where('category', 'Subscription')
+            ->get();
+    
+        // Get all localities and apartments
+        $localities = Locality::where('status', 'active')
+            ->select('locality_name', 'unique_code', 'pincode')
+            ->get();
+    
+        $apartments = Apartment::where('status', 'active')->get();
+    
+        // Group apartments by locality_id
+        $apartmentsByLocality = $apartments->groupBy('locality_id');
+    
+        return view('demo-order-details', compact('localities', 'flowers', 'apartmentsByLocality'));
+    }
+    
+    
+    public function getApartmentslocallity($unique_code)
+    {
+        \Log::info('Fetching apartments for locality unique_code: ' . $unique_code);
+    
         $apartments = Apartment::where('locality_id', $unique_code)
             ->where('status', 'active')
             ->get(['apartment_name']);
-
+    
+        \Log::info('Apartments found: ', $apartments->toArray());
+    
         return response()->json($apartments);
     }
+    
+    
 
 public function handleUserData(Request $request)
 {

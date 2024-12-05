@@ -125,7 +125,6 @@
         
        
         
-
         <div class="row mt-3">
             <div class="col-md-6">
                 <label for="city" class="form-label">Town/City</label>
@@ -213,27 +212,36 @@
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script>
+        // Get the apartment data from the Blade variable
+        const apartmentsByLocality = @json($apartmentsByLocality);
+    
         document.getElementById('locality').addEventListener('change', function () {
             const selectedOption = this.options[this.selectedIndex];
-            const pincode = selectedOption.getAttribute('data-pincode');
-            const uniqueCode = this.value;
+            const uniqueCode = this.value;  // Get selected locality's unique_code
+            const pincode = selectedOption.getAttribute('data-pincode');  // Get pincode for selected locality
+            const apartmentSelect = document.getElementById('apartment_name');
     
-            // Update Pincode
+            // Update the pincode input field
             document.getElementById('pincode').value = pincode;
     
-            // Fetch Apartments
+            // Clear previous apartment options
+            apartmentSelect.innerHTML = '<option value="">Select Apartment</option>';
+    
+            // If a locality is selected
             if (uniqueCode) {
-                fetch(`/get-apartments-locality/${uniqueCode}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const apartmentSelect = document.getElementById('apartment_name');
-                        apartmentSelect.innerHTML = '<option value="">Select Apartment</option>';
-                        data.forEach(apartment => {
-                            apartmentSelect.innerHTML += `<option value="${apartment.apartment_name}">${apartment.apartment_name}</option>`;
-                        });
-                    })
-                    .catch(error => console.error('Error fetching apartments:', error));
+                // Get apartments for the selected locality
+                const apartments = apartmentsByLocality[uniqueCode] || [];
+    
+                // Populate the apartment dropdown
+                if (apartments.length > 0) {
+                    apartments.forEach(apartment => {
+                        apartmentSelect.innerHTML += `<option value="${apartment.apartment_name}">${apartment.apartment_name}</option>`;
+                    });
+                } else {
+                    apartmentSelect.innerHTML = '<option value="">No Apartments Available</option>';
+                }
             }
         });
     </script>
+    
 @endsection
