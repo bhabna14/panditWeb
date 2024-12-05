@@ -85,7 +85,7 @@ public function handleUserData(Request $request)
         $address = UserAddress::create([
             'user_id' => $user->userid,
             'state' => $validatedUserData['state'],
-            'city' => $validatedUserData['city'],
+            'city' =>"Bhubaneswar",
             'pincode' => $validatedUserData['pincode'],
             'locality' => $validatedUserData['locality'],
             'apartment_name' => $validatedUserData['apartment_name'],
