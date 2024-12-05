@@ -29,19 +29,38 @@
             <form action="{{ route('admin.generateFlowerPickupReport') }}" method="POST">
                 @csrf
                 <div class="row">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="from_date">From Date</label>
                         <input type="date" name="from_date" id="from_date" class="form-control" required>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="to_date">To Date</label>
                         <input type="date" name="to_date" id="to_date" class="form-control" required>
                     </div>
-                    <div class="col-md-4 align-self-end">
+                    <div class="col-md-3">
+                        <label for="vendor_id">Vendor</label>
+                        <select name="vendor_id" id="vendor_id" class="form-control">
+                            <option value="">All Vendors</option>
+                            @foreach($vendors as $vendor)
+                                <option value="{{ $vendor->id }}">{{ $vendor->vendor_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="rider_id">Rider</label>
+                        <select name="rider_id" id="rider_id" class="form-control">
+                            <option value="">All Riders</option>
+                            @foreach($riders as $rider)
+                                <option value="{{ $rider->id }}">{{ $rider->rider_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-12 mt-3">
                         <button type="submit" class="btn btn-primary">Generate Report</button>
                     </div>
                 </div>
             </form>
+            
         </div>
     </div>
 
