@@ -42,7 +42,7 @@
                         <select name="vendor_id" id="vendor_id" class="form-control">
                             <option value="">All Vendors</option>
                             @foreach($vendors as $vendor)
-                                <option value="{{ $vendor->id }}">{{ $vendor->vendor_name }}</option>
+                                <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -51,7 +51,7 @@
                         <select name="rider_id" id="rider_id" class="form-control">
                             <option value="">All Riders</option>
                             @foreach($riders as $rider)
-                                <option value="{{ $rider->id }}">{{ $rider->rider_name }}</option>
+                                <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
                             @endforeach
                         </select>
                     </div>
