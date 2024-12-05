@@ -75,15 +75,15 @@ class PodcastController extends Controller
             ->where('publish_date', '>=', Carbon::now()->subDays(7)) // Only last 7 days
             ->get()
             ->map(function ($podcast) {
-                $podcast->podcast_image = asset('storage/' . $podcast->image); // Format podcast image URL
-                $podcast->podcast_music = asset('storage/' . $podcast->music); // Format podcast music URL
+                $podcast->podcast_image = asset('storage/' . $podcast->podcast_image); // Format podcast image URL
+                $podcast->podcast_music = asset('storage/' . $podcast->podcast_music); // Format podcast music URL
                 return $podcast;
             });
     
         // Step 4: Format URLs for the most recent podcast (if it exists)
         if ($recentPodcast) {
-            $recentPodcast->podcast_image = asset('storage/' . $recentPodcast->image);
-            $recentPodcast->podcast_music = asset('storage/' . $recentPodcast->music);
+            $recentPodcast->podcast_image = asset('storage/' . $recentPodcast->podcast_image);
+            $recentPodcast->podcast_music = asset('storage/' . $recentPodcast->podcast_music);
         }
     
         // Step 5: Prepare the response data
