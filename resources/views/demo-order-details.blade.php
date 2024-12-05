@@ -199,7 +199,7 @@
             <div class="col-md-3">
                 <label for="status" class="form-label">status</label>
                 <select name="status" id="status" class="form-control" required>
-                    <option value="actie">active</option>
+                    <option value="active">active</option>
                     <option value="expired">expired</option>
 
                 </select>
