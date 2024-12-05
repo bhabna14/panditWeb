@@ -67,6 +67,8 @@ class LocalityController extends Controller
         return view('admin.editlocality', compact('locality'));
     }
     
+  
+
     public function updateLocality(Request $request, $id)
     {
         $request->validate([
@@ -82,17 +84,24 @@ class LocalityController extends Controller
             'pincode' => $request->pincode,
         ]);
     
+        // Get the unique_code of the locality
+        $uniqueCode = $locality->unique_code;
+    
         // Update apartments
         $apartmentNames = $request->apartment_name;
         $locality->apartment()->delete(); // Remove old apartments
         foreach ($apartmentNames as $name) {
             if (!empty($name)) {
-                $locality->apartment()->create(['apartment_name' => $name]);
+                $locality->apartment()->create([
+                    'apartment_name' => $name,
+                    'locality_id' => $uniqueCode, // Save the unique_code here
+                ]);
             }
         }
     
         return redirect()->route('admin.managelocality')->with('success', 'Locality updated successfully!');
     }
+    
     
 
 public function deleteLocality($id)
