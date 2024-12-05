@@ -76,6 +76,7 @@
                             <th>Vendor Name</th>
                             <th>Rider Name</th>
                             <th>Flower Details</th>
+                            <th>Status</th>
                             <th>Total Price</th>
                         </tr>
                     </thead>
@@ -89,10 +90,18 @@
                                 <td>{{ $pickup->rider->rider_name }}</td>
                                 <td>
                                     @foreach($pickup->flowerPickupItems as $item)
-                                        <div>{{ $item->flower->name }} - {{ $item->quantity }} {{ $item->unit->name }}</div>
+                                        <div>{{ $item->flower->name }} - {{ $item->quantity }} {{ $item->unit->name }} ({{$item->price}})</div>
                                     @endforeach
                                 </td>
-                                <td>{{ $pickup->total_price }}</td>
+                                <td>
+                                    @if ($pickup->payment_status === 'Paid')
+                                        <span class="badge bg-success">Paid</span>
+                                    @else
+                                        <span class="badge bg-danger">Unpaid</span>
+                                    @endif
+                                </td>
+                                <td>&#8377;{{ number_format($pickup->total_price, 2) }}</td> <!-- For INR -->
+
                             </tr>
                         @endforeach
                     </tbody>
