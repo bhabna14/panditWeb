@@ -34,6 +34,8 @@ use App\Http\Controllers\Admin\PodcastSocialMediaController;
 use App\Http\Controllers\Admin\RiderController;
 use App\Http\Controllers\Admin\FlowerVendorController;
 use App\Http\Controllers\Admin\FlowerPickupController;
+use App\Http\Controllers\Admin\ReportController;
+
 use App\Http\Controllers\UserManagementController;
 
 use App\Http\Controllers\Pandit\AreaController;
@@ -251,6 +253,14 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     
     Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
 
+    // Route::controller(ReportController::class)->group(function() {
+    //     Route::get('/flower-pickup-report', 'pickreportform')->name('admin.flower-pickup-report');
+    //     Route::post('/flower-pickup-report', 'showpickupreport')->name('admin.show-pickup-report');
+      
+    // });
+    Route::get('admin/flower-pickup-report', [ReportController::class, 'flowerPickupReport'])->name('admin.flowerPickupReport');
+    Route::post('admin/flower-pickup-report', [ReportController::class, 'generateReport'])->name('admin.generateFlowerPickupReport');
+    
     // flower vendor controller
 
     Route::controller(FlowerVendorController::class)->group(function() {

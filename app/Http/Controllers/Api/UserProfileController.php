@@ -381,6 +381,7 @@ public function deletePhoto()
                 'apartment' => $locality->apartment->map(function ($apartment) {
                     return [
                         'apartment_id' => $apartment->id,
+                        'locality_id' => $apartment->locality_id,
                         'apartment_name' => $apartment->apartment_name,
                     ];
                 }),
