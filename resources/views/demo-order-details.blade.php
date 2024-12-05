@@ -181,20 +181,25 @@
 
         <!-- Payment Details -->
         <div class="row mt-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="start_date" class="form-label">Start Date</label>
                 <input type="date" name="start_date" class="form-control" id="start_date"
                     placeholder="Enter Amount" required>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">End Date</label>
+                <input type="date" name="end_date" class="form-control" id="end_date"
+                    placeholder="Enter Amount" required>
+            </div>
+            <div class="col-md-3">
                 <label for="paid_amount" class="form-label">Paid Amount</label>
                 <input type="number" name="paid_amount" class="form-control" id="paid_amount"
                     placeholder="Enter Amount" required>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="status" class="form-label">status</label>
                 <select name="status" id="status" class="form-control" required>
-                    <option value="active">active</option>
+                    <option value="actie">active</option>
                     <option value="expired">expired</option>
 
                 </select>

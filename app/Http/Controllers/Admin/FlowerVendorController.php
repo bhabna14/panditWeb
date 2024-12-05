@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FlowerVendor;
 use App\Models\FlowerVendorBank;
+use App\Models\FlowerPickupDetails;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -79,6 +81,15 @@ class FlowerVendorController extends Controller
                             ->get();
     
         return view('admin.manage-flower-vendors', compact('vendor_details'));
+    }
+
+    public function vendorAllDetails($id){
+        $pickupDetails = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
+        ->where('vendor_id',$id)
+        ->get()
+        ->groupBy('pickup_date'); 
+
+    return view('admin.vendor-all-details', compact('pickupDetails'));
     }
 
     public function deleteVendorDetails($id)

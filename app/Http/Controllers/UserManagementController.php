@@ -108,6 +108,8 @@ public function handleUserData(Request $request)
             'start_date' => $validatedUserData['start_date'],
             'address_id' => $address->id,
             'total_price' => $validatedUserData['paid_amount'],
+            'created_at' => $validatedUserData['start_date'],
+            
             
         ]);
 
@@ -139,7 +141,7 @@ public function handleUserData(Request $request)
             'order_id' => $order->order_id,
             'product_id' => $validatedUserData['product_id'],
             'start_date' => $validatedUserData['start_date'],
-            'end_date' => $endDate,
+            'end_date' => $validatedUserData['end_date'],
             // 'is_active' => true,
             'status' => $validatedUserData['status'],
         ]);

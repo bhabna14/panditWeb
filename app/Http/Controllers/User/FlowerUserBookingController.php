@@ -80,9 +80,7 @@ class FlowerUserBookingController extends Controller
 
     public function cutsomizedcheckout($product_id)
     {
-        // dd($product_id);
-        // Retrieve the product details by product_id
-        // $product = FlowerProduct::findOrFail($product_id);
+     
         $singleflowers = FlowerProduct::where('status', 'active')
                         ->where('category', 'Flower')
                         ->get();
