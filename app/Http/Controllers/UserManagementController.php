@@ -138,7 +138,7 @@ public function handleUserData(Request $request)
             'user_id' => $user->userid,
             'order_id' => $order->order_id,
             'product_id' => $validatedUserData['product_id'],
-            'start_date' => $startDate,
+            'start_date' => $validatedUserData['start_date'],
             'end_date' => $endDate,
             // 'is_active' => true,
             'status' => $validatedUserData['status'],
