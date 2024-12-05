@@ -100,7 +100,7 @@
                                         <span class="badge bg-danger">Unpaid</span>
                                     @endif
                                 </td>
-                                <td>&#8377;{{ number_format($pickup->total_price, 2) }}</td> <!-- For INR -->
+                                <td>&#8377;{{ $pickup->total_price }}</td> <!-- For INR -->
 
                             </tr>
                         @endforeach
@@ -108,7 +108,7 @@
                     <tfoot>
                         <tr>
                             <th colspan="4">Grand Total</th>
-                            <th>{{ $grandTotal }}</th>
+                            <th>&#8377;{{ number_format($grandTotal, 2) }}</th>
                         </tr>
                     </tfoot>
                 </table>
