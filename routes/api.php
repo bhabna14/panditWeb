@@ -68,7 +68,7 @@ Route::middleware('auth:rider-api')->group(function () {
     Route::post('/rider/requested-deliver/{order_id}', [OrderController::class, 'markAsRequestedDelivered'])
     ->middleware('auth:rider-api');
 
-
+    Route::post('/rider/flower-pickup-request', [OrderController::class, 'savePickupRequest']);
 });
 
 

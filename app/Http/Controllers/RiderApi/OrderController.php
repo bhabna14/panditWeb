@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
 use App\Models\DeliveryHistory;
+use App\Models\FlowerPickupRequest;
+
 use App\Models\Order;;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -331,6 +333,37 @@ class OrderController extends Controller
     }
 }
 
-        
+public function savePickupRequest(Request $request)
+{
+    // Validate input data
+    $request->validate([
+        'pickup_date' => 'required|date',
+        'pickdetails' => 'required|string',
+    ]);
+
+    // Get the authenticated rider
+    $rider = Auth::guard('rider-api')->user();
+    if (!$rider) {
+        return response()->json([
+            'status' => 401,
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    // Create a new flower pickup request
+    $pickupRequest = new FlowerPickupRequest();
+    $pickupRequest->rider_id = $rider->rider_id;
+    $pickupRequest->pickup_date = $request->pickup_date;
+    $pickupRequest->pickdetails = $request->pickdetails;
+    $pickupRequest->status = 'pending';  // default status is 'pending'
+    $pickupRequest->save();
+
+    // Return response
+    return response()->json([
+        'status' => 200,
+        'message' => 'Flower pickup request saved successfully.',
+        'data' => $pickupRequest,
+    ], 201);
+}
 
 }
