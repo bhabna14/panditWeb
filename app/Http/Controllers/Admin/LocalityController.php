@@ -50,7 +50,7 @@ class LocalityController extends Controller
         foreach ($request->apartment_name as $name) {
             if (!empty(trim($name))) {
                 Apartment::create([
-                    'locality_id' => $locality->id, // Link the apartment to the locality
+                    'locality_id' => $locality->unique_code, // Link the apartment to the locality
                     'apartment_name' => $name,
                 ]);
             }

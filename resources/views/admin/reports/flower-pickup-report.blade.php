@@ -17,9 +17,7 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15">
-                    <a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">Add Flower Pickup Details</a>
-                </li>
+                
                 <li class="breadcrumb-item active" aria-current="page">Flower Pickup Report</li>
             </ol>
         </div>
@@ -68,8 +66,8 @@
                             @php $grandTotal += $pickup->total_price; @endphp
                             <tr>
                                 <td>{{ $pickup->pickup_date }}</td>
-                                <td>{{ $pickup->vendor->name }}</td>
-                                <td>{{ $pickup->rider->name }}</td>
+                                <td>{{ $pickup->vendor->vendor_name }}</td>
+                                <td>{{ $pickup->rider->rider_name }}</td>
                                 <td>
                                     @foreach($pickup->flowerPickupItems as $item)
                                         <div>{{ $item->flower->name }} - {{ $item->quantity }} {{ $item->unit->name }}</div>

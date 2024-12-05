@@ -258,8 +258,8 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     //     Route::post('/flower-pickup-report', 'showpickupreport')->name('admin.show-pickup-report');
       
     // });
-    Route::get('admin/flower-pickup-report', [ReportController::class, 'flowerPickupReport'])->name('admin.flowerPickupReport');
-    Route::post('admin/flower-pickup-report', [ReportController::class, 'generateReport'])->name('admin.generateFlowerPickupReport');
+    Route::get('/flower-pickup-report', [ReportController::class, 'flowerPickupReport'])->name('admin.flowerPickupReport');
+    Route::post('/flower-pickup-report', [ReportController::class, 'generateReport'])->name('admin.generateFlowerPickupReport');
     
     // flower vendor controller
 
