@@ -145,13 +145,13 @@
                 </div>
             </div>
             <div class="col-md-2">
-                <label class="rdiobox"><input name="address_type" type="radio" value="Home"> <span>Home</span></label>
+                <label class="rdiobox"><input checked name="address_type" type="radio" value="Home"> <span>Home</span></label>
             </div>
             <div class="col-lg-2">
                 <label class="rdiobox"><input name="address_type" type="radio" value="Work"> <span>Work</span></label>
             </div>
             <div class="col-lg-2">
-              <label class="rdiobox"><input checked name="address_type" type="radio" value="Other"> <span>Other</span></label>
+              <label class="rdiobox"><input  name="address_type" type="radio" value="Other"> <span>Other</span></label>
           </div>
         </div>
        
@@ -199,7 +199,7 @@
             <div class="col-md-3">
                 <label for="status" class="form-label">status</label>
                 <select name="status" id="status" class="form-control" required>
-                    <option value="actie">active</option>
+                    <option value="active">active</option>
                     <option value="expired">expired</option>
 
                 </select>

@@ -66,6 +66,7 @@ public function handleUserData(Request $request)
             'landmark' => 'nullable|string',
             'product_id' => 'nullable',
             'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date',
             'paid_amount' => 'nullable|numeric',
             'status' => 'nullable|string',
         ]);
@@ -84,7 +85,7 @@ public function handleUserData(Request $request)
         $address = UserAddress::create([
             'user_id' => $user->userid,
             'state' => $validatedUserData['state'],
-            'city' => $validatedUserData['city'],
+            'city' =>"Bhubaneswar",
             'pincode' => $validatedUserData['pincode'],
             'locality' => $validatedUserData['locality'],
             'apartment_name' => $validatedUserData['apartment_name'],

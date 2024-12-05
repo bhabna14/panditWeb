@@ -21,7 +21,8 @@ class Order extends Model
         'rider_id',
         'order_id',  // Add this line
         'address_id',
-        'suggestion'
+        'suggestion',
+        'created_at'
     ];
     public function delivery()
     {
