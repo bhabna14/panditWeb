@@ -108,7 +108,7 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="4">Grand Total</th>
+                            <th colspan="5">Grand Total</th>
                             <th>&#8377;{{ number_format($grandTotal, 2) }}</th>
                         </tr>
                     </tfoot>
