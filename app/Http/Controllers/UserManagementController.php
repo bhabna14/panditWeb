@@ -39,7 +39,14 @@ public function demoOrderDetails()
 
     return view('demo-order-details', compact('localities', 'flowers', 'apartments'));
 }
+public function getApartments($unique_code)
+    {
+        $apartments = Apartment::where('locality_id', $unique_code)
+            ->where('status', 'active')
+            ->get(['apartment_name']);
 
+        return response()->json($apartments);
+    }
 
 public function handleUserData(Request $request)
 {

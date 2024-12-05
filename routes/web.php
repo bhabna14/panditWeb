@@ -501,7 +501,7 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::controller(UserManagementController::class)->group(function() {
         Route::get('/demo-order-details', 'demoOrderDetails')->name('demoOrderDetails');
         Route::post('/save-demo-order-details', 'handleUserData')->name('saveDemoOrderDetails');
-
+        Route::get('/get-apartments-locality/{unique_code}',  'getApartments');
        
     });
 

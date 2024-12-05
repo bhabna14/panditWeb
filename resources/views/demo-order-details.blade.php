@@ -109,22 +109,22 @@
                     @endforeach
                 </select>
             </div>
-            
+        
             <div class="col-md-4">
                 <label for="apartment_name" class="form-label">Apartment Name</label>
                 <select class="form-control" id="apartment_name" name="apartment_name">
                     <option value="">Select Apartment</option>
-                    @foreach ($apartments as $apartment)
-                        <option value="{{ $apartment->apartment_name }}">{{ $apartment->apartment_name }}</option>
-                    @endforeach
                 </select>
             </div>
+        
             <div class="col-md-4">
                 <label for="pincode" class="form-label">Pincode</label>
-                <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" required
-                    >
+                <input type="text" class="form-control" id="pincode" name="pincode" placeholder="Enter pincode" readonly required>
             </div>
         </div>
+        
+       
+        
 
         <div class="row mt-3">
             <div class="col-md-6">
@@ -212,4 +212,28 @@
 
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
+    <script>
+        document.getElementById('locality').addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const pincode = selectedOption.getAttribute('data-pincode');
+            const uniqueCode = this.value;
+    
+            // Update Pincode
+            document.getElementById('pincode').value = pincode;
+    
+            // Fetch Apartments
+            if (uniqueCode) {
+                fetch(`/get-apartments-locality/${uniqueCode}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const apartmentSelect = document.getElementById('apartment_name');
+                        apartmentSelect.innerHTML = '<option value="">Select Apartment</option>';
+                        data.forEach(apartment => {
+                            apartmentSelect.innerHTML += `<option value="${apartment.apartment_name}">${apartment.apartment_name}</option>`;
+                        });
+                    })
+                    .catch(error => console.error('Error fetching apartments:', error));
+            }
+        });
+    </script>
 @endsection
