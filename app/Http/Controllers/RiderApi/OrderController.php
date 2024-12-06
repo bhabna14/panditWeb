@@ -355,6 +355,7 @@ public function savePickupRequest(Request $request)
     $pickupRequest->rider_id = $rider->rider_id;
     $pickupRequest->pickup_date = $request->pickup_date;
     // $pickupRequest->pickdetails = $request->pickdetails;
+    $pickupDetails = $request->pickdetails;
     $formattedDetails = collect(explode("\n", $pickupDetails)) // Split by newlines (assuming details are line-separated)
     ->map(fn($detail) => 'Vendor name : other vendor , ' . $detail) // Prepend the text
     ->implode("\n"); // Join back into a single string with newlines
