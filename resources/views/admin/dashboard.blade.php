@@ -139,7 +139,7 @@
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Total Orders</h6>
+														<h6 class="mb-2 tx-12">Total Pandit Bookings</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -201,7 +201,7 @@
 								
 								
 								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{url('admin/manage-pandits')}}" target="_blank">
+									<a href="" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -230,7 +230,7 @@
 								</div>
 								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
 									
-									<a href="{{url('admin/manage-pandits')}}" target="_blank">
+									<a href="" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -258,7 +258,7 @@
 									</a>
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{url('admin/manage-orders')}}" target="_blank">
+									<a href="" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -287,7 +287,7 @@
 								</div>
 								
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{url('admin/manage-users')}}" target="_blank">
+									<a href="" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -316,7 +316,7 @@
 									</a>
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{url('admin/manage-users')}}" target="_blank">
+									<a href="{" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
