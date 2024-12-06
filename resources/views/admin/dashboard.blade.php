@@ -351,6 +351,127 @@
 						<!-- </div> -->
 					</div>
 					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom">Other Deatils</h4>
+
+							<div class="row">
+								
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-pandits')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Pandits</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalPandit }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-pandits')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Total Pending Pandits</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{$pendingPandit}}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
+															<span class="font-weight-semibold text-danger"> -453</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+													<i class="si si-user-follow tx-16 text-info"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-orders')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Total Income (without request_id)</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalPriceWithoutRequestId ?? 0 }}</h4>
+														</div>
+													</div>
+													
+													
+													
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
+													<i class="si si-user-following tx-16 text-secondary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-users')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Total Income (with request_id)</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalPriceWithRequestId ?? 0 }}</h4>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								
+							</div>
+						</div>
+					</div>
 
 					
 

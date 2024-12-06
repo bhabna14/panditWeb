@@ -53,38 +53,77 @@ class AdminController extends Controller
     }
 }
 
-    public function admindashboard()
-    {
-        $totalPandit = Profile::where('status', 'active')->count();
-        $pendingPandit = Profile::where('pandit_status', 'pending')->count();
-        $totalOrder = Booking:: count();
-        $totalUser = User::count();
+public function admindashboard()
+{
+    $totalPandit = Profile::where('status', 'active')->count();
+    $pendingPandit = Profile::where('pandit_status', 'pending')->count();
+    $totalOrder = Booking::count();
+    $totalUser = User::count();
 
-        $pandit_profiles = Profile::orderBy('id', 'desc')
-                                    ->where('pandit_status', 'pending')                        
-                                    ->get(); // Fetch all profiles        
-        $notifications = Notification::where('is_read', false)->latest()->get();   
-        
-        $activeSubscriptions = Subscription::where('status', 'active')->count();
+    $pandit_profiles = Profile::orderBy('id', 'desc')
+                                ->where('pandit_status', 'pending')                        
+                                ->get(); // Fetch all profiles        
+    $notifications = Notification::where('is_read', false)->latest()->get();   
 
-        // Paused subscriptions count
-        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-        $expiredSubscriptions = Subscription::where('status', 'expired')->count();
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
 
-        // Orders where 'created_at' is today and 'request_id' is not null
-        $ordersRequestedToday = Order::whereDate('created_at', Carbon::today())
-            ->whereNotNull('request_id')
-            ->count();
-        
-        // Orders where 'created_at' is today and 'request_id' is null
-        $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
-            ->whereNull('request_id')
-            ->count();
-        
+    // Paused subscriptions count
+    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+    $expiredSubscriptions = Subscription::where('status', 'expired')->count();
 
+    // Orders where 'created_at' is today and 'request_id' is not null
+    $ordersRequestedToday = Order::whereDate('created_at', Carbon::today())
+        ->whereNotNull('request_id')
+        ->count();
 
-         return view('admin/dashboard', compact('activeSubscriptions','pausedSubscriptions','expiredSubscriptions','ordersRequestedToday','subscriptionOrderToday','notifications','pandit_profiles','totalPandit','pendingPandit','totalOrder','totalUser'));
-    } 
+    // Orders where 'created_at' is today and 'request_id' is null
+    $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
+        ->whereNull('request_id')
+        ->count();
+
+    // Calculate the total price for orders without request_id
+    $ordersWithoutRequestId = Order::whereDate('created_at', Carbon::today())
+        ->whereNull('request_id')
+        ->get();
+
+    $totalPriceWithoutRequestId = 0;
+    foreach ($ordersWithoutRequestId as $order) {
+        $payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
+        if ($payment) {
+            $totalPriceWithoutRequestId += $order->total_price;
+        }
+    }
+
+    // Calculate the total price for orders with request_id
+    $ordersWithRequestId = Order::whereDate('created_at', Carbon::today())
+        ->whereNotNull('request_id')
+        ->get();
+
+    $totalPriceWithRequestId = 0;
+    foreach ($ordersWithRequestId as $order) {
+        $payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
+        if ($payment) {
+            $totalPriceWithRequestId += $order->total_price;
+        }
+    }
+
+    return view('admin/dashboard', compact(
+        'activeSubscriptions',
+        'pausedSubscriptions',
+        'expiredSubscriptions',
+        'ordersRequestedToday',
+        'subscriptionOrderToday',
+        'notifications',
+        'pandit_profiles',
+        'totalPandit',
+        'pendingPandit',
+        'totalOrder',
+        'totalUser',
+        'totalPriceWithoutRequestId',
+        'totalPriceWithRequestId'
+    ));
+}
+
     public function adminlogout()
     {
       
