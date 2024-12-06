@@ -84,13 +84,15 @@ class FlowerVendorController extends Controller
     }
 
     public function vendorAllDetails($id){
+
         $pickupDetails = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
-        ->where('vendor_id',$id)
+        ->where('vendor_id', $id)
         ->get()
-        ->groupBy('pickup_date'); 
-
-
+        ->groupBy('pickup_date');
+    
+    
     return view('admin.vendor-all-details', compact('pickupDetails'));
+    
     }
 
     public function deleteVendorDetails($id)

@@ -82,7 +82,7 @@
                             <div class="card-body p-3">
                                 <i class="fa fa-rupee-sign text-success custom-size-icon"></i>
                                 <h6 class="mb-1">Total Refer</h6>
-                                <p class="mb-0 font-weight-bold">₹{{ number_format($totalSpend, 2) }}</p>
+                                <p class="mb-0 font-weight-bold">0</p>
                             </div>
                         </div>
                     </div>
@@ -98,8 +98,8 @@
             <div class="card-header">
                 <h4 class="card-title">Delivery History</h4>
             </div>
-            <div class="card-body">
-                <table class="table table-bordered">
+            <div class="table-responsive  export-table">
+                <table id="file-datatable" class="table table-bordered ">
                     <thead>
                         <tr>
                             <th>Order ID</th>
