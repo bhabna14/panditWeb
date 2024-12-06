@@ -211,7 +211,7 @@
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalPandit }}</h4>
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $subscriptionOrderToday }}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
 															<span class="text-success font-weight-semibold"> +427</span>
@@ -240,7 +240,7 @@
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{$pendingPandit}}</h4>
+															<h4 class="tx-20 font-weight-semibold mb-2">{{$ordersRequestedToday}}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
 															<span class="font-weight-semibold text-danger"> -453</span>
@@ -268,7 +268,7 @@
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalOrder}}</h4>
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptions}}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
 															<span class=" text-success font-weight-semibold"> +788</span>
@@ -298,7 +298,7 @@
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-22 font-weight-semibold mb-2">{{$totalUser}}</h4>
+															<h4 class="tx-22 font-weight-semibold mb-2">{{$expiredSubscriptions}}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
 															<span class="text-danger font-weight-semibold"> -693</span>
@@ -327,7 +327,7 @@
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-22 font-weight-semibold mb-2">{{$totalUser}}</h4>
+															<h4 class="tx-22 font-weight-semibold mb-2">{{$pausedSubscriptions}}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
 															<span class="text-danger font-weight-semibold"> -693</span>

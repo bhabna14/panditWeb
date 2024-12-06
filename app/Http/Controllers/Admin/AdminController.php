@@ -15,6 +15,9 @@ use App\Models\Booking;
 use App\Models\Poojadetails;
 use App\Models\Poojaitems;
 use App\Models\PanditDevice;
+use App\Models\Order;
+use App\Models\Subscription;
+
 use App\Models\UserDevice;
 use App\Models\PanditLogin;
 use App\Models\Bankdetail;
@@ -24,7 +27,7 @@ use App\Models\PanditEducation;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -60,8 +63,27 @@ class AdminController extends Controller
         $pandit_profiles = Profile::orderBy('id', 'desc')
                                     ->where('pandit_status', 'pending')                        
                                     ->get(); // Fetch all profiles        
-        $notifications = Notification::where('is_read', false)->latest()->get();          
-         return view('admin/dashboard', compact('notifications','pandit_profiles','totalPandit','pendingPandit','totalOrder','totalUser'));
+        $notifications = Notification::where('is_read', false)->latest()->get();   
+        
+        $activeSubscriptions = Subscription::where('status', 'active')->count();
+
+        // Paused subscriptions count
+        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+        $expiredSubscriptions = Subscription::where('status', 'expired')->count();
+
+        // Orders where 'created_at' is today and 'request_id' is not null
+        $ordersRequestedToday = Order::whereDate('created_at', Carbon::today())
+            ->whereNotNull('request_id')
+            ->count();
+        
+        // Orders where 'created_at' is today and 'request_id' is null
+        $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
+            ->whereNull('request_id')
+            ->count();
+        
+
+
+         return view('admin/dashboard', compact('activeSubscriptions','pausedSubscriptions','expiredSubscriptions','ordersRequestedToday','subscriptionOrderToday','notifications','pandit_profiles','totalPandit','pendingPandit','totalOrder','totalUser'));
     } 
     public function adminlogout()
     {
