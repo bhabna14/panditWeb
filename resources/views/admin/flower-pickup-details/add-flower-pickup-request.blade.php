@@ -116,7 +116,7 @@
                         <!-- Flower Details -->
                         <div id="add-flower-wrapper">
                             <div class="row">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="flower_id">Flower</label>
                                         <select name="flower_id[]" class="form-control" required>
@@ -126,7 +126,7 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="unit_id">Unit</label>
                                         <select name="unit_id[]" class="form-control" required>
@@ -136,10 +136,16 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="form-group">
                                         <label for="quantity">Quantity</label>
                                         <input type="number" name="quantity[]" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="price">price</label>
+                                        <input type="number" name="price[]" class="form-control" required>
                                     </div>
                                 </div>
                             </div>
@@ -204,7 +210,7 @@ document.addEventListener('click', function(e) {
             $("#add-flower-wrapper").append(`
                 <div class="remove-flower-wrapper">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="flower_id">Flower</label>
                                 <select name="flower_id[]" class="form-control" required>
@@ -214,7 +220,7 @@ document.addEventListener('click', function(e) {
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="form-group">
                                 <label for="unit_id">Unit</label>
                                 <select name="unit_id[]" class="form-control" required>
@@ -230,6 +236,12 @@ document.addEventListener('click', function(e) {
                                 <input type="number" name="quantity[]" class="form-control" required>
                             </div>
                         </div>
+                        <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label for="price">Price</label>
+                                            <input type="number" name="price[]" class="form-control"  required>
+                                        </div>
+                                </div>
                          <div class="col-md-1 mt-3">
                             <button type="button" class="btn btn-danger mt-2 remove_flower"><i class="fa fa-minus"></i></button>
                             

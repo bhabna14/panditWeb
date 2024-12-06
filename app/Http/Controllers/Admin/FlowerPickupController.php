@@ -121,6 +121,7 @@ class FlowerPickupController extends Controller
         $pickUpId = 'PICKUP-' . strtoupper(uniqid());
     
         // Save main flower pickup details
+        // Save flower pickup details
         $pickup = FlowerPickupDetails::create([
             'pick_up_id' => $pickUpId,
             'vendor_id' => $request->vendor_id,
@@ -131,18 +132,33 @@ class FlowerPickupController extends Controller
             'payment_status' => 'pending',
             'payment_id' => null,
         ]);
-    
-      
-        // Save flower items
-        foreach ($request->flower_id as $index => $flower_id) {
-            FlowerPickupItems::create([
-                'pick_up_id' => $pickUpId,
-                'flower_id' => $flower_id,
-                'unit_id' => $request->unit_id[$index],
-                'quantity' => $request->quantity[$index],
-                'price' => null, // Set price as null initially
-            ]);
+
+        $totalPrice = 0; // Initialize total price
+
+    // Save flower items
+    foreach ($request->flower_id as $index => $flower_id) {
+        $price = $request->price[$index] ?? null; // If no price provided, default to null
+        $quantity = $request->quantity[$index];
+
+        // Create FlowerPickupItem
+        FlowerPickupItems::create([
+            'pick_up_id' => $pickUpId,
+            'flower_id' => $flower_id,
+            'unit_id' => $request->unit_id[$index],
+            'quantity' => $quantity,
+            'price' => $price, // Save price as null if not provided
+        ]);
+
+        // Add price to total if price is given
+        if ($price !== null) {
+            $totalPrice += $price ; // Multiply price by quantity and add to total
         }
+    }
+
+    // Update total price in FlowerPickupDetails
+    $pickup->total_price = $totalPrice;
+    $pickup->save();
+
 
     
         return redirect()->back()->with('success', 'Flower pickup details saved successfully!');
