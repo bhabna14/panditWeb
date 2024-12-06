@@ -34,23 +34,21 @@ class AdminController extends Controller
         return view("adminlogin");
     }
     public function authenticate(Request $request)
-    {
+{
+    $credentials = $request->validate([
+        'email' => 'required',
+        'password' => 'required'
+    ]);
 
-        $credentials = $request->validate([
-            'email' => 'required',
-            'password' => 'required'
-        ]);
-        // $credentials = $request->only('name', 'password');
-        if (Auth::guard('admins')->attempt($request->only('email', 'password'))) {
-           
-            return redirect()->intended('/admin/dashboard');
-            
-        }
-    
-       else {
-            return redirect()->back()->withInput()->withErrors(['login_error' => 'Invalid phone number or email']);
-        }
+    if (Auth::guard('admins')->attempt($credentials)) {
+        $admin = Auth::guard('admins')->user();
+        session(['admin_role' => $admin->role]); // Store role in session
+        
+        return redirect()->intended('/admin/dashboard');
+    } else {
+        return redirect()->back()->withInput()->withErrors(['login_error' => 'Invalid email or password']);
     }
+}
 
     public function admindashboard()
     {
