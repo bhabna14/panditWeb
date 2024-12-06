@@ -17,6 +17,8 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
+                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickuprequest') }}" class="btn btn-info text-white">Add Flower Pickup Request</a></li>
+
                 <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">Add Flower Pickup Details</a></li>
                 
                 <li class="breadcrumb-item active" aria-current="page">Flower Pickup Details</li>
@@ -188,12 +190,5 @@
     <!-- INTERNAL Select2 js -->
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 
-    <script>
-        setTimeout(function() {
-            document.getElementById('Message').style.display = 'none';
-        }, 3000);
-        setTimeout(function() {
-            document.getElementById('Messages').style.display = 'none';
-        }, 3000);
-    </script>
+  
 @endsection

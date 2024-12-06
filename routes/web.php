@@ -276,6 +276,9 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
 
     Route::controller(FlowerPickupController::class)->group(function() {
         Route::get('/add-flower-pickup-details', 'addflowerpickupdetails')->name('admin.addflowerpickupdetails');
+        Route::get('/add-flower-pickup-request', 'addflowerpickuprequest')->name('admin.addflowerpickuprequest');
+        Route::post('/flower-pickup-request/approve/{id}',  'approveRequest')->name('flower-pickup-request.approve');
+
         Route::get('/manage-flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
         Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');

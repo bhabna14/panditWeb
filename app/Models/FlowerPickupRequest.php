@@ -16,4 +16,7 @@ class FlowerPickupRequest extends Model
         'pickdetails',
         'status',
     ];
+    public function rider() {
+        return $this->belongsTo(RiderDetails::class ,'rider_id', 'rider_id');
+    }
 }

@@ -10,6 +10,8 @@ use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
+use App\Models\FlowerPickupRequest;
+
 use Illuminate\Support\Facades\Log;
 
 class FlowerPickupController extends Controller
@@ -29,6 +31,34 @@ class FlowerPickupController extends Controller
     
         return view('admin.flower-pickup-details.add-flower-pickup-details', compact('flowers', 'units', 'vendors', 'riders'));
     }
+    public function addflowerpickuprequest()
+    {
+      
+        $flowers = FlowerProduct::where('status', 'active')
+                        ->where('category', 'Flower')
+                        ->get();
+        $units = PoojaUnit::where('status', 'active')->get();
+        $vendors = FlowerVendor::where('status', 'active')->get();
+        $riders = RiderDetails::where('status', 'active')->get();
+        $pickuprequests = FlowerPickupRequest::where('status', 'pending')->get();
+
+    
+        return view('admin.flower-pickup-details.add-flower-pickup-request', compact('pickuprequests','flowers', 'units', 'vendors', 'riders'));
+    }
+    public function approveRequest($id)
+{
+    $request = FlowerPickupRequest::find($id);
+
+    if ($request) {
+        $request->status = 'approved';
+        $request->save();
+
+        return redirect()->back()->with('success', 'Pickup request approved successfully.');
+    }
+
+    return redirect()->back()->with('error', 'Pickup request not found.');
+}
+
     
     public function manageflowerpickupdetails()
     {
