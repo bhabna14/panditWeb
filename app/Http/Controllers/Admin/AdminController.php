@@ -81,18 +81,17 @@ public function admindashboard()
         ->whereNull('request_id')
         ->count();
 
-    // Calculate the total price for orders without request_id
+  // Calculate the total price for orders without request_id
     $ordersWithoutRequestId = Order::whereDate('created_at', Carbon::today())
-        ->whereNull('request_id')
-        ->get();
+    ->whereNull('request_id')
+    ->get();
 
     $totalPriceWithoutRequestId = 0;
     foreach ($ordersWithoutRequestId as $order) {
-        $payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
-        if ($payment) {
-            $totalPriceWithoutRequestId += $order->total_price;
-        }
+    // No condition on payment_status anymore
+    $totalPriceWithoutRequestId += $order->total_price;
     }
+
 
     // Calculate the total price for orders with request_id
     $ordersWithRequestId = Order::whereDate('created_at', Carbon::today())
