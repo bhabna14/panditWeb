@@ -224,7 +224,7 @@
                                                         </td>
                                             
                                                         <td>
-                                                            <strong>Address:</strong> {{ $request->address->apartment_flat_plot ?? "" }},{{ $order->address->localityDetails->apartment_name ?? "" }}, {{ $request->address->locality_name ?? "" }}<br>
+                                                            <strong>Address:</strong> {{ $request->address->apartment_flat_plot ?? "" }},{{ $order->address->apartment_name ?? "" }}, {{ $request->address->locality_name ?? "" }}<br>
                                                             <strong>Landmark:</strong> {{ $request->address->landmark ?? "" }}<br>
                                                             <strong>City:</strong> {{ $request->address->city ?? ""}}<br>
                                                             <strong>State:</strong> {{ $request->address->state ?? ""}}<br>

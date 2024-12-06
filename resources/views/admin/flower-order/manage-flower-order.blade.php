@@ -138,7 +138,7 @@
                                                        ( {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }} - {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }} )
                                                     </td>
                                                     <td>
-                                                        <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }},{{ $order->address->localityDetails->apartment_name ?? "" }}, {{ $order->address->localityDetails->locality_name ?? "" }}<br>
+                                                        <strong>Address:</strong> {{ $order->address->apartment_flat_plot ?? "" }},{{ $order->address->apartment_name ?? "" }}, {{ $order->address->localityDetails->locality_name ?? "" }}<br>
                                                         <strong>Landmark:</strong> {{ $order->address->landmark ?? "" }}<br>
                                                         <strong>City:</strong> {{ $order->address->city ?? ""}}<br>
                                                         <strong>State:</strong> {{ $order->address->state ?? ""}}<br>
