@@ -63,7 +63,7 @@
     <div class="col-lg-12">
         <div class="card custom-card">
             <div class="card-header">
-                <h4 class="card-title">Delivery History</h4>
+                <h4 class="card-title">Vendor History</h4>
             </div>
             <div class="table-responsive  export-table">
                 <table id="file-datatable" class="table table-bordered ">
@@ -87,16 +87,20 @@
                                 <td>{{ $detail->rider?->rider_name ?? 'N/A' }}</td>
                                 <td>
                                     <ul>
-                                        @foreach ($detail->flowerPickupItems as $item)
-                                            <li>
-                                                <strong>Flower:</strong> {{ $item->flower?->name ?? 'N/A' }} <br>
-                                                <strong>Quantity:</strong> {{ $item->quantity ?? 'N/A' }} {{ $item->unit?->unit_name ?? 'N/A' }} <br>
-                                                <strong>Price:</strong> ₹{{ $item->price ?? 'N/A' }}
-                                            </li>
-                                            @if (!$loop->last)
-                                                <hr>
-                                            @endif
-                                        @endforeach
+                                        @if($detail->flowerPickupItems)
+                                            @foreach ($detail->flowerPickupItems as $item)
+                                                <li>
+                                                    <strong>Flower:</strong> {{ $item->flower?->name ?? 'N/A' }} <br>
+                                                    <strong>Quantity:</strong> {{ $item->quantity ?? 'N/A' }} {{ $item->unit?->unit_name ?? 'N/A' }} <br>
+                                                    <strong>Price:</strong> ₹{{ $item->price ?? 'N/A' }}
+                                                </li>
+                                                @if (!$loop->last)
+                                                    <hr>
+                                                @endif
+                                            @endforeach
+                                        @else
+                                            <li>No flower pickup items available.</li>
+                                        @endif
                                     </ul>
                                 </td>
                                 <td>{{ $detail->pickup_date }}</td>
