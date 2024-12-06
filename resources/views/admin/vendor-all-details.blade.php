@@ -45,11 +45,19 @@
 
                     <!-- Rider Details -->
                     <div class="profile-details">
-                        <h4 class="mb-1">{{ optional($pickupDetails->first()->first()->vendor)->vendor_name ?? 'N/A' }}</h4>
-                        <p class="mb-0 text-muted">
-                            <i class="fa fa-phone me-2"></i>Phone: {{ optional($pickupDetails->first()->first()->vendor)->phone_no ?? 'N/A' }}
-                        </p>
+                        @if ($pickupDetails->isNotEmpty() && $pickupDetails->first()->isNotEmpty())
+                            <h4 class="mb-1">{{ optional($pickupDetails->first()->first()->vendor)->vendor_name ?? 'N/A' }}</h4>
+                            <p class="mb-0 text-muted">
+                                <i class="fa fa-phone me-2"></i>Phone: {{ optional($pickupDetails->first()->first()->vendor)->phone_no ?? 'N/A' }}
+                            </p>
+                        @else
+                            <h4 class="mb-1">N/A</h4>
+                            <p class="mb-0 text-muted">
+                                <i class="fa fa-phone me-2"></i>Phone: N/A
+                            </p>
+                        @endif
                     </div>
+                    
                 </div>
 
                 <!-- Rider Statistics -->
