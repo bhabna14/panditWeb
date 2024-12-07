@@ -55,7 +55,15 @@
                                         {{ $errors->first('danger') }}
                                     </div>
                                     @endif
-                                   
+                                    @if ($errors->any())
+                                    <div class="alert alert-danger">
+                                        <ul>
+                                            @foreach ($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                @endif
                                     <form action="{{ route('subadmins.update', $subadmin->id) }}" method="POST">
                                         @csrf
                                         <div class="mb-3">
