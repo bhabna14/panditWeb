@@ -17,13 +17,13 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Subadmins</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Edit Subadmin</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
                             {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Subadmins</li>
+                            <li class="breadcrumb-item active" aria-current="page">Manage Subadmin</li>
                         </ol>
                     </div>
                 </div>
@@ -55,45 +55,32 @@
                                         {{ $errors->first('danger') }}
                                     </div>
                                     @endif
-                                    <div class="table-responsive ">
-                                        <table id="file-datatable" class="table table-bordered ">
-                                            <thead>
-                                                <tr>
-                                                    <th> ID</th>
-                                                    <th>Name</th>
-                                                    <th>Email</th>
-                                                    <th>Role</th>
-                                                   
-                                                    <th>Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($subadmins as $subadmin)
-                                                <tr>
-                                                    
-                                                    <td>{{ $loop->iteration }}</td>
-                                                    <td>{{ $subadmin->name }}</td>
-                                                    <td>{{ $subadmin->email }}</td>
-                                                    <td>{{ $subadmin->role }}</td>
-                                                   
-                                                    <td>
-                                                        <a href="{{ route('subadmins.edit', $subadmin->id) }}" class="btn btn-warning btn-sm"><i class="fa fa-edit"></i></a>
-                                                        <form action="{{ route('subadmins.delete', $subadmin->id) }}" method="POST" style="display:inline-block;">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')"><i class="fa fa-trash"></i></button>
-                                                        </form>
-                                                    </td>
-                                                    
-                                                </tr>
-                                                @endforeach
-                                            </tbody>
-                                            
-                                        </table>
-                                      
-                                        
-
-                                    </div>
+                                   
+                                    <form action="{{ route('subadmins.update', $subadmin->id) }}" method="POST">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label for="name" class="form-label">Name</label>
+                                            <input type="text" class="form-control" id="name" name="name" value="{{ $subadmin->name }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" class="form-control" id="email" name="email" value="{{ $subadmin->email }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="role" class="form-label">Role</label>
+                                            <input type="text" class="form-control" id="role" name="role" value="{{ $subadmin->role }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="password" class="form-label">Password (optional)</label>
+                                            <input type="password" class="form-control" id="password" name="password">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="password_confirmation" class="form-label">Confirm Password</label>
+                                            <input type="password" class="form-control" id="password_confirmation" name="password_confirmation">
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                    </form>
+                                
                                 </div>
                             </div>
                         </div>

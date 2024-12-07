@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\RiderController;
 use App\Http\Controllers\Admin\FlowerVendorController;
 use App\Http\Controllers\Admin\FlowerPickupController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SubadminController;
 
 use App\Http\Controllers\UserManagementController;
 
@@ -217,6 +218,13 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
 ## admin routes
 Route::prefix('admin')->middleware(['admin'])->group(function () {
+
+    Route::get('/manage-subadmins',  [SubadminController::class, 'managesubadmin'])->name('managesubadmin');
+    Route::get('/subadmins/{id}/edit', [SubadminController::class, 'edit'])->name('subadmins.edit');
+    Route::post('/subadmins/{id}/update', [SubadminController::class, 'update'])->name('subadmins.update');
+    Route::delete('/subadmins/{id}/delete', [SubadminController::class, 'delete'])->name('subadmins.delete');
+
+
     Route::get('/add-product', [ProductController::class, 'addproduct']);
     Route::get('/manage-product',  [ProductController::class, 'manageproduct'])->name('manageproduct');
 
@@ -236,6 +244,7 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
     Route::get('/manage-delivery-history', [FlowerOrderController::class, 'mngdeliveryhistory'])->name('admin.managedeliveryhistory');
     Route::get('/rider-all-details/{id}', [FlowerOrderController::class, 'showRiderDetails'])->name('admin.riderAllDetails');
+Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])->name('orders.markAsViewed');
 
     //rider assign by admin and update
     Route::post('orders/{id}/assignRider', [FlowerOrderController::class, 'assignRider'])->name('admin.orders.assignRider');
