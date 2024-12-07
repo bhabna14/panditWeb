@@ -81,7 +81,7 @@
 													<div class="d-flex wd-100p">
 														<div class="main-img-user"><img alt="" src="{{asset('assets/img/faces/2.jpg')}}" class=""></div>
 														<div class="ms-3 my-auto">
-															<h6 class="tx-15 font-weight-semibold mb-0">{{ Auth::guard('users')->user()->name;}}</h6><span class="dropdown-title-text subtext op-6  tx-12">Premium Member</span>
+															<h6 class="tx-15 font-weight-semibold mb-0">{{ Auth::guard('admins')->user()->name }}</h6><span class="dropdown-title-text subtext op-6  tx-12">Premium Member</span>
 														</div>
 													</div>
 												</div>
