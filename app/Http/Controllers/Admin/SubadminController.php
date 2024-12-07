@@ -41,7 +41,7 @@ class SubadminController extends Controller
 
         $subadmin->save();
 
-        return redirect()->route('subadmins.manage')->with('success', 'Sub-admin updated successfully.');
+        return redirect()->route('managesubadmin')->with('success', 'Sub-admin updated successfully.');
     }
 
     // Delete Sub-admin
@@ -50,6 +50,6 @@ class SubadminController extends Controller
         $subadmin = Admin::findOrFail($id);
         $subadmin->delete();
 
-        return redirect()->route('subadmins.manage')->with('success', 'Sub-admin deleted successfully.');
+        return redirect()->route('managesubadmin')->with('success', 'Sub-admin deleted successfully.');
     }
 }
