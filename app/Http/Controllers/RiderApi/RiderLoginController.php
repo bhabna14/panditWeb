@@ -137,45 +137,102 @@ class RiderLoginController extends Controller
     }
     
     
+    // public function getRiderDetails()
+    // {
+    //     try {
+    //         // Get the authenticated rider
+    //         $rider = Auth::guard('rider-api')->user();
+
+    //         if (!$rider) {
+    //             return response()->json([
+    //                 'status' => 401,
+    //                 'message' => 'Unauthorized',
+    //             ], 401);
+    //         }
+
+    //         // Retrieve rider details
+    //         $riderDetails = RiderDetails::where('rider_id', $rider->rider_id)->first();
+
+    //         if (!$riderDetails) {
+    //             return response()->json([
+    //                 'status' => 404,
+    //                 'message' => 'Rider details not found',
+    //             ], 404);
+    //         }
+
+    //         // Generate the full image URL
+    //         $riderDetails->rider_img = $riderDetails->rider_img 
+    //             ? url('storage/' . $riderDetails->rider_img) 
+    //             : null;
+
+    //         return response()->json([
+    //             'status' => 200,
+    //             'message' => 'Rider details fetched successfully',
+    //             'data' => $riderDetails,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => 500,
+    //             'message' => 'Something went wrong',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
     public function getRiderDetails()
-    {
-        try {
-            // Get the authenticated rider
-            $rider = Auth::guard('rider-api')->user();
+{
+    try {
+        // Get the authenticated rider
+        $rider = Auth::guard('rider-api')->user();
 
-            if (!$rider) {
-                return response()->json([
-                    'status' => 401,
-                    'message' => 'Unauthorized',
-                ], 401);
-            }
-
-            // Retrieve rider details
-            $riderDetails = RiderDetails::where('rider_id', $rider->rider_id)->first();
-
-            if (!$riderDetails) {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Rider details not found',
-                ], 404);
-            }
-
-            // Generate the full image URL
-            $riderDetails->rider_img = $riderDetails->rider_img 
-                ? url('storage/' . $riderDetails->rider_img) 
-                : null;
-
+        if (!$rider) {
             return response()->json([
-                'status' => 200,
-                'message' => 'Rider details fetched successfully',
-                'data' => $riderDetails,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'Something went wrong',
-                'error' => $e->getMessage(),
-            ], 500);
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
         }
+
+        // Retrieve rider details
+        $riderDetails = RiderDetails::where('rider_id', $rider->rider_id)->first();
+
+        if (!$riderDetails) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Rider details not found',
+            ], 404);
+        }
+
+        // Generate the full image URL
+        $riderDetails->rider_img = $riderDetails->rider_img 
+            ? url('storage/' . $riderDetails->rider_img) 
+            : null;
+
+        // Get total deliveries done by the rider
+        $totalDeliveries = DeliveryHistory::where('rider_id', $rider->rider_id)
+            ->count();
+
+        // Get deliveries done by the rider in the current month
+        $currentMonthDeliveries = DeliveryHistory::where('rider_id', $rider->rider_id)
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+            ->count();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Rider details fetched successfully',
+            'data' => [
+                'riderDetails' => $riderDetails,
+                'totalDeliveries' => $totalDeliveries,
+                'currentMonthDeliveries' => $currentMonthDeliveries,
+            ],
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 500,
+            'message' => 'Something went wrong',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
 }

@@ -19,14 +19,14 @@ class FollowUpController extends Controller
         ->with([
             'subscription' => function ($query) {
                 $query->where('status', 'active')
-                      ->whereBetween('end_date', [Carbon::today(), Carbon::today()->addDays(3)]);
+                      ->whereBetween('end_date', [Carbon::today(), Carbon::today()->addDays(5)]);
             },
             'user',
             'address.localityDetails'
         ])
         ->whereHas('subscription', function ($query) {
             $query->where('status', 'active')
-                  ->whereBetween('end_date', [Carbon::today(), Carbon::today()->addDays(3)]);
+                  ->whereBetween('end_date', [Carbon::today(), Carbon::today()->addDays(5)]);
         })
         ->orderBy('created_at', 'desc')
         ->get();

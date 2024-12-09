@@ -93,7 +93,7 @@
                         </td>
                         <td>
                             <!-- Call Button with Phone Icon -->
-                            <a href="tel:{{ $order->user->phone }}" class="btn btn-sm btn-success mb-2">
+                            <a href="tel:{{ $order->user->mobile_number }}" class="btn btn-sm btn-success mb-2">
                                 <i class="fas fa-phone-alt"></i> Call
                             </a>
                         
