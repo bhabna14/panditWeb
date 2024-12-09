@@ -42,15 +42,19 @@
         @csrf
         <!-- User Details -->
         <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="name" class="form-label">User Name</label>
-                <input type="text" name="name" class="form-control" id="name" placeholder="Enter User Name">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="phone" class="form-label">Phone Number</label>
-                <input type="text" name="mobile_number" class="form-control" id="mobile_number" placeholder="Enter Phone Number" required>
+            <div class="col-md-12">
+                <label for="userid" class="form-label">User</label>
+                <select class="form-control" id="userid" name="userid" required>
+                    <option value="">Select User</option>
+                    @foreach ($user_details as $user)
+                        <option value="{{ $user->userid }}">
+                            {{ $user->userid }} - ({{ $user->mobile_number }})
+                        </option>
+                    @endforeach
+                </select>
             </div>
         </div>
+        
 
         <!-- Address Details -->
         <div class="row">
@@ -88,8 +92,7 @@
         <div class="row mt-3">
             <div class="col-md-6">
                 <label for="apartment_flat_plot" class="form-label">Apartment/Flat/Plot</label>
-                <input type="text" class="form-control" id="apartment_flat_plot" name="apartment_flat_plot"
-                    placeholder="Enter details" required>
+                <input type="text" class="form-control" id="apartment_flat_plot" name="apartment_flat_plot"  placeholder="Enter details" required>
             </div>
             <div class="col-md-6">
                 <label for="landmark" class="form-label">Landmark</label>

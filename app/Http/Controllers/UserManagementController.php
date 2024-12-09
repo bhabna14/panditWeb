@@ -24,6 +24,9 @@ class UserManagementController extends Controller
 
     public function demoOrderDetails()
     {
+
+        $user_details = User::get();
+
         $flowers = FlowerProduct::where('status', 'active')
             ->where('category', 'Subscription')
             ->get();
@@ -38,7 +41,7 @@ class UserManagementController extends Controller
         // Group apartments by locality_id
         $apartmentsByLocality = $apartments->groupBy('locality_id');
     
-        return view('demo-order-details', compact('localities', 'flowers', 'apartmentsByLocality'));
+        return view('demo-order-details', compact('localities', 'flowers', 'apartmentsByLocality','user_details'));
     }
     
     
@@ -52,8 +55,9 @@ public function handleUserData(Request $request)
 
         // Validate user details
         $validatedUserData = $request->validate([
-            'name' => 'nullable',
-            'mobile_number' => 'required',
+            // 'name' => 'nullable',
+            // 'mobile_number' => 'required',
+            'userid' => 'required|string',
             'state' => 'required|string',
             'city' => 'required|string',
             'pincode' => 'required|digits:6',
@@ -71,19 +75,19 @@ public function handleUserData(Request $request)
             'status' => 'nullable|string',
         ]);
 
-        // Generate unique user ID
-        $user_id = 'USER' . rand(10000, 99999);
-
-        // Create the user
-        $user = User::create([
-            'userid' => $user_id,
-            'name' => $validatedUserData['name'],
-            'mobile_number' => '+91' . $validatedUserData['mobile_number'],
-        ]);
+        // // Generate unique user ID
+        // $user_id = 'USER' . rand(10000, 99999);
+        
+        // // Create the user
+        // $user = User::create([
+        //     'userid' => $user_id,
+        //     'name' => $validatedUserData['name'],
+        //     'mobile_number' => '+91' . $validatedUserData['mobile_number'],
+        // ]);
 
         // Create user address
         $address = UserAddress::create([
-            'user_id' => $user->userid,
+            'user_id' => $validatedUserData['userid'],
             'state' => $validatedUserData['state'],
             'city' =>"Bhubaneswar",
             'pincode' => $validatedUserData['pincode'],
@@ -102,7 +106,7 @@ public function handleUserData(Request $request)
 
         // Create order
         $order = Order::create([
-            'user_id' => $user->userid,
+            'user_id' => $validatedUserData['userid'],
             'order_id' => $orderId,
             'product_id' => $validatedUserData['product_id'],
             'quantity' => '1',
@@ -138,12 +142,11 @@ public function handleUserData(Request $request)
         // Create subscription
         Subscription::create([
             'subscription_id' => $subscriptionId,
-            'user_id' => $user->userid,
+            'user_id' => $validatedUserData['userid'],
             'order_id' => $order->order_id,
             'product_id' => $validatedUserData['product_id'],
             'start_date' => $validatedUserData['start_date'],
             'end_date' => $validatedUserData['end_date'],
-            // 'is_active' => true,
             'status' => $validatedUserData['status'],
         ]);
 
@@ -151,7 +154,7 @@ public function handleUserData(Request $request)
         FlowerPayment::create([
             'order_id' => $order->order_id,
             'payment_id' => 'NULL',
-            'user_id' => $user->userid,
+            'user_id' => $validatedUserData['userid'],
             'payment_method' => 'rozarpay',
             'paid_amount' => $validatedUserData['paid_amount'],
             'payment_status' => 'paid',
