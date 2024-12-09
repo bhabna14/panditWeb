@@ -34,7 +34,7 @@ class FlowerOrderController extends Controller
     $riders = RiderDetails::where('status', 'active')->get();
     
     // Count unviewed orders
-    $unviewedOrdersCount = Order::where('is_viewed', false)->count();
+    // $unviewedOrdersCount = Order::where('is_viewed', false)->count();
 
     return view('admin.flower-order.manage-flower-order', compact(
         'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday', 'unviewedOrdersCount'
