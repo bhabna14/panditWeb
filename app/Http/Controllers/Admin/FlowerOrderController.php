@@ -37,7 +37,7 @@ class FlowerOrderController extends Controller
     // $unviewedOrdersCount = Order::where('is_viewed', false)->count();
 
     return view('admin.flower-order.manage-flower-order', compact(
-        'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday', 'unviewedOrdersCount'
+        'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
     ));
 }
 public function markAsViewed()
