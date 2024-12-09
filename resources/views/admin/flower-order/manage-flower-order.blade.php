@@ -173,7 +173,7 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <button id="viewOrdersButton" class="btn btn-primary">Mark Orders as Viewed</button>
+                                                        {{-- <button id="viewOrdersButton" class="btn btn-primary">Mark Orders as Viewed</button> --}}
 
                                                         <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>
                                                     </td>
