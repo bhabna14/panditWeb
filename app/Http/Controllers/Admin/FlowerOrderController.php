@@ -22,23 +22,31 @@ class FlowerOrderController extends Controller
 {
     //
     public function showOrders()
-    {
-        $orders = Order::whereNull('request_id')
-                       ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user','flowerProduct','address.localityDetails'])
-                       ->orderBy('created_at', 'desc')
-                       ->get();
-                       $activeSubscriptions = Subscription::where('status', 'active')->count();
+{
+    $orders = Order::whereNull('request_id')
+                   ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                   ->orderBy('created_at', 'desc')
+                   ->get();
 
-                       // Paused subscriptions count
-                       $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-               
-                       // Orders requested today
-                       $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
-        $riders = RiderDetails::where('status', 'active')
-                      
-                       ->get();           
-        return view('admin.flower-order.manage-flower-order', compact('riders','orders','activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
-    }
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
+    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+    $riders = RiderDetails::where('status', 'active')->get();
+    
+    // Count unviewed orders
+    $unviewedOrdersCount = Order::where('is_viewed', false)->count();
+
+    return view('admin.flower-order.manage-flower-order', compact(
+        'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday', 'unviewedOrdersCount'
+    ));
+}
+public function markAsViewed()
+{
+    Order::where('is_viewed', false)->update(['is_viewed' => true]);
+    return response()->json(['message' => 'Orders marked as viewed.'], 200);
+}
+
+
 
     // In your Controller:
 public function showNotifications()
