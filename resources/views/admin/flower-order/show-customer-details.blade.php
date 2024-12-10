@@ -292,10 +292,13 @@
                                                                         @endif
                                                                     </div>
                                                                     <p class="card-text mb-2">
-                                                                        <strong>Address:</strong> {{ $address->area ?? "N/A" }}<br>
-                                                                        <strong>City:</strong> {{ $address->city ?? "N/A" }}<br>
-                                                                        <strong>State:</strong> {{ $address->state ?? "N/A" }}<br>
-                                                                        <strong>Zip Code:</strong> {{ $address->pincode ?? "N/A" }}
+                                                                                
+                                                                            <strong>Address:</strong> {{ $address->apartment_flat_plot ?? "" }},{{ $address->apartment_name ?? "" }}, {{ $address->localityDetails->locality_name ?? "" }}<br>
+                                                                            <strong>Landmark:</strong> {{ $address->landmark ?? "" }}<br>
+                                                                            <strong>City:</strong> {{ $address->city ?? ""}}<br>
+                                                                            <strong>State:</strong> {{ $address->state ?? ""}}<br>
+                                                                            <strong>Pin Code:</strong> {{ $address->pincode ?? "" }}
+                                                                       
                                                                     </p>
                                                                 </div>
                                                             </div>

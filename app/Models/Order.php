@@ -62,5 +62,9 @@ public function pauseResumeLogs()
 {
     return $this->hasMany(SubscriptionPauseResumeLog::class, 'order_id', 'order_id');
 }
+public function marketingFollowUps()
+{
+    return $this->hasMany(MarketingFollowUp::class, 'order_id', 'order_id');
+}
 
 }

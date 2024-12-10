@@ -17,9 +17,8 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('subscriptions:update-status')->daily();
-        $schedule->call(function () {
-            Subscription::expireIfEnded();
-        })->daily();
+        $schedule->command('subscription:update-status-expired')->daily();
+        $schedule->command('subscription:update-paused-to-active')->daily();
     }
 
     /**

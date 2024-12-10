@@ -173,6 +173,8 @@
                                                         @endif
                                                     </td>
                                                     <td>
+                                                        {{-- <button id="viewOrdersButton" class="btn btn-primary">Mark Orders as Viewed</button> --}}
+
                                                         <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>
                                                     </td>
                                                 </tr>
@@ -239,5 +241,33 @@
 
     <!-- INTERNAL Select2 js -->
     <script src="{{asset('assets/plugins/select2/js/select2.full.min.js')}}"></script>
+    {{-- <script>
+        let playSound = {{ $unviewedOrdersCount > 0 ? 'true' : 'false' }};
+        const audio = new Audio('{{ asset('sound/flowersound.mp3') }}');
+    
+        if (playSound) {
+            audio.loop = true;
+            audio.play();
+        }
+    
+        // Mark orders as viewed and stop sound
+        function markOrdersAsViewed() {
+            fetch("{{ route('orders.markAsViewed') }}", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                }
+            }).then(response => {
+                if (response.ok) {
+                    audio.pause();
+                    playSound = false;
+                }
+            });
+        }
+    
+        // Call the function when the "view orders" button or action is clicked
+        document.getElementById('viewOrdersButton').addEventListener('click', markOrdersAsViewed);
+    </script> --}}
+    
 
 @endsection

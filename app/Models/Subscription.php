@@ -24,26 +24,7 @@ class Subscription extends Model
         'status'
     ];
     // In Subscription.php model
-public static function expireIfEnded()
-{
-    $today = Carbon::today();
 
-    // Find active subscriptions where the end date has passed
-    $subscriptions = self::where('is_active', true)
-        ->where('end_date', '<', $today)
-        ->get();
-
-    foreach ($subscriptions as $subscription) {
-        $subscription->status = 'expired';
-        $subscription->is_active = false;
-        $subscription->save();
-
-        Log::info('Subscription expired', [
-            'order_id' => $subscription->order_id,
-            'user_id' => $subscription->user_id,
-        ]);
-    }
-}
 public function pauseResumeLogs()
 {
     return $this->hasMany(SubscriptionPauseResumeLog::class);

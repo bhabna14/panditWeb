@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\FlowerVendorController;
 use App\Http\Controllers\Admin\FlowerPickupController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubadminController;
+use App\Http\Controllers\Admin\FollowUpController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -263,6 +264,14 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
     
     Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
 
+
+    // Followup Controller 
+
+    Route::get('/follow-up-subscriptions', [FollowUpController::class, 'followUpSubscriptions'])->name('admin.followUpSubscriptions');
+Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
+
+
+
     // Route::controller(ReportController::class)->group(function() {
     //     Route::get('/flower-pickup-report', 'pickreportform')->name('admin.flower-pickup-report');
     //     Route::post('/flower-pickup-report', 'showpickupreport')->name('admin.show-pickup-report');
@@ -270,7 +279,9 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
     // });
     Route::get('/flower-pickup-report', [ReportController::class, 'flowerPickupReport'])->name('admin.flowerPickupReport');
     Route::post('/flower-pickup-report', [ReportController::class, 'generateReport'])->name('admin.generateFlowerPickupReport');
-    
+    Route::get('/revenue-report', [ReportController::class, 'showRevenueReport'])->name('admin.revenueReport');
+    Route::post('/revenue-report', [ReportController::class, 'filterRevenueReport'])->name('admin.filterRevenueReport');
+
     // flower vendor controller
 
     Route::controller(FlowerVendorController::class)->group(function() {
