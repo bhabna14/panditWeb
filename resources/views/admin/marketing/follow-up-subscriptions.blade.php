@@ -127,37 +127,43 @@
         </div> 
     </div>
 </div>
-<div class="modal fade" id="viewNotesModal-{{ $order->id }}" tabindex="-1" aria-labelledby="viewNotesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Follow-Up Notes for Order #{{ $order->order_id }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @if ($order->marketingFollowUps->isEmpty())
-                    <p>No follow-up notes available.</p>
-                @else
-                    <div class="timeline">
-                        @foreach ($order->marketingFollowUps as $followUp)
-                            <div class="timeline-item">
-                                <span class="timeline-date">{{ \Carbon\Carbon::parse($followUp->followup_date)->format('d M Y') }}</span>
-                                <div class="timeline-content">
-                                    <strong>Note:</strong> {{ $followUp->note }}
-                                    <br>
-                                    <small>Added on {{ $followUp->created_at->format('d M Y, h:i A') }}</small>
+@foreach ($orders as $order)
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="viewNotesModal-{{ $order->id }}" tabindex="-1" aria-labelledby="viewNotesModalLabel-{{ $order->id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Follow-Up Notes for Order #{{ $order->order_id }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @if ($order->marketingFollowUps->isEmpty())
+                        <p>No follow-up notes available.</p>
+                    @else
+                        <div class="timeline">
+                            @foreach ($order->marketingFollowUps as $followUp)
+                                <div class="timeline-item">
+                                    <span class="timeline-date">{{ \Carbon\Carbon::parse($followUp->followup_date)->format('d M Y') }}</span>
+                                    <div class="timeline-content">
+                                        <strong>Note:</strong> {{ $followUp->note }}
+                                        <br>
+                                        <small>Added on {{ $followUp->created_at->format('d M Y, h:i A') }}</small>
+                                    </div>
                                 </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @endif
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+@endforeach
+
 
 @foreach($orders as $order)
 @if($order->subscription)
