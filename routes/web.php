@@ -40,6 +40,7 @@ use App\Http\Controllers\Admin\FollowUpController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
+use App\Http\Controllers\NewUserOrderController;
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -49,7 +50,6 @@ use App\Http\Controllers\Pandit\PanditController;
 use App\Http\Controllers\Pandit\AddressController;
 use App\Http\Controllers\Pandit\ProfileController;
 use App\Http\Controllers\Pandit\PoojaListController;
-// use App\Http\Controllers\Pandit\PanditLoginController; 
 use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
@@ -534,6 +534,11 @@ Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->nam
         Route::get('/demo-customize-order', 'demoCustomizeOrder')->name('demoCustomizeOrder');
         Route::post('/save-customize-order', 'saveCustomizeOrder')->name('saveCustomizeOrder');
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
+    });
+
+    Route::controller(NewUserOrderController::class)->group(function() {
+        Route::get('/new-user-order', 'newUserOrder')->name('newUserOrder');
+        Route::post('/save-new-user-order', 'saveNewUserOrder')->name('saveNewUserOrder');
     });
     
 });

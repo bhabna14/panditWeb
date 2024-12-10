@@ -19,35 +19,29 @@ use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
 
 use Illuminate\Support\Facades\DB;
 
-class UserManagementController extends Controller
+class NewUserOrderController extends Controller
 {
 
-    public function demoOrderDetails()
+    public function newUserOrder()
     {
-        $user_details = User::get();
-
         $flowers = FlowerProduct::where('status', 'active')
             ->where('category', 'Subscription')
             ->get();
     
-        return view('demo-order-details', compact('flowers','user_details'));
+        // Get all localities and apartments
+        $localities = Locality::where('status', 'active')
+            ->select('locality_name', 'unique_code', 'pincode')
+            ->get();
+    
+        $apartments = Apartment::where('status', 'active')->get();
+    
+        // Group apartments by locality_id
+        $apartmentsByLocality = $apartments->groupBy('locality_id');
+    
+        return view('new-user-order', compact('localities', 'flowers', 'apartmentsByLocality'));
     }
     
-    public function getUserAddresses($userId)
-    {
-        $addresses = UserAddress::where('user_id', $userId)
-            ->where('status', 'active')
-            ->get(['id', 'address_type', 'apartment_flat_plot', 'locality', 'landmark', 'city', 'state', 'country', 'pincode', 'default']);
-    
-        foreach ($addresses as $address) {
-            $address->locality_name = $address->localityDetails->locality_name ?? 'N/A';
-        }
-    
-        return response()->json(['addresses' => $addresses]);
-    }
-
-
-public function handleUserData(Request $request)
+public function saveNewUserOrder(Request $request)
 {
     try {
         // Start a database transaction
@@ -55,8 +49,18 @@ public function handleUserData(Request $request)
 
         // Validate user details
         $validatedUserData = $request->validate([
-            'userid' => 'required|string',
-            'address_id' => 'required|string',
+            'name' => 'nullable',
+            'mobile_number' => 'required',
+            'state' => 'required|string',
+            'city' => 'required|string',
+            'pincode' => 'required|digits:6',
+            'apartment_name' => 'nullable|string',
+            'address_type' => 'nullable|string',
+            'place_category' => 'nullable|string',
+            'duration' => 'nullable|numeric|in:1,3,6',
+            'locality' => 'required|string',
+            'apartment_flat_plot' => 'required|string',
+            'landmark' => 'nullable|string',
             'product_id' => 'nullable',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
@@ -64,20 +68,45 @@ public function handleUserData(Request $request)
             'status' => 'nullable|string',
         ]);
 
+        // Generate unique user ID
+        $user_id = 'USER' . rand(10000, 99999);
+
+        // Create the user
+        $user = User::create([
+            'userid' => $user_id,
+            'name' => $validatedUserData['name'],
+            'mobile_number' => '+91' . $validatedUserData['mobile_number'],
+        ]);
+
+        // Create user address
+        $address = UserAddress::create([
+            'user_id' => $user->userid,
+            'state' => $validatedUserData['state'],
+            'city' => $validatedUserData['city'],
+            'pincode' => $validatedUserData['pincode'],
+            'locality' => $validatedUserData['locality'],
+            'apartment_name' => $validatedUserData['apartment_name'],
+            'place_category' => $validatedUserData['place_category'],
+            'apartment_flat_plot' => $validatedUserData['apartment_flat_plot'],
+            'landmark' => $validatedUserData['landmark'] ?? null,
+            'address_type' => $validatedUserData['address_type'],
+            'country' => 'India',
+            'status' => 'active',
+        ]);
+
         // Generate unique order ID
         $orderId = 'ORD-' . strtoupper(Str::random(12));
 
         // Create order
         $order = Order::create([
-            'user_id' => $validatedUserData['userid'],
+            'user_id' => $user->userid,
             'order_id' => $orderId,
             'product_id' => $validatedUserData['product_id'],
             'quantity' => '1',
             'start_date' => $validatedUserData['start_date'],
-            'address_id' => $validatedUserData['address_id'],
+            'address_id' => $address->id,
             'total_price' => $validatedUserData['paid_amount'],
             'created_at' => $validatedUserData['start_date'],
-            
         ]);
 
         // Generate unique subscription ID
@@ -104,11 +133,12 @@ public function handleUserData(Request $request)
         // Create subscription
         Subscription::create([
             'subscription_id' => $subscriptionId,
-            'user_id' => $validatedUserData['userid'],
+            'user_id' => $user->userid,
             'order_id' => $order->order_id,
             'product_id' => $validatedUserData['product_id'],
             'start_date' => $validatedUserData['start_date'],
             'end_date' => $validatedUserData['end_date'],
+            // 'is_active' => true,
             'status' => $validatedUserData['status'],
         ]);
 
@@ -116,7 +146,7 @@ public function handleUserData(Request $request)
         FlowerPayment::create([
             'order_id' => $order->order_id,
             'payment_id' => 'NULL',
-            'user_id' => $validatedUserData['userid'],
+            'user_id' => $user->userid,
             'payment_method' => 'rozarpay',
             'paid_amount' => $validatedUserData['paid_amount'],
             'payment_status' => 'paid',
