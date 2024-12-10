@@ -8,6 +8,7 @@ use App\Models\Locality;
 class UserAddress extends Model
 {
     use HasFactory;
+    
     protected $fillable = [
        'user_id', 'address_type', 'area', 'city', 'state', 'pincode', 'country', 'default',
         'locality', 'apartment_name','place_category', 'apartment_flat_plot', 'landmark'

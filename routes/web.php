@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubadminController;
 
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\UserCustomizeOrderController;
 
 use App\Http\Controllers\Pandit\AreaController;
 use App\Http\Controllers\Pandit\BankController;
@@ -518,7 +519,12 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
        
     });
 
-
+    Route::controller(UserCustomizeOrderController::class)->group(function() {
+        Route::get('/demo-customize-order', 'demoCustomizeOrder')->name('demoCustomizeOrder');
+        Route::post('/save-customize-order', 'saveCustomizeOrder')->name('saveCustomizeOrder');
+        Route::get('/get-user-addresses/{userId}','getUserAddresses');
+    });
+    
 });
 
 // user routes

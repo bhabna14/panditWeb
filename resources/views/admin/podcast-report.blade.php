@@ -385,8 +385,11 @@
                         <tr>
                             <th>Podcast Image</th>
                             <td>
-                                <img id="podcastImage" src="" alt="Podcast Image" width="100">
+                                <a id="podcastImageLink" href="#" target="_blank">
+                                    <img id="podcastImage" src="" alt="Podcast Image" width="100">
+                                </a>
                             </td>
+                            
                         </tr>
                         <tr>
                             <th>Podcast Music</th>
@@ -664,15 +667,19 @@
             data: { podcast_id: podcastId },
             success: function (response) {
                 // Podcast Image
-                if (response.podcast_image) {
-                    $('#podcastImage')
-                        .attr('src', `/storage/${response.podcast_image}`)
-                        .attr('alt', 'Podcast Image');
-                } else {
-                    $('#podcastImage')
-                        .attr('src', '')
-                        .attr('alt', 'No Image Available');
-                }
+             if (response.podcast_image) {
+                const imageUrl = `/storage/${response.podcast_image}`;
+                $('#podcastImage')
+                    .attr('src', imageUrl)
+                    .attr('alt', 'Podcast Image');
+                $('#podcastImageLink').attr('href', imageUrl).removeClass('disabled');
+            } else {
+                $('#podcastImage')
+                    .attr('src', '')
+                    .attr('alt', 'No Image Available');
+                $('#podcastImageLink').attr('href', '#').addClass('disabled');
+            }
+
                 // Set podcast music
                 if (response.podcast_music) {
                     $('#podcastMusic source')
