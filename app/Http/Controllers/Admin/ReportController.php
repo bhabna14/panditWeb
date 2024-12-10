@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
+use App\Models\Order;
+
 class ReportController extends Controller
 {
     public function flowerPickupReport()
@@ -42,6 +44,37 @@ class ReportController extends Controller
         $riders = RiderDetails::where('status', 'active')->get();
     
         return view('admin.reports.flower-pickup-report', compact('reportData', 'vendors', 'riders'));
+    }
+
+
+    public function showRevenueReport()
+    {
+        // Display an empty form on the initial page load
+        $orders = [];
+        $totalRevenue = 0;
+
+        return view('admin.reports.revenue-report', compact('orders', 'totalRevenue'));
+    }
+
+    public function filterRevenueReport(Request $request)
+    {
+        // Validate the date inputs
+        $request->validate([
+            'from_date' => 'required|date',
+            'to_date' => 'required|date|after_or_equal:from_date',
+        ]);
+
+        // Fetch orders within the date range
+        $orders = Order::whereBetween('created_at', [$request->from_date, $request->to_date])
+            ->with(['user', 'flowerPayments'])
+            ->get();
+
+        // Calculate total revenue
+        $totalRevenue = $orders->sum(function ($order) {
+            return $order->flowerPayments->sum('paid_amount'); // Assuming `amount` is the payment column
+        });
+
+        return view('admin.reports.revenue-report', compact('orders', 'totalRevenue'));
     }
     
 }

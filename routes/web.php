@@ -278,7 +278,9 @@ Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->nam
     // });
     Route::get('/flower-pickup-report', [ReportController::class, 'flowerPickupReport'])->name('admin.flowerPickupReport');
     Route::post('/flower-pickup-report', [ReportController::class, 'generateReport'])->name('admin.generateFlowerPickupReport');
-    
+    Route::get('/revenue-report', [ReportController::class, 'showRevenueReport'])->name('admin.revenueReport');
+    Route::post('/revenue-report', [ReportController::class, 'filterRevenueReport'])->name('admin.filterRevenueReport');
+
     // flower vendor controller
 
     Route::controller(FlowerVendorController::class)->group(function() {
