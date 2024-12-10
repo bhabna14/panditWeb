@@ -527,6 +527,7 @@ Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->nam
     Route::controller(UserManagementController::class)->group(function() {
         Route::get('/demo-order-details', 'demoOrderDetails')->name('demoOrderDetails');
         Route::post('/save-demo-order-details', 'handleUserData')->name('saveDemoOrderDetails');
+        Route::get('/get-user-addresses/{userId}','getUserAddresses');
        
     });
 
