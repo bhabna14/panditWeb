@@ -56,7 +56,7 @@
                   <h4 class="title">Your Trusted Source for Online Pandit Booking</h4>
               </div>
               <ul class="sigma_list list-2 mb-0">
-                  <li>Pooja At Home</li>
+                  <li>Pooja At Home r</li>
                   <li>Special Poojas</li>
                   <li>Experienced Pandits</li>
                   <li>Pooja At Temple</li>
