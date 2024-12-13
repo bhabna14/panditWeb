@@ -16,7 +16,7 @@
                 <li class="breadcrumb-item tx-15"><a href="{{ url('admin/demo-order-details') }}"
                         class="btn btn-warning text-dark">New User</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active tx-15" aria-current="page">Add Product</li>
+                {{-- <li class="breadcrumb-item active tx-15" aria-current="page">Add Product</li> --}}
             </ol>
         </div>
     </div>
