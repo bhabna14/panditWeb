@@ -2,7 +2,8 @@
 
 @section('styles')
     <!-- Internal Select2 css -->
-    <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" rel="stylesheet" />
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.css">
     <style>
         .ui-datepicker {
@@ -79,7 +80,7 @@
         <div class="row">
             <div class="col-md-12">
                 <label for="userid" class="form-label">User</label>
-                <select class="form-control" id="userid" name="userid" required>
+                <select class="form-control select2" id="userid" name="userid" required>
                     <option value="">Select User</option>
                     @foreach ($user_details as $user)
                         <option value="{{ $user->userid }}">
@@ -168,8 +169,15 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select User",
+            allowClear: true
+        });
+    });
+</script>
     <script>
         $(document).ready(function() {
             // Add new flower group
@@ -266,64 +274,74 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
 
     <script>
-       document.getElementById('userid').addEventListener('change', function () {
-    const userId = this.value;
-
-    // Clear previous addresses
-    const addressContainer = document.getElementById('addressContainer');
-    addressContainer.innerHTML = '<p>Loading addresses...</p>';
-
-    if (userId) {
-        fetch(`/admin/get-user-addresses/${userId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.addresses.length > 0) {
-                    addressContainer.innerHTML = ''; // Clear loading message
-                    let addressHTML = '<div class="row">';
-                    
-                    data.addresses.forEach((address, index) => {
-                        const defaultBadge = address.default ? 
-                            '<span class="badge bg-success">Default</span>' : '';
-                        
-                        // Create a new row every 3 addresses
-                        if (index % 3 === 0 && index !== 0) {
-                            addressHTML += '</div><div class="row">';
-                        }
-
-                        addressHTML += `
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <input type="radio" name="address_id" id="address${address.id}" value="${address.id}" required>
-                                        <label for="address${address.id}">
-                                            <h5 class="card-title">${address.address_type} ${defaultBadge}</h5>
-                                            <p class="card-text">
-                                                ${address.apartment_flat_plot ?? ''},<br>
-                                                ${address.locality_name ?? 'N/A'},<br>
-                                                ${address.landmark ?? ''}<br>
-                                                ${address.city}, ${address.state}, ${address.country}<br>
-                                                ${address.pincode}
-                                            </p>
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>`;
-                    });
-
-                    addressHTML += '</div>'; // Close the last row
-                    addressContainer.innerHTML = addressHTML;
-                } else {
-                    addressContainer.innerHTML = '<p>No addresses found for the selected user.</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching addresses:', error);
-                addressContainer.innerHTML = '<p>Failed to load addresses. Please try again.</p>';
+        $(document).ready(function () {
+            // Initialize Select2
+            $('.select2').select2({
+                placeholder: "Select User",
+                allowClear: true
             });
-    } else {
-        addressContainer.innerHTML = '<p>Select a user to load addresses.</p>';
-    }
-});
-
+    
+            // Handle user selection
+            $('.select2').on('change', function () {
+                const userId = this.value;
+    
+                // Clear previous addresses
+                const addressContainer = document.getElementById('addressContainer');
+                addressContainer.innerHTML = '<p>Loading addresses...</p>';
+    
+                if (userId) {
+                    fetch(`/admin/get-user-addresses/${userId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.addresses.length > 0) {
+                                addressContainer.innerHTML = ''; // Clear loading message
+                                let addressHTML = '<div class="row">';
+                                
+                                data.addresses.forEach((address, index) => {
+                                    const defaultBadge = address.default 
+                                        ? '<span class="badge bg-success">Default</span>' 
+                                        : '';
+                                    
+                                    // Create a new row every 3 addresses
+                                    if (index % 3 === 0 && index !== 0) {
+                                        addressHTML += '</div><div class="row">';
+                                    }
+    
+                                    addressHTML += `
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card h-100">
+                                                <div class="card-body">
+                                                    <input type="radio" name="address_id" id="address${address.id}" value="${address.id}" required>
+                                                    <label for="address${address.id}">
+                                                        <h5 class="card-title">${address.address_type} ${defaultBadge}</h5>
+                                                        <p class="card-text">
+                                                            ${address.apartment_flat_plot ?? ''},<br>
+                                                            ${address.locality_name ?? 'N/A'},<br>
+                                                            ${address.landmark ?? ''}<br>
+                                                            ${address.city}, ${address.state}, ${address.country}<br>
+                                                            ${address.pincode}
+                                                        </p>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>`;
+                                });
+    
+                                addressHTML += '</div>'; // Close the last row
+                                addressContainer.innerHTML = addressHTML;
+                            } else {
+                                addressContainer.innerHTML = '<p>No addresses found for the selected user.</p>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching addresses:', error);
+                            addressContainer.innerHTML = '<p>Failed to load addresses. Please try again.</p>';
+                        });
+                } else {
+                    addressContainer.innerHTML = '<p>Select a user to load addresses.</p>';
+                }
+            });
+        });
     </script>
+    
 @endsection

@@ -56,7 +56,7 @@ public function handleUserData(Request $request)
         // Validate user details
         $validatedUserData = $request->validate([
             'userid' => 'required|string',
-            'address_id' => 'required|string',
+            'address_id' => 'required|numeric',
             'product_id' => 'nullable',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
