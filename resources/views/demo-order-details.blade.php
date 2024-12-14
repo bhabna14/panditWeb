@@ -74,7 +74,7 @@
         <div class="row mt-3">
             <div class="col-md-6">
                 <label for="product" class="form-label">Flower</label>
-                <select name="product_id" id="product" class="form-control select2" required>
+                <select name="product_id" id="product" class="form-control" required>
                     <option value="">Select Flower</option>
                     @foreach ($flowers as $flower)
                         <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
