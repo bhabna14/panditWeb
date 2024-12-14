@@ -19,6 +19,7 @@ class Order extends Model
         'requested_flower_price',
         'delivery_charge',
         'rider_id',
+        'referral_id',
         'order_id',  // Add this line
         'address_id',
         'suggestion',

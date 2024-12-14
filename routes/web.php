@@ -250,6 +250,8 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
 
     //rider assign by admin and update
     Route::post('orders/{id}/assignRider', [FlowerOrderController::class, 'assignRider'])->name('admin.orders.assignRider');
+    Route::post('orders/{id}/refferRider', [FlowerOrderController::class, 'refferRider'])->name('admin.orders.refferRider');
+    
     Route::get('orders/{id}/editRider', [FlowerOrderController::class, 'editRider'])->name('admin.orders.editRider');
     Route::post('orders/{id}/updateRider', [FlowerOrderController::class, 'updateRider'])->name('admin.orders.updateRider');
 

@@ -121,6 +121,7 @@
                                                     <th>Total Price</th>
                                                     <th>Status</th>
                                                     <th>Assigned Rider</th>
+                                                    <th>Reffered By</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -162,6 +163,7 @@
                                                             <form action="{{ route('admin.orders.assignRider', $order->id) }}" method="POST">
                                                                 @csrf
                                                                 <select name="rider_id" class="form-control">
+                                                                    <option selected>Choose</option>
                                                                     @foreach($riders as $rider)
                                                                         <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
                                                                             {{ $rider->rider_name }}
@@ -169,6 +171,24 @@
                                                                     @endforeach
                                                                 </select>
                                                                 <button type="submit" class="btn btn-sm btn-success mt-2">Assign Rider</button>
+                                                            </form>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if($order->rider_id)
+                                                            <span>{{ $order->rider->rider_name }}</span>
+                                                        @else
+                                                            <form action="{{ route('admin.orders.refferRider', $order->id) }}" method="POST">
+                                                                @csrf
+                                                                <select name="rider_id" class="form-control">
+                                                                    <option selected>Choose</option>
+                                                                    @foreach($riders as $rider)
+                                                                        <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
+                                                                            {{ $rider->rider_name }}
+                                                                        </option>
+                                                                    @endforeach
+                                                                </select>
+                                                                <button type="submit" class="btn btn-sm btn-success mt-2">save</button>
                                                             </form>
                                                         @endif
                                                     </td>
