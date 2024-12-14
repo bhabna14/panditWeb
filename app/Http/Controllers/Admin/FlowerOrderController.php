@@ -166,11 +166,12 @@ public function assignRider(Request $request, $orderId)
 public function refferRider(Request $request, $orderId)
 {
     $order = Order::findOrFail($orderId);
-    $order->referral_id = $request->rider_id;
+    $order->referral_id = $request->referral_id; // Use 'referral_id' from the form
     $order->save();
 
-    return redirect()->back()->with('success', 'Rider reffered successfully.');
+    return redirect()->back()->with('success', 'Rider referred successfully.');
 }
+
 public function updateRider(Request $request, $orderId)
 {
     // Validate the incoming data
