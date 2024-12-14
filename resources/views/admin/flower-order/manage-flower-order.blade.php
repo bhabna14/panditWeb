@@ -175,12 +175,12 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        @if($order->rider_id)
+                                                        @if($order->referral_id)
                                                             <span>{{ $order->rider->rider_name }}</span>
                                                         @else
                                                             <form action="{{ route('admin.orders.refferRider', $order->id) }}" method="POST">
                                                                 @csrf
-                                                                <select name="rider_id" class="form-control">
+                                                                <select name="referral_id" class="form-control">
                                                                     <option selected>Choose</option>
                                                                     @foreach($riders as $rider)
                                                                         <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
