@@ -162,8 +162,8 @@
                                                         @else
                                                             <form action="{{ route('admin.orders.assignRider', $order->id) }}" method="POST">
                                                                 @csrf
-                                                                <select name="rider_id" class="form-control">
-                                                                    <option selected>Choose</option>
+                                                                <select name="rider_id" class="form-control" required>
+                                                                    <option value="" selected>Choose</option>
                                                                     @foreach($riders as $rider)
                                                                         <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
                                                                             {{ $rider->rider_name }}
@@ -176,22 +176,30 @@
                                                     </td>
                                                     <td>
                                                         @if($order->referral_id)
-                                                            <span>{{ $order->rider->rider_name }}</span>
+                                                            @php
+                                                                $referralRider = $riders->firstWhere('rider_id', $order->referral_id);
+                                                            @endphp
+                                                            @if($referralRider)
+                                                                <span>{{ $referralRider->rider_name }}</span>
+                                                            @else
+                                                                <span>No Referral Rider Found</span>
+                                                            @endif
                                                         @else
                                                             <form action="{{ route('admin.orders.refferRider', $order->id) }}" method="POST">
                                                                 @csrf
-                                                                <select name="referral_id" class="form-control">
-                                                                    <option selected>Choose</option>
+                                                                <select name="referral_id" class="form-control" required>
+                                                                    <option value="" selected>Choose</option>
                                                                     @foreach($riders as $rider)
-                                                                        <option value="{{ $rider->rider_id }}" {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
+                                                                        <option value="{{ $rider->rider_id }}" {{ $order->referral_id == $rider->rider_id ? 'selected' : '' }}>
                                                                             {{ $rider->rider_name }}
                                                                         </option>
                                                                     @endforeach
                                                                 </select>
-                                                                <button type="submit" class="btn btn-sm btn-success mt-2">save</button>
+                                                                <button type="submit" class="btn btn-sm btn-success mt-2">Save</button>
                                                             </form>
                                                         @endif
                                                     </td>
+                                                    
                                                     <td>
                                                         {{-- <button id="viewOrdersButton" class="btn btn-primary">Mark Orders as Viewed</button> --}}
 

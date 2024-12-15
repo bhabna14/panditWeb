@@ -157,6 +157,9 @@ public function showOrdersToday()
 
 public function assignRider(Request $request, $orderId)
 {
+    $request->validate([
+        'rider_id' => 'required|exists:flower__rider_details,rider_id',
+    ]);
     $order = Order::findOrFail($orderId);
     $order->rider_id = $request->rider_id;
     $order->save();
@@ -165,12 +168,17 @@ public function assignRider(Request $request, $orderId)
 }
 public function refferRider(Request $request, $orderId)
 {
+    $request->validate([
+        'referral_id' => 'required|exists:flower__rider_details,rider_id', // Ensure the referral_id exists in the riders table
+    ]);
+
     $order = Order::findOrFail($orderId);
-    $order->referral_id = $request->referral_id; // Use 'referral_id' from the form
+    $order->referral_id = $request->referral_id;
     $order->save();
 
     return redirect()->back()->with('success', 'Rider referred successfully.');
 }
+
 
 public function updateRider(Request $request, $orderId)
 {
