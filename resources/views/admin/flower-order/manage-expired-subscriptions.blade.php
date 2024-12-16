@@ -81,11 +81,12 @@
                                                         <td>{{ $subscription->flowerProduct->name }} <br>
                                                             ( {{ \Carbon\Carbon::parse($subscription->subscription->start_date)->format('F j, Y') }} - {{ $subscription->subscription->new_date ? \Carbon\Carbon::parse($subscription->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($subscription->subscription->end_date)->format('F j, Y') }} )
                                                          </td>
-                                                        <td>
-                                                            <strong>Address:</strong> {{ $subscription->address->area ?? "" }}<br>
+                                                         <td>
+                                                            <strong>Address:</strong> {{ $subscription->address->apartment_flat_plot ?? "" }},{{ $subscription->address->apartment_name ?? "" }}, {{ $subscription->address->localityDetails->locality_name ?? "" }}<br>
+                                                            <strong>Landmark:</strong> {{ $subscription->address->landmark ?? "" }}<br>
                                                             <strong>City:</strong> {{ $subscription->address->city ?? ""}}<br>
                                                             <strong>State:</strong> {{ $subscription->address->state ?? ""}}<br>
-                                                            <strong>Zip Code:</strong> {{ $subscription->address->pincode ?? "" }}
+                                                            <strong>Pin Code:</strong> {{ $subscription->address->pincode ?? "" }}
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M, Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M, Y') }}</td>
