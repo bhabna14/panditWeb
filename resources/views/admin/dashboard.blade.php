@@ -72,7 +72,7 @@
 					</div>
 					<div class="row">
 						<div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
-							<h4 class="card-title-custom">Pandit Deatils</h4>
+							<h4 class="card-title-custom">Pandit Details</h4>
 
 							<div class="row">
 								
@@ -195,7 +195,7 @@
 						</div>
 						<div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
 							
-							<h4 class="card-title-custom">Flower Purchase Deatils</h4>
+							<h4 class="card-title-custom">Flower Purchase Details</h4>
 							
 							<div class="row">
 								
@@ -356,7 +356,7 @@
 					<!-- row closed -->
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-							<h4 class="card-title-custom">Other Deatils</h4>
+							<h4 class="card-title-custom">Other Details</h4>
 
 							<div class="row">
 								
