@@ -63,18 +63,22 @@ class ReportController extends Controller
             'from_date' => 'required|date',
             'to_date' => 'required|date|after_or_equal:from_date',
         ]);
-
-        // Fetch orders within the date range
-        $orders = Order::whereBetween('created_at', [$request->from_date, $request->to_date])
-            ->with(['user', 'flowerPayments'])
-            ->get();
-
+    
+        // Fetch orders where the related subscription is active during the specified period
+        $orders = Order::whereHas('subscription', function ($query) use ($request) {
+            $query->where('status', 'active')
+                  ->whereBetween('start_date', [$request->from_date, $request->to_date]); // Filter subscriptions by start_date
+        })
+        ->with(['user', 'flowerPayments', 'subscription']) // Eager load subscription
+        ->get();
+    
         // Calculate total revenue
         $totalRevenue = $orders->sum(function ($order) {
-            return $order->flowerPayments->sum('paid_amount'); // Assuming `amount` is the payment column
+            return $order->flowerPayments->sum('paid_amount'); // Assuming `paid_amount` is the payment column
         });
-
+    
         return view('admin.reports.revenue-report', compact('orders', 'totalRevenue'));
     }
+    
     
 }

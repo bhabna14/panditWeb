@@ -19,6 +19,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('subscriptions:update-status')->daily();
         $schedule->command('subscription:update-status-expired')->daily();
         $schedule->command('subscription:update-paused-to-active')->daily();
+           // Test scheduler
+    $schedule->call(function () {
+        \Log::info('Scheduler is working!');
+    })->everyMinute();
     }
 
     /**
