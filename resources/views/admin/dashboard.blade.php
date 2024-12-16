@@ -17,6 +17,7 @@
     font-weight: 600;
     font-size: 14px;
     text-transform: uppercase;
+	margin-left: 8px;
 }
 .card-title-custom:before {
     content: "";
@@ -24,7 +25,7 @@
     height: 16px;
     background: var(--primary-bg-color);
     position: absolute;
-    left: 4px;
+    left: 13px;
     display: block;
     top: 1px;
 }
@@ -71,7 +72,9 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
+						<div class="col-xl-6 col-lg-12 col-md-12 col-sm-12" style="
+						border-right: 1px dotted #b49e9e;
+					">
 							<h4 class="card-title-custom">Pandit Details</h4>
 
 							<div class="row">
