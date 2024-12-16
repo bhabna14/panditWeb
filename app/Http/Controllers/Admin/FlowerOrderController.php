@@ -130,19 +130,43 @@ public function showNotifications()
 
 public function showActiveSubscriptions()
 {
-    $activeSubscriptions = Subscription::where('status', 'active')
-        ->with(['relatedOrder.flowerRequest', 'relatedOrder.flowerPayments', 'relatedOrder.user', 'relatedOrder.flowerProduct', 'relatedOrder.address'])
-        ->get();
+    $activeSubscriptions = Order::whereNull('request_id')
+    ->whereHas('subscription', function ($query) {
+        $query->where('status', 'active');
+    })
+    ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+    ->orderBy('created_at', 'desc')
+    ->get();
 
     return view('admin.flower-order.manage-active-subscriptions', compact('activeSubscriptions'));
 }
 public function showPausedSubscriptions()
 {
-    $pausedSubscriptions = Subscription::where('status', 'paused')
-        ->with(['relatedOrder.flowerRequest', 'relatedOrder.flowerPayments', 'relatedOrder.user', 'relatedOrder.flowerProduct', 'relatedOrder.address'])
+   
+        $pausedSubscriptions = Order::whereNull('request_id')
+        ->whereHas('subscription', function ($query) {
+            $query->where('status', 'paused');
+        })
+        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+        ->orderBy('created_at', 'desc')
         ->get();
+    
 
     return view('admin.flower-order.manage-paused-subscriptions', compact('pausedSubscriptions'));
+}
+public function showexpiredSubscriptions()
+{
+   
+        $expiredSubscriptions = Order::whereNull('request_id')
+        ->whereHas('subscription', function ($query) {
+            $query->where('status', 'expired');
+        })
+        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+        ->orderBy('created_at', 'desc')
+        ->get();
+    
+
+    return view('admin.flower-order.manage-expired-subscriptions', compact('expiredSubscriptions'));
 }
 
 public function showOrdersToday()

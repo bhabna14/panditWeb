@@ -62,10 +62,13 @@
                                                 <tr>
                                                     <th>ID</th>
                                                     <th>User Name</th>
+                                                    <th>Product Details</th>
                                                     <th>Address Details</th>
                                                     <th>Start Date</th>
                                                     <th>End Date</th>
                                                     <th>Pause Date</th>
+                                                    <th>Total Price</th>
+                                                    <th>Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -75,6 +78,9 @@
                                                         <td>Name: {{ $subscription->user->name }} <br>
                                                             Number : {{ $subscription->user->mobile_number }}
                                                         </td>
+                                                        <td>{{ $subscription->flowerProduct->name }} <br>
+                                                            ( {{ \Carbon\Carbon::parse($subscription->subscription->start_date)->format('F j, Y') }} - {{ $subscription->subscription->new_date ? \Carbon\Carbon::parse($subscription->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($subscription->subscription->end_date)->format('F j, Y') }} )
+                                                         </td>
                                                         <td>
                                                             <strong>Address:</strong> {{ $subscription->address->area ?? "" }}<br>
                                                             <strong>City:</strong> {{ $subscription->address->city ?? ""}}<br>
@@ -84,6 +90,16 @@
                                                         <td>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M, Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M, Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->paused_at)->format('d M, Y') }}</td>
+                                                        <td>{{ number_format($subscription->total_price, 2) }}</td>
+                                                        <td>
+                                                            <span class="status-badge 
+                                                            {{ $subscription->subscription->status === 'active' ? 'status-running bg-success' : '' }}
+                                                            {{ $subscription->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
+                                                            {{ $subscription->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}
+                                                            {{ $subscription->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                                                {{ ucfirst($subscription->subscription->status) }}
+                                                            </span>
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             </tbody>

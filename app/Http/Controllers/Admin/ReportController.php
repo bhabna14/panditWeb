@@ -67,7 +67,7 @@ class ReportController extends Controller
         // Fetch orders where the related subscription is active during the specified period
         $orders = Order::whereHas('subscription', function ($query) use ($request) {
             $query->where('status', 'active')
-                  ->whereBetween('start_date', [$request->from_date, $request->to_date]); // Filter subscriptions by start_date
+                  ->whereBetween('created_at', [$request->from_date, $request->to_date]); // Filter subscriptions by start_date
         })
         ->with(['user', 'flowerPayments', 'subscription']) // Eager load subscription
         ->get();

@@ -262,6 +262,8 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
 
     Route::get('/active-subscriptions', [FlowerOrderController::class, 'showActiveSubscriptions'])->name('active.subscriptions');
     Route::get('/paused-subscriptions', [FlowerOrderController::class, 'showPausedSubscriptions'])->name('paused.subscriptions');
+    Route::get('/expired-subscriptions', [FlowerOrderController::class, 'showexpiredSubscriptions'])->name('expired.subscriptions');
+
     Route::get('/orders-today', [FlowerOrderController::class, 'showOrdersToday'])->name('orders.today');
     
     Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');

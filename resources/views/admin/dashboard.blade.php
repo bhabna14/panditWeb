@@ -201,7 +201,7 @@
 								
 								
 								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('admin.orders.index')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -230,7 +230,7 @@
 								</div>
 								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
 									
-									<a href="" target="_blank">
+									<a href="{{route('flower-request')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -258,9 +258,10 @@
 									</a>
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('active.subscriptions')}}">
 									<div class="card sales-card">
 										<div class="row">
+											
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
@@ -276,6 +277,7 @@
 													</div>
 												</div>
 											</div>
+										
 											<div class="col-4">
 												<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
 													<i class="si si-user-following tx-16 text-secondary"></i>
@@ -287,7 +289,7 @@
 								</div>
 								
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('expired.subscriptions')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -316,7 +318,7 @@
 									</a>
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{" target="_blank">
+									<a href="{{route('paused.subscriptions')}}">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -334,6 +336,7 @@
 														</p> --}}
 													</div>
 												</div>
+												
 											</div>
 											<div class="col-4">
 												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
