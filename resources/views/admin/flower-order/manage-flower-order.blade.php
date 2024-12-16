@@ -49,7 +49,9 @@
                     </div>
                 </div>
                 <div class="row">
+                 
                     <div class="col-md-4">
+                        <a href="{{route('active.subscriptions')}}">
                             <div class="card bg-success text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-check-circle"></i> Active Subscriptions
@@ -59,9 +61,12 @@
                                     <p class="card-text text-white">Users with an active subscription</p>
                                 </div>
                             </div>
+                        </a>
                     </div>
                 
+                
                     <div class="col-md-4">
+                        <a href="{{route('paused.subscriptions')}}">
                             <div class="card bg-warning text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-pause-circle"></i> Paused Subscriptions
@@ -71,9 +76,11 @@
                                     <p class="card-text">Users with a paused subscription</p>
                                 </div>
                             </div>
+                        </a>
                     </div>
                 
                     <div class="col-md-4">
+                        <a href="{{route('expired.subscriptions')}}">
                             <div class="card bg-info text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-box"></i>Subscription Placed today
@@ -83,6 +90,7 @@
                                     <p class="card-text">Subscription Placed today</p>
                                 </div>
                             </div>
+                        </a>
                     </div>
                 </div>
                 

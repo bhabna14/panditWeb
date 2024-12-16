@@ -66,7 +66,7 @@
                                                     <th>Address Details</th>
                                                     <th>Start Date</th>
                                                     <th>End Date</th>
-                                                    <th>Pause Date</th>
+                                                   
                                                     <th>Total Price</th>
                                                     <th>Status</th>
                                                 </tr>
@@ -90,7 +90,7 @@
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M, Y') }}</td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M, Y') }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->paused_at)->format('d M, Y') }}</td>
+                                                        {{-- <td>{{ \Carbon\Carbon::parse($subscription->paused_at)->format('d M, Y') }}</td> --}}
                                                         <td>{{ number_format($subscription->total_price, 2) }}</td>
                                                         <td>
                                                             <span class="status-badge 
