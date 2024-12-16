@@ -88,8 +88,8 @@
                                                             <strong>State:</strong> {{ $subscription->address->state ?? ""}}<br>
                                                             <strong>Pin Code:</strong> {{ $subscription->address->pincode ?? "" }}
                                                         </td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->start_date)->format('d M, Y') }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->end_date)->format('d M, Y') }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($subscription->subscription->start_date)->format('d M, Y') }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}</td>
                                                         {{-- <td>{{ \Carbon\Carbon::parse($subscription->paused_at)->format('d M, Y') }}</td> --}}
                                                         <td>{{ number_format($subscription->total_price, 2) }}</td>
                                                         <td>

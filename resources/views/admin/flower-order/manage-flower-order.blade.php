@@ -80,7 +80,7 @@
                     </div>
                 
                     <div class="col-md-4">
-                        <a href="{{route('expired.subscriptions')}}">
+                        
                             <div class="card bg-info text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-box"></i>Subscription Placed today
@@ -90,7 +90,7 @@
                                     <p class="card-text">Subscription Placed today</p>
                                 </div>
                             </div>
-                        </a>
+                       
                     </div>
                 </div>
                 
