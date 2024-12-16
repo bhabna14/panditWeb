@@ -76,7 +76,7 @@
 						border-right: 1px dotted #b49e9e;
 					">
 							
-							<h4 class="card-title-custom">Flower Details</h4>
+							<h4 class="card-title-custom">Flower Subscription</h4>
 							
 							<div class="row">
 								
@@ -88,7 +88,7 @@
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12 ">New Subscription Today</h6>
+														<h6 class="mb-2 tx-12 ">New Subscription</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -117,7 +117,7 @@
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Customize Order Today</h6>
+														<h6 class="mb-2 tx-12">Customize Order</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -146,7 +146,7 @@
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Active Subscription</h6>
+														<h6 class="mb-2 tx-12">Active</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -177,7 +177,7 @@
 												
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Expired Subscription</h6>
+														<h6 class="mb-2 tx-12">Expired</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -206,7 +206,7 @@
 												
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Paused Subscription</h6>
+														<h6 class="mb-2 tx-12">Paused</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
