@@ -21,6 +21,7 @@ use App\Models\PublishPodcast;
 use App\Models\FlowerPickupDetails;
 use App\Models\RiderDetails;
 use App\Models\DeliveryHistory;
+use App\Models\PodcastPrepair;
 
 use App\Models\UserDevice;
 use App\Models\PanditLogin;
@@ -145,7 +146,16 @@ $totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year
    ->whereMonth('created_at', now()->month)
    ->sum('total_price');
 
+    // Total Scripts Completed
+    $totalCompletedScripts = PodcastPrepair::where('podcast_script_status', 'COMPLETED')->count();
+    $totalCompletedRecoding = PodcastPrepair::where('podcast_recording_status', 'COMPLETED')->count();
+    $totalCompletedEditing = PodcastPrepair::where('podcast_editing_status', 'COMPLETED')->count();
+
+
     return view('admin/dashboard', compact(
+        'totalCompletedEditing',
+        'totalCompletedRecoding',
+        'totalCompletedScripts',
         'totalPaidThisMonth' ,
         'totalUnpaidThisMonth',
         'totalAmountThisMonth',
