@@ -478,7 +478,7 @@
 							<div class="row">
 								
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('admin.manageflowerpickupdetails')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -504,7 +504,7 @@
 									</a>
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('admin.manageflowerpickupdetails')}}" target="_blank">
 										<div class="card sales-card">
 											<div class="row">
 												<div class="col-8">
@@ -529,7 +529,7 @@
 									</a>
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('admin.manageflowerpickupdetails')}}" target="_blank">
 										<div class="card sales-card">
 											<div class="row">
 												<div class="col-8">
@@ -652,7 +652,7 @@
 
 							<div class="row">
 								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('podcastReport')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -680,7 +680,7 @@
 									</a>
 								</div>
 								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('podcastReport')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -708,7 +708,7 @@
 									</a>
 								</div>
 								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('podcastReport')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -736,7 +736,7 @@
 									</a>
 								</div>
 								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('podcastReport')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
