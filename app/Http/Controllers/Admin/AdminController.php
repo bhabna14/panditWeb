@@ -19,6 +19,8 @@ use App\Models\Order;
 use App\Models\Subscription;
 use App\Models\PublishPodcast;
 use App\Models\FlowerPickupDetails;
+use App\Models\RiderDetails;
+use App\Models\DeliveryHistory;
 
 use App\Models\UserDevice;
 use App\Models\PanditLogin;
@@ -111,8 +113,46 @@ public function admindashboard()
     $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
     // Count total podcasts with status 'active'
     $totalActivePodcasts = PublishPodcast::where('status', 'active')->count();
+   // Total Riders
+   $totalRiders = RiderDetails::count();
+
+   // Total Deliveries This Month
+   $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
+       ->whereMonth('created_at', now()->month)
+       ->count();
+     // Total Deliveries Today
+     $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())
+     ->count();
+
+   // Total Deliveries
+   $totalDeliveries = DeliveryHistory::count();
+
+
+   // Total Amount Paid This Month
+   $totalPaidThisMonth = FlowerPickupDetails::where('payment_status', 'Paid')
+   ->whereYear('created_at', now()->year)
+   ->whereMonth('created_at', now()->month)
+   ->sum('total_price');
+
+// Total Amount Unpaid This Month
+$totalUnpaidThisMonth = FlowerPickupDetails::where('payment_status', 'Pending')
+   ->whereYear('created_at', now()->year)
+   ->whereMonth('created_at', now()->month)
+   ->sum('total_price');
+
+// Total Amount This Month (No Status Condition)
+$totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year)
+   ->whereMonth('created_at', now()->month)
+   ->sum('total_price');
 
     return view('admin/dashboard', compact(
+        'totalPaidThisMonth' ,
+        'totalUnpaidThisMonth',
+        'totalAmountThisMonth',
+        'totalRiders' ,
+        'totalDeliveriesThisMonth',
+        'totalDeliveriesToday',
+        'totalDeliveries' ,
         'totalActivePodcasts',
         'totalFlowerPickupPrice',
         'activeSubscriptions',

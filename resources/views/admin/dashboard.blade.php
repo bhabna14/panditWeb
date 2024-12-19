@@ -360,7 +360,295 @@
 					<!-- row closed -->
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom"> Rideretails</h4>
+
+							<div class="row">
+								
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Riders</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{$totalRiders}}</h4>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery Today </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveriesToday}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery in this Month </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveriesThisMonth}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveries}}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-following tx-16 text-secondary"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+							</div>
+						</div>
+					</div>
+					<!-- row closed -->
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom"> Expenses Details in this Month</h4>
+
+							<div class="row">
+								
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Paid in this Month</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">₹ {{$totalPaidThisMonth}}</h4>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Unpaid in this Month </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{$totalUnpaidThisMonth}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Expense in this Month </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2"> ₹ {{$totalAmountThisMonth}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+							</div>
+						</div>
+					</div>
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 							<h4 class="card-title-custom">Other Details</h4>
+
+							<div class="row">
+							
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Expenses</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalFlowerPickupPrice, 2) }}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Income (Subscription)</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalPriceWithoutRequestId ?? 0, 2) }}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-following tx-16 text-secondary"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Income (Customized Order)</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalPriceWithRequestId ?? 0, 2) }}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
+														<i class="fa fa-user tx-16 text-primary"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+								
+							</div>
+						</div>
+					</div>
+
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom">Podcast Details</h4>
 
 							<div class="row">
 								
@@ -392,83 +680,6 @@
 									</div>
 									</a>
 								</div>
-								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-										<div class="card sales-card">
-											<div class="row">
-												<div class="col-8">
-													<div class="ps-4 pt-4 pe-3 pb-4">
-														<div class="">
-															<h6 class="mb-2 tx-12">Total Expenses</h6>
-														</div>
-														<div class="pb-0 mt-0">
-															<div class="d-flex">
-																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalFlowerPickupPrice, 2) }}</h4>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col-4">
-													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-														<i class="si si-user-follow tx-16 text-info"></i>
-													</div>
-												</div>
-											</div>
-										</div>
-									</a>
-								</div>
-								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-										<div class="card sales-card">
-											<div class="row">
-												<div class="col-8">
-													<div class="ps-4 pt-4 pe-3 pb-4">
-														<div class="">
-															<h6 class="mb-2 tx-12">Total Income (Subscription)</h6>
-														</div>
-														<div class="pb-0 mt-0">
-															<div class="d-flex">
-																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalPriceWithoutRequestId ?? 0, 2) }}</h4>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col-4">
-													<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
-														<i class="si si-user-following tx-16 text-secondary"></i>
-													</div>
-												</div>
-											</div>
-										</div>
-									</a>
-								</div>
-								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-										<div class="card sales-card">
-											<div class="row">
-												<div class="col-8">
-													<div class="ps-4 pt-4 pe-3 pb-4">
-														<div class="">
-															<h6 class="mb-2 tx-12">Total Income (Customized Order)</h6>
-														</div>
-														<div class="pb-0 mt-0">
-															<div class="d-flex">
-																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalPriceWithRequestId ?? 0, 2) }}</h4>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col-4">
-													<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-														<i class="fa fa-user tx-16 text-primary"></i>
-													</div>
-												</div>
-											</div>
-										</div>
-									</a>
-								</div>
-								
-								
 							</div>
 						</div>
 					</div>
