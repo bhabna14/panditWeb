@@ -39,6 +39,7 @@
                                 <div class="form-group">
                                     <label for="vendor_id">Vendor</label>
                                     <select name="vendor_id" class="form-control" required>
+                                        <option value="" selected>Choose</option>
                                         @foreach($vendors as $vendor)
                                             <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
                                         @endforeach
@@ -92,6 +93,7 @@
                                 <div class="form-group">
                                     <label for="rider_id">Assign to Rider</label>
                                     <select name="rider_id" class="form-control" required>
+                                        <option value="" selected>Choose</option>
                                         @foreach($riders as $rider)
                                             <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
                                         @endforeach

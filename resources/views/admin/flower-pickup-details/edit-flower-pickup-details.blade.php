@@ -25,7 +25,15 @@
         {{ session('success') }}
     </div>
 @endif
-
+@if($errors->any())
+<div class="alert alert-danger">
+    <ul>
+        @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
 <div class="row">
     <div class="col-12 col-sm-12">
         <form method="POST" action="{{ route('flower-pickup.update', $detail->id) }}">
@@ -40,6 +48,7 @@
                                 <div class="form-group">
                                     <label for="vendor_id">Vendor</label>
                                     <select name="vendor_id" class="form-control" required>
+                                        <option value="" selected>Choose</option>
                                         @foreach($vendors as $vendor)
                                             <option value="{{ $vendor->vendor_id }}" {{ $detail->vendor_id == $vendor->vendor_id ? 'selected' : '' }}>
                                                 {{ $vendor->vendor_name }}
@@ -99,7 +108,7 @@
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label for="price">Price</label>
-                                            <input type="number" name="price[]" class="form-control" value="{{ $item->price }}" required>
+                                            <input type="number" name="price[]" class="form-control" value="{{ $item->price }}" >
                                         </div>
                                     </div>
                                     
@@ -114,6 +123,7 @@
                                 <div class="form-group">
                                     <label for="rider_id">Assign to Rider</label>
                                     <select name="rider_id" class="form-control" required>
+                                        <option value="" selected>Choose</option>
                                         @foreach($riders as $rider)
                                             <option value="{{ $rider->rider_id }}" {{ $detail->rider_id == $rider->rider_id ? 'selected' : '' }}>
                                                 {{ $rider->rider_name }}
@@ -196,7 +206,7 @@ document.addEventListener('click', function(e) {
                         <div class="col-md-2">
                                         <div class="form-group">
                                             <label for="price">Price</label>
-                                            <input type="number" name="price[]" class="form-control" value="{{ $item->price }}" required>
+                                            <input type="number" name="price[]" class="form-control" value="{{ $item->price }}">
                                         </div>
                                 </div>
                          <div class="col-md-1 mt-3">

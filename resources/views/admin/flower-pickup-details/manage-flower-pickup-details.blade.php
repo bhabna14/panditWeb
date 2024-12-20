@@ -58,6 +58,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>Pickup Id</th>
                                     <th>Vendor</th>
                                     <th>Rider</th>
                                     <th>Flower Details</th>
@@ -72,6 +73,7 @@
                                 @foreach ($pickupDetails->flatten()->sortByDesc('created_at') as $index => $detail)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
+                                        <td>{{ $detail->pick_up_id ?? 'N/A' }}</td>
                                         <td>{{ $detail->vendor?->vendor_name ?? 'N/A' }}</td>
                                         <td>{{ $detail->rider?->rider_name ?? 'N/A' }}</td>
                                         <td>

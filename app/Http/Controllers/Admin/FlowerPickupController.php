@@ -193,7 +193,7 @@ public function update(Request $request, $id)
         'flower_id.*' => 'required',
         'unit_id.*' => 'required',
         'quantity.*' => 'required|numeric',
-        'price.*' => 'required|numeric',
+        // 'price.*' => 'required|numeric',
         'rider_id' => 'required',
     ]);
 
