@@ -17,7 +17,7 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickuprequest') }}" class="btn btn-info text-white">Add Flower Pickup Request</a></li>
+                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickuprequest') }}" class="btn btn-danger text-white">Add Flower Pickup Request</a></li>
 
                 <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">Add Flower Pickup Details</a></li>
                 
@@ -25,11 +25,7 @@
             </ol>
         </div>
     </div>
-    @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
+
 
 @if($errors->any())
     <div class="alert alert-danger">
