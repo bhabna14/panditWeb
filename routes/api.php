@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TestNotificationController;
 
 /// controllers for pandit dashboards
 use App\Http\Controllers\Api\AreaController;
@@ -48,7 +49,7 @@ Route::prefix('rider')->group(function () {
     Route::post('/verify-otp', [RiderLoginController::class, 'verifyOtp'])->name('rider.verifyOtp');
 });
 
-
+Route::post('/test-post-podcast', [TestNotificationController::class, 'postPodcast']);
 
 Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/details', [RiderLoginController::class, 'getRiderDetails']);
