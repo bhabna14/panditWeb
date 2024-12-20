@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\NotificationService;
-use App\Models\UserUnauthorisedDevices;
+use App\Models\User;
 
 use Illuminate\Support\Facades\Log;
 
@@ -20,7 +20,7 @@ class TestNotificationController extends Controller
         $podcastBody = $request->input('body');
     
         // Retrieve all device tokens
-        $deviceTokens = UserUnauthorisedDevices::pluck('device_id')->toArray();
+        $deviceTokens = User::pluck('device_id')->toArray();
     
         if (empty($deviceTokens)) {
             Log::info('No device tokens found for sending notifications.');
