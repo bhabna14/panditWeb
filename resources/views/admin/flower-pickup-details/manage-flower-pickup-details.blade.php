@@ -86,7 +86,8 @@
                                                 @endforeach
                                             </ul>
                                         </td>
-                                        <td>{{ $detail->pickup_date }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($detail->pickup_date)->format('d-m-Y') }}</td>
+
                                         <td>
                                             @if ($detail->total_price)
                                                 ₹{{ $detail->total_price }}
