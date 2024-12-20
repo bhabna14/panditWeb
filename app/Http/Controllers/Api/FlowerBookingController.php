@@ -161,111 +161,194 @@ class FlowerBookingController extends Controller
         ]);
     }
     
+    // public function storerequest(Request $request)
+    // {
+    //     try {
+    //         // Get the authenticated user
+    //         $user = Auth::guard('sanctum')->user();
+            
+    //         // Generate the request_id
+    //         $requestId = 'REQ-' . strtoupper(Str::random(12));
+    
+    //         // Create the flower request and store the request_id
+    //         $flowerRequest = FlowerRequest::create([
+    //             'request_id' => $requestId,  // Store request_id in FlowerRequest
+    //             'product_id' => $request->product_id,
+    //             'user_id' => $user->userid,
+    //             'address_id' => $request->address_id,
+    //             'description' => $request->description,
+    //             'suggestion' => $request->suggestion,
+    //             'date' => $request->date,
+    //             'time' => $request->time,
+    //             'status' => 'pending'
+    //         ]);
+    
+    //         // Loop through flower names, units, and quantities to create FlowerRequestItem entries
+    //         foreach ($request->flower_name as $index => $flowerName) {
+    //             // Create a FlowerRequestItem with flower_request_id set to the generated request_id
+    //             FlowerRequestItem::create([
+    //                 'flower_request_id' => $requestId,  // Use the generated request_id
+    //                 'flower_name' => $flowerName,
+    //                 'flower_unit' => $request->flower_unit[$index],
+    //                 'flower_quantity' => $request->flower_quantity[$index],
+    //             ]);
+    //         }
+    
+    //         // Eager load the flower_request_items relationship
+    //         // $flowerRequest = $flowerRequest->load('flowerRequestItems');
+    //         $flowerRequest = $flowerRequest->load([
+    //             'order',
+    //             'address.localityDetails', // Load localityDetails as a nested relationship
+    //             'user',
+    //             'flowerProduct',
+    //             'flowerRequestItems',
+    //         ]);
+    
+    //         Notification::create([
+    //             'type' => 'order',
+    //             'data' => [
+    //                 'message' => 'A new order has been placed!',
+    //                 'order_id' => $flowerRequest->id,
+    //                 'user_name' => $flowerRequest->user->name, // Assuming the order has a user relation
+    //             ],
+    //             'is_read' => false, // Mark as unread
+    //         ]);
+    
+    //         try {
+    //             // Log the alert for a new order
+    //             Log::info('New order created successfully.', ['request_id' => $requestId]);
+            
+    //             // Array of email addresses to send the email
+    //             $emails = [
+    //                 'bhabana.samantara@33crores.com',
+    //                 'pankaj.sial@33crores.com',
+    //                 'basudha@33crores.com',
+    //                 'priya@33crores.com',
+    //                 'starleen@33crores.com',
+    //             ];
+            
+    //             // Log before attempting to send the email
+    //             Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
+            
+    //             // Send the email to all recipients
+    //             Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+            
+    //             // Log success
+    //             Log::info('Email sent successfully to multiple recipients.', [
+    //                 'request_id' => $requestId,
+    //                 'user_id' => $user->userid,
+    //             ]);
+            
+    //         } catch (\Exception $e) {
+    //             // Log the error with details
+    //             Log::error('Failed to send email.', [
+    //                 'request_id' => $requestId,
+    //                 'user_id' => $user->userid ?? 'N/A',
+    //                 'error_message' => $e->getMessage(),
+    //                 'trace' => $e->getTraceAsString(),
+    //             ]);
+    //         }
+            
+            
+    //         // Prepare response data including flower details in FlowerRequest
+    //         return response()->json([
+    //             'status' => 200,
+    //             'message' => 'Flower request created successfully',
+    //             'data' => $flowerRequest,
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         // Log the error and return a response
+    //         Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
+    //         return response()->json([
+    //             'status' => 500,
+    //             'message' => 'Failed to create flower request',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+    // fcm integrate notification
     public function storerequest(Request $request)
-    {
-        try {
-            // Get the authenticated user
-            $user = Auth::guard('sanctum')->user();
-            
-            // Generate the request_id
-            $requestId = 'REQ-' . strtoupper(Str::random(12));
-    
-            // Create the flower request and store the request_id
-            $flowerRequest = FlowerRequest::create([
-                'request_id' => $requestId,  // Store request_id in FlowerRequest
-                'product_id' => $request->product_id,
-                'user_id' => $user->userid,
-                'address_id' => $request->address_id,
-                'description' => $request->description,
-                'suggestion' => $request->suggestion,
-                'date' => $request->date,
-                'time' => $request->time,
-                'status' => 'pending'
+{
+    try {
+        // Get the authenticated user
+        $user = Auth::guard('sanctum')->user();
+
+        // Generate the request_id
+        $requestId = 'REQ-' . strtoupper(Str::random(12));
+
+        // Create the flower request and store the request_id
+        $flowerRequest = FlowerRequest::create([
+            'request_id' => $requestId,  // Store request_id in FlowerRequest
+            'product_id' => $request->product_id,
+            'user_id' => $user->userid,
+            'address_id' => $request->address_id,
+            'description' => $request->description,
+            'suggestion' => $request->suggestion,
+            'date' => $request->date,
+            'time' => $request->time,
+            'status' => 'pending'
+        ]);
+
+        // Loop through flower names, units, and quantities to create FlowerRequestItem entries
+        foreach ($request->flower_name as $index => $flowerName) {
+            FlowerRequestItem::create([
+                'flower_request_id' => $requestId,  // Use the generated request_id
+                'flower_name' => $flowerName,
+                'flower_unit' => $request->flower_unit[$index],
+                'flower_quantity' => $request->flower_quantity[$index],
             ]);
-    
-            // Loop through flower names, units, and quantities to create FlowerRequestItem entries
-            foreach ($request->flower_name as $index => $flowerName) {
-                // Create a FlowerRequestItem with flower_request_id set to the generated request_id
-                FlowerRequestItem::create([
-                    'flower_request_id' => $requestId,  // Use the generated request_id
-                    'flower_name' => $flowerName,
-                    'flower_unit' => $request->flower_unit[$index],
-                    'flower_quantity' => $request->flower_quantity[$index],
-                ]);
-            }
-    
-            // Eager load the flower_request_items relationship
-            // $flowerRequest = $flowerRequest->load('flowerRequestItems');
-            $flowerRequest = $flowerRequest->load([
-                'order',
-                'address.localityDetails', // Load localityDetails as a nested relationship
-                'user',
-                'flowerProduct',
-                'flowerRequestItems',
-            ]);
-    
-            Notification::create([
-                'type' => 'order',
-                'data' => [
-                    'message' => 'A new order has been placed!',
-                    'order_id' => $flowerRequest->id,
-                    'user_name' => $flowerRequest->user->name, // Assuming the order has a user relation
-                ],
-                'is_read' => false, // Mark as unread
-            ]);
-    
-            try {
-                // Log the alert for a new order
-                Log::info('New order created successfully.', ['request_id' => $requestId]);
-            
-                // Array of email addresses to send the email
-                $emails = [
-                    'bhabana.samantara@33crores.com',
-                    'pankaj.sial@33crores.com',
-                    'basudha@33crores.com',
-                    'priya@33crores.com',
-                    'starleen@33crores.com',
-                ];
-            
-                // Log before attempting to send the email
-                Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
-            
-                // Send the email to all recipients
-                Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
-            
-                // Log success
-                Log::info('Email sent successfully to multiple recipients.', [
-                    'request_id' => $requestId,
-                    'user_id' => $user->userid,
-                ]);
-            
-            } catch (\Exception $e) {
-                // Log the error with details
-                Log::error('Failed to send email.', [
-                    'request_id' => $requestId,
-                    'user_id' => $user->userid ?? 'N/A',
-                    'error_message' => $e->getMessage(),
-                    'trace' => $e->getTraceAsString(),
-                ]);
-            }
-            
-            
-            // Prepare response data including flower details in FlowerRequest
-            return response()->json([
-                'status' => 200,
-                'message' => 'Flower request created successfully',
-                'data' => $flowerRequest,
-            ], 200);
-        } catch (\Exception $e) {
-            // Log the error and return a response
-            Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
-            return response()->json([
-                'status' => 500,
-                'message' => 'Failed to create flower request',
-                'error' => $e->getMessage(),
-            ], 500);
         }
+
+        // Eager load the flower_request_items relationship
+        $flowerRequest = $flowerRequest->load([
+            'order',
+            'address.localityDetails', // Load localityDetails as a nested relationship
+            'user',
+            'flowerProduct',
+            'flowerRequestItems',
+        ]);
+
+        // Send bulk FCM notifications
+        try {
+            // Retrieve device tokens from UserDevice table
+            $deviceTokens = UserDevice::where('user_id', $user->userid)->pluck('device_token')->toArray();
+
+            if (!empty($deviceTokens)) {
+                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                $notificationService->sendBulkNotifications(
+                    $deviceTokens,
+                    'Order Created Successfully',
+                    'Your order has been created successfully. Please wait for the price update.',
+                    [
+                        'request_id' => $requestId,
+                        'user_name' => $user->name ?? 'User',
+                    ]
+                );
+            } else {
+                Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send FCM notification.', ['error' => $e->getMessage()]);
+        }
+
+        // Prepare response data including flower details in FlowerRequest
+        return response()->json([
+            'status' => 200,
+            'message' => 'Flower request created successfully',
+            'data' => $flowerRequest,
+        ], 200);
+    } catch (\Exception $e) {
+        // Log the error and return a response
+        Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
+        return response()->json([
+            'status' => 500,
+            'message' => 'Failed to create flower request',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
     
     public function ordersList()
     {
