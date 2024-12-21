@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\FlowerPickupController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubadminController;
 use App\Http\Controllers\Admin\FollowUpController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -272,7 +273,7 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
     // Followup Controller 
 
     Route::get('/follow-up-subscriptions', [FollowUpController::class, 'followUpSubscriptions'])->name('admin.followUpSubscriptions');
-Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
+    Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
 
 
 
@@ -517,6 +518,8 @@ Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->nam
         Route::post('/updatepromonation/{id}', 'updatepromonation')->name('updatepromonation');
         Route::delete('/deletepromonation/{id}', 'deletepromonation')->name('deletepromonation');
     });
+    Route::get('/send-notification', [AdminNotificationController::class, 'create'])->name('admin.notification.create');
+    Route::post('/send-notification', [AdminNotificationController::class, 'send'])->name('admin.notification.send');
 
 
     Route::controller(YoutubeController::class)->group(function() {
