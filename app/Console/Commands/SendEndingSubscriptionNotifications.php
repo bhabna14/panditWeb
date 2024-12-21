@@ -32,16 +32,19 @@ class SendEndingSubscriptionNotifications extends Command
      */
     public function handle()
     {
-        $now = Carbon::today();
+        $now = Carbon::now(); // Get current date and time
         $endDateThreshold = $now->addDays(5); // Next 5 days
-        $subscriptionQuery = Subscription::where(function ($query) use ($endDateThreshold) {
+
+        // Query for subscriptions that are ending in the next 5 days
+        $subscriptionQuery = Subscription::where(function ($query) use ($now, $endDateThreshold) {
             $query->whereNotNull('new_date')
                 ->whereBetween('new_date', [$now, $endDateThreshold]);
-        })->orWhere(function ($query) use ($endDateThreshold) {
+        })->orWhere(function ($query) use ($now, $endDateThreshold) {
             $query->whereNull('new_date')
                 ->whereBetween('end_date', [$now, $endDateThreshold]);
         })->get();
 
+        // Loop through subscriptions and send notifications
         foreach ($subscriptionQuery as $subscription) {
             $user_id = $subscription->user_id;
             $deviceTokens = UserDevice::where('user_id', $user_id)->pluck('device_id')->toArray();
