@@ -31,28 +31,22 @@ class FlowerBookingController extends Controller
 
     public function purchaseSubscription(Request $request)
     {
-        // Log the incoming request data
         \Log::info('Purchase subscription called', ['request' => $request->all()]);
     
-        // Extract the product_id and other necessary fields from the request
         $productId = $request->product_id; 
         $user = Auth::guard('sanctum')->user();
     
-        // Check if the user is authenticated
         if (!$user) {
             \Log::error('User not authenticated');
             return response()->json(['message' => 'Unauthorized'], 401);
         }
     
-        // Generate a unique order ID
         $orderId = 'ORD-' . strtoupper(Str::random(12));
         $addressId = $request->address_id;
         $suggestion = $request->suggestion;
     
-        // Log the order creation attempt
         \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
     
-        // Create the order
         try {
             $order = Order::create([
                 'order_id' => $orderId,
@@ -69,34 +63,26 @@ class FlowerBookingController extends Controller
             return response()->json(['message' => 'Failed to create order'], 500);
         }
     
-        // Calculate subscription start and end dates
-        $startDate = $request->start_date ? Carbon::parse($request->start_date) : now(); // Default to now if no start date is provided
-        $duration = $request->duration; // Duration is 1 for 30 days, 3 for 60 days, 6 for 90 days
-        
-        // Calculate end date based on subscription duration
+        $startDate = $request->start_date ? Carbon::parse($request->start_date) : now();
+        $duration = $request->duration;
+    
         if ($duration == 1) {
-            $endDate = $startDate->copy()->addDays(29); // For 1, add 30 days
+            $endDate = $startDate->copy()->addDays(29);
         } else if ($duration == 3) {
-            $endDate = $startDate->copy()->addDays(89); // For 3, add 90 days
+            $endDate = $startDate->copy()->addDays(89);
         } else if ($duration == 6) {
-            $endDate = $startDate->copy()->addDays(179); // For 6, add 180 days
-        }
-        else {
-            // Handle unexpected duration value
+            $endDate = $startDate->copy()->addDays(179);
+        } else {
             \Log::error('Invalid subscription duration', ['duration' => $duration]);
             return response()->json(['message' => 'Invalid subscription duration'], 400);
         }
-        
     
-        // Log subscription creation
         \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $productId, 'start_date' => $startDate, 'end_date' => $endDate]);
     
-        // Create the subscription
         $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
-        $today = now()->format('Y-m-d');  // Format the date to match start_date format
-    
-        // Determine the status based on the start_date
+        $today = now()->format('Y-m-d');
         $status = ($startDate->format('Y-m-d') === $today) ? 'active' : 'pending';
+    
         try {
             Subscription::create([
                 'subscription_id' => $subscriptionId,
@@ -106,7 +92,7 @@ class FlowerBookingController extends Controller
                 'start_date' => $startDate,
                 'end_date' => $endDate,
                 'is_active' => true,
-                'status' => $status 
+                'status' => $status,
             ]);
             \Log::info('Subscription created successfully');
         } catch (\Exception $e) {
@@ -114,7 +100,6 @@ class FlowerBookingController extends Controller
             return response()->json(['message' => 'Failed to create subscription'], 500);
         }
     
-        // Process payment details and create payment record
         try {
             FlowerPayment::create([
                 'order_id' => $orderId,
@@ -129,38 +114,48 @@ class FlowerBookingController extends Controller
             \Log::error('Failed to record payment', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Failed to record payment'], 500);
         }
-      // Fetch the complete order details
-      $order = Order::with(['flowerProduct', 'user', 'address.localityDetails', 'flowerPayments', 'subscription'])
-      ->where('order_id', $orderId)
-      ->first();
-
-        if (!$order) {
-        \Log::error('Order not found for email sending');
-        return response()->json(['message' => 'Order not found'], 404);
+    
+        $deviceTokens = UserDevice::where('user_id', $user->userid)->pluck('device_id')->toArray();
+    
+        if (!empty($deviceTokens)) {
+            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+            $notificationService->sendBulkNotifications(
+                $deviceTokens,
+                'Subscription Activated',
+                'Your subscription has been activated successfully.',
+                ['subscription_id' => $subscriptionId]
+            );
+    
+            \Log::info('Notification sent successfully to all devices.', [
+                'user_id' => $user->userid,
+                'device_tokens' => $deviceTokens,
+            ]);
+        } else {
+            \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
         }
-
-        // Email recipients
+    
         $emails = [
-        'bhabana.samantara@33crores.com',
-        'pankaj.sial@33crores.com',
-        'basudha@33crores.com',
-        'priya@33crores.com',
-        'starleen@33crores.com'
+            'bhabana.samantara@33crores.com',
+            'pankaj.sial@33crores.com',
+            'basudha@33crores.com',
+            'priya@33crores.com',
+            'starleen@33crores.com'
         ];
-
-        // Send the email
+    
         try {
-        Mail::to($emails)->send(new SubscriptionConfirmationMail($order));
-        \Log::info('Order details email sent successfully', ['emails' => $emails]);
+            Mail::to($emails)->send(new SubscriptionConfirmationMail($order));
+            \Log::info('Order details email sent successfully', ['emails' => $emails]);
         } catch (\Exception $e) {
-        \Log::error('Failed to send order details email', ['error' => $e->getMessage()]);
+            \Log::error('Failed to send order details email', ['error' => $e->getMessage()]);
         }
+    
         return response()->json([
             'message' => 'Subscription activated successfully',
             'end_date' => $endDate,
             'order_id' => $orderId,
         ]);
     }
+    
     
     // public function storerequest(Request $request)
     // {
