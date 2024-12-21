@@ -32,7 +32,7 @@ class SendEndingSubscriptionNotifications extends Command
      */
     public function handle()
     {
-        $now = Carbon::now();
+        $now = Carbon::today();
         $endDateThreshold = $now->addDays(5); // Next 5 days
         $subscriptionQuery = Subscription::where(function ($query) use ($endDateThreshold) {
             $query->whereNotNull('new_date')
