@@ -33,35 +33,48 @@ class SendEndingSubscriptionNotifications extends Command
     public function handle()
     {
         $now = Carbon::now(); // Get current date and time
-        $endDateThreshold = $now->addDays(5); // Next 5 days
+        $endDateThreshold = $now->addDays(5); // Subscriptions ending in the next 5 days
 
-        // Query for subscriptions that are ending in the next 5 days
-        $subscriptionQuery = Subscription::where(function ($query) use ($now, $endDateThreshold) {
+        // Query subscriptions where either new_date or end_date is within the next 5 days
+        $subscriptions = Subscription::where(function ($query) use ($now, $endDateThreshold) {
+            // If new_date is available, use it. Otherwise, fall back to end_date.
             $query->whereNotNull('new_date')
-                ->whereBetween('new_date', [$now, $endDateThreshold]);
+                  ->whereBetween('new_date', [$now, $endDateThreshold]);
         })->orWhere(function ($query) use ($now, $endDateThreshold) {
+            // If new_date is NULL, use end_date
             $query->whereNull('new_date')
-                ->whereBetween('end_date', [$now, $endDateThreshold]);
+                  ->whereBetween('end_date', [$now, $endDateThreshold]);
         })->get();
 
         // Loop through subscriptions and send notifications
-        foreach ($subscriptionQuery as $subscription) {
-            $user_id = $subscription->user_id;
-            $deviceTokens = UserDevice::where('user_id', $user_id)->pluck('device_id')->toArray();
+        foreach ($subscriptions as $subscription) {
+            // Determine the correct end date to use (either new_date or end_date)
+            $subscriptionEndDate = $subscription->new_date ?? $subscription->end_date;
+            
+            // If the subscription is ending in the next 5 days, send a notification
+            if (Carbon::parse($subscriptionEndDate)->between($now, $endDateThreshold)) {
+                $user_id = $subscription->user_id;
 
-            if (!empty($deviceTokens)) {
-                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-                $notificationService->sendBulkNotifications(
-                    $deviceTokens,
-                    'Subscription Ending Soon',
-                    'Please start your Subscription Now, To avoid any inconvenience.',
-                    ['order_id' => $subscription->order_id]
-                );
+                // Fetch device tokens for the user
+                $deviceTokens = UserDevice::where('user_id', $user_id)->pluck('device_id')->toArray();
 
-                \Log::info('Notification sent successfully to all devices.', [
-                    'user_id' => $user_id,
-                    'device_tokens' => $deviceTokens,
-                ]);
+                if (!empty($deviceTokens)) {
+                    // Send the notification
+                    $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                    $notificationService->sendBulkNotifications(
+                        $deviceTokens,
+                        'Subscription Ending Soon',
+                        'Your subscription is ending soon. Please renew it to avoid any inconvenience.',
+                        ['order_id' => $subscription->order_id]
+                    );
+
+                    \Log::info('Notification sent successfully to user.', [
+                        'user_id' => $user_id,
+                        'device_tokens' => $deviceTokens,
+                    ]);
+                } else {
+                    \Log::warning('No device tokens found for user.', ['user_id' => $user_id]);
+                }
             }
         }
     }
