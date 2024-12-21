@@ -19,6 +19,17 @@ class Kernel extends ConsoleKernel
         $schedule->command('subscriptions:update-status')->daily();
         $schedule->command('subscription:update-status-expired')->daily();
         $schedule->command('subscription:update-paused-to-active')->daily();
+        // Scheduler for Subscription ending soon
+        // $schedule->command('subscriptions:sendEndingNotifications')
+        //      ->twiceDaily(9, 17); // Runs at 9 AM and 5 PM
+
+             $schedule->command('subscriptions:sendEndingNotifications')
+             ->at('15:21')
+             ->runInBackground(); // Runs at 15:20 (3:20 PM)
+             
+    $schedule->command('subscriptions:sendEndingNotifications')
+             ->at('15:22')
+             ->runInBackground(); // Runs at 15:21 (3:21 PM)
         
     }
 
