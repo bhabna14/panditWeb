@@ -666,42 +666,63 @@ class FlowerBookingController extends Controller
     
  
     public function markPaymentApi(Request $request, $id)
-{
-    try {
-        // Find the order by flower request ID
-        $order = Order::where('request_id', $id)->firstOrFail();
-
-        // Create a new flower payment entry
-        FlowerPayment::create([
-            'order_id' => $order->order_id,
-            'payment_id' => $request->payment_id, // Can be set later if available
-            'user_id' => $order->user_id,
-            'payment_method' => 'Razorpay',
-            'paid_amount' => $order->total_price,
-            'payment_status' => 'paid',
-        ]);
-
-        // Update the status of the FlowerRequest to "paid"
-        $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
-
-        if ($flowerRequest->status === 'approved') {
-            $flowerRequest->status = 'paid';
-            $flowerRequest->save();
+    {
+        try {
+            // Find the order by flower request ID
+            $order = Order::where('request_id', $id)->firstOrFail();
+    
+            // Create a new flower payment entry
+            FlowerPayment::create([
+                'order_id' => $order->order_id,
+                'payment_id' => $request->payment_id, // Can be set later if available
+                'user_id' => $order->user_id,
+                'payment_method' => 'Razorpay',
+                'paid_amount' => $order->total_price,
+                'payment_status' => 'paid',
+            ]);
+    
+            // Update the status of the FlowerRequest to "paid"
+            $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
+    
+            if ($flowerRequest->status === 'approved') {
+                $flowerRequest->status = 'paid';
+                $flowerRequest->save();
+            }
+    
+            // Send notification to the user
+            $deviceTokens = UserDevice::where('user_id', $order->user_id)->pluck('device_id')->toArray();
+    
+            if (!empty($deviceTokens)) {
+                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                $notificationService->sendBulkNotifications(
+                    $deviceTokens,
+                    'Payment Successful',
+                    'Payment is successfully done. Your order will be delivered on time.',
+                    ['order_id' => $order->order_id]
+                );
+    
+                \Log::info('Notification sent successfully to all devices.', [
+                    'user_id' => $order->user_id,
+                    'device_tokens' => $deviceTokens,
+                ]);
+            } else {
+                \Log::warning('No device tokens found for user.', ['user_id' => $order->user_id]);
+            }
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Payment marked as paid'
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Failed to mark payment as paid.', ['error' => $e->getMessage()]);
+    
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to mark payment as paid'
+            ], 500);
         }
-        
-
-        return response()->json([
-            'status' => 200,
-            'message' => 'Payment marked as paid'
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 500,
-            'message' => 'Failed to mark payment as paid'
-        ], 500);
     }
-}
+    
 // public function resume(Request $request, $order_id)
 // {
 //     try {
