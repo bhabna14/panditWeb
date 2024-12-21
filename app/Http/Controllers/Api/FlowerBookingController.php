@@ -310,7 +310,7 @@ class FlowerBookingController extends Controller
                 $notificationService->sendBulkNotifications(
                     $deviceTokens,
                     'Order Created',
-                    'Your order has been created successfully. Please wait for the price update.',
+                    'Your order has been Placed successfully. Cost will be notified in few minutes.',
                     ['order_id' => $flowerRequest->id]
                 );
     

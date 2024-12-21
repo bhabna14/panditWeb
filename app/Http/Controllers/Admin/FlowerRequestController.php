@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use App\Models\Subscription;
 use App\Models\RiderDetails;
-
+use App\Models\UserDevice;
+use App\Services\NotificationService;
 use Carbon\Carbon;
 class FlowerRequestController extends Controller
 {
@@ -44,6 +45,38 @@ class FlowerRequestController extends Controller
         return view('admin.flower-request.manage-flower-request', compact('riders','pendingRequests', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
     }
     
+// public function saveOrder(Request $request, $id)
+// {
+//     try {
+//         $flowerRequest = FlowerRequest::findOrFail($id);
+
+//         // Generate a unique order ID
+//         $orderId = 'ORD-' . strtoupper(Str::random(12));
+
+//         // Create the order
+//         $order = Order::create([
+//             'order_id' => $orderId,
+//             'request_id' => $flowerRequest->request_id,
+//             'product_id' => $flowerRequest->product_id,
+//             'user_id' => $flowerRequest->user_id,
+//             'address_id' => $flowerRequest->address_id,
+//             'quantity' => 1,
+//             'requested_flower_price' => $request->requested_flower_price,
+//             'delivery_charge' => $request->delivery_charge,
+//             'total_price' => ($request->requested_flower_price ?: 0) + ($request->delivery_charge ?: 0),
+
+//             'suggestion' => $flowerRequest->suggestion,
+//         ]);
+
+//         $flowerRequest->status = 'approved';
+//         $flowerRequest->save();
+        
+//         return redirect()->back()->with('success', 'Order saved successfully');
+//     } catch (\Exception $e) {
+//         return redirect()->back()->with('error', 'Failed to save order');
+//     }
+// }
+
 public function saveOrder(Request $request, $id)
 {
     try {
@@ -63,18 +96,40 @@ public function saveOrder(Request $request, $id)
             'requested_flower_price' => $request->requested_flower_price,
             'delivery_charge' => $request->delivery_charge,
             'total_price' => ($request->requested_flower_price ?: 0) + ($request->delivery_charge ?: 0),
-
             'suggestion' => $flowerRequest->suggestion,
         ]);
 
+        // Update the flower request status
         $flowerRequest->status = 'approved';
         $flowerRequest->save();
-        
+
+        // Send notification to user's devices
+        $deviceTokens = UserDevice::where('user_id', $flowerRequest->user_id)->pluck('device_id')->toArray();
+
+        if (!empty($deviceTokens)) {
+            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+            $notificationService->sendBulkNotifications(
+                $deviceTokens,
+                'Order Approved',
+                'Your order has been successfully created and approved.',
+                ['order_id' => $order->order_id]
+            );
+
+            \Log::info('Notification sent successfully to all devices.', [
+                'user_id' => $flowerRequest->user_id,
+                'device_tokens' => $deviceTokens,
+            ]);
+        } else {
+            \Log::warning('No device tokens found for user.', ['user_id' => $flowerRequest->user_id]);
+        }
+
         return redirect()->back()->with('success', 'Order saved successfully');
     } catch (\Exception $e) {
+        \Log::error('Failed to save order.', ['error' => $e->getMessage()]);
         return redirect()->back()->with('error', 'Failed to save order');
     }
 }
+
 
 public function markPayment(Request $request, $id)
 {
