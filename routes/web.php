@@ -520,7 +520,7 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
     });
     Route::get('/send-notification', [AdminNotificationController::class, 'create'])->name('admin.notification.create');
     Route::post('/send-notification', [AdminNotificationController::class, 'send'])->name('admin.notification.send');
-
+    Route::delete('/notifications/{id}', [AdminNotificationController::class, 'delete'])->name('admin.notifications.delete');
 
     Route::controller(YoutubeController::class)->group(function() {
         Route::get('/youtube', 'youTube')->name('youTube');

@@ -61,6 +61,45 @@
 
         <button type="submit" class="btn btn-primary">Send Notification</button>
     </form>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Image</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach($notifications as $notification)
+                <tr>
+                    <td>{{ $notification->id }}</td>
+                    <td>{{ $notification->title }}</td>
+                    <td>{{ $notification->description }}</td>
+                    <td>
+                        @if($notification->image)
+                            <img src="{{ asset('storage/' . $notification->image) }}" alt="Notification Image" width="50">
+                        @else
+                            N/A
+                        @endif
+                    </td>
+                    <td>{{ ucfirst($notification->status) }}</td>
+                    <td>{{ $notification->created_at }}</td>
+                    <td>
+                        <form action="{{ route('admin.notifications.delete', $notification->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this notification?');">
+                            @csrf
+                            @method('DELETE')
+                            <button class="btn btn-danger btn-sm">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
    
     
 @endsection
