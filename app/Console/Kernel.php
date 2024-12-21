@@ -24,11 +24,11 @@ class Kernel extends ConsoleKernel
         //      ->twiceDaily(9, 17); // Runs at 9 AM and 5 PM
 
              $schedule->command('subscriptions:sendEndingNotifications')
-             ->at('15:22')
+             ->at('15:28')
              ->runInBackground(); // Runs at 15:20 (3:20 PM)
              
     $schedule->command('subscriptions:sendEndingNotifications')
-             ->at('15:23')
+             ->at('15:29')
              ->runInBackground(); // Runs at 15:21 (3:21 PM)
         
     }
