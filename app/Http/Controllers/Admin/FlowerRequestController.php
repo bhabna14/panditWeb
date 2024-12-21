@@ -111,7 +111,7 @@ public function saveOrder(Request $request, $id)
             $notificationService->sendBulkNotifications(
                 $deviceTokens,
                 'Order Approved',
-                'Your order has been successfully created and approved.',
+                'Your order mmount is available , please pay the amont',
                 ['order_id' => $order->order_id]
             );
 
