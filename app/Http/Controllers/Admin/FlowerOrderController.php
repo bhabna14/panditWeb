@@ -12,6 +12,7 @@ use App\Models\UserAddress;
 use App\Models\Notification;
 use App\Models\RiderDetails;
 use App\Models\DeliveryHistory;
+use App\Models\FlowerPickupDetails;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -254,7 +255,22 @@ public function showRiderDetails($id)
     ])->where('rider_id', $rider->rider_id)
       ->orderBy('created_at', 'desc')
       ->get();
+// add pickup history
+    $pickupHistory = FlowerPickupDetails::with([
+        'vendor',
+        'rider',
+        'flowerPickupItems',
+    ])->where('rider_id', $rider->rider_id)
+      ->orderBy('created_at', 'desc')
+      ->get();
 
+    // calculate tota_price
+    $total_price = FlowerPickupDetails::where('rider_id', $rider->rider_id)->sum('total_price');
+    //calculate total paid from pyament_status
+    $total_paid = FlowerPickupDetails::where('rider_id', $rider->rider_id)->where('payment_status','Paid')->sum('total_price');
+    //calculate total unpaid from pyament_status
+
+    $total_unpaid = FlowerPickupDetails::where('rider_id', $rider->rider_id)->where('payment_status','pending')->sum('total_price');
     // Calculate total orders
     $totalOrders = $deliveryHistory->count();
 
@@ -273,7 +289,8 @@ public function showRiderDetails($id)
     });
 
     // Return to the Blade view
-    return view('admin.rider-all-details', compact('rider', 'deliveryHistory', 'totalOrders', 'ongoingOrders', 'monthlyOrders', 'totalSpend'));
+   
+    return view('admin.rider-all-details', compact('total_price','total_paid','total_unpaid','rider','pickupHistory', 'deliveryHistory', 'totalOrders', 'ongoingOrders', 'monthlyOrders', 'totalSpend'));
 }
 
 

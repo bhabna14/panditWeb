@@ -86,58 +86,177 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Total Price -->
+                    <div class="prof-details text-center">
+                        <div class="card bg-light shadow-sm" style="min-width: 120px;">
+                            <div class="card-body p-3">
+                                <i class="fa fa-dollar-sign text-info custom-size-icon"></i>
+                                <h6 class="mb-1">Total Price</h6>
+                                <p class="mb-0 font-weight-bold">₹{{ number_format($total_price, 2) }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- // total total_paid --}}
+                    <div class="prof-details text-center">
+                        <div class="card bg-light shadow-sm" style="min-width: 120px;">
+                            <div class="card-body p-3">
+                                <i class="fa fa-dollar-sign text-info custom-size-icon"></i>
+                                <h6 class="mb-1">Total Paid</h6>
+                                <p class="mb-0 font-weight-bold">₹{{ number_format($total_paid, 2) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- // total total_unpaid --}}
+                    <div class="prof-details text-center">
+                        <div class="card bg-light shadow-sm" style="min-width: 120px;">
+                            <div class="card-body p-3">
+                                <i class="fa fa-dollar-sign text-info custom-size-icon"></i>
+                                <h6 class="mb-1">Total Unpaid</h6>
+                                <p class="mb-0 font-weight-bold">₹{{ number_format($total_unpaid, 2) }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer py-0">
+                <div class="profile-tab tab-menu-heading border-bottom-0">
+                    <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0">
+                       
+                        <a class="nav-link mb-2 mt-2 active" data-bs-toggle="tab" href="#deliveryhistory">Delivery History</a>
+                        <a class="nav-link mb-2 mt-2" data-bs-toggle="tab" href="#pickuphistory">Pickup History</a>
+
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card custom-card">
-            <div class="card-header">
-                <h4 class="card-title">Delivery History</h4>
-            </div>
-            <div class="table-responsive  export-table">
-                <table id="file-datatable" class="table table-bordered ">
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>User Name</th>
-                            <th>Product Name</th>
-                            <th>Payment Details</th>
-                            <th>Address</th>
-                            <th>Delivery Status</th>
-                            <th>Location</th>
-                            <th>Delivered At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($deliveryHistory as $history)
-                            <tr>
-                                <td>{{ $history->order->order_id }}</td>
-                                <td>{{ $history->order->user->name ?? 'N/A' }}</td>
-                                <td>{{ $history->order->flowerProduct->name ?? 'N/A' }}</td>
-                                <td>
-                                    @foreach($history->order->flowerPayments as $payment)
-                                        ₹{{ $payment->paid_amount }}<br>
-                                    @endforeach
-                                </td>
-                                <td>
-                                    {{ $history->order->address->apartment_flat_plot ?? 'N/A' }},
-                                    {{ $history->order->address->localityDetails->locality_name ?? 'N/A' }}
-                                </td>
-                                <td>{{ $history->delivery_status }}</td>
-                                <td>{{ $history->longitude }}, {{ $history->latitude }}</td>
-                                <td>{{ $history->created_at->format('d-m-Y H:i:s') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+
+	<!-- Row -->
+    <div class="row row-sm">
+        <div class="col-lg-12 col-md-12">
+            <div class="custom-card main-content-body-profile">
+                <div class="tab-content">
+                    <div class="main-content-body  tab-pane border-top-0 active" id="deliveryhistory">
+                        <div class="border-0">
+                            <div class="main-content-body main-content-body-profile">
+                                <div class="main-profile-body p-0">
+                                    <div class="row row-sm">
+                                        <div class="table-responsive  export-table">
+                                            <table id="file-datatable" class="table table-bordered ">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Order ID</th>
+                                                        <th>User Name</th>
+                                                        <th>Product Name</th>
+                                                        <th>Payment Details</th>
+                                                        <th>Address</th>
+                                                        <th>Delivery Status</th>
+                                                        <th>Location</th>
+                                                        <th>Delivered At</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($deliveryHistory as $history)
+                                                        <tr>
+                                                            <td>{{ $history->order->order_id }}</td>
+                                                            <td>{{ $history->order->user->name ?? 'N/A' }}</td>
+                                                            <td>{{ $history->order->flowerProduct->name ?? 'N/A' }}</td>
+                                                            <td>
+                                                                @foreach($history->order->flowerPayments as $payment)
+                                                                    ₹{{ $payment->paid_amount }}<br>
+                                                                @endforeach
+                                                            </td>
+                                                            <td>
+                                                                {{ $history->order->address->apartment_flat_plot ?? 'N/A' }},
+                                                                {{ $history->order->address->localityDetails->locality_name ?? 'N/A' }}
+                                                            </td>
+                                                            <td>{{ $history->delivery_status }}</td>
+                                                            <td>{{ $history->longitude }}, {{ $history->latitude }}</td>
+                                                            <td>{{ $history->created_at->format('d-m-Y H:i:s') }}</td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- main-profile-body -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="main-content-body  tab-pane border-top-0" id="pickuphistory">
+                        <div class="border-0">
+                            <div class="main-content-body main-content-body-profile">
+                                <div class="main-profile-body p-0">
+                                    <div class="row row-sm">
+                                        <div class="table-responsive  export-table">
+                                            <table id="file-datatable" class="table table-bordered ">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Pickup Id</th>
+                                                            <th>Vendor Name</th>
+                                                            <th>Pickup Items</th>
+                                                            <th>Pickup Date</th>
+                                                            <th>Total Price</th>
+                                                            <th>Payment Status</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach($pickupHistory as $history)
+                                                        <tr>
+                                                            <!-- Pickup ID -->
+                                                            <td>{{ $history->pick_up_id }}</td>
+                                                            
+                                                            <!-- Vendor Name -->
+                                                            <td>{{ $history->vendor->vendor_name ?? 'N/A' }}</td>
+                                                            
+                
+                                                            <td>
+                                                                <ul>
+                                                                    @foreach ($history->flowerPickupItems as $item)
+                                                                        <li>
+                                                                            <strong>Flower:</strong> {{ $item->flower?->name ?? 'N/A' }} <br>
+                                                                            <strong>Quantity:</strong> {{ $item->quantity ?? 'N/A' }} {{ $item->unit?->unit_name ?? 'N/A' }} <br>
+                                                                            <strong>Price:</strong> ₹{{ $item->price ?? 'N/A' }}
+                                                                        </li>
+                                                                        @if (!$loop->last)
+                                                                            <hr>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </ul>
+                                                            </td>
+                                                            
+                                                            <!-- Pickup Date -->
+                                                            <td>{{ \Carbon\Carbon::parse($history->pickup_date)->format('d-m-Y') }}</td>
+                                                            
+                                                            <!-- Total Price -->
+                                                            <td>₹ {{ number_format($history->total_price, 2) }} </td>
+                                                            
+                                                            <!-- Payment Status -->
+                                                            <td>{{ ucfirst($history->payment_status) }}</td>
+                                                        </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                              
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- main-profile-body -->
+                            </div>
+                        </div>
+                    </div>
+                
+                </div>
             </div>
         </div>
     </div>
-</div>
+    <!-- row closed -->
 @endsection
 
 @section('scripts')
