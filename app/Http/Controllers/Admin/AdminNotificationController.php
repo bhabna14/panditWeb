@@ -43,7 +43,7 @@ class AdminNotificationController extends Controller
         }
         $notification->save();
 
-        $deviceTokens = UserUnauthorisedDevices::pluck('device_id')->toArray();
+        $deviceTokens = UserDevice::pluck('device_id')->toArray();
         if (!empty($deviceTokens)) {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
             $notificationService->sendBulkNotifications(
@@ -69,7 +69,7 @@ class AdminNotificationController extends Controller
     {
         try {
             $notification = FCMNotification::findOrFail($id);
-            $deviceTokens = UserUnauthorisedDevices::pluck('device_id')->toArray();
+            $deviceTokens = UserDevice::pluck('device_id')->toArray();
 
             if (!empty($deviceTokens)) {
                 $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
