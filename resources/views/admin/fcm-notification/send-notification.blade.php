@@ -102,10 +102,10 @@
                             @method('DELETE')
                             <button class="btn btn-danger btn-sm">Delete</button>
                         </form>
+                        <form id="resend-form-{{ $notification->id }}" action="{{ route('admin.notifications.resend', $notification->id) }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
                         <button class="btn btn-primary btn-sm" onclick="resendNotification({{ $notification->id }})">Resend</button>
-                        
-
-                        
                     </td>
                 </tr>
             @endforeach

@@ -35,18 +35,16 @@ class AdminNotificationController extends Controller
         }
     
         // Save notification to database
-        $notification = \App\Models\FCMNotification::create([
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
-            'image' => $imageUrl,
-            'status' => 'sent',
-        ]);
-    
-        // Get all device tokens
-        $deviceTokens = UserDevice::pluck('device_id')->toArray();
-    
+        $notification = new FCMNotification();
+        $notification->title = $request->title;
+        $notification->description = $request->description;
+        if ($request->hasFile('image')) {
+            $notification->image = $request->file('image')->store('notifications', 'public');
+        }
+        $notification->save();
+
+        $deviceTokens = UserUnauthorisedDevices::pluck('device_id')->toArray();
         if (!empty($deviceTokens)) {
-            // Send notification
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
             $notificationService->sendBulkNotifications(
                 $deviceTokens,
@@ -55,9 +53,10 @@ class AdminNotificationController extends Controller
                 ['image' => $notification->image]
             );
         }
-    
+
         return redirect()->back()->with('success', 'Notification sent successfully!');
     }
+
     public function delete($id)
     {
         $notification = FCMNotification::findOrFail($id);
@@ -65,14 +64,14 @@ class AdminNotificationController extends Controller
     
         return redirect()->route('admin.notification.create')->with('success', 'Notification deleted successfully!');
     }
+
     public function resend($id)
     {
         try {
             $notification = FCMNotification::findOrFail($id);
             $deviceTokens = UserUnauthorisedDevices::pluck('device_id')->toArray();
-    
+
             if (!empty($deviceTokens)) {
-                // Send notification
                 $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
                 $notificationService->sendBulkNotifications(
                     $deviceTokens,
@@ -81,12 +80,10 @@ class AdminNotificationController extends Controller
                     ['image' => $notification->image]
                 );
             }
-    
+
             return redirect()->back()->with('success', 'Notification resent successfully!');
         } catch (\Exception $e) {
-            // Log the error for debugging
-            \Log::error('Error resending notification: ' . $e->getMessage());
-    
+            Log::error('Error resending notification: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Failed to resend notification. Please try again later.');
         }
     }
