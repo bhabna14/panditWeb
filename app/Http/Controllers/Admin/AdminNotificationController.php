@@ -65,19 +65,28 @@ class AdminNotificationController extends Controller
     }
     public function resend($id)
     {
+        // do the try catch exception handling
+
         $notification = FCMNotification::findOrFail($id);
+        $deviceTokens = UserDevice::pluck('device_id')->toArray();
+
+        if (!empty($deviceTokens)) {
+            // Send notification
+            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+            $notificationService->sendBulkNotifications(
+                $deviceTokens,
+                $notification->title,
+                $notification->description,
+                ['image' => $notification->image]
+            );
+        }
+
+        return redirect()->route('admin.notification.create')->with('success', 'Notification resent successfully!');
+
+        
+
     
-        // Assuming you have a list of recipients to resend the notification to
-        $recipients = UserUnauthorisedDevices::pluck('device_id')->toArray();
-    
-        NotificationService::sendBulkNotifications(
-            $notification->title,
-            $notification->description,
-            ['image' => $notification->image],
-            $recipients
-        );
-    
-        return redirect()->back()->with('success', 'Notification resent successfully!');
+      
     }
     
 }
