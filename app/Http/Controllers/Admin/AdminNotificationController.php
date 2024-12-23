@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\UserDevice;
 use App\Services\NotificationService;
 use App\Models\FCMNotification;
+use App\Models\UserUnauthorisedDevices;
 
 class AdminNotificationController extends Controller
 {
@@ -40,7 +41,7 @@ class AdminNotificationController extends Controller
         ]);
     
         // Get all device tokens
-        $deviceTokens = \App\Models\UserDevice::pluck('device_id')->toArray();
+        $deviceTokens = UserDevice::pluck('device_id')->toArray();
     
         if (!empty($deviceTokens)) {
             // Send notification
@@ -62,6 +63,21 @@ class AdminNotificationController extends Controller
     
         return redirect()->route('admin.notification.create')->with('success', 'Notification deleted successfully!');
     }
+    public function resend($id)
+    {
+        $notification = FCMNotification::findOrFail($id);
     
+        // Assuming you have a list of recipients to resend the notification to
+        $recipients = UserUnauthorisedDevices::pluck('device_id')->toArray();
+    
+        NotificationService::sendBulkNotifications(
+            $notification->title,
+            $notification->description,
+            ['image' => $notification->image],
+            $recipients
+        );
+    
+        return redirect()->back()->with('success', 'Notification resent successfully!');
+    }
     
 }

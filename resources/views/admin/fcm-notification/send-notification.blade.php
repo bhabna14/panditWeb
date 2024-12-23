@@ -41,6 +41,12 @@
         </div>
     @endif
 
+    @if (session()->has('error'))
+        <div class="alert alert-danger" id="Message">
+            {{ session()->get('error') }}
+        </div>
+    @endif
+    
     <form action="{{ route('admin.notification.send') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
@@ -62,6 +68,7 @@
         <button type="submit" class="btn btn-primary">Send Notification</button>
     </form>
 
+    
     <table class="table table-bordered">
         <thead>
             <tr>
@@ -95,6 +102,10 @@
                             @method('DELETE')
                             <button class="btn btn-danger btn-sm">Delete</button>
                         </form>
+                        <button class="btn btn-primary btn-sm" onclick="resendNotification({{ $notification->id }})">Resend</button>
+                        
+
+                        
                     </td>
                 </tr>
             @endforeach
@@ -114,6 +125,25 @@
     <!-- jQuery Timepicker plugin -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-timepicker/1.13.18/jquery.timepicker.min.js"></script>
 
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function resendNotification(notificationId) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to resend this notification?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, resend it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('resend-form-' + notificationId).submit();
+                }
+            });
+        }
+    </script>
+    
+  
     
 @endsection
