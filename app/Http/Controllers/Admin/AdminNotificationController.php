@@ -8,6 +8,8 @@ use App\Models\UserDevice;
 use App\Services\NotificationService;
 use App\Models\FCMNotification;
 use App\Models\UserUnauthorisedDevices;
+use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
+
 
 class AdminNotificationController extends Controller
 {
@@ -65,28 +67,28 @@ class AdminNotificationController extends Controller
     }
     public function resend($id)
     {
-        // do the try catch exception handling
-
-        $notification = FCMNotification::findOrFail($id);
-        $deviceTokens = UserDevice::pluck('device_id')->toArray();
-
-        if (!empty($deviceTokens)) {
-            // Send notification
-            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-            $notificationService->sendBulkNotifications(
-                $deviceTokens,
-                $notification->title,
-                $notification->description,
-                ['image' => $notification->image]
-            );
-        }
-
-        return redirect()->route('admin.notification.create')->with('success', 'Notification resent successfully!');
-
-        
-
+        try {
+            $notification = FCMNotification::findOrFail($id);
+            $deviceTokens = UserUnauthorisedDevices::pluck('device_id')->toArray();
     
-      
+            if (!empty($deviceTokens)) {
+                // Send notification
+                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                $notificationService->sendBulkNotifications(
+                    $deviceTokens,
+                    $notification->title,
+                    $notification->description,
+                    ['image' => $notification->image]
+                );
+            }
+    
+            return redirect()->back()->with('success', 'Notification resent successfully!');
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('Error resending notification: ' . $e->getMessage());
+    
+            return redirect()->back()->with('error', 'Failed to resend notification. Please try again later.');
+        }
     }
     
 }
