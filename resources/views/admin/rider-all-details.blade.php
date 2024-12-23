@@ -77,7 +77,7 @@
                     </div>
 
                     <!-- Total Refer -->
-                    <div class="prof-details text-center">
+                    <div class="prof-details text-center me-4 mb-3 mb-md-0">
                         <div class="card bg-light shadow-sm" style="min-width: 120px;">
                             <div class="card-body p-3">
                                 <i class="fa fa-rupee-sign text-success custom-size-icon"></i>
@@ -88,7 +88,7 @@
                     </div>
 
                     <!-- Total Price -->
-                    <div class="prof-details text-center">
+                    <div class="prof-details text-center me-4 mb-3 mb-md-0">
                         <div class="card bg-light shadow-sm" style="min-width: 120px;">
                             <div class="card-body p-3">
                                 <i class="fa fa-dollar-sign text-info custom-size-icon"></i>
@@ -99,7 +99,7 @@
                     </div>
 
                     {{-- // total total_paid --}}
-                    <div class="prof-details text-center">
+                    <div class="prof-details text-center me-4 mb-3 mb-md-0">
                         <div class="card bg-light shadow-sm" style="min-width: 120px;">
                             <div class="card-body p-3">
                                 <i class="fa fa-dollar-sign text-info custom-size-icon"></i>
@@ -109,7 +109,7 @@
                         </div>
                     </div>
                     {{-- // total total_unpaid --}}
-                    <div class="prof-details text-center">
+                    <div class="prof-details text-center me-4 mb-3 mb-md-0">
                         <div class="card bg-light shadow-sm" style="min-width: 120px;">
                             <div class="card-body p-3">
                                 <i class="fa fa-dollar-sign text-info custom-size-icon"></i>
