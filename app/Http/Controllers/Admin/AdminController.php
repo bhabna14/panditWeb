@@ -22,14 +22,13 @@ use App\Models\FlowerPickupDetails;
 use App\Models\RiderDetails;
 use App\Models\DeliveryHistory;
 use App\Models\PodcastPrepair;
-
+use App\Models\FlowerRequest;
 use App\Models\UserDevice;
 use App\Models\PanditLogin;
 use App\Models\Bankdetail;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
-use App\Models\FlowerRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -78,9 +77,11 @@ public function admindashboard()
     $expiredSubscriptions = Subscription::where('status', 'expired')->count();
 
     // Orders where 'created_at' is today and 'request_id' is not null
-    $ordersRequestedToday = Order::whereDate('created_at', Carbon::today())
-        ->whereNotNull('request_id')
-        ->count();
+    // $ordersRequestedToday = Order::whereDate('created_at', Carbon::today())
+    //     ->whereNotNull('request_id')
+    //     ->count();
+    $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
+
 
     // Orders where 'created_at' is today and 'request_id' is null
     $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
@@ -88,7 +89,8 @@ public function admindashboard()
         ->count();
 
     // Calculate the total price for orders without request_id
-    $ordersWithoutRequestId = FlowerRequest::whereDate('created_at', Carbon::today())->count();
+    $ordersWithoutRequestId = Order::whereNull('request_id')
+        ->get();
 
     $totalPriceWithoutRequestId = 0;
     foreach ($ordersWithoutRequestId as $order) {
