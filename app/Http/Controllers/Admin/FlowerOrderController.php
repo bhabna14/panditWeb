@@ -162,10 +162,12 @@ public function showexpiredSubscriptions()
     ->whereHas('subscription', function ($query) {
         $query->where('status', 'expired');
     })
-    ->whereDoesntHave('orders.user', function ($query) {
-        $query->whereHas('subscription', function ($subQuery) {
-            $subQuery->where('status', 'active');
-        });
+    ->whereNotIn('user_id', function ($query) {
+        $query->select('user_id')
+            ->from('orders')
+            ->whereHas('subscription', function ($subQuery) {
+                $subQuery->where('status', 'active');
+            });
     })
     ->with([
         'flowerRequest', 
@@ -175,9 +177,9 @@ public function showexpiredSubscriptions()
         'flowerProduct', 
         'address.localityDetails'
     ])
-    ->groupBy('user_id') // Prevent duplicate user entries
     ->orderBy('created_at', 'desc')
     ->get();
+
 
   
     
