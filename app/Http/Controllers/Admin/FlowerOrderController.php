@@ -22,25 +22,71 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     //
-    public function showOrders()
-{
-    $orders = Order::whereNull('request_id')
-                   ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-                   ->orderBy('created_at', 'desc')
-                   ->get();
-
-    $activeSubscriptions = Subscription::where('status', 'active')->count();
-    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
-    $riders = RiderDetails::where('status', 'active')->get();
+    public function showOrders(Request $request)
+    {
+        $query = Order::whereNull('request_id')
+                      ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                      ->orderBy('created_at', 'desc');
     
-    // Count unviewed orders
-    // $unviewedOrdersCount = Order::where('is_viewed', false)->count();
+        // Check if the filter is for renewed subscriptions
+        if ($request->query('filter') === 'renewed') {
+            $query->whereDate('created_at', Carbon::today())
+                ->whereIn('user_id', function ($subQuery) {
+                    $subQuery->select('user_id')
+                            ->from('orders')
+                            ->whereDate('created_at', '<', Carbon::today());
+                });
+        }
 
-    return view('admin.flower-order.manage-flower-order', compact(
-        'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
-    ));
-}
+        // Filter for new user subscriptions
+        if ($request->query('filter') === 'new') {
+            $query->whereDate('created_at', Carbon::today())
+                ->whereNotIn('user_id', function ($subQuery) {
+                    $subQuery->select('user_id')
+                            ->from('orders')
+                            ->whereDate('created_at', '<', Carbon::today())
+                            ->whereNull('request_id'); // Ensure request_id is NULL in the subquery
+                });
+        }
+
+        // Filter for active subscriptions
+        if ($request->query('filter') === 'active') {
+            $query->whereHas('subscription', function ($subQuery) {
+                $subQuery->where('status', 'active');
+            });
+        }
+    
+         // Filter for expired subscriptions without a new subscription
+        if ($request->query('filter') === 'expired') {
+            $query->whereHas('subscription', function ($subQuery) {
+                $subQuery->where('status', 'expired')
+                        ->whereNotIn('user_id', function ($nestedQuery) {
+                            $nestedQuery->select('user_id')
+                                        ->from('subscriptions')
+                                        ->where('status', 'active');
+                        });
+            });
+        }
+
+        // Filter for paused subscriptions
+        if ($request->query('filter') === 'paused') {
+            $query->whereHas('subscription', function ($subQuery) {
+                $subQuery->where('status', 'paused');
+            });
+        }
+
+        $orders = $query->get();
+    
+        $activeSubscriptions = Subscription::where('status', 'active')->count();
+        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+        $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+        $riders = RiderDetails::where('status', 'active')->get();
+        
+        return view('admin.flower-order.manage-flower-order', compact(
+            'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
+        ));
+    }
+    
 public function markAsViewed()
 {
     Order::where('is_viewed', false)->update(['is_viewed' => true]);
@@ -118,13 +164,13 @@ public function showNotifications()
     
 
     
-    public function show($id)
+    public function showorderdetails($id)
     {
         $order = Order::with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address', 'pauseResumeLogs'])->findOrFail($id);
 
     
     
-        return view('admin.flower-request.show-order-details', compact('order'));
+        return view('admin.flower-order.show-order-details', compact('order'));
     }
     
 
@@ -225,22 +271,45 @@ public function updateRider(Request $request, $orderId)
 }
 
 
-public function mngdeliveryhistory()
+public function mngdeliveryhistory(Request $request)
 {
     try {
-        $deliveryHistory = DeliveryHistory::with([
-            'order.user',                   // Fetch user details
-            'order.flowerProduct',          // Fetch product details
-            'order.flowerPayments',         // Fetch payment details
-            'order.address.localityDetails', // Fetch address details
-            'rider'                         // Fetch rider details
-        ])->orderBy('created_at', 'desc')->get();
+        $filter = $request->input('filter', 'all'); // Get the filter from the URL, default is 'all'
 
-        return view('admin.flower-order.manage-delivery-history', compact('deliveryHistory'));
+        // Build the query
+        $query = DeliveryHistory::with([
+            'order.user',                    // Fetch user details
+            'order.flowerProduct',           // Fetch product details
+            'order.flowerPayments',          // Fetch payment details
+            'order.address.localityDetails', // Fetch address details
+            'rider'                          // Fetch rider details
+        ])->orderBy('created_at', 'desc');
+
+        // Apply the filter for 'todaydelivery'
+        if ($filter == 'todaydelivery') {
+            $query->whereDate('created_at', Carbon::today()); // Filter by today's date
+        }
+
+        // apply the filter for total 'monthlydelivery'
+        if ($filter == 'monthlydelivery') {
+            $query->whereBetween('created_at', [
+                now()->startOfMonth(),
+                now()->endOfMonth()
+            ]);
+        }
+
+        // Execute the query to get the delivery history
+        $deliveryHistory = $query->get();
+
+        // Get total deliveries for today
+        $totalDeliveriesToday = $query->whereDate('created_at', Carbon::today())->count();
+
+        return view('admin.flower-order.manage-delivery-history', compact('deliveryHistory', 'totalDeliveriesToday'));
     } catch (\Exception $e) {
         return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
     }
 }
+
 public function showRiderDetails($id)
 {
     // Fetch rider details

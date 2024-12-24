@@ -19,7 +19,7 @@
         "pusher/pusher-php-server": "^7.2",
         "razorpay/razorpay": "^2.9",
         "stichoza/google-translate-php": "^5.1",
-        "twilio/sdk": "^8.2"
+        "twilio/sdk": "^8.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",

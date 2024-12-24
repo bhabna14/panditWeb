@@ -72,9 +72,7 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-xl-6 col-lg-12 col-md-12 col-sm-12"  style="
-						border-right: 1px dotted #b49e9e;
-					">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 							
 							<h4 class="card-title-custom">Flower Subscription</h4>
 							
@@ -82,13 +80,13 @@
 								
 								
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{route('admin.orders.index')}}" target="_blank">
+									<a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12 ">New</h6>
+														<h6 class="mb-2 tx-12 ">New Subscription</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -110,13 +108,14 @@
 									</a>
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{route('admin.orders.index')}}" target="_blank">
+									<a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
+
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12 ">Renewed</h6>
+														<h6 class="mb-2 tx-12 ">Renewed Subscription</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -139,7 +138,7 @@
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
 									
-									<a href="{{route('flower-request')}}" target="_blank">
+									<a href="{{route('flower-request', ['filter' => 'today'])}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -151,9 +150,7 @@
 														<div class="d-flex">
 															<h4 class="tx-20 font-weight-semibold mb-2">{{$ordersRequestedToday}}</h4>
 														</div>
-														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="font-weight-semibold text-danger"> -453</span>
-														</p> --}}
+														
 													</div>
 												</div>
 											</div>
@@ -166,15 +163,47 @@
 									</div>
 									</a>
 								</div>
+
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{route('active.subscriptions')}}">
+									<a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
+
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Paused Subscription</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-22 font-weight-semibold mb-2">{{$pausedSubscriptions}}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
+															<span class="text-danger font-weight-semibold"> -693</span>
+														</p> --}}
+													</div>
+												</div>
+												
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{ route('admin.orders.index', ['filter' => 'active']) }}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Active</h6>
+														<h6 class="mb-2 tx-12">Active Subscription</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -198,14 +227,14 @@
 								</div>
 								
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{route('expired.subscriptions')}}" target="_blank">
+									<a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
 												
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12">Expired</h6>
+														<h6 class="mb-2 tx-12">Expired Subscription</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -226,174 +255,24 @@
 									</div>
 									</a>
 								</div>
-								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{route('paused.subscriptions')}}">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12">Paused</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-22 font-weight-semibold mb-2">{{$pausedSubscriptions}}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="text-danger font-weight-semibold"> -693</span>
-														</p> --}}
-													</div>
-												</div>
-												
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-													<i class="fa fa-user tx-16 text-primary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
+								
 								
 							</div>
 						
 						</div>
-						<div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
-							<h4 class="card-title-custom">Pandit Details</h4>
-
-							<div class="row">
-								
-								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{url('admin/manage-pandits')}}" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12 ">Total Pandits</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalPandit }}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-															<span class="text-success font-weight-semibold"> +427</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-													<i class="fa fa-user tx-16 text-primary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{url('admin/manage-pandits')}}" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12">Total Pending Pandits</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{$pendingPandit}}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="font-weight-semibold text-danger"> -453</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-													<i class="si si-user-follow tx-16 text-info"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{url('admin/manage-orders')}}" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12">Total Pandit Bookings</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalOrder}}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-															<span class=" text-success font-weight-semibold"> +788</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
-													<i class="si si-user-following tx-16 text-secondary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								
-								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{url('admin/manage-users')}}" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12">Total Users</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-22 font-weight-semibold mb-2">{{$totalUser}}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="text-danger font-weight-semibold"> -693</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-													<i class="fa fa-user tx-16 text-primary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								
-							</div>
-						</div>
+						
 						
 						<!-- </div> -->
 					</div>
 					<!-- row closed -->
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-							<h4 class="card-title-custom"> Rideretails</h4>
+							<h4 class="card-title-custom"> Rider Details</h4>
 
 							<div class="row">
 								
 								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('admin.manageRiderDetails')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -419,7 +298,7 @@
 									</a>
 								</div>
 								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('admin.managedeliveryhistory' , ['filter' => 'todaydelivery'])}}" target="_blank">
 										<div class="card sales-card">
 											<div class="row">
 												<div class="col-8">
@@ -444,7 +323,8 @@
 									</a>
 								</div>
 								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('admin.managedeliveryhistory' , ['filter' => 'monthlydelivery'])}}" target="_blank">
+
 										<div class="card sales-card">
 											<div class="row">
 												<div class="col-8">
@@ -469,7 +349,8 @@
 									</a>
 								</div>
 								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
+									<a href="{{route('admin.managedeliveryhistory')}}" target="_blank">
+
 										<div class="card sales-card">
 											<div class="row">
 												<div class="col-8">
@@ -498,15 +379,131 @@
 						</div>
 					</div>
 					<!-- row closed -->
+					<!---Expenses in a day-->
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom"> Expenses Details in a Day</h4>
+
+							<div class="row">
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'todayexpenses'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Expense in a Today </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2"> ₹ {{$totalExpensesday}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageflowerpickupdetails' , ['filter' => 'todaypaidpickup'])}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Paid in a Day</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">₹ {{$totalPaidExpensesday}}</h4>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'todaypendingpickup'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Unpaid in a Day </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{$totalUnpaidExpensesday}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+								
+							</div>
+						</div>
+					</div>
+					<!-- row closed -->
+					<!---Expenses in month-->
 					<!-- row closed -->
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 							<h4 class="card-title-custom"> Expenses Details in this Month</h4>
 
 							<div class="row">
-								
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{route('admin.manageflowerpickupdetails')}}" target="_blank">
+
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'monthlyexpenses'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Expense in this Month </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2"> ₹ {{$totalAmountThisMonth}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'monthlypaidpickup'])}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
@@ -532,7 +529,7 @@
 									</a>
 								</div>
 								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{route('admin.manageflowerpickupdetails')}}" target="_blank">
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'monthlypendingpickup'])}}" target="_blank">
 										<div class="card sales-card">
 											<div class="row">
 												<div class="col-8">
@@ -556,31 +553,7 @@
 										</div>
 									</a>
 								</div>
-								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{{route('admin.manageflowerpickupdetails')}}" target="_blank">
-										<div class="card sales-card">
-											<div class="row">
-												<div class="col-8">
-													<div class="ps-4 pt-4 pe-3 pb-4">
-														<div class="">
-															<h6 class="mb-2 tx-12">Total Expense in this Month </h6>
-														</div>
-														<div class="pb-0 mt-0">
-															<div class="d-flex">
-																<h4 class="tx-20 font-weight-semibold mb-2"> ₹ {{$totalAmountThisMonth}} </h4>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col-4">
-													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-														<i class="si si-user-follow tx-16 text-info"></i>
-													</div>
-												</div>
-											</div>
-										</div>
-									</a>
-								</div>
+								
 								
 							</div>
 						</div>
@@ -795,7 +768,133 @@
 						</div>
 					</div>
 
-					
+					<!-- row start -->
+					<!---pandit details-->
+
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom">Pandit Details</h4>
+
+							<div class="row">
+								
+								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-pandits')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Pandits</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalPandit }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-pandits')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Total Pending Pandits</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{$pendingPandit}}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
+															<span class="font-weight-semibold text-danger"> -453</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+													<i class="si si-user-follow tx-16 text-info"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-orders')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Total Pandit Bookings</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalOrder}}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class=" text-success font-weight-semibold"> +788</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
+													<i class="si si-user-following tx-16 text-secondary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								
+								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{url('admin/manage-users')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Total Users</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-22 font-weight-semibold mb-2">{{$totalUser}}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
+															<span class="text-danger font-weight-semibold"> -693</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								
+							</div>
+						</div>
+					</div>
 
 					<!-- row  -->
 					<div class="row">

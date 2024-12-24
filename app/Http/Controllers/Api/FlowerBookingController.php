@@ -23,6 +23,10 @@ use App\Models\FlowerPayment;
 use App\Models\FlowerRequestItem;
 use App\Services\NotificationService;
 use App\Models\UserDevice;
+// twilio client add
+use Twilio\Rest\Client;
+// give command for install twilio
+// composer require twilio/sdk
 
 class FlowerBookingController extends Controller
 {
@@ -121,8 +125,8 @@ class FlowerBookingController extends Controller
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
             $notificationService->sendBulkNotifications(
                 $deviceTokens,
-                'Subscription Activated',
-                'Your subscription has been activated successfully.',
+                'Order Received',
+                'Your subscription has been placed successfully.',
                 ['subscription_id' => $subscriptionId]
             );
     
@@ -136,10 +140,10 @@ class FlowerBookingController extends Controller
     
         $emails = [
             'bhabana.samantara@33crores.com',
-            'pankaj.sial@33crores.com',
-            'basudha@33crores.com',
-            'priya@33crores.com',
-            'starleen@33crores.com'
+            // 'pankaj.sial@33crores.com',
+            // 'basudha@33crores.com',
+            // 'priya@33crores.com',
+            // 'starleen@33crores.com'
         ];
     
         try {
@@ -264,76 +268,109 @@ class FlowerBookingController extends Controller
     // }
 
     // fcm integrate notification
+    
+    
     public function storerequest(Request $request)
-    {
-        try {
-            // Get the authenticated user
-            $user = Auth::guard('sanctum')->user();
-    
-            // Generate the request_id
-            $requestId = 'REQ-' . strtoupper(Str::random(12));
-    
-            // Create the flower request and store the request_id
-            $flowerRequest = FlowerRequest::create([
-                'request_id' => $requestId, // Store request_id in FlowerRequest
-                'product_id' => $request->product_id,
-                'user_id' => $user->userid,
-                'address_id' => $request->address_id,
-                'description' => $request->description,
-                'suggestion' => $request->suggestion,
-                'date' => $request->date,
-                'time' => $request->time,
-                'status' => 'pending',
+{
+    try {
+        // Get the authenticated user
+        $user = Auth::guard('sanctum')->user();
+
+        // Generate the request_id for the new flower request
+        $requestId = 'REQ-' . strtoupper(Str::random(12));
+
+        // Create the flower request and store the generated request_id
+        $flowerRequest = FlowerRequest::create([
+            'request_id' => $requestId, // Store request_id in FlowerRequest
+            'product_id' => $request->product_id,
+            'user_id' => $user->userid,
+            'address_id' => $request->address_id,
+            'description' => $request->description,
+            'suggestion' => $request->suggestion,
+            'date' => $request->date,
+            'time' => $request->time,
+            'status' => 'pending',
+        ]);
+
+        // Process flower items and create corresponding entries
+        foreach ($request->flower_name as $index => $flowerName) {
+            FlowerRequestItem::create([
+                'flower_request_id' => $requestId, // Use the generated request_id
+                'flower_name' => $flowerName,
+                'flower_unit' => $request->flower_unit[$index],
+                'flower_quantity' => $request->flower_quantity[$index],
             ]);
-    
-            // Loop through flower names, units, and quantities to create FlowerRequestItem entries
-            foreach ($request->flower_name as $index => $flowerName) {
-                FlowerRequestItem::create([
-                    'flower_request_id' => $requestId, // Use the generated request_id
-                    'flower_name' => $flowerName,
-                    'flower_unit' => $request->flower_unit[$index],
-                    'flower_quantity' => $request->flower_quantity[$index],
-                ]);
-            }
-    
-            // Retrieve all device tokens for the authenticated user
-            $deviceTokens = UserDevice::where('user_id', $user->userid)->pluck('device_id')->toArray();
-    
-            if (!empty($deviceTokens)) {
-                // Send notifications to all device tokens
-                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-                $notificationService->sendBulkNotifications(
-                    $deviceTokens,
-                    'Order Created',
-                    'Your order has been Placed successfully. Cost will be notified in few minutes.',
-                    ['order_id' => $flowerRequest->id]
-                );
-    
-                \Log::info('Notifications sent successfully to all devices.', [
-                    'user_id' => $user->userid,
-                    'device_tokens' => $deviceTokens,
-                ]);
-            } else {
-                \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
-            }
-    
-            // Prepare response data including flower details in FlowerRequest
-            return response()->json([
-                'status' => 200,
-                'message' => 'Flower request created successfully',
-                'data' => $flowerRequest,
-            ], 200);
-        } catch (\Exception $e) {
-            // Log the error and return a response
-            \Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
-            return response()->json([
-                'status' => 500,
-                'message' => 'Failed to create flower request',
-                'error' => $e->getMessage(),
-            ], 500);
         }
+
+        // Firebase Notification: Notify the user via registered device tokens
+        $deviceTokens = UserDevice::where('user_id', $user->userid)->pluck('device_id')->toArray();
+
+        if (!empty($deviceTokens)) {
+            // Initialize the notification service with Firebase credentials
+            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+
+            // Send a bulk notification to all registered device tokens
+            $notificationService->sendBulkNotifications(
+                $deviceTokens,
+                'Order Created',
+                'Your order has been placed. Price will be notified in few minutes.',
+                ['order_id' => $flowerRequest->id] // Additional data payload
+            );
+
+            // Log successful notifications
+            \Log::info('Notifications sent successfully to all devices.', [
+                'user_id' => $user->userid,
+                'device_tokens' => $deviceTokens,
+            ]);
+        } else {
+            // Log a warning if no device tokens are found
+            \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+        }
+
+        // Email Notification: Send details to multiple recipients
+        $flowerRequest = $flowerRequest->load([
+            'address.localityDetails',
+            'user',
+            'flowerRequestItems',
+        ]);
+
+        $emails = [
+            'bhabana.samantara@33crores.com',
+            // 'pankaj.sial@33crores.com',
+            // 'basudha@33crores.com',
+            // 'priya@33crores.com',
+            // 'starleen@33crores.com',
+        ];
+
+        // Log before sending the email
+        \Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
+
+        // Send the email
+        Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+
+        \Log::info('Email sent successfully to all recipients.');
+
+      
+        // Return a successful response with flower request details
+        return response()->json([
+            'status' => 200,
+            'message' => 'Flower request created successfully',
+            'data' => $flowerRequest,
+        ], 200);
+
+    } catch (\Exception $e) {
+        // Log the error for debugging
+        \Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
+
+        // Return an error response
+        return response()->json([
+            'status' => 500,
+            'message' => 'Failed to create flower request',
+            'error' => $e->getMessage(),
+        ], 500);
     }
-    
+}
+
 
     
     public function ordersList()

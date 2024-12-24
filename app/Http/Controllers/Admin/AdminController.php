@@ -105,10 +105,7 @@ public function admindashboard()
     ->distinct('user_id')
     ->count();
 
-    
-
-
-    // Fetch the total number of subscription orders requested today
+    // Fetch the total number of subscription orders requested today ( not used in dashboard )
     $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
                                 ->whereNull('request_id')
                                 ->count();
@@ -122,7 +119,7 @@ public function admindashboard()
     // Fetch the total number of paused subscriptions
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
 
-    // fetch the expired subscriptions whose new subscription is not created
+    // fetch the expired subscriptions whose new subscription is not created ( expired )
     $expiredSubscriptions = Subscription::where('status', 'expired')
         ->whereNotIn('user_id', function ($query) {
             $query->select('user_id')
@@ -130,13 +127,60 @@ public function admindashboard()
                 ->where('status', 'active');
         })
         ->count();
+    //Rider Details
+    // Total Riders
+    $totalRiders = RiderDetails::count();
 
+    // Total Deliveries This Month
+    $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
+        ->whereMonth('created_at', now()->month)
+        ->count();
+        // Total Deliveries Today
+        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())
+        ->count();
+
+    // Total Deliveries
+    $totalDeliveries = DeliveryHistory::count();
   
+    //Expenses Details in a Day
+    //Total Expenses in a Day
+    $totalExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())->sum('total_price');
+    // total paid expenses in a day
+    $totalPaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
+        ->where('payment_status', 'Paid')
+        ->sum('total_price');
+    // total unpaid expenses in a day
+    $totalUnpaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
+        ->where('payment_status', 'Pending')
+        ->sum('total_price');
 
-    // Calculate the total price for orders without request_id
+    //Expenses Details in The month
+    // Total Amount Paid This Month
+   $totalPaidThisMonth = FlowerPickupDetails::where('payment_status', 'Paid')
+   ->whereYear('created_at', now()->year)
+   ->whereMonth('created_at', now()->month)
+   ->sum('total_price');
+
+    // Total Amount Unpaid This Month
+    $totalUnpaidThisMonth = FlowerPickupDetails::where('payment_status', 'Pending')
+    ->whereYear('created_at', now()->year)
+    ->whereMonth('created_at', now()->month)
+    ->sum('total_price');
+
+    // Total Amount This Month (No Status Condition)
+    $totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year)
+    ->whereMonth('created_at', now()->month)
+    ->sum('total_price');
+
+      
+    // Total details of flower orders
+    // Calculate the total price from the flower_pickup_details table ( total expenses )
+    $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
+
+    // Calculate the total price for orders without request_id (total income of subscription orders)
     $ordersWithoutRequestId = Order::whereNull('request_id')
-        ->get();
-
+            ->get();
+    
     $totalPriceWithoutRequestId = 0;
     foreach ($ordersWithoutRequestId as $order) {
         $payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
@@ -145,7 +189,7 @@ public function admindashboard()
         }
     }
 
-    // Calculate the total price for orders with request_id
+    // Calculate the total price for orders with request_id ( total income of customized orders )
     $ordersWithRequestId = Order::whereNotNull('request_id')
         ->get();
 
@@ -157,42 +201,9 @@ public function admindashboard()
         }
     }
 
-    // Calculate the total price from the flower_pickup_details table
-    $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
+    // Podcast Details
     // Count total podcasts with status 'active'
     $totalActivePodcasts = PublishPodcast::where('status', 'active')->count();
-   // Total Riders
-   $totalRiders = RiderDetails::count();
-
-   // Total Deliveries This Month
-   $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
-       ->whereMonth('created_at', now()->month)
-       ->count();
-     // Total Deliveries Today
-     $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())
-     ->count();
-
-   // Total Deliveries
-   $totalDeliveries = DeliveryHistory::count();
-
-
-   // Total Amount Paid This Month
-   $totalPaidThisMonth = FlowerPickupDetails::where('payment_status', 'Paid')
-   ->whereYear('created_at', now()->year)
-   ->whereMonth('created_at', now()->month)
-   ->sum('total_price');
-
-// Total Amount Unpaid This Month
-$totalUnpaidThisMonth = FlowerPickupDetails::where('payment_status', 'Pending')
-   ->whereYear('created_at', now()->year)
-   ->whereMonth('created_at', now()->month)
-   ->sum('total_price');
-
-// Total Amount This Month (No Status Condition)
-$totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year)
-   ->whereMonth('created_at', now()->month)
-   ->sum('total_price');
-
     // Total Scripts Completed
     $totalCompletedScripts = PodcastPrepair::where('podcast_script_status', 'COMPLETED')->count();
     $totalCompletedRecoding = PodcastPrepair::where('podcast_recording_status', 'COMPLETED')->count();
@@ -226,7 +237,10 @@ $totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year
         'totalOrder',
         'totalUser',
         'totalPriceWithoutRequestId',
-        'totalPriceWithRequestId'
+        'totalPriceWithRequestId',
+        'totalExpensesday',
+        'totalPaidExpensesday',
+        'totalUnpaidExpensesday',
     ));
 }
 

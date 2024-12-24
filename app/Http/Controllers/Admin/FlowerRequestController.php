@@ -17,33 +17,43 @@ use Carbon\Carbon;
 class FlowerRequestController extends Controller
 {
     //
-    public function showRequests()
+    public function showRequests(Request $request)
     {
-        // Eager load the necessary relationships, including flowerRequestItems
-        $pendingRequests = FlowerRequest::with([
+        // Get the filter value from the query string, defaulting to 'today'
+        $filter = $request->input('filter', 'today');
+    
+        $query = FlowerRequest::with([
             'order' => function ($query) {
-                $query->with('flowerPayments','delivery');
+                $query->with('flowerPayments', 'delivery');
             },
-            
             'flowerProduct',
             'user',
             'address.localityDetails',
-            'flowerRequestItems'  // Eager load flowerRequestItems
-        ])
-        ->orderBy('id', 'desc')
-        ->get();
-
+            'flowerRequestItems'
+        ])->orderBy('id', 'desc');
+    
+        // Apply filter: Only show today's orders if 'today' filter is selected
+        if ($filter == 'today') {
+            $query->whereDate('created_at', Carbon::today());
+        }
+    
+        // Get the filtered orders
+        $pendingRequests = $query->get();
+    
         $activeSubscriptions = Subscription::where('status', 'active')->count();
-
-        // Paused subscriptions count
         $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-
-        // Orders requested today
         $ordersRequestedToday = FlowerRequest::whereDate('date', Carbon::today())->count();
         $riders = RiderDetails::where('status', 'active')->get();
-        // dd($riders);
-        return view('admin.flower-request.manage-flower-request', compact('riders','pendingRequests', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'));
+    
+        return view('admin.flower-request.manage-flower-request', compact(
+            'riders',
+            'pendingRequests',
+            'activeSubscriptions',
+            'pausedSubscriptions',
+            'ordersRequestedToday'
+        ));
     }
+    
     
 // public function saveOrder(Request $request, $id)
 // {
@@ -111,7 +121,7 @@ public function saveOrder(Request $request, $id)
             $notificationService->sendBulkNotifications(
                 $deviceTokens,
                 'Order Approved',
-                'Your order mmount is available , please pay the amont',
+                'Price is updated, please pay the amount',
                 ['order_id' => $order->order_id]
             );
 
