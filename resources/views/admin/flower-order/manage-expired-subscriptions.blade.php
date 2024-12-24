@@ -89,7 +89,15 @@
                                                             <strong>Pin Code:</strong> {{ $subscription->address->pincode ?? "" }}
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->subscription->start_date)->format('d M, Y') }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}</td>
+                                                        {{-- <td>{{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}</td> --}}
+                                                        <td>
+                                                            @if($subscription->subscription->new_date)
+                                                                <del>{{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}</del> <br>
+                                                                {{ \Carbon\Carbon::parse($subscription->subscription->new_date)->format('d M, Y') }}
+                                                            @else
+                                                                {{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}
+                                                            @endif
+                                                        </td>
                                                         {{-- <td>{{ \Carbon\Carbon::parse($subscription->paused_at)->format('d M, Y') }}</td> --}}
                                                         <td>{{ number_format($subscription->total_price, 2) }}</td>
                                                         <td>
