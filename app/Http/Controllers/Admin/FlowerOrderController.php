@@ -157,19 +157,19 @@ public function showPausedSubscriptions()
 }
 public function showexpiredSubscriptions()
 {
-   
-        $expiredSubscriptions = Order::whereNull('request_id')
+    // Fetch the orders with unique user_id where request_id is null and subscription status is expired
+    $expiredSubscriptions = Order::whereNull('request_id')
         ->whereHas('subscription', function ($query) {
             $query->where('status', 'expired');
         })
         ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+        ->distinct('user_id') // Use distinct to fetch unique user_id
         ->orderBy('created_at', 'desc')
-        ->groupBy('user_id') // Prevent duplicate user entries
         ->get();
-    
 
     return view('admin.flower-order.manage-expired-subscriptions', compact('expiredSubscriptions'));
 }
+
 
 public function showOrdersToday()
 {
