@@ -122,8 +122,14 @@ public function admindashboard()
     // Fetch the total number of paused subscriptions
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
 
-    // Fetch the total number of expired subscriptions
-    $expiredSubscriptions = Subscription::where('status', 'expired')->count();
+    // fetch the expired subscriptions whose new subscription is not created
+    $expiredSubscriptions = Subscription::where('status', 'expired')
+        ->whereNotIn('user_id', function ($query) {
+            $query->select('user_id')
+                ->from('subscriptions')
+                ->where('status', 'active');
+        })
+        ->count();
 
   
 
