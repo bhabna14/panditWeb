@@ -157,12 +157,25 @@ public function showPausedSubscriptions()
 }
 public function showexpiredSubscriptions()
 {
-    // Fetch expired subscriptions list whose new subscription is not created don not repeat the expired subscription with same user_id and i have all relationship with orders table
+    // Fetch expired subscriptions that have not been renewed or reactivated by the user yet (i.e. no active subscription)
     $expiredSubscriptions = Order::whereNull('request_id')
     ->whereHas('subscription', function ($query) {
         $query->where('status', 'expired');
     })
-    ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+    ->whereDoesntHave('user.orders', function ($query) {
+        $query->whereHas('subscription', function ($subQuery) {
+            $subQuery->where('status', 'active');
+        });
+    })
+    ->with([
+        'flowerRequest', 
+        'subscription', 
+        'flowerPayments', 
+        'user', 
+        'flowerProduct', 
+        'address.localityDetails'
+    ])
+    ->groupBy('user_id') // Prevent duplicate user entries
     ->orderBy('created_at', 'desc')
     ->get();
 
