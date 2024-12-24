@@ -162,7 +162,7 @@ public function showexpiredSubscriptions()
     ->whereHas('subscription', function ($query) {
         $query->where('status', 'expired');
     })
-    ->whereDoesntHave('user.orders', function ($query) {
+    ->whereDoesntHave('orders.user', function ($query) {
         $query->whereHas('subscription', function ($subQuery) {
             $subQuery->where('status', 'active');
         });
