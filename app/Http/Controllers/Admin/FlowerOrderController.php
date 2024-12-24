@@ -157,29 +157,15 @@ public function showPausedSubscriptions()
 }
 public function showexpiredSubscriptions()
 {
-    // Fetch expired subscriptions that have not been renewed or reactivated by the user yet (i.e. no active subscription)
-    $expiredSubscriptions = Order::whereNull('request_id')
-    ->whereHas('subscription', function ($query) {
-        $query->where('status', 'expired');
-    })
-    ->whereDoesntHave('user', function ($query) {
-        $query->whereHas('subscription', function ($subQuery) {
-            $subQuery->where('status', 'active');
-        });
-    })
-    ->with([
-        'flowerRequest', 
-        'subscription', 
-        'flowerPayments', 
-        'user', 
-        'flowerProduct', 
-        'address.localityDetails'
-    ])
-    ->groupBy('user_id') // Prevent duplicate user entries
-    ->orderBy('created_at', 'desc')
-    ->get();
-
-  
+   
+        $expiredSubscriptions = Order::whereNull('request_id')
+        ->whereHas('subscription', function ($query) {
+            $query->where('status', 'expired');
+        })
+        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+        ->orderBy('created_at', 'desc')
+        ->groupBy('user_id') // Prevent duplicate user entries
+        ->get();
     
 
     return view('admin.flower-order.manage-expired-subscriptions', compact('expiredSubscriptions'));
