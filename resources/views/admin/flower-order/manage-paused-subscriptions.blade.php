@@ -66,7 +66,8 @@
                                                     <th>Address Details</th>
                                                     <th>Start Date</th>
                                                     <th>End Date</th>
-                                                    <th>Pause Date</th>
+                                                    <th>Pause Start Date</th>
+                                                    <th>Pause End Date</th>
                                                     <th>Total Price</th>
                                                     <th>Status</th>
                                                 </tr>
@@ -89,8 +90,19 @@
                                                             <strong>Pin Code:</strong> {{ $subscription->address->pincode ?? "" }}
                                                         </td>
                                                         <td>{{ \Carbon\Carbon::parse($subscription->subscription->start_date)->format('d M, Y') }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}</td>
-                                                        <td>{{ \Carbon\Carbon::parse($subscription->subscription->paused_at)->format('d M, Y') }}</td>
+                                                        {{-- // if new_date have value then display other show the end_date with line strock --}}
+                                                        <td>
+                                                            @if($subscription->subscription->new_date)
+                                                                <del>{{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}</del> <br>
+                                                                {{ \Carbon\Carbon::parse($subscription->subscription->new_date)->format('d M, Y') }}
+                                                            @else
+                                                                {{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}
+                                                            @endif
+                                                        </td>
+                                                        {{-- <td>{{ \Carbon\Carbon::parse($subscription->subscription->end_date)->format('d M, Y') }}</td> --}}
+                                                        <td>{{ \Carbon\Carbon::parse($subscription->subscription->pause_start_date)->format('d M, Y') }}</td>
+                                                        <td>{{ \Carbon\Carbon::parse($subscription->subscription->pause_end_date)->format('d M, Y') }}</td>
+
                                                         <td>{{ number_format($subscription->total_price, 2) }}</td>
                                                         <td>
                                                             <span class="status-badge 
