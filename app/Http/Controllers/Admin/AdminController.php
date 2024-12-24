@@ -33,7 +33,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\DB;
 class AdminController extends Controller
 {
     //
@@ -80,17 +80,25 @@ public function admindashboard()
     // Fetch the total number of notifications (unread) (latest first)(not required now)
     $notifications = Notification::where('is_read', false)->latest()->get();  
     
-    // Fetch the total number of new user subscriptions today
-    $newUserSubscription = User::whereDate('created_at', Carbon::today())
-                                // ->where('subscription_status', 'active')
-                                ->count();
 
- 
-    // check with the user_id whose has already ordered in order table and take a new subscription today
-    $renewSubscription = User::whereIn('userid', function($query) {
-        $query->select('user_id')->from('orders')->whereDate('created_at', Carbon::today());
-    })->count();
-    
+// Fetch the total number of new user subscriptions today
+$newUserSubscription = Order::whereDate('created_at', Carbon::today())
+    ->whereNotIn('user_id', function ($query) {
+        $query->select('user_id')
+            ->from('orders')
+            ->whereDate('created_at', '<', Carbon::today());
+    })
+    ->count();
+
+// Fetch the total number of renewed user subscriptions today
+$renewSubscription = Order::whereDate('created_at', Carbon::today())
+    ->whereIn('user_id', function ($query) {
+        $query->select('user_id')
+            ->from('orders')
+            ->whereDate('created_at', '<', Carbon::today());
+    })
+    ->count();
+
 
     // Fetch the total number of subscription orders requested today
     $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
