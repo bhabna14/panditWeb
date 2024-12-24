@@ -157,13 +157,14 @@ public function showPausedSubscriptions()
 }
 public function showexpiredSubscriptions()
 {
-   
-        $expiredSubscriptions = Order::whereNull('request_id')
-        ->whereHas('subscription', function ($query) {
-            $query->where('status', 'expired');
+    // Fetch expired subscriptions list whose new subscription is not created don not repeat the expired subscription with same user_id
+    $expiredSubscriptions = Subscription::where('status', 'expired')
+        ->whereNotIn('user_id', function ($query) {
+            $query->select('user_id')
+                ->from('subscriptions')
+                ->where('status', 'active');
         })
-        ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-        ->orderBy('created_at', 'desc')
+        ->with(['order.flowerPayments', 'order.user', 'order.flowerProduct', 'order.address'])
         ->get();
     
 
