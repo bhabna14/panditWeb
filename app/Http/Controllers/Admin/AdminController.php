@@ -80,11 +80,11 @@ public function admindashboard()
     // Fetch the total number of notifications (unread) (latest first)(not required now)
     $notifications = Notification::where('is_read', false)->latest()->get();  
     
-    // check with the user_id its new user or old user in order table and take the first subscription today
+    // check with the user_id its new user or old user in order table and take the first subscription today 
     $newUserSubscription = User::whereNotIn('userid', function($query) {
         $query->select('user_id')->from('orders')->whereDate('created_at', Carbon::today());
     })->count();
-    
+ 
     // check with the user_id whose has already ordered in order table and take a new subscription today
     $renewSubscription = User::whereIn('userid', function($query) {
         $query->select('user_id')->from('orders')->whereDate('created_at', Carbon::today());
