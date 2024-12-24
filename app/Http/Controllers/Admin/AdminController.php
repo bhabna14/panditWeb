@@ -29,6 +29,7 @@ use App\Models\Bankdetail;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
+use App\Models\FlowerRequest;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -87,8 +88,7 @@ public function admindashboard()
         ->count();
 
     // Calculate the total price for orders without request_id
-    $ordersWithoutRequestId = Order::whereNull('request_id')
-        ->get();
+    $ordersWithoutRequestId = FlowerRequest::whereDate('created_at', Carbon::today())->count();
 
     $totalPriceWithoutRequestId = 0;
     foreach ($ordersWithoutRequestId as $order) {

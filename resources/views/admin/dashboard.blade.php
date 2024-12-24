@@ -81,14 +81,14 @@
 							<div class="row">
 								
 								
-								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
 									<a href="{{route('admin.orders.index')}}" target="_blank">
 									<div class="card sales-card">
 										<div class="row">
 											<div class="col-8">
 												<div class="ps-4 pt-4 pe-3 pb-4">
 													<div class="">
-														<h6 class="mb-2 tx-12 ">New Subscription</h6>
+														<h6 class="mb-2 tx-12 ">New</h6>
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
@@ -109,7 +109,35 @@
 									</div>
 									</a>
 								</div>
-								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.orders.index')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Renewed</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $subscriptionOrderToday }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
 									
 									<a href="{{route('flower-request')}}" target="_blank">
 									<div class="card sales-card">
