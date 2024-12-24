@@ -60,33 +60,55 @@ class AdminController extends Controller
 
 public function admindashboard()
 {
+    // Fetch the total number of pandits and pending pandits
     $totalPandit = Profile::where('status', 'active')->count();
+
+    // Count the total number of pandits and pending pandits
     $pendingPandit = Profile::where('pandit_status', 'pending')->count();
+
+    // Fetch the total number of orders and users
     $totalOrder = Booking::count();
+
+    // Fetch the total number of orders and users
     $totalUser = User::count();
 
+    // Fetch the total number of pandits and pending pandits
     $pandit_profiles = Profile::orderBy('id', 'desc')
                                 ->where('pandit_status', 'pending')                        
-                                ->get(); // Fetch all profiles        
-    $notifications = Notification::where('is_read', false)->latest()->get();   
+                                ->get(); // Fetch all profiles      
+    
+    // Fetch the total number of notifications (unread) (latest first)(not required now)
+    $notifications = Notification::where('is_read', false)->latest()->get();  
+    
+    // check with the user_id its new user or old user in order table and take the first subscription today
+    $newUserSubscription = User::whereNotIn('userid', function($query) {
+        $query->select('user_id')->from('orders')->whereDate('created_at', Carbon::today());
+    })->count();
+    
+    // check with the user_id whose has already ordered in order table and take a new subscription today
+    $renewSubscription = User::whereIn('userid', function($query) {
+        $query->select('user_id')->from('orders')->whereDate('created_at', Carbon::today());
+    })->count();
+    
 
-    $activeSubscriptions = Subscription::where('status', 'active')->count();
+    // Fetch the total number of subscription orders requested today
+    $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
+                                ->whereNull('request_id')
+                                ->count();
 
-    // Paused subscriptions count
-    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-    $expiredSubscriptions = Subscription::where('status', 'expired')->count();
-
-    // Orders where 'created_at' is today and 'request_id' is not null
-    // $ordersRequestedToday = Order::whereDate('created_at', Carbon::today())
-    //     ->whereNotNull('request_id')
-    //     ->count();
+    // Fetch the total number of flower requests requested today (customized order)
     $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
 
+    // Fetch the total number of active subscriptions
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
 
-    // Orders where 'created_at' is today and 'request_id' is null
-    $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
-        ->whereNull('request_id')
-        ->count();
+    // Fetch the total number of paused subscriptions
+    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+
+    // Fetch the total number of expired subscriptions
+    $expiredSubscriptions = Subscription::where('status', 'expired')->count();
+
+  
 
     // Calculate the total price for orders without request_id
     $ordersWithoutRequestId = Order::whereNull('request_id')
@@ -155,6 +177,8 @@ $totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year
 
 
     return view('admin/dashboard', compact(
+        'renewSubscription' ,
+        'newUserSubscription',
         'totalCompletedEditing',
         'totalCompletedRecoding',
         'totalCompletedScripts',

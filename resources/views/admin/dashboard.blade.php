@@ -92,7 +92,7 @@
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $subscriptionOrderToday }}</h4>
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscription }}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
 															<span class="text-success font-weight-semibold"> +427</span>
@@ -120,7 +120,7 @@
 													</div>
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $subscriptionOrderToday }}</h4>
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscription   }}</h4>
 														</div>
 														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
 															<span class="text-success font-weight-semibold"> +427</span>
