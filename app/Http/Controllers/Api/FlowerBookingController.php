@@ -137,10 +137,10 @@ class FlowerBookingController extends Controller
     
         $emails = [
             'bhabana.samantara@33crores.com',
-            // 'pankaj.sial@33crores.com',
-            // 'basudha@33crores.com',
-            // 'priya@33crores.com',
-            // 'starleen@33crores.com'
+            'pankaj.sial@33crores.com',
+            'basudha@33crores.com',
+            'priya@33crores.com',
+            'starleen@33crores.com'
         ];
     
         try {
@@ -333,10 +333,10 @@ class FlowerBookingController extends Controller
 
         $emails = [
             'bhabana.samantara@33crores.com',
-            // 'pankaj.sial@33crores.com',
-            // 'basudha@33crores.com',
-            // 'priya@33crores.com',
-            // 'starleen@33crores.com',
+            'pankaj.sial@33crores.com',
+            'basudha@33crores.com',
+            'priya@33crores.com',
+            'starleen@33crores.com',
         ];
 
         // Log before sending the email

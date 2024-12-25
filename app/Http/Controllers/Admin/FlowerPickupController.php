@@ -105,7 +105,7 @@ public function manageflowerpickupdetails(Request $request)
         $pickupDetails = $query->get()->groupBy('pickup_date'); // Group by pickup date
         
         // Calculate total expenses for today
-        $totalExpensesday = $query->whereDate('pickup_date', Carbon::today())->sum('expense_amount'); // Assuming `expense_amount` is the field for expenses
+        $totalExpensesday = $query->whereDate('pickup_date', Carbon::today())->sum('total_price'); // Assuming `expense_amount` is the field for expenses
 
         // Return the view with the filtered data
         return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('pickupDetails', 'totalExpensesday'));
