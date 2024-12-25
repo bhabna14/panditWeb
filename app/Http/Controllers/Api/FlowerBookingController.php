@@ -351,7 +351,6 @@ class FlowerBookingController extends Controller
         \Log::info('Email sent successfully to all recipients.');
 
        
-      
         // Return a successful response with flower request details
         return response()->json([
             'status' => 200,
