@@ -350,7 +350,43 @@ class FlowerBookingController extends Controller
 
         \Log::info('Email sent successfully to all recipients.');
 
-       
+      
+        // Twilio WhatsApp Notification: Notify admin with request details
+        // $adminNumber = '+919040112795';
+        // $twilioSid = 'ACdfac13d1e62222d0c03233793c2d4ca3';
+        // $twilioToken = 'd44a876ef567a485dfa70bb1014443db';
+        // $twilioWhatsAppNumber = 'whatsapp:+14155238886';
+           
+            // $messageBody = "*New Flower Request Received*\n\n" .:
+            //     "*Request ID:* {$flowerRequest->request_id}\n" .
+            //     "*User:* {$flowerRequest->user->mobile_number}\n" .
+            //     "*Address:* {$flowerRequest->address->apartment_flat_plot}, " .
+            //     "{$flowerRequest->address->localityDetails->locality_name}, " .
+            //     "{$flowerRequest->address->city}, {$flowerRequest->address->state}, " .
+            //     "{$flowerRequest->address->pincode}\n" .
+            //     "*Landmark:* {$flowerRequest->address->landmark}\n" .
+            //     "*Description:* {$flowerRequest->description}\n" .
+            //     "*Suggestion:* {$flowerRequest->suggestion}\n" .
+            //     "*Date:* {$flowerRequest->date}\n" .
+            //     "*Time:* {$flowerRequest->time}\n\n" .
+            //     "*Flower Items:*\n";
+    
+            // foreach ($flowerRequest->flowerRequestItems as $item) {
+            //     $messageBody .= "- {$item->flower_name}: {$item->flower_quantity} {$item->flower_unit}\n";
+            // }
+    
+            // $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
+            // $twilioClient->messages->create(
+            //     "whatsapp:{$adminNumber}",
+            //     [
+            //         'from' => $twilioWhatsAppNumber,
+            //         'body' => $messageBody,
+            //     ]
+            // );
+    
+
+        
+
         // Return a successful response with flower request details
         return response()->json([
             'status' => 200,
