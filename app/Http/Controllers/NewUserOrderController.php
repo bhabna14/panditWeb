@@ -147,7 +147,7 @@ public function saveNewUserOrder(Request $request)
             'order_id' => $order->order_id,
             'payment_id' => 'NULL',
             'user_id' => $user->userid,
-            'payment_method' => 'rozarpay',
+            'payment_method' => 'cash',
             'paid_amount' => $validatedUserData['paid_amount'],
             'payment_status' => 'paid',
         ]);

@@ -347,6 +347,44 @@ class FlowerBookingController extends Controller
 
         \Log::info('Email sent successfully to all recipients.');
 
+         // Twilio WhatsApp Notification: Notify admin with request details
+         $adminNumber = '+919776888887';
+       
+         $twilioSid = env('TWILIO_ACCOUNT_SID');
+            $twilioToken = env('TWILIO_AUTH_TOKEN');
+            $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
+
+            
+             $messageBody = "*New Flower Request Received*\n\n" .
+                 "*Request ID:* {$flowerRequest->request_id}\n" .
+                 "*User:* {$flowerRequest->user->mobile_number}\n" .
+                 "*Address:* {$flowerRequest->address->apartment_flat_plot}, " .
+                 "{$flowerRequest->address->localityDetails->locality_name}, " .
+                 "{$flowerRequest->address->city}, {$flowerRequest->address->state}, " .
+                 "{$flowerRequest->address->pincode}\n" .
+                 "*Landmark:* {$flowerRequest->address->landmark}\n" .
+                 "*Description:* {$flowerRequest->description}\n" .
+                 "*Suggestion:* {$flowerRequest->suggestion}\n" .
+                 "*Date:* {$flowerRequest->date}\n" .
+                 "*Time:* {$flowerRequest->time}\n\n" .
+                 "*Flower Items:*\n";
+     
+             foreach ($flowerRequest->flowerRequestItems as $item) {
+                 $messageBody .= "- {$item->flower_name}: {$item->flower_quantity} {$item->flower_unit}\n";
+             }
+     
+             $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
+             $twilioClient->messages->create(
+                 "whatsapp:{$adminNumber}",
+                 [
+                     'from' => $twilioWhatsAppNumber,
+                     'body' => $messageBody,
+                 ]
+             );
+     
+ 
+         \Log::info('WhatsApp notification sent successfully.', ['admin_number' => $adminNumber]);
+
         // Return a successful response with flower request details
         return response()->json([
             'status' => 200,
