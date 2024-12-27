@@ -85,7 +85,8 @@ class PublishPodcastController extends Controller
 
         // Send notifications to users
         \Log::info('Sending notifications to users...');
-        $deviceTokens = UserDevice::pluck('device_id')->toArray();
+        // $deviceTokens = UserDevice::pluck('device_id')->toArray();
+        $deviceTokens = UserDevice::whereNotNull('device_id')->pluck('device_id')->filter()->toArray();
 
         if (!empty($deviceTokens)) {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));

@@ -116,7 +116,7 @@ class FlowerBookingController extends Controller
             return response()->json(['message' => 'Failed to record payment'], 500);
         }
     
-        $deviceTokens = UserDevice::where('user_id', $user->userid)->pluck('device_id')->toArray();
+        $deviceTokens = UserDevice::where('user_id', $user->userid)->whereNotNull('device_id')->pluck('device_id')->toArray();
     
         if (!empty($deviceTokens)) {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
@@ -300,7 +300,7 @@ class FlowerBookingController extends Controller
         }
 
         // Firebase Notification: Notify the user via registered device tokens
-        $deviceTokens = UserDevice::where('user_id', $user->userid)->pluck('device_id')->toArray();
+        $deviceTokens = UserDevice::where('user_id', $user->userid)->whereNotNull('device_id')->pluck('device_id')->toArray();
 
         if (!empty($deviceTokens)) {
             // Initialize the notification service with Firebase credentials
@@ -718,7 +718,7 @@ class FlowerBookingController extends Controller
             }
     
             // Send notification to the user
-            $deviceTokens = UserDevice::where('user_id', $order->user_id)->pluck('device_id')->toArray();
+            $deviceTokens = UserDevice::where('user_id', $order->user_id)->whereNotNull('device_id')->pluck('device_id')->toArray();
     
             if (!empty($deviceTokens)) {
                 $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));

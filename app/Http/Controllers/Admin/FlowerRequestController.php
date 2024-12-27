@@ -114,7 +114,7 @@ public function saveOrder(Request $request, $id)
         $flowerRequest->save();
 
         // Send notification to user's devices
-        $deviceTokens = UserDevice::where('user_id', $flowerRequest->user_id)->pluck('device_id')->toArray();
+        $deviceTokens = UserDevice::where('user_id', $flowerRequest->user_id)->whereNotNull('device_id')->pluck('device_id')->toArray();
 
         if (!empty($deviceTokens)) {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));

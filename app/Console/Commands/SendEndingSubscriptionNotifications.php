@@ -56,7 +56,7 @@ class SendEndingSubscriptionNotifications extends Command
                 $user_id = $subscription->user_id;
 
                 // Fetch device tokens for the user
-                $deviceTokens = UserDevice::where('user_id', $user_id)->pluck('device_id')->toArray();
+                $deviceTokens = UserDevice::where('user_id', $user_id)->whereNotNull('device_id')->pluck('device_id')->toArray();
 
                 if (!empty($deviceTokens)) {
                     // Send the notification
