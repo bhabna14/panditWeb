@@ -113,7 +113,7 @@ class OrderController extends Controller
     }
     
     //get assign order to rider every day basis till the end date
-    public function getAssignOrders()
+    public function getAssignedOrders()
     {
         try {
             // Fetch today's orders based on subscription table
