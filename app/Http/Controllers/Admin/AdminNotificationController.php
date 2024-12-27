@@ -69,13 +69,16 @@ class AdminNotificationController extends Controller
     
         return redirect()->route('admin.notification.create')->with('success', 'Notification deleted successfully!');
     }
-
     public function resend($id)
     {
         try {
+            // Find the notification by ID
             $notification = FCMNotification::findOrFail($id);
-            $deviceTokens = UserDevice::pluck('device_id')->toArray();
-
+    
+            // Retrieve device tokens, ensuring no null values are included
+            $deviceTokens = UserDevice::whereNotNull('device_id')->pluck('device_id')->toArray();
+    
+            // Check if there are any valid device tokens
             if (!empty($deviceTokens)) {
                 $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
                 $notificationService->sendBulkNotifications(
@@ -84,13 +87,24 @@ class AdminNotificationController extends Controller
                     $notification->description,
                     ['image' => $notification->image]
                 );
+    
+                Log::info('Notification resent successfully.', [
+                    'notification_id' => $id,
+                    'device_tokens' => $deviceTokens,
+                ]);
+    
+                return redirect()->back()->with('success', 'Notification resent successfully!');
+            } else {
+                Log::warning('No valid device tokens found for resending notification.', ['notification_id' => $id]);
+                return redirect()->back()->with('error', 'No valid device tokens found. Notification could not be resent.');
             }
-
-            return redirect()->back()->with('success', 'Notification resent successfully!');
         } catch (\Exception $e) {
-            Log::error('Error resending notification: ' . $e->getMessage());
+            Log::error('Error resending notification: ' . $e->getMessage(), [
+                'notification_id' => $id,
+            ]);
             return redirect()->back()->with('error', 'Failed to resend notification. Please try again later.');
         }
     }
+    
     
 }
