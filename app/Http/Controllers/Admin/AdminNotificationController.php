@@ -43,7 +43,7 @@ class AdminNotificationController extends Controller
         }
         $notification->save();
 
-        $deviceTokens = UserDevice::pluck('device_id')->toArray();
+        $deviceTokens = UserDevice::whereNotNull('device_id')->pluck('device_id')->toArray();
         if (!empty($deviceTokens)) {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
             $notificationService->sendBulkNotifications(
