@@ -34,7 +34,7 @@ class AdminNotificationController extends Controller
             $imageUrl = $request->file('image')->store('notifications', 'public');
         }
     
-        // Save notification to database
+        // Save notification to the database
         $notification = new FCMNotification();
         $notification->title = $request->title;
         $notification->description = $request->description;
@@ -42,8 +42,10 @@ class AdminNotificationController extends Controller
             $notification->image = $request->file('image')->store('notifications', 'public');
         }
         $notification->save();
-
-        $deviceTokens = UserDevice::whereNotNull('device_id')->pluck('device_id')->toArray();
+    
+        // Retrieve device tokens, excluding null values
+        $deviceTokens = UserDevice::whereNotNull('device_id')->pluck('device_id')->filter()->toArray();
+    
         if (!empty($deviceTokens)) {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
             $notificationService->sendBulkNotifications(
@@ -52,10 +54,13 @@ class AdminNotificationController extends Controller
                 $notification->description,
                 ['image' => $notification->image]
             );
+        } else {
+            \Log::warning('No valid device tokens found.');
         }
-
+    
         return redirect()->back()->with('success', 'Notification sent successfully!');
     }
+    
 
     public function delete($id)
     {

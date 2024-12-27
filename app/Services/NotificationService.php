@@ -9,6 +9,7 @@ class NotificationService
 {
     protected $messaging;
 
+    // Initialize Firebase Messaging
     public function __construct($credentialsPath = null)
     {
         // Use provided path or default to configuration value
@@ -23,6 +24,7 @@ class NotificationService
         $this->messaging = $factory->createMessaging();
     }
 
+    // Send a notification to a single device
     public function sendNotification($deviceToken, $title, $body, $data = [])
     {
         $message = CloudMessage::withTarget('token', $deviceToken)
@@ -35,17 +37,45 @@ class NotificationService
         return $this->messaging->send($message);
     }
 
+    // public function sendBulkNotifications($deviceTokens, $title, $body, $data = [])
+    // {
+    //     $messages = [];
+    //     foreach ($deviceTokens as $deviceToken) {
+    //         $messages[] = CloudMessage::withTarget('token', $deviceToken)
+    //             ->withNotification([
+    //                 'title' => $title,
+    //                 'body'  => $body,
+    //             ])
+    //             ->withData($data);
+    //     }
+    //     return $this->messaging->sendAll($messages);
+    // }
+    
+    // public function sendBulkNotifications($deviceTokens, $title, $body, $data = [])
     public function sendBulkNotifications($deviceTokens, $title, $body, $data = [])
     {
         $messages = [];
+
         foreach ($deviceTokens as $deviceToken) {
-            $messages[] = CloudMessage::withTarget('token', $deviceToken)
-                ->withNotification([
-                    'title' => $title,
-                    'body'  => $body,
-                ])
-                ->withData($data);
+            // Ensure the token is a valid string
+            if (is_string($deviceToken) && !empty($deviceToken)) {
+                $messages[] = CloudMessage::withTarget('token', $deviceToken)
+                    ->withNotification([
+                        'title' => $title,
+                        'body'  => $body,
+                    ])
+                    ->withData($data);
+            } else {
+                \Log::warning('Invalid device token encountered.', ['deviceToken' => $deviceToken]);
+            }
         }
-        return $this->messaging->sendAll($messages);
+
+        if (!empty($messages)) {
+            return $this->messaging->sendAll($messages);
+        }
+
+        \Log::info('No valid messages to send.');
+        return null;
     }
+
 }
