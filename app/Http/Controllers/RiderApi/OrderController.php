@@ -112,11 +112,11 @@ class OrderController extends Controller
         }
     }
     
-    //get assign order to rider every day basis till the end date
-    public function getAssignedOrders()
+    //get assign order to rider every day basis till the end date and subscription is status is active
+    public function getAssignOrders()
     {
         try {
-            // Fetch today's orders based on subscription table
+            // Fetch today's orders based on flower_requests table
     
             $rider = Auth::guard('rider-api')->user();
     
@@ -128,10 +128,11 @@ class OrderController extends Controller
             }
     
             $today = Carbon::today();
-            $orders = Order::where('rider_id', $rider->rider_id)
-                ->whereHas('subscription', function ($query) use ($today) {
-                    $query->whereDate('end_date', '>=', $today);
-                })
+            $orders = Order::whereHas('subscription', function ($query) use ($today) {
+                $query->where('status', 'active')
+                    ->whereDate('end_date', '>=', $today);
+            })
+                ->where('rider_id', $rider->rider_id)
                 ->with(['subscription', 'delivery', 'user', 'flowerProduct', 'address.localityDetails'])
                 ->orderBy('id', 'desc')
                 ->get();
@@ -146,13 +147,13 @@ class OrderController extends Controller
     
             return response()->json([
                 'status' => 200,
-                'message' => 'Assigned orders for today fetched successfully',
+                'message' => 'Orders assigned for today fetched successfully',
                 'data' => $orders,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
-                'message' => 'An error occurred while fetching assigned orders.',
+                'message' => 'An error occurred while fetching orders.',
                 'error' => $e->getMessage(),
             ], 500);
         }
