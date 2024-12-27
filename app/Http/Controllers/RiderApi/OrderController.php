@@ -112,31 +112,30 @@ class OrderController extends Controller
         }
     }
     
-    //get assign order to rider
-    public function getAssignedOrders()
+    //get assign order to rider every day basis till the end date
+    public function getAssignOrders()
     {
         try {
-            // Check if the rider is authenticated
+            // Fetch today's orders based on subscription table
+    
             $rider = Auth::guard('rider-api')->user();
-
+    
             if (!$rider) {
                 return response()->json([
                     'status' => 401,
                     'message' => 'Unauthorized',
                 ], 401);
             }
-
-            // Fetch active orders assigned to the rider
+    
+            $today = Carbon::today();
             $orders = Order::where('rider_id', $rider->rider_id)
-                            ->with(['flowerRequest', 'subscription','delivery', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-                            ->whereHas('subscription', function($query) {
-                                // Only fetch orders where the subscription is active
-                                $query->where('status', 'active');
-                            })
-                            ->orderBy('id', 'desc')
-                            ->get();
-
-            // Check if the orders collection is empty
+                ->whereHas('subscription', function ($query) use ($today) {
+                    $query->whereDate('end_date', '>=', $today);
+                })
+                ->with(['subscription', 'delivery', 'user', 'flowerProduct', 'address.localityDetails'])
+                ->orderBy('id', 'desc')
+                ->get();
+    
             if ($orders->isEmpty()) {
                 return response()->json([
                     'status' => 200,
@@ -144,20 +143,17 @@ class OrderController extends Controller
                     'data' => [],
                 ]);
             }
-
-            // Return the assigned orders if found
+    
             return response()->json([
                 'status' => 200,
-                'message' => 'Assigned orders fetched successfully',
+                'message' => 'Assigned orders for today fetched successfully',
                 'data' => $orders,
             ]);
-            
         } catch (\Exception $e) {
-            // Handle any exceptions and return a 500 server error response
             return response()->json([
                 'status' => 500,
-                'message' => 'An error occurred while fetching orders.',
-                'error' => $e->getMessage(), // Optionally, you can log this error for debugging
+                'message' => 'An error occurred while fetching assigned orders.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
