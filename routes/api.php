@@ -38,8 +38,10 @@ use App\Http\Controllers\RiderApi\OrderController;
 use App\Http\Controllers\RiderApi\RiderLoginController;
 use App\Http\Controllers\Notification\PushNotificationController;
 
+use App\Http\Controllers\Api\FCMNotificationController;
 
 Route::post('/save-token', [PushNotificationController::class, 'saveToken']);
+Route::get('/fcm-bulk-notifications', [FCMNotificationController::class, 'getAllNotifications']);
 // Routes for Rider Login
 Route::prefix('rider')->group(function () {
     // Send OTP
