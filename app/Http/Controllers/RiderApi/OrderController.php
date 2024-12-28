@@ -305,12 +305,13 @@ class OrderController extends Controller
             
             Log::info("Received delivery location for order_id: {$order_id}, rider_id: {$rider->rider_id} - Longitude: {$validated['longitude']}, Latitude: {$validated['latitude']}");
     
-            // Check if the order is assigned to the rider and active
+            // Check if the order is assigned to the rider and active, and the order was created today
             $order = Order::where('order_id', $order_id)
                         ->where('rider_id', $rider->rider_id)
                         ->whereHas('subscription', function ($query) {
                             $query->where('status', 'active');
                         })
+                        // Filter for orders created today
                         ->first();
     
             if (!$order) {
@@ -318,16 +319,16 @@ class OrderController extends Controller
     
                 return response()->json([
                     'status' => 404,
-                    'message' => 'Order not found or not assigned to this rider',
+                    'message' => 'Order not found or not assigned to this rider, or order not created today',
                 ], 404);
             }
     
-            // Find the existing delivery history record
+            // Find the existing delivery history record for today's date
             $deliveryHistory = DeliveryHistory::where('order_id', $order->order_id)
                                               ->where('rider_id', $rider->rider_id)
-                                              ->whereDate('created_at', Carbon::today())  // Add condition for today
+                                              ->whereDate('created_at', Carbon::today()) // Only today's records
                                               ->first();
-                                              
+    
             if ($deliveryHistory) {
                 // Update the existing delivery history record
                 $deliveryHistory->update([
@@ -337,7 +338,7 @@ class OrderController extends Controller
                 ]);
                 Log::info("Updated delivery history for order_id: {$order->order_id} by rider_id: {$rider->rider_id}");
             } else {
-                // If no record exists, create a new one
+                // If no record exists for today, create a new delivery history record
                 $deliveryHistory = DeliveryHistory::create([
                     'order_id' => $order->order_id,
                     'rider_id' => $rider->rider_id,
@@ -364,6 +365,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    
     
     
 
