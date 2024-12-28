@@ -247,6 +247,8 @@ public function admindashboard()
 
 
     return view('admin/dashboard', compact(
+        'totalAssignedOrderstoprahlad',
+        'totalDeliveredTodaybyprahlad',
         'totalDeliveredTodaybysubrat',
         'totalAssignedOrderstosubrat',
         'totalDeliveredTodaybybablu',

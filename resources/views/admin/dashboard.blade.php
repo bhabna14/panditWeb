@@ -347,10 +347,10 @@
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
 															<h4 class="tx-12 font
-															-weight-semibold mb-2">Total Delivery: {{$totalAssignedOrderstosubrat}}</h4>
+															-weight-semibold mb-2">Total Delivery: {{$totalAssignedOrderstoprahlad}}</h4>
 
 															<h4 class="tx-12 font
-															-weight-semibold mb-2">Total Delivered: {{$totalDeliveredTodaybysubrat}}</h4>
+															-weight-semibold mb-2">Total Delivered: {{$totalDeliveredTodaybyprahlad}}</h4>
 
 														</div>
 													</div>
