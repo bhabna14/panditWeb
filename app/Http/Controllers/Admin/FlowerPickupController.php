@@ -62,58 +62,51 @@ class FlowerPickupController extends Controller
 }
 
     
-public function manageflowerpickupdetails(Request $request)
-{
-    try {
-        // Get the filter parameter from the URL (if available)
-        $filter = $request->input('filter', 'all'); // Default is 'all'
-        
-        // Build the query
-        $query = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider']);
-        
-        // If 'todayexpenses' filter is applied, get pickups for today only
-        if ($filter == 'todayexpenses') {
-            $query->whereDate('pickup_date', Carbon::today()); // Filter by today's date
-        }
-        // If 'todaypaidpickup' filter is applied, get pickups for today with payment status 'Paid'
-        if ($filter == 'todaypaidpickup') {
-            $query->whereDate('pickup_date', Carbon::today()) // Filter by today's date
-                ->where('payment_status', 'Paid'); // Filter by payment status
-        }
-        // If 'todaypendingpickup' filter is applied, get pickups for today with payment status 'pending'
-        if ($filter == 'todaypendingpickup') {
-            $query->whereDate('pickup_date', Carbon::today()) // Filter by today's date
-                ->where('payment_status', 'pending'); // Filter by payment status
-        }
-
-         // If 'monthlyexpenses' filter is applied, get pickups for current month only
-        if ($filter == 'monthlyexpenses') {
-                $query->whereMonth('pickup_date', Carbon::now()->month); // Filter by current month
+    public function manageflowerpickupdetails(Request $request)
+    {
+        try {
+            // Get the filter parameter from the URL (if available)
+            $filter = $request->input('filter', 'all'); // Default is 'all'
+            
+            // Build the query
+            $query = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider']);
+            
+            // Apply filters based on the filter parameter
+            if ($filter == 'todayexpenses') {
+                $query->whereDate('pickup_date', Carbon::today()); // Today's date
+            } elseif ($filter == 'todaypaidpickup') {
+                $query->whereDate('pickup_date', Carbon::today())
+                    ->where('payment_status', 'Paid'); // Today's paid pickups
+            } elseif ($filter == 'todaypendingpickup') {
+                $query->whereDate('pickup_date', Carbon::today())
+                    ->where('payment_status', 'pending'); // Today's pending pickups
+            } elseif ($filter == 'monthlyexpenses') {
+                $query->whereMonth('pickup_date', Carbon::now()->month); // Current month
+            } elseif ($filter == 'monthlypaidpickup') {
+                $query->whereMonth('pickup_date', Carbon::now()->month)
+                    ->where('payment_status', 'Paid'); // Monthly paid pickups
+            } elseif ($filter == 'monthlypendingpickup') {
+                $query->whereMonth('pickup_date', Carbon::now()->month)
+                    ->where('payment_status', 'pending'); // Monthly pending pickups
             }
-        // If 'monthlypaidpickup' filter is applied, get pickups for monthly with payment status 'Paid'
-        if ($filter == 'monthlypaidpickup') {
-            $query->whereDate('pickup_date', Carbon::now()->month) // Filter by today's date
-                ->where('payment_status', 'Paid'); // Filter by payment status
-        }
-        // If 'monthlypendingpickup' filter is applied, get pickups for monthly with payment status 'pending'
-        if ($filter == 'monthlypendingpickup') {
-            $query->whereDate('pickup_date', Carbon::now()->month) // Filter by today's date
-                ->where('payment_status', 'pending'); // Filter by payment status
-        }
 
-        // Get the pickup details
-        $pickupDetails = $query->get()->groupBy('pickup_date'); // Group by pickup date
-        
-        // Calculate total expenses for today
-        $totalExpensesday = $query->whereDate('pickup_date', Carbon::today())->sum('total_price'); // Assuming `expense_amount` is the field for expenses
+            // Order the results by pickup_date in descending order
+            $query->orderBy('pickup_date', 'desc');
 
-        // Return the view with the filtered data
-        return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('pickupDetails', 'totalExpensesday'));
-        
-    } catch (\Exception $e) {
-        return back()->withErrors(['error' => 'Failed to fetch pickup details: ' . $e->getMessage()]);
+            // Get the pickup details
+            $pickupDetails = $query->get()->groupBy('pickup_date'); // Group by pickup date
+            
+            // Calculate total expenses for today
+            $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())->sum('total_price'); 
+
+            // Return the view with the filtered data
+            return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('pickupDetails', 'totalExpensesday'));
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to fetch pickup details: ' . $e->getMessage()]);
+        }
     }
-}
+
 
     
     // public function edit($id)
