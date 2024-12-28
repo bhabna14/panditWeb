@@ -306,6 +306,8 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
 
         Route::get('/manage-flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
+        Route::post('/save-flower-pickup-assign-rider', 'saveFlowerPickupAssignRider')->name('admin.saveFlowerPickupAssignRider');
+       
         Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');
 
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');

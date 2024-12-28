@@ -207,68 +207,68 @@ public function manageflowerpickupdetails(Request $request)
     }
     
     
-    // public function saveFlowerPickupDetails(Request $request)
-    // {
-    //     // Validate the request
-    //     $request->validate([
-    //         'vendor_id' => 'required|exists:flower__vendor_details,vendor_id',
-    //         'pickup_date' => 'required|date',
-    //         'rider_id' => 'required|exists:flower__rider_details,rider_id',
-    //         'flower_id' => 'required|array',
-    //         'flower_id.*' => 'required|exists:flower_products,product_id',
-    //         'unit_id' => 'required|array',
-    //         'unit_id.*' => 'required|exists:pooja_units,id',
-    //         'quantity' => 'required|array',
-    //         'quantity.*' => 'required|numeric|min:1',
-    //     ]);
+    public function saveFlowerPickupAssignRider(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'vendor_id' => 'required|exists:flower__vendor_details,vendor_id',
+            'pickup_date' => 'required|date',
+            'rider_id' => 'required|exists:flower__rider_details,rider_id',
+            'flower_id' => 'required|array',
+            'flower_id.*' => 'required|exists:flower_products,product_id',
+            'unit_id' => 'required|array',
+            'unit_id.*' => 'required|exists:pooja_units,id',
+            'quantity' => 'required|array',
+            'quantity.*' => 'required|numeric|min:1',
+        ]);
     
-    //     // Generate unique pick_up_id
-    //     $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+        // Generate unique pick_up_id
+        $pickUpId = 'PICKUP-' . strtoupper(uniqid());
     
-    //     // Save main flower pickup details
-    //     // Save flower pickup details
-    //     $pickup = FlowerPickupDetails::create([
-    //         'pick_up_id' => $pickUpId,
-    //         'vendor_id' => $request->vendor_id,
-    //         'pickup_date' => $request->pickup_date,
-    //         'rider_id' => $request->rider_id,
-    //         'total_price' => 0, // Will calculate later
-    //         'payment_method' => null,
-    //         'payment_status' => 'pending',
-    //         'status' => 'PickupCompleted',
-    //         'payment_id' => null,
-    //     ]);
+        // Save main flower pickup details
+        // Save flower pickup details
+        $pickup = FlowerPickupDetails::create([
+            'pick_up_id' => $pickUpId,
+            'vendor_id' => $request->vendor_id,
+            'pickup_date' => $request->pickup_date,
+            'rider_id' => $request->rider_id,
+            'total_price' => 0, // Will calculate later
+            'payment_method' => null,
+            'payment_status' => 'pending',
+            'status' => 'PickupCompleted',
+            'payment_id' => null,
+        ]);
 
-    //     $totalPrice = 0; // Initialize total price
+        $totalPrice = 0; // Initialize total price
 
-    // // Save flower items
-    // foreach ($request->flower_id as $index => $flower_id) {
-    //     $price = $request->price[$index] ?? null; // If no price provided, default to null
-    //     $quantity = $request->quantity[$index];
+    // Save flower items
+    foreach ($request->flower_id as $index => $flower_id) {
+        $price = $request->price[$index] ?? null; // If no price provided, default to null
+        $quantity = $request->quantity[$index];
 
-    //     // Create FlowerPickupItem
-    //     FlowerPickupItems::create([
-    //         'pick_up_id' => $pickUpId,
-    //         'flower_id' => $flower_id,
-    //         'unit_id' => $request->unit_id[$index],
-    //         'quantity' => $quantity,
-    //         'price' => $price, // Save price as null if not provided
-    //     ]);
+        // Create FlowerPickupItem
+        FlowerPickupItems::create([
+            'pick_up_id' => $pickUpId,
+            'flower_id' => $flower_id,
+            'unit_id' => $request->unit_id[$index],
+            'quantity' => $quantity,
+            'price' => $price, // Save price as null if not provided
+        ]);
 
-    //     // Add price to total if price is given
-    //     if ($price !== null) {
-    //         $totalPrice += $price ; // Multiply price by quantity and add to total
-    //     }
-    // }
+        // Add price to total if price is given
+        if ($price !== null) {
+            $totalPrice += $price ; // Multiply price by quantity and add to total
+        }
+    }
 
-    // // Update total price in FlowerPickupDetails
-    // $pickup->total_price = $totalPrice;
-    // $pickup->save();
+    // Update total price in FlowerPickupDetails
+    $pickup->total_price = $totalPrice;
+    $pickup->save();
 
 
     
-    //     return redirect()->back()->with('success', 'Flower pickup details saved successfully!');
-    // }
+        return redirect()->back()->with('success', 'Flower pickup details saved successfully!');
+    }
     
 //     public function update(Request $request, $id)
 // {
