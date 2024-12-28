@@ -127,6 +127,13 @@ public function admindashboard()
                 ->where('status', 'active');
         })
         ->count();
+    // Individual Rider Details
+    //display to total assigned orders to rider from orders table whose request_id is null  where rider_id is RIDER73783 and add subscription status is active from subcription table 
+    $totalAssignedOrderstobablu = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
+    ->whereNull('orders.request_id')  // Ensure request_id is null
+    ->where('orders.rider_id', 'RIDER73783')  // Filter by rider_id
+    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
+    ->count();
     //Rider Details
     // Total Riders
     $totalRiders = RiderDetails::count();
@@ -211,6 +218,7 @@ public function admindashboard()
 
 
     return view('admin/dashboard', compact(
+        'totalAssignedOrderstobablu',
         'renewSubscription' ,
         'newUserSubscription',
         'totalCompletedEditing',

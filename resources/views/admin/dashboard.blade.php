@@ -267,6 +267,120 @@
 					<!-- row closed -->
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom">Indivisual Rider Details</h4>
+
+							<div class="row">
+								
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageRiderDetails')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Bablu Pristy</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{$totalAssignedOrderstobablu}}</h4>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.managedeliveryhistory' , ['filter' => 'todaydelivery'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery Today </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveriesToday}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.managedeliveryhistory' , ['filter' => 'monthlydelivery'])}}" target="_blank">
+
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery in this Month </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveriesThisMonth}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.managedeliveryhistory')}}" target="_blank">
+
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveries}}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-following tx-16 text-secondary"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+							</div>
+						</div>
+					</div>
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 							<h4 class="card-title-custom"> Rider Details</h4>
 
 							<div class="row">
