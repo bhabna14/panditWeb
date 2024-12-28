@@ -280,11 +280,16 @@
 													<div class="">
 														<h6 class="mb-2 tx-12 ">Bablu Pristy</h6>
 													</div>
+														
 													<div class="pb-0 mt-0">
 														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{$totalAssignedOrderstobablu}}</h4>
+															<h4 class="tx-12 font
+															-weight-semibold mb-2">Total Delivery: {{$totalAssignedOrderstobablu}}</h4>
+
+															<h4 class="tx-12 font
+															-weight-semibold mb-2">Total Delivered: {{$totalDeliveredTodaybybablu}}</h4>
+
 														</div>
-														
 													</div>
 												</div>
 											</div>

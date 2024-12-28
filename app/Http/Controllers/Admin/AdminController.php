@@ -134,6 +134,10 @@ public function admindashboard()
     ->where('orders.rider_id', 'RIDER73783')  // Filter by rider_id
     ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
     ->count();
+    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER73783) and created_at date is today
+    $totalDeliveredTodaybybablu = DeliveryHistory::whereDate('created_at', now()->toDateString())
+    ->where('rider_id', 'RIDER73783')
+    ->count();
     //Rider Details
     // Total Riders
     $totalRiders = RiderDetails::count();
@@ -218,6 +222,7 @@ public function admindashboard()
 
 
     return view('admin/dashboard', compact(
+        'totalDeliveredTodaybybablu',
         'totalAssignedOrderstobablu',
         'renewSubscription' ,
         'newUserSubscription',
