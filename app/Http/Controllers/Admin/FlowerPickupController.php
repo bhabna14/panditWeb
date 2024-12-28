@@ -181,39 +181,27 @@ public function manageflowerpickupdetails(Request $request)
         // Initialize total price
         $totalPrice = 0;
     
-        // Handle flower details to aggregate prices for the same flower_id
-        $flowerDetails = [];
-    
-        foreach ($request->flower_id as $index => $flower_id) {
-            if (!isset($flowerDetails[$flower_id])) {
-                $flowerDetails[$flower_id] = [
-                    'quantity' => 0,
-                    'price' => 0,
-                    'unit_id' => $request->unit_id[$index],
-                ];
-            }
-    
-            // Aggregate quantities and prices
-            $flowerDetails[$flower_id]['quantity'] += $request->quantity[$index];
-            $flowerDetails[$flower_id]['price'] += $request->price[$index]; // Aggregate price
-        }
-    
         // Save flower items and calculate total price
-        foreach ($flowerDetails as $flower_id => $details) {
+        foreach ($request->flower_id as $index => $flowerId) {
+            $quantity = $request->quantity[$index];
+            $price = $request->price[$index];
+            $unitId = $request->unit_id[$index];
+    
+            // Insert flower details into FlowerPickupItems table
             FlowerPickupItems::create([
                 'pick_up_id' => $pickUpId,
-                'flower_id' => $flower_id,
-                'unit_id' => $details['unit_id'],
-                'quantity' => $details['quantity'],
-                'price' => $details['price'],
+                'flower_id' => $flowerId,
+                'unit_id' => $unitId,
+                'quantity' => $quantity,
+                'price' => $price,
             ]);
     
-            $totalPrice += $details['price']; // Accumulate total price
+            // Accumulate total price
+            $totalPrice += $price;
         }
     
         // Update total price in FlowerPickupDetails
-        $pickup->total_price = $totalPrice;
-        $pickup->save();
+        $pickup->update(['total_price' => $totalPrice]);
     
         return redirect()->back()->with('success', 'Flower pickup details saved successfully!');
     }
