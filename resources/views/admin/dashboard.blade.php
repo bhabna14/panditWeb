@@ -267,7 +267,7 @@
 					<!-- row closed -->
 					<div class="row">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-							<h4 class="card-title-custom">Indivisual Rider Details</h4>
+							<h4 class="card-title-custom">Individual Rider Details</h4>
 
 							<div class="row">
 								
