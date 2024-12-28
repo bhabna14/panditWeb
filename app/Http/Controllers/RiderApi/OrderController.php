@@ -244,7 +244,7 @@ class OrderController extends Controller
                 })
                 ->with([
                     'order.subscription',
-                    'order.delivery',
+                   
                     'order.user',
                     'order.flowerProduct',
                     'order.address.localityDetails',
