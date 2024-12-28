@@ -135,7 +135,7 @@ public function admindashboard()
     ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
     ->count();
     // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER73783) and created_at date is today
-    $totalDeliveredTodaybybablu = DeliveryHistory::whereDate('created_at', now()->toDateString())
+    $totalDeliveredTodaybybablu = DeliveryHistory::whereDate('created_at', Carbon::today())
     ->where('rider_id', 'RIDER73783')
     ->where('delivery_status', 'delivered')
     ->count();
