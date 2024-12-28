@@ -8,6 +8,7 @@ use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
 use App\Models\DeliveryHistory;
 use App\Models\FlowerPickupRequest;
+use App\Models\DeliveryStartHistory;
 
 use App\Models\Order;;
 use Carbon\Carbon;
@@ -153,7 +154,11 @@ class OrderController extends Controller
                     'latitude' => $request->latitude ?? null,   // Optional if provided
                 ]);
             }
-
+                // Also save delivery start time in the new table
+                DeliveryStartHistory::create([
+                    'rider_id' => $rider->rider_id,
+                    'start_delivery_time' => now(), // Save the current time as start delivery time
+                ]);
             return response()->json([
                 'status' => 200,
                 'message' => 'Delivery started successfully. Orders have been saved in delivery history.',
@@ -169,52 +174,106 @@ class OrderController extends Controller
 
     
     //get assign order to rider every day basis till the end date and subscription is status is active
-    public function getAssignedOrders()
-    {
-        try {
-            // Fetch today's orders based on subscription table
+    // public function getAssignedOrders()
+    // {
+    //     try {
+    //         // Fetch today's orders based on subscription table
     
-            $rider = Auth::guard('rider-api')->user();
+    //         $rider = Auth::guard('rider-api')->user();
     
-            if (!$rider) {
-                return response()->json([
-                    'status' => 401,
-                    'message' => 'Unauthorized',
-                ], 401);
-            }
+    //         if (!$rider) {
+    //             return response()->json([
+    //                 'status' => 401,
+    //                 'message' => 'Unauthorized',
+    //             ], 401);
+    //         }
     
-            $today = Carbon::today();
-            $orders = Order::where('rider_id', $rider->rider_id)
+    //         $today = Carbon::today();
+    //         $orders = Order::where('rider_id', $rider->rider_id)
             
-                ->whereHas('subscription', function ($query) use ($today) {
-                    $query->where('status', 'active')
+    //             ->whereHas('subscription', function ($query) use ($today) {
+    //                 $query->where('status', 'active')
+    //                 ->whereDate('end_date', '>=', $today);
+    //             })
+    //             ->with(['subscription', 'delivery', 'user', 'flowerProduct', 'address.localityDetails'])
+    //             ->orderBy('id', 'desc')
+    //             ->get();
+    
+    //         if ($orders->isEmpty()) {
+    //             return response()->json([
+    //                 'status' => 200,
+    //                 'message' => 'No orders assigned for today',
+    //                 'data' => [],
+    //             ]);
+    //         }
+    
+    //         return response()->json([
+    //             'status' => 200,
+    //             'message' => 'Assigned orders for today fetched successfully',
+    //             'data' => $orders,
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'status' => 500,
+    //             'message' => 'An error occurred while fetching assigned orders.',
+    //             'error' => $e->getMessage(),
+    //         ], 500);
+    //     }
+    // }
+
+    public function getAssignedOrders()
+{
+    try {
+        // Fetch today's orders based on subscription table
+        $rider = Auth::guard('rider-api')->user();
+
+        if (!$rider) {
+            return response()->json([
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $today = Carbon::today();
+        
+        // Get orders with delivery history and delivery start history
+        $orders = Order::where('rider_id', $rider->rider_id)
+            ->whereHas('subscription', function ($query) use ($today) {
+                $query->where('status', 'active')
                     ->whereDate('end_date', '>=', $today);
-                })
-                ->with(['subscription', 'delivery', 'user', 'flowerProduct', 'address.localityDetails'])
-                ->orderBy('id', 'desc')
-                ->get();
-    
-            if ($orders->isEmpty()) {
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'No orders assigned for today',
-                    'data' => [],
-                ]);
-            }
-    
+            })
+            ->with(['subscription', 'delivery', 'user', 'flowerProduct', 'address.localityDetails'])
+            ->join('delivery_histories', 'orders.order_id', '=', 'delivery_histories.order_id')
+            ->leftJoin('delivery_start_histories', function ($join) use ($today) {
+                $join->on('delivery_histories.rider_id', '=', 'delivery_start_histories.rider_id')
+                     ->whereDate('delivery_start_histories.start_delivery_time', '=', $today);
+            })
+            ->where('delivery_histories.delivery_status', 'pending')
+            ->orderBy('orders.id', 'desc')
+            ->get();
+
+        if ($orders->isEmpty()) {
             return response()->json([
                 'status' => 200,
-                'message' => 'Assigned orders for today fetched successfully',
-                'data' => $orders,
+                'message' => 'No orders assigned for today',
+                'data' => [],
             ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred while fetching assigned orders.',
-                'error' => $e->getMessage(),
-            ], 500);
         }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Assigned orders for today fetched successfully',
+            'data' => $orders,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 500,
+            'message' => 'An error occurred while fetching assigned orders.',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
 
 
     // Mark order as delivered by rider
