@@ -139,6 +139,30 @@ public function admindashboard()
     ->where('rider_id', 'RIDER73783')
     ->where('delivery_status', 'delivered')
     ->count();
+
+
+    $totalAssignedOrderstosubrat = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
+    ->whereNull('orders.request_id')  // Ensure request_id is null
+    ->where('orders.rider_id', 'RIDER87967')  // Filter by rider_id
+    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
+    ->count();
+    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER87967) and created_at date is today
+    $totalDeliveredTodaybysubrat = DeliveryHistory::whereDate('created_at', Carbon::today())
+    ->where('rider_id', 'RIDER87967')
+    ->where('delivery_status', 'delivered')
+    ->count();
+
+
+    $totalAssignedOrderstoprahlad = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
+    ->whereNull('orders.request_id')  // Ensure request_id is null
+    ->where('orders.rider_id', 'RIDER91711')  // Filter by rider_id
+    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
+    ->count();
+    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER91711) and created_at date is today
+    $totalDeliveredTodaybyprahlad = DeliveryHistory::whereDate('created_at', Carbon::today())
+    ->where('rider_id', 'RIDER91711')
+    ->where('delivery_status', 'delivered')
+    ->count();
     //Rider Details
     // Total Riders
     $totalRiders = RiderDetails::count();
@@ -223,6 +247,8 @@ public function admindashboard()
 
 
     return view('admin/dashboard', compact(
+        'totalDeliveredTodaybysubrat',
+        'totalAssignedOrderstosubrat',
         'totalDeliveredTodaybybablu',
         'totalAssignedOrderstobablu',
         'renewSubscription' ,
