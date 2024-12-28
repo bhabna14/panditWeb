@@ -13,9 +13,11 @@ use App\Models\Notification;
 use App\Models\RiderDetails;
 use App\Models\DeliveryHistory;
 use App\Models\FlowerPickupDetails;
-
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Models\SubscriptionPauseResumeLog;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -414,6 +416,76 @@ public function showRiderDetails($id)
     // Return to the Blade view
    
     return view('admin.rider-all-details', compact('total_price','total_paid','total_unpaid','rider','pickupHistory', 'deliveryHistory', 'totalOrders', 'ongoingOrders', 'monthlyOrders', 'totalSpend'));
+}
+
+
+
+public function pause(Request $request, $order_id)
+{
+    try {
+        // Fetch subscription associated with the order
+        $subscription = Subscription::where('order_id', $order_id)->firstOrFail();
+
+        // Validate and parse the dates
+        $pauseStartDate = Carbon::parse($request->pause_start_date);
+        $pauseEndDate = Carbon::parse($request->pause_end_date);
+        
+        if ($pauseStartDate->gt($pauseEndDate)) {
+            return redirect()->back()->with('error', 'Pause Start Date must be before Pause End Date.');
+        }
+
+        // Log the pause request
+        Log::info('Pausing subscription', [
+            'order_id' => $order_id,
+            'pause_start_date' => $pauseStartDate,
+            'pause_end_date' => $pauseEndDate,
+        ]);
+
+        // Calculate paused days
+        $pausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1;
+
+        // Determine the effective current end date
+        $lastNewEndDate = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+            ->orderBy('id', 'desc')
+            ->value('new_end_date');
+        $currentEndDate = $lastNewEndDate ? Carbon::parse($lastNewEndDate) : Carbon::parse($subscription->end_date);
+
+        // Recalculate the new end date
+        $newEndDate = $currentEndDate->addDays($pausedDays);
+
+        // Update subscription details
+        $subscription->update([
+            'status' => 'paused',
+            'pause_start_date' => $pauseStartDate,
+            'pause_end_date' => $pauseEndDate,
+            'new_date' => $newEndDate,
+            'is_active' => true
+        ]);
+
+        // Log the pause action
+        SubscriptionPauseResumeLog::create([
+            'subscription_id' => $subscription->subscription_id,
+            'order_id' => $order_id,
+            'action' => 'paused',
+            'pause_start_date' => $pauseStartDate,
+            'pause_end_date' => $pauseEndDate,
+            'paused_days' => $pausedDays,
+            'new_end_date' => $newEndDate,
+        ]);
+
+        // Return a success message with redirection
+        return redirect()->route('subscription.index')->with('success', 'Subscription paused successfully.');
+
+    } catch (\Exception $e) {
+        // Log any exceptions that occur
+        Log::error('Error pausing subscription: ' . $e->getMessage(), [
+            'order_id' => $order_id,
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        // Return a failure message
+        return redirect()->back()->with('error', 'An error occurred while pausing the subscription.');
+    }
 }
 
 

@@ -1,6 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('styles')
+<input type="hidden" name="_token" value="{{ csrf_token() }}">
 
     <!-- Data table css -->
     <link href="{{asset('assets/plugins/datatable/css/dataTables.bootstrap5.css')}}" rel="stylesheet" />
@@ -211,10 +212,62 @@
                                                     <td>
                                                        
                                                         <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>
-                                                        <a href="" class="btn btn-primary">Pause</a>
+                                                       <!-- Updated Modal Form -->
+                                                       @if ($order->subscription->status === 'active')
+                                                            <!-- Show Pause Button -->
+                                                            <a href="#" class="btn btn-warning mb-3" data-bs-toggle="modal" data-bs-target="#pauseModal{{ $order->order_id }}">Pause</a>
+                                                        @elseif ($order->subscription->status === 'paused')
+                                                            <!-- Show Resume Button -->
+                                                            <a href="{{ route('resume.subscription', $order->order_id) }}" class="btn btn-success mb-3">Resume</a>
+                                                        @endif
+
+                                                        <div class="modal fade" id="pauseModal{{ $order->order_id }}" tabindex="-1" aria-labelledby="pauseModalLabel" aria-hidden="true">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="pauseModalLabel">Pause Subscription</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <form id="pauseForm{{ $order->order_id }}" action="{{ route('pause.subscription', $order->order_id) }}" method="POST">
+                                                                            @csrf
+                                                                            <input type="hidden" name="order_id" value="{{ $order->order_id }}">
+
+                                                                            <div class="mb-3">
+                                                                                <label for="pause_start_date_{{ $order->order_id }}" class="form-label">Pause Start Date</label>
+                                                                                <input type="date" id="pause_start_date_{{ $order->order_id }}" name="pause_start_date" 
+                                                                                    class="form-control" required 
+                                                                                    min="{{ $order->subscription->start_date }}" 
+                                                                                    max="{{ $order->subscription->end_date }}">
+                                                                            </div>
+
+                                                                            <div class="mb-3">
+                                                                                <label for="pause_end_date_{{ $order->order_id }}" class="form-label">Pause End Date</label>
+                                                                                <input type="date" id="pause_end_date_{{ $order->order_id }}" name="pause_end_date" 
+                                                                                    class="form-control" required 
+                                                                                    min="{{ $order->subscription->start_date }}" 
+                                                                                    max="{{ $order->subscription->end_date }}">
+                                                                            </div>
+
+                                                                            <p class="text-muted">
+                                                                                Dates must be between <strong>{{ $order->subscription->start_date }}</strong> and <strong>{{ $order->subscription->end_date }}</strong>.
+                                                                            </p>
+
+                                                                            <div class="modal-footer">
+                                                                                <button type="submit" class="btn btn-primary">Submit</button>
+                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        
 
                                                     </td>
                                                 </tr>
+                                             
                                                 @endforeach
                                             </tbody>
                                             
@@ -278,33 +331,7 @@
 
     <!-- INTERNAL Select2 js -->
     <script src="{{asset('assets/plugins/select2/js/select2.full.min.js')}}"></script>
-    {{-- <script>
-        let playSound = {{ $unviewedOrdersCount > 0 ? 'true' : 'false' }};
-        const audio = new Audio('{{ asset('sound/flowersound.mp3') }}');
-    
-        if (playSound) {
-            audio.loop = true;
-            audio.play();
-        }
-    
-        // Mark orders as viewed and stop sound
-        function markOrdersAsViewed() {
-            fetch("{{ route('orders.markAsViewed') }}", {
-                method: "POST",
-                headers: {
-                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                }
-            }).then(response => {
-                if (response.ok) {
-                    audio.pause();
-                    playSound = false;
-                }
-            });
-        }
-    
-        // Call the function when the "view orders" button or action is clicked
-        document.getElementById('viewOrdersButton').addEventListener('click', markOrdersAsViewed);
-    </script> --}}
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Updated JavaScript -->
 
 @endsection

@@ -245,6 +245,11 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+    // Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('admin.orders.pause');
+    Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('pause.subscription');
+    Route::post('/flower-orders/{order_id}/resume', [FlowerOrderController::class, 'resume'])
+    ->name('resume.subscription');
+
     Route::get('/manage-delivery-history', [FlowerOrderController::class, 'mngdeliveryhistory'])->name('admin.managedeliveryhistory');
     Route::get('/rider-all-details/{id}', [FlowerOrderController::class, 'showRiderDetails'])->name('admin.riderAllDetails');
 Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])->name('orders.markAsViewed');
