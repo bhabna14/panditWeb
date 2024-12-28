@@ -15,6 +15,7 @@ class DeliveryHistory extends Model
         'order_id',
         'rider_id',
         'delivery_status',
+        'start_delivery_time',
         'longitude',
         'latitude',
     ];

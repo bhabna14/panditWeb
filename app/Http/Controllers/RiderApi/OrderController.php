@@ -145,7 +145,7 @@ class OrderController extends Controller
             // Save orders to delivery_history
             foreach ($orders as $order) {
                 DeliveryHistory::create([
-                    'order_id' => $order->id,
+                    'order_id' => $order->order_id,
                     'rider_id' => $rider->rider_id,
                     'delivery_status' => 'pending',
                     'start_delivery_time' => now(),
