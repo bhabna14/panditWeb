@@ -243,12 +243,12 @@ class OrderController extends Controller
                     ->whereDate('end_date', '>=', $today);
             })
             ->with(['subscription', 'delivery', 'user', 'flowerProduct', 'address.localityDetails'])
-            ->join('delivery_histories', 'orders.order_id', '=', 'delivery_histories.order_id')
+            ->join('delivery_history', 'orders.order_id', '=', 'delivery_history.order_id')
             ->leftJoin('delivery_start_histories', function ($join) use ($today) {
-                $join->on('delivery_histories.rider_id', '=', 'delivery_start_histories.rider_id')
+                $join->on('delivery_history.rider_id', '=', 'delivery_start_histories.rider_id')
                      ->whereDate('delivery_start_histories.start_delivery_time', '=', $today);
             })
-            ->where('delivery_histories.delivery_status', 'pending')
+            ->where('delivery_history.delivery_status', 'pending')
             ->orderBy('orders.id', 'desc')
             ->get();
 
