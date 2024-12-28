@@ -209,9 +209,10 @@
                                                     </td>
                                                     
                                                     <td>
-                                                        {{-- <button id="viewOrdersButton" class="btn btn-primary">Mark Orders as Viewed</button> --}}
-
+                                                       
                                                         <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-primary">View Details</a>
+                                                        <a href="" class="btn btn-primary">Pause</a>
+
                                                     </td>
                                                 </tr>
                                                 @endforeach

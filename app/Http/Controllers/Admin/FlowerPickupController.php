@@ -229,7 +229,7 @@ class FlowerPickupController extends Controller
             'total_price' => 0, // Will calculate later
             'payment_method' => null,
             'payment_status' => 'pending',
-            'status' => 'PickupCompleted',
+            'status' => 'pending',
             'payment_id' => null,
         ]);
 
