@@ -52,7 +52,7 @@
                 <div class="row">
                  
                     <div class="col-md-4">
-                        <a href="{{route('active.subscriptions')}}">
+                        <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}">
                             <div class="card bg-success text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-check-circle"></i> Active Subscriptions
@@ -67,7 +67,7 @@
                 
                 
                     <div class="col-md-4">
-                        <a href="{{route('paused.subscriptions')}}">
+                        <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}">
                             <div class="card bg-warning text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-pause-circle"></i> Paused Subscriptions
@@ -81,7 +81,7 @@
                     </div>
                 
                     <div class="col-md-4">
-                        
+                        <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}">
                             <div class="card bg-info text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-box"></i>Subscription Placed today
@@ -91,7 +91,7 @@
                                     <p class="card-text">Subscription Placed today</p>
                                 </div>
                             </div>
-                       
+                        </a>
                     </div>
                 </div>
                 
@@ -218,7 +218,7 @@
                                                             <a href="#" class="btn btn-warning mb-3" data-bs-toggle="modal" data-bs-target="#pauseModal{{ $order->order_id }}">Pause</a>
                                                         @elseif ($order->subscription->status === 'paused')
                                                             <!-- Show Resume Button -->
-                                                            <a href="{{ route('resume.subscription', $order->order_id) }}" class="btn btn-success mb-3">Resume</a>
+                                                            {{-- <a href="{{ route('resume.subscription', $order->order_id) }}" class="btn btn-success mb-3">Resume</a> --}}
                                                         @endif
 
                                                         <div class="modal fade" id="pauseModal{{ $order->order_id }}" tabindex="-1" aria-labelledby="pauseModalLabel" aria-hidden="true">
