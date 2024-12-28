@@ -224,7 +224,6 @@ class OrderController extends Controller
     public function getAssignedOrders()
     {
         try {
-            // Fetch today's orders based on subscription table
             $rider = Auth::guard('rider-api')->user();
     
             if (!$rider) {
@@ -236,42 +235,38 @@ class OrderController extends Controller
     
             $today = Carbon::today();
     
-            // Join delivery_history and delivery_start_histories and apply conditions
-            $orders = Order::select('orders.*')
-                ->join('delivery_history', 'orders.order_id', '=', 'delivery_history.order_id')
-                ->leftJoin('delivery_start_histories', 'delivery_history.rider_id', '=', 'delivery_start_histories.rider_id')
-                ->where('delivery_history.delivery_status', 'pending')
-                ->whereDate('delivery_start_histories.start_delivery_time', $today)
-                ->where('delivery_history.rider_id', $rider->rider_id)
-                ->whereHas('subscription', function ($query) use ($today) {
-                    $query->where('status', 'active')
-                        ->whereDate('end_date', '>=', $today);
+            // Fetch delivery history data with pending status and today's start_delivery_time
+            $deliveryHistory = DeliveryHistory::where('rider_id', $rider->rider_id)
+                ->where('delivery_status', 'pending')
+                ->whereHas('deliveryStartHistory', function ($query) use ($today) {
+                    $query->whereDate('start_delivery_time', $today);
                 })
-                ->with(['subscription', 'delivery', 'user', 'flowerProduct', 'address.localityDetails']) // Eager load the related models
-                ->orderBy('orders.id', 'desc')
+                ->with(['order', 'order.address.localityDetails']) // Load related order and address data
+                ->orderBy('id', 'desc')
                 ->get();
     
-            if ($orders->isEmpty()) {
+            if ($deliveryHistory->isEmpty()) {
                 return response()->json([
                     'status' => 200,
-                    'message' => 'No orders assigned for today',
+                    'message' => 'No delivery records assigned for today',
                     'data' => [],
                 ]);
             }
     
             return response()->json([
                 'status' => 200,
-                'message' => 'Assigned orders for today fetched successfully',
-                'data' => $orders,
+                'message' => 'Assigned deliveries for today fetched successfully',
+                'data' => $deliveryHistory,
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
-                'message' => 'An error occurred while fetching assigned orders.',
+                'message' => 'An error occurred while fetching assigned deliveries.',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
+    
     
 
 
