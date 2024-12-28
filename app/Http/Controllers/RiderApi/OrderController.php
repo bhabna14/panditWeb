@@ -362,7 +362,7 @@ class OrderController extends Controller
                             $query->whereDate('date', $today);
                         })
                         ->where('rider_id', $rider->rider_id)
-                        ->with(['flowerRequest','delivery', 'user', 'flowerProduct', 'address.localityDetails'])
+                        ->with(['flowerRequest','deliveryCustomizeHistory', 'user', 'flowerProduct', 'address.localityDetails'])
                         ->orderBy('id', 'desc')
                         ->get();
 

@@ -68,4 +68,9 @@ public function marketingFollowUps()
     return $this->hasMany(MarketingFollowUp::class, 'order_id', 'order_id');
 }
 
+public function deliveryCustomizeHistory()
+{
+    return $this->hasOne(DeliveryCustomizeHistory::class, 'rider_id', 'rider_id');
+}
+
 }
