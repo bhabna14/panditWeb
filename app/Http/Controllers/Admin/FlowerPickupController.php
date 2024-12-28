@@ -91,7 +91,8 @@ class FlowerPickupController extends Controller
             }
 
             // Order the results by pickup_date in descending order
-            $query->orderBy('pickup_date', 'desc');
+           //
+            $query->orderBy('pickup_date', 'asc');
 
             // Get the pickup details
             $pickupDetails = $query->get()->groupBy('pickup_date'); // Group by pickup date
