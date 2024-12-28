@@ -87,12 +87,12 @@ class OrderController extends Controller
     
             // Update prices for each flower in flower_pickup_items
             foreach ($validated['flower_pickup_items'] as $item) {
-                $flowerPickupItem = FlowerPickupItems::where('pick_up_id', $pickupId)
+                $flowerPickupItems = FlowerPickupItems::where('pick_up_id', $pickupId)
                     ->where('flower_id', $item['flower_id'])
-                    ->first();
+                    ->get(); // Fetch all matching rows
     
-                if ($flowerPickupItem) {
-                    // Update the flower price
+                foreach ($flowerPickupItems as $flowerPickupItem) {
+                    // Update the flower price for each matching row
                     $flowerPickupItem->price = $item['price'];
                     $flowerPickupItem->save();
                 }
@@ -111,6 +111,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    
     
     //get assign order to rider every day basis till the end date and subscription is status is active
     public function getAssignedOrders()
@@ -161,6 +162,7 @@ class OrderController extends Controller
     }
 
 
+    // Mark order as delivered by rider
     public function markAsDelivered(Request $request, $order_id)
     {
         try {
