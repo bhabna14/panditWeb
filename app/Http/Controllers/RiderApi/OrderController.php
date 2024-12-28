@@ -285,20 +285,20 @@ class OrderController extends Controller
         try {
             // Authenticate the rider
             $rider = Auth::guard('rider-api')->user();
-
+    
             if (!$rider) {
                 return response()->json([
                     'status' => 401,
                     'message' => 'Unauthorized',
                 ], 401);
             }
-
+    
             // Validate the request for longitude and latitude
             $validated = $request->validate([
                 'longitude' => 'required|numeric',
                 'latitude' => 'required|numeric',
             ]);
-
+    
             // Check if the order is assigned to the rider and active
             $order = Order::where('order_id', $order_id)
                         ->where('rider_id', $rider->rider_id)
@@ -306,29 +306,43 @@ class OrderController extends Controller
                             $query->where('status', 'active');
                         })
                         ->first();
-
+    
             if (!$order) {
                 return response()->json([
                     'status' => 404,
                     'message' => 'Order not found or not assigned to this rider',
                 ], 404);
             }
-
-            // Save delivery history
-            $deliveryHistory = DeliveryHistory::create([
-                'order_id' => $order->order_id,
-                'rider_id' => $rider->rider_id,
-                'delivery_status' => 'delivered',
-                'longitude' => $validated['longitude'],
-                'latitude' => $validated['latitude'],
-            ]);
-
+    
+            // Find the existing delivery history record
+            $deliveryHistory = DeliveryHistory::where('order_id', $order->order_id)
+                                              ->where('rider_id', $rider->rider_id)
+                                              ->first();
+    
+            if ($deliveryHistory) {
+                // Update the existing delivery history record
+                $deliveryHistory->update([
+                    'delivery_status' => 'delivered',
+                    'longitude' => $validated['longitude'],
+                    'latitude' => $validated['latitude'],
+                ]);
+            } else {
+                // If no record exists, create a new one (optional, you can skip this part if no creation is needed)
+                DeliveryHistory::create([
+                    'order_id' => $order->order_id,
+                    'rider_id' => $rider->rider_id,
+                    'delivery_status' => 'delivered',
+                    'longitude' => $validated['longitude'],
+                    'latitude' => $validated['latitude'],
+                ]);
+            }
+    
             return response()->json([
                 'status' => 200,
                 'message' => 'Order marked as delivered successfully',
                 'data' => $deliveryHistory,
             ]);
-
+    
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 500,
@@ -337,6 +351,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    
 
 
 
