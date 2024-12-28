@@ -289,8 +289,6 @@ class OrderController extends Controller
             $rider = Auth::guard('rider-api')->user();
     
             if (!$rider) {
-                Log::warning("Unauthorized access attempt by rider_id: {$order_id}");
-    
                 return response()->json([
                     'status' => 401,
                     'message' => 'Unauthorized',
@@ -302,31 +300,26 @@ class OrderController extends Controller
                 'longitude' => 'required|numeric',
                 'latitude' => 'required|numeric',
             ]);
-            
-            Log::info("Received delivery location for order_id: {$order_id}, rider_id: {$rider->rider_id} - Longitude: {$validated['longitude']}, Latitude: {$validated['latitude']}");
     
-            // Check if the order is assigned to the rider and active, and the order was created today
+            // Check if the order is assigned to the rider and active
             $order = Order::where('order_id', $order_id)
                         ->where('rider_id', $rider->rider_id)
                         ->whereHas('subscription', function ($query) {
                             $query->where('status', 'active');
                         })
-                        // Filter for orders created today
                         ->first();
     
             if (!$order) {
-                Log::error("Order not found or not assigned to rider_id: {$rider->rider_id} for order_id: {$order_id}");
-    
                 return response()->json([
                     'status' => 404,
-                    'message' => 'Order not found or not assigned to this rider, or order not created today',
+                    'message' => 'Order not found or not assigned to this rider',
                 ], 404);
             }
     
-            // Find the existing delivery history record for today's date
+            // Find the delivery history record for today's date
             $deliveryHistory = DeliveryHistory::where('order_id', $order->order_id)
                                               ->where('rider_id', $rider->rider_id)
-                                              ->whereDate('created_at', Carbon::today()) // Only today's records
+                                              ->whereDate('created_at', Carbon::today()) // Only for today
                                               ->first();
     
             if ($deliveryHistory) {
@@ -336,17 +329,12 @@ class OrderController extends Controller
                     'longitude' => $validated['longitude'],
                     'latitude' => $validated['latitude'],
                 ]);
-                Log::info("Updated delivery history for order_id: {$order->order_id} by rider_id: {$rider->rider_id}");
             } else {
-                // If no record exists for today, create a new delivery history record
-                $deliveryHistory = DeliveryHistory::create([
-                    'order_id' => $order->order_id,
-                    'rider_id' => $rider->rider_id,
-                    'delivery_status' => 'delivered',
-                    'longitude' => $validated['longitude'],
-                    'latitude' => $validated['latitude'],
-                ]);
-                Log::info("Created new delivery history for order_id: {$order->order_id} by rider_id: {$rider->rider_id}");
+                // No existing record for today, you can log or handle it as needed
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'No delivery history record found for today',
+                ], 404);
             }
     
             return response()->json([
@@ -356,8 +344,6 @@ class OrderController extends Controller
             ]);
     
         } catch (\Exception $e) {
-            Log::error("Error occurred while marking order_id: {$order_id} as delivered. Error: " . $e->getMessage());
-    
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while marking the order as delivered.',
