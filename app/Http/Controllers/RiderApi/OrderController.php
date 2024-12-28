@@ -69,8 +69,9 @@ class OrderController extends Controller
             $validated = $request->validate([
                 'total_price' => 'required|numeric',
                 'flower_pickup_items' => 'required|array',
+                'flower_pickup_items.*.id' => 'required|integer', // Use unique identifier if available
                 'flower_pickup_items.*.flower_id' => 'required|string',
-                'flower_pickup_items.*.price' => 'required|numeric', // Ensure correct price validation
+                'flower_pickup_items.*.price' => 'required|numeric',
             ]);
     
             // Find the pickup record by ID
@@ -87,12 +88,10 @@ class OrderController extends Controller
     
             // Update prices for each flower in flower_pickup_items
             foreach ($validated['flower_pickup_items'] as $item) {
-                $flowerPickupItems = FlowerPickupItems::where('pick_up_id', $pickupId)
-                    ->where('flower_id', $item['flower_id'])
-                    ->get(); // Fetch all matching rows
+                // Use the unique 'id' to update the correct record
+                $flowerPickupItem = FlowerPickupItems::where('id', $item['id'])->first();
     
-                foreach ($flowerPickupItems as $flowerPickupItem) {
-                    // Update the flower price for each matching row
+                if ($flowerPickupItem) {
                     $flowerPickupItem->price = $item['price'];
                     $flowerPickupItem->save();
                 }
@@ -111,6 +110,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    
     
     
     //get assign order to rider every day basis till the end date and subscription is status is active
