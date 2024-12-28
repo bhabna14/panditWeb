@@ -10,6 +10,7 @@ use App\Models\DeliveryHistory;
 use App\Models\FlowerPickupRequest;
 use App\Models\DeliveryStartHistory;
 use App\Models\DeliveryCustomizeHistory;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\Order;;
 use Carbon\Carbon;
@@ -280,6 +281,7 @@ class OrderController extends Controller
 
 
     // Mark order as delivered by rider
+
     public function markAsDelivered(Request $request, $order_id)
     {
         try {
@@ -287,6 +289,8 @@ class OrderController extends Controller
             $rider = Auth::guard('rider-api')->user();
     
             if (!$rider) {
+                Log::warning("Unauthorized access attempt by rider_id: {$order_id}");
+    
                 return response()->json([
                     'status' => 401,
                     'message' => 'Unauthorized',
@@ -298,6 +302,8 @@ class OrderController extends Controller
                 'longitude' => 'required|numeric',
                 'latitude' => 'required|numeric',
             ]);
+            
+            Log::info("Received delivery location for order_id: {$order_id}, rider_id: {$rider->rider_id} - Longitude: {$validated['longitude']}, Latitude: {$validated['latitude']}");
     
             // Check if the order is assigned to the rider and active
             $order = Order::where('order_id', $order_id)
@@ -308,6 +314,8 @@ class OrderController extends Controller
                         ->first();
     
             if (!$order) {
+                Log::error("Order not found or not assigned to rider_id: {$rider->rider_id} for order_id: {$order_id}");
+    
                 return response()->json([
                     'status' => 404,
                     'message' => 'Order not found or not assigned to this rider',
@@ -326,15 +334,17 @@ class OrderController extends Controller
                     'longitude' => $validated['longitude'],
                     'latitude' => $validated['latitude'],
                 ]);
+                Log::info("Updated delivery history for order_id: {$order->order_id} by rider_id: {$rider->rider_id}");
             } else {
-                // If no record exists, create a new one (optional, you can skip this part if no creation is needed)
-                DeliveryHistory::create([
+                // If no record exists, create a new one
+                $deliveryHistory = DeliveryHistory::create([
                     'order_id' => $order->order_id,
                     'rider_id' => $rider->rider_id,
                     'delivery_status' => 'delivered',
                     'longitude' => $validated['longitude'],
                     'latitude' => $validated['latitude'],
                 ]);
+                Log::info("Created new delivery history for order_id: {$order->order_id} by rider_id: {$rider->rider_id}");
             }
     
             return response()->json([
@@ -344,6 +354,8 @@ class OrderController extends Controller
             ]);
     
         } catch (\Exception $e) {
+            Log::error("Error occurred while marking order_id: {$order_id} as delivered. Error: " . $e->getMessage());
+    
             return response()->json([
                 'status' => 500,
                 'message' => 'An error occurred while marking the order as delivered.',
@@ -351,6 +363,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
+    
     
 
 
