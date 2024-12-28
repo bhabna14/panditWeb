@@ -20,7 +20,7 @@ class FlowerRequestController extends Controller
     public function showRequests(Request $request)
     {
         // Get the filter value from the query string, defaulting to 'today'
-        $filter = $request->input('filter', 'today');
+        // $filter = $request->input('filter', 'today');
     
         $query = FlowerRequest::with([
             'order' => function ($query) {
@@ -33,12 +33,13 @@ class FlowerRequestController extends Controller
         ])->orderBy('id', 'desc');
     
         // Apply filter: Only show today's orders if 'today' filter is selected
-        if ($filter == 'today') {
-            $query->whereDate('created_at', Carbon::today());
-        }
+        // if ($filter == 'today') {
+        //     $query->whereDate('created_at', Carbon::today());
+        // }
     
         // Get the filtered orders
         $pendingRequests = $query->get();
+
     
         $activeSubscriptions = Subscription::where('status', 'active')->count();
         $pausedSubscriptions = Subscription::where('status', 'paused')->count();
