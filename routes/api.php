@@ -58,6 +58,9 @@ Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/get-assign-pickup', [OrderController::class, 'getAssignPickup']);
     Route::post('/rider/update-flower-prices/{pickup_id}', [OrderController::class, 'updateFlowerPrices']);
 
+    // Route for fetching today's requested orders and saving in delivery history table
+    Route::post('/start-delivery', [OrderController::class, 'startDelivery']);
+
    // assign order to rider
    Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignedOrders'])->name('rider.assignedOrders');
    Route::post('/rider/deliver/{order_id}', [OrderController::class, 'markAsDelivered'])

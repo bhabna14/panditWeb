@@ -111,7 +111,62 @@ class OrderController extends Controller
         }
     }
     
-    
+
+    // startDelivery method to start delivery for rider
+    public function startDelivery(Request $request)
+    {
+        try {
+            $rider = Auth::guard('rider-api')->user();
+
+            if (!$rider) {
+                return response()->json([
+                    'status' => 401,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
+            // Fetch today's orders assigned to the rider
+            $today = Carbon::today();
+            $orders = Order::where('rider_id', $rider->rider_id)
+                ->whereHas('subscription', function ($query) use ($today) {
+                    $query->where('status', 'active')
+                        ->whereDate('end_date', '>=', $today);
+                })
+                ->get();
+
+            if ($orders->isEmpty()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'No orders assigned for today',
+                    'data' => [],
+                ]);
+            }
+
+            // Save orders to delivery_history
+            foreach ($orders as $order) {
+                DeliveryHistory::create([
+                    'order_id' => $order->id,
+                    'rider_id' => $rider->rider_id,
+                    'delivery_status' => 'pending',
+                    'start_delivery_time' => now(),
+                    'longitude' => $request->longitude ?? null, // Optional if provided
+                    'latitude' => $request->latitude ?? null,   // Optional if provided
+                ]);
+            }
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Delivery started successfully. Orders have been saved in delivery history.',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'An error occurred while starting the delivery.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
     
     //get assign order to rider every day basis till the end date and subscription is status is active
     public function getAssignedOrders()

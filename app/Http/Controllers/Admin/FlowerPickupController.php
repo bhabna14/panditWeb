@@ -175,6 +175,7 @@ public function manageflowerpickupdetails(Request $request)
             'total_price' => 0, // Will calculate later
             'payment_method' => null,
             'payment_status' => 'pending',
+            'status' => 'PickupCompleted',
             'payment_id' => null,
         ]);
 
