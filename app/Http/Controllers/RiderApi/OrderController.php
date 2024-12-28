@@ -325,8 +325,9 @@ class OrderController extends Controller
             // Find the existing delivery history record
             $deliveryHistory = DeliveryHistory::where('order_id', $order->order_id)
                                               ->where('rider_id', $rider->rider_id)
+                                              ->whereDate('created_at', Carbon::today())  // Add condition for today
                                               ->first();
-    
+                                              
             if ($deliveryHistory) {
                 // Update the existing delivery history record
                 $deliveryHistory->update([
