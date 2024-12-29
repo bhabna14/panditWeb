@@ -11,13 +11,7 @@ class ProductController extends Controller
     public function getActiveProducts()
 {
     $products = FlowerProduct::where('status', 'active')
-    ->get()->map(function ($product) {
-        // Append full URL to product image
-        $product->product_image = $product->product_image 
-            ? asset('storage/' . $product->product_image) 
-            : null;
-        return $product;
-    });
+    ->get();
 
     return response()->json([
         'status' => 200,
