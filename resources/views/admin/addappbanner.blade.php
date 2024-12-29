@@ -68,7 +68,7 @@
                                         <option value="podcast">Podcast</option>
                                         <option value="flower">Flower</option>
                                         <option value="pandit">Pandit</option>
-
+                                        <option value="product">Product</option>
                                     </select>
                                 </div>
                             </div>
