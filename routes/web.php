@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubadminController;
 use App\Http\Controllers\Admin\FollowUpController;
 use App\Http\Controllers\Admin\CustomizeProductController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 
 
 use App\Http\Controllers\UserManagementController;
