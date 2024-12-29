@@ -527,7 +527,13 @@ Route::controller(CustomizeProductController::class)->group(function() {
         Route::delete('/deletepromonation/{id}', 'deletepromonation')->name('deletepromonation');
     });
 
+    Route::get('/send-notification', [AdminNotificationController::class, 'create'])->name('admin.notification.create');
+    Route::post('/send-notification', [AdminNotificationController::class, 'send'])->name('admin.notification.send');
+    Route::delete('/notifications/{id}', [AdminNotificationController::class, 'delete'])->name('admin.notifications.delete');
+    Route::post('/notifications/resend/{id}', [AdminNotificationController::class, 'resend'])->name('admin.notifications.resend');
 
+    Route::get('/send-whatsapp-notification', [AdminNotificationController::class, 'whatsappcreate'])->name('admin.whatsapp-notification.create');
+    Route::post('/send-whatsapp-notification', [AdminNotificationController::class, 'sendWhatsappNotification'])->name('admin.whatsapp-notification.send');
     Route::controller(YoutubeController::class)->group(function() {
         Route::get('/youtube', 'youTube')->name('youTube');
         Route::post('/save-youtube-url', 'store')->name('saveYoutubeUrl');

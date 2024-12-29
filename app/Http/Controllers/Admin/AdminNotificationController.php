@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\UserDevice;
+use App\Models\User;
+use Twilio\Rest\Client;
 use App\Services\NotificationService;
 use App\Models\FCMNotification;
 use App\Models\UserUnauthorisedDevices;
@@ -19,7 +21,13 @@ class AdminNotificationController extends Controller
         $notifications = FCMNotification::orderBy('created_at', 'desc')->get();
         return view('admin.fcm-notification.send-notification', compact('notifications'));
     }
-
+    public function whatsappcreate()
+    {
+       // display users list
+        $users = User::orderBy('created_at', 'desc')->get();
+        return view('admin.fcm-notification.send-whatsaap-notification',compact('users'));
+    }
+    
     public function send(Request $request)
     {
         $request->validate([
@@ -105,6 +113,45 @@ class AdminNotificationController extends Controller
             return redirect()->back()->with('error', 'Failed to resend notification. Please try again later.');
         }
     }
-    
+    public function sendWhatsappNotification(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'user' => 'required|array',
+            'description' => 'required|string',
+            'image' => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
+        ]);
+
+        $title = $request->input('title');
+        $description = $request->input('description');
+        $userIds = $request->input('user');
+        $imagePath = $request->file('image') ? $request->file('image')->store('uploads', 'public') : null;
+
+        $users = User::whereIn('id', $userIds)->get();
+
+        // Twilio initialization
+        $sid = config('services.twilio.sid');
+        $token = config('services.twilio.token');
+        $twilio = new Client($sid, $token);
+
+        foreach ($users as $user) {
+            $messageBody = "*$title*\n\n$description";
+
+            try {
+                $message = $twilio->messages->create(
+                    'whatsapp:' . $user->mobile_number, // Recipient's number
+                    [
+                        'from' => config('services.twilio.whatsapp_number'),
+                        'body' => $messageBody,
+                        'mediaUrl' => $imagePath ? asset('storage/' . $imagePath) : null,
+                    ]
+                );
+            } catch (\Exception $e) {
+                return back()->withErrors(['error' => 'Failed to send message to ' . $user->mobile_number]);
+            }
+        }
+
+        return back()->with('success', 'WhatsApp notifications sent successfully!');
+    }
     
 }
