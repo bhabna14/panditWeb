@@ -8,7 +8,6 @@ use App\Models\FlowerProduct;
 class ProductController extends Controller
 {
     //
-
     public function getActiveProducts()
 {
     $products = FlowerProduct::where('status', 'active')

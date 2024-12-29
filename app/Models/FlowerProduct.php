@@ -9,6 +9,7 @@ class FlowerProduct extends Model
 {
     use HasFactory;
     protected $table = 'flower_products';
+    
     protected $fillable = ['product_id','name','product_image', 'price','mrp', 'description', 'category', 'stock', 'duration','status'];
 
 
@@ -16,9 +17,12 @@ class FlowerProduct extends Model
     {
         return $this->hasMany(FlowerPickupDetails::class, 'product_id','flower_id');
     }
-//     public function pickupDetails()
-// {
-//     return $this->hasMany(FlowerPickupDetails::class, 'flower_id', 'id');
-// }
 
+    public function packageItems()
+{
+    return $this->hasMany(PackageItem::class, 'product_id', 'product_id');
+}
+
+
+    
 }

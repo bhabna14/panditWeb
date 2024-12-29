@@ -10,6 +10,34 @@
     <!-- INTERNAL Select2 css -->
     <link href="{{asset('assets/plugins/select2/css/select2.min.css')}}" rel="stylesheet" />
 
+    <style>
+        .modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.modal-header {
+    border-bottom: 2px solid #ddd;
+}
+
+.list-group-item {
+    border: none;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-bottom: 8px;
+}
+
+.list-group-item:hover {
+    background-color: #f1f1f1;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-footer {
+    border-top: 2px solid #ddd;
+}
+
+    </style>
+
 @endsection
 
 @section('content')
@@ -64,6 +92,7 @@
                                                     <th>Stock</th>
                                                     <th>Category</th>
                                                     <th>Status</th>
+                                                    <th>Package Item</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -73,7 +102,7 @@
                                                         <td>{{ $loop->iteration }}</td>
                                                         <td>{{ $product->name }}</td>
                                                         <td>
-                                                            <img src="{{ asset($product->product_image ? 'storage/' . $product->product_image : 'front-assets/img/images.jfif') }}" alt="user" style="widows: 100px;height:100px">
+                                                            <img src="{{$product->product_image }}" alt="user" style="widows: 100px;height:100px">
 
                                                         </td>
                                                         <td>Rs. {{ number_format($product->mrp, 2) }}</td>
@@ -82,6 +111,53 @@
                                                         <td>{{ $product->stock }}</td>
                                                         <td>{{ $product->category }}</td>
                                                         <td>{{ ucfirst($product->status) }}</td>
+                                                        
+                                                        <td>
+                                                            @if ($product->packageItems->isNotEmpty())
+                                                                <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#productModal{{ $product->product_id }}">
+                                                                    View Items
+                                                                </button>
+                                                                
+                                                                <!-- Modal -->
+                                                                <div class="modal fade" id="productModal{{ $product->product_id }}" tabindex="-1" aria-labelledby="productModalLabel{{ $product->product_id }}" aria-hidden="true">
+                                                                    <div class="modal-dialog modal-lg">
+                                                                        <div class="modal-content shadow-lg border-0">
+                                                                            <div class="modal-header bg-primary text-white">
+                                                                                <h5 class="modal-title" id="productModalLabel{{ $product->product_id }}">
+                                                                                    Product Details
+                                                                                </h5>
+                                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                            </div>
+                                                                            <div class="modal-body p-4">
+                                                                                <div class="container-fluid">
+                                                                                    <h6 class="mb-3 text-secondary">Package Items & Variants</h6>
+                                                                                    <ul class="list-group">
+                                                                                        @foreach ($product->packageItems as $packageItem)
+                                                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                                                <div>
+                                                                                                    <strong>Item:</strong> {{ $packageItem->item->item_name ?? 'N/A' }} <br>
+                                                                                                    <small class="text-muted">Variant: {{ $packageItem->variant->title ?? 'N/A' }}</small>
+                                                                                                </div>
+                                                                                                <span class="badge bg-success text-white">Available</span>
+                                                                                            </li>
+                                                                                        @endforeach
+                                                                                    </ul>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-footer bg-light">
+                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            @else
+                                                                <button type="button" class="btn btn-sm btn-secondary" disabled>
+                                                                    No Items
+                                                                </button>
+                                                            @endif
+                                                        </td>
+                                                    
+                                                        
                                                         <td>
                                                             <a href="{{ url('admin/edit-product/'.$product->id) }}" class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
                                                             <a href="{{ url('admin/delete-product/'.$product->id) }}" class="btn btn-sm btn-danger" 
