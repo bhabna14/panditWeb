@@ -2,7 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TestNotificationController;
 
 /// controllers for pandit dashboards
 use App\Http\Controllers\Api\AreaController;
@@ -34,14 +33,13 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\RiderApi\OrderController;
+use App\Http\Controllers\Api\ProductApiController;
 
 use App\Http\Controllers\RiderApi\RiderLoginController;
 use App\Http\Controllers\Notification\PushNotificationController;
 
-use App\Http\Controllers\Api\FCMNotificationController;
 
 Route::post('/save-token', [PushNotificationController::class, 'saveToken']);
-Route::get('/fcm-bulk-notifications', [FCMNotificationController::class, 'getAllNotifications']);
 // Routes for Rider Login
 Route::prefix('rider')->group(function () {
     // Send OTP
@@ -51,15 +49,12 @@ Route::prefix('rider')->group(function () {
     Route::post('/verify-otp', [RiderLoginController::class, 'verifyOtp'])->name('rider.verifyOtp');
 });
 
-Route::post('/test-post-podcast', [TestNotificationController::class, 'postPodcast']);
+
 
 Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/details', [RiderLoginController::class, 'getRiderDetails']);
     Route::get('rider/get-assign-pickup', [OrderController::class, 'getAssignPickup']);
     Route::post('/rider/update-flower-prices/{pickup_id}', [OrderController::class, 'updateFlowerPrices']);
-
-    // Route for fetching today's requested orders and saving in delivery history table
-    Route::post('/start-delivery', [OrderController::class, 'startDelivery']);
 
    // assign order to rider
    Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignedOrders'])->name('rider.assignedOrders');
@@ -257,3 +252,15 @@ Route::middleware('auth:sanctum')->post('/make-payment/{id}', [FlowerBookingCont
 
 Route::middleware('auth:sanctum')->post('/flower-requests', [FlowerBookingController::class, 'storerequest']);
 Route::middleware('auth:sanctum')->get('/orders-list', [FlowerBookingController::class, 'ordersList']);
+
+
+// product api
+
+Route::middleware('auth:sanctum')->post('/product-subscription', [ProductApiController::class, 'productSubscription']);
+Route::middleware('auth:sanctum')->post('/product-requests', [ProductApiController::class, 'productRequest']);
+Route::middleware('auth:sanctum')->post('/make-request-payment/{id}', [ProductApiController::class, 'makeRequestPayment']);
+Route::middleware('auth:sanctum')->get('/product-orders-list', [ProductApiController::class, 'ProductOrdersList']);
+
+
+
+
