@@ -124,7 +124,7 @@ class ProductController extends Controller
             $imageUrl = asset($imagePath);
     
             // Update the product's image URL
-            $product->product_image = $imagePath;
+            $product->product_image = $imageUrl;
             $product->save();
         }
     
@@ -144,6 +144,7 @@ class ProductController extends Controller
     
         return redirect()->route('admin.edit-product', $product->id)->with('success', 'Product updated successfully.');
     }
+    
     
     public function deleteProduct($id)
     {
