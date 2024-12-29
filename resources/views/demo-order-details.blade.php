@@ -2,7 +2,9 @@
 
 @section('styles')
     <!-- Internal Select2 css -->
-    <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+    {{-- <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet"> --}}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/css/select2.min.css" rel="stylesheet" />
+
 @endsection
 
 @section('content')
@@ -16,7 +18,7 @@
                 <li class="breadcrumb-item tx-15"><a href="{{ url('admin/demo-order-details') }}"
                         class="btn btn-warning text-dark">New User</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active tx-15" aria-current="page">Add Product</li>
+                {{-- <li class="breadcrumb-item active tx-15" aria-current="page">Add Product</li> --}}
             </ol>
         </div>
     </div>
@@ -44,7 +46,7 @@
         <div class="row">
             <div class="col-md-12">
                 <label for="userid" class="form-label">User</label>
-                <select class="form-control" id="userid" name="userid" required>
+                <select class="form-control select2" id="userid" name="userid" required>
                     <option value="">Select User</option>
                     @foreach ($user_details as $user)
                         <option value="{{ $user->userid }}">
@@ -52,6 +54,7 @@
                         </option>
                     @endforeach
                 </select>
+                
             </div>
         </div>
         
@@ -71,7 +74,7 @@
         <div class="row mt-3">
             <div class="col-md-6">
                 <label for="product" class="form-label">Flower</label>
-                <select name="product_id" id="product" class="form-control select2" required>
+                <select name="product_id" id="product" class="form-control" required>
                     <option value="">Select Flower</option>
                     @foreach ($flowers as $flower)
                         <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
@@ -126,68 +129,88 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
+    {{-- <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script> --}}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-beta.1/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.select2').select2({
+            placeholder: "Select User",
+            allowClear: true
+        });
+    });
+</script>
+
    
 <script>
-    document.getElementById('userid').addEventListener('change', function () {
-  const userId = this.value;
+    $(document).ready(function () {
+        // Initialize Select2
+        $('.select2').select2({
+            placeholder: "Select User",
+            allowClear: true
+        });
 
- // Clear previous addresses
- const addressContainer = document.getElementById('addressContainer');
- addressContainer.innerHTML = '<p>Loading addresses...</p>';
+        // Handle user selection
+        $('.select2').on('change', function () {
+            const userId = this.value;
 
- if (userId) {
-     fetch(`/admin/get-user-addresses/${userId}`)
-         .then(response => response.json())
-         .then(data => {
-             if (data.addresses.length > 0) {
-                 addressContainer.innerHTML = ''; // Clear loading message
-                 let addressHTML = '<div class="row">';
-                 
-                 data.addresses.forEach((address, index) => {
-                     const defaultBadge = address.default ? 
-                         '<span class="badge bg-success">Default</span>' : '';
-                     
-                     // Create a new row every 3 addresses
-                     if (index % 3 === 0 && index !== 0) {
-                         addressHTML += '</div><div class="row">';
-                     }
+            // Clear previous addresses
+            const addressContainer = document.getElementById('addressContainer');
+            addressContainer.innerHTML = '<p>Loading addresses...</p>';
 
-                     addressHTML += `
-                         <div class="col-md-4 mb-3">
-                             <div class="card h-100">
-                                 <div class="card-body">
-                                     <input type="radio" name="address_id" id="address${address.id}" value="${address.id}" required>
-                                     <label for="address${address.id}">
-                                         <h5 class="card-title">${address.address_type} ${defaultBadge}</h5>
-                                         <p class="card-text">
-                                             ${address.apartment_flat_plot ?? ''},<br>
-                                             ${address.locality_name ?? 'N/A'},<br>
-                                             ${address.landmark ?? ''}<br>
-                                             ${address.city}, ${address.state}, ${address.country}<br>
-                                             ${address.pincode}
-                                         </p>
-                                     </label>
-                                 </div>
-                             </div>
-                         </div>`;
-                 });
+            if (userId) {
+                fetch(`/admin/get-user-addresses/${userId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.addresses.length > 0) {
+                            addressContainer.innerHTML = ''; // Clear loading message
+                            let addressHTML = '<div class="row">';
+                            
+                            data.addresses.forEach((address, index) => {
+                                const defaultBadge = address.default 
+                                    ? '<span class="badge bg-success">Default</span>' 
+                                    : '';
+                                
+                                // Create a new row every 3 addresses
+                                if (index % 3 === 0 && index !== 0) {
+                                    addressHTML += '</div><div class="row">';
+                                }
 
-                 addressHTML += '</div>'; // Close the last row
-                 addressContainer.innerHTML = addressHTML;
-             } else {
-                 addressContainer.innerHTML = '<p>No addresses found for the selected user.</p>';
-             }
-         })
-         .catch(error => {
-             console.error('Error fetching addresses:', error);
-             addressContainer.innerHTML = '<p>Failed to load addresses. Please try again.</p>';
-         });
- } else {
-     addressContainer.innerHTML = '<p>Select a user to load addresses.</p>';
- }
-});
+                                addressHTML += `
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card h-100">
+                                            <div class="card-body">
+                                                <input type="radio" name="address_id" id="address${address.id}" value="${address.id}" required>
+                                                <label for="address${address.id}">
+                                                    <h5 class="card-title">${address.address_type} ${defaultBadge}</h5>
+                                                    <p class="card-text">
+                                                        ${address.apartment_flat_plot ?? ''},<br>
+                                                        ${address.locality_name ?? 'N/A'},<br>
+                                                        ${address.landmark ?? ''}<br>
+                                                        ${address.city}, ${address.state}, ${address.country}<br>
+                                                        ${address.pincode}
+                                                    </p>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>`;
+                            });
 
- </script>
+                            addressHTML += '</div>'; // Close the last row
+                            addressContainer.innerHTML = addressHTML;
+                        } else {
+                            addressContainer.innerHTML = '<p>No addresses found for the selected user.</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching addresses:', error);
+                        addressContainer.innerHTML = '<p>Failed to load addresses. Please try again.</p>';
+                    });
+            } else {
+                addressContainer.innerHTML = '<p>Select a user to load addresses.</p>';
+            }
+        });
+    });
+</script>
+
     
 @endsection

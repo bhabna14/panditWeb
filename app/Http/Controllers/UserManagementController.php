@@ -56,7 +56,7 @@ public function handleUserData(Request $request)
         // Validate user details
         $validatedUserData = $request->validate([
             'userid' => 'required|string',
-            'address_id' => 'required|string',
+            'address_id' => 'required|numeric',
             'product_id' => 'nullable',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
@@ -83,23 +83,23 @@ public function handleUserData(Request $request)
         // Generate unique subscription ID
         $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
 
-        // Calculate subscription start and end dates
-        $startDate = $validatedUserData['start_date'] 
-            ? Carbon::parse($validatedUserData['start_date']) 
-            : Carbon::now(); // Convert to Carbon instance or default to now
+        // // Calculate subscription start and end dates
+        // $startDate = $validatedUserData['start_date'] 
+        //     ? Carbon::parse($validatedUserData['start_date']) 
+        //     : Carbon::now(); // Convert to Carbon instance or default to now
 
-        $duration = $validatedUserData['duration'];
+        // $duration = $validatedUserData['duration'];
 
-        // Determine the end date based on duration
-        if ($duration == 1) {
-            $endDate = $startDate->addDays(29); // For 1 month, 30 days
-        } elseif ($duration == 3) {
-            $endDate = $startDate->addDays(89); // For 3 months, 90 days
-        } elseif ($duration == 6) {
-            $endDate = $startDate->addDays(179); // For 6 months, 180 days
-        } else {
-            $endDate = $startDate; // Default case (no duration provided)
-        }
+        // // Determine the end date based on duration
+        // if ($duration == 1) {
+        //     $endDate = $startDate->addDays(29); // For 1 month, 30 days
+        // } elseif ($duration == 3) {
+        //     $endDate = $startDate->addDays(89); // For 3 months, 90 days
+        // } elseif ($duration == 6) {
+        //     $endDate = $startDate->addDays(179); // For 6 months, 180 days
+        // } else {
+        //     $endDate = $startDate; // Default case (no duration provided)
+        // }
 
         // Create subscription
         Subscription::create([

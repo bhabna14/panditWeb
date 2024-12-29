@@ -17,7 +17,7 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickuprequest') }}" class="btn btn-info text-white">Add Flower Pickup Request</a></li>
+                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickuprequest') }}" class="btn btn-danger text-white">Add Flower Pickup Request</a></li>
 
                 <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addflowerpickupdetails') }}" class="btn btn-info text-white">Add Flower Pickup Details</a></li>
                 
@@ -25,11 +25,7 @@
             </ol>
         </div>
     </div>
-    @if(session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
+
 
 @if($errors->any())
     <div class="alert alert-danger">
@@ -58,6 +54,7 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
+                                    <th>Pickup Id</th>
                                     <th>Vendor</th>
                                     <th>Rider</th>
                                     <th>Flower Details</th>
@@ -72,6 +69,7 @@
                                 @foreach ($pickupDetails->flatten()->sortByDesc('created_at') as $index => $detail)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
+                                        <td>{{ $detail->pick_up_id ?? 'N/A' }}</td>
                                         <td>{{ $detail->vendor?->vendor_name ?? 'N/A' }}</td>
                                         <td>{{ $detail->rider?->rider_name ?? 'N/A' }}</td>
                                         <td>
@@ -88,7 +86,8 @@
                                                 @endforeach
                                             </ul>
                                         </td>
-                                        <td>{{ $detail->pickup_date }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($detail->pickup_date)->format('d-m-Y') }}</td>
+
                                         <td>
                                             @if ($detail->total_price)
                                                 ₹{{ $detail->total_price }}

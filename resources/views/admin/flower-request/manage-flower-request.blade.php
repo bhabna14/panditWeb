@@ -51,7 +51,7 @@
 
                 <div class="row">
                     <div class="col-md-4">
-                        <a href="{{ route('active.subscriptions') }}">
+                        <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}">
                             <div class="card bg-success text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-check-circle"></i> Active Subscriptions
@@ -64,8 +64,9 @@
                         </a>
                     </div>
                 
+                
                     <div class="col-md-4">
-                        <a href="{{ route('paused.subscriptions') }}">
+                        <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}">
                             <div class="card bg-warning text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-pause-circle"></i> Paused Subscriptions
@@ -79,7 +80,7 @@
                     </div>
                 
                     <div class="col-md-4">
-                        <a href="{{ route('orders.today') }}">
+                        <a href="{{route('flower-request', ['filter' => 'today'])}}">
                             <div class="card bg-info text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-box"></i> Orders Requested Today

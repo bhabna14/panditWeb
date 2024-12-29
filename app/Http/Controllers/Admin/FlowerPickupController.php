@@ -14,6 +14,8 @@ use App\Models\FlowerPickupRequest;
 
 use Illuminate\Support\Facades\Log;
 
+use Carbon\Carbon;
+
 class FlowerPickupController extends Controller
 {
     //
@@ -60,16 +62,53 @@ class FlowerPickupController extends Controller
 }
 
     
-    public function manageflowerpickupdetails()
+    public function manageflowerpickupdetails(Request $request)
     {
-        // Fetch all pickup details with their related data
-        $pickupDetails = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
-            ->get()
-            ->groupBy('pickup_date'); // Group by pickup date for easy separation in the view
-    
-        // Pass the organized data to the view
-        return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('pickupDetails'));
+        try {
+            // Get the filter parameter from the URL (if available)
+            $filter = $request->input('filter', 'all'); // Default is 'all'
+            
+            // Build the query
+            $query = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider']);
+            
+            // Apply filters based on the filter parameter
+            if ($filter == 'todayexpenses') {
+                $query->whereDate('pickup_date', Carbon::today()); // Today's date
+            } elseif ($filter == 'todaypaidpickup') {
+                $query->whereDate('pickup_date', Carbon::today())
+                    ->where('payment_status', 'Paid'); // Today's paid pickups
+            } elseif ($filter == 'todaypendingpickup') {
+                $query->whereDate('pickup_date', Carbon::today())
+                    ->where('payment_status', 'pending'); // Today's pending pickups
+            } elseif ($filter == 'monthlyexpenses') {
+                $query->whereMonth('pickup_date', Carbon::now()->month); // Current month
+            } elseif ($filter == 'monthlypaidpickup') {
+                $query->whereMonth('pickup_date', Carbon::now()->month)
+                    ->where('payment_status', 'Paid'); // Monthly paid pickups
+            } elseif ($filter == 'monthlypendingpickup') {
+                $query->whereMonth('pickup_date', Carbon::now()->month)
+                    ->where('payment_status', 'pending'); // Monthly pending pickups
+            }
+
+            // Order the results by pickup_date in descending order
+           //
+            $query->orderBy('pickup_date', 'asc');
+
+            // Get the pickup details
+            $pickupDetails = $query->get()->groupBy('pickup_date'); // Group by pickup date
+            
+            // Calculate total expenses for today
+            $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())->sum('total_price'); 
+
+            // Return the view with the filtered data
+            return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('pickupDetails', 'totalExpensesday'));
+            
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to fetch pickup details: ' . $e->getMessage()]);
+        }
     }
+
+
     
     // public function edit($id)
     // {
@@ -100,9 +139,69 @@ class FlowerPickupController extends Controller
         return view('admin.flower-pickup-details.edit-flower-pickup-details', compact('detail', 'vendors', 'flowers', 'units', 'riders'));
     }
 
-
-    
     public function saveFlowerPickupDetails(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'vendor_id' => 'required|exists:flower__vendor_details,vendor_id',
+            'pickup_date' => 'required|date',
+            'rider_id' => 'required|exists:flower__rider_details,rider_id',
+            'flower_id' => 'required|array',
+            'flower_id.*' => 'required|exists:flower_products,product_id',
+            'unit_id' => 'required|array',
+            'unit_id.*' => 'required|exists:pooja_units,id',
+            'quantity' => 'required|array',
+            'quantity.*' => 'required|numeric|min:1',
+            'price' => 'required|array',
+            'price.*' => 'required|numeric|min:0',
+        ]);
+    
+        // Generate unique pick_up_id
+        $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+    
+        // Save main flower pickup details
+        $pickup = FlowerPickupDetails::create([
+            'pick_up_id' => $pickUpId,
+            'vendor_id' => $request->vendor_id,
+            'pickup_date' => $request->pickup_date,
+            'rider_id' => $request->rider_id,
+            'total_price' => 0, // Will calculate later
+            'payment_method' => null,
+            'payment_status' => 'pending',
+            'status' => 'PickupCompleted',
+            'payment_id' => null,
+        ]);
+    
+        // Initialize total price
+        $totalPrice = 0;
+    
+        // Save flower items and calculate total price
+        foreach ($request->flower_id as $index => $flowerId) {
+            $quantity = $request->quantity[$index];
+            $price = $request->price[$index];
+            $unitId = $request->unit_id[$index];
+    
+            // Insert flower details into FlowerPickupItems table
+            FlowerPickupItems::create([
+                'pick_up_id' => $pickUpId,
+                'flower_id' => $flowerId,
+                'unit_id' => $unitId,
+                'quantity' => $quantity,
+                'price' => $price,
+            ]);
+    
+            // Accumulate total price
+            $totalPrice += $price;
+        }
+    
+        // Update total price in FlowerPickupDetails
+        $pickup->update(['total_price' => $totalPrice]);
+    
+        return redirect()->back()->with('success', 'Flower pickup details saved successfully!');
+    }
+    
+    
+    public function saveFlowerPickupAssignRider(Request $request)
     {
         // Validate the request
         $request->validate([
@@ -130,6 +229,7 @@ class FlowerPickupController extends Controller
             'total_price' => 0, // Will calculate later
             'payment_method' => null,
             'payment_status' => 'pending',
+            'status' => 'pending',
             'payment_id' => null,
         ]);
 
@@ -193,7 +293,7 @@ public function update(Request $request, $id)
         'flower_id.*' => 'required',
         'unit_id.*' => 'required',
         'quantity.*' => 'required|numeric',
-        'price.*' => 'required|numeric',
+        // 'price.*' => 'required|numeric',
         'rider_id' => 'required',
     ]);
 

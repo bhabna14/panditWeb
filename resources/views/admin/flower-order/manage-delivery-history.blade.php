@@ -57,6 +57,42 @@
                                         {{ $errors->first('danger') }}
                                     </div>
                                     @endif
+                                    <div class="filter-section mb-3">
+                                        <form method="GET" action="{{ route('admin.managedeliveryhistory') }}">
+                                            <div class="row">
+                                                <!-- From Date -->
+                                                <div class="col-md-3">
+                                                    <label for="from_date">From Date</label>
+                                                    <input type="date" id="from_date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+                                                </div>
+                                                
+                                                <!-- To Date -->
+                                                <div class="col-md-3">
+                                                    <label for="to_date">To Date</label>
+                                                    <input type="date" id="to_date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+                                                </div>
+                                                
+                                                <!-- Rider -->
+                                                <div class="col-md-3">
+                                                    <label for="rider_id">Rider</label>
+                                                    <select id="rider_id" name="rider_id" class="form-control">
+                                                        <option value="">All Riders</option>
+                                                        @foreach($riders as $rider)
+                                                            <option value="{{ $rider->rider_id }}" {{ request('rider_id') == $rider->rider_id ? 'selected' : '' }}>
+                                                                {{ $rider->rider_name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                
+                                                <!-- Submit Button -->
+                                                <div class="col-md-3 d-flex align-items-end">
+                                                    <button type="submit" class="btn btn-primary w-100">Generate Report</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    
                                     <div class="table-responsive">
                                         <table id="file-datatable" class="table table-bordered">
                                             <thead>

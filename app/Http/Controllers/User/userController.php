@@ -19,6 +19,7 @@ use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Rating;
 use App\Models\FlowerProduct;
+use Illuminate\Support\Facades\Http;
 
 use App\Models\PanditDevice;
 use Illuminate\Support\Facades\Log;
@@ -55,7 +56,13 @@ class userController extends Controller
         $pandits = Profile::where('pandit_status', 'accepted')
                         ->take(6)
                         ->get();
-        return view("user/index" , compact('upcomingPoojas','otherpoojas','pandits'));
+                        $responseBanners = Http::get('https://pandit.33crores.com/api/app-banners');
+
+                        // Check if the response is successful and filter based on the 'flower' category
+                        $banners = $responseBanners->successful() && isset($responseBanners->json()['data'])
+                            ? collect($responseBanners->json()['data'])->filter(fn($banner) => isset($banner['category']) && strtolower($banner['category']) === 'pandit')
+                            : collect();
+        return view("user/index" , compact('upcomingPoojas','banners','otherpoojas','pandits'));
     }
    
 

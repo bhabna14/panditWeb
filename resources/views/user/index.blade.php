@@ -1,11 +1,14 @@
 @extends('user.layouts.front')
 
 @section('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css">
+
 @endsection
 
 @section('content')
     
-
+{{-- 
  <section class="banner-bg">
     <div class="container">
       <div class="row">
@@ -17,7 +20,21 @@
         </div>
       </div>
     </div>
- </section>
+ </section> --}}
+ <section class="" style="margin-top: -17px;">
+  <div class="">
+    <!-- Home Banner Section -->
+    <div class="home-banner-section">
+      <div id="homeBannerCarousel" class="owl-carousel owl-theme">
+        @foreach ($banners as $banner)
+          <div class="item">
+            <img src="{{ $banner['banner_img_url'] }}" alt="{{ $banner['alt_text'] ?? 'Home Banner' }}" class="img-fluid d-block w-100">
+          </div>
+        @endforeach
+      </div>
+    </div>
+  </div>
+</section>
  <section>
   <div class="container">
       <div class="row" style="margin-top:60px;    margin-bottom: 140px;">
@@ -389,7 +406,7 @@
                 </div>
 
                 <div  class="col-lg-6" data-aos="fade-up" data-aos-delay="500">
-                    <img src="{{ asset('front-assets/img/Beige &amp; White Special Offer Discount Instagram Post.png') }}" alt="image">
+                    <img src="{{ asset('front-assets/img/WhatsApp Image 2024-12-11 at 2.31.41 PM.jpeg') }}" alt="image">
                 </div>
             </div>
         </div>
@@ -426,5 +443,26 @@
           }
       });
   });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+
+<script>
+  
+$(document).ready(function(){
+  // Initialize Owl Carousel for Home Banner
+  $('#homeBannerCarousel').owlCarousel({
+    loop: true,           // Enable looping
+    margin: 10,           // Add margin between slides
+    nav: false,            // Enable next/prev buttons
+    autoplay: true,       // Enable auto slide
+    autoplayTimeout: 2000, // Auto slide timeout (5 seconds)
+    autoplayHoverPause: true, // Pause on hover
+    items: 1,             // Display one item per slide
+    dots: false,           // Enable dots navigation
+    animateOut: 'fadeOut', // Add fade out effect when transitioning between slides
+    animateIn: 'fadeIn'   // Add fade in effect for incoming slides
+  });
+});
+
 </script>
 @endsection

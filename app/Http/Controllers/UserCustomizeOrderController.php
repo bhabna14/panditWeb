@@ -105,7 +105,7 @@ public function saveCustomizeOrder(Request $request)
         // Iterate through the flower details and create associated records
         foreach ($request->flower_name as $index => $flowerName) {
             FlowerRequestItem::create([
-                'flower_request_id' => $flowerRequest->id, // Use the ID from the created FlowerRequest
+                'flower_request_id' => $requestId, // Use the ID from the created FlowerRequest
                 'flower_name' => $flowerName,
                 'flower_unit' => $request->flower_unit[$index],
                 'flower_quantity' => $request->flower_quantity[$index],

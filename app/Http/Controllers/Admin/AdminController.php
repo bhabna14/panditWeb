@@ -19,7 +19,10 @@ use App\Models\Order;
 use App\Models\Subscription;
 use App\Models\PublishPodcast;
 use App\Models\FlowerPickupDetails;
-
+use App\Models\RiderDetails;
+use App\Models\DeliveryHistory;
+use App\Models\PodcastPrepair;
+use App\Models\FlowerRequest;
 use App\Models\UserDevice;
 use App\Models\PanditLogin;
 use App\Models\Bankdetail;
@@ -30,7 +33,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\DB;
 class AdminController extends Controller
 {
     //
@@ -57,36 +60,163 @@ class AdminController extends Controller
 
 public function admindashboard()
 {
+    // Fetch the total number of pandits and pending pandits
     $totalPandit = Profile::where('status', 'active')->count();
+
+    // Count the total number of pandits and pending pandits
     $pendingPandit = Profile::where('pandit_status', 'pending')->count();
+
+    // Fetch the total number of orders and users
     $totalOrder = Booking::count();
+
+    // Fetch the total number of orders and users
     $totalUser = User::count();
 
+    // Fetch the total number of pandits and pending pandits
     $pandit_profiles = Profile::orderBy('id', 'desc')
                                 ->where('pandit_status', 'pending')                        
-                                ->get(); // Fetch all profiles        
-    $notifications = Notification::where('is_read', false)->latest()->get();   
+                                ->get(); // Fetch all profiles      
+    
+    // Fetch the total number of notifications (unread) (latest first)(not required now)
+    $notifications = Notification::where('is_read', false)->latest()->get();  
+    
 
+
+    // Fetch the total number of new user subscriptions today
+    $newUserSubscription = Order::whereDate('created_at', Carbon::today())
+        ->whereNull('request_id') // Add condition for request_id to be NULL
+        ->whereNotIn('user_id', function ($query) {
+            $query->select('user_id')
+                ->from('orders')
+                ->whereNull('request_id') // Ensure request_id is NULL in the subquery
+                ->whereDate('created_at', '<', Carbon::today());
+        })
+        ->count();
+    
+    // Fetch the total number of renewed user subscriptions today
+    $renewSubscription = Order::whereDate('created_at', Carbon::today())
+    ->whereNull('request_id')
+    ->whereIn('user_id', function ($query) {
+        $query->select('user_id')
+            ->from('orders')
+            ->whereNull('request_id')
+            ->whereDate('created_at', '<', Carbon::today());
+    })
+    ->distinct('user_id')
+    ->count();
+
+    // Fetch the total number of subscription orders requested today ( not used in dashboard )
+    $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
+                                ->whereNull('request_id')
+                                ->count();
+
+    // Fetch the total number of flower requests requested today (customized order)
+    $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
+
+    // Fetch the total number of active subscriptions
     $activeSubscriptions = Subscription::where('status', 'active')->count();
 
-    // Paused subscriptions count
+    // Fetch the total number of paused subscriptions
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-    $expiredSubscriptions = Subscription::where('status', 'expired')->count();
 
-    // Orders where 'created_at' is today and 'request_id' is not null
-    $ordersRequestedToday = Order::whereDate('created_at', Carbon::today())
-        ->whereNotNull('request_id')
+    // fetch the expired subscriptions whose new subscription is not created ( expired )
+    $expiredSubscriptions = Subscription::where('status', 'expired')
+        ->whereNotIn('user_id', function ($query) {
+            $query->select('user_id')
+                ->from('subscriptions')
+                ->where('status', 'active');
+        })
+        ->count();
+    // Individual Rider Details
+    //display to total assigned orders to rider from orders table whose request_id is null  where rider_id is RIDER73783 and add subscription status is active from subcription table 
+    $totalAssignedOrderstobablu = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
+    ->whereNull('orders.request_id')  // Ensure request_id is null
+    ->where('orders.rider_id', 'RIDER73783')  // Filter by rider_id
+    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
+    ->count();
+    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER73783) and created_at date is today
+    $totalDeliveredTodaybybablu = DeliveryHistory::whereDate('created_at', Carbon::today())
+    ->where('rider_id', 'RIDER73783')
+    ->where('delivery_status', 'delivered')
+    ->count();
+
+
+    $totalAssignedOrderstosubrat = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
+    ->whereNull('orders.request_id')  // Ensure request_id is null
+    ->where('orders.rider_id', 'RIDER87967')  // Filter by rider_id
+    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
+    ->count();
+    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER87967) and created_at date is today
+    $totalDeliveredTodaybysubrat = DeliveryHistory::whereDate('created_at', Carbon::today())
+    ->where('rider_id', 'RIDER87967')
+    ->where('delivery_status', 'delivered')
+    ->count();
+
+
+    $totalAssignedOrderstoprahlad = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
+    ->whereNull('orders.request_id')  // Ensure request_id is null
+    ->where('orders.rider_id', 'RIDER91711')  // Filter by rider_id
+    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
+    ->count();
+    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER91711) and created_at date is today
+    $totalDeliveredTodaybyprahlad = DeliveryHistory::whereDate('created_at', Carbon::today())
+    ->where('rider_id', 'RIDER91711')
+    ->where('delivery_status', 'delivered')
+    ->count();
+    //Rider Details
+    // Total Riders
+    $totalRiders = RiderDetails::count();
+
+    // Total Deliveries This Month
+    $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
+        ->whereMonth('created_at', now()->month)
+        ->count();
+        // Total Deliveries Today
+        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())
         ->count();
 
-    // Orders where 'created_at' is today and 'request_id' is null
-    $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
-        ->whereNull('request_id')
-        ->count();
+    // Total Deliveries
+    $totalDeliveries = DeliveryHistory::count();
+  
+    //Expenses Details in a Day
+    //Total Expenses in a Day
+    $totalExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())->sum('total_price');
+    // total paid expenses in a day
+    $totalPaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
+        ->where('payment_status', 'Paid')
+        ->sum('total_price');
+    // total unpaid expenses in a day
+    $totalUnpaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
+        ->where('payment_status', 'Pending')
+        ->sum('total_price');
 
-    // Calculate the total price for orders without request_id
+    //Expenses Details in The month
+    // Total Amount Paid This Month
+   $totalPaidThisMonth = FlowerPickupDetails::where('payment_status', 'Paid')
+   ->whereYear('created_at', now()->year)
+   ->whereMonth('created_at', now()->month)
+   ->sum('total_price');
+
+    // Total Amount Unpaid This Month
+    $totalUnpaidThisMonth = FlowerPickupDetails::where('payment_status', 'Pending')
+    ->whereYear('created_at', now()->year)
+    ->whereMonth('created_at', now()->month)
+    ->sum('total_price');
+
+    // Total Amount This Month (No Status Condition)
+    $totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year)
+    ->whereMonth('created_at', now()->month)
+    ->sum('total_price');
+
+      
+    // Total details of flower orders
+    // Calculate the total price from the flower_pickup_details table ( total expenses )
+    $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
+
+    // Calculate the total price for orders without request_id (total income of subscription orders)
     $ordersWithoutRequestId = Order::whereNull('request_id')
-        ->get();
-
+            ->get();
+    
     $totalPriceWithoutRequestId = 0;
     foreach ($ordersWithoutRequestId as $order) {
         $payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
@@ -95,7 +225,7 @@ public function admindashboard()
         }
     }
 
-    // Calculate the total price for orders with request_id
+    // Calculate the total price for orders with request_id ( total income of customized orders )
     $ordersWithRequestId = Order::whereNotNull('request_id')
         ->get();
 
@@ -107,12 +237,34 @@ public function admindashboard()
         }
     }
 
-    // Calculate the total price from the flower_pickup_details table
-    $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
+    // Podcast Details
     // Count total podcasts with status 'active'
     $totalActivePodcasts = PublishPodcast::where('status', 'active')->count();
+    // Total Scripts Completed
+    $totalCompletedScripts = PodcastPrepair::where('podcast_script_status', 'COMPLETED')->count();
+    $totalCompletedRecoding = PodcastPrepair::where('podcast_recording_status', 'COMPLETED')->count();
+    $totalCompletedEditing = PodcastPrepair::where('podcast_editing_status', 'COMPLETED')->count();
+
 
     return view('admin/dashboard', compact(
+        'totalAssignedOrderstoprahlad',
+        'totalDeliveredTodaybyprahlad',
+        'totalDeliveredTodaybysubrat',
+        'totalAssignedOrderstosubrat',
+        'totalDeliveredTodaybybablu',
+        'totalAssignedOrderstobablu',
+        'renewSubscription' ,
+        'newUserSubscription',
+        'totalCompletedEditing',
+        'totalCompletedRecoding',
+        'totalCompletedScripts',
+        'totalPaidThisMonth' ,
+        'totalUnpaidThisMonth',
+        'totalAmountThisMonth',
+        'totalRiders' ,
+        'totalDeliveriesThisMonth',
+        'totalDeliveriesToday',
+        'totalDeliveries' ,
         'totalActivePodcasts',
         'totalFlowerPickupPrice',
         'activeSubscriptions',
@@ -127,7 +279,10 @@ public function admindashboard()
         'totalOrder',
         'totalUser',
         'totalPriceWithoutRequestId',
-        'totalPriceWithRequestId'
+        'totalPriceWithRequestId',
+        'totalExpensesday',
+        'totalPaidExpensesday',
+        'totalUnpaidExpensesday',
     ));
 }
 

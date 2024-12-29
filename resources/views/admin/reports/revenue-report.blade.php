@@ -13,12 +13,12 @@
 @section('content')
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Flower Pickup Report</span>
+            <span class="main-content-title mg-b-0 mg-b-lg-1">Flower Revenue Report</span>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
                 
-                <li class="breadcrumb-item active" aria-current="page">Flower Pickup Report</li>
+                <li class="breadcrumb-item active" aria-current="page">Flower Revenue Report</li>
             </ol>
         </div>
     </div>

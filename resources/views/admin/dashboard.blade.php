@@ -17,6 +17,7 @@
     font-weight: 600;
     font-size: 14px;
     text-transform: uppercase;
+	margin-left: 8px;
 }
 .card-title-custom:before {
     content: "";
@@ -24,7 +25,7 @@
     height: 16px;
     background: var(--primary-bg-color);
     position: absolute;
-    left: 4px;
+    left: 13px;
     display: block;
     top: 1px;
 }
@@ -71,8 +72,815 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
-							<h4 class="card-title-custom">Pandit Deatils</h4>
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							
+							<h4 class="card-title-custom">Flower Subscription</h4>
+							
+							<div class="row">
+								
+								
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">New Subscription</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscription }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
+
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Renewed Subscription</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscription   }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									
+									<a href="{{route('flower-request', ['filter' => 'today'])}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Customize Order</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{$ordersRequestedToday}}</h4>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+													<i class="si si-user-follow tx-16 text-info"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
+
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Paused Subscription</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-22 font-weight-semibold mb-2">{{$pausedSubscriptions}}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
+															<span class="text-danger font-weight-semibold"> -693</span>
+														</p> --}}
+													</div>
+												</div>
+												
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{ route('admin.orders.index', ['filter' => 'active']) }}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Active Subscription</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptions}}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class=" text-success font-weight-semibold"> +788</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+										
+											<div class="col-4">
+												<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
+													<i class="si si-user-following tx-16 text-secondary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12">Expired Subscription</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-22 font-weight-semibold mb-2">{{$expiredSubscriptions}}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
+															<span class="text-danger font-weight-semibold"> -693</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								
+								
+							</div>
+						
+						</div>
+						
+						
+						<!-- </div> -->
+					</div>
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom">Individual Rider Details</h4>
+
+							<div class="row">
+								
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageRiderDetails')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Bablu Prusty</h6>
+													</div>
+														
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-12 font
+															-weight-semibold mb-2">Total Delivery: {{$totalAssignedOrderstobablu}}</h4>
+
+															<h4 class="tx-12 font
+															-weight-semibold mb-2">Total Delivered: {{$totalDeliveredTodaybybablu}}</h4>
+
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageRiderDetails')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Subrat</h6>
+													</div>
+														
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-12 font
+															-weight-semibold mb-2">Total Delivery: {{$totalAssignedOrderstosubrat}}</h4>
+
+															<h4 class="tx-12 font
+															-weight-semibold mb-2">Total Delivered: {{$totalDeliveredTodaybysubrat}}</h4>
+
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageRiderDetails')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Prahlad</h6>
+													</div>
+														
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-12 font
+															-weight-semibold mb-2">Total Delivery: {{$totalAssignedOrderstoprahlad}}</h4>
+
+															<h4 class="tx-12 font
+															-weight-semibold mb-2">Total Delivered: {{$totalDeliveredTodaybyprahlad}}</h4>
+
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+
+
+								
+							</div>
+						</div>
+					</div>
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom"> Rider Details</h4>
+
+							<div class="row">
+								
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageRiderDetails')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Riders</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{$totalRiders}}</h4>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.managedeliveryhistory' , ['filter' => 'todaydelivery'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery Today </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveriesToday}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.managedeliveryhistory' , ['filter' => 'monthlydelivery'])}}" target="_blank">
+
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery in this Month </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveriesThisMonth}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.managedeliveryhistory')}}" target="_blank">
+
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Delivery</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">{{$totalDeliveries}}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-following tx-16 text-secondary"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+							</div>
+						</div>
+					</div>
+					<!-- row closed -->
+					<!---Expenses in a day-->
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom"> Expenses Details in a Day</h4>
+
+							<div class="row">
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'todayexpenses'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Expense in a Today </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2"> ₹ {{$totalExpensesday}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageflowerpickupdetails' , ['filter' => 'todaypaidpickup'])}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Paid in a Day</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">₹ {{$totalPaidExpensesday}}</h4>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'todaypendingpickup'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Unpaid in a Day </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{$totalUnpaidExpensesday}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+								
+							</div>
+						</div>
+					</div>
+					<!-- row closed -->
+					<!---Expenses in month-->
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom"> Expenses Details in this Month</h4>
+
+							<div class="row">
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'monthlyexpenses'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Expense in this Month </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2"> ₹ {{$totalAmountThisMonth}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'monthlypaidpickup'])}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Paid in this Month</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">₹ {{$totalPaidThisMonth}}</h4>
+														</div>
+														
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('admin.manageflowerpickupdetails', ['filter' => 'monthlypendingpickup'])}}" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Unpaid in this Month </h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{$totalUnpaidThisMonth}} </h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+								
+							</div>
+						</div>
+					</div>
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom">Other Details</h4>
+
+							<div class="row">
+							
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Expenses</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalFlowerPickupPrice, 2) }}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-follow tx-16 text-info"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Income (Subscription)</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalPriceWithoutRequestId ?? 0, 2) }}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
+														<i class="si si-user-following tx-16 text-secondary"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+									<a href="" target="_blank">
+										<div class="card sales-card">
+											<div class="row">
+												<div class="col-8">
+													<div class="ps-4 pt-4 pe-3 pb-4">
+														<div class="">
+															<h6 class="mb-2 tx-12">Total Income (Customized Order)</h6>
+														</div>
+														<div class="pb-0 mt-0">
+															<div class="d-flex">
+																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalPriceWithRequestId ?? 0, 2) }}</h4>
+															</div>
+														</div>
+													</div>
+												</div>
+												<div class="col-4">
+													<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
+														<i class="fa fa-user tx-16 text-primary"></i>
+													</div>
+												</div>
+											</div>
+										</div>
+									</a>
+								</div>
+								
+								
+							</div>
+						</div>
+					</div>
+
+					<!-- row closed -->
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom">Podcast Details</h4>
+
+							<div class="row">
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('podcastReport')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Completed Script</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalCompletedScripts }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('podcastReport')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Completed Recording</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalCompletedRecoding }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('podcastReport')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Completed Editing</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalCompletedEditing }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+									<a href="{{route('podcastReport')}}" target="_blank">
+									<div class="card sales-card">
+										<div class="row">
+											<div class="col-8">
+												<div class="ps-4 pt-4 pe-3 pb-4">
+													<div class="">
+														<h6 class="mb-2 tx-12 ">Total Published Podcast</h6>
+													</div>
+													<div class="pb-0 mt-0">
+														<div class="d-flex">
+															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalActivePodcasts }}</h4>
+														</div>
+														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
+															<span class="text-success font-weight-semibold"> +427</span>
+														</p> --}}
+													</div>
+												</div>
+											</div>
+											<div class="col-4">
+												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
+													<i class="fa fa-user tx-16 text-primary"></i>
+												</div>
+											</div>
+										</div>
+									</div>
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- row start -->
+					<!---pandit details-->
+
+					<div class="row">
+						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+							<h4 class="card-title-custom">Pandit Details</h4>
 
 							<div class="row">
 								
@@ -193,280 +1001,7 @@
 								
 							</div>
 						</div>
-						<div class="col-xl-6 col-lg-12 col-md-12 col-sm-12">
-							
-							<h4 class="card-title-custom">Flower Purchase Deatils</h4>
-							
-							<div class="row">
-								
-								
-								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12 ">Total Subscription Today</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $subscriptionOrderToday }}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-															<span class="text-success font-weight-semibold"> +427</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-													<i class="fa fa-user tx-16 text-primary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								<div class="col-xl-6 col-lg-12 col-md-12 col-xs-12">
-									
-									<a href="" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12">Total Requested Today</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{$ordersRequestedToday}}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="font-weight-semibold text-danger"> -453</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-													<i class="si si-user-follow tx-16 text-info"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12">Active Subscription</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptions}}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-															<span class=" text-success font-weight-semibold"> +788</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
-													<i class="si si-user-following tx-16 text-secondary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								
-								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12">Expired Subscription</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-22 font-weight-semibold mb-2">{{$expiredSubscriptions}}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="text-danger font-weight-semibold"> -693</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-													<i class="fa fa-user tx-16 text-primary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								<div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-									<a href="{" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12">Paused Subscription</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-22 font-weight-semibold mb-2">{{$pausedSubscriptions}}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="text-danger font-weight-semibold"> -693</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-													<i class="fa fa-user tx-16 text-primary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								
-							</div>
-						
-						</div>
-						<!-- </div> -->
 					</div>
-					<!-- row closed -->
-					<div class="row">
-						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-							<h4 class="card-title-custom">Other Deatils</h4>
-
-							<div class="row">
-								
-								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-									<div class="card sales-card">
-										<div class="row">
-											<div class="col-8">
-												<div class="ps-4 pt-4 pe-3 pb-4">
-													<div class="">
-														<h6 class="mb-2 tx-12 ">Total Published Podcast</h6>
-													</div>
-													<div class="pb-0 mt-0">
-														<div class="d-flex">
-															<h4 class="tx-20 font-weight-semibold mb-2">{{ $totalActivePodcasts }}</h4>
-														</div>
-														{{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-															<span class="text-success font-weight-semibold"> +427</span>
-														</p> --}}
-													</div>
-												</div>
-											</div>
-											<div class="col-4">
-												<div class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-													<i class="fa fa-user tx-16 text-primary"></i>
-												</div>
-											</div>
-										</div>
-									</div>
-									</a>
-								</div>
-								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-										<div class="card sales-card">
-											<div class="row">
-												<div class="col-8">
-													<div class="ps-4 pt-4 pe-3 pb-4">
-														<div class="">
-															<h6 class="mb-2 tx-12">Total Expenses</h6>
-														</div>
-														<div class="pb-0 mt-0">
-															<div class="d-flex">
-																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalFlowerPickupPrice, 2) }}</h4>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col-4">
-													<div class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-														<i class="si si-user-follow tx-16 text-info"></i>
-													</div>
-												</div>
-											</div>
-										</div>
-									</a>
-								</div>
-								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-										<div class="card sales-card">
-											<div class="row">
-												<div class="col-8">
-													<div class="ps-4 pt-4 pe-3 pb-4">
-														<div class="">
-															<h6 class="mb-2 tx-12">Total Income (Subscription)</h6>
-														</div>
-														<div class="pb-0 mt-0">
-															<div class="d-flex">
-																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalPriceWithoutRequestId ?? 0, 2) }}</h4>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col-4">
-													<div class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
-														<i class="si si-user-following tx-16 text-secondary"></i>
-													</div>
-												</div>
-											</div>
-										</div>
-									</a>
-								</div>
-								<div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-									<a href="" target="_blank">
-										<div class="card sales-card">
-											<div class="row">
-												<div class="col-8">
-													<div class="ps-4 pt-4 pe-3 pb-4">
-														<div class="">
-															<h6 class="mb-2 tx-12">Total Income (Customized Order)</h6>
-														</div>
-														<div class="pb-0 mt-0">
-															<div class="d-flex">
-																<h4 class="tx-20 font-weight-semibold mb-2">₹ {{ number_format($totalPriceWithRequestId ?? 0, 2) }}</h4>
-															</div>
-														</div>
-													</div>
-												</div>
-												<div class="col-4">
-													<div class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-														<i class="fa fa-user tx-16 text-primary"></i>
-													</div>
-												</div>
-											</div>
-										</div>
-									</a>
-								</div>
-								
-								
-							</div>
-						</div>
-					</div>
-
-					
 
 					<!-- row  -->
 					<div class="row">

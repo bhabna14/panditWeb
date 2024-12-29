@@ -25,10 +25,18 @@
         {{ session('success') }}
     </div>
 @endif
-
+@if($errors->any())
+<div class="alert alert-danger">
+    <ul>
+        @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
+@endif
 <div class="row">
     <div class="col-12 col-sm-12">
-        <form method="POST" action="{{ route('admin.saveFlowerPickupDetails') }}">
+        <form method="POST" action="{{ route('admin.saveFlowerPickupAssignRider') }}">
             @csrf
             <div id="show_doc_item">
                 <div class="card">
@@ -39,6 +47,7 @@
                                 <div class="form-group">
                                     <label for="vendor_id">Vendor</label>
                                     <select name="vendor_id" class="form-control" required>
+                                        <option value="" selected>Choose</option>
                                         @foreach($vendors as $vendor)
                                             <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
                                         @endforeach
@@ -92,6 +101,7 @@
                                 <div class="form-group">
                                     <label for="rider_id">Assign to Rider</label>
                                     <select name="rider_id" class="form-control" required>
+                                        <option value="" selected>Choose</option>
                                         @foreach($riders as $rider)
                                             <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
                                         @endforeach

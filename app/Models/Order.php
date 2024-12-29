@@ -19,6 +19,7 @@ class Order extends Model
         'requested_flower_price',
         'delivery_charge',
         'rider_id',
+        'referral_id',
         'order_id',  // Add this line
         'address_id',
         'suggestion',
@@ -65,6 +66,11 @@ public function pauseResumeLogs()
 public function marketingFollowUps()
 {
     return $this->hasMany(MarketingFollowUp::class, 'order_id', 'order_id');
+}
+
+public function deliveryCustomizeHistory()
+{
+    return $this->hasOne(DeliveryCustomizeHistory::class, 'rider_id', 'rider_id');
 }
 
 }

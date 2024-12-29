@@ -21,6 +21,7 @@ class Subscription extends Model
         'is_active',
         'pause_start_date',
         'pause_end_date',
+        'new_date',
         'status'
     ];
     // In Subscription.php model

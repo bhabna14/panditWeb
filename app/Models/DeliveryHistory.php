@@ -15,6 +15,7 @@ class DeliveryHistory extends Model
         'order_id',
         'rider_id',
         'delivery_status',
+      
         'longitude',
         'latitude',
     ];
@@ -27,4 +28,9 @@ public function rider()
 {
     return $this->belongsTo(RiderDetails::class,'rider_id', 'rider_id');
 }
+public function deliveryStartHistory()
+{
+    return $this->hasOne(DeliveryStartHistory::class, 'rider_id', 'rider_id');
+}
+
 }

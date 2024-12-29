@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\FlowerPickupController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SubadminController;
 use App\Http\Controllers\Admin\FollowUpController;
+use App\Http\Controllers\Admin\AdminNotificationController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -244,31 +245,39 @@ Route::prefix('admin')->middleware(['admin'])->group(function () {
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+    // Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('admin.orders.pause');
+    Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('pause.subscription');
+    Route::post('/flower-orders/{order_id}/resume', [FlowerOrderController::class, 'resume'])
+    ->name('resume.subscription');
+
     Route::get('/manage-delivery-history', [FlowerOrderController::class, 'mngdeliveryhistory'])->name('admin.managedeliveryhistory');
     Route::get('/rider-all-details/{id}', [FlowerOrderController::class, 'showRiderDetails'])->name('admin.riderAllDetails');
 Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])->name('orders.markAsViewed');
 
     //rider assign by admin and update
     Route::post('orders/{id}/assignRider', [FlowerOrderController::class, 'assignRider'])->name('admin.orders.assignRider');
+    Route::post('orders/{id}/refferRider', [FlowerOrderController::class, 'refferRider'])->name('admin.orders.refferRider');
+    
     Route::get('orders/{id}/editRider', [FlowerOrderController::class, 'editRider'])->name('admin.orders.editRider');
     Route::post('orders/{id}/updateRider', [FlowerOrderController::class, 'updateRider'])->name('admin.orders.updateRider');
 
 
     Route::get('/show-customer/{id}/details', [FlowerOrderController::class, 'showCustomerDetails'])->name('showCustomerDetails');
 
-    Route::get('/flower-request-orders', [FlowerOrderController::class, 'showRequestOrders'])->name('admin.requestorder.index');
 
     Route::get('/active-subscriptions', [FlowerOrderController::class, 'showActiveSubscriptions'])->name('active.subscriptions');
     Route::get('/paused-subscriptions', [FlowerOrderController::class, 'showPausedSubscriptions'])->name('paused.subscriptions');
+    Route::get('/expired-subscriptions', [FlowerOrderController::class, 'showexpiredSubscriptions'])->name('expired.subscriptions');
+
     Route::get('/orders-today', [FlowerOrderController::class, 'showOrdersToday'])->name('orders.today');
     
-    Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'show'])->name('admin.orders.show');
+    Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'showorderdetails'])->name('admin.orders.show');
 
 
     // Followup Controller 
 
     Route::get('/follow-up-subscriptions', [FollowUpController::class, 'followUpSubscriptions'])->name('admin.followUpSubscriptions');
-Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
+    Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
 
 
 
@@ -302,6 +311,8 @@ Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->nam
 
         Route::get('/manage-flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
+        Route::post('/save-flower-pickup-assign-rider', 'saveFlowerPickupAssignRider')->name('admin.saveFlowerPickupAssignRider');
+       
         Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');
 
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
@@ -513,7 +524,10 @@ Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->nam
         Route::post('/updatepromonation/{id}', 'updatepromonation')->name('updatepromonation');
         Route::delete('/deletepromonation/{id}', 'deletepromonation')->name('deletepromonation');
     });
-
+    Route::get('/send-notification', [AdminNotificationController::class, 'create'])->name('admin.notification.create');
+    Route::post('/send-notification', [AdminNotificationController::class, 'send'])->name('admin.notification.send');
+    Route::delete('/notifications/{id}', [AdminNotificationController::class, 'delete'])->name('admin.notifications.delete');
+    Route::post('/notifications/resend/{id}', [AdminNotificationController::class, 'resend'])->name('admin.notifications.resend');
 
     Route::controller(YoutubeController::class)->group(function() {
         Route::get('/youtube', 'youTube')->name('youTube');
