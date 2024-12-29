@@ -107,18 +107,28 @@ class ProductController extends Controller
             'item_id' => 'nullable|array',
             'variant_id' => 'nullable|array',
         ]);
-
+    
         $product = FlowerProduct::findOrFail($id);
+    
         $product->update($request->except('product_image'));
-
+    
         if ($request->hasFile('product_image')) {
+            // Delete the old image if it exists
             if ($product->product_image) {
                 Storage::delete('public/' . $product->product_image);
             }
-            $product->product_image = $request->file('product_image')->store('products', 'public');
+    
+            // New image storage logic
+            $imagePath = 'product_images/' . $request->file('product_image')->hashName();
+            $request->file('product_image')->move(public_path('product_images'), $imagePath);
+            $imageUrl = asset($imagePath);
+    
+            // Update the product's image URL
+            $product->product_image = $imagePath;
             $product->save();
         }
-
+    
+        // Update package items
         PackageItem::where('product_id', $product->product_id)->delete();
         if ($request->item_id && $request->variant_id) {
             foreach ($request->item_id as $index => $itemId) {
@@ -131,10 +141,10 @@ class ProductController extends Controller
                 }
             }
         }
-
+    
         return redirect()->route('admin.edit-product', $product->id)->with('success', 'Product updated successfully.');
     }
-
+    
     public function deleteProduct($id)
     {
         $product = FlowerProduct::findOrFail($id);
