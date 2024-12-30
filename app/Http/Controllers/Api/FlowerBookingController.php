@@ -172,7 +172,7 @@ public function purchaseSubscription(Request $request)
         return response()->json(['message' => 'Unauthorized'], 401);
     }
 
-    $orderId = 'ORD-' . strtoupper(Str::random(12));
+    $orderId = $request->order_id;
     $addressId = $request->address_id;
     $suggestion = $request->suggestion;
 
@@ -206,7 +206,7 @@ public function purchaseSubscription(Request $request)
         // Check if the payment is captured
         if ($payment->status !== 'captured') {
             \Log::error('Payment not captured', ['payment_id' => $paymentId]);
-            return response()->json(['message' => 'Payment not captured'], 400);
+            return response()->json(['message' => 'Payment was not successfull, Your payment will be refunded with in 7 days.'], 400);
         }
     } catch (\Exception $e) {
         \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
