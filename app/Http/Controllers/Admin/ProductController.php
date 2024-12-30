@@ -92,7 +92,7 @@ class ProductController extends Controller
 
         return view('admin.edit-product', compact('product', 'Poojaitemlist', 'selectedItems'));
     }
-
+    
     public function updateProduct(Request $request, $id)
     {
         $request->validate([
