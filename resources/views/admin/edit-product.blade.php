@@ -77,7 +77,7 @@
                     @foreach ($selectedItems as $selected)
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <select class="form-control select2 item-select" name="item_id[]" required>
+                                <select class="form-control select2 item-select" name="item_id[]">
                                     <option value="">Select Puja List</option>
                                     @foreach ($Poojaitemlist as $pujalist)
                                         <option value="{{ $pujalist->id }}" {{ $pujalist->id == $selected->item_id ? 'selected' : '' }}>
@@ -87,7 +87,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <select class="form-control select2 variant-select" name="variant_id[]" required>
+                                <select class="form-control select2 variant-select" name="variant_id[]">
                                     <option value="">Select Variant</option>
                                     @foreach ($Poojaitemlist->find($selected->item_id)->variants as $variant)
                                         <option value="{{ $variant->id }}" {{ $variant->id == $selected->variant_id ? 'selected' : '' }}>
@@ -107,7 +107,7 @@
                 <label for="product_image" class="form-label">Product Image</label>
                 <input type="file" name="product_image" class="form-control" id="product_image">
                 @if($product->product_image)
-                    <img src="{{ asset('storage/' . $product->product_image) }}" alt="Product Image" width="100" class="mt-2">
+                    <img src="{{ $product->product_image}}" alt="Product Image" width="100" class="mt-2">
                 @endif
             </div>
 

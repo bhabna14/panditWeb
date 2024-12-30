@@ -100,7 +100,7 @@
                     <div id="packageItems">
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <select class="form-control select2 item-select" name="item_id[]" required>
+                                <select class="form-control select2 item-select" name="item_id[]">
                                     <option value="">Select Puja List</option>
                                     @foreach ($Poojaitemlist as $pujalist)
                                         <option value="{{ $pujalist->id }}" data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
@@ -110,7 +110,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6">
-                                <select class="form-control select2 variant-select" name="variant_id[]" required>
+                                <select class="form-control select2 variant-select" name="variant_id[]">
                                     <option value="">Select Variant</option>
                                 </select>
                             </div>
