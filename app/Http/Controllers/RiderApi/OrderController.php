@@ -131,12 +131,20 @@ class OrderController extends Controller
             // Fetch today's orders assigned to the rider
             $today = Carbon::today();
             $orders = Order::where('rider_id', $rider->rider_id)
-                ->whereHas('subscription', function ($query) use ($today) {
-                    $query->where('status', 'active')
-                        ->whereDate('end_date', '>=', $today);
-                })
-                ->get();
-
+            ->whereHas('subscription', function ($query) use ($today) {
+                $query->where('status', 'active')
+                    ->where(function ($query) use ($today) {
+                        $query->whereNotNull('new_date') // If new_date exists, check it
+                            ->whereDate('new_date', '>=', $today)
+                            ->orWhere(function ($query) use ($today) { // Fallback to end_date if new_date is null
+                                $query->whereNull('new_date')
+                                    ->whereDate('end_date', '>=', $today);
+                            });
+                    });
+            })
+            ->get();
+        
+// dd($orders);
             if ($orders->isEmpty()) {
                 return response()->json([
                     'status' => 200,

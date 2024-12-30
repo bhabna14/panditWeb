@@ -81,7 +81,7 @@
                     </div>
                 
                     <div class="col-md-4">
-                        <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}">
+                        <a href="{{ route('admin.orders.index', ['filter' => 'renew']) }}">
                             <div class="card bg-info text-dark mb-3">
                                 <div class="card-header">
                                     <i class="fas fa-box"></i>Subscription Placed today
