@@ -1036,13 +1036,38 @@ public function purchaseSubscription(Request $request)
     public function markPaymentApi(Request $request, $id)
     {
         try {
+            // Initialize Razorpay API
+            $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+            $paymentId = $request->payment_id;
+    
+            try {
+                // Fetch the payment details from Razorpay
+                $payment = $razorpayApi->payment->fetch($paymentId);
+                \Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
+    
+                // Check if the payment is captured
+                if ($payment->status !== 'captured') {
+                    // Attempt to capture the payment if it is authorized
+                    if ($payment->status === 'authorized') {
+                        $capture = $razorpayApi->payment->fetch($paymentId)->capture(['amount' => $payment->amount]);
+                        \Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
+                    } else {
+                        \Log::error('Payment not captured', ['payment_id' => $paymentId]);
+                        return response()->json(['message' => 'Payment was not successful, Your payment will be refunded within 7 days.'], 400);
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
+                return response()->json(['message' => 'Failed to fetch payment status'], 500);
+            }
+    
             // Find the order by flower request ID
             $order = Order::where('request_id', $id)->firstOrFail();
     
             // Create a new flower payment entry
             FlowerPayment::create([
                 'order_id' => $order->order_id,
-                'payment_id' => $request->payment_id, // Can be set later if available
+                'payment_id' => $paymentId, // Set payment ID from Razorpay
                 'user_id' => $order->user_id,
                 'payment_method' => 'Razorpay',
                 'paid_amount' => $order->total_price,
@@ -1090,6 +1115,7 @@ public function purchaseSubscription(Request $request)
             ], 500);
         }
     }
+    
     
 // public function resume(Request $request, $order_id)
 // {
