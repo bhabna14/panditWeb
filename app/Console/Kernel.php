@@ -23,11 +23,11 @@ class Kernel extends ConsoleKernel
 
         // Schedule for sending subscription ending notifications
         $schedule->command('subscriptions:sendEndingNotifications')
-                 ->at('18:05')
+                 ->at('18:15')
                  ->runInBackground();
 
         $schedule->command('subscriptions:sendEndingNotifications')
-                 ->at('18:08')
+                 ->at('18:16')
                  ->runInBackground();
     }
 
@@ -49,7 +49,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \App\Console\Commands\SendEndingNotifications::class,
+        \App\Console\Commands\SendEndingSubscriptionNotifications::class,
         // Add other commands here if necessary
     ];
 }
