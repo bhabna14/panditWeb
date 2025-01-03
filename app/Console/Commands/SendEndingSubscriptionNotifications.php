@@ -35,7 +35,7 @@ class SendEndingSubscriptionNotifications extends Command
     public function handle()
     {
         $now = Carbon::now(); // Get current date and time
-        \Log::info('Current date and time:', ['now' => $now]);
+        \Log::info('my Current date and time:', ['now' => $now]);
     
         $endDateThreshold = $now->addDays(5); // Subscriptions ending in the next 5 days
         \Log::info('End date threshold:', ['endDateThreshold' => $endDateThreshold]);
@@ -51,8 +51,10 @@ class SendEndingSubscriptionNotifications extends Command
                   ->whereBetween('end_date', [$now, $endDateThreshold]);
         });
         
+        // Log SQL query and bindings
         \Log::info('SQL Query:', ['query' => $query->toSql()]);
-        
+        \Log::info('SQL Bindings:', ['bindings' => $query->getBindings()]);
+    
         // Fetch subscriptions
         $subscriptions = $query->get();
     
@@ -99,8 +101,9 @@ class SendEndingSubscriptionNotifications extends Command
             }
         }
     
-        \Log::info('Subscription processing completed.');
+        \Log::info('Subscription processing completed end.');
     }
+    
     
     
     
