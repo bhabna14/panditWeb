@@ -12,35 +12,34 @@
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
     <style>
-      .modal-header {
-    background-color: #007bff;
-    color: #fff;
-    border-bottom: none;
-}
+        .modal-header {
+            background-color: #007bff;
+            color: #fff;
+            border-bottom: none;
+        }
 
-.modal-body {
-    font-size: 16px;
-    line-height: 1.8;
-}
+        .modal-body {
+            font-size: 16px;
+            line-height: 1.8;
+        }
 
-.modal-body p {
-    margin-bottom: 10px;
-}
+        .modal-body p {
+            margin-bottom: 10px;
+        }
 
-.modal-footer {
-    border-top: none;
-}
+        .modal-footer {
+            border-top: none;
+        }
 
-.btn-outline-primary {
-    border-color: #007bff;
-    color: #007bff;
-}
+        .btn-outline-primary {
+            border-color: #007bff;
+            color: #007bff;
+        }
 
-.btn-outline-primary:hover {
-    background-color: #007bff;
-    color: #fff;
-}
-
+        .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
     </style>
 @endsection
 
@@ -134,9 +133,9 @@
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
                     <!-- <div>
-                                            <h6 class="main-content-label mb-1">File export Datatables</h6>
-                                            <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
-                                        </div> -->
+                                                                <h6 class="main-content-label mb-1">File export Datatables</h6>
+                                                                <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
+                                                            </div> -->
 
 
                     @if (session()->has('success'))
@@ -214,15 +213,17 @@
                                                             </p>
                                                             <p><i class="fas fa-landmark text-primary"></i>
                                                                 <strong>Landmark:</strong>
-                                                                {{ $order->address->landmark ?? '' }}</p>
+                                                                {{ $order->address->landmark ?? '' }}
+                                                            </p>
+                                                            <p><i class="fas fa-envelope text-primary"></i> <strong>Pin
+                                                                    Code:</strong> {{ $order->address->pincode ?? '' }}</p>
                                                             <p><i class="fas fa-city text-primary"></i>
                                                                 <strong>City:</strong> {{ $order->address->city ?? '' }}
                                                             </p>
                                                             <p><i class="fas fa-flag text-primary"></i>
                                                                 <strong>State:</strong> {{ $order->address->state ?? '' }}
                                                             </p>
-                                                            <p><i class="fas fa-envelope text-primary"></i> <strong>Pin
-                                                                    Code:</strong> {{ $order->address->pincode ?? '' }}</p>
+
                                                         </div>
 
                                                         <!-- Modal Footer -->
@@ -235,9 +236,175 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <!-- Edit Address Button -->
+                                            <a href="#" class="btn btn-outline-secondary btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editAddressModal{{ $order->id }}">
+                                                <i class="fas fa-edit"></i> Edit Address
+                                            </a>
+
+                                            <!-- Edit Address Modal -->
+                                            <div class="modal fade" id="editAddressModal{{ $order->id }}"
+                                                tabindex="-1" aria-labelledby="editAddressModalLabel{{ $order->id }}"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <!-- Modal Header -->
+                                                        <div class="modal-header bg-primary text-white">
+                                                            <h5 class="modal-title"
+                                                                id="editAddressModalLabel{{ $order->id }}">
+                                                                <i class="fas fa-edit"></i> Edit Address
+                                                            </h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+
+                                                        <!-- Modal Body -->
+                                                        <div class="modal-body">
+                                                            <form
+                                                                action="{{ route('admin.orders.updateAddress', $order->address->id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <div class="row">
+                                                                    <div class="mb-3">
+                                                                        <label for="apartment_flat_plot"
+                                                                            class="form-label">Flat/Plot</label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="apartment_flat_plot"
+                                                                            name="apartment_flat_plot"
+                                                                            value="{{ $order->address->apartment_flat_plot }}">
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label for="apartment_name"
+                                                                            class="form-label">Apartment Name</label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="apartment_name" name="apartment_name"
+                                                                            value="{{ $order->address->apartment_name }}">
+                                                                    </div>
+
+                                                                </div>
+                                                                <div class="row">
+                                                                    <div class="mb-3">
+                                                                        <label for="locality_name"
+                                                                            class="form-label">Locality</label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="locality_name" name="locality_name"
+                                                                            value="{{ $order->address->locality }}">
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label for="landmark"
+                                                                            class="form-label">Landmark</label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="landmark" name="landmark"
+                                                                            value="{{ $order->address->landmark }}">
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="row">
+                                                                    <div class="mb-3">
+                                                                        <label for="pincode" class="form-label">Pin
+                                                                            Code</label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="pincode" name="pincode"
+                                                                            value="{{ $order->address->pincode }}">
+                                                                    </div>
+
+                                                                    <div class="mb-3">
+                                                                        <label for="city"
+                                                                            class="form-label">City</label>
+                                                                        <input type="text" class="form-control"
+                                                                            id="city" name="city"
+                                                                            value="{{ $order->address->city }}">
+                                                                    </div>
+                                                                </div>
+
+
+                                                                <div class="mb-3">
+                                                                    <label for="state" class="form-label">State</label>
+                                                                    <input type="text" class="form-control"
+                                                                        id="state" name="state"
+                                                                        value="{{ $order->address->state }}">
+                                                                </div>
+
+                                                                <!-- Modal Footer -->
+                                                                <div class="modal-footer">
+                                                                    <button type="submit" class="btn btn-primary">
+                                                                        <i class="fas fa-save"></i> Save Changes
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">
+                                                                        <i class="fas fa-times"></i> Close
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </td>
 
-                                        <td>{{ number_format($order->total_price, 2) }}</td>
+                                        <td>
+                                            {{ number_format($order->total_price, 2) }}
+                                            <!-- Edit Price Button -->
+                                            <a href="#" class="btn btn-outline-secondary btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editPriceModal{{ $order->id }}">
+                                                <i class="fas fa-edit"></i> Edit Price
+                                            </a>
+
+                                            <!-- Edit Price Modal -->
+                                            <div class="modal fade" id="editPriceModal{{ $order->id }}"
+                                                tabindex="-1" aria-labelledby="editPriceModalLabel{{ $order->id }}"
+                                                aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <!-- Modal Header -->
+                                                        <div class="modal-header bg-primary text-white">
+                                                            <h5 class="modal-title"
+                                                                id="editPriceModalLabel{{ $order->id }}">
+                                                                <i class="fas fa-edit"></i> Edit Total Price
+                                                            </h5>
+                                                            <button type="button" class="btn-close"
+                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+
+                                                        <!-- Modal Body -->
+                                                        <div class="modal-body">
+                                                            <form
+                                                                action="{{ route('admin.orders.updatePrice', $order->id) }}"
+                                                                method="POST">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <div class="mb-3">
+                                                                    <label for="total_price" class="form-label">Total
+                                                                        Price</label>
+                                                                    <input type="number" class="form-control"
+                                                                        id="total_price" name="total_price"
+                                                                        value="{{ $order->total_price }}" step="0.01"
+                                                                        required>
+                                                                </div>
+
+                                                                <!-- Modal Footer -->
+                                                                <div class="modal-footer">
+                                                                    <button type="submit" class="btn btn-primary">
+                                                                        <i class="fas fa-save"></i> Save Changes
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-bs-dismiss="modal">
+                                                                        <i class="fas fa-times"></i> Close
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td>
                                             <span
                                                 class="status-badge 
