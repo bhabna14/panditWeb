@@ -26,7 +26,7 @@ class FlowerOrderController extends Controller
     //
     public function showOrders(Request $request)
     {
-        
+
         $query = Order::whereNull('request_id')
                       ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
                       ->orderBy('created_at', 'desc');
@@ -165,9 +165,7 @@ public function showNotifications()
         return view('admin.flower-order.show-customer-details', compact('user','addressdata','pendingRequests', 'orders','totalOrders', 'ongoingOrders', 'totalSpend'));
     }
     
-
-    
-    public function showorderdetails($id)
+public function showorderdetails($id)
     {
         $order = Order::with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address', 'pauseResumeLogs'])->findOrFail($id);
 
@@ -176,8 +174,6 @@ public function showNotifications()
         return view('admin.flower-order.show-order-details', compact('order'));
     }
     
-
-
 public function showActiveSubscriptions()
 {
     $activeSubscriptions = Order::whereNull('request_id')
@@ -218,7 +214,6 @@ public function showexpiredSubscriptions()
 
     return view('admin.flower-order.manage-expired-subscriptions', compact('expiredSubscriptions'));
 }
-
 
 public function showOrdersToday()
 {
@@ -272,46 +267,6 @@ public function updateRider(Request $request, $orderId)
     // Redirect back with a success message
     return redirect()->back()->with('success', 'Rider updated successfully.');
 }
-
-
-// public function mngdeliveryhistory(Request $request)
-// {
-//     try {
-//         $filter = $request->input('filter', 'all'); // Get the filter from the URL, default is 'all'
-
-//         // Build the query
-//         $query = DeliveryHistory::with([
-//             'order.user',                    // Fetch user details
-//             'order.flowerProduct',           // Fetch product details
-//             'order.flowerPayments',          // Fetch payment details
-//             'order.address.localityDetails', // Fetch address details
-//             'rider'                          // Fetch rider details
-//         ])->orderBy('created_at', 'desc');
-
-//         // Apply the filter for 'todaydelivery'
-//         if ($filter == 'todaydelivery') {
-//             $query->whereDate('created_at', Carbon::today()); // Filter by today's date
-//         }
-
-//         // apply the filter for total 'monthlydelivery'
-//         if ($filter == 'monthlydelivery') {
-//             $query->whereBetween('created_at', [
-//                 now()->startOfMonth(),
-//                 now()->endOfMonth()
-//             ]);
-//         }
-
-//         // Execute the query to get the delivery history
-//         $deliveryHistory = $query->get();
-
-//         // Get total deliveries for today
-//         $totalDeliveriesToday = $query->whereDate('created_at', Carbon::today())->count();
-
-//         return view('admin.flower-order.manage-delivery-history', compact('deliveryHistory', 'totalDeliveriesToday'));
-//     } catch (\Exception $e) {
-//         return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
-//     }
-// }
 
 public function mngdeliveryhistory(Request $request)
 {
@@ -488,6 +443,48 @@ public function pause(Request $request, $order_id)
         return redirect()->back()->with('error', 'An error occurred while pausing the subscription.');
     }
 }
+
+
+public function updateAddress(Request $request, $id)
+{
+    // Find the address by ID
+    $address = UserAddress::findOrFail($id);
+
+    // Update the address fields
+    $address->apartment_flat_plot = $request->input('apartment_flat_plot');
+    $address->apartment_name = $request->input('apartment_name');
+    $address->locality = $request->input('locality_name');
+    $address->landmark = $request->input('landmark');
+    $address->pincode = $request->input('pincode');
+    $address->city = $request->input('city');
+    $address->state = $request->input('state');
+
+    // Save the updated address
+    $address->save();
+
+    // Redirect back with success message
+    return redirect()->back()->with('success', 'Address updated successfully.');
+}
+
+
+public function updatePrice(Request $request, $id)
+{
+    // Validate the incoming request
+    $request->validate([
+        'total_price' => 'required|numeric|min:0',
+    ]);
+
+    // Find the order by ID
+    $order = Order::findOrFail($id);
+
+    // Update the total price
+    $order->total_price = $request->input('total_price');
+    $order->save();
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'Order price updated successfully!');
+}
+
 
 
 }

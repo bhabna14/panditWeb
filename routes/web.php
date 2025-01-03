@@ -280,6 +280,11 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
     
     Route::get('/flower-orders/{id}', [FlowerOrderController::class, 'showorderdetails'])->name('admin.orders.show');
 
+    Route::put('/orders/{id}/update-address', [FlowerOrderController::class, 'updateAddress'])->name('admin.orders.updateAddress');
+
+    Route::put('/orders/{id}/update-price', [FlowerOrderController::class, 'updatePrice'])->name('admin.orders.updatePrice');
+
+
 
     // Followup Controller 
 
