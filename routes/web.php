@@ -258,6 +258,8 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('pause.subscription');
     Route::post('/flower-orders/{order_id}/resume', [FlowerOrderController::class, 'resume'])
     ->name('resume.subscription');
+    Route::put('/orders/{order_id}/update-payment-status', [FlowerOrderController::class, 'updatePaymentStatus'])->name('admin.orders.updatePaymentStatus');
+
 
     Route::get('/manage-delivery-history', [FlowerOrderController::class, 'mngdeliveryhistory'])->name('admin.managedeliveryhistory');
     Route::get('/rider-all-details/{id}', [FlowerOrderController::class, 'showRiderDetails'])->name('admin.riderAllDetails');
@@ -563,7 +565,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
     });
 
     Route::controller(UserManagementController::class)->group(function() {
-        Route::get('/demo-order-details', 'demoOrderDetails')->name('demoOrderDetails');
+        Route::get('/existing-user', 'existingUser')->name('existingUser');
         Route::post('/save-demo-order-details', 'handleUserData')->name('saveDemoOrderDetails');
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
        

@@ -65,6 +65,7 @@ public function saveNewUserOrder(Request $request)
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
             'paid_amount' => 'nullable|numeric',
+            'payment_method' => 'nullable|string',
             'status' => 'nullable|string',
         ]);
 
@@ -138,7 +139,6 @@ public function saveNewUserOrder(Request $request)
             'product_id' => $validatedUserData['product_id'],
             'start_date' => $validatedUserData['start_date'],
             'end_date' => $validatedUserData['end_date'],
-            // 'is_active' => true,
             'status' => $validatedUserData['status'],
         ]);
 
@@ -147,7 +147,7 @@ public function saveNewUserOrder(Request $request)
             'order_id' => $order->order_id,
             'payment_id' => 'NULL',
             'user_id' => $user->userid,
-            'payment_method' => 'cash',
+            'payment_method' =>  $validatedUserData['payment_method'],
             'paid_amount' => $validatedUserData['paid_amount'],
             'payment_status' => 'paid',
         ]);
@@ -155,17 +155,14 @@ public function saveNewUserOrder(Request $request)
         // Commit the transaction
         \DB::commit();
 
-        return response()->json([
-            'message' => 'User, address, order, subscription, and payment added successfully.',
-        ], 200);
+        return redirect()->back()->with('success', 'New user add succesful!');
+
     } catch (\Exception $e) {
         // Rollback the transaction on error
         \DB::rollBack();
 
-        return response()->json([
-            'message' => 'An error occurred.',
-            'error' => $e->getMessage(),
-        ], 500);
+        return redirect()->back()->with('error', 'failed to save new user order');
+
     }
 }
 

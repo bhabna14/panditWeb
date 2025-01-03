@@ -485,6 +485,26 @@ public function updatePrice(Request $request, $id)
     return redirect()->back()->with('success', 'Order price updated successfully!');
 }
 
+public function updatePaymentStatus(Request $request, $order_id)
+{
+    $request->validate([
+        'payment_status' => 'required|string|in:pending,paid',
+    ]);
+
+    $payment = FlowerPayment::where('order_id', $order_id)->first();
+
+    if (!$payment) {
+        return redirect()->back()->with('error', 'Payment record not found.');
+    }
+
+    $payment->update([
+        'payment_status' => $request->payment_status,
+    ]);
+
+    return redirect()->back()->with('success', 'Payment status updated successfully.');
+}
+
+
 
 
 }

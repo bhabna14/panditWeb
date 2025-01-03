@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 class UserManagementController extends Controller
 {
 
-    public function demoOrderDetails()
+    public function existingUser()
     {
         $user_details = User::get();
 
@@ -30,7 +30,7 @@ class UserManagementController extends Controller
             ->where('category', 'Subscription')
             ->get();
     
-        return view('demo-order-details', compact('flowers','user_details'));
+        return view('existing-user-details', compact('flowers','user_details'));
     }
     
     public function getUserAddresses($userId)
@@ -60,6 +60,8 @@ public function handleUserData(Request $request)
             'product_id' => 'nullable',
             'start_date' => 'nullable|date',
             'end_date' => 'nullable|date',
+            'payment_method' => 'nullable|string',
+            'payment_status' => 'nullable|string',
             'paid_amount' => 'nullable|numeric',
             'status' => 'nullable|string',
         ]);
@@ -83,24 +85,6 @@ public function handleUserData(Request $request)
         // Generate unique subscription ID
         $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
 
-        // // Calculate subscription start and end dates
-        // $startDate = $validatedUserData['start_date'] 
-        //     ? Carbon::parse($validatedUserData['start_date']) 
-        //     : Carbon::now(); // Convert to Carbon instance or default to now
-
-        // $duration = $validatedUserData['duration'];
-
-        // // Determine the end date based on duration
-        // if ($duration == 1) {
-        //     $endDate = $startDate->addDays(29); // For 1 month, 30 days
-        // } elseif ($duration == 3) {
-        //     $endDate = $startDate->addDays(89); // For 3 months, 90 days
-        // } elseif ($duration == 6) {
-        //     $endDate = $startDate->addDays(179); // For 6 months, 180 days
-        // } else {
-        //     $endDate = $startDate; // Default case (no duration provided)
-        // }
-
         // Create subscription
         Subscription::create([
             'subscription_id' => $subscriptionId,
@@ -117,25 +101,22 @@ public function handleUserData(Request $request)
             'order_id' => $order->order_id,
             'payment_id' => 'NULL',
             'user_id' => $validatedUserData['userid'],
-            'payment_method' => 'rozarpay',
+            'payment_method' => $validatedUserData['payment_method'],
             'paid_amount' => $validatedUserData['paid_amount'],
-            'payment_status' => 'paid',
+            'payment_status' => $validatedUserData['payment_status'],
         ]);
 
         // Commit the transaction
         \DB::commit();
 
-        return response()->json([
-            'message' => 'User, address, order, subscription, and payment added successfully.',
-        ], 200);
+               return redirect()->back()->with('success', 'existing user add succesful!');
+
     } catch (\Exception $e) {
         // Rollback the transaction on error
         \DB::rollBack();
 
-        return response()->json([
-            'message' => 'An error occurred.',
-            'error' => $e->getMessage(),
-        ], 500);
+        return redirect()->back()->with('error', 'An error occurred while adding the existing user. Please try again.');
+
     }
 }
 

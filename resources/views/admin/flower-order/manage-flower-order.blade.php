@@ -158,6 +158,7 @@
                                     <th>Product Details</th>
                                     <th>Address Details</th>
                                     <th>Total Price</th>
+                                    <th>Payment Status</th>
                                     <th>Status</th>
                                     <th>Assigned Rider</th>
                                     <th>Reffered By</th>
@@ -405,6 +406,61 @@
                                                 </div>
                                             </div>
                                         </td>
+                                        <td>
+                                            @if ($order->flowerPayments->isNotEmpty())
+                                                @foreach ($order->flowerPayments as $payment)
+                                                    <span class="status-badge bg-info">{{ $payment->payment_status }}</span><br>
+                                                @endforeach
+                                            @else
+                                                <span class="status-badge bg-warning">No Payment</span>
+                                            @endif
+
+                                            <!-- Edit Payment Status Button -->
+                                            <a href="#" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editPaymentStatusModal{{ $order->order_id }}">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </a>
+
+                                            <!-- Edit Payment Status Modal -->
+                                            <div class="modal fade" id="editPaymentStatusModal{{ $order->order_id }}" tabindex="-1" aria-labelledby="editPaymentStatusModalLabel{{ $order->order_id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <!-- Modal Header -->
+                                                        <div class="modal-header bg-primary text-white">
+                                                            <h5 class="modal-title" id="editPaymentStatusModalLabel{{ $order->order_id}}">
+                                                                <i class="fas fa-edit"></i> Edit Payment Status
+                                                            </h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+
+                                                        <!-- Modal Body -->
+                                                        <div class="modal-body">
+                                                            <form action="{{ route('admin.orders.updatePaymentStatus', $order->order_id) }}" method="POST">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <div class="mb-3">
+                                                                    <label for="payment_status" class="form-label">Payment Status</label>
+                                                                    <select class="form-control" id="payment_status" name="payment_status" required>
+                                                                        <option value="pending" {{ $order->flowerPayments->first()->payment_status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                                        <option value="paid" {{ $order->flowerPayments->first()->payment_status == 'paid' ? 'selected' : '' }}>Paid</option>
+                                                                    </select>
+                                                                </div>
+
+                                                                <!-- Modal Footer -->
+                                                                <div class="modal-footer">
+                                                                    <button type="submit" class="btn btn-primary">
+                                                                        <i class="fas fa-save"></i> Save Changes
+                                                                    </button>
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                        <i class="fas fa-times"></i> Close
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        
                                         <td>
                                             <span
                                                 class="status-badge 
