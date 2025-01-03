@@ -15,22 +15,20 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
-        $schedule->command('subscriptions:update-status')->daily();
+        // Schedule subscription status updates
+        $schedule->command('subscription:update-status-active')->daily();
         $schedule->command('subscription:update-status-expired')->daily();
         $schedule->command('subscription:update-paused-to-active')->daily();
-        // Scheduler for Subscription ending soon
-        // $schedule->command('subscriptions:sendEndingNotifications')
-        //      ->twiceDaily(9, 17); // Runs at 9 AM and 5 PM
+        $schedule->command('subscription:update-status-active-to-pause')->daily();
 
-             $schedule->command('subscriptions:sendEndingNotifications')
-             ->at('15:43')
-             ->runInBackground(); // Runs at 15:20 (3:20 PM)
-             
-    $schedule->command('subscriptions:sendEndingNotifications')
-             ->at('15:44')
-             ->runInBackground(); // Runs at 15:21 (3:21 PM)
-        
+        // Schedule for sending subscription ending notifications
+        $schedule->command('subscriptions:sendEndingNotifications')
+                 ->at('17:50')
+                 ->runInBackground();
+
+        $schedule->command('subscriptions:sendEndingNotifications')
+                 ->at('18:00')
+                 ->runInBackground();
     }
 
     /**
@@ -44,5 +42,14 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
-    
+
+    /**
+     * The Artisan commands provided by your application.
+     *
+     * @var array
+     */
+    protected $commands = [
+        \App\Console\Commands\SendEndingNotifications::class,
+        // Add other commands here if necessary
+    ];
 }
