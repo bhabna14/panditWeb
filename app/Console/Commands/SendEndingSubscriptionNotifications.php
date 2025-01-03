@@ -40,8 +40,8 @@ class SendEndingSubscriptionNotifications extends Command
         $endDateThreshold = $now->addDays(5); // Subscriptions ending in the next 5 days
         \Log::info('End date threshold:', ['endDateThreshold' => $endDateThreshold]);
     
-        // Query subscriptions where either new_date or end_date is within the next 5 days
-        $subscriptions = Subscription::where(function ($query) use ($now, $endDateThreshold) {
+        // Log the generated SQL query for debugging
+        $query = Subscription::where(function ($query) use ($now, $endDateThreshold) {
             // If new_date is available, use it. Otherwise, fall back to end_date.
             $query->whereNotNull('new_date')
                   ->whereBetween('new_date', [$now, $endDateThreshold]);
@@ -49,7 +49,12 @@ class SendEndingSubscriptionNotifications extends Command
             // If new_date is NULL, use end_date
             $query->whereNull('new_date')
                   ->whereBetween('end_date', [$now, $endDateThreshold]);
-        })->get();
+        });
+        
+        \Log::info('SQL Query:', ['query' => $query->toSql()]);
+    
+        // Fetch subscriptions
+        $subscriptions = $query->get();
     
         \Log::info('Fetched subscriptions:', ['subscriptions_count' => $subscriptions->count()]);
     
@@ -67,7 +72,11 @@ class SendEndingSubscriptionNotifications extends Command
                 \Log::info('Subscription is ending soon. User ID:', ['user_id' => $user_id]);
     
                 // Fetch device tokens for the user
-                $deviceTokens = UserDevice::where('user_id', $user_id)->whereNotNull('device_id')->pluck('device_id')->toArray();
+                $deviceTokens = UserDevice::where('user_id', $user_id)
+                                          ->whereNotNull('device_id')
+                                          ->pluck('device_id')
+                                          ->toArray();
+    
                 \Log::info('Fetched device tokens:', ['device_tokens_count' => count($deviceTokens), 'user_id' => $user_id]);
     
                 if (!empty($deviceTokens)) {
@@ -92,5 +101,6 @@ class SendEndingSubscriptionNotifications extends Command
     
         \Log::info('Subscription processing completed.');
     }
+    
     
 }
