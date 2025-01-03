@@ -158,7 +158,7 @@
                                     <th>Product Details</th>
                                     <th>Address Details</th>
                                     <th>Total Price</th>
-                                    <th>Payment Status</th>
+                                    {{-- <th>Payment Status</th> --}}
                                     <th>Status</th>
                                     <th>Assigned Rider</th>
                                     <th>Reffered By</th>
@@ -406,7 +406,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        {{-- <td>
                                             @if ($order->flowerPayments->isNotEmpty())
                                                 @foreach ($order->flowerPayments as $payment)
                                                     <span class="status-badge bg-info">{{ $payment->payment_status }}</span><br>
@@ -461,7 +461,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </td>
+                                        </td> --}}
                                         
                                         <td>
                                             <span
