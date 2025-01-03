@@ -26,6 +26,7 @@ class FlowerOrderController extends Controller
     //
     public function showOrders(Request $request)
     {
+        
         $query = Order::whereNull('request_id')
                       ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
                       ->orderBy('created_at', 'desc');

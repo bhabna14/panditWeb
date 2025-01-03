@@ -39,6 +39,8 @@ use App\Http\Controllers\Admin\SubadminController;
 use App\Http\Controllers\Admin\FollowUpController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\CustomizeProductController;
+use App\Http\Controllers\Admin\FlowerDashboardController;
+
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 
 
@@ -224,6 +226,10 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
 ## admin routes
     Route::prefix('admin')->middleware(['admin'])->group(function () {
+// flower dashboard
+
+    Route::get('/flower-dashboard',  [FlowerDashboardController::class, 'flowerDashboard'])->name('flowerDashboard');
+
 
     Route::get('/manage-subadmins',  [SubadminController::class, 'managesubadmin'])->name('managesubadmin');
     Route::get('/subadmins/{id}/edit', [SubadminController::class, 'edit'])->name('subadmins.edit');
