@@ -33,33 +33,31 @@ class UpdatePausedSubscriptions extends Command
      */
     public function handle()
     {
-        // Get today's date
-        $today = Carbon::now()->format('Y-m-d');
-
-        // Fetch logs where pause_end_date has passed and resume_date is null
-        $logs = SubscriptionPauseResumeLog::where('action', 'paused')
-            ->whereNull('resume_date')
-            ->where('pause_end_date', '<=', $today)
+        $today = Carbon::today();
+    
+        // Find paused subscriptions where the pause end date has passed
+        $subscriptions = Subscription::where('status', 'paused')
+            ->where('pause_end_date', '<', $today->addDay()) // Check pause_end_date less than tomorrow
             ->get();
-
-        foreach ($logs as $log) {
-            $subscription = Subscription::where('id', $log->subscription_id)
-                ->where('status', 'paused')
-                ->first();
-
-            if ($subscription) {
-                // Update subscription status to active
-                $subscription->status = 'active';
-                $subscription->save();
-
-                // Update resume_date in log
-                $log->resume_date = $today;
-                $log->save();
-
-                $this->info("Subscription ID {$subscription->id} status updated to active.");
-            }
+    
+        foreach ($subscriptions as $subscription) {
+            // Update the status to active
+            $subscription->status = 'active';
+            $subscription->is_active = true;
+            $subscription->pause_start_date = null;
+            $subscription->pause_end_date = null;
+            $subscription->save();
+    
+            // Log the status update
+            Log::info('Subscription status updated to active', [
+                'order_id' => $subscription->order_id,
+                'user_id' => $subscription->user_id,
+            ]);
         }
-
-        $this->info('All matching paused subscriptions have been updated.');
+    
+        $this->info('Subscription statuses updated successfully.');
+    
+        return Command::SUCCESS;
     }
+    
 }
