@@ -63,7 +63,6 @@
                 <input type="number" name="price" class="form-control" id="price" placeholder="Enter product sale price" required>
             </div>
 
-          
                 <!-- Category -->
                 <div class="col-md-6 mb-3">
                     <label for="category" class="form-label">Category</label>
@@ -72,7 +71,8 @@
                         <option value="Puja Item">Puja Item</option>
                         <option value="Subscription">Subscription</option>
                         <option value="Flower">Flower</option>
-                        <option value="Immediateproduct">Immediate Product</option>
+                        <option value="Immediateproduct">Customize Flower</option>
+                        <option value="Customizeproduct">Customize Product</option>
                         <option value="Package">Package</option>
                         <option value="Books">Books</option>
                     </select>

@@ -260,7 +260,6 @@ class ProductApiController extends Controller
         }
     }
 
-
     public function makeRequestPayment(Request $request, $id)
     {
         try {
@@ -298,34 +297,107 @@ class ProductApiController extends Controller
             ], 500);
         }
     }
+ 
 
+
+    // public function ProductOrdersList()
+    // {
+    //     try {
+    //         // Get the authenticated user's ID
+    //         $userId = Auth::guard('sanctum')->user()->userid;
+
+    //         // Fetch standalone orders for the authenticated user (orders without request_id)
+    //         $subscriptionsOrder = ProductOrder::whereNull('request_id')
+    //         ->where('user_id', $userId)
+    //         ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+    //         ->orderBy('id', 'desc')
+    //         ->get();
+        
+    //     // Map to add the product_image_url to each order's flowerProduct
+    //     $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
+    //         if ($order->flowerProduct) {
+    //             // Ensure flowerProduct exists before accessing product_image
+    //             $order->flowerProduct->product_image_url = $order->flowerProduct->product_image; // Generate full URL for the photo
+    //         }
+    //         return $order;
+    //     });
+        
+
+    //         // Fetch related orders for the authenticated user (orders with request_id)
+    //         $requestedOrders = ProductRequest::where('user_id', $userId)
+    //         ->with([
+    //             'order' => function ($query) {
+    //                 $query->with('flowerPayments');
+    //             },
+    //             'flowerProduct',
+    //             'user',
+    //             'address.localityDetails',
+    //             'flowerRequestItems' 
+    //         ])
+    //         ->orderBy('id', 'desc')
+    //         ->get()
+    //         // ->orderBy('id', 'desc')
+    //         ->map(function ($request) {
+    //             // Check if 'order' relationship exists and has 'flower_payments'
+    //             if ($request->order) {
+    //                 // If 'flower_payments' is empty, set it to an empty object
+    //                 if ($request->order->flowerPayments->isEmpty()) {
+    //                     $request->order->flower_payments = (object)[];
+    //                 } else {
+    //                     // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
+    //                     $request->order->flower_payments = $request->order->flowerPayments;
+    //                 }
+    //                 // Remove the 'flowerPayments' property to avoid duplication
+    //                 unset($request->order->flowerPayments);
+    //             }
+        
+    //             // Map product image URL
+    //             if ($request->flowerProduct) {
+    //                 // Generate full URL for the product image
+    //                 $request->flowerProduct->product_image_url = $request->flowerProduct->product_image;
+    //             }
+        
+    //             return $request;
+    //         });
+        
+    //         // Combine both into a single response
+    //         return response()->json([
+    //             'success' => 200,
+    //             'data' => [
+    //                 'subscriptions_order' => $subscriptionsOrder,
+    //                 'requested_orders' => $requestedOrders,
+    //             ],
+    //         ], 200);
+    //     } catch (\Exception $e) {
+    //         // Log the error for debugging
+    //         \Log::error('Failed to fetch orders list: ' . $e->getMessage());
+
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Failed to retrieve orders list.',
+    //         ], 500);
+    //     }
+    // }
 
 
     public function ProductOrdersList()
-    {
-        try {
-            // Get the authenticated user's ID
-            $userId = Auth::guard('sanctum')->user()->userid;
+{
+    try {
+        $userId = Auth::guard('sanctum')->user()->userid;
 
-            // Fetch standalone orders for the authenticated user (orders without request_id)
-            $subscriptionsOrder = ProductOrder::whereNull('request_id')
+        $subscriptionsOrder = ProductOrder::whereNull('request_id')
             ->where('user_id', $userId)
             ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
             ->orderBy('id', 'desc')
-            ->get();
-        
-        // Map to add the product_image_url to each order's flowerProduct
-        $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
-            if ($order->flowerProduct) {
-                // Ensure flowerProduct exists before accessing product_image
-                $order->flowerProduct->product_image_url = $order->flowerProduct->product_image; // Generate full URL for the photo
-            }
-            return $order;
-        });
-        
+            ->get()
+            ->map(function ($order) {
+                if ($order->flowerProduct && $order->flowerProduct->product_image) {
+                    $order->flowerProduct->product_image_url = url('product_images/' . $order->flowerProduct->product_image);
+                }
+                return $order;
+            });
 
-            // Fetch related orders for the authenticated user (orders with request_id)
-            $requestedOrders = ProductRequest::where('user_id', $userId)
+        $requestedOrders = ProductRequest::where('user_id', $userId)
             ->with([
                 'order' => function ($query) {
                     $query->with('flowerPayments');
@@ -333,51 +405,33 @@ class ProductApiController extends Controller
                 'flowerProduct',
                 'user',
                 'address.localityDetails',
-                'flowerRequestItems' 
+                'flowerRequestItems',
             ])
             ->orderBy('id', 'desc')
             ->get()
-            // ->orderBy('id', 'desc')
             ->map(function ($request) {
-                // Check if 'order' relationship exists and has 'flower_payments'
-                if ($request->order) {
-                    // If 'flower_payments' is empty, set it to an empty object
-                    if ($request->order->flowerPayments->isEmpty()) {
-                        $request->order->flower_payments = (object)[];
-                    } else {
-                        // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
-                        $request->order->flower_payments = $request->order->flowerPayments;
-                    }
-                    // Remove the 'flowerPayments' property to avoid duplication
-                    unset($request->order->flowerPayments);
+                if ($request->flowerProduct && $request->flowerProduct->product_image) {
+                    $request->flowerProduct->product_image_url = url('product_images/' . $request->flowerProduct->product_image);
                 }
-        
-                // Map product image URL
-                if ($request->flowerProduct) {
-                    // Generate full URL for the product image
-                    $request->flowerProduct->product_image_url = $request->flowerProduct->product_image;
-                }
-        
                 return $request;
             });
-        
-            // Combine both into a single response
-            return response()->json([
-                'success' => 200,
-                'data' => [
-                    'subscriptions_order' => $subscriptionsOrder,
-                    'requested_orders' => $requestedOrders,
-                ],
-            ], 200);
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            \Log::error('Failed to fetch orders list: ' . $e->getMessage());
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve orders list.',
-            ], 500);
-        }
+        return response()->json([
+            'success' => 200,
+            'data' => [
+                'subscriptions_order' => $subscriptionsOrder,
+                'requested_orders' => $requestedOrders,
+            ],
+        ], 200);
+    } catch (\Exception $e) {
+        \Log::error('Failed to fetch orders list: ' . $e->getMessage());
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve orders list.',
+        ], 500);
     }
+}
+
 
 }

@@ -24,7 +24,6 @@ use App\Http\Controllers\Api\FlowerBookingController;
 
 use App\Http\Controllers\Admin\NotificationController;
 
-
 /// controllers for frontend pages 
 use App\Http\Controllers\Api\PanditController;
 use App\Http\Controllers\Api\PujaController;
@@ -48,8 +47,6 @@ Route::prefix('rider')->group(function () {
     // Verify OTP
     Route::post('/verify-otp', [RiderLoginController::class, 'verifyOtp'])->name('rider.verifyOtp');
 });
-
-
 
 Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/details', [RiderLoginController::class, 'getRiderDetails']);
@@ -78,6 +75,7 @@ Route::middleware('auth:rider-api')->group(function () {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::get('/products', [ProductController::class, 'getActiveProducts']);
 Route::controller(PanditLoginController::class)->group(function() {
     Route::post('/pandit-send-otp',  'sendOtp');
@@ -203,7 +201,7 @@ Route::get('/pooja/{slug}', [PanditController::class, 'poojadetails']);
 
 //home page user login api
 
-Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
+Route::post('/user-send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
 Route::post('/verify-otpless', [OtpController::class, 'verifyOtp'])->name('api.verify-otp');
 Route::middleware('auth:sanctum')->post('/userLogout', [OtpController::class, 'userLogout']);
 

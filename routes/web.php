@@ -39,6 +39,7 @@ use App\Http\Controllers\Admin\SubadminController;
 use App\Http\Controllers\Admin\FollowUpController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\CustomizeProductController;
+use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 
 
 use App\Http\Controllers\UserManagementController;
@@ -222,7 +223,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 });
 
 ## admin routes
-Route::prefix('admin')->middleware(['admin'])->group(function () {
+    Route::prefix('admin')->middleware(['admin'])->group(function () {
 
     Route::get('/manage-subadmins',  [SubadminController::class, 'managesubadmin'])->name('managesubadmin');
     Route::get('/subadmins/{id}/edit', [SubadminController::class, 'edit'])->name('subadmins.edit');
@@ -263,9 +264,7 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
     Route::get('orders/{id}/editRider', [FlowerOrderController::class, 'editRider'])->name('admin.orders.editRider');
     Route::post('orders/{id}/updateRider', [FlowerOrderController::class, 'updateRider'])->name('admin.orders.updateRider');
 
-
     Route::get('/show-customer/{id}/details', [FlowerOrderController::class, 'showCustomerDetails'])->name('showCustomerDetails');
-
 
     Route::get('/active-subscriptions', [FlowerOrderController::class, 'showActiveSubscriptions'])->name('active.subscriptions');
     Route::get('/paused-subscriptions', [FlowerOrderController::class, 'showPausedSubscriptions'])->name('paused.subscriptions');
@@ -282,11 +281,12 @@ Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])-
     Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
 
 // PRODUCT DETAILS ROUTES
-Route::controller(CustomizeProductController::class)->group(function() {
+Route::controller(ProductSubscriptionController::class)->group(function() {
 
     Route::get('/manage-customize-request','showCustomizeRequest')->name('product-customize-request');
+    Route::get('/manage-product-subscription','showProductSubscription')->name('admin.productSubscriptionOrder');
     Route::post('/save-customize-price/{id}','saveCustomizePrice')->name('admin.saveCustomizePrice');
-  
+
   });
   
   

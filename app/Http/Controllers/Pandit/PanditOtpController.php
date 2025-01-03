@@ -18,6 +18,7 @@ class PanditOtpController extends Controller
 
     public function sendOtp(Request $request)
     {
+       
         $phoneNumber = $request->input('phone');
         $countryCode = '+91'; // Assuming the country code is +91 as in your Blade template
         $fullPhoneNumber = $countryCode . $phoneNumber;
@@ -32,6 +33,7 @@ class PanditOtpController extends Controller
                     'clientId'      => $this->clientId,
                     'clientSecret'  => $this->clientSecret,
                 ],
+
                 'json' => [
                     'phoneNumber' => $fullPhoneNumber,
                 ],

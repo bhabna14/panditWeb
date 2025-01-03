@@ -48,6 +48,7 @@
         @method('PUT')
         
         <div class="row">
+            
             <div class="col-md-6 mb-3">
                 <label for="name" class="form-label">Product Name</label>
                 <input type="text" name="name" class="form-control" id="name" value="{{ $product->name }}" required>
@@ -69,6 +70,10 @@
                     <option value="Puja Item" {{ $product->category == 'Puja Item' ? 'selected' : '' }}>Puja Item</option>
                     <option value="Subscription" {{ $product->category == 'Subscription' ? 'selected' : '' }}>Subscription</option>
                     <option value="Flower" {{ $product->category == 'Flower' ? 'selected' : '' }}>Flower</option>
+                    <option value="Immediateproduct" {{ $product->category == 'Immediateproduct' ? 'selected' : '' }}>Customize Flower</option>
+                    <option value="Customizeproduct"  {{ $product->category == 'Customizeproduct' ? 'selected' : '' }}>Customize Product</option>
+                    <option value="Package"  {{ $product->category == 'Package' ? 'selected' : '' }}>Package</option>
+                    <option value="Books"  {{ $product->category == 'Books' ? 'selected' : '' }}>Books</option>
                 </select>
             </div>
 
@@ -119,6 +124,7 @@
             <div class="col-md-12 mt-4">
                 <button type="submit" class="btn btn-primary">Update Product</button>
             </div>
+
         </div>
     </form>
 @endsection
