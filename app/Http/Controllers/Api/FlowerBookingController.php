@@ -18,146 +18,448 @@ use App\Mail\SubscriptionConfirmationMail;
 
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Auth;
-
+// use Illuminate\Support\Facades\Log;
 use App\Models\FlowerPayment;
 use App\Models\FlowerRequestItem;
 use App\Services\NotificationService;
 use App\Models\UserDevice;
-
+use Razorpay\Api\Api;
 use Twilio\Rest\Client;
 class FlowerBookingController extends Controller
 {
     //
    
+// old
+    // public function purchaseSubscription(Request $request)
+    // {
+    //     \Log::info('Purchase subscription called', ['request' => $request->all()]);
+    
+    //     $productId = $request->product_id; 
+    //     $user = Auth::guard('sanctum')->user();
+    
+    //     if (!$user) {
+    //         \Log::error('User not authenticated');
+    //         return response()->json(['message' => 'Unauthorized'], 401);
+    //     }
+    
+    //     $orderId = 'ORD-' . strtoupper(Str::random(12));
+    //     $addressId = $request->address_id;
+    //     $suggestion = $request->suggestion;
+    
+    //     \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
+    
+    //     try {
+    //         $order = Order::create([
+    //             'order_id' => $orderId,
+    //             'product_id' => $productId, 
+    //             'user_id' => $user->userid,
+    //             'quantity' => 1,
+    //             'total_price' => $request->paid_amount,
+    //             'address_id' => $addressId,
+    //             'suggestion' => $suggestion,
+    //         ]);
+    //         \Log::info('Order created successfully', ['order' => $order]);
+    //     } catch (\Exception $e) {
+    //         \Log::error('Failed to create order', ['error' => $e->getMessage()]);
+    //         return response()->json(['message' => 'Failed to create order'], 500);
+    //     }
+    
+    //     $startDate = $request->start_date ? Carbon::parse($request->start_date) : now();
+    //     $duration = $request->duration;
+    
+    //     if ($duration == 1) {
+    //         $endDate = $startDate->copy()->addDays(29);
+    //     } else if ($duration == 3) {
+    //         $endDate = $startDate->copy()->addDays(89);
+    //     } else if ($duration == 6) {
+    //         $endDate = $startDate->copy()->addDays(179);
+    //     } else {
+    //         \Log::error('Invalid subscription duration', ['duration' => $duration]);
+    //         return response()->json(['message' => 'Invalid subscription duration'], 400);
+    //     }
+    
+    //     \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $productId, 'start_date' => $startDate, 'end_date' => $endDate]);
+    
+    //     $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
+    //     $today = now()->format('Y-m-d');
+    //     $status = ($startDate->format('Y-m-d') === $today) ? 'active' : 'pending';
+    
+    //     try {
+    //         Subscription::create([
+    //             'subscription_id' => $subscriptionId,
+    //             'user_id' => $user->userid,
+    //             'order_id' => $orderId,
+    //             'product_id' => $productId,
+    //             'start_date' => $startDate,
+    //             'end_date' => $endDate,
+    //             'is_active' => true,
+    //             'status' => $status,
+    //         ]);
+    //         \Log::info('Subscription created successfully');
+    //     } catch (\Exception $e) {
+    //         \Log::error('Failed to create subscription', ['error' => $e->getMessage()]);
+    //         return response()->json(['message' => 'Failed to create subscription'], 500);
+    //     }
+    
+    //     try {
+    //         FlowerPayment::create([
+    //             'order_id' => $orderId,
+    //             'payment_id' => $request->payment_id,
+    //             'user_id' => $user->userid,
+    //             'payment_method' => "Razorpay",
+    //             'paid_amount' => $request->paid_amount,
+    //             'payment_status' => "paid",
+    //         ]);
+    //         \Log::info('Payment recorded successfully');
+    //     } catch (\Exception $e) {
+    //         \Log::error('Failed to record payment', ['error' => $e->getMessage()]);
+    //         return response()->json(['message' => 'Failed to record payment'], 500);
+    //     }
+    
+    //     $deviceTokens = UserDevice::where('user_id', $user->userid)->whereNotNull('device_id')->pluck('device_id')->toArray();
+    
+    //     if (!empty($deviceTokens)) {
+    //         $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+    //         $notificationService->sendBulkNotifications(
+    //             $deviceTokens,
+    //             'Order Received',
+    //             'Your subscription has been placed successfully.',
+    //             ['subscription_id' => $subscriptionId]
+    //         );
+    
+    //         \Log::info('Notification sent successfully to all devices.', [
+    //             'user_id' => $user->userid,
+    //             'device_tokens' => $deviceTokens,
+    //         ]);
+    //     } else {
+    //         \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+    //     }
+    
+    //     $emails = [
+    //         'bhabana.samantara@33crores.com',
+    //         'pankaj.sial@33crores.com',
+    //         'basudha@33crores.com',
+    //         'priya@33crores.com',
+    //         'starleen@33crores.com'
+    //     ];
+    
+    //     try {
+    //         Mail::to($emails)->send(new SubscriptionConfirmationMail($order));
+    //         \Log::info('Order details email sent successfully', ['emails' => $emails]);
+    //     } catch (\Exception $e) {
+    //         \Log::error('Failed to send order details email', ['error' => $e->getMessage()]);
+    //     }
+    
+    //     return response()->json([
+    //         'message' => 'Subscription activated successfully',
+    //         'end_date' => $endDate,
+    //         'order_id' => $orderId,
+    //     ]);
+    // }
+    
+    // razoy pay captured
+  
 
-    public function purchaseSubscription(Request $request)
-    {
-        \Log::info('Purchase subscription called', ['request' => $request->all()]);
-    
-        $productId = $request->product_id; 
-        $user = Auth::guard('sanctum')->user();
-    
-        if (!$user) {
-            \Log::error('User not authenticated');
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-    
-        $orderId = 'ORD-' . strtoupper(Str::random(12));
-        $addressId = $request->address_id;
-        $suggestion = $request->suggestion;
-    
-        \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
-    
-        try {
-            $order = Order::create([
-                'order_id' => $orderId,
-                'product_id' => $productId, 
-                'user_id' => $user->userid,
-                'quantity' => 1,
-                'total_price' => $request->paid_amount,
-                'address_id' => $addressId,
-                'suggestion' => $suggestion,
-            ]);
-            \Log::info('Order created successfully', ['order' => $order]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to create order', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to create order'], 500);
-        }
-    
-        $startDate = $request->start_date ? Carbon::parse($request->start_date) : now();
-        $duration = $request->duration;
-    
-        if ($duration == 1) {
-            $endDate = $startDate->copy()->addDays(29);
-        } else if ($duration == 3) {
-            $endDate = $startDate->copy()->addDays(89);
-        } else if ($duration == 6) {
-            $endDate = $startDate->copy()->addDays(179);
-        } else {
-            \Log::error('Invalid subscription duration', ['duration' => $duration]);
-            return response()->json(['message' => 'Invalid subscription duration'], 400);
-        }
-    
-        \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $productId, 'start_date' => $startDate, 'end_date' => $endDate]);
-    
-        $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
-        $today = now()->format('Y-m-d');
-        $status = ($startDate->format('Y-m-d') === $today) ? 'active' : 'pending';
-    
-        try {
-            Subscription::create([
-                'subscription_id' => $subscriptionId,
-                'user_id' => $user->userid,
-                'order_id' => $orderId,
-                'product_id' => $productId,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'is_active' => true,
-                'status' => $status,
-            ]);
-            \Log::info('Subscription created successfully');
-        } catch (\Exception $e) {
-            \Log::error('Failed to create subscription', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to create subscription'], 500);
-        }
-    
-        try {
-            FlowerPayment::create([
-                'order_id' => $orderId,
-                'payment_id' => $request->payment_id,
-                'user_id' => $user->userid,
-                'payment_method' => "Razorpay",
-                'paid_amount' => $request->paid_amount,
-                'payment_status' => "paid",
-            ]);
-            \Log::info('Payment recorded successfully');
-        } catch (\Exception $e) {
-            \Log::error('Failed to record payment', ['error' => $e->getMessage()]);
-            return response()->json(['message' => 'Failed to record payment'], 500);
-        }
-    
-        $deviceTokens = UserDevice::where('user_id', $user->userid)->whereNotNull('device_id')->pluck('device_id')->toArray();
-    
-        if (!empty($deviceTokens)) {
-            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-            $notificationService->sendBulkNotifications(
-                $deviceTokens,
-                'Order Received',
-                'Your subscription has been placed successfully.',
-                ['subscription_id' => $subscriptionId]
-            );
-    
-            \Log::info('Notification sent successfully to all devices.', [
-                'user_id' => $user->userid,
-                'device_tokens' => $deviceTokens,
-            ]);
-        } else {
-            \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
-        }
-    
-        $emails = [
-            'bhabana.samantara@33crores.com',
-            'pankaj.sial@33crores.com',
-            'basudha@33crores.com',
-            'priya@33crores.com',
-            'starleen@33crores.com'
-        ];
-    
-        try {
-            Mail::to($emails)->send(new SubscriptionConfirmationMail($order));
-            \Log::info('Order details email sent successfully', ['emails' => $emails]);
-        } catch (\Exception $e) {
-            \Log::error('Failed to send order details email', ['error' => $e->getMessage()]);
-        }
-    
-        return response()->json([
-            'message' => 'Subscription activated successfully',
-            'end_date' => $endDate,
-            'order_id' => $orderId,
-        ]);
+// public function purchaseSubscription(Request $request)
+// {
+//     \Log::info('Purchase subscription called', ['request' => $request->all()]);
+
+//     $productId = $request->product_id;
+//     $user = Auth::guard('sanctum')->user();
+
+//     if (!$user) {
+//         \Log::error('User not authenticated');
+//         return response()->json(['message' => 'Unauthorized'], 401);
+//     }
+
+//     $orderId = $request->order_id;
+//     $addressId = $request->address_id;
+//     $suggestion = $request->suggestion;
+
+//     \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
+
+//     try {
+//         $order = Order::create([
+//             'order_id' => $orderId,
+//             'product_id' => $productId,
+//             'user_id' => $user->userid,
+//             'quantity' => 1,
+//             'total_price' => $request->paid_amount,
+//             'address_id' => $addressId,
+//             'suggestion' => $suggestion,
+//         ]);
+//         \Log::info('Order created successfully', ['order' => $order]);
+//     } catch (\Exception $e) {
+//         \Log::error('Failed to create order', ['error' => $e->getMessage()]);
+//         return response()->json(['message' => 'Failed to create order'], 500);
+//     }
+
+//     // Initialize Razorpay API
+//     $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+//     $paymentId = $request->payment_id;
+
+//     try {
+//         // Fetch the payment details from Razorpay
+//         $payment = $razorpayApi->payment->fetch($paymentId);
+//         \Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
+
+//         // Check if the payment is captured
+//         if ($payment->status !== 'captured') {
+//             \Log::error('Payment not captured', ['payment_id' => $paymentId]);
+//             return response()->json(['message' => 'Payment was not successfull, Your payment will be refunded with in 7 days.'], 400);
+//         }
+//     } catch (\Exception $e) {
+//         \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
+//         return response()->json(['message' => 'Failed to fetch payment status'], 500);
+//     }
+
+//     // Process subscription logic
+//     $startDate = $request->start_date ? Carbon::parse($request->start_date) : now();
+//     $duration = $request->duration;
+
+//     if ($duration == 1) {
+//         $endDate = $startDate->copy()->addDays(29);
+//     } else if ($duration == 3) {
+//         $endDate = $startDate->copy()->addDays(89);
+//     } else if ($duration == 6) {
+//         $endDate = $startDate->copy()->addDays(179);
+//     } else {
+//         \Log::error('Invalid subscription duration', ['duration' => $duration]);
+//         return response()->json(['message' => 'Invalid subscription duration'], 400);
+//     }
+
+//     \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $productId, 'start_date' => $startDate, 'end_date' => $endDate]);
+
+//     $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
+//     $today = now()->format('Y-m-d');
+//     $status = ($startDate->format('Y-m-d') === $today) ? 'active' : 'pending';
+
+//     try {
+//         Subscription::create([
+//             'subscription_id' => $subscriptionId,
+//             'user_id' => $user->userid,
+//             'order_id' => $orderId,
+//             'product_id' => $productId,
+//             'start_date' => $startDate,
+//             'end_date' => $endDate,
+//             'is_active' => true,
+//             'status' => $status,
+//         ]);
+//         \Log::info('Subscription created successfully');
+//     } catch (\Exception $e) {
+//         \Log::error('Failed to create subscription', ['error' => $e->getMessage()]);
+//         return response()->json(['message' => 'Failed to create subscription'], 500);
+//     }
+
+//     try {
+//         FlowerPayment::create([
+//             'order_id' => $orderId,
+//             'payment_id' => $paymentId,
+//             'user_id' => $user->userid,
+//             'payment_method' => "Razorpay",
+//             'paid_amount' => $request->paid_amount,
+//             'payment_status' => "paid",
+//         ]);
+//         \Log::info('Payment recorded successfully');
+//     } catch (\Exception $e) {
+//         \Log::error('Failed to record payment', ['error' => $e->getMessage()]);
+//         return response()->json(['message' => 'Failed to record payment'], 500);
+//     }
+
+//     $deviceTokens = UserDevice::where('user_id', $user->userid)->whereNotNull('device_id')->pluck('device_id')->toArray();
+
+//     if (!empty($deviceTokens)) {
+//         $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+//         $notificationService->sendBulkNotifications(
+//             $deviceTokens,
+//             'Order Received',
+//             'Your subscription has been placed successfully.',
+//             ['subscription_id' => $subscriptionId]
+//         );
+
+//         \Log::info('Notification sent successfully to all devices.', [
+//             'user_id' => $user->userid,
+//             'device_tokens' => $deviceTokens,
+//         ]);
+//     } else {
+//         \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+//     }
+
+//     $emails = [
+//         'bhabana.samantara@33crores.com',
+//         'pankaj.sial@33crores.com',
+//         'basudha@33crores.com',
+//         'priya@33crores.com',
+//         'starleen@33crores.com'
+//     ];
+
+//     try {
+//         Mail::to($emails)->send(new SubscriptionConfirmationMail($order));
+//         \Log::info('Order details email sent successfully', ['emails' => $emails]);
+//     } catch (\Exception $e) {
+//         \Log::error('Failed to send order details email', ['error' => $e->getMessage()]);
+//     }
+
+//     return response()->json([
+//         'message' => 'Subscription activated successfully',
+//         'end_date' => $endDate,
+//         'order_id' => $orderId,
+//     ]);
+// }
+
+public function purchaseSubscription(Request $request)
+{
+    \Log::info('Purchase subscription called', ['request' => $request->all()]);
+
+    $productId = $request->product_id;
+    $user = Auth::guard('sanctum')->user();
+
+    if (!$user) {
+        \Log::error('User not authenticated');
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
-    
-    
+
+    $orderId = 'ORD-' . strtoupper(Str::random(12));
+    $addressId = $request->address_id;
+    $suggestion = $request->suggestion;
+
+    \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
+
+    try {
+        $order = Order::create([
+            'order_id' => $orderId,
+            'product_id' => $productId,
+            'user_id' => $user->userid,
+            'quantity' => 1,
+            'total_price' => $request->paid_amount,
+            'address_id' => $addressId,
+            'suggestion' => $suggestion,
+        ]);
+        \Log::info('Order created successfully', ['order' => $order]);
+    } catch (\Exception $e) {
+        \Log::error('Failed to create order', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to create order'], 500);
+    }
+
+    // Initialize Razorpay API
+    $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+    $paymentId = $request->payment_id;
+
+    try {
+        // Fetch the payment details from Razorpay
+        $payment = $razorpayApi->payment->fetch($paymentId);
+        \Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
+
+        // Check if the payment is captured
+        if ($payment->status !== 'captured') {
+            // Attempt to capture the payment if it is authorized
+            if ($payment->status === 'authorized') {
+                $capture = $razorpayApi->payment->fetch($paymentId)->capture(['amount' => $payment->amount]);
+                \Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
+            } else {
+                \Log::error('Payment not captured', ['payment_id' => $paymentId]);
+                return response()->json(['message' => 'Payment was not successful, Your payment will be refunded within 7 days.'], 400);
+            }
+        }
+    } catch (\Exception $e) {
+        \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to fetch payment status'], 500);
+    }
+
+    // Process subscription logic
+    $startDate = $request->start_date ? Carbon::parse($request->start_date) : now();
+    $duration = $request->duration;
+
+    if ($duration == 1) {
+        $endDate = $startDate->copy()->addDays(29);
+    } else if ($duration == 3) {
+        $endDate = $startDate->copy()->addDays(89);
+    } else if ($duration == 6) {
+        $endDate = $startDate->copy()->addDays(179);
+    } else {
+        \Log::error('Invalid subscription duration', ['duration' => $duration]);
+        return response()->json(['message' => 'Invalid subscription duration'], 400);
+    }
+
+    \Log::info('Creating subscription', ['user_id' => $user->userid, 'product_id' => $productId, 'start_date' => $startDate, 'end_date' => $endDate]);
+
+    $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
+    $today = now()->format('Y-m-d');
+    $status = ($startDate->format('Y-m-d') === $today) ? 'active' : 'pending';
+
+    try {
+        Subscription::create([
+            'subscription_id' => $subscriptionId,
+            'user_id' => $user->userid,
+            'order_id' => $orderId,
+            'product_id' => $productId,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'is_active' => true,
+            'status' => $status,
+        ]);
+        \Log::info('Subscription created successfully');
+    } catch (\Exception $e) {
+        \Log::error('Failed to create subscription', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to create subscription'], 500);
+    }
+
+    try {
+        FlowerPayment::create([
+            'order_id' => $orderId,
+            'payment_id' => $paymentId,
+            'user_id' => $user->userid,
+            'payment_method' => "Razorpay",
+            'paid_amount' => $request->paid_amount,
+            'payment_status' => "paid",
+        ]);
+        \Log::info('Payment recorded successfully');
+    } catch (\Exception $e) {
+        \Log::error('Failed to record payment', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to record payment'], 500);
+    }
+
+    $deviceTokens = UserDevice::where('user_id', $user->userid)->whereNotNull('device_id')->pluck('device_id')->toArray();
+
+    if (!empty($deviceTokens)) {
+        $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+        $notificationService->sendBulkNotifications(
+            $deviceTokens,
+            'Order Received',
+            'Your subscription has been placed successfully.',
+            ['subscription_id' => $subscriptionId]
+        );
+
+        \Log::info('Notification sent successfully to all devices.', [
+            'user_id' => $user->userid,
+            'device_tokens' => $deviceTokens,
+        ]);
+    } else {
+        \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+    }
+
+    $emails = [
+        'bhabana.samantara@33crores.com',
+        'pankaj.sial@33crores.com',
+        'basudha@33crores.com',
+        'priya@33crores.com',
+        'starleen@33crores.com'
+    ];
+
+    try {
+        Mail::to($emails)->send(new SubscriptionConfirmationMail($order));
+        \Log::info('Order details email sent successfully', ['emails' => $emails]);
+    } catch (\Exception $e) {
+        \Log::error('Failed to send order details email', ['error' => $e->getMessage()]);
+    }
+
+    return response()->json([
+        'message' => 'Subscription activated successfully',
+        'end_date' => $endDate,
+        'order_id' => $orderId,
+    ]);
+}
+
     // public function storerequest(Request $request)
     // {
     //     try {
@@ -734,13 +1036,38 @@ class FlowerBookingController extends Controller
     public function markPaymentApi(Request $request, $id)
     {
         try {
+            // Initialize Razorpay API
+            $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+            $paymentId = $request->payment_id;
+    
+            try {
+                // Fetch the payment details from Razorpay
+                $payment = $razorpayApi->payment->fetch($paymentId);
+                \Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
+    
+                // Check if the payment is captured
+                if ($payment->status !== 'captured') {
+                    // Attempt to capture the payment if it is authorized
+                    if ($payment->status === 'authorized') {
+                        $capture = $razorpayApi->payment->fetch($paymentId)->capture(['amount' => $payment->amount]);
+                        \Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
+                    } else {
+                        \Log::error('Payment not captured', ['payment_id' => $paymentId]);
+                        return response()->json(['message' => 'Payment was not successful, Your payment will be refunded within 7 days.'], 400);
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
+                return response()->json(['message' => 'Failed to fetch payment status'], 500);
+            }
+    
             // Find the order by flower request ID
             $order = Order::where('request_id', $id)->firstOrFail();
     
             // Create a new flower payment entry
             FlowerPayment::create([
                 'order_id' => $order->order_id,
-                'payment_id' => $request->payment_id, // Can be set later if available
+                'payment_id' => $paymentId, // Set payment ID from Razorpay
                 'user_id' => $order->user_id,
                 'payment_method' => 'Razorpay',
                 'paid_amount' => $order->total_price,
@@ -788,6 +1115,7 @@ class FlowerBookingController extends Controller
             ], 500);
         }
     }
+    
     
 // public function resume(Request $request, $order_id)
 // {
