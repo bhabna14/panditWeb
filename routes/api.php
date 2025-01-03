@@ -201,7 +201,7 @@ Route::get('/pooja/{slug}', [PanditController::class, 'poojadetails']);
 
 //home page user login api
 
-Route::post('/user-send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
+Route::post('/send-otp', [OtpController::class, 'sendOtp'])->name('api.send-otp');
 Route::post('/verify-otpless', [OtpController::class, 'verifyOtp'])->name('api.verify-otp');
 Route::middleware('auth:sanctum')->post('/userLogout', [OtpController::class, 'userLogout']);
 
