@@ -42,7 +42,7 @@ class SendEndingSubscriptionNotifications extends Command
     
         // Log the generated SQL query for debugging
         $query = Subscription::where(function ($query) use ($now, $endDateThreshold) {
-            // If new_date is available, use it. Otherwise, fall back to end_date.
+            // If new_date is available, use it.
             $query->whereNotNull('new_date')
                   ->whereBetween('new_date', [$now, $endDateThreshold]);
         })->orWhere(function ($query) use ($now, $endDateThreshold) {
@@ -52,7 +52,7 @@ class SendEndingSubscriptionNotifications extends Command
         });
         
         \Log::info('SQL Query:', ['query' => $query->toSql()]);
-    
+        
         // Fetch subscriptions
         $subscriptions = $query->get();
     
@@ -101,6 +101,7 @@ class SendEndingSubscriptionNotifications extends Command
     
         \Log::info('Subscription processing completed.');
     }
+    
     
     
 }
