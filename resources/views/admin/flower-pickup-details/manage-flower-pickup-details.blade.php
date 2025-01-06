@@ -67,12 +67,12 @@
                             </thead>
                             <tbody>
                                 @foreach ($pickupDetails->flatten()->sortByDesc('created_at') as $index => $detail)
-                                    <tr style="border-bottom: 1px solid #060606;">
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $detail->pick_up_id ?? 'N/A' }}</td>
-                                        <td>{{ $detail->vendor?->vendor_name ?? 'N/A' }}</td>
-                                        <td>{{ $detail->rider?->rider_name ?? 'N/A' }}</td>
-                                        <td>
+                                    <tr>
+                                        <td style="border-bottom: 1px solid #060606;">{{ $index + 1 }}</td>
+                                        <td style="border-bottom: 1px solid #060606;">{{ $detail->pick_up_id ?? 'N/A' }}</td>
+                                        <td style="border-bottom: 1px solid #060606;">{{ $detail->vendor?->vendor_name ?? 'N/A' }}</td>
+                                        <td style="border-bottom: 1px solid #060606;">{{ $detail->rider?->rider_name ?? 'N/A' }}</td>
+                                        <td style="border-bottom: 1px solid #060606;">
                                             <ul>
                                                 @foreach ($detail->flowerPickupItems as $item)
                                                     <li>
@@ -86,24 +86,24 @@
                                                 @endforeach
                                             </ul>
                                         </td>
-                                        <td>{{ \Carbon\Carbon::parse($detail->pickup_date)->format('d-m-Y') }}</td>
+                                        <td style="border-bottom: 1px solid #060606;">{{ \Carbon\Carbon::parse($detail->pickup_date)->format('d-m-Y') }}</td>
 
-                                        <td>
+                                        <td style="border-bottom: 1px solid #060606;">
                                             @if ($detail->total_price)
                                                 ₹{{ $detail->total_price }}
                                             @else
                                                 <span class="text-warning">Pending</span>
                                             @endif
                                         </td>
-                                        <td>
+                                        <td style="border-bottom: 1px solid #060606;">
                                             @if ($detail->payment_status === 'Paid')
                                                 <span class="badge bg-success">Paid</span>
                                             @else
                                                 <span class="badge bg-danger">Unpaid</span>
                                             @endif
                                         </td>
-                                        <td>{{ $detail->status ?? 'N/A' }}</td>
-                                        <td>
+                                        <td style="border-bottom: 1px solid #060606;">{{ $detail->status ?? 'N/A' }}</td>
+                                        <td style="border-bottom: 1px solid #060606;">
                                             <a href="{{ route('flower-pickup.edit', $detail->id) }}" class="btn btn-primary btn-sm">Edit</a>
 
                                             

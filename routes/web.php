@@ -363,7 +363,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
 
     });
 
-
     Route::controller(AdminController::class)->group(function() {
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');
@@ -446,9 +445,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/podcast/recording-details', 'getRecordingDetails')->name('admin.podcast.recordingDetails');
         Route::get('/podcast/editingDetails',  'getEditingDetails')->name('admin.podcast.editingDetails');
         Route::get('/podcast/publishDetails', 'getPublishDetails')->name('admin.podcast.publishDetails');
-
-
-        });
+    });
 
     Route::controller(PodcastEditingController::class)->group(function () {
         Route::get('/podcast-editing', 'podcastEditing')->name('podcastEditing');
@@ -463,7 +460,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
 
         Route::post('/approve-editing-podcast/{podcast_id}', 'approvePodcastEditing')->name('approvePodcastEditing');
         Route::post('/reject-editing-podcast/{podcast_id}','rejectPodcastEditing')->name('rejectPodcastEditing');
-
     });
     
 
