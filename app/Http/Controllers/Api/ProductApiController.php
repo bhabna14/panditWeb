@@ -316,7 +316,7 @@ class ProductApiController extends Controller
                 }
                 return $order;
             });
-            
+
 
         $requestedOrders = ProductRequest::where('user_id', $userId)
             ->with([
@@ -353,6 +353,7 @@ class ProductApiController extends Controller
         ], 500);
     }
 }
+
 
 
 }
