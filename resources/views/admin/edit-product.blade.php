@@ -45,7 +45,6 @@
     @endif
     <form action="{{ route('admin.update-product', $product->id) }}" method="post" enctype="multipart/form-data">
         @csrf
-        @method('PUT')
         
         <div class="row">
             
