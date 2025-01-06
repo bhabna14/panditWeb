@@ -95,16 +95,6 @@ public function admindashboard()
         })
         ->count();
 
-        $newUserSubscriptionProduct = ProductOrder::whereDate('created_at', Carbon::today())
-        ->where('category','Package')
-        ->whereNull('request_id') // Add condition for request_id to be NULL
-        ->whereNotIn('user_id', function ($query) {
-            $query->select('user_id')
-                ->from('orders')
-                ->whereNull('request_id') // Ensure request_id is NULL in the subquery
-                ->whereDate('created_at', '<', Carbon::today());
-        })
-        ->count();
     
     // Fetch the total number of renewed user subscriptions today
     $renewSubscription = Order::whereDate('created_at', Carbon::today())
