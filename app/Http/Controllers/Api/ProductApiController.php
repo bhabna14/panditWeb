@@ -354,6 +354,4 @@ class ProductApiController extends Controller
     }
 }
 
-
-
 }
