@@ -38,9 +38,10 @@ public function user()
 {
     return $this->belongsTo(User::class, 'user_id', 'userid');
 }
+
 public function flowerProduct()
 {
-    return $this->belongsTo(ProductOrder::class, 'product_id', 'product_id');
+    return $this->belongsTo(flowerProduct::class, 'product_id', 'product_id');
 }
 public function address()
 {

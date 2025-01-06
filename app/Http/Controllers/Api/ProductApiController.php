@@ -392,7 +392,7 @@ class ProductApiController extends Controller
             ->get()
             ->map(function ($order) {
                 if ($order->flowerProduct && $order->flowerProduct->product_image) {
-                    $order->flowerProduct->product_image_url = url('product_images/' . $order->flowerProduct->product_image);
+                    $order->flowerProduct->product_image_url = url( $order->flowerProduct->product_image);
                 }
                 return $order;
             });
@@ -411,7 +411,7 @@ class ProductApiController extends Controller
             ->get()
             ->map(function ($request) {
                 if ($request->flowerProduct && $request->flowerProduct->product_image) {
-                    $request->flowerProduct->product_image_url = url('product_images/' . $request->flowerProduct->product_image);
+                    $request->flowerProduct->product_image_url = url($request->flowerProduct->product_image);
                 }
                 return $request;
             });

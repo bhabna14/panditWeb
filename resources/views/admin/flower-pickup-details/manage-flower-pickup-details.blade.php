@@ -67,7 +67,7 @@
                             </thead>
                             <tbody>
                                 @foreach ($pickupDetails->flatten()->sortByDesc('created_at') as $index => $detail)
-                                    <tr>
+                                    <tr style="border-bottom: 1px solid #060606;">
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $detail->pick_up_id ?? 'N/A' }}</td>
                                         <td>{{ $detail->vendor?->vendor_name ?? 'N/A' }}</td>
