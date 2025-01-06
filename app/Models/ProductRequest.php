@@ -37,6 +37,7 @@ class ProductRequest extends Model
     {
          return $this->belongsTo(User::class, 'user_id', 'userid');
     }
+    
     public function flowerProduct()
     {
         return $this->belongsTo(FlowerProduct::class, 'product_id', 'product_id');
