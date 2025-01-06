@@ -6,9 +6,9 @@ use App\Http\Controllers\User\FlowerUserBookingController;
 
 use App\Http\Controllers\User\PaymentController;
 use App\Http\Controllers\User\FlowerRegistrationController;
+use App\Http\Controllers\User\FooterController;
 
 use App\Http\Controllers\OtplessLoginController;
-
 
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\AdminController;
@@ -71,6 +71,15 @@ Route::fallback(function () {
     abort(404);
 });
 
+Route::controller(FooterController::class)->group(function() {
+    Route::get('/contact-us','contactUs')->name('user.contactUs');
+    Route::get('/about-us','aboutUs')->name('user.aboutUs');
+    Route::get('/term-condition','termsAndConditions')->name('user.contactUs');
+    Route::get('/privacy-data','privacyPolicy')->name('user.privacyData');
+    Route::get('/business-enrolledment','businessEnrollment')->name('user.businessEnrollment');
+    Route::get('/religious-service-provider','religiousProvider')->name('user.religiousProvider');
+
+});
 
 Route::get('/otplogin', [OtplessLoginController::class, 'otplogin'])->name('otplogin');
 Route::post('/send-otp-user', [OtplessLoginController::class, 'sendOtp']);
@@ -135,6 +144,10 @@ Route::get('/poojas', 'fetchPoojas')->name('fetchPoojas');
 Route::get('/register', 'userregister')->name('user-register');
 
 });
+
+// foolter routes
+
+
 Route::controller(FlowerUserBookingController::class)->group(function() {
         //flower routes
         Route::get('/flower', 'flower')->name('flower');
