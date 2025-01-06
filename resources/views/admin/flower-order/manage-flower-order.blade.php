@@ -158,7 +158,7 @@
                                     <th>Product Details</th>
                                     <th>Address Details</th>
                                     <th>Total Price</th>
-                                    <th>Payment Status</th>
+                                    {{-- <th>Payment Status</th> --}}
                                     <th>Status</th>
                                     <th>Assigned Rider</th>
                                     <th>Reffered By</th>
@@ -406,7 +406,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>
+                                        {{-- <td>
                                             @if ($order->flowerPayments->isNotEmpty())
                                                 @foreach ($order->flowerPayments as $payment)
                                                     <span class="status-badge bg-info">{{ $payment->payment_status }}</span><br>
@@ -440,10 +440,12 @@
                                                                 <div class="mb-3">
                                                                     <label for="payment_status" class="form-label">Payment Status</label>
                                                                     <select class="form-control" id="payment_status" name="payment_status" required>
-                                                                        <option value="pending" {{ $order->flowerPayments->first()->payment_status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                                        <!-- Check if payment_status is 'pending', 'paid', or null -->
+                                                                        <option value="pending" {{ (is_null($order->flowerPayments->first()->payment_status) || $order->flowerPayments->first()->payment_status == 'pending') ? 'selected' : '' }}>Pending</option>
                                                                         <option value="paid" {{ $order->flowerPayments->first()->payment_status == 'paid' ? 'selected' : '' }}>Paid</option>
                                                                     </select>
                                                                 </div>
+                                                                
 
                                                                 <!-- Modal Footer -->
                                                                 <div class="modal-footer">
@@ -459,7 +461,7 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                        </td>
+                                        </td> --}}
                                         
                                         <td>
                                             <span
