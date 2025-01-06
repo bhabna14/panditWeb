@@ -41,7 +41,7 @@ public function user()
 
 public function flowerProduct()
 {
-    return $this->belongsTo(flowerProduct::class, 'product_id', 'product_id');
+    return $this->belongsTo(FlowerProduct::class, 'product_id', 'product_id');
 }
 public function address()
 {
