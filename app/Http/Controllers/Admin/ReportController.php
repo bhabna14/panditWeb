@@ -63,17 +63,17 @@ class ReportController extends Controller
             'from_date' => 'required|date',
             'to_date' => 'required|date|after_or_equal:from_date',
         ]);
-    
+        
         $orders = Order::whereHas('subscription', function ($query) use ($request) {
-            $query->whereRaw("`status` COLLATE utf8mb4_unicode_ci = 'active'")
+            $query->whereRaw("`status` = 'active' COLLATE utf8mb4_unicode_ci")
                   ->whereBetween('created_at', [$request->from_date, $request->to_date]);
         })
         ->whereHas('flowerPayments', function ($query) {
-            $query->whereRaw("`payment_method` COLLATE utf8mb4_unicode_ci = 'paid'");
+            $query->whereRaw("`payment_method` = 'paid' COLLATE utf8mb4_unicode_ci");
         })
         ->with(['user', 'flowerPayments', 'subscription'])
         ->get();
-
+        
 
 
         // Calculate total revenue
