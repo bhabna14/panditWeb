@@ -73,7 +73,6 @@ class ReportController extends Controller
         })
         ->with(['user', 'flowerPayments', 'subscription'])
         ->get();
-        
 
 
         // Calculate total revenue
