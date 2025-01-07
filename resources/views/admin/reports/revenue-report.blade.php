@@ -30,7 +30,7 @@
                 @csrf
                 <div class="row">
                     <!-- From Date -->
-                    <div class="col-md-5">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label for="from_date">From Date</label>
                             <input type="date" name="from_date" class="form-control" value="{{ old('from_date') }}" required>
@@ -38,15 +38,27 @@
                     </div>
 
                     <!-- To Date -->
-                    <div class="col-md-5">
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label for="to_date">To Date</label>
                             <input type="date" name="to_date" class="form-control" value="{{ old('to_date') }}" required>
                         </div>
                     </div>
-
+                <!-- Payment Method -->
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="payment_method">Payment Method</label>
+                        <select name="payment_method" class="form-control select2" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="razorpay">Razor Pay</option>
+                            <option value="upi">UPI</option>
+                            <option value="cash">Cash</option>
+                        </select>
+                    </div>
+                </div>
+                    
                     <!-- Submit Button -->
-                    <div class="col-md-2 mt-4">
+                    <div class="col-md-3 mt-4">
                         <button type="submit" class="btn btn-primary">Generate Report</button>
                     </div>
                 </div>

@@ -58,30 +58,35 @@ class ReportController extends Controller
 
     public function filterRevenueReport(Request $request)
     {
-        // Validate the date inputs
+        // Validate the inputs
         $request->validate([
             'from_date' => 'required|date',
             'to_date' => 'required|date|after_or_equal:from_date',
+            'payment_method' => 'nullable|string',
         ]);
     
+        // Filter orders based on subscription and payment method
         $orders = Order::whereHas('subscription', function ($query) use ($request) {
             $query->where('status', 'active')
                   ->whereBetween('created_at', [$request->from_date, $request->to_date]);
         })
-        ->with([
-            'user',
-            'flowerPayments' => function ($query) {
-                $query->where('payment_status', 'paid'); // Filter only 'paid' payments
-            },
-            'subscription'
-        ])
+        ->whereHas('flowerPayments', function ($query) use ($request) {
+            $query->where('payment_status', 'paid'); // Filter only 'paid' payments
+    
+            // Apply payment method filter if provided
+            if (!empty($request->payment_method)) {
+                $query->where('payment_method', $request->payment_method);
+            }
+        })
+        ->with(['user', 'flowerPayments', 'subscription'])
         ->get();
-
+    
         // Calculate total revenue
         $totalRevenue = $orders->sum(function ($order) {
             return $order->flowerPayments->sum('paid_amount'); // Assuming `paid_amount` is the payment column
         });
     
+        // Return the view with the filtered data
         return view('admin.reports.revenue-report', compact('orders', 'totalRevenue'));
     }
     
