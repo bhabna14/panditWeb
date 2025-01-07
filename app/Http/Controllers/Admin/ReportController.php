@@ -71,7 +71,7 @@ class ReportController extends Controller
         ->with([
             'user',
             'flowerPayments' => function ($query) {
-                $query->where('payment_method', 'paid'); // Filter only 'paid' payments
+                $query->where('payment_status', 'paid'); // Filter only 'paid' payments
             },
             'subscription'
         ])
