@@ -69,9 +69,12 @@ class ReportController extends Controller
             $query->where('status', 'active')
                   ->whereBetween('created_at', [$request->from_date, $request->to_date]); // Filter subscriptions by start_date
         })
-        ->with(['user', 'flowerPayments', 'subscription']) // Eager load subscription
+        ->whereHas('flowerPayments', function ($query) {
+            $query->where('payment_method', 'paid'); // Filter payments with 'paid' status
+        })
+        ->with(['user', 'flowerPayments', 'subscription']) // Eager load related data
         ->get();
-    
+
         // Calculate total revenue
         $totalRevenue = $orders->sum(function ($order) {
             return $order->flowerPayments->sum('paid_amount'); // Assuming `paid_amount` is the payment column

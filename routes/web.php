@@ -261,12 +261,16 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
     
     Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower-request');
+    Route::get('/manage-product-request', [FlowerRequestController::class, 'showRequests'])->name('product-request');
+
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
 
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+    Route::get('/product-orders', [ProductSubscriptionController::class, 'showProductOrder'])->name('admin.product.index');
+
     // Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('admin.orders.pause');
     Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('pause.subscription');
     Route::post('/flower-orders/{order_id}/resume', [FlowerOrderController::class, 'resume'])

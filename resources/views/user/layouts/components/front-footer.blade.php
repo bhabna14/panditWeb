@@ -12,7 +12,6 @@
             Odisha , Bharat<br>
             <br></p>
             </div>
-
           </div>
 
           <div class="col-xl-2 col-lg-4 col-sm-6">
@@ -22,7 +21,6 @@
               <a href="https://pandit.33crores.com/about-us">Our Story</a>
               <a href="https://pandit.33crores.com/about-us">What is 33 Crores</a>
               <a href="https://pandit.33crores.com/contact-us">Contact</a>
-              
             </div>
           </div>
 
@@ -36,8 +34,6 @@
               <a href="https://pandit.33crores.com/religious-service-provider">Religious Service Provider</a>
             </div>
           </div>
-
-         
 
           <div class="col-xl-2 col-lg-4 col-sm-6">
             <h5 class="text-16 fw-500 mb-30">Follow Us</h5>

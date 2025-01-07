@@ -70,6 +70,7 @@
                             <th>User Name</th>
                             <th>Order Date</th>
                             <th>Total Amount</th>
+                            <th>Payment Method</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,6 +80,8 @@
                                 <td>{{ $order->user->mobile_number }}</td>
                                 <td>{{ $order->created_at->format('d M Y') }}</td>
                                 <td>₹ {{ number_format($order->flowerPayments->sum('paid_amount'), 2)  }}</td>
+                                <td>{{$order->flowerPayments->payment_method }}</td>
+
                             </tr>
                         @empty
                             <tr>

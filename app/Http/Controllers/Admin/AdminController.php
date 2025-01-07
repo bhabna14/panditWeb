@@ -28,6 +28,10 @@ use App\Models\PanditLogin;
 use App\Models\Bankdetail;
 use App\Models\Notification;
 use App\Models\ProductOrder;
+use App\Models\ProductRequest;
+use App\Models\ProductSucription;
+
+
 
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
@@ -95,6 +99,16 @@ public function admindashboard()
         })
         ->count();
 
+        $newUserSubscriptionProduct = ProductOrder::whereDate('created_at', Carbon::today())
+        ->whereNull('request_id') // Add condition for request_id to be NULL
+        ->whereNotIn('user_id', function ($query) {
+            $query->select('user_id')
+                ->from('product__orders_details')
+                ->whereNull('request_id') // Ensure request_id is NULL in the subquery
+                ->whereDate('created_at', '<', Carbon::today());
+        })
+        ->count();
+
     
     // Fetch the total number of renewed user subscriptions today
     $renewSubscription = Order::whereDate('created_at', Carbon::today())
@@ -102,6 +116,17 @@ public function admindashboard()
     ->whereIn('user_id', function ($query) {
         $query->select('user_id')
             ->from('orders')
+            ->whereNull('request_id')
+            ->whereDate('created_at', '<', Carbon::today());
+    })
+    ->distinct('user_id')
+    ->count();
+
+    $renewSubscriptionProduct = ProductOrder::whereDate('created_at', Carbon::today())
+    ->whereNull('request_id')
+    ->whereIn('user_id', function ($query) {
+        $query->select('user_id')
+            ->from('product__orders_details')
             ->whereNull('request_id')
             ->whereDate('created_at', '<', Carbon::today());
     })
@@ -116,8 +141,14 @@ public function admindashboard()
     // Fetch the total number of flower requests requested today (customized order)
     $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
 
+    $productRequestedToday = ProductRequest::whereDate('created_at', Carbon::today())->count();
+
+
     // Fetch the total number of active subscriptions
     $activeSubscriptions = Subscription::where('status', 'active')->count();
+
+    $activeSubscriptionsProduct = ProductSucription::where('status', 'active')->count();
+
 
     // Fetch the total number of paused subscriptions
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
@@ -130,6 +161,15 @@ public function admindashboard()
                 ->where('status', 'active');
         })
         ->count();
+
+        $expiredSubscriptionsProduct = ProductSucription::where('status', 'expired')
+        ->whereNotIn('user_id', function ($query) {
+            $query->select('user_id')
+                ->from('product__subscriptions_details')
+                ->where('status', 'active');
+        })
+        ->count();
+
     // Individual Rider Details
     //display to total assigned orders to rider from orders table whose request_id is null  where rider_id is RIDER73783 and add subscription status is active from subcription table 
     $totalAssignedOrderstobablu = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
@@ -247,7 +287,6 @@ public function admindashboard()
     $totalCompletedRecoding = PodcastPrepair::where('podcast_recording_status', 'COMPLETED')->count();
     $totalCompletedEditing = PodcastPrepair::where('podcast_editing_status', 'COMPLETED')->count();
 
-
     return view('admin/dashboard', compact(
         'totalAssignedOrderstoprahlad',
         'totalDeliveredTodaybyprahlad',
@@ -257,6 +296,11 @@ public function admindashboard()
         'totalAssignedOrderstobablu',
         'renewSubscription' ,
         'newUserSubscription',
+        'newUserSubscriptionProduct',
+        'productRequestedToday',
+        'renewSubscriptionProduct',
+        'expiredSubscriptionsProduct',
+        'activeSubscriptionsProduct',
         'totalCompletedEditing',
         'totalCompletedRecoding',
         'totalCompletedScripts',

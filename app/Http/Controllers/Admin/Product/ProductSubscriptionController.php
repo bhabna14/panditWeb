@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\ProductOrder;
 use App\Models\ProductSucription;
+
+
 use App\Models\RiderDetails;
 use Carbon\Carbon;
 
 class ProductSubscriptionController extends Controller
 {
-    public function showOrders(Request $request)
+    public function showProductOrder(Request $request)
     {
         $query = ProductOrder::whereNull('request_id')
                       ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
@@ -22,7 +24,7 @@ class ProductSubscriptionController extends Controller
             $query->whereDate('created_at', Carbon::today())
                 ->whereIn('user_id', function ($subQuery) {
                     $subQuery->select('user_id')
-                            ->from('orders')
+                            ->from('product__orders_details')
                             ->whereDate('created_at', '<', Carbon::today());
                 });
         }
@@ -32,7 +34,7 @@ class ProductSubscriptionController extends Controller
             $query->whereDate('created_at', Carbon::today())
                 ->whereNotIn('user_id', function ($subQuery) {
                     $subQuery->select('user_id')
-                            ->from('orders')
+                            ->from('product__orders_details')
                             ->whereDate('created_at', '<', Carbon::today())
                             ->whereNull('request_id'); // Ensure request_id is NULL in the subquery
                 });
@@ -40,18 +42,18 @@ class ProductSubscriptionController extends Controller
 
         // Filter for active subscriptions
         if ($request->query('filter') === 'active') {
-            $query->whereHas('subscription', function ($subQuery) {
+            $query->whereHas('product__subscriptions_details', function ($subQuery) {
                 $subQuery->where('status', 'active');
             });
         }
     
          // Filter for expired subscriptions without a new subscription
         if ($request->query('filter') === 'expired') {
-            $query->whereHas('subscription', function ($subQuery) {
+            $query->whereHas('product__subscriptions_details', function ($subQuery) {
                 $subQuery->where('status', 'expired')
                         ->whereNotIn('user_id', function ($nestedQuery) {
                             $nestedQuery->select('user_id')
-                                        ->from('subscriptions')
+                                        ->from('product__subscriptions_details')
                                         ->where('status', 'active');
                         });
             });
@@ -59,7 +61,7 @@ class ProductSubscriptionController extends Controller
 
         // Filter for paused subscriptions
         if ($request->query('filter') === 'paused') {
-            $query->whereHas('subscription', function ($subQuery) {
+            $query->whereHas('product__subscriptions_details', function ($subQuery) {
                 $subQuery->where('status', 'paused');
             });
         }
@@ -70,7 +72,7 @@ class ProductSubscriptionController extends Controller
         $ordersRequestedToday = ProductSucription::whereDate('created_at', Carbon::today())->count();
         $riders = RiderDetails::where('status', 'active')->get();
         
-        return view('admin.product-order.manage-flower-order', compact(
+        return view('admin.product-package.manage-product-order', compact(
             'riders', 'orders', 'activeSubscriptions', 'ordersRequestedToday'
         ));
     }

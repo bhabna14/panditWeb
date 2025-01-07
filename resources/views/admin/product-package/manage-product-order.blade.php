@@ -18,13 +18,13 @@
                 <!-- breadcrumb -->
                 <div class="breadcrumb-header justify-content-between">
                     <div class="left-content">
-                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Flower Order</span>
+                      <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Product Order</span>
                     </div>
                     <div class="justify-content-center mt-2">
                         <ol class="breadcrumb d-flex justify-content-between align-items-center">
                             {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
                             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Manage Flower Order</li>
+                            <li class="breadcrumb-item active" aria-current="page">Product Order</li>
                         </ol>
                     </div>
                 </div>
@@ -36,9 +36,9 @@
                             <div class="card-footer py-0">
                                 <div class="profile-tab tab-menu-heading border-bottom-0">
                                     <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
-                                        <a class="nav-link mb-2 mt-2 {{ Request::is('admin/flower-orders') ? 'active' : '' }}" href="{{ route('admin.orders.index') }}"
+                                        <a class="nav-link mb-2 mt-2 {{ Request::is('admin/product-orders') ? 'active' : '' }}" href="{{ route('admin.product.index') }}"
                                             onclick="changeColor(this)">Subscription Orders</a>
-                                        <a class="nav-link mb-2 mt-2" href="{{ route('flower-request') }}"
+                                        <a class="nav-link mb-2 mt-2" href="{{ route('product-request') }}"
                                             onclick="changeColor(this)">Request Orders</a>
                                     </nav>
                                 </div>
@@ -64,20 +64,6 @@
                 
                 
                     <div class="col-md-4">
-                        <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}">
-                            <div class="card bg-warning text-dark mb-3">
-                                <div class="card-header">
-                                    <i class="fas fa-pause-circle"></i> Paused Subscriptions
-                                </div>
-                                <div class="card-body">
-                                    <h5 class="card-title">{{ $pausedSubscriptions }}</h5>
-                                    <p class="card-text">Users with a paused subscription</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                
-                    <div class="col-md-4">
                         <a href="{{ route('admin.orders.index', ['filter' => 'renew']) }}">
                             <div class="card bg-info text-dark mb-3">
                                 <div class="card-header">
@@ -99,11 +85,7 @@
                         <div class="col-lg-12">
                             <div class="card custom-card overflow-hidden">
                                 <div class="card-body">
-                                    <!-- <div>
-                                        <h6 class="main-content-label mb-1">File export Datatables</h6>
-                                        <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
-                                    </div> -->
-
+                                  
                                     
                                     @if (session()->has('success'))
                                     <div class="alert alert-success" id="Message">

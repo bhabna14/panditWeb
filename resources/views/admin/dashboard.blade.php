@@ -809,7 +809,7 @@
             <div class="row">
 
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
+                    <a href="{{ route('admin.product.index', ['filter' => 'new']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
@@ -819,7 +819,7 @@
                                         </div>
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscription }}
+                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscriptionProduct }}
                                                 </h4>
                                             </div>
                                             {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
@@ -839,7 +839,7 @@
                     </a>
                 </div>
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
+                    <a href="{{ route('admin.product.index', ['filter' => 'renewed']) }}" target="_blank">
 
                         <div class="card sales-card">
                             <div class="row">
@@ -850,7 +850,7 @@
                                         </div>
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscription }}</h4>
+                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscriptionProduct }}</h4>
                                             </div>
                                             {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
 										<span class="text-success font-weight-semibold"> +427</span>
@@ -870,7 +870,7 @@
                 </div>
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
 
-                    <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
+                    <a href="{{ route('product-request', ['filter' => 'today']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
@@ -880,7 +880,7 @@
                                         </div>
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $ordersRequestedToday }}
+                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $productRequestedToday }}
                                                 </h4>
                                             </div>
 
@@ -900,7 +900,7 @@
 
                 
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}" target="_blank">
+                    <a href="{{ route('admin.product.index', ['filter' => 'active']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
 
@@ -911,7 +911,7 @@
                                         </div>
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptions }}
+                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptionsProduct }}
                                                 </h4>
                                             </div>
                                            
@@ -931,7 +931,7 @@
                 </div>
 
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
+                    <a href="{{ route('admin.product.index', ['filter' => 'expired']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
@@ -942,7 +942,7 @@
                                         </div>
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
-                                                <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}
+                                                <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptionsProduct }}
                                                 </h4>
                                             </div>
                                            
@@ -989,9 +989,7 @@
                                                 <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalCompletedScripts }}
                                                 </h4>
                                             </div>
-                                            {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-															<span class="text-success font-weight-semibold"> +427</span>
-														</p> --}}
+                                            
                                         </div>
                                     </div>
                                 </div>
