@@ -66,14 +66,15 @@ class ReportController extends Controller
     
         // Fetch orders where the related subscription is active during the specified period
         $orders = Order::whereHas('subscription', function ($query) use ($request) {
-            $query->where('status', 'active')
-                  ->whereBetween('created_at', [$request->from_date, $request->to_date]); // Filter subscriptions by start_date
+            $query->whereRaw("BINARY `status` = 'active'")
+                  ->whereBetween('created_at', [$request->from_date, $request->to_date]);
         })
         ->whereHas('flowerPayments', function ($query) {
-            $query->where('payment_method', 'paid'); // Filter payments with 'paid' status
+            $query->whereRaw("BINARY `payment_method` = 'paid'");
         })
-        ->with(['user', 'flowerPayments', 'subscription']) // Eager load related data
+        ->with(['user', 'flowerPayments', 'subscription'])
         ->get();
+
 
         // Calculate total revenue
         $totalRevenue = $orders->sum(function ($order) {
