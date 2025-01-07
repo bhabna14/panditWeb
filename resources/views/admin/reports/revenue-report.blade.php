@@ -48,7 +48,7 @@
                 <div class="col-md-3">
                     <div class="form-group">
                         <label for="payment_method">Payment Method</label>
-                        <select name="payment_method" class="form-control select2">
+                        <select name="payment_method" class="form-control">
                             <option value="">All</option>
                             <option value="razorpay">Razor Pay</option>
                             <option value="upi">UPI</option>
