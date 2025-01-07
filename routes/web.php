@@ -319,13 +319,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
 
   });
   
-  
-
-    // Route::controller(ReportController::class)->group(function() {
-    //     Route::get('/flower-pickup-report', 'pickreportform')->name('admin.flower-pickup-report');
-    //     Route::post('/flower-pickup-report', 'showpickupreport')->name('admin.show-pickup-report');
-      
-    // });
     Route::get('/flower-pickup-report', [ReportController::class, 'flowerPickupReport'])->name('admin.flowerPickupReport');
     Route::post('/flower-pickup-report', [ReportController::class, 'generateReport'])->name('admin.generateFlowerPickupReport');
     Route::get('/revenue-report', [ReportController::class, 'showRevenueReport'])->name('admin.revenueReport');
