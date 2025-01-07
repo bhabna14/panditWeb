@@ -80,8 +80,11 @@
                                 <td>{{ $order->user->mobile_number }}</td>
                                 <td>{{ $order->created_at->format('d M Y') }}</td>
                                 <td>₹ {{ number_format($order->flowerPayments->sum('paid_amount'), 2)  }}</td>
-                                <td>{{$order->flowerPayments->payment_method }}</td>
-
+                                <td>
+                                    @foreach ($order->flowerPayments as $payment)
+                                        {{ $payment->payment_method }}<br>
+                                    @endforeach
+                                </td>
                             </tr>
                         @empty
                             <tr>
