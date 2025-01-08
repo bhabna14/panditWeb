@@ -9,9 +9,61 @@
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
+
+
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
     <style>
+
+.btn {
+    text-align: center;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    color: #fff;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* View Button */
+.btn-view {
+    background-color: #4CAF50;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-view:hover {
+    background-color: #45a049;
+}
+
+/* Action Buttons (Pause/Resume) */
+.btn-action {
+    background-color: #c80100;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn-action:hover {
+    background-color: #a00000;
+}
+
+.modal-content {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+
+
+.modal-footer {
+    border-top: none;
+}
+
+.btn {
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
         .modal-header {
             background-color: #007bff;
             color: #fff;
@@ -132,10 +184,6 @@
         <div class="col-lg-12">
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
-                    <!-- <div>
-                                                                <h6 class="main-content-label mb-1">File export Datatables</h6>
-                                                                <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
-                                                            </div> -->
 
 
                     @if (session()->has('success'))
@@ -406,63 +454,7 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        {{-- <td>
-                                            @if ($order->flowerPayments->isNotEmpty())
-                                                @foreach ($order->flowerPayments as $payment)
-                                                    <span class="status-badge bg-info">{{ $payment->payment_status }}</span><br>
-                                                @endforeach
-                                            @else
-                                                <span class="status-badge bg-warning">No Payment</span>
-                                            @endif
 
-                                            <!-- Edit Payment Status Button -->
-                                            <a href="#" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editPaymentStatusModal{{ $order->order_id }}">
-                                                <i class="fas fa-edit"></i> Edit
-                                            </a>
-
-                                            <!-- Edit Payment Status Modal -->
-                                            <div class="modal fade" id="editPaymentStatusModal{{ $order->order_id }}" tabindex="-1" aria-labelledby="editPaymentStatusModalLabel{{ $order->order_id }}" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <!-- Modal Header -->
-                                                        <div class="modal-header bg-primary text-white">
-                                                            <h5 class="modal-title" id="editPaymentStatusModalLabel{{ $order->order_id}}">
-                                                                <i class="fas fa-edit"></i> Edit Payment Status
-                                                            </h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-
-                                                        <!-- Modal Body -->
-                                                        <div class="modal-body">
-                                                            <form action="{{ route('admin.orders.updatePaymentStatus', $order->order_id) }}" method="POST">
-                                                                @csrf
-                                                                @method('PUT')
-                                                                <div class="mb-3">
-                                                                    <label for="payment_status" class="form-label">Payment Status</label>
-                                                                    <select class="form-control" id="payment_status" name="payment_status" required>
-                                                                        <!-- Check if payment_status is 'pending', 'paid', or null -->
-                                                                        <option value="pending" {{ (is_null($order->flowerPayments->first()->payment_status) || $order->flowerPayments->first()->payment_status == 'pending') ? 'selected' : '' }}>Pending</option>
-                                                                        <option value="paid" {{ $order->flowerPayments->first()->payment_status == 'paid' ? 'selected' : '' }}>Paid</option>
-                                                                    </select>
-                                                                </div>
-                                                                
-
-                                                                <!-- Modal Footer -->
-                                                                <div class="modal-footer">
-                                                                    <button type="submit" class="btn btn-primary">
-                                                                        <i class="fas fa-save"></i> Save Changes
-                                                                    </button>
-                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                                        <i class="fas fa-times"></i> Close
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td> --}}
-                                        
                                         <td>
                                             <span
                                                 class="status-badge 
@@ -528,72 +520,54 @@
                                             @endif
                                         </td>
 
-                                        <td>
-
-                                            <a href="{{ route('admin.orders.show', $order->id) }}"
-                                                class="btn btn-primary">View Details</a>
-                                            <!-- Updated Modal Form -->
-                                            @if ($order->subscription->status === 'active')
-                                                <!-- Show Pause Button -->
-                                                <a href="#" class="btn btn-warning mb-3" data-bs-toggle="modal"
-                                                    data-bs-target="#pauseModal{{ $order->order_id }}">Pause</a>
-                                            @elseif ($order->subscription->status === 'paused')
-                                                <!-- Show Resume Button -->
-                                                {{-- <a href="{{ route('resume.subscription', $order->order_id) }}" class="btn btn-success mb-3">Resume</a> --}}
+                                        <td style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                                            <!-- View Button -->
+                                            <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-success">View</a>
+                                        
+                                            <!-- Pause/Resume Button -->
+                                            @if ($order->subscription->status == 'active')
+                                            <a href="javascript:void(0);" 
+                                            class="btn btn-info pause-button mt-2" 
+                                            onclick="openPauseModal('{{ $order->subscription->start_date }}', '{{ $order->subscription->end_date }}')">
+                                            Pause
+                                         </a>
+                                            @elseif ($order->subscription->status == 'paused')
+                                                <a href="javascript:void(0);" 
+                                                    class="btn btn-warning resume-button mt-2" 
+                                                    onclick="openResumeModal('{{ $order->subscription->pause_start_date }}', '{{ $order->subscription->pause_end_date }}')">
+                                                    Resume
+                                                </a>
                                             @endif
-
-                                            <div class="modal fade" id="pauseModal{{ $order->order_id }}" tabindex="-1"
-                                                aria-labelledby="pauseModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
+                                        
+                                            <!-- Pause Modal -->
+                                            <div class="modal fade" id="pauseModal" tabindex="-1" aria-labelledby="pauseModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="pauseModalLabel">Pause
-                                                                Subscription</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            <h5 class="modal-title" id="pauseModalLabel">Pause Subscription</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
                                                         <div class="modal-body">
-                                                            <form id="pauseForm{{ $order->order_id }}"
-                                                                action="{{ route('pause.subscription', $order->order_id) }}"
-                                                                method="POST">
+                                                            <!-- Pause Form -->
+                                                            <form id="pauseForm" action="{{ route('subscription.pause', $order->order_id) }}" method="POST">
                                                                 @csrf
-                                                                <input type="hidden" name="order_id"
-                                                                    value="{{ $order->order_id }}">
-
                                                                 <div class="mb-3">
-                                                                    <label for="pause_start_date_{{ $order->order_id }}"
-                                                                        class="form-label">Pause Start Date</label>
-                                                                    <input type="date"
-                                                                        id="pause_start_date_{{ $order->order_id }}"
-                                                                        name="pause_start_date" class="form-control"
-                                                                        required
-                                                                        min="{{ $order->subscription->start_date }}"
-                                                                        max="{{ $order->subscription->end_date }}">
+                                                                    <label for="pause_start_date" class="form-label">Pause Start Date</label>
+                                                                    <input type="date" id="pause_start_date" name="pause_start_date" class="form-control" required>
                                                                 </div>
-
+                                            
                                                                 <div class="mb-3">
-                                                                    <label for="pause_end_date_{{ $order->order_id }}"
-                                                                        class="form-label">Pause End Date</label>
-                                                                    <input type="date"
-                                                                        id="pause_end_date_{{ $order->order_id }}"
-                                                                        name="pause_end_date" class="form-control"
-                                                                        required
-                                                                        min="{{ $order->subscription->start_date }}"
-                                                                        max="{{ $order->subscription->end_date }}">
+                                                                    <label for="pause_end_date" class="form-label">Pause End Date</label>
+                                                                    <input type="date" id="pause_end_date" name="pause_end_date" class="form-control" required>
                                                                 </div>
-
+                                            
                                                                 <p class="text-muted">
-                                                                    Dates must be between
-                                                                    <strong>{{ $order->subscription->start_date }}</strong>
-                                                                    and
-                                                                    <strong>{{ $order->subscription->end_date }}</strong>.
+                                                                    Dates must be between <span id="subscriptionStart"></span> and <span id="subscriptionEnd"></span>.
                                                                 </p>
-
+                                            
                                                                 <div class="modal-footer">
-                                                                    <button type="submit"
-                                                                        class="btn btn-primary">Submit</button>
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Close</button>
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                    <button type="submit" class="btn btn-primary">Submit</button>
                                                                 </div>
                                                             </form>
                                                         </div>
@@ -601,7 +575,32 @@
                                                 </div>
                                             </div>
 
-
+                                            <div class="modal fade" id="resumeModal" tabindex="-1" aria-labelledby="resumeModalLabel" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="resumeModalLabel">Resume Subscription</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <!-- Form to resume subscription -->
+                                                            <form id="resumeForm" action="{{ route('subscription.resume', $order->order_id) }}" method="POST">
+                                                                @csrf
+                                                                <div class="mb-3">
+                                                                    <label for="resume_date" class="form-label">Select Resume Date</label>
+                                                                    <input type="date" id="resume_date" name="resume_date" class="form-control" required>
+                                                                </div>
+                                            
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                    <button type="submit" class="btn btn-success">Resume</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
 
                                         </td>
                                     </tr>
@@ -609,6 +608,9 @@
                             </tbody>
 
                         </table>
+
+
+
                         <!-- Add the modal for editing the rider -->
                         @foreach ($orders as $order)
                             <div class="modal fade" id="editRiderModal{{ $order->id }}" tabindex="-1"
@@ -676,6 +678,46 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap 5 -->
+
+    <script>
+      // Open the Pause Modal and set the date range
+function openPauseModal(startDate, endDate) {
+    const startDateField = document.getElementById('pause_start_date');
+    const endDateField = document.getElementById('pause_end_date');
+    const subscriptionStartText = document.getElementById('subscriptionStart');
+    const subscriptionEndText = document.getElementById('subscriptionEnd');
+
+    // Set the date range text
+    subscriptionStartText.textContent = startDate;
+    subscriptionEndText.textContent = endDate;
+
+    // Set the min and max attributes for the date fields
+    startDateField.setAttribute('min', startDate);
+    endDateField.setAttribute('min', startDate);
+    endDateField.setAttribute('max', endDate);
+
+    // Open the modal using Bootstrap
+    new bootstrap.Modal(document.getElementById('pauseModal')).show();
+}
+
+// Open the Resume Modal
+function openResumeModal(pauseStartDate, pauseEndDate) {
+    const resumeDateField = document.getElementById('resume_date');
+
+    // Set the min and max for the resume date field
+    resumeDateField.setAttribute('min', pauseStartDate);
+    resumeDateField.setAttribute('max', pauseEndDate);
+
+    // Set the default date to the pause start date
+    resumeDateField.value = pauseStartDate;
+
+    // Open the modal using Bootstrap
+    new bootstrap.Modal(document.getElementById('resumeModal')).show();
+}
+
+
+    </script>
 
     <!-- Updated JavaScript -->
 @endsection

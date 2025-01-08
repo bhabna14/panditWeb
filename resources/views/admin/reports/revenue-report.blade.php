@@ -50,14 +50,13 @@
                         <label for="payment_method">Payment Method</label>
                         <select name="payment_method" class="form-control">
                             <option value="">All</option>
-                            <option value="razorpay">Razor Pay</option>
+                            <option value="Razorpay">Razor Pay</option>
                             <option value="upi">UPI</option>
                             <option value="cash">Cash</option>
                         </select>
                     </div>
                 </div>
-                    
-                    <!-- Submit Button -->
+                     <!-- Submit Button -->
                     <div class="col-md-3 mt-4">
                         <button type="submit" class="btn btn-primary">Generate Report</button>
                     </div>
@@ -111,11 +110,7 @@
                         </tr>
                     </tfoot>
                 </table>
-
-                <!-- Total Revenue -->
-                {{-- <div class="mt-3">
-                    <h5>Total Revenue: ₹{{ number_format($totalRevenue, 2) }}</h5>
-                </div> --}}
+              
             </div>
         </div>
     </div>

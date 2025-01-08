@@ -271,16 +271,13 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
     Route::get('/product-orders', [ProductSubscriptionController::class, 'showProductOrder'])->name('admin.product.index');
 
-    // Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('admin.orders.pause');
-    Route::post('/flower-orders/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('pause.subscription');
-    Route::post('/flower-orders/{order_id}/resume', [FlowerOrderController::class, 'resume'])
-    ->name('resume.subscription');
+    Route::post('/subscription/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('subscription.pause');
+    Route::post('/subscription/{order_id}/resume', [FlowerOrderController::class, 'resume'])->name('subscription.resume');
+
     Route::put('/orders/{order_id}/update-payment-status', [FlowerOrderController::class, 'updatePaymentStatus'])->name('admin.orders.updatePaymentStatus');
-
-
     Route::get('/manage-delivery-history', [FlowerOrderController::class, 'mngdeliveryhistory'])->name('admin.managedeliveryhistory');
     Route::get('/rider-all-details/{id}', [FlowerOrderController::class, 'showRiderDetails'])->name('admin.riderAllDetails');
-Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])->name('orders.markAsViewed');
+    Route::post('/orders/mark-as-viewed', [OrderController::class, 'markAsViewed'])->name('orders.markAsViewed');
 
     //rider assign by admin and update
     Route::post('orders/{id}/assignRider', [FlowerOrderController::class, 'assignRider'])->name('admin.orders.assignRider');
