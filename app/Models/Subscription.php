@@ -33,7 +33,7 @@ public function pauseResumeLogs()
 
 public function relatedOrder()
 {
-    return $this->belongsTo(Order::class, 'order_id'); // Adjust 'order_id' as per your actual foreign key.
+    return $this->belongsTo(Order::class, 'order_id', 'order_id'); // Make sure 'order_id' is correct
 }
 
 }

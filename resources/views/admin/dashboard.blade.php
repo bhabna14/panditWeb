@@ -176,7 +176,7 @@
             <h4 class="card-title-custom">Flower Subscription</h4>
             <div class="row">
                 <!-- New Subscription -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
@@ -197,7 +197,7 @@
                 </div>
     
                 <!-- Renewed Subscription -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
@@ -218,7 +218,7 @@
                 </div>
     
                 <!-- Customize Order -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
@@ -231,6 +231,26 @@
                                 <div class="col-4">
                                     <div class="circle-icon bg-gradient-to-r from-green-400 to-teal-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-cogs tx-16 text-white"></i> <!-- Customize Order Icon -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
+                        <div class="card sales-card">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12"> Non Assign Rider</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $ordersRequestedToday }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="circle-icon bg-gradient-to-r from-red-400 to-teal-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-users text-white"></i>
                                     </div>
                                 </div>
                             </div>

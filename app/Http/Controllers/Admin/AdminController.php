@@ -109,6 +109,15 @@ public function admindashboard()
         })
         ->count();
 
+        $nonAssignedRidersCount = DB::table('subscriptions')
+        ->join('orders', 'subscriptions.order_id', '=', 'orders.order_id')
+        ->where('subscriptions.status', 'active')
+        ->where(function ($query) {
+            $query->whereNull('orders.rider_id')
+                  ->orWhere('orders.rider_id', '');
+        })
+        ->count();
+    
     
     // Fetch the total number of renewed user subscriptions today
     $renewSubscription = Order::whereDate('created_at', Carbon::today())
@@ -335,6 +344,7 @@ public function admindashboard()
         'totalExpensesday',
         'totalPaidExpensesday',
         'totalUnpaidExpensesday',
+        'nonAssignedRidersCount'
     ));
 }
 
