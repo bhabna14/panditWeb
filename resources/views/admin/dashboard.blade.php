@@ -239,13 +239,13 @@
                 </div>
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12"> Non Assign Rider</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $ordersRequestedToday }}</h4>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $nonAssignedRidersCount }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">

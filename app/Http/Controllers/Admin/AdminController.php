@@ -109,12 +109,13 @@ public function admindashboard()
         })
         ->count();
 
-        $nonAssignedRidersCount = DB::table('subscriptions')
-        ->join('orders', 'subscriptions.order_id', '=', 'orders.order_id')
-        ->where('subscriptions.status', 'active')
-        ->where(function ($query) {
-            $query->whereNull('orders.rider_id')
-                  ->orWhere('orders.rider_id', '');
+        $nonAssignedRidersCount = Subscription::with('relatedOrder')
+        ->where('status', 'active')
+        ->whereHas('relatedOrder', function ($query) {
+            $query->where(function ($q) {
+                $q->whereNull('rider_id')
+                  ->orWhere('rider_id', '');
+            });
         })
         ->count();
     

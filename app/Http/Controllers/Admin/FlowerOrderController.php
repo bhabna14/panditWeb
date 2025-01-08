@@ -25,77 +25,88 @@ class FlowerOrderController extends Controller
 {
     //
     public function showOrders(Request $request)
-    {
+{
+    $query = Order::whereNull('request_id')
+                  ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                  ->orderBy('id', 'desc'); // This orders by the Order ID
 
-        $query = Order::whereNull('request_id')
-                      ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-                      ->orderBy('created_at', 'desc');
-    
-        // Check if the filter is for renewed subscriptions
-        if ($request->query('filter') === 'renewed') {
-            $query->whereDate('created_at', Carbon::today())
-                ->whereIn('user_id', function ($subQuery) {
-                    $subQuery->select('user_id')
-                            ->from('orders')
-                            ->whereDate('created_at', '<', Carbon::today());
-                });
-        }
-
-        if ($request->query('filter') === 'end') {
-            $query->whereHas('subscription', function ($subQuery) {
-                $subQuery->whereDate('end_date', Carbon::today())
-                         ->where('status', 'active');
+    // Filter for non-assigned riders
+    if ($request->query('filter') === 'rider') {
+        $query->whereHas('subscription.relatedOrder', function ($query) {
+            $query->where(function ($q) {
+                $q->whereNull('rider_id')
+                  ->orWhere('rider_id', '');
             });
-        }
-
-        // Filter for new user subscriptions
-        if ($request->query('filter') === 'new') {
-            $query->whereDate('created_at', Carbon::today())
-                ->whereNotIn('user_id', function ($subQuery) {
-                    $subQuery->select('user_id')
-                            ->from('orders')
-                            ->whereDate('created_at', '<', Carbon::today())
-                            ->whereNull('request_id'); // Ensure request_id is NULL in the subquery
-                });
-        }
-
-        // Filter for active subscriptions
-        if ($request->query('filter') === 'active') {
-            $query->whereHas('subscription', function ($subQuery) {
-                $subQuery->where('status', 'active');
-            });
-        }
-    
-         // Filter for expired subscriptions without a new subscription
-        if ($request->query('filter') === 'expired') {
-            $query->whereHas('subscription', function ($subQuery) {
-                $subQuery->where('status', 'expired')
-                        ->whereNotIn('user_id', function ($nestedQuery) {
-                            $nestedQuery->select('user_id')
-                                        ->from('subscriptions')
-                                        ->where('status', 'active');
-                        });
-            });
-        }
-
-        // Filter for paused subscriptions
-        if ($request->query('filter') === 'paused') {
-            $query->whereHas('subscription', function ($subQuery) {
-                $subQuery->where('status', 'paused');
-            });
-        }
-
-        $orders = $query->get();
-    
-        $activeSubscriptions = Subscription::where('status', 'active')->count();
-        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-        $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
-        $riders = RiderDetails::where('status', 'active')->get();
-        
-        return view('admin.flower-order.manage-flower-order', compact(
-            'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
-        ));
+        });
     }
+
+    // Check if the filter is for renewed subscriptions
+    if ($request->query('filter') === 'renewed') {
+        $query->whereDate('created_at', Carbon::today())
+              ->whereIn('user_id', function ($subQuery) {
+                  $subQuery->select('user_id')
+                           ->from('orders')
+                           ->whereDate('created_at', '<', Carbon::today());
+              });
+    }
+
+    if ($request->query('filter') === 'end') {
+        $query->whereHas('subscription', function ($subQuery) {
+            $subQuery->whereDate('end_date', Carbon::today())
+                     ->where('status', 'active');
+        });
+    }
+
+    // Filter for new user subscriptions
+    if ($request->query('filter') === 'new') {
+        $query->whereDate('created_at', Carbon::today())
+              ->whereNotIn('user_id', function ($subQuery) {
+                  $subQuery->select('user_id')
+                           ->from('orders')
+                           ->whereDate('created_at', '<', Carbon::today())
+                           ->whereNull('request_id'); // Ensure request_id is NULL in the subquery
+              });
+    }
+
+    // Filter for active subscriptions
+    if ($request->query('filter') === 'active') {
+        $query->whereHas('subscription', function ($subQuery) {
+            $subQuery->where('status', 'active');
+        });
+    }
+    
+    // Filter for expired subscriptions without a new subscription
+    if ($request->query('filter') === 'expired') {
+        $query->whereHas('subscription', function ($subQuery) {
+            $subQuery->where('status', 'expired')
+                     ->whereNotIn('user_id', function ($nestedQuery) {
+                         $nestedQuery->select('user_id')
+                                     ->from('subscriptions')
+                                     ->where('status', 'active');
+                     });
+        });
+    }
+
+    // Filter for paused subscriptions
+    if ($request->query('filter') === 'paused') {
+        $query->whereHas('subscription', function ($subQuery) {
+            $subQuery->where('status', 'paused');
+        });
+    }
+
+    // Retrieve the filtered orders
+    $orders = $query->get();
+    
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
+    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+    $riders = RiderDetails::where('status', 'active')->get();
+    
+    return view('admin.flower-order.manage-flower-order', compact(
+        'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
+    ));
+}
+
     
 public function markAsViewed()
 {
