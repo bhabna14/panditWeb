@@ -123,7 +123,6 @@ Route::controller(userController::class)->group(function() {
     // Route::get('/booking/success',  'bookingSuccess')->name('booking.success');
     // Route::get('/pandit-details', 'panditetails')->name('panditdetails');
     // Route::get('/book-now', 'booknow')->name('booknow');
-    Route::get('/about-us', 'aboutus')->name('aboutus');
     Route::get('/contact', 'contact')->name('contact');
    
     Route::get('/userlogin', 'userlogin')->name('userlogin');

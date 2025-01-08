@@ -839,7 +839,7 @@ private function convertDurationToMinutes($durationString)
     //     return view('user/booknow', compact('addressdata'));
     // }
     public function aboutus(){
-        return view('user/aboutus');
+        return view('user/about-us');
     }
     public function contact(){
         return view('user/contact');
