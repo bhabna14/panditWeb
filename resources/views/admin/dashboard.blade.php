@@ -9,6 +9,110 @@
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <style>
+      /* General Card Styling */
+.card.sales-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    background-color: #ffffff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card.sales-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Title Styling */
+.card .card-title-custom {
+    color: #444;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Circle Icon Styling */
+.circle-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.circle-icon:hover {
+    background: linear-gradient(45deg, #6a11cb, #fc4a1a);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+}
+
+.circle-icon i {
+    font-size: 24px;
+    color: #ffffff;
+}
+
+/* Subscription Stats */
+.tx-20, .tx-22 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+}
+
+.tx-12 {
+    font-size: 12px;
+    color: #777;
+}
+
+/* Background Gradient for Each Card */
+.bg-gradient-to-r.from-blue-500.to-teal-500 {
+    background: linear-gradient(45deg, #2196f3, #64b5f6);
+}
+
+.bg-gradient-to-r.from-pink-500.to-purple-600 {
+    background: linear-gradient(45deg, #f06292, #9c27b0);
+}
+
+.bg-gradient-to-r.from-green-400.to-teal-500 {
+    background: linear-gradient(45deg, #66bb6a, #26a69a);
+}
+
+.bg-gradient-to-r.from-orange-400.to-red-500 {
+    background: linear-gradient(45deg, #ff7043, #e57373);
+}
+
+.bg-gradient-to-r.from-teal-500.to-blue-600 {
+    background: linear-gradient(45deg, #00897b, #039be5);
+}
+
+.bg-gradient-to-r.from-red-600.to-orange-500 {
+    background: linear-gradient(45deg, #e53935, #ff7043);
+}
+
+/* Hover Effect on Card */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+    .card.sales-card {
+        margin-bottom: 20px;
+    }
+    .circle-icon {
+        width: 40px;
+        height: 40px;
+    }
+    .tx-20, .tx-22 {
+        font-size: 18px;
+    }
+    .tx-12 {
+        font-size: 10px;
+    }
+}
+
         .card-title-custom {
             margin-bottom: 0.75rem;
         }
@@ -58,15 +162,10 @@
                             <div class="text-justified align-items-center">
                                 <h3 class="text-dark font-weight-semibold mb-2 mt-0">Hi, Welcome Back <span
                                         class="text-primary">{{ Auth::guard('admins')->user()->name }}!</span></h3>
-                                {{-- <p class="text-dark tx-14 mb-3 lh-3"> You have used the 85% of free plan storage. Please upgrade your plan to get unlimited storage.</p>
-												<button class="btn btn-primary shadow">Upgrade Now</button> --}}
+
                             </div>
                         </div>
-                        {{-- <div class="col-xl-3 col-lg-5 col-md-6 col-sm-12 d-flex align-items-center justify-content-center">
-											<div class="chart-circle float-md-end mt-4 mt-md-0" data-value="0.85" data-thickness="8" data-color=""><canvas width="100" height="100"></canvas>
-												<div class="chart-circle-value circle-style"><div class="tx-18 font-weight-semibold">85%</div></div>
-											</div>
-										</div> --}}
+
                     </div>
                 </div>
             </div>
@@ -74,156 +173,106 @@
     </div>
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-
             <h4 class="card-title-custom">Flower Subscription</h4>
-
             <div class="row">
-
+                <!-- New Subscription -->
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12 ">New Subscription</h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscription }}</h4>
-                                            </div>
-                                           
-                                        </div>
+                                        <h6 class="mb-2 tx-12">New Subscription</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscription }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                    <div class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-gift tx-16 text-white"></i> <!-- New Subscription Icon -->
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
+    
+                <!-- Renewed Subscription -->
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12 ">Renewed Subscription</h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscription }}</h4>
-                                            </div>
-                                            {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-															<span class="text-success font-weight-semibold"> +427</span>
-														</p> --}}
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Renewed Subscription</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscription }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                    <div class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-recycle tx-16 text-white"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
+    
+                <!-- Customize Order -->
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-
                     <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12">Customize Order</h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $ordersRequestedToday }}
-                                                </h4>
-                                            </div>
-
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Customize Order</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $ordersRequestedToday }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-                                        <i class="si si-user-follow tx-16 text-info"></i>
+                                    <div class="circle-icon bg-gradient-to-r from-green-400 to-teal-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-cogs tx-16 text-white"></i> <!-- Customize Order Icon -->
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+    
+                <!-- Paused Subscription -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
-
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12">Paused Subscription</h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
-                                            </div>
-                                            {{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="text-danger font-weight-semibold"> -693</span>
-														</p> --}}
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Paused Subscription</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
                                     </div>
-
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                    <div class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+    
+                <!-- Active Subscription -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
-
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12">Active Subscription</h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptions }}
-                                                </h4>
-                                            </div>
-                                            {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-															<span class=" text-success font-weight-semibold"> +788</span>
-														</p> --}}
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Active Subscription</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptions }}</h4>
                                     </div>
                                 </div>
-
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="si si-user-following tx-16 text-secondary"></i>
+                                    <div class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-play tx-16 text-white"></i> <!-- Active Subscription Icon -->
                                     </div>
                                 </div>
                             </div>
@@ -231,46 +280,52 @@
                     </a>
                 </div>
 
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
+                        <div class="card sales-card">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Subscription Ends Today</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $todayEndSubscription }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-exclamation-triangle tx-16 text-white"></i><!-- Active Subscription Icon -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+    
+                <!-- Expired Subscription -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
-
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12">Expired Subscription</h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}
-                                                </h4>
-                                            </div>
-                                            {{-- <p class="mb-0 tx-12  text-muted">Last week<i class="fa fa-caret-down mx-2 text-danger"></i>
-															<span class="text-danger font-weight-semibold"> -693</span>
-														</p> --}}
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Expired Subscription</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-warning-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                    <div class="circle-icon bg-gradient-to-r from-red-600 to-orange-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-skull-crossbones tx-16 text-white"></i>
+                                        <!-- Expired Subscription Icon -->
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-
-
             </div>
-
         </div>
-
-
-        <!-- </div> -->
     </div>
+    
+    
     <!-- row closed -->
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
@@ -393,220 +448,185 @@
             <h4 class="card-title-custom"> Rider Details</h4>
 
             <div class="row">
-
+                <!-- Total Riders -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card bg-gradient-primary text-white">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12 ">Total Riders</h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalRiders }}</h4>
-                                            </div>
-
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Total Riders</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalRiders }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                    <div class="circle-icon bg-white text-primary text-center">
+                                        <i class="fa fa-users fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
+            
+                <!-- Total Delivery Today -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'todaydelivery']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card bg-gradient-info text-white">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12">Total Delivery Today </h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveriesToday }}
-                                                </h4>
-                                            </div>
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Total Delivery Today</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveriesToday }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-                                        <i class="si si-user-follow tx-16 text-info"></i>
+                                    <div class="circle-icon bg-white text-info text-center">
+                                        <i class="fa fa-calendar-check fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
+            
+                <!-- Total Delivery in Month -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
-                        target="_blank">
-
-                        <div class="card sales-card">
+                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}" target="_blank">
+                        <div class="card sales-card bg-gradient-success text-white">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12">Total Delivery in this Month </h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">
-                                                    {{ $totalDeliveriesThisMonth }} </h4>
-                                            </div>
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Total Delivery in Month</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveriesThisMonth }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-                                        <i class="si si-user-follow tx-16 text-info"></i>
+                                    <div class="circle-icon bg-white text-success text-center">
+                                        <i class="fa fa-calendar-alt fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
+            
+                <!-- Total Delivery -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-
-                        <div class="card sales-card">
+                        <div class="card sales-card bg-gradient-secondary text-white">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12">Total Delivery</h6>
-                                        </div>
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveries }}</h4>
-                                            </div>
-                                        </div>
+                                        <h6 class="mb-2 tx-12">Total Delivery</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveries }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-secondary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="si si-user-following tx-16 text-secondary"></i>
+                                    <div class="circle-icon bg-white text-secondary text-center">
+                                        <i class="fa fa-box fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-
             </div>
+            
         </div>
     </div>
-    <!-- row closed -->
-    <!---Expenses in a day-->
-    <!-- row closed -->
+  
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <h4 class="card-title-custom"> Expenses Details in a Day</h4>
-
+            <h4 class="card-title-custom">Expenses Details in a Day</h4>
+    
             <div class="row">
+    
+                <!-- Total Expense Today -->
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-
-                    <a href="{{ route('admin.manageflowerpickupdetails', ['filter' => 'todayexpenses']) }}"
-                        target="_blank">
+                    <a href="{{ route('admin.manageflowerpickupdetails', ['filter' => 'todayexpenses']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <div class="">
-                                            <h6 class="mb-2 tx-12">Total Expense in a Today </h6>
+                                            <h6 class="mb-2 tx-12">Total Expense Today</h6>
                                         </div>
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2"> ₹ {{ $totalExpensesday }}
-                                                </h4>
+                                                <h4 class="tx-20 font-weight-semibold mb-2">₹ {{ $totalExpensesday }}</h4>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-                                        <i class="si si-user-follow tx-16 text-info"></i>
+                                <div class="col-4 text-center">
+                                    <div class="circle-icon bg-gradient-primary text-white text-center align-self-center">
+                                        <i class="fas fa-wallet fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
+    
+                <!-- Total Paid Today -->
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.manageflowerpickupdetails', ['filter' => 'todaypaidpickup']) }}"
-                        target="_blank">
+                    <a href="{{ route('admin.manageflowerpickupdetails', ['filter' => 'todaypaidpickup']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <div class="">
-                                            <h6 class="mb-2 tx-12 ">Total Paid in a Day</h6>
+                                            <h6 class="mb-2 tx-12">Total Paid in a Day</h6>
                                         </div>
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">₹ {{ $totalPaidExpensesday }}
-                                                </h4>
+                                                <h4 class="tx-20 font-weight-semibold mb-2">₹ {{ $totalPaidExpensesday }}</h4>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                <div class="col-4 text-center">
+                                    <div class="circle-icon bg-gradient-success text-white text-center align-self-center">
+                                        <i class="fas fa-hand-holding-usd fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
+    
+                <!-- Total Unpaid Today -->
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.manageflowerpickupdetails', ['filter' => 'todaypendingpickup']) }}"
-                        target="_blank">
+                    <a href="{{ route('admin.manageflowerpickupdetails', ['filter' => 'todaypendingpickup']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <div class="">
-                                            <h6 class="mb-2 tx-12">Total Unpaid in a Day </h6>
+                                            <h6 class="mb-2 tx-12">Total Unpaid in a Day</h6>
                                         </div>
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
-                                                <h4 class="tx-20 font-weight-semibold mb-2">₹
-                                                    {{ $totalUnpaidExpensesday }} </h4>
+                                                <h4 class="tx-20 font-weight-semibold mb-2">₹ {{ $totalUnpaidExpensesday }}</h4>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-info-transparent text-center align-self-center overflow-hidden">
-                                        <i class="si si-user-follow tx-16 text-info"></i>
+                                <div class="col-4 text-center">
+                                    <div class="circle-icon bg-gradient-warning text-white text-center align-self-center">
+                                        <i class="fas fa-credit-card fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-
-
+    
             </div>
         </div>
     </div>
+    
     <!-- row closed -->
     <!---Expenses in month-->
     <!-- row closed -->

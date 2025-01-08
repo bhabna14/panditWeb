@@ -162,6 +162,11 @@ public function admindashboard()
         })
         ->count();
 
+
+        $todayEndSubscription = Subscription::whereDate('end_date', Carbon::today())
+        ->where('status', 'active')
+        ->count();
+    
         $expiredSubscriptionsProduct = ProductSucription::where('status', 'expired')
         ->whereNotIn('user_id', function ($query) {
             $query->select('user_id')
@@ -316,6 +321,7 @@ public function admindashboard()
         'activeSubscriptions',
         'pausedSubscriptions',
         'expiredSubscriptions',
+        'todayEndSubscription',
         'ordersRequestedToday',
         'subscriptionOrderToday',
         'notifications',
