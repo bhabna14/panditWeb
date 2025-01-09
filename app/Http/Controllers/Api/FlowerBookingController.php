@@ -634,7 +634,7 @@ public function purchaseSubscription(Request $request)
         ]);
 
         $emails = [
-            'bhabana.samantara@33crores.com',
+            'soumyaranjan.puhan@33crores.com',
             'pankaj.sial@33crores.com',
             'basudha@33crores.com',
             'priya@33crores.com',

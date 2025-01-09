@@ -245,7 +245,7 @@ class OrderController extends Controller
             }
     
             $today = Carbon::today();
-    
+
             // Fetch delivery history with pending status and today's delivery start time
             $deliveries = DeliveryHistory::where('rider_id', $rider->rider_id)
                 // ->where('delivery_status', 'pending')
