@@ -217,11 +217,16 @@ public function storerequest(Request $request)
             ]);
         }
 
-        // Firebase Notification Logic
         $deviceTokens = UserDevice::where('user_id', $user->userid)
-            ->whereNotNull('device_id')
-            ->pluck('device_id')
-            ->toArray();
+    ->whereNotNull('device_id')
+    ->pluck('device_id')
+    ->filter()
+    ->toArray();
+
+if (empty($deviceTokens)) {
+    \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+}
+
 
         if (!empty($deviceTokens)) {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
@@ -255,7 +260,12 @@ public function storerequest(Request $request)
         ];
 
         \Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
-        Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+try {
+    Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+    \Log::info('Email sent successfully to all recipients.');
+} catch (\Exception $e) {
+    \Log::error('Failed to send email.', ['error' => $e->getMessage()]);
+}
         \Log::info('Email sent successfully to all recipients.');
 
         // Twilio WhatsApp Notification Logic
@@ -282,14 +292,20 @@ public function storerequest(Request $request)
             $messageBody .= "- {$item->flower_name}: {$item->flower_quantity} {$item->flower_unit}\n";
         }
 
-        $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
-        $twilioClient->messages->create(
-            "whatsapp:{$adminNumber}",
-            [
-                'from' => $twilioWhatsAppNumber,
-                'body' => $messageBody,
-            ]
-        );
+        try {
+            $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
+            $twilioClient->messages->create(
+                "whatsapp:{$adminNumber}",
+                [
+                    'from' => $twilioWhatsAppNumber,
+                    'body' => $messageBody,
+                ]
+            );
+            \Log::info('WhatsApp notification sent successfully.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to send WhatsApp notification.', ['error' => $e->getMessage()]);
+        }
+        
 
         \Log::info('WhatsApp notification sent successfully.', ['admin_number' => $adminNumber]);
 
@@ -374,7 +390,7 @@ public function storerequest(Request $request)
                 // Map product image URL
                 if ($request->flowerProduct) {
                     // Generate full URL for the product image
-                    $request->flowerProduct->product_image_url = asset('storage/' . $request->flowerProduct->product_image);
+                    $request->flowerProduct->product_image_url =  $request->flowerProduct->product_image;
                 }
         
                 return $request;
