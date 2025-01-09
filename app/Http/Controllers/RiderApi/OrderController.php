@@ -120,31 +120,30 @@ class OrderController extends Controller
     {
         try {
             $rider = Auth::guard('rider-api')->user();
-
+    
             if (!$rider) {
                 return response()->json([
                     'status' => 401,
                     'message' => 'Unauthorized',
                 ], 401);
             }
-
+    
             // Fetch today's orders assigned to the rider
             $today = Carbon::today();
             $orders = Order::where('rider_id', $rider->rider_id)
-            ->whereHas('subscription', function ($query) use ($today) {
-                $query->where('status', 'active')
-                    ->where(function ($query) use ($today) {
-                        $query->whereNotNull('new_date') // If new_date exists, check it
-                            ->whereDate('new_date', '>=', $today)
-                            ->orWhere(function ($query) use ($today) { // Fallback to end_date if new_date is null
-                                $query->whereNull('new_date')
-                                    ->whereDate('end_date', '>=', $today);
-                            });
-                    });
-            })
-            ->get();
-        
-// dd($orders);
+                ->whereHas('subscription', function ($query) use ($today) {
+                    $query->where('status', 'active')
+                        ->where(function ($query) use ($today) {
+                            $query->whereNotNull('new_date')
+                                ->whereDate('new_date', '>=', $today)
+                                ->orWhere(function ($query) use ($today) {
+                                    $query->whereNull('new_date')
+                                        ->whereDate('end_date', '>=', $today);
+                                });
+                        });
+                })
+                ->get();
+    
             if ($orders->isEmpty()) {
                 return response()->json([
                     'status' => 200,
@@ -152,23 +151,37 @@ class OrderController extends Controller
                     'data' => [],
                 ]);
             }
-
-            // Save orders to delivery_history
+    
+            // Save orders to delivery_history after checking for duplicates
             foreach ($orders as $order) {
+                $existingDelivery = DeliveryHistory::where('order_id', $order->order_id)
+                    ->where('rider_id', $rider->rider_id)
+                    ->whereDate('created_at', $today)
+                    ->first();
+    
+                if ($existingDelivery) {
+                    return response()->json([
+                        'status' => 409, // Conflict status
+                        'message' => "Duplicate entry detected for order ID {$order->order_id} and rider ID {$rider->rider_id}. Delivery already started for today.",
+                    ]);
+                }
+    
                 DeliveryHistory::create([
                     'order_id' => $order->order_id,
                     'rider_id' => $rider->rider_id,
                     'delivery_status' => 'pending',
                     'start_delivery_time' => now(),
-                    'longitude' => $request->longitude ?? null, // Optional if provided
-                    'latitude' => $request->latitude ?? null,   // Optional if provided
+                    'longitude' => $request->longitude ?? null,
+                    'latitude' => $request->latitude ?? null,
                 ]);
             }
-                // Also save delivery start time in the new table
-                DeliveryStartHistory::create([
-                    'rider_id' => $rider->rider_id,
-                    'start_delivery_time' => now(), // Save the current time as start delivery time
-                ]);
+    
+            // Save start delivery time to delivery_start_history table
+            DeliveryStartHistory::updateOrCreate(
+                ['rider_id' => $rider->rider_id, 'start_delivery_time' => $today],
+                ['start_delivery_time' => now()]
+            );
+    
             return response()->json([
                 'status' => 200,
                 'message' => 'Delivery started successfully. Orders have been saved in delivery history.',
@@ -181,7 +194,6 @@ class OrderController extends Controller
             ], 500);
         }
     }
-
     
     //get assign order to rider every day basis till the end date and subscription is status is active
     // public function getAssignedOrders()
