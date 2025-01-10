@@ -532,19 +532,25 @@
                                             <a href="{{ route('admin.orders.show', $order->id) }}" class="btn btn-success">View</a>
                                         
                                             <!-- Pause/Resume Button -->
-                                            @if ($order->subscription->status == 'active')
-                                            <a href="javascript:void(0);" 
-                                            class="btn btn-info pause-button mt-2" 
-                                            onclick="openPauseModal('{{ $order->subscription->start_date }}', '{{ $order->subscription->end_date }}')">
-                                            Pause
-                                         </a>
-                                            @elseif ($order->subscription->status == 'paused')
-                                                <a href="javascript:void(0);" 
-                                                    class="btn btn-warning resume-button mt-2" 
-                                                    onclick="openResumeModal('{{ $order->subscription->pause_start_date }}', '{{ $order->subscription->pause_end_date }}')">
-                                                    Resume
-                                                </a>
-                                            @endif
+                                                @if ($order->subscription)
+                                                    @if ($order->subscription->status == 'active')
+                                                        <a href="javascript:void(0);" 
+                                                           class="btn btn-info pause-button mt-2" 
+                                                           onclick="openPauseModal('{{ $order->subscription->start_date }}', '{{ $order->subscription->end_date }}')">
+                                                           Pause
+                                                        </a>
+                                                    @elseif ($order->subscription->status == 'paused')
+                                                        <a href="javascript:void(0);" 
+                                                           class="btn btn-warning resume-button mt-2" 
+                                                           onclick="openResumeModal('{{ $order->subscription->pause_start_date }}', '{{ $order->subscription->pause_end_date }}')">
+                                                           Resume
+                                                        </a>
+                                                    @endif
+                                                @else
+                                                    <!-- Optionally, handle the case when there is no subscription -->
+                                                    <span>No subscription available</span>
+                                                @endif
+                                            
                                         
                                             <!-- Pause Modal -->
                                             <div class="modal fade" id="pauseModal" tabindex="-1" aria-labelledby="pauseModalLabel" aria-hidden="true">
