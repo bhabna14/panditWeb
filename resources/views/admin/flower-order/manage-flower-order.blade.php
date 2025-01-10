@@ -462,15 +462,16 @@
                                         </td>
 
                                         <td>
-                                            <span
-                                                class="status-badge 
-                                                        {{ $order->subscription->status === 'active' ? 'status-running bg-success' : '' }}
-                                                        {{ $order->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
-                                                        {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}
-                                                        {{ $order->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
-                                                {{ ucfirst($order->subscription->status) }}
+                                            <span class="status-badge
+                                                {{ optional($order->subscription)->status === 'active' ? 'status-running bg-success' : '' }}
+                                                {{ optional($order->subscription)->status === 'paused' ? 'status-paused bg-warning' : '' }}
+                                                {{ optional($order->subscription)->status === 'expired' ? 'status-expired bg-danger' : '' }}
+                                                {{ optional($order->subscription)->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                                
+                                                {{ ucfirst(optional($order->subscription)->status) }}
                                             </span>
                                         </td>
+                                        
                                         <td>
                                             @if ($order->rider_id)
                                                 <span>{{ $order->rider->rider_name }}</span>
