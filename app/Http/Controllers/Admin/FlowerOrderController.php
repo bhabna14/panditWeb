@@ -78,17 +78,15 @@ class FlowerOrderController extends Controller
     if ($request->query('filter') === 'expired') {
         $query->whereHas('subscription', function ($subQuery) {
             $subQuery->where('status', 'expired')
-            ->distinct('user_id')  
-            ->latest('end_date')
-            ->whereNotIn('user_id', function ($nestedQuery) {
-            $nestedQuery->select('user_id')
-            ->from('subscriptions')
-            ->whereIn('status', ['active', 'paused']);
-            });
-                    
+                ->distinct('user_id')  // Ensure distinct user_id in the subQuery
+                ->latest('end_date')
+                ->whereNotIn('user_id', function ($nestedQuery) {
+                    $nestedQuery->select('user_id')
+                        ->from('subscriptions')
+                        ->whereIn('status', ['active', 'paused']);
+                });
         });
     }
-    
     
     // Filter for paused subscriptions
     if ($request->query('filter') === 'paused') {
