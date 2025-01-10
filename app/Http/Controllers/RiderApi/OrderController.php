@@ -195,53 +195,6 @@ class OrderController extends Controller
         }
     }
     
-    //get assign order to rider every day basis till the end date and subscription is status is active
-    // public function getAssignedOrders()
-    // {
-    //     try {
-    //         // Fetch today's orders based on subscription table
-    
-    //         $rider = Auth::guard('rider-api')->user();
-    
-    //         if (!$rider) {
-    //             return response()->json([
-    //                 'status' => 401,
-    //                 'message' => 'Unauthorized',
-    //             ], 401);
-    //         }
-    
-    //         $today = Carbon::today();
-    //         $orders = Order::where('rider_id', $rider->rider_id)
-            
-    //             ->whereHas('subscription', function ($query) use ($today) {
-    //                 $query->where('status', 'active')
-    //                 ->whereDate('end_date', '>=', $today);
-    //             })
-    //             ->with(['subscription', 'delivery', 'user', 'flowerProduct', 'address.localityDetails'])
-    //             ->orderBy('id', 'desc')
-    //             ->get();
-    
-    //         if ($orders->isEmpty()) {
-    //             return response()->json([
-    //                 'status' => 200,
-    //                 'message' => 'No orders assigned for today',
-    //                 'data' => [],
-    //             ]);
-    //         }
-    
-    //         return response()->json([
-    //             'status' => 200,
-    //             'message' => 'Assigned orders for today fetched successfully',
-    //             'data' => $orders,
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'status' => 500,
-    //             'message' => 'An error occurred while fetching assigned orders.',
-    //             'error' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
 
     public function getAssignedOrders()
     {

@@ -19,7 +19,7 @@
 
 .card.sales-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 12px rgba(47, 41, 47, 0.2);
 }
 
 /* Title Styling */
@@ -155,7 +155,7 @@
     <!-- row -->
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
-            <div class="card">
+            <div class="card" >
                 <div class="card-body">
                     <div class="row">
                         <div class="col-xl-9 col-lg-7 col-md-12 col-sm-12">
@@ -349,119 +349,94 @@
     <!-- row closed -->
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <h4 class="card-title-custom">Individual Rider Details</h4>
-
+            <h4 class="card-title-custom mb-4">Individual Rider Details</h4>
+    
             <div class="row">
-
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card">
+    
+                <!-- Bablu Prusty -->
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
+                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" class="text-decoration-none">
+                        <div class=" sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12 ">Bablu Prusty</h6>
-                                        </div>
-
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-12 font
-															-weight-semibold mb-2">Total Delivery:
-                                                    {{ $totalAssignedOrderstobablu }}</h4>
-
-                                                <h4 class="tx-12 font
-															-weight-semibold mb-2">Total
-                                                    Delivered: {{ $totalDeliveredTodaybybablu }}</h4>
-
-                                            </div>
+                                        <h6 class="mb-2 text-dark">Bablu Prusty</h6>
+                                        <div class="d-flex flex-column">
+                                            <!-- Total Delivery with icon -->
+                                            <h4 class="tx-12 font-weight-semibold text-dark mb-2">
+                                                <i class="fas fa-truck-loading me-2 text-dark"></i> Total Delivery: {{ $totalAssignedOrderstobablu }}
+                                            </h4>
+                                    
+                                            <!-- Total Delivered with icon -->
+                                            <h4 class="tx-12 font-weight-semibold text-dark mb-0">
+                                                <i class="fas fa-check-circle me-2 text-dark"></i> Total Delivered: {{ $totalDeliveredTodaybybablu }}
+                                            </h4>
                                         </div>
                                     </div>
+                                    
                                 </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                <div class="col-4 d-flex justify-content-center align-items-center">
+                                    <div class="circle-icon bg-white text-primary text-center" style="border-radius: 50%; width: 60px; height: 60px;">
+                                        <i class="fas fa-truck-loading fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card">
+    
+                <!-- Subrat -->
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
+                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" class="text-decoration-none">
+                        <div class=" sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12 ">Subrat</h6>
-                                        </div>
-
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-12 font
-															-weight-semibold mb-2">Total Delivery:
-                                                    {{ $totalAssignedOrderstosubrat }}</h4>
-
-                                                <h4 class="tx-12 font
-															-weight-semibold mb-2">Total
-                                                    Delivered: {{ $totalDeliveredTodaybysubrat }}</h4>
-
-                                            </div>
+                                        <h6 class="mb-2 text-dark">Subrat</h6>
+                                        <div class="d-flex flex-column">
+                                            <h4 class="tx-12 font-weight-semibold text-dark mb-2"><i class="fas fa-truck-loading me-2 text-dark"></i>Total Delivery: {{ $totalAssignedOrderstosubrat }}</h4>
+                                            <h4 class="tx-12 font-weight-semibold text-dark mb-0"> <i class="fas fa-check-circle me-2 text-dark"></i> Total Delivered: {{ $totalDeliveredTodaybysubrat }}</h4>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                <div class="col-4 d-flex justify-content-center align-items-center">
+                                    <div class="circle-icon bg-white text-primary text-center" style="border-radius: 50%; width: 60px; height: 60px;">
+                                        <i class="fas fa-box-open fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card">
+    
+                <!-- Prahlad -->
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
+                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" class="text-decoration-none">
+                        <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <div class="">
-                                            <h6 class="mb-2 tx-12 ">Prahlad</h6>
-                                        </div>
-
-                                        <div class="pb-0 mt-0">
-                                            <div class="d-flex">
-                                                <h4 class="tx-12 font
-															-weight-semibold mb-2">Total Delivery:
-                                                    {{ $totalAssignedOrderstoprahlad }}</h4>
-
-                                                <h4 class="tx-12 font
-															-weight-semibold mb-2">Total
-                                                    Delivered: {{ $totalDeliveredTodaybyprahlad }}</h4>
-
-                                            </div>
+                                        <h6 class="mb-2 text-dark">Prahlad</h6>
+                                        <div class="d-flex flex-column">
+                                            <h4 class="tx-12 font-weight-semibold text-dark mb-2"><i class="fas fa-truck-loading me-2 text-dark"></i>Total Delivery: {{ $totalAssignedOrderstoprahlad }}</h4>
+                                            <h4 class="tx-12 font-weight-semibold text-dark mb-0"> <i class="fas fa-check-circle me-2 text-dark"></i> Total Delivered: {{ $totalDeliveredTodaybyprahlad }}</h4>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-primary-transparent text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-primary"></i>
+                                <div class="col-4 d-flex justify-content-center align-items-center">
+                                    <div class="circle-icon bg-white text-primary text-center" style="border-radius: 50%; width: 60px; height: 60px;">
+                                        <i class="fas fa-user-check fa-2x"></i>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
-
-
-
+    
             </div>
         </div>
     </div>
+    
     <!-- row closed -->
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">

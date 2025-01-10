@@ -111,13 +111,17 @@
                                             <tbody>
                                                 @foreach($deliveryHistory as $history)
                                                     <tr>
-                                                        <td>{{ $history->order->order_id }}</td>
+                                                        <td>{{ optional($history->order)->order_id ?? 'N/A' }}</td>
                                                         <td>{{ $history->order->user->mobile_number ?? 'N/A' }}</td>
                                                         <td>{{ $history->order->flowerProduct->name ?? 'N/A' }}</td>
                                                         <td>
-                                                            @foreach($history->order->flowerPayments as $payment)
-                                                                <p> ₹{{ $payment->paid_amount }}</p>
-                                                            @endforeach
+                                                            @if($history->order && $history->order->flowerPayments)
+                                                                @foreach($history->order->flowerPayments as $payment)
+                                                                    <p> ₹{{ $payment->paid_amount }}</p>
+                                                                @endforeach
+                                                            @else
+                                                                <p>N/A</p>
+                                                            @endif
                                                         </td>
                                                         <td>
                                                             <strong>Address:</strong> {{ $history->order->address->apartment_flat_plot ?? "" }}, {{ $history->order->address->localityDetails->locality_name ?? "" }}<br>
