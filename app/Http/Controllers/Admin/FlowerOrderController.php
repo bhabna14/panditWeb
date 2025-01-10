@@ -77,10 +77,13 @@ class FlowerOrderController extends Controller
     
     // Filter for expired subscriptions without a new subscription
     if ($request->query('filter') === 'expired') {
-        $query->whereDoesntHave('subscription', function ($subQuery) {
+        $query->whereDoesntHave('subscriptions', function ($subQuery) {
             $subQuery->whereIn('status', ['active', 'paused', 'resume']);
-        })->where('status', 'expired');
+        })->whereHas('subscriptions', function ($subQuery) {
+            $subQuery->where('status', 'expired');
+        });
     }
+    
     
 
     // Filter for paused subscriptions
