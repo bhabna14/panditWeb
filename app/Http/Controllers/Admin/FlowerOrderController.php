@@ -83,9 +83,11 @@ class FlowerOrderController extends Controller
                          $nestedQuery->select('user_id')
                                      ->from('subscriptions')
                                      ->whereIn('status', ['active', 'paused']);
-                     });
+                     })
+                     ->whereRaw('end_date = (SELECT MAX(end_date) FROM subscriptions WHERE subscriptions.user_id = subscription.user_id AND status = "expired")');
         });
     }
+    
     
     // Filter for paused subscriptions
     if ($request->query('filter') === 'paused') {
