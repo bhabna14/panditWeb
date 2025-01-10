@@ -82,11 +82,11 @@ class FlowerOrderController extends Controller
                      ->whereNotIn('user_id', function ($nestedQuery) {
                          $nestedQuery->select('user_id')
                                      ->from('subscriptions')
-                                     ->where('status', 'active');
+                                     ->whereIn('status', ['active', 'paused']);
                      });
         });
     }
-
+    
     // Filter for paused subscriptions
     if ($request->query('filter') === 'paused') {
         $query->whereHas('subscription', function ($subQuery) {
