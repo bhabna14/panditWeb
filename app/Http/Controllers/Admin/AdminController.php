@@ -168,8 +168,6 @@ public function admindashboard()
     })
     ->count();
 
-
-
         $todayEndSubscription = Subscription::whereDate('end_date', Carbon::today())
         ->where('status', 'active')
         ->count();
