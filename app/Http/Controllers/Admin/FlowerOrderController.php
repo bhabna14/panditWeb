@@ -76,15 +76,19 @@ class FlowerOrderController extends Controller
     }
 
     if ($request->query('filter') === 'expired') {
-        $query->whereHas('subscription', function ($subQuery) {
-            $subQuery->where('status', 'expired')
-                ->whereNotIn('user_id', function ($nestedQuery) {
-                    $nestedQuery->select('user_id')
-                        ->from('subscriptions')
-                        ->whereIn('status', ['active', 'paused']);
-                })
-                ->groupBy('user_id')  // Group by user_id to get one record per user
-                ->orderBy('end_date', 'desc');  // Order by the latest end_date
+        $latestExpiredSubscriptions = Subscription::selectRaw('MAX(end_date) as latest_end_date, user_id')
+            ->where('status', 'expired')
+            ->whereNotIn('user_id', function ($nestedQuery) {
+                $nestedQuery->select('user_id')
+                    ->from('subscriptions')
+                    ->whereIn('status', ['active', 'paused']);
+            })
+            ->groupBy('user_id');  // Group by user_id to ensure one record per user
+    
+        $query->whereHas('subscription', function ($subQuery) use ($latestExpiredSubscriptions) {
+            $subQuery->whereIn('end_date', $latestExpiredSubscriptions->pluck('latest_end_date'))
+                ->whereIn('user_id', $latestExpiredSubscriptions->pluck('user_id'))
+                ->where('status', 'expired');
         });
     }
 
