@@ -165,12 +165,13 @@ public function admindashboard()
 
     // fetch the expired subscriptions whose new subscription is not created ( expired )
     $expiredSubscriptions = Subscription::where('status', 'expired')
-        ->whereNotIn('user_id', function ($query) {
-            $query->select('user_id')
-                ->from('subscriptions')
-                ->where('status', 'active');
-        })
-        ->count();
+    ->whereNotIn('user_id', function ($query) {
+        $query->select('user_id')
+            ->from('subscriptions')
+            ->whereIn('status', ['active', 'pause', 'resume']);
+    })
+    ->count();
+
 
 
         $todayEndSubscription = Subscription::whereDate('end_date', Carbon::today())
