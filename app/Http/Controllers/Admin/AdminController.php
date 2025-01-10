@@ -166,6 +166,7 @@ public function admindashboard()
             ->from('subscriptions')
             ->whereIn('status', ['active', 'paused', 'resume']);
     })
+    ->distinct('user_id')
     ->count();
 
         $todayEndSubscription = Subscription::whereDate('end_date', Carbon::today())
