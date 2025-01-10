@@ -86,8 +86,6 @@ public function admindashboard()
     // Fetch the total number of notifications (unread) (latest first)(not required now)
     $notifications = Notification::where('is_read', false)->latest()->get();  
     
-
-
     // Fetch the total number of new user subscriptions today
     $newUserSubscription = Order::whereDate('created_at', Carbon::today())
         ->whereNull('request_id') // Add condition for request_id to be NULL
@@ -158,8 +156,6 @@ public function admindashboard()
     $activeSubscriptions = Subscription::where('status', 'active')->count();
 
     $activeSubscriptionsProduct = ProductSucription::where('status', 'active')->count();
-
-
     // Fetch the total number of paused subscriptions
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
 
@@ -168,7 +164,7 @@ public function admindashboard()
     ->whereNotIn('user_id', function ($query) {
         $query->select('user_id')
             ->from('subscriptions')
-            ->whereIn('status', ['active', 'pause', 'resume']);
+            ->whereIn('status', ['active', 'paused', 'resume']);
     })
     ->count();
 

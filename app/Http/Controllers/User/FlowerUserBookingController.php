@@ -163,7 +163,7 @@ class FlowerUserBookingController extends Controller
         try {
             Subscription::create([
                 'subscription_id' => $subscriptionId,
-                'user_id' => $user->userid,
+                'user_id' => $user->userid, 
                 'order_id' => $orderId,
                 'product_id' => $productId,
                 'start_date' => $startDate,
