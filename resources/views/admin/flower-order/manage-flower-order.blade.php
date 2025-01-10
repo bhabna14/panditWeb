@@ -225,11 +225,17 @@
                                         <td>{{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') : 'N/A' }}
                                         </td>
 
-                                        <td>{{ $order->flowerProduct->name }} <br>
-                                            ({{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }}
-                                            -
-                                            {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }})
+                                        <td>
+                                            {{ $order->flowerProduct->name }} <br>
+                                            @if($order->subscription)
+                                                ({{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }}
+                                                -
+                                                {{ $order->subscription->new_date ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y') : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }})
+                                            @else
+                                                <span>No subscription data</span>
+                                            @endif
                                         </td>
+                                        
                                         <td>
                                             <!-- Button to Open Modal -->
                                             <button type="button" class="btn btn-outline-primary btn-sm"
