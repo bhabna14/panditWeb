@@ -76,7 +76,7 @@ class FlowerOrderController extends Controller
     }
     
     if ($request->query('filter') === 'expired') {
-        $expiredSubscriptions->whereHas('subscription', function ($subQuery) {
+        $query->whereHas('subscription', function ($subQuery) {
             $subQuery->where('status', 'expired')
                      ->whereNotIn('user_id', function ($nestedQuery) {
                          $nestedQuery->select('user_id')
