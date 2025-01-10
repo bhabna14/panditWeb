@@ -75,13 +75,16 @@ class FlowerOrderController extends Controller
         });
     }
     
-    // Filter for expired subscriptions without a new subscription
     if ($request->query('filter') === 'expired') {
-        $query->whereDoesntHave('subscription', function ($subQuery) {
+        $query->whereDoesntHave('subscriptions', function ($subQuery) {
             $subQuery->whereIn('status', ['active', 'paused', 'resume']);
-        })->whereHas('subscription', function ($subQuery) {
+        })->whereHas('subscriptions', function ($subQuery) {
             $subQuery->where('status', 'expired');
-        });
+        })->with(['subscriptions' => function ($subQuery) {
+            $subQuery->where('status', 'expired')
+                     ->orderBy('end_date', 'desc') // Sort by the latest end date
+                     ->limit(1); // Get only the latest expired subscription
+        }]);
     }
     
 
