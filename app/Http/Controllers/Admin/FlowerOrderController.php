@@ -74,7 +74,7 @@ class FlowerOrderController extends Controller
             $subQuery->where('status', 'active');
         });
     }
-    
+
     if ($request->query('filter') === 'expired') {
         $query->whereHas('subscription', function ($subQuery) {
             $subQuery->where('status', 'expired')
@@ -83,8 +83,8 @@ class FlowerOrderController extends Controller
                         ->from('subscriptions')
                         ->whereIn('status', ['active', 'paused']);
                 })
-                ->distinct('user_id')  // Ensure distinct user_id inside whereHas as well
-                ->latest('end_date');  // Order by latest end_date within whereHas
+                ->groupBy('user_id')  // Group by user_id to get one record per user
+                ->orderBy('end_date', 'desc');  // Order by the latest end_date
         });
     }
 
