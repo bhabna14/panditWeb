@@ -217,7 +217,7 @@
                         <div class="row x-gap-15 y-gap-20">
                             <div class="col-auto">
                                 <!-- Display the product or pandit's photo -->
-                                <img src="{{ asset('storage/'.$product->product_image ?? 'default-image.jpg') }}" alt="Subscription Image" class="size-140 rounded-4 object-cover">
+                                <img src="{{ $product->product_image}}" alt="Subscription Image" class="size-140 rounded-4 object-cover">
                             </div>
                             <div class="col">
                                 <div class="lh-17 fw-500">{{ $product->name }}</div>

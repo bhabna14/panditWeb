@@ -206,7 +206,7 @@
                 </div>
                 <div class="row order-details-booking">
                     <div class="col-md-2">
-                        <img src="{{asset('storage/'.$request->flowerProduct->product_image) }}" alt="Product Image" /> <!-- Display product image -->
+                        <img src="{{$request->flowerProduct->product_image }}" alt="Product Image" /> <!-- Display product image -->
                     </div>
                     <div class="col-md-7">
                         <h6>{{ $request->flowerProduct->name }}</h6> <!-- Subscription name -->
