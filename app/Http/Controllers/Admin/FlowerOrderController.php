@@ -101,7 +101,7 @@ class FlowerOrderController extends Controller
 
     // Retrieve the filtered orders
     $orders = $query->get();
-    
+
     $activeSubscriptions = Subscription::where('status', 'active')->count();
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
     $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
@@ -133,13 +133,6 @@ public function showNotifications()
         $addressdata = UserAddress::where('user_id', $userid)
                                 ->where('status','active')
                                 ->get();
-    
-        // Fetch user orders based on `userid`
-        // $orders = Order::where('user_id', $userid)
-        //                ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address'])
-        //                ->orderBy('id', 'desc')
-        //                ->get();
-
         $orders = Order::where('user_id', $userid)
     ->whereHas('subscription', function ($query) {
         // This ensures that only orders with a related subscription are included
@@ -563,6 +556,21 @@ public function resume(Request $request, $order_id)
     } catch (\Exception $e) {
         return redirect()->back()->with('error', 'Failed to resume subscription.');
     }
+}
+
+public function discontinue($userId)
+{
+    // Find all subscriptions related to the order
+    $subscriptions = Subscription::where('user_id', $userId)->get();
+
+    // Update their status to 'dead'
+    foreach ($subscriptions as $subscription) {
+        $subscription->status = 'dead';
+        $subscription->save();
+    }
+
+    // Redirect back with a success message
+    return redirect()->back()->with('success', 'All related subscriptions have been discontinued.');
 }
 
 

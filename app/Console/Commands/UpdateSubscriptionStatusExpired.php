@@ -28,8 +28,9 @@ class UpdateSubscriptionStatusExpired extends Command
         // Get today's date
         $today = Carbon::now()->startOfDay();
     
-        // Get subscriptions where status is not already expired
-        $subscriptions = Subscription::where('status', '!=', 'expired')->get();
+        // Get subscriptions where status is neither 'expired' nor 'dead'
+         $subscriptions = Subscription::whereNotIn('status', ['expired', 'dead'])->get();
+
     
         foreach ($subscriptions as $subscription) {
             // Determine the expiry date

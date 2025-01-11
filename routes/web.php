@@ -272,6 +272,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
     Route::post('/subscription/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('subscription.pause');
     Route::post('/subscription/{order_id}/resume', [FlowerOrderController::class, 'resume'])->name('subscription.resume');
+    Route::get('/subscriptions/discontinue/{userId}', [FlowerOrderController::class, 'discontinue'])->name('admin.subscriptions.discontinue');
 
     Route::put('/orders/{order_id}/update-payment-status', [FlowerOrderController::class, 'updatePaymentStatus'])->name('admin.orders.updatePaymentStatus');
     Route::get('/manage-delivery-history', [FlowerOrderController::class, 'mngdeliveryhistory'])->name('admin.managedeliveryhistory');
