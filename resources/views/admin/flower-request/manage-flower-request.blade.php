@@ -178,16 +178,21 @@
                                                                 </form>
                                                             @endif
                                                         </td>
+                                                        
                                                         <td>
-                                                            <form action="{{ route('admin.markPayment', $request->request_id) }}" method="POST" style="display: inline;">
+                                                            <form id="markPaymentForm_{{ $request->request_id }}" 
+                                                                  action="{{ route('admin.markPayment', $request->request_id) }}" 
+                                                                  method="POST" 
+                                                                  style="display: inline;">
                                                                 @csrf
                                                                 @if ($request->status == 'pending' || $request->status == 'paid')
-                                                                    <button type="submit" class="btn btn-success mt-2" disabled>Paid</button>
+                                                                    <button type="button" class="btn btn-success mt-2" disabled>Paid</button>
                                                                 @elseif ($request->status == 'approved')
-                                                                <button type="button" class="btn btn-success mt-2" onclick="confirmPayment({{ $request->request_id }})">Paid</button>
+                                                                    <button type="button" class="btn btn-success mt-2" onclick="confirmPayment({{ $request->request_id }})">Paid</button>
                                                                 @endif
                                                             </form>
                                                         </td>
+                                                        
                                             
                                                         <td> 
                                                             @if ($request->order && $request->order->total_price)
