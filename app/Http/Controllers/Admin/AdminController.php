@@ -55,10 +55,13 @@ class AdminController extends Controller
     ]);
 
     if (Auth::guard('admins')->attempt($credentials)) {
+        
         $admin = Auth::guard('admins')->user();
+
         session(['admin_role' => $admin->role]); // Store role in session
         
         return redirect()->intended('/admin/dashboard');
+
     } else {
         return redirect()->back()->withInput()->withErrors(['login_error' => 'Invalid email or password']);
     }
