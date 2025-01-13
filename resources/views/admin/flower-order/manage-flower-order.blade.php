@@ -466,8 +466,10 @@
                                                 class="status-badge
                                                 {{ optional($order->subscription)->status === 'active' ? 'status-running bg-success' : '' }}
                                                 {{ optional($order->subscription)->status === 'paused' ? 'status-paused bg-warning' : '' }}
-                                                {{ optional($order->subscription)->status === 'expired' ? 'status-expired bg-danger' : '' }}
+                                                {{ optional($order->subscription)->status === 'expired' ? 'status-expired bg-info' : '' }}
+                                                {{ optional($order->subscription)->status === 'dead' ? 'status-expired bg-danger' : '' }}
                                                 {{ optional($order->subscription)->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                                 
                                                 {{ ucfirst(optional($order->subscription)->status) }}
                                             </span>
                                         </td>
