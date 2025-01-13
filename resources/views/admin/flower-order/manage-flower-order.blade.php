@@ -583,19 +583,13 @@
                                                                 method="POST">
                                                                 @csrf
                                                                 <div class="mb-3">
-                                                                    <label for="pause_start_date" class="form-label">Pause
-                                                                        Start Date</label>
-                                                                    <input type="date" id="pause_start_date"
-                                                                        name="pause_start_date" class="form-control"
-                                                                        required>
+                                                                    <label for="pause_start_date" class="form-label">Pause Start Date</label>
+                                                                    <input type="date" id="pause_start_date" name="pause_start_date" class="form-control" required>
                                                                 </div>
-
+                                                                
                                                                 <div class="mb-3">
-                                                                    <label for="pause_end_date" class="form-label">Pause
-                                                                        End Date</label>
-                                                                    <input type="date" id="pause_end_date"
-                                                                        name="pause_end_date" class="form-control"
-                                                                        required>
+                                                                    <label for="pause_end_date" class="form-label">Pause End Date</label>
+                                                                    <input type="date" id="pause_end_date" name="pause_end_date" class="form-control" required>
                                                                 </div>
 
                                                                 <p class="text-muted">
@@ -796,6 +790,13 @@
         });
     </script>
 @endif
+<script>
+    // Function to set the min attribute of the Pause End Date
+    document.getElementById('pause_start_date').addEventListener('change', function () {
+        let startDate = this.value;
+        document.getElementById('pause_end_date').setAttribute('min', startDate);
+    });
+</script>
 
 
 
