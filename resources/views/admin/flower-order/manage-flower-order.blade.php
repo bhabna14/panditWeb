@@ -551,7 +551,7 @@
                                                     <!-- Resume Button -->
                                                     <a href="javascript:void(0);"
                                                         class="btn btn-warning resume-button mt-2 d-flex align-items-center"
-                                                        onclick="openResumeModal('{{ $order->subscription->pause_start_date }}', '{{ $order->subscription->pause_end_date }}')">
+                                                        onclick="openResumeModal('{{ $order->subscription->pause_start_date }}', '{{ $order->subscription->pause_end_date }}','{{ $order->subscription->new_date ?? '' }}')">
                                                         <i class="fas fa-play-circle me-2"></i>resume
                                                     </a>
                                                     @elseif($order->subscription->status == 'expired')
@@ -752,12 +752,14 @@ function openPauseModal(startDate, endDate, newDate) {
 }
 
         // Open the Resume Modal
-        function openResumeModal(pauseStartDate, pauseEndDate) {
+        function openResumeModal(pauseStartDate, pauseEndDate,newDate) {
             const resumeDateField = document.getElementById('resume_date');
+
+            const adjustedEndDate = newDate || pauseEndDate;
 
             // Set the min and max for the resume date field
             resumeDateField.setAttribute('min', pauseStartDate);
-            resumeDateField.setAttribute('max', pauseEndDate);
+            resumeDateField.setAttribute('max', adjustedEndDate);
 
             // Set the default date to the pause start date
             resumeDateField.value = pauseStartDate;
