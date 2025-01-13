@@ -542,10 +542,11 @@
                                                 @if ($order->subscription->status == 'active')
                                                     <!-- Pause Button -->
                                                     <a href="javascript:void(0);"
-                                                        class="btn btn-info pause-button mt-2 d-flex align-items-center"
-                                                        onclick="openPauseModal('{{ $order->subscription->start_date }}', '{{ $order->subscription->end_date }}')">
-                                                        <i class="fas fa-pause-circle me-2"></i>pause
-                                                    </a>
+                                                    class="btn btn-warning pause-button mt-2 d-flex align-items-center"
+                                                    onclick="openPauseModal('{{ $order->subscription->start_date }}', '{{ $order->subscription->end_date }}', '{{ $order->subscription->new_date ?? '' }}')">
+                                                    <i class="fas fa-pause-circle me-2"></i> Pause
+                                                 </a>
+                                                 
                                                 @elseif ($order->subscription->status == 'paused')
                                                     <!-- Resume Button -->
                                                     <a href="javascript:void(0);"
@@ -726,25 +727,29 @@
     <!-- Bootstrap 5 -->
 
     <script>
-        // Open the Pause Modal and set the date range
-        function openPauseModal(startDate, endDate) {
-            const startDateField = document.getElementById('pause_start_date');
-            const endDateField = document.getElementById('pause_end_date');
-            const subscriptionStartText = document.getElementById('subscriptionStart');
-            const subscriptionEndText = document.getElementById('subscriptionEnd');
+      // Open the Pause Modal and set the date range
+function openPauseModal(startDate, endDate, newDate) {
+    const startDateField = document.getElementById('pause_start_date');
+    const endDateField = document.getElementById('pause_end_date');
+    const subscriptionStartText = document.getElementById('subscriptionStart');
+    const subscriptionEndText = document.getElementById('subscriptionEnd');
 
-            // Set the date range text
-            subscriptionStartText.textContent = startDate;
-            subscriptionEndText.textContent = endDate;
+    // Set the date range text
+    subscriptionStartText.textContent = startDate;
 
-            // Set the min and max attributes for the date fields
-            startDateField.setAttribute('min', startDate);
-            endDateField.setAttribute('min', startDate);
-            endDateField.setAttribute('max', endDate);
+    // Check if new_date is available and set the end date accordingly
+    const adjustedEndDate = newDate || endDate;
+    subscriptionEndText.textContent = adjustedEndDate;
 
-            // Open the modal using Bootstrap
-            new bootstrap.Modal(document.getElementById('pauseModal')).show();
-        }
+    // Set the min and max attributes for the date fields
+    startDateField.setAttribute('min', startDate);
+    endDateField.setAttribute('max', adjustedEndDate);
+    endDateField.setAttribute('min', startDate);
+    endDateField.setAttribute('max', adjustedEndDate);
+
+    // Open the modal using Bootstrap
+    new bootstrap.Modal(document.getElementById('pauseModal')).show();
+}
 
         // Open the Resume Modal
         function openResumeModal(pauseStartDate, pauseEndDate) {
