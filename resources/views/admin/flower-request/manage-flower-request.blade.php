@@ -184,7 +184,7 @@
                                                                 @if ($request->status == 'pending' || $request->status == 'paid')
                                                                     <button type="submit" class="btn btn-success mt-2" disabled>Paid</button>
                                                                 @elseif ($request->status == 'approved')
-                                                                    <button type="submit" class="btn btn-success mt-2">Paid</button>
+                                                                <button type="button" class="btn btn-success mt-2" onclick="confirmPayment({{ $request->request_id }})">Paid</button>
                                                                 @endif
                                                             </form>
                                                         </td>
@@ -345,6 +345,23 @@
             });
         });
         </script>
-        
+        <script>
+            function confirmPayment(requestId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You are about to mark this payment as Paid.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, mark as Paid!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('markPaymentForm_' + requestId).submit();
+        }
+    });
+}
+        </script>
+
 
 @endsection
