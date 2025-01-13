@@ -232,10 +232,7 @@
                                                     <strong><i class="fas fa-pause-circle me-2"></i></strong> {{ \Carbon\Carbon::parse($order->subscription->pause_start_date)->format('d-m-Y') }}<br>
                                                     <strong><i class="fas fa-play-circle me-2"></i></strong> {{ \Carbon\Carbon::parse($order->subscription->pause_end_date)->format('d-m-Y') }}
                                                 </div>
-                                            @else
-                                                <div style="margin-top: 8px; padding: 8px; background-color: #d4edda; color: #155724; border-radius: 5px;">
-                                                    <strong>Status:</strong> <span style="color: #28a745;">Active</span>
-                                                </div>
+                                         
                                             @endif
                                         </td>
                                         
