@@ -224,7 +224,6 @@
                                             </td>
 
                                         <td style="text-align: left; padding: 10px; font-size: 14px; color: #333;">
-                                            <strong>Created At:</strong> 
                                             {{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') : 'N/A' }}
                                             
                                             @if ($order->subscription && $order->subscription->status == 'paused')
