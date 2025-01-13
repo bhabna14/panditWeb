@@ -221,9 +221,24 @@
                                             Number : {{ $order->user->mobile_number }} <br>
                                             <a href="{{ route('showCustomerDetails', $order->user->userid) }}"
                                                 class="btn btn-sm btn-warning">View Customer</a>
+                                            </td>
+
+                                        <td style="text-align: left; padding: 10px; font-size: 14px; color: #333;">
+                                            <strong>Created At:</strong> 
+                                            {{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') : 'N/A' }}
+                                            
+                                            @if ($order->subscription && $order->subscription->status == 'paused')
+                                                <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
+                                                    <strong><i class="fas fa-pause-circle me-2"></i></strong> {{ \Carbon\Carbon::parse($order->subscription->pause_start_date)->format('d-m-Y') }}<br>
+                                                    <strong><i class="fas fa-play-circle me-2"></i></strong> {{ \Carbon\Carbon::parse($order->subscription->pause_end_date)->format('d-m-Y') }}
+                                                </div>
+                                            @else
+                                                <div style="margin-top: 8px; padding: 8px; background-color: #d4edda; color: #155724; border-radius: 5px;">
+                                                    <strong>Status:</strong> <span style="color: #28a745;">Active</span>
+                                                </div>
+                                            @endif
                                         </td>
-                                        <td>{{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') : 'N/A' }}
-                                        </td>
+                                        
 
                                         <td>
                                             {{ $order->flowerProduct->name }} <br>
