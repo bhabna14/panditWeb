@@ -6,7 +6,8 @@
     <link href="{{asset('assets/plugins/datatable/css/dataTables.bootstrap5.css')}}" rel="stylesheet" />
     <link href="{{asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css')}}"  rel="stylesheet">
     <link href="{{asset('assets/plugins/datatable/responsive.bootstrap5.css')}}" rel="stylesheet" />
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
     <!-- INTERNAL Select2 css -->
     <link href="{{asset('assets/plugins/select2/css/select2.min.css')}}" rel="stylesheet" />
 <style>
@@ -122,9 +123,7 @@
                                                     <th>Request ID</th>
                                                     <th>Purchase Date</th>
                                                     <th>Delivery Date</th>
-                                                  
                                                     <th>Flower Items</th>
-                                                   
                                                     <th>Status</th>
                                                     <th>Price</th>
                                                     <th>Actions</th>
@@ -178,7 +177,7 @@
                                                                 </form>
                                                             @endif
                                                         </td>
-                                                        
+
                                                         <td>
                                                             <form id="markPaymentForm_{{ $request->request_id }}" 
                                                                   action="{{ route('admin.markPayment', $request->request_id) }}" 
@@ -188,10 +187,11 @@
                                                                 @if ($request->status == 'pending' || $request->status == 'paid')
                                                                     <button type="button" class="btn btn-success mt-2" disabled>Paid</button>
                                                                 @elseif ($request->status == 'approved')
-                                                                    <button type="button" class="btn btn-success mt-2" onclick="confirmPayment({{ $request->request_id }})">Paid</button>
+                                                                    <button type="button" class="btn btn-success mt-2" onclick="confirmPayment('{{ $request->request_id }}')">Paid</button>
                                                                 @endif
                                                             </form>
                                                         </td>
+                                                        
                                                         
                                             
                                                         <td> 
@@ -351,7 +351,7 @@
         });
         </script>
         <script>
-            function confirmPayment(requestId) {
+          function confirmPayment(requestId) {
     Swal.fire({
         title: 'Are you sure?',
         text: "You are about to mark this payment as Paid.",
@@ -366,7 +366,9 @@
         }
     });
 }
+
         </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
 @endsection
