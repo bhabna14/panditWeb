@@ -68,7 +68,9 @@ class ReportController extends Controller
         // Filter orders based on subscription and payment method
         $orders = Order::whereHas('subscription', function ($query) use ($request) {
             $query->where('status', 'active')
-                  ->whereBetween('created_at', [$request->from_date, $request->to_date]);
+            ->orderBy('created_at', 'desc')
+            ->whereBetween('created_at', [$request->from_date, $request->to_date]);
+                
         })
         ->whereHas('flowerPayments', function ($query) use ($request) {
             $query->where('payment_status', 'paid'); // Filter only 'paid' payments
@@ -79,7 +81,6 @@ class ReportController extends Controller
             }
         
             // Order by 'created_at' in descending order
-            $query->orderBy('created_at', 'desc');
         })
         
         ->with(['user', 'flowerPayments', 'subscription'])
