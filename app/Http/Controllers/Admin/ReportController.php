@@ -72,12 +72,16 @@ class ReportController extends Controller
         })
         ->whereHas('flowerPayments', function ($query) use ($request) {
             $query->where('payment_status', 'paid'); // Filter only 'paid' payments
-    
+        
             // If a specific payment method is selected, filter by it
             if ($request->filled('payment_method')) {
                 $query->where('payment_method', $request->payment_method);
             }
+        
+            // Order by 'created_at' in descending order
+            $query->orderBy('created_at', 'desc');
         })
+        
         ->with(['user', 'flowerPayments', 'subscription'])
         ->get();
     
