@@ -58,41 +58,38 @@ class ReportController extends Controller
 
     public function filterRevenueReport(Request $request)
     {
-        // Validate the inputs
-        $request->validate([
-            'from_date' => 'required|date',
-            'to_date' => 'required|date|after_or_equal:from_date',
-            'payment_method' => 'nullable|string',
-        ]);
-    
-        // Filter orders based on subscription and payment method
-        $orders = Order::whereHas('subscription', function ($query) use ($request) {
-            $query->where('status', 'active')
-            ->orderBy('created_at', 'desc')
-            ->whereBetween('created_at', [$request->from_date, $request->to_date]);
-                
-        })
-        ->whereHas('flowerPayments', function ($query) use ($request) {
-            $query->where('payment_status', 'paid'); // Filter only 'paid' payments
-        
-            // If a specific payment method is selected, filter by it
-            if ($request->filled('payment_method')) {
-                $query->where('payment_method', $request->payment_method);
-            }
-        
-            // Order by 'created_at' in descending order
-        })
-        
-        ->with(['user', 'flowerPayments', 'subscription'])
-        ->get();
-    
-        // Calculate total revenue
-        $totalRevenue = $orders->sum(function ($order) {
-            return $order->flowerPayments->sum('paid_amount'); // Assuming `paid_amount` is the payment column
-        });
-    
-        // Return the view with the filtered data
-        return view('admin.reports.revenue-report', compact('orders', 'totalRevenue'));
+     // Validate the request
+$request->validate([
+    'from_date' => 'required|date',
+    'to_date' => 'required|date|after_or_equal:from_date',
+    'payment_method' => 'nullable|string',
+]);
+
+// Filter orders based on subscription and payment method
+$orders = Order::whereHas('subscription', function ($query) use ($request) {
+        $query->where('status', 'active')
+              ->whereBetween('created_at', [$request->from_date, $request->to_date]);
+    })
+    ->whereHas('flowerPayments', function ($query) use ($request) {
+        $query->where('payment_status', 'paid');
+
+        // If a specific payment method is selected, filter by it
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+    })
+    ->with(['user', 'flowerPayments', 'subscription'])
+    ->orderBy('created_at', 'desc') // ✅ Order by created_at in descending order
+    ->get();
+
+// Calculate total revenue
+$totalRevenue = $orders->sum(function ($order) {
+    return $order->flowerPayments->sum('paid_amount'); // Assuming `paid_amount` is the payment column
+});
+
+// Return the view with the filtered data
+return view('admin.reports.revenue-report', compact('orders', 'totalRevenue'));
+
     }
     
     
