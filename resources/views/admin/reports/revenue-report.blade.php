@@ -106,7 +106,7 @@
                     <tfoot>
                         <tr>
                             <th colspan="3">Grand Total</th>
-                            <th>Total Revenue: <span style="font-size: 25px;font-weight: bold">₹{{ number_format($totalRevenue, 2) }}</span></th>
+                            <th><span style="font-size: 25px;font-weight: bold">₹ {{ number_format($totalRevenue, 2) }}</span></th>
                         </tr>
                     </tfoot>
                 </table>
