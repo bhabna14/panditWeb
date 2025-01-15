@@ -169,6 +169,7 @@ public function admindashboard()
             ->from('subscriptions')
             ->whereIn('status', ['active', 'paused', 'resume']);
     })
+
     ->distinct('user_id')
     ->latest('end_date')
     ->count();

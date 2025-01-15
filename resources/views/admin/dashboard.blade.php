@@ -727,7 +727,6 @@
             <h4 class="card-title-custom">Other Details</h4>
 
             <div class="row">
-
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                     <a href="" target="_blank">
                         <div class="card sales-card">

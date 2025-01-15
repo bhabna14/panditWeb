@@ -12,7 +12,6 @@ class FlowerPickupDetails extends Model
          'pick_up_id', 'vendor_id', 'rider_id', 'pickup_date', 'total_price', 'payment_method','payment_status','status','payment_id'
     ];
 
-   
     public function vendor() {
         return $this->belongsTo(FlowerVendor::class,'vendor_id', 'vendor_id');
     }
