@@ -118,7 +118,7 @@
                             @forelse ($podcastDetails as $month => $podcasts)
                                 <div class="accordion-item">
                                     <h2 class="accordion-header" id="heading{{ $loop->index }}">
-                                        <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}"  style="background: linear-gradient(120deg, #eecefa, #f866b8);" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $loop->index }}" aria-expanded="true" aria-controls="collapse{{ $loop->index }}">
+                                        <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}"  style="background: linear-gradient(120deg, #87f0cf, #f866b8);" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $loop->index }}" aria-expanded="true" aria-controls="collapse{{ $loop->index }}">
                                             {{ $month }}
                                         </button>
                                     </h2>
