@@ -128,15 +128,15 @@
                                                 <table class="table table-bordered table-striped text-nowrap key-buttons border-bottom">
                                                     <thead class="bg-info text-dark">
                                                         <tr>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">SlNo</th>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Podcast Name</th>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Add Script</th>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Script File Location</th>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Script Create Date</th>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Source Of The Story</th>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Script Created By</th>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Save</th>
-                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Reject Reason</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">SlNo</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">Podcast Name</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">Add Script</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">Script File Location</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">Script Create Date</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">Source Of The Story</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">Script Created By</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">Save</th>
+                                                            <th class="text-white" style="background-color: rgb(20,30,200)">Reject Reason</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
