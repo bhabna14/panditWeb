@@ -152,9 +152,10 @@ public function admindashboard()
     // Fetch the total number of flower requests requested today (customized order)
     $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
 
+
     $productRequestedToday = ProductRequest::whereDate('created_at', Carbon::today())->count();
 
-
+    
     // Fetch the total number of active subscriptions
     $activeSubscriptions = Subscription::where('status', 'active')->count();
 

@@ -2,6 +2,37 @@
 
 @section('styles')
     <link href="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.css') }}" rel="stylesheet">
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <style>
+        h3 {
+    font-size: 20px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 20px 0;
+    padding: 10px;
+    border-radius: 5px;
+}
+.table {
+    border-collapse: collapse;
+    width: 100%;
+}
+.table th, .table td {
+    text-align: center;
+    padding: 10px;
+}
+.table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+.btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 4px;
+}
+
+    </style>
 @endsection
 
 @section('content')
@@ -83,83 +114,85 @@
                                 {{ $errors->first('danger') }}
                             </div>
                         @endif
-                        <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
-                            <thead>
-                                <tr>
-                                    <th class="border-bottom-0 bg-info text-white">SlNo</th>
-                                    <th class="border-bottom-0 bg-info text-white">Podcast Name</th>
-                                    <th class="border-bottom-0 bg-info text-white">Add Script</th>
-                                    <th class="border-bottom-0 bg-info text-white">Script File Location</th>
-                                    <th class="border-bottom-0 bg-info text-white">Script Create Date</th>
-                                    <th class="border-bottom-0 bg-info text-white">Source Of The Story</th>
-                                    <th class="border-bottom-0 bg-info text-white">Script Created By</th>
-                                    <th class="border-bottom-0 bg-info text-white">Save</th>
-                                    <th class="border-bottom-0 bg-info text-white">Reject Reason</th>
-
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($podcast_details as $index => $podcast)
-                                    <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $podcast->podcast_name }}</td>
-
-                                        <td>
-                                            <a href="{{ route('scriptEditor', ['podcast_id' => $podcast->podcast_id]) }}"
-                                                class="btn btn-success" style="font-size: 16px">+</a>
-                                        </td>
-
-                                        <!-- Form to Update Script -->
-                                        <form action="{{ route('updatePodcastScript', $podcast->podcast_id) }}"
-                                            method="post" enctype="multipart/form-data">
-                                            @csrf
-                                            <td>
-                                                <input type="text" class="form-control" id="script_location"
-                                                    name="script_location" placeholder="Enter Script File Location" value="{{ $podcast->script_location}}"
-                                                    required>
-                                            </td>
-
-                                            <td>
-                                                <div class="input-group">
-                                                    <div class="input-group-text">
-                                                        <i class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
-                                                    </div>
-                                                    <input class="form-control script-created-date"
-                                                        name="script_created_date" type="date" readonly>
-                                                </div>
-                                            </td>
-
-
-                                            <td>
-                                                <input type="text" class="form-control" id="story_source"
-                                                    name="story_source" placeholder="Enter Source Of The Story" value="{{$podcast->story_source}}" required>
-                                            </td>
-                                            <td>
-                                                <input type="text" class="form-control" id="script_created_by"
-                                                    name="script_created_by" placeholder="Enter Script Created By"  value="{{$podcast->script_created_by}}" 
-                                                    required>
-                                            </td>
-                                            <td>
-                                                <button type="submit" class="btn btn-success btn-md">Save</button>
-                                            </td>
-                                            <td>
-                                                @if ($podcast->script_reject_reason)
-                                                    {{ $podcast->script_reject_reason }}
-                                                @else
-                                                    Not Verified
-                                                @endif
-                                            </td>
-                                        </form>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="9" class="text-center">No completed podcasts available for
-                                            editing.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-
+                        <div class="accordion" id="podcastAccordion">
+                            @forelse ($podcastDetails as $month => $podcasts)
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header" id="heading{{ $loop->index }}">
+                                        <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}"  style="background: linear-gradient(120deg, #eecefa, #f866b8);" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $loop->index }}" aria-expanded="true" aria-controls="collapse{{ $loop->index }}">
+                                            {{ $month }}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse{{ $loop->index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" aria-labelledby="heading{{ $loop->index }}" data-bs-parent="#podcastAccordion">
+                                        <div class="accordion-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-striped text-nowrap key-buttons border-bottom">
+                                                    <thead class="bg-info text-dark">
+                                                        <tr>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">SlNo</th>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Podcast Name</th>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Add Script</th>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Script File Location</th>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Script Create Date</th>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Source Of The Story</th>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Script Created By</th>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Save</th>
+                                                            <th class="text-white" style="background-color: rgba(0,30 ,20,0.1)">Reject Reason</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach ($podcasts as $index => $podcast)
+                                                            <tr>
+                                                                <td>{{ $index + 1 }}</td>
+                                                                <td>{{ $podcast->podcast_name }}</td>
+                                                                <td>
+                                                                    <a href="{{ route('scriptEditor', ['podcast_id' => $podcast->podcast_id]) }}"
+                                                                        class="btn btn-success" style="font-size: 16px">+</a>
+                                                                </td>
+                                                                <!-- Form to Update Script -->
+                                                                <form action="{{ route('updatePodcastScript', $podcast->podcast_id) }}" method="post"
+                                                                    enctype="multipart/form-data">
+                                                                    @csrf
+                                                                    <td>
+                                                                        <input type="text" class="form-control" name="script_location"
+                                                                            placeholder="Enter Script File Location" value="{{ $podcast->script_location }}"
+                                                                            required>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input class="form-control script-created-date" name="script_created_date" type="date"
+                                                                            value="{{ $podcast->podcast_create_date }}" readonly>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="text" class="form-control" name="story_source"
+                                                                            placeholder="Enter Source Of The Story" value="{{ $podcast->story_source }}" required>
+                                                                    </td>
+                                                                    <td>
+                                                                        <input type="text" class="form-control" name="script_created_by"
+                                                                            placeholder="Enter Script Created By" value="{{ $podcast->script_created_by }}" required>
+                                                                    </td>
+                                                                    <td>
+                                                                        <button type="submit" class="btn btn-success btn-md">Save</button>
+                                                                    </td>
+                                                                    <td>
+                                                                        @if ($podcast->script_reject_reason)
+                                                                            {{ $podcast->script_reject_reason }}
+                                                                        @else
+                                                                            Not Verified
+                                                                        @endif
+                                                                    </td>
+                                                                </form>
+                                                            </tr>
+                                                        @endforeach
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="alert alert-warning text-center">No podcasts available for the selected months.</div>
+                            @endforelse
+                        </div>
+                        
 
                     </div>
                 </div>
@@ -220,5 +253,9 @@
             });
         });
     </script>
+
+    
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
 @endsection

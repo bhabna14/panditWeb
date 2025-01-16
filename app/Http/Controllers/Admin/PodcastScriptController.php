@@ -5,13 +5,31 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PodcastPrepair;
+use Carbon\Carbon;
 
 class PodcastScriptController extends Controller
 {
-    public function podcastScript(){
-        $podcast_details = PodcastPrepair::where('podcast_create_status','PODCAST INITIALIZE')->where('podcast_script_status','PENDING')->get();
-        return view('admin/add-podcast-script',compact('podcast_details'));
+
+    public function podcastScript()
+    {
+        $podcastDetails = PodcastPrepair::where('podcast_create_status', 'PODCAST INITIALIZE')
+            ->where('podcast_script_status', 'PENDING')
+            ->get()
+            ->groupBy(function ($item) {
+                // Use Y-m for a sortable format, then convert it back to F Y for display
+                return Carbon::parse($item->podcast_create_date)->format('Y-m');
+            })
+            ->sortKeys() // Sort by year and month in ascending order
+            ->mapWithKeys(function ($items, $key) {
+                // Convert the keys back to F Y for display
+                $formattedKey = Carbon::createFromFormat('Y-m', $key)->format('F Y');
+                return [$formattedKey => $items];
+            });
+    
+        return view('admin/add-podcast-script', compact('podcastDetails'));
     }
+    
+    
 
     public function updatePodcastScript(Request $request, $podcast_id)
 {

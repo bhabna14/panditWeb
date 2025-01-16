@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Models\PodcastPrepair;
 use App\Models\PublishPodcast;
 
+use Carbon\Carbon;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -15,11 +16,26 @@ class PodcastReportController extends Controller
     public function podcastReport()
     {
         $podcast_details = PodcastPrepair::where('status', 'active')->get();
-
-        $publish_data = PublishPodcast::whereIn('podcast_id', $podcast_details->pluck('podcast_id'))->pluck('publish_date', 'podcast_id');
     
-        return view('admin/podcast-report', compact('podcast_details', 'publish_data'));
+        // Fetch publish date for each podcast
+        $publish_data = PublishPodcast::whereIn('podcast_id', $podcast_details->pluck('podcast_id'))
+                                      ->pluck('publish_date', 'podcast_id');
+        
+        // Group podcast data by month-year of the publish_date
+        $podcastsByMonth = $publish_data->map(function ($publishDate, $podcastId) use ($podcast_details) {
+            return [
+                'podcast' => $podcast_details->firstWhere('podcast_id', $podcastId),
+                'publish_date' => Carbon::parse($publishDate)->format('F Y') // Group by month-year
+            ];
+        });
+    
+        // Group by formatted month and year
+        $groupedPodcasts = $podcastsByMonth->groupBy('publish_date');
+    
+        return view('admin/podcast-report', compact('groupedPodcasts'));
     }
+    
+    
     
 
     public function getScriptDetails(Request $request)

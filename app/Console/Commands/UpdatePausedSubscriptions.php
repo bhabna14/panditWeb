@@ -24,8 +24,6 @@ class UpdatePausedSubscriptions extends Command
      *
      * @var string
      */
-    
-
     /**
      * Execute the console command.
      *

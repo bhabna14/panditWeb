@@ -42,6 +42,8 @@ use App\Http\Controllers\Admin\CustomizeProductController;
 use App\Http\Controllers\Admin\FlowerDashboardController;
 
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
+use App\Http\Controllers\Admin\ProductRequestController;
+
 
 
 use App\Http\Controllers\UserManagementController;
@@ -60,6 +62,10 @@ use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
 use App\Http\Controllers\Pandit\PoojaHistoryController;
+
+
+
+
 
 
 use App\Http\Controllers\Auth\LoginRegisterController;
@@ -258,9 +264,18 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/edit-product/{id}', [ProductController::class, 'editProduct'])->name('admin.edit-product');
     Route::post('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
     Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
-    
+
+
+    // product dashboard
+    Route::controller(ProductRequestController::class)->group(function() {
+
+    Route::get('/manage-product-request', 'showRequests')->name('product-request');
+    Route::post('/save-product-order/{id}', 'saveProductOrder')->name('admin.saveProductOrder');
+    Route::post('/mark-product-payment/{id}', 'markPayment')->name('admin.markProductPayment');
+
+    });
+
     Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower-request');
-    Route::get('/manage-product-request', [FlowerRequestController::class, 'showRequests'])->name('product-request');
 
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');

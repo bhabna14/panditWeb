@@ -59,12 +59,6 @@ class ProductSubscriptionController extends Controller
             });
         }
 
-        // Filter for paused subscriptions
-        if ($request->query('filter') === 'paused') {
-            $query->whereHas('product__subscriptions_details', function ($subQuery) {
-                $subQuery->where('status', 'paused');
-            });
-        }
 
         $orders = $query->get();
     

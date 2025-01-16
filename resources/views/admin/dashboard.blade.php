@@ -884,7 +884,7 @@
                 </div>
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
 
-                    <a href="{{ route('product-request', ['filter' => 'today']) }}" target="_blank">
+                    <a href="{{ route('product-request') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
@@ -892,12 +892,12 @@
                                         <div class="">
                                             <h6 class="mb-2 tx-12">Customize Order</h6>
                                         </div>
+                                        
                                         <div class="pb-0 mt-0">
                                             <div class="d-flex">
                                                 <h4 class="tx-20 font-weight-semibold mb-2">{{ $productRequestedToday }}
                                                 </h4>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>

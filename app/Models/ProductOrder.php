@@ -11,17 +11,18 @@ class ProductOrder extends Model
     protected $table = 'product__orders_details';
 
     protected $fillable = [
+        'order_id',
         'request_id',
         'product_id',
         'user_id',
+        'address_id',
         'quantity',
-        'total_price',
         'requested_flower_price',
         'delivery_charge',
-        'order_id',  // Add this line
-        'address_id',
-        'suggestion'
+        'total_price',
+        'suggestion',
     ];
+    
     public function flowerRequest()
     {
         return $this->belongsTo(ProductRequest::class, 'request_id', 'request_id');

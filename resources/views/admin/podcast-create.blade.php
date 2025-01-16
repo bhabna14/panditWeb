@@ -111,10 +111,9 @@
 
                                             <div class="row">
 
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         <div class="main-content-label mg-b-5">Podcast Language</div>
-
                                                         <select class="form-control" id="language" name="language"
                                                             required>
                                                             <option value=" ">Select Language</option>
@@ -125,12 +124,24 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="col-md-6">
+                                                <div class="col-md-4">
                                                     <div class="form-group">
                                                         <div class="main-content-label mg-b-5">Podcast Name</div>
-
                                                         <input type="text" class="form-control" id="podcast_name"
                                                             name="podcast_name" placeholder="Enter Podcast Name" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <div class="main-content-label mg-b-5">Create Date</div>
+                                                        <div class="input-group">
+                                                            <div class="input-group-text">
+                                                                <i class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
+                                                            </div>
+                                                            <input class="form-control" id="create_date" name="create_date"  type="date">
+                                                              
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -140,7 +151,6 @@
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <div class="main-content-label mg-b-5">Deity</div>
-
                                                         <select class="form-control" id="deity_category"
                                                             name="deity_category" required>
                                                             <option value="">Select Deity</option>
@@ -149,7 +159,6 @@
                                                                     {{ $category->category_name }}</option>
                                                             @endforeach
                                                         </select>
-
                                                     </div>
                                                 </div>
                                                 <div class="col-md-4">
@@ -170,22 +179,16 @@
 
                                                 <div class="col-md-4">
                                                     <div class="form-group">
-                                                        <div class="main-content-label mg-b-5">Publish Date</div>
+                                                        <div class="main-content-label mg-b-5">Estimate Publish Date</div>
                                                         <div class="input-group">
-
                                                             <div class="input-group-text">
-                                                                <i
-                                                                    class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
+                                                                <i class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
                                                             </div>
-                                                            <input class="form-control" id="date" name="date"
-                                                                type="date">
+                                                            <input class="form-control" id="date" name="date"  type="date">
                                                         </div>
                                                     </div>
                                                 </div>
-
                                             </div>
-
-
 
                                             <div class="row">
                                                 <div class="col-md-4">

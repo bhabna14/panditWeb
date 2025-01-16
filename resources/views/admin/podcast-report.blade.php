@@ -107,63 +107,60 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @forelse ($podcast_details as $index => $podcast)
+                                    @foreach ($groupedPodcasts as $month => $podcasts)
                                         <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $podcast->podcast_name }}</td>
-                                            <td>{{ $podcast->language }}</td>
-                                            <td>{{ $podcast->deity_category }}</td>
-                                            <td>{{ $podcast->script_verified_date }}</td>
-                                            <td>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span
-                                                        class="badge bg-primary p-2">{{ $podcast->podcast_script_status }}</span>
-                                                    <button type="button" class="btn btn-success btn-sm script-details"
-                                                        data-id="{{ $podcast->podcast_id }}">
-                                                        <i class="fa fa-eye"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            <td>{{ $podcast->recording_date }}</td>
-                                            <td>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span
-                                                        class="badge bg-success text-white p-2">{{ $podcast->podcast_recording_status }}</span>
-                                                    <button type="button" class="btn btn-warning btn-sm recording-details"
-                                                        data-id="{{ $podcast->podcast_id }}"><i
-                                                            class="fa fa-eye"></i></button>
-                                                </div>
-                                            </td>
-                                            <td>{{ $podcast->editing_date }}</td>
-                                            <td>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span
-                                                        class="badge bg-secondary p-2">{{ $podcast->podcast_editing_status }}</span>
-
-                                                    <button type="button" class="btn btn-warning btn-sm editing-details"
-                                                        data-id="{{ $podcast->podcast_id }}"><i
-                                                            class="fa fa-eye"></i></button>
-                                                </div>
-                                            </td>
-                                            <td>{{ $publish_data[$podcast->podcast_id] ?? 'N/A' }}</td>
-                                            <td>
-                                                <div class="d-flex align-items-center gap-2">
-                                                    <span class="badge bg-dark p-2">{{ $podcast->podcast_status }}</span>
-                                                    <button type="button" class="btn btn-primary btn-sm publish-details"
-                                                        data-id="{{ $podcast->podcast_id }}">
-                                                        <i class="fa fa-eye"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            <td colspan="12" class=" text-white text-center" style="background: linear-gradient(90deg, #f94d8f, #690230);font-size: 20px;font-weight: bold">{{ $month }}</td>
                                         </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="15" class="text-center">No podcasts available</td>
-                                        </tr>
-                                    @endforelse
+                                        @foreach ($podcasts as $index => $podcastData)
+                                            <tr>
+                                                <td>{{ $index + 1 }}</td>
+                                                <td>{{ $podcastData['podcast']->podcast_name }}</td>
+                                                <td>{{ $podcastData['podcast']->language }}</td>
+                                                <td>{{ $podcastData['podcast']->deity_category }}</td>
+                                                <td>{{ $podcastData['podcast']->script_verified_date }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge bg-primary p-2">{{ $podcastData['podcast']->podcast_script_status }}</span>
+                                                        <button type="button" class="btn btn-success btn-sm script-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>{{ $podcastData['podcast']->recording_date }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge bg-success text-white p-2">{{ $podcastData['podcast']->podcast_recording_status }}</span>
+                                                        <button type="button" class="btn btn-warning btn-sm recording-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>{{ $podcastData['podcast']->editing_date }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge bg-secondary p-2">{{ $podcastData['podcast']->podcast_editing_status }}</span>
+                                                        <button type="button" class="btn btn-warning btn-sm editing-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td>{{ $podcastData['publish_date'] }}</td>
+                                                <td>
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="badge bg-dark p-2">{{ $podcastData['podcast']->podcast_status }}</span>
+                                                        <button type="button" class="btn btn-primary btn-sm publish-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
+                                                            <i class="fa fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @endforeach
                                 </tbody>
                             </table>
                         </div>
+                        
+                        
                     </div>
                 </div>
             </div>

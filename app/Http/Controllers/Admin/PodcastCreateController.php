@@ -42,8 +42,9 @@ class PodcastCreateController extends Controller
                 'podcast_name' => $request->podcast_name,
                 'deity_category' => $request->deity_category,
                 'festival_name' => $request->festival_name,
-                'podcast_create_date' => $request->date,
-                'podcast_create_status' => 'PODCAST INITIALIZE', // Assuming 'active' is a default status
+                'podcast_create_date' => $request->create_date,
+                'estimate_publish_date' => $request->date,
+                'podcast_create_status' => 'PODCAST INITIALIZE',
             ]);
 
             // Redirect back with a success message
