@@ -41,9 +41,8 @@ class UpdatePausedSubscriptions extends Command
     
         // Find paused subscriptions where the pause end date has passed
         $subscriptions = Subscription::where('status', 'paused')
-            ->where('pause_end_date', '<', $today->addDay()) // Check pause_end_date less than tomorrow
+            ->where('pause_end_date', $today->subDay())  // Check pause_end_date is yesterday
             ->get();
-
           
 
         foreach ($subscriptions as $subscription) {

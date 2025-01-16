@@ -15,7 +15,11 @@ class UpdateSubscriptionStatusExpired extends Command
      */
     protected $signature = 'subscription:update-status-expired';
 
-    // Command description
+    /**
+     * The command description.
+     *
+     * @var string
+     */
     protected $description = 'Automatically update subscriptions to expired status based on new_date or end_date';
 
     /**
@@ -28,10 +32,16 @@ class UpdateSubscriptionStatusExpired extends Command
         // Get today's date
         $today = Carbon::now()->startOfDay();
 
-        // Get subscriptions where status is not 'expired' or 'dead'
+        // Get subscriptions where status is not 'dead' (we want to skip 'dead' subscriptions)
         $subscriptions = Subscription::whereIn('status', ['active', 'paused'])->get();
 
         foreach ($subscriptions as $subscription) {
+            // Skip if the subscription status is 'dead'
+            if ($subscription->status === 'dead') {
+                $this->info("Subscription ID {$subscription->id} is marked as 'dead' and will not be updated.");
+                continue;  // Skip this subscription
+            }
+
             // Determine the expiry date (new_date takes priority over end_date)
             $expiryDate = $subscription->new_date ?? $subscription->end_date;
 
