@@ -589,10 +589,10 @@
                                                 <!-- Subscription Dates -->
                                                 @if ($order->subscription)
                                                     <p class="subscription-dates">
-                                                        <strong>From Date:</strong> <br>
+                                                        <strong>From :</strong> <br>
                                                         {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }}
                                                         <br>
-                                                        <strong>To Date:</strong> <br>
+                                                        <strong>To :</strong> <br>
                                                         {{ $order->subscription->new_date
                                                             ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y')
                                                             : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }}
@@ -604,10 +604,6 @@
                                                 @endif
                                             </div>
                                         </td>
-
-
-
-
 
                                         <td>
                                             <span style="font-weight: bold">₹
