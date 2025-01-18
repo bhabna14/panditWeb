@@ -335,11 +335,11 @@
                                     <th>Customer Details</th>
                                     <th>Purchase Date</th>
                                     <th>Product Details</th>
-                                    <th>Total Price</th>
+                                    <th>Price</th>
                                     <th>Status</th>
                                     <th>Assigned Rider</th>
                                     <th>Reffered By</th>
-                                    <th>Actions</th>
+                                    <th>Subscription</th>
                                 </tr>
                             </thead>
                             <tbody>
