@@ -36,4 +36,6 @@ public function relatedOrder()
     return $this->belongsTo(Order::class, 'order_id', 'order_id'); // Make sure 'order_id' is correct
 }
 
+
+
 }
