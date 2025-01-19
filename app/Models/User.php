@@ -14,7 +14,6 @@ class User extends Authenticatable
 
 
     use Notifiable;
-
     /**     *
      * @var array
      */

@@ -175,10 +175,19 @@ public function admindashboard()
     ->latest('end_date')
     ->count();
 
-        $todayEndSubscription = Subscription::whereDate('end_date', Carbon::today())
-        ->where('status', 'active')
-        ->count();
-    
+    $todayEndSubscription = Subscription::where(function ($query) {
+        $query->where(function ($subQuery) {
+            $subQuery->whereNotNull('new_date') // Check if new_date is available
+                     ->whereDate('new_date', Carbon::today()); // Count using new_date if available
+        })
+        ->orWhere(function ($subQuery) {
+            $subQuery->whereNull('new_date') // Check if new_date is not available
+                     ->whereDate('end_date', Carbon::today()); // Count using end_date
+        });
+    })
+    ->where('status', 'active') // Status must be active
+    ->count();
+
         $expiredSubscriptionsProduct = ProductSucription::where('status', 'expired')
         ->whereNotIn('user_id', function ($query) {
             $query->select('user_id')
