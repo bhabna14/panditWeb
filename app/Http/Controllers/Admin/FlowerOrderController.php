@@ -52,10 +52,16 @@ class FlowerOrderController extends Controller
 
     if ($request->query('filter') === 'end') {
         $query->whereHas('subscription', function ($subQuery) {
-            $subQuery->whereDate('end_date', Carbon::today())
-                     ->where('status', 'active');
+            $subQuery->where(function ($dateQuery) {
+                $dateQuery->whereNotNull('new_date')
+                          ->whereDate('new_date', Carbon::today());
+            })->orWhere(function ($dateQuery) {
+                $dateQuery->whereNull('new_date')
+                          ->whereDate('end_date', Carbon::today());
+            })->where('status', 'active');
         });
     }
+    
 
     // Filter for new user subscriptions
     if ($request->query('filter') === 'new') {
