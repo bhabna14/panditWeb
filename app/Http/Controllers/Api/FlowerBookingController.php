@@ -423,7 +423,7 @@ try {
 {
     try {
         // Find the subscription by order_id
-        $subscription = Subscription::where('order_id', $order_id)->firstOrFail();
+        $subscription = Subscription::where('order_id', $order_id)->where('status','active')->firstOrFail();
 
         // Calculate pause start and end dates
         $pauseStartDate = Carbon::parse($request->pause_start_date);
@@ -581,7 +581,7 @@ public function resume(Request $request, $order_id)
 {
     try {
         // Find the subscription by order_id
-        $subscription = Subscription::where('order_id', $order_id)->firstOrFail();
+        $subscription = Subscription::where('order_id', $order_id)->where('status','active')->firstOrFail();
 
         // Validate that the subscription is currently paused
         if ($subscription->status !== 'paused') {
