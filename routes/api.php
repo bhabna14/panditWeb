@@ -75,7 +75,8 @@ Route::middleware('auth:rider-api')->group(function () {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
-Route::middleware('auth:users')->get('/current-orders', [ProductController::class, 'getCurrentOrders']);
+
+Route::get('/current-orders', [ProductController::class, 'getCurrentOrders']);
 
 Route::get('/products', [ProductController::class, 'getActiveProducts']);
 Route::controller(PanditLoginController::class)->group(function() {
