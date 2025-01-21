@@ -25,10 +25,12 @@ class ProductController extends Controller
 }
 
 public function getCurrentOrders(Request $request)
-{
+{          
+
     try {
-        if (Auth::guard('users')->check()) {
-            $userId = Auth::guard('users')->user()->userid;
+        if (Auth::guard('sanctum')->check()) {
+
+            $userId = Auth::guard('sanctum')->user()->userid;
         
             // Fetch current orders with the latest subscription for each order_id
             $currentOrders = Order::whereNull('request_id')
