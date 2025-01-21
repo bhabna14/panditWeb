@@ -342,22 +342,26 @@ try {
             // Get the authenticated user's ID
             $userId = Auth::guard('sanctum')->user()->userid;
 
-            // Fetch standalone orders for the authenticated user (orders without request_id)
-            $subscriptionsOrder = Order::whereNull('request_id')
-            ->where('user_id', $userId)
-            ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails','pauseResumeLogs'])
-            ->orderBy('id', 'desc')
+
+            $subscriptionsOrder = Subscription::where('user_id', $userId)
+            ->with([
+                'order', // Associated orders
+                'flowerProducts', // Product info related to subscriptions
+                'pauseResumeLog',
+                'flowerPayments',
+                'users',
+            ])
+            ->orderBy('created_at', 'desc') // Order by latest subscription
             ->get();
-        
-        // Map to add the product_image_url to each order's flowerProduct
+
+        // Add image URL to flower products if they exist
         $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
-            if ($order->flowerProduct) {
-                // Ensure flowerProduct exists before accessing product_image
-                $order->flowerProduct->product_image_url = $order->flowerProduct->product_image; // Generate full URL for the photo
+            if ($order->flowerProducts) {
+                $order->flowerProducts->product_image_url = $order->flowerProducts->product_image;
             }
             return $order;
         });
-        
+
 
             // Fetch related orders for the authenticated user (orders with request_id)
             $requestedOrders = FlowerRequest::where('user_id', $userId)
@@ -396,10 +400,6 @@ try {
                 return $request;
             });
         
-        
-
-
-    
             // Combine both into a single response
             return response()->json([
                 'success' => 200,
