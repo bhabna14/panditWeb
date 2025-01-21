@@ -242,17 +242,7 @@
         });
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get today's date in YYYY-MM-DD format
-            const today = new Date().toISOString().split('T')[0];
-
-            // Select all elements with the class 'script-created-date'
-            document.querySelectorAll('.script-created-date').forEach(input => {
-                input.value = today;
-            });
-        });
-    </script>
+    
 
     
 <!-- Bootstrap JS -->
