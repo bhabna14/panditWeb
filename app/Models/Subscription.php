@@ -48,6 +48,12 @@ class Subscription extends Model
    {
        return $this->hasMany(SubscriptionPauseResumeLog::class);
    }
+
+   
+   public function relatedOrder()
+   {
+       return $this->belongsTo(Order::class, 'order_id', 'order_id');  // Adjust 'order_id' if necessary
+   }
    
    public function order()
    {
