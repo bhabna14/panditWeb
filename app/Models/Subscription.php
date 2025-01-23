@@ -44,10 +44,11 @@ class Subscription extends Model
            ]);
        }
    }
-   public function pauseResumeLogs()
-   {
-       return $this->hasMany(SubscriptionPauseResumeLog::class);
-   }
+  
+public function pauseResumeLogs()
+{
+    return $this->hasMany(SubscriptionPauseResumeLog::class, 'subscription_id', 'subscription_id');
+}
 
    
    public function relatedOrder()

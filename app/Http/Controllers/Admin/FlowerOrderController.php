@@ -26,13 +26,20 @@ class FlowerOrderController extends Controller
     //
     public function showOrders(Request $request)
 {
-    $query = Order::whereNull('request_id')
-                  ->with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-                  ->orderBy('id', 'desc'); // This orders by the Order ID
+
+    $query = Subscription::with([
+        'order',
+        'flowerPayments',
+        'users',
+        'flowerProducts',
+        'pauseResumeLog',
+        'order.address.localityDetails'
+        ])
+    ->orderBy('id', 'desc'); 
 
     // Filter for non-assigned riders
     if ($request->query('filter') === 'rider') {
-        $query->whereHas('subscription.relatedOrder', function ($query) {
+        $query->whereHas('order', function ($query) {
             $query->where(function ($q) {
                 $q->whereNull('rider_id')
                   ->orWhere('rider_id', '');
@@ -42,69 +49,56 @@ class FlowerOrderController extends Controller
 
     // Check if the filter is for renewed subscriptions
     if ($request->query('filter') === 'renewed') {
-        $query->whereDate('created_at', Carbon::today())
-              ->whereIn('user_id', function ($subQuery) {
-                  $subQuery->select('user_id')
-                           ->from('orders')
-                           ->whereDate('created_at', '<', Carbon::today());
-              });
+       $query->whereDate('created_at', Carbon::today()) // Check rows created today
+        ->whereIn('order_id', function ($query) {
+            $query->select('order_id')
+                ->from('subscriptions')
+                ->groupBy('order_id')
+                ->havingRaw('COUNT(order_id) > 1'); // Find duplicate order IDs
+        });
     }
 
     if ($request->query('filter') === 'end') {
-        $query->whereHas('subscription', function ($subQuery) {
-            $subQuery->where(function ($dateQuery) {
+
+            $query->where(function ($dateQuery) {
                 $dateQuery->whereNotNull('new_date')
                           ->whereDate('new_date', Carbon::today());
             })->orWhere(function ($dateQuery) {
                 $dateQuery->whereNull('new_date')
                           ->whereDate('end_date', Carbon::today());
             })->where('status', 'active');
-        });
     }
     
 
     // Filter for new user subscriptions
     if ($request->query('filter') === 'new') {
         $query->whereDate('created_at', Carbon::today())
-              ->whereNotIn('user_id', function ($subQuery) {
-                  $subQuery->select('user_id')
-                           ->from('orders')
-                           ->whereDate('created_at', '<', Carbon::today())
-                           ->whereNull('request_id'); // Ensure request_id is NULL in the subquery
-              });
+        ->distinct('user_id');                  
     }
 
     // Filter for active subscriptions
     if ($request->query('filter') === 'active') {
-        $query->whereHas('subscription', function ($subQuery) {
-            $subQuery->where('status', 'active');
-        });
+        $query->where('status', 'active');
     }
 
     if ($request->query('filter') === 'expired') {
-        $latestExpiredSubscriptions = Subscription::selectRaw('MAX(end_date) as latest_end_date, user_id')
-            ->where('status', 'expired')
-            ->whereNotIn('user_id', function ($nestedQuery) {
-                $nestedQuery->select('user_id')
-                    ->from('subscriptions')
-                    ->whereIn('status', ['active', 'paused']);
-            })
-            ->groupBy('user_id');  // Group by user_id to ensure one record per user
+
+        $query->where('status', 'expired')
+        ->whereNotIn('user_id', function ($query) {
+            $query->select('user_id')
+                ->from('subscriptions')
+                ->whereIn('status', ['active', 'paused', 'resume']);
+        })
     
-        $query->whereHas('subscription', function ($subQuery) use ($latestExpiredSubscriptions) {
-            $subQuery->whereIn('end_date', $latestExpiredSubscriptions->pluck('latest_end_date'))
-                ->whereIn('user_id', $latestExpiredSubscriptions->pluck('user_id'))
-                ->where('status', 'expired');
-        });
+        ->distinct('user_id')
+        ->latest('end_date');
+
     }
 
     // Filter for paused subscriptions
     if ($request->query('filter') === 'paused') {
-        $query->whereHas('subscription', function ($subQuery) {
-            $subQuery->where('status', 'paused');
-        });
+            $query->where('status', 'paused');
     }
-
     // Retrieve the filtered orders
     $orders = $query->get();
 
@@ -179,17 +173,13 @@ public function showNotifications()
 
     // Total spend
     $totalSpend = Order::where('user_id', $userid)->sum('total_price'); // Adjust column name if necessary
-
-  
         // Return the view with user and orders data
         return view('admin.flower-order.show-customer-details', compact('user','addressdata','pendingRequests', 'orders','totalOrders', 'ongoingOrders', 'totalSpend'));
     }
     
 public function showorderdetails($id)
     {
-        $order = Order::with(['flowerRequest', 'subscription', 'flowerPayments', 'user', 'flowerProduct', 'address', 'pauseResumeLogs'])->findOrFail($id);
-
-    
+        $order = Subscription::with([ 'order', 'flowerPayments', 'users', 'flowerProducts', 'pauseResumeLogs'])->findOrFail($id);
     
         return view('admin.flower-order.show-order-details', compact('order'));
     }
@@ -454,11 +444,34 @@ public function updatePaymentStatus(Request $request, $order_id)
 }
 
 
-public function pause(Request $request, $order_id)
+public function pausePage($id)
+{
+
+    $order = Subscription::where('id', $id)->firstOrFail();
+
+    return view('admin.pause-resume' , [
+        'order' => $order,
+        'action' => 'pause',
+    ]);
+
+}
+
+public function resumePage($id)
+{
+    $order = Subscription::where('id', $id)->firstOrFail();
+
+    return view('admin.pause-resume', [
+        'order' => $order,
+        'action' => 'resume',
+    ]);
+}
+
+
+public function pause(Request $request, $id)
 {
     try {
         // Find the subscription by order_id
-        $subscription = Subscription::where('order_id', $order_id)->firstOrFail();
+        $subscription = Subscription::where('id', $id)->where('status','active')->firstOrFail();
 
         // Validate input dates
         $pauseStartDate = Carbon::parse($request->pause_start_date);
@@ -478,7 +491,6 @@ public function pause(Request $request, $order_id)
 
         // Update the subscription status and new date field
         $subscription->update([
-            'status' => 'paused',
             'pause_start_date' => $pauseStartDate,
             'pause_end_date' => $pauseEndDate,
             'new_date' => $newEndDate,
@@ -487,34 +499,34 @@ public function pause(Request $request, $order_id)
         // Log the pause action
         SubscriptionPauseResumeLog::create([
             'subscription_id' => $subscription->subscription_id,
-            'order_id' => $order_id,
+            'order_id' => $subscription->order_id,
             'action' => 'paused',
             'pause_start_date' => $pauseStartDate,
             'pause_end_date' => $pauseEndDate,
             'paused_days' => $pausedDays,
             'new_end_date' => $newEndDate,
         ]);
+        return redirect()->route('admin.dashboard')->with('success', 'Successfully paused subscription');
 
-        return redirect()->back()->with('success', 'Successfully paused subscription.');
 
     } catch (\Exception $e) {
         // Log any errors that occur during the process
         Log::error('Error pausing subscription', [
-            'order_id' => $order_id,
+            'order_id' => $subscription->order_id,
             'error_message' => $e->getMessage(),
             'trace' => $e->getTraceAsString()
         ]);
+        return redirect()->back()->with('success', 'Failed to pause subscription.');
 
-        return redirect()->back()->with('error', 'Failed to pause subscription.');
     }
 }
 
 
-public function resume(Request $request, $order_id)
+public function resume(Request $request, $id)
 {
     try {
         // Find the subscription by order_id
-        $subscription = Subscription::where('order_id', $order_id)->firstOrFail();
+        $subscription = Subscription::where('id', $id)->where('status','paused')->firstOrFail();
 
         // Validate that the subscription is currently paused
         if ($subscription->status !== 'paused') {
@@ -549,7 +561,7 @@ public function resume(Request $request, $order_id)
         // Log the resume action
         SubscriptionPauseResumeLog::create([
             'subscription_id' => $subscription->subscription_id,
-            'order_id' => $order_id,
+            'order_id' => $subscription->order_id,
             'action' => 'resumed',
             'resume_date' => $resumeDate,
             'pause_start_date' => $pauseStartDate,
@@ -557,9 +569,10 @@ public function resume(Request $request, $order_id)
             'paused_days' => $actualPausedDays,
         ]);
 
-        return redirect()->back()->with('success', 'Successfully resumed subscription.');
+        return redirect()->route('admin.dashboard')->with('success', 'Successfully resumed subscription.');
 
     } catch (\Exception $e) {
+
         return redirect()->back()->with('error', 'Failed to resume subscription.');
     }
 }

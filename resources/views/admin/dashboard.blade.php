@@ -351,88 +351,41 @@
             <h4 class="card-title-custom mb-4">Individual Rider Details</h4>
     
             <div class="row">
-    
-                <!-- Bablu Prusty -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
-                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" class="text-decoration-none">
-                        <div class=" sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 text-dark">Bablu Prusty</h6>
-                                        <div class="d-flex flex-column">
-                                            <!-- Total Delivery with icon -->
-                                            <h4 class="tx-12 font-weight-semibold text-dark mb-2">
-                                                <i class="fas fa-truck-loading me-2 text-dark"></i> Total Delivery: {{ $totalAssignedOrderstobablu }}
-                                            </h4>
-                                    
-                                            <!-- Total Delivered with icon -->
-                                            <h4 class="tx-12 font-weight-semibold text-dark mb-0">
-                                                <i class="fas fa-check-circle me-2 text-dark"></i> Total Delivered: {{ $totalDeliveredTodaybybablu }}
-                                            </h4>
+                @foreach ($ridersData as $data)
+                    <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
+                        <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" class="text-decoration-none">
+                            <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <div class="ps-4 pt-4 pe-3 pb-4">
+                                            <h6 class="mb-2 text-dark">{{ $data['rider']->rider_name }}</h6>
+                                            <div class="d-flex flex-column">
+                                                <!-- Total Delivery with icon -->
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-2">
+                                                    <i class="fas fa-truck-loading me-2 text-dark"></i>
+                                                    Total Delivery: {{ $data['totalAssignedOrders'] }}
+                                                </h4>
+            
+                                                <!-- Total Delivered with icon -->
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-0">
+                                                    <i class="fas fa-check-circle me-2 text-dark"></i>
+                                                    Total Delivered: {{ $data['totalDeliveredToday'] }}
+                                                </h4>
+                                            </div>
                                         </div>
                                     </div>
-                                    
-                                </div>
-                                <div class="col-4 d-flex justify-content-center align-items-center">
-                                    <div class="circle-icon bg-white text-primary text-center" style="border-radius: 50%; width: 60px; height: 60px;">
-                                        <i class="fas fa-truck-loading fa-2x"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-    
-                <!-- Subrat -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
-                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" class="text-decoration-none">
-                        <div class=" sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 text-dark">Subrat</h6>
-                                        <div class="d-flex flex-column">
-                                            <h4 class="tx-12 font-weight-semibold text-dark mb-2"><i class="fas fa-truck-loading me-2 text-dark"></i>Total Delivery: {{ $totalAssignedOrderstosubrat }}</h4>
-                                            <h4 class="tx-12 font-weight-semibold text-dark mb-0"> <i class="fas fa-check-circle me-2 text-dark"></i> Total Delivered: {{ $totalDeliveredTodaybysubrat }}</h4>
+                                    <div class="col-4 d-flex justify-content-center align-items-center">
+                                        <div class="circle-icon bg-white text-primary text-center" style="border-radius: 50%; width: 60px; height: 60px;">
+                                            <i class="fas fa-truck-loading fa-2x"></i>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-4 d-flex justify-content-center align-items-center">
-                                    <div class="circle-icon bg-white text-primary text-center" style="border-radius: 50%; width: 60px; height: 60px;">
-                                        <i class="fas fa-box-open fa-2x"></i>
-                                    </div>
-                                </div>
                             </div>
-                        </div>
-                    </a>
-                </div>
-    
-                <!-- Prahlad -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
-                    <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" class="text-decoration-none">
-                        <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 text-dark">Prahlad</h6>
-                                        <div class="d-flex flex-column">
-                                            <h4 class="tx-12 font-weight-semibold text-dark mb-2"><i class="fas fa-truck-loading me-2 text-dark"></i>Total Delivery: {{ $totalAssignedOrderstoprahlad }}</h4>
-                                            <h4 class="tx-12 font-weight-semibold text-dark mb-0"> <i class="fas fa-check-circle me-2 text-dark"></i> Total Delivered: {{ $totalDeliveredTodaybyprahlad }}</h4>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-4 d-flex justify-content-center align-items-center">
-                                    <div class="circle-icon bg-white text-primary text-center" style="border-radius: 50%; width: 60px; height: 60px;">
-                                        <i class="fas fa-user-check fa-2x"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-    
+                        </a>
+                    </div>
+                @endforeach
             </div>
+            
         </div>
     </div>
     
@@ -491,7 +444,7 @@
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Total Delivery in Month</h6>
+                                        <h6 class="mb-2 tx-12">Delivery in Month</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveriesThisMonth }}</h4>
                                     </div>
                                 </div>
@@ -512,7 +465,7 @@
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Total Delivery</h6>
+                                        <h6 class="mb-2 tx-12">Sub Total Delivery</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveries }}</h4>
                                     </div>
                                 </div>
@@ -814,7 +767,7 @@
     </div>
     {{-- product details --}}
 
-    <div class="row">
+    {{-- <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 
             <h4 class="card-title-custom">Product Subscription</h4>
@@ -835,9 +788,7 @@
                                                 <h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscriptionProduct }}
                                                 </h4>
                                             </div>
-                                            {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-										<span class="text-success font-weight-semibold"> +427</span>
-									</p> --}}
+                                           
                                         </div>
                                     </div>
                                 </div>
@@ -865,9 +816,7 @@
                                             <div class="d-flex">
                                                 <h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscriptionProduct }}</h4>
                                             </div>
-                                            {{-- <p class="mb-0 tx-12 text-muted">Last week<i class="fa fa-caret-up mx-2 text-success"></i>
-										<span class="text-success font-weight-semibold"> +427</span>
-									</p> --}}
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -979,8 +928,7 @@
         </div>
 
 
-        <!-- </div> -->
-    </div>
+    </div> --}}
 
     <!-- row closed -->
     <div class="row">

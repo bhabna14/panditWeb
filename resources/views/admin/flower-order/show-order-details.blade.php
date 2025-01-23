@@ -121,23 +121,23 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Product:</span>
-                        <span class="info-value">{{ $order->flowerProduct->name }}</span>
+                        <span class="info-value">{{ $order->flowerProducts->name }}</span>
                     </div>
                     <div class="info-row price-row">
                         <span class="info-label">Total Price:</span>
-                        <span class="info-value">₹ {{ number_format($order->total_price, 2) }}</span>
+                        <span class="info-value">₹ {{ number_format($order->order->total_price, 2) }}</span>
                     </div>
             
                     <div class="divider"></div>
             
-                    @if($order->subscription)
+                    @if($order)
                         <div class="info-row">
                             <span class="info-label">Start Date:</span>
-                            <span class="info-value">{{ \Carbon\Carbon::parse($order->subscription->start_date)->format('d M, Y') }}</span>
+                            <span class="info-value">{{ \Carbon\Carbon::parse($order->start_date)->format('d M, Y') }}</span>
                         </div>
                         <div class="info-row">
                             <span class="info-label">End Date:</span>
-                            <span class="info-value">{{ \Carbon\Carbon::parse($order->subscription->end_date)->format('d M, Y') }}</span>
+                            <span class="info-value">{{ \Carbon\Carbon::parse($order->end_date)->format('d M, Y') }}</span>
                         </div>
                           <!-- Check if subscription has been paused and resumed -->
                         @if($order->pauseResumeLogs->count() > 0)
@@ -145,18 +145,18 @@
                                 <span class="info-label">Note:</span>
                                 <span class="info-value text-warning">
                                     You paused or resumed the subscription, so your new extended end date is 
-                                    {{ \Carbon\Carbon::parse($order->subscription->new_date)->format('d M, Y') }}.
+                                    {{ \Carbon\Carbon::parse($order->new_date)->format('d M, Y') }}.
                                 </span>
                             </div>
                         @endif
                         <div class="info-row">
                             <span class="info-label">Status:</span>
                             <span class="status-badge 
-                                {{ $order->subscription->status === 'active' ? 'status-running bg-success' : '' }}
-                                {{ $order->subscription->status === 'paused' ? 'status-paused bg-warning' : '' }}
-                                {{ $order->subscription->status === 'expired' ? 'status-expired bg-danger' : '' }}
-                                 {{ $order->subscription->status === 'pending' ? 'status-expired bg-danger' : '' }}">
-                                {{ ucfirst($order->subscription->status) }}
+                                {{ $order->status === 'active' ? 'status-running bg-success' : '' }}
+                                {{ $order->status === 'paused' ? 'status-paused bg-warning' : '' }}
+                                {{ $order->status === 'expired' ? 'status-expired bg-danger' : '' }}
+                                 {{ $order->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                {{ ucfirst($order->status) }}
                             </span>
                         </div>
                         

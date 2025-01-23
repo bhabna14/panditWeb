@@ -223,7 +223,6 @@
             white-space: nowrap;
             /* Prevent wrapping for no subscription text */
         }
-        
     </style>
 @endsection
 
@@ -353,9 +352,9 @@
                                                 </p>
 
                                                 <!-- Customer Name -->
-                                                @if (!empty($order->user->name))
+                                                @if (!empty($order->users->name))
                                                     <p class="customer-name">
-                                                        <strong>Name :</strong> {{ $order->user->name }}
+                                                        <strong>Name :</strong> {{ $order->users->name }}
                                                     </p>
                                                 @else
                                                     <p class="customer-name text-muted">
@@ -364,9 +363,9 @@
                                                 @endif
 
                                                 <!-- Customer Number -->
-                                                @if (!empty($order->user->mobile_number))
+                                                @if (!empty($order->users->mobile_number))
                                                     <p class="customer-number">
-                                                        <strong>No :</strong> {{ $order->user->mobile_number }}
+                                                        <strong>No :</strong> {{ $order->users->mobile_number }}
                                                     </p>
                                                 @else
                                                     <p class="customer-number text-muted">
@@ -375,8 +374,8 @@
                                                 @endif
 
                                                 <!-- View Customer Button -->
-                                                @if (!empty($order->user->userid))
-                                                    <a href="{{ route('showCustomerDetails', $order->user->userid) }}"
+                                                @if (!empty($order->users->userid))
+                                                    <a href="{{ route('showCustomerDetails', $order->users->userid) }}"
                                                         class="btn btn-outline-info btn-sm">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
@@ -409,25 +408,26 @@
                                                                 <div class="modal-body">
                                                                     <p><i class="fas fa-map-marker-alt text-primary"></i>
                                                                         <strong>Address:</strong>
-                                                                        {{ $order->address->apartment_flat_plot ?? '' }},
-                                                                        {{ $order->address->apartment_name ?? '' }},
-                                                                        {{ $order->address->localityDetails->locality_name ?? '' }}
+                                                                        {{ $order->order->address->apartment_flat_plot ?? '' }},
+                                                                        {{ $order->order->address->apartment_name ?? '' }},
+                                                                        {{ $order->order->address->localityDetails->locality_name ?? '' }}
                                                                     </p>
                                                                     <p><i class="fas fa-landmark text-primary"></i>
                                                                         <strong>Landmark:</strong>
-                                                                        {{ $order->address->landmark ?? '' }}
+                                                                        {{ $order->order->address->landmark ?? '' }}
                                                                     </p>
                                                                     <p><i class="fas fa-envelope text-primary"></i>
                                                                         <strong>Pin
                                                                             Code:</strong>
-                                                                        {{ $order->address->pincode ?? '' }}</p>
+                                                                        {{ $order->order->address->pincode ?? '' }}
+                                                                    </p>
                                                                     <p><i class="fas fa-city text-primary"></i>
                                                                         <strong>City:</strong>
-                                                                        {{ $order->address->city ?? '' }}
+                                                                        {{ $order->order->address->city ?? '' }}
                                                                     </p>
                                                                     <p><i class="fas fa-flag text-primary"></i>
                                                                         <strong>State:</strong>
-                                                                        {{ $order->address->state ?? '' }}
+                                                                        {{ $order->order->address->state ?? '' }}
                                                                     </p>
 
                                                                 </div>
@@ -471,7 +471,7 @@
                                                                 <!-- Modal Body -->
                                                                 <div class="modal-body">
                                                                     <form
-                                                                        action="{{ route('admin.orders.updateAddress', $order->address->id) }}"
+                                                                        action="{{ route('admin.orders.updateAddress', $order->order->address->id) }}"
                                                                         method="POST">
                                                                         @csrf
                                                                         @method('PUT')
@@ -482,7 +482,7 @@
                                                                                 <input type="text" class="form-control"
                                                                                     id="apartment_flat_plot"
                                                                                     name="apartment_flat_plot"
-                                                                                    value="{{ $order->address->apartment_flat_plot }}">
+                                                                                    value="{{ $order->order->address->apartment_flat_plot }}">
                                                                             </div>
 
                                                                             <div class="mb-3">
@@ -492,7 +492,7 @@
                                                                                 <input type="text" class="form-control"
                                                                                     id="apartment_name"
                                                                                     name="apartment_name"
-                                                                                    value="{{ $order->address->apartment_name }}">
+                                                                                    value="{{ $order->order->address->apartment_name }}">
                                                                             </div>
 
                                                                         </div>
@@ -503,7 +503,7 @@
                                                                                 <input type="text" class="form-control"
                                                                                     id="locality_name"
                                                                                     name="locality_name"
-                                                                                    value="{{ $order->address->locality }}">
+                                                                                    value="{{ $order->order->address->locality }}">
                                                                             </div>
 
                                                                             <div class="mb-3">
@@ -511,7 +511,7 @@
                                                                                     class="form-label">Landmark</label>
                                                                                 <input type="text" class="form-control"
                                                                                     id="landmark" name="landmark"
-                                                                                    value="{{ $order->address->landmark }}">
+                                                                                    value="{{ $order->order->address->landmark }}">
                                                                             </div>
                                                                         </div>
 
@@ -522,7 +522,7 @@
                                                                                     Code</label>
                                                                                 <input type="text" class="form-control"
                                                                                     id="pincode" name="pincode"
-                                                                                    value="{{ $order->address->pincode }}">
+                                                                                    value="{{ $order->order->address->pincode }}">
                                                                             </div>
 
                                                                             <div class="mb-3">
@@ -530,7 +530,7 @@
                                                                                     class="form-label">City</label>
                                                                                 <input type="text" class="form-control"
                                                                                     id="city" name="city"
-                                                                                    value="{{ $order->address->city }}">
+                                                                                    value="{{ $order->order->address->city }}">
                                                                             </div>
                                                                         </div>
 
@@ -540,7 +540,7 @@
                                                                                 class="form-label">State</label>
                                                                             <input type="text" class="form-control"
                                                                                 id="state" name="state"
-                                                                                value="{{ $order->address->state }}">
+                                                                                value="{{ $order->order->address->state }}">
                                                                         </div>
 
                                                                         <!-- Modal Footer -->
@@ -571,13 +571,13 @@
                                         <td style="text-align: left; padding: 10px; font-size: 14px; color: #333;">
                                             {{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') : 'N/A' }}
 
-                                            @if ($order->subscription && $order->subscription->status == 'paused')
+                                            @if ($order && $order->status == 'paused')
                                                 <div
                                                     style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
                                                     <strong><i class="fas fa-pause-circle me-2"></i></strong>
-                                                    {{ \Carbon\Carbon::parse($order->subscription->pause_start_date)->format('d-m-Y') }}<br>
+                                                    {{ \Carbon\Carbon::parse($order->pause_start_date)->format('d-m-Y') }}<br>
                                                     <strong><i class="fas fa-play-circle me-2"></i></strong>
-                                                    {{ \Carbon\Carbon::parse($order->subscription->pause_end_date)->format('d-m-Y') }}
+                                                    {{ \Carbon\Carbon::parse($order->pause_end_date)->format('d-m-Y') }}
                                                 </div>
                                             @endif
                                         </td>
@@ -585,17 +585,17 @@
 
                                         <td style="padding: 15px; vertical-align: top;">
                                             <div class="product-details">
-                                              
+
                                                 <!-- Subscription Dates -->
-                                                @if ($order->subscription)
+                                                @if ($order)
                                                     <p class="subscription-dates">
                                                         <strong>From :</strong> <br>
-                                                        {{ \Carbon\Carbon::parse($order->subscription->start_date)->format('F j, Y') }}
+                                                        {{ \Carbon\Carbon::parse($order->start_date)->format('F j, Y') }}
                                                         <br>
                                                         <strong>To :</strong> <br>
-                                                        {{ $order->subscription->new_date
-                                                            ? \Carbon\Carbon::parse($order->subscription->new_date)->format('F j, Y')
-                                                            : \Carbon\Carbon::parse($order->subscription->end_date)->format('F j, Y') }}
+                                                        {{ $order->new_date
+                                                            ? \Carbon\Carbon::parse($order->new_date)->format('F j, Y')
+                                                            : \Carbon\Carbon::parse($order->end_date)->format('F j, Y') }}
                                                     </p>
                                                 @else
                                                     <p class="no-subscription text-muted">
@@ -607,7 +607,7 @@
 
                                         <td>
                                             <span style="font-weight: bold">₹
-                                                {{ number_format($order->total_price, 2) }}</span>
+                                                {{ number_format($order->order->total_price, 2) }}</span>
                                             <!-- Edit Price Button -->
                                             {{-- <a href="#" class="btn btn-outline-secondary btn-sm"
                                                 data-bs-toggle="modal"
@@ -667,43 +667,44 @@
                                         <td>
                                             <span
                                                 class="status-badge
-                                                {{ optional($order->subscription)->status === 'active' ? 'status-running bg-success' : '' }}
-                                                {{ optional($order->subscription)->status === 'paused' ? 'status-paused bg-warning' : '' }}
-                                                {{ optional($order->subscription)->status === 'expired' ? 'status-expired bg-primary' : '' }}
-                                                {{ optional($order->subscription)->status === 'dead' ? 'status-expired bg-danger' : '' }}
-                                                {{ optional($order->subscription)->status === 'pending' ? 'status-expired bg-danger' : '' }}">
-
-                                                {{ ucfirst(optional($order->subscription)->status) }}
+                                                {{ optional($order)->status === 'active' ? 'status-running bg-success' : '' }}
+                                                {{ optional($order)->status === 'paused' ? 'status-paused bg-warning' : '' }}
+                                                {{ optional($order)->status === 'expired' ? 'status-expired bg-primary' : '' }}
+                                                {{ optional($order)->status === 'dead' ? 'status-expired bg-danger' : '' }}
+                                                {{ optional($order)->status === 'pending' ? 'status-expired bg-danger' : '' }}">
+                                                {{ ucfirst(optional($order)->status) }}
                                             </span>
                                         </td>
 
                                         <td>
-                                            @if ($order->rider_id)
-                                                <span>{{ $order->rider->rider_name }}</span>
-                                                <a href="#editRiderModal{{ $order->id }}" class="btn btn-sm btn-outline-info"
-                                                    data-bs-toggle="modal"><i class="fas fa-edit"></i></a>
+                                            @if ($order->order->rider_id)
+                                                <span>{{ $order->order->rider->rider_name }}</span>
+                                                <a href="#editRiderModal{{ $order->order->id }}"
+                                                    class="btn btn-sm btn-outline-info" data-bs-toggle="modal"><i
+                                                        class="fas fa-edit"></i></a>
                                             @else
-                                                <form action="{{ route('admin.orders.assignRider', $order->id) }}"
+                                                <form action="{{ route('admin.orders.assignRider', $order->order->id) }}"
                                                     method="POST">
                                                     @csrf
-                                                   <div class="d-flex flex-column">
-                                                    <select name="rider_id" class="form-control" required>
-                                                        <option value="" selected>Choose</option>
-                                                        @foreach ($riders as $rider)
-                                                            <option value="{{ $rider->rider_id }}"
-                                                                {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
-                                                                {{ $rider->rider_name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <button style="font-weight: bold" type="submit" class="btn btn-sm btn-success mt-2">
-                                                        Save</button>
-                                                   </div>
+                                                    <div class="d-flex flex-column">
+                                                        <select name="rider_id" class="form-control" required>
+                                                            <option value="" selected>Choose</option>
+                                                            @foreach ($riders as $rider)
+                                                                <option value="{{ $rider->rider_id }}"
+                                                                    {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
+                                                                    {{ $rider->rider_name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <button style="font-weight: bold" type="submit"
+                                                            class="btn btn-sm btn-success mt-2">
+                                                            Save</button>
+                                                    </div>
                                                 </form>
                                             @endif
                                         </td>
                                         <td>
-                                            @if ($order->referral_id)
+                                            @if ($order->order->referral_id)
                                                 @php
                                                     $referralRider = $riders->firstWhere(
                                                         'rider_id',
@@ -716,22 +717,22 @@
                                                     <span>No Referral Rider Found</span>
                                                 @endif
                                             @else
-                                                <form action="{{ route('admin.orders.refferRider', $order->id) }}"
+                                                <form action="{{ route('admin.orders.refferRider', $order->order->id) }}"
                                                     method="POST">
                                                     @csrf
-                                                   <div class="d-flex flex-column">
-                                                    <select name="referral_id" class="form-control" required>
-                                                        <option value="" selected>Choose</option>
-                                                        @foreach ($riders as $rider)
-                                                            <option value="{{ $rider->rider_id }}"
-                                                                {{ $order->referral_id == $rider->rider_id ? 'selected' : '' }}>
-                                                                {{ $rider->rider_name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                    <button type="submit"
-                                                        class="btn btn-sm btn-success mt-2">Save</button>
-                                                   </div>
+                                                    <div class="d-flex flex-column">
+                                                        <select name="referral_id" class="form-control" required>
+                                                            <option value="" selected>Choose</option>
+                                                            @foreach ($riders as $rider)
+                                                                <option value="{{ $rider->rider_id }}"
+                                                                    {{ $order->referral_id == $rider->rider_id ? 'selected' : '' }}>
+                                                                    {{ $rider->rider_name }}
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-success mt-2">Save</button>
+                                                    </div>
                                                 </form>
                                             @endif
                                         </td>
@@ -740,156 +741,63 @@
                                             <!-- View Button -->
                                             <!-- View Button -->
                                             <a href="{{ route('admin.orders.show', $order->id) }}"
-                                                class="btn d-flex align-items-center" style="background:linear-gradient(90deg, #48fadf 0%, #2ebae5 100%);" >
+                                                class="btn d-flex align-items-center"
+                                                style="background:linear-gradient(90deg, #48fadf 0%, #2ebae5 100%);">
                                                 <i class="fas fa-eye me-2"></i>view
                                             </a>
 
                                             <!-- Pause/Resume/Discontinued Buttons -->
-                                            @if ($order->subscription)
-                                                @if ($order->subscription->status == 'active')
-                                                    <!-- Pause Button -->
-                                                    <a href="javascript:void(0);"
-                                                        class="btn btn-warning pause-button mt-2 d-flex align-items-center"
-                                                        onclick="openPauseModal('{{ $order->subscription->start_date }}', '{{ $order->subscription->end_date }}', '{{ $order->subscription->new_date ?? '' }}')">
+                                            @if ($order)
+                                                @if ($order->status == 'active')
+                                                    <a href="{{ route('subscription.pausepage', $order->id) }}"
+                                                        class="btn btn-warning pause-button mt-2 d-flex align-items-center">
                                                         <i class="fas fa-pause-circle me-2"></i> Pause
                                                     </a>
-                                                @elseif ($order->subscription->status == 'paused')
-                                                    <!-- Resume Button -->
-                                                    <a href="javascript:void(0);"
-                                                        class="btn btn-warning resume-button mt-2 d-flex align-items-center"
-                                                        onclick="openResumeModal('{{ $order->subscription->pause_start_date }}', '{{ $order->subscription->pause_end_date }}','{{ $order->subscription->new_date ?? '' }}')">
-                                                        <i class="fas fa-play-circle me-2"></i>resume
+                                                @elseif ($order->status == 'paused')
+                                                    <a href="{{ route('subscription.resumepage', $order->id) }}"
+                                                        class="btn btn-warning pause-button mt-2 d-flex align-items-center">
+                                                        <i class="fas fa-play-circle me-2"></i>Resume
                                                     </a>
-                                                @elseif($order->subscription->status == 'expired')
+                                                @elseif($order->status == 'expired')
                                                     <!-- Discontinued Button -->
                                                     <a href="javascript:void(0);"
                                                         class="btn mt-2 d-flex align-items-center"
                                                         style="background-color: #fe0404; color: white;"
-                                                        onclick="confirmDiscontinue('{{ route('admin.subscriptions.discontinue', $order->user_id) }}')">
+                                                        onclick="confirmDiscontinue('{{ route('admin.subscriptions.discontinue', $order->order->user_id) }}')">
                                                         <i class="fas fa-times-circle me-2"></i> Remove
                                                     </a>
                                                 @endif
                                             @else
                                                 <span>No subscription available</span>
                                             @endif
-
-
-                                            <!-- Pause Modal -->
-                                            <div class="modal fade" id="pauseModal" tabindex="-1"
-                                                aria-labelledby="pauseModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="pauseModalLabel">Pause
-                                                                Subscription</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <!-- Pause Form -->
-                                                            <form id="pauseForm"
-                                                                action="{{ route('subscription.pause', $order->order_id) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                <div class="mb-3">
-                                                                    <label for="pause_start_date" class="form-label">Pause
-                                                                        Start Date</label>
-                                                                    <input type="date" id="pause_start_date"
-                                                                        name="pause_start_date" class="form-control"
-                                                                        required>
-                                                                </div>
-
-                                                                <div class="mb-3">
-                                                                    <label for="pause_end_date" class="form-label">Pause
-                                                                        End Date</label>
-                                                                    <input type="date" id="pause_end_date"
-                                                                        name="pause_end_date" class="form-control"
-                                                                        required>
-                                                                </div>
-
-                                                                <p class="text-muted">
-                                                                    Dates must be between <span
-                                                                        id="subscriptionStart"></span> and <span
-                                                                        id="subscriptionEnd"></span>.
-                                                                </p>
-
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Close</button>
-                                                                    <button type="submit"
-                                                                        class="btn btn-primary">Submit</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="modal fade" id="resumeModal" tabindex="-1"
-                                                aria-labelledby="resumeModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="resumeModalLabel">Resume
-                                                                Subscription</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <!-- Form to resume subscription -->
-                                                            <form id="resumeForm"
-                                                                action="{{ route('subscription.resume', $order->order_id) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                <div class="mb-3">
-                                                                    <label for="resume_date" class="form-label">Select
-                                                                        Resume Date</label>
-                                                                    <input type="date" id="resume_date"
-                                                                        name="resume_date" class="form-control" required>
-                                                                </div>
-
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Close</button>
-                                                                    <button type="submit"
-                                                                        class="btn btn-success">Resume</button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
-
                         </table>
-
-
 
                         <!-- Add the modal for editing the rider -->
                         @foreach ($orders as $order)
-                            <div class="modal fade" id="editRiderModal{{ $order->id }}" tabindex="-1"
-                                aria-labelledby="editRiderModalLabel{{ $order->id }}" aria-hidden="true">
+                            <div class="modal fade" id="editRiderModal{{ $order->order->id }}" tabindex="-1"
+                                aria-labelledby="editRiderModalLabel{{ $order->order->id }}" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="editRiderModalLabel{{ $order->id }}">Change
-                                                Rider for Order #{{ $order->order_id }}</h5>
+                                            <h5 class="modal-title" id="editRiderModalLabel{{ $order->order->id }}">
+                                                Change
+                                                Rider for Order #{{ $order->order->order_id }}</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"
                                                 aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form action="{{ route('admin.orders.updateRider', $order->id) }}"
+                                            <form action="{{ route('admin.orders.updateRider', $order->order->id) }}"
                                                 method="POST">
                                                 @csrf
                                                 <div class="mb-3">
-                                                    <label for="rider_id{{ $order->id }}" class="form-label">Select
+                                                    <label for="rider_id{{ $order->order->id }}"
+                                                        class="form-label">Select
                                                         Rider</label>
-                                                    <select name="rider_id" id="rider_id{{ $order->id }}"
+                                                    <select name="rider_id" id="rider_id{{ $order->order->id }}"
                                                         class="form-control">
                                                         @foreach ($riders as $rider)
                                                             <option value="{{ $rider->rider_id }}"
@@ -906,8 +814,6 @@
                                 </div>
                             </div>
                         @endforeach
-
-
                     </div>
                 </div>
             </div>
@@ -937,50 +843,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Bootstrap 5 -->
-
-    <script>
-        // Open the Pause Modal and set the date range
-        function openPauseModal(startDate, endDate, newDate) {
-            const startDateField = document.getElementById('pause_start_date');
-            const endDateField = document.getElementById('pause_end_date');
-            const subscriptionStartText = document.getElementById('subscriptionStart');
-            const subscriptionEndText = document.getElementById('subscriptionEnd');
-
-            // Set the date range text
-            subscriptionStartText.textContent = startDate;
-
-            // Check if new_date is available and set the end date accordingly
-            const adjustedEndDate = newDate || endDate;
-            subscriptionEndText.textContent = adjustedEndDate;
-
-            // Set the min and max attributes for the date fields
-            startDateField.setAttribute('min', startDate);
-            endDateField.setAttribute('max', adjustedEndDate);
-            endDateField.setAttribute('min', startDate);
-            endDateField.setAttribute('max', adjustedEndDate);
-
-            // Open the modal using Bootstrap
-            new bootstrap.Modal(document.getElementById('pauseModal')).show();
-        }
-
-        // Open the Resume Modal
-        function openResumeModal(pauseStartDate, pauseEndDate, newDate) {
-            const resumeDateField = document.getElementById('resume_date');
-
-            const adjustedEndDate = newDate || pauseEndDate;
-
-            // Set the min and max for the resume date field
-            resumeDateField.setAttribute('min', pauseStartDate);
-            resumeDateField.setAttribute('max', adjustedEndDate);
-
-            // Set the default date to the pause start date
-            resumeDateField.value = pauseStartDate;
-
-            // Open the modal using Bootstrap
-            new bootstrap.Modal(document.getElementById('resumeModal')).show();
-        }
-    </script>
-
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -1018,8 +880,5 @@
             document.getElementById('pause_end_date').setAttribute('min', startDate);
         });
     </script>
-
-
-
     <!-- Updated JavaScript -->
 @endsection

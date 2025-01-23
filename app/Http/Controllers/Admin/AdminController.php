@@ -88,27 +88,12 @@ public function admindashboard()
     
     // Fetch the total number of notifications (unread) (latest first)(not required now)
     $notifications = Notification::where('is_read', false)->latest()->get();  
-    
-    // Fetch the total number of new user subscriptions today
-    $newUserSubscription = Order::whereDate('created_at', Carbon::today())
-        ->whereNull('request_id') // Add condition for request_id to be NULL
-        ->whereNotIn('user_id', function ($query) {
-            $query->select('user_id')
-                ->from('orders')
-                ->whereNull('request_id') // Ensure request_id is NULL in the subquery
-                ->whereDate('created_at', '<', Carbon::today());
-        })
-        ->count();
 
-        $newUserSubscriptionProduct = ProductOrder::whereDate('created_at', Carbon::today())
-        ->whereNull('request_id') // Add condition for request_id to be NULL
-        ->whereNotIn('user_id', function ($query) {
-            $query->select('user_id')
-                ->from('product__orders_details')
-                ->whereNull('request_id') // Ensure request_id is NULL in the subquery
-                ->whereDate('created_at', '<', Carbon::today());
-        })
-        ->count();
+// new user count
+
+        $newUserSubscription = Order::whereDate('created_at', Carbon::today())
+        ->distinct('user_id')                   
+         ->count('user_id');  
 
         $nonAssignedRidersCount = Subscription::with('relatedOrder')
         ->where('status', 'active')
@@ -120,28 +105,13 @@ public function admindashboard()
         })
         ->count();
     
-    
-    // Fetch the total number of renewed user subscriptions today
-    $renewSubscription = Order::whereDate('created_at', Carbon::today())
-    ->whereNull('request_id')
-    ->whereIn('user_id', function ($query) {
-        $query->select('user_id')
-            ->from('orders')
-            ->whereNull('request_id')
-            ->whereDate('created_at', '<', Carbon::today());
+    $renewSubscription = Subscription::whereDate('created_at', Carbon::today()) // Check rows created today
+    ->whereIn('order_id', function ($query) {
+        $query->select('order_id')
+            ->from('subscriptions')
+            ->groupBy('order_id')
+            ->havingRaw('COUNT(order_id) > 1'); // Find duplicate order IDs
     })
-    ->distinct('user_id')
-    ->count();
-
-    $renewSubscriptionProduct = ProductOrder::whereDate('created_at', Carbon::today())
-    ->whereNull('request_id')
-    ->whereIn('user_id', function ($query) {
-        $query->select('user_id')
-            ->from('product__orders_details')
-            ->whereNull('request_id')
-            ->whereDate('created_at', '<', Carbon::today());
-    })
-    ->distinct('user_id')
     ->count();
 
     // Fetch the total number of subscription orders requested today ( not used in dashboard )
@@ -152,14 +122,9 @@ public function admindashboard()
     // Fetch the total number of flower requests requested today (customized order)
     $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
 
-
-    $productRequestedToday = ProductRequest::whereDate('created_at', Carbon::today())->count();
-
-    
     // Fetch the total number of active subscriptions
     $activeSubscriptions = Subscription::where('status', 'active')->count();
 
-    $activeSubscriptionsProduct = ProductSucription::where('status', 'active')->count();
     // Fetch the total number of paused subscriptions
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
 
@@ -175,9 +140,13 @@ public function admindashboard()
     ->latest('end_date')
     ->count();
 
-        $todayEndSubscription = Subscription::whereDate('end_date', Carbon::today())
-        ->where('status', 'active')
-        ->count();
+
+    $expiredSubscriptions = Subscription::where('status', 'expired') 
+    ->select('order_id')         // Select order_id to group by it
+    ->groupBy('order_id')        // Group by order_id to avoid multiple counts
+    ->get()
+    ->count();   
+       
 
         $todayEndSubscription = Subscription::where(function ($query) {
             $query->where(function ($subQuery) {
@@ -192,52 +161,32 @@ public function admindashboard()
         ->where('status', 'active') // Status must be active
         ->count();
     
-        $expiredSubscriptionsProduct = ProductSucription::where('status', 'expired')
-        ->whereNotIn('user_id', function ($query) {
-            $query->select('user_id')
-                ->from('product__subscriptions_details')
-                ->where('status', 'active');
+        $riders = RiderDetails::where('status','active')->get();
+
+    // Fetch dynamic data for each rider
+    $ridersData = $riders->map(function ($rider) {
+        // Total assigned orders to this rider
+        $totalAssignedOrders = Order::where('rider_id', $rider->rider_id) // Filter by rider_id
+        ->whereHas('subscription', function ($query) {
+            $query->where('status', 'active'); // Check subscription status
         })
         ->count();
 
-    // Individual Rider Details
-    //display to total assigned orders to rider from orders table whose request_id is null  where rider_id is RIDER73783 and add subscription status is active from subcription table 
-    $totalAssignedOrderstobablu = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
-    ->whereNull('orders.request_id')  // Ensure request_id is null
-    ->where('orders.rider_id', 'RIDER73783')  // Filter by rider_id
-    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
-    ->count();
-    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER73783) and created_at date is today
-    $totalDeliveredTodaybybablu = DeliveryHistory::whereDate('created_at', Carbon::today())
-    ->where('rider_id', 'RIDER73783')
-    ->where('delivery_status', 'delivered')
-    ->count();
+        // Total delivered orders today by this rider
+        $totalDeliveredToday = DeliveryHistory::whereDate('created_at', Carbon::today())
+            ->where('rider_id', $rider->rider_id)
+            ->where('delivery_status', 'delivered')
+            ->count();
 
+        return [
+            'rider' => $rider,
+            'totalAssignedOrders' => $totalAssignedOrders,
+            'totalDeliveredToday' => $totalDeliveredToday,
+        ];
+    });
 
-    $totalAssignedOrderstosubrat = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
-    ->whereNull('orders.request_id')  // Ensure request_id is null
-    ->where('orders.rider_id', 'RIDER87967')  // Filter by rider_id
-    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
-    ->count();
-    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER87967) and created_at date is today
-    $totalDeliveredTodaybysubrat = DeliveryHistory::whereDate('created_at', Carbon::today())
-    ->where('rider_id', 'RIDER87967')
-    ->where('delivery_status', 'delivered')
-    ->count();
-
-    $totalAssignedOrderstoprahlad = Order::join('subscriptions', 'orders.order_id', '=', 'subscriptions.order_id')
-    ->whereNull('orders.request_id')  // Ensure request_id is null
-    ->where('orders.rider_id', 'RIDER91711')  // Filter by rider_id
-    ->where('subscriptions.status', 'active')  // Ensure the subscription status is active
-    ->count();
-    // total delivered in today use the table devliery history and withe the condition of this rider_id (RIDER91711) and created_at date is today
-    $totalDeliveredTodaybyprahlad = DeliveryHistory::whereDate('created_at', Carbon::today())
-    ->where('rider_id', 'RIDER91711')
-    ->where('delivery_status', 'delivered')
-    ->count();
-    //Rider Details
     // Total Riders
-    $totalRiders = RiderDetails::count();
+    $totalRiders = RiderDetails::where('status','active')->count();
 
     // Total Deliveries This Month
     $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
@@ -250,7 +199,6 @@ public function admindashboard()
     // Total Deliveries
     $totalDeliveries = DeliveryHistory::count();
   
-    //Expenses Details in a Day
     //Total Expenses in a Day
     $totalExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())->sum('total_price');
     // total paid expenses in a day
@@ -309,28 +257,16 @@ public function admindashboard()
         }
     }
 
-    // Podcast Details
     // Count total podcasts with status 'active'
     $totalActivePodcasts = PublishPodcast::where('status', 'active')->count();
-    // Total Scripts Completed
     $totalCompletedScripts = PodcastPrepair::where('podcast_script_status', 'COMPLETED')->count();
     $totalCompletedRecoding = PodcastPrepair::where('podcast_recording_status', 'COMPLETED')->count();
     $totalCompletedEditing = PodcastPrepair::where('podcast_editing_status', 'COMPLETED')->count();
 
     return view('admin/dashboard', compact(
-        'totalAssignedOrderstoprahlad',
-        'totalDeliveredTodaybyprahlad',
-        'totalDeliveredTodaybysubrat',
-        'totalAssignedOrderstosubrat',
-        'totalDeliveredTodaybybablu',
-        'totalAssignedOrderstobablu',
+        'ridersData',
         'renewSubscription' ,
         'newUserSubscription',
-        'newUserSubscriptionProduct',
-        'productRequestedToday',
-        'renewSubscriptionProduct',
-        'expiredSubscriptionsProduct',
-        'activeSubscriptionsProduct',
         'totalCompletedEditing',
         'totalCompletedRecoding',
         'totalCompletedScripts',

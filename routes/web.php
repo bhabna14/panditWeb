@@ -285,8 +285,11 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
     Route::get('/product-orders', [ProductSubscriptionController::class, 'showProductOrder'])->name('admin.product.index');
 
-    Route::post('/subscription/{order_id}/pause', [FlowerOrderController::class, 'pause'])->name('subscription.pause');
-    Route::post('/subscription/{order_id}/resume', [FlowerOrderController::class, 'resume'])->name('subscription.resume');
+
+    Route::get('/subscription/pause-page/{id}',[FlowerOrderController::class,  'pausePage'])->name('subscription.pausepage');
+    Route::get('/subscription/resume-page/{id}',[FlowerOrderController::class,   'resumePage'])->name('subscription.resumepage');
+    Route::post('/subscription/{id}/pause', [FlowerOrderController::class, 'pause'])->name('subscription.pause');
+    Route::post('/subscription/{id}/resume', [FlowerOrderController::class, 'resume'])->name('subscription.resume');
     Route::get('/subscriptions/discontinue/{userId}', [FlowerOrderController::class, 'discontinue'])->name('admin.subscriptions.discontinue');
 
     Route::put('/orders/{order_id}/update-payment-status', [FlowerOrderController::class, 'updatePaymentStatus'])->name('admin.orders.updatePaymentStatus');
