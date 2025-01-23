@@ -350,6 +350,8 @@ try {
                 'pauseResumeLog',
                 'flowerPayments',
                 'users',
+                'order.address', // Include associated address through the order
+
             ])
             ->orderBy('created_at', 'desc') // Order by latest subscription
             ->get();
