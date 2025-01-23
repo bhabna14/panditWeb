@@ -186,7 +186,7 @@ public function admindashboard()
         ->whereMonth('created_at', now()->month)
         ->count();
         // Total Deliveries Today
-        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())
+        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
         ->count();
 
     // Total Deliveries
