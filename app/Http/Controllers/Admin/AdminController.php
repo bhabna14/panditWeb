@@ -135,18 +135,11 @@ public function admindashboard()
             ->from('subscriptions')
             ->whereIn('status', ['active', 'paused', 'resume']);
     })
-
     ->distinct('user_id')
     ->latest('end_date')
     ->count();
 
 
-    $expiredSubscriptions = Subscription::where('status', 'expired') 
-    ->select('order_id')         // Select order_id to group by it
-    ->groupBy('order_id')        // Group by order_id to avoid multiple counts
-    ->get()
-    ->count();   
-       
 
         $todayEndSubscription = Subscription::where(function ($query) {
             $query->where(function ($subQuery) {

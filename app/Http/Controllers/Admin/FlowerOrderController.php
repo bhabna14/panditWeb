@@ -94,7 +94,7 @@ class FlowerOrderController extends Controller
         ->latest('end_date');
 
     }
-
+   
     // Filter for paused subscriptions
     if ($request->query('filter') === 'paused') {
             $query->where('status', 'paused');
