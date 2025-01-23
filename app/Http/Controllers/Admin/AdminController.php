@@ -184,13 +184,14 @@ public function admindashboard()
     // Total Deliveries This Month
     $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
         ->whereMonth('created_at', now()->month)
+        ->where('delivery_status', 'delivered')
         ->count();
         // Total Deliveries Today
         $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
         ->count();
 
     // Total Deliveries
-    $totalDeliveries = DeliveryHistory::count();
+    $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
   
     //Total Expenses in a Day
     $totalExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())->sum('total_price');
