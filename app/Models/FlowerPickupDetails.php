@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class FlowerPickupDetails extends Model
 {
     protected $table = 'flower__pickup_details'; 
+    
     protected $fillable = [
          'pick_up_id', 'vendor_id', 'rider_id', 'pickup_date', 'total_price', 'payment_method','payment_status','status','payment_id'
     ];

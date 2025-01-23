@@ -221,23 +221,22 @@ public function admindashboard()
     $totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year)
     ->whereMonth('created_at', now()->month)
     ->sum('total_price');
-
       
-    // Total details of flower orders
     // Calculate the total price from the flower_pickup_details table ( total expenses )
     $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
 
     // Calculate the total price for orders without request_id (total income of subscription orders)
-    $ordersWithoutRequestId = Order::whereNull('request_id')
-            ->get();
+    $ordersWithoutRequestId = Subscription::get();
+            
     
     $totalPriceWithoutRequestId = 0;
-    foreach ($ordersWithoutRequestId as $order) {
-        $payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
+    foreach ($ordersWithoutRequestId as $subscription) {
+        $payment = $subscription->flowerPayments()->where('payment_status', 'paid')->get();
         if ($payment) {
-            $totalPriceWithoutRequestId += $order->total_price;
+            $totalPriceWithoutRequestId += $subscription->total_price;
         }
     }
+
 
     // Calculate the total price for orders with request_id ( total income of customized orders )
     $ordersWithRequestId = Order::whereNotNull('request_id')
