@@ -224,11 +224,17 @@ public function admindashboard()
       
     // Calculate the total price from the flower_pickup_details table ( total expenses )
     $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
-    
-    $totalPriceWithoutRequestId = Subscription::whereHas('flowerPayments', function ($query) {
-        $query->where('payment_status', 'paid');
-    })
-    ->sum('total_price');
+
+    $ordersWithoutRequestId = Subscription::get();
+
+$totalPriceWithoutRequestId = 0;
+foreach ($ordersWithoutRequestId as $order) {
+$payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
+if ($payment) {
+    $totalPriceWithoutRequestId += $order->total_price;
+}
+}
+
 
     // Calculate the total price for orders with request_id ( total income of customized orders )
     $ordersWithRequestId = Order::whereNotNull('request_id')
