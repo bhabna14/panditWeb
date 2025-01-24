@@ -173,8 +173,8 @@
     </div>
     
     
-    <div class="row">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+    <div class="row mt-2">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom">Flower Subscription</h4>
             <div class="row">
                 <!-- New Subscription -->
