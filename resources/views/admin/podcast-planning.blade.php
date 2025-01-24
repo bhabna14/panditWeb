@@ -79,7 +79,7 @@
                 <h2 class="accordion-header" id="heading{{ $loop->index }}">
                     <button 
                         class="accordion-button {{ $loop->first ? '' : 'collapsed' }}"  
-                        style="background: linear-gradient(120deg, #e9ca9e, #f3c1dd);" 
+                        style="background: linear-gradient(120deg, #67015e, #4a3c44);" 
                         type="button" 
                         data-bs-toggle="collapse" 
                         data-bs-target="#collapse{{ $loop->index }}" 
