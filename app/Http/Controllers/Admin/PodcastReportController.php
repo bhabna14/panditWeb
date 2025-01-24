@@ -17,11 +17,11 @@ class PodcastReportController extends Controller
     {
         // Fetch all active podcasts
         $podcast_details = PodcastPrepair::where('status', 'active')->get();
-        
+    
         // Fetch publish dates for all podcasts (if any)
         $publish_data = PublishPodcast::whereIn('podcast_id', $podcast_details->pluck('podcast_id'))
                                       ->pluck('publish_date', 'podcast_id');
-        
+    
         // Separate unpublished podcasts and assign a formatted `podcast_create_date`
         $podcastDetailsWithPublishDate = $podcast_details->map(function ($podcast) use ($publish_data) {
             $publish_date = $publish_data->get($podcast->podcast_id, null);
@@ -37,8 +37,14 @@ class PodcastReportController extends Controller
             return $item['publish_date'] !== 'Unpublished' ? $item['publish_date'] : $item['create_date'];
         });
     
-        return view('admin/podcast-report', compact('groupedPodcasts'));
+        // Sort groups by month-year in ascending order
+        $sortedGroupedPodcasts = $groupedPodcasts->sortKeysUsing(function ($a, $b) {
+            return Carbon::createFromFormat('F Y', $a)->timestamp <=> Carbon::createFromFormat('F Y', $b)->timestamp;
+        });
+    
+        return view('admin/podcast-report', compact('sortedGroupedPodcasts'));
     }
+    
     
     public function getScriptDetails(Request $request)
 {
