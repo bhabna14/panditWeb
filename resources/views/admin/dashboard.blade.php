@@ -153,7 +153,7 @@
     <!-- /breadcrumb -->
 
     <!-- row -->
-    <div class="row">
+    <div class="row" id="welcomeSection">
         <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
             <div class="card">
                 <div class="card-body">
@@ -166,12 +166,12 @@
                                 </h3>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
     
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
@@ -1302,4 +1302,14 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <!-- Include the notification sound script in your script.blade.php -->
+
+    <script>
+        // Hide the section after 5 seconds (5000 milliseconds)
+        setTimeout(() => {
+            const welcomeSection = document.getElementById('welcomeSection');
+            if (welcomeSection) {
+                welcomeSection.style.display = 'none';
+            }
+        }, 5000);
+    </script>
 @endsection
