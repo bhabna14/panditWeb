@@ -66,7 +66,7 @@
 
     <!-- Row -->
     <div class="accordion" id="podcastAccordion">
-        @foreach ($groupedPodcasts as $month => $podcasts)
+        @foreach ($sortedGroupedPodcasts as $month => $podcasts)
             <div class="accordion-item">
                 <h2 class="accordion-header" id="heading{{ $loop->index }}">
                     <button 
