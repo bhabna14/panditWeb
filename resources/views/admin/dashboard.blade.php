@@ -139,7 +139,7 @@
 
 @section('content')
     <!-- breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
+    <div class="breadcrumb-header justify-content-between"  id="welcomeSection">
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">DASHBOARD</span>
         </div>
