@@ -153,7 +153,7 @@
     <!-- /breadcrumb -->
 
     <!-- row -->
-    <div class="row" id="welcomeSection">
+    <div class="row" id="welcomeSections">
         <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
             <div class="card">
                 <div class="card-body">
@@ -1312,4 +1312,14 @@
             }
         }, 5000);
     </script>
+
+<script>
+    // Hide the section after 5 seconds (5000 milliseconds)
+    setTimeout(() => {
+        const welcomeSection = document.getElementById('welcomeSections');
+        if (welcomeSection) {
+            welcomeSection.style.display = 'none';
+        }
+    }, 5000);
+</script>
 @endsection
