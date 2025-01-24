@@ -13,7 +13,7 @@ class PodcastPlanningController extends Controller
     public function podcastPlanning()
     {
         // Fetch active podcasts
-        $all_podcast = PodcastPrepair::where('status', 'active')->get();
+        $all_podcast = PodcastPrepair::where('status', 'active')->orderBy('podcast_create_date', 'asc')->get();
 
         // Group podcasts by month-year using the podcast_create_date column
         $podcastDetails = $all_podcast->groupBy(function ($podcast) {
