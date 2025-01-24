@@ -14,6 +14,7 @@ class PodcastScriptController extends Controller
     {
         $podcastDetails = PodcastPrepair::where('podcast_create_status', 'PODCAST INITIALIZE')
             ->where('podcast_script_status', 'PENDING')
+            ->orderBy('podcast_create_date', 'asc') // Sort by podcast_create_date in ascending order
             ->get()
             ->groupBy(function ($item) {
                 // Use Y-m for a sortable format, then convert it back to F Y for display
@@ -28,6 +29,7 @@ class PodcastScriptController extends Controller
     
         return view('admin/add-podcast-script', compact('podcastDetails'));
     }
+    
 
     public function updatePodcastDetails(Request $request, $id)
 {

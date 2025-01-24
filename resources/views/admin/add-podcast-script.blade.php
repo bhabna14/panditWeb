@@ -76,7 +76,7 @@
                                 onclick="setActive(this)">Publish</a>
                                 <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
-                            <a class="nav-link mb-2 mt-2" href="{{ url('admin/podcast-report') }}"
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
                                 onclick="setActive(this)">Report</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-planning') }}"
                                 onclick="setActive(this)">Planning</a>
