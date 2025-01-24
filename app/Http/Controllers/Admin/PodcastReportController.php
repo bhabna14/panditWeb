@@ -15,29 +15,31 @@ class PodcastReportController extends Controller
 
     public function podcastReport()
     {
+        // Fetch all active podcasts
         $podcast_details = PodcastPrepair::where('status', 'active')->get();
-    
-        // Fetch publish date for each podcast
+        
+        // Fetch publish dates for all podcasts (if any)
         $publish_data = PublishPodcast::whereIn('podcast_id', $podcast_details->pluck('podcast_id'))
                                       ->pluck('publish_date', 'podcast_id');
         
-        // Group podcast data by month-year of the publish_date
-        $podcastsByMonth = $publish_data->map(function ($publishDate, $podcastId) use ($podcast_details) {
+        // Separate unpublished podcasts and assign a formatted `podcast_create_date`
+        $podcastDetailsWithPublishDate = $podcast_details->map(function ($podcast) use ($publish_data) {
+            $publish_date = $publish_data->get($podcast->podcast_id, null);
             return [
-                'podcast' => $podcast_details->firstWhere('podcast_id', $podcastId),
-                'publish_date' => Carbon::parse($publishDate)->format('F Y') // Group by month-year
+                'podcast' => $podcast,
+                'publish_date' => $publish_date ? Carbon::parse($publish_date)->format('F Y') : 'Unpublished',
+                'create_date' => $publish_date ? null : Carbon::parse($podcast->podcast_create_date)->format('F Y'),
             ];
         });
     
-        // Group by formatted month and year
-        $groupedPodcasts = $podcastsByMonth->groupBy('publish_date');
+        // Group podcasts by publish date or creation date for unpublished
+        $groupedPodcasts = $podcastDetailsWithPublishDate->groupBy(function ($item) {
+            return $item['publish_date'] !== 'Unpublished' ? $item['publish_date'] : $item['create_date'];
+        });
     
         return view('admin/podcast-report', compact('groupedPodcasts'));
     }
     
-    
-    
-
     public function getScriptDetails(Request $request)
 {
     $podcast = PodcastPrepair::where('podcast_id', $request->podcast_id)->first();

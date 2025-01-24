@@ -28,6 +28,21 @@ class PodcastScriptController extends Controller
     
         return view('admin/add-podcast-script', compact('podcastDetails'));
     }
+
+    public function updatePodcastDetails(Request $request, $id)
+{
+    $request->validate([
+        'podcast_name' => 'required|string|max:255',
+        'podcast_create_date' => 'required|date',
+    ]);
+
+    $podcast = PodcastPrepair::findOrFail($id);
+    $podcast->podcast_name = $request->podcast_name;
+    $podcast->podcast_create_date = $request->podcast_create_date;
+    $podcast->save();
+
+    return redirect()->back()->with('success', 'Podcast details updated successfully.');
+}
     
     
 

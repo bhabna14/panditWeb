@@ -16,6 +16,7 @@ class PodcastPrepair extends Model
         'podcast_id',
         'language',
         'podcast_name',
+        'podcast_type',
         'deity_category',
         'festival_name',
         'podcast_create_date',

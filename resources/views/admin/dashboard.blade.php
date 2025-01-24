@@ -155,22 +155,24 @@
     <!-- row -->
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
-            <div class="card" >
+            <div class="card">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-xl-9 col-lg-7 col-md-12 col-sm-12">
                             <div class="text-justified align-items-center">
-                                <h3 class="text-dark font-weight-semibold mb-2 mt-0">Hi, Welcome Back <span
-                                        class="text-primary">{{ Auth::guard('admins')->user()->name }}!</span></h3>
-
+                                <h3 class="text-dark font-weight-semibold mb-2 mt-0">
+                                    Hi, Welcome Back 
+                                    <span class="text-primary">{{ Auth::guard('admins')->user()->name }}!</span>
+                                </h3>
                             </div>
                         </div>
-
+                        
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <h4 class="card-title-custom">Flower Subscription</h4>

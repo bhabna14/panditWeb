@@ -23,32 +23,32 @@
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 ">
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-create') }}"
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-create') }}"
                                 onclick="setActive(this)">Create Podcast</a>
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-script') }}"
-                                onclick="setActive(this)">Script Of Podcast</a>
+                            <a class="nav-link mb-2 mt-2"  style="padding: 10px;" href="{{ url('admin/podcast-script') }}"
+                                onclick="setActive(this)">Script</a>
                             <a class="nav-link mb-2 mt-2 bg-warning"
                                 style="color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
-                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
-                                Verified</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-recording') }}"
-                                onclick="setActive(this)">Recording Of Podcast</a>
+                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">
+                                Verification</a>
+                            <a class="nav-link mb-2 mt-2" style="padding: 10px;"
+                                href="{{ url('admin/podcast-recording') }}" onclick="setActive(this)">Recording</a>
                             <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-editing') }}"
-                                onclick="setActive(this)">Editing Of Podcast</a>
+                                onclick="setActive(this)">Editing</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">Editing
+                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">
                                 Verified</a>
-                           
-                                <a class="nav-link mb-2 mt-2" style="padding: 10px;"
-                                href="{{ url('admin/podcast-media') }}" onclick="setActive(this)">Podcast
-                                Media</a>
-                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
-                                onclick="setActive(this)">Publish Podcast</a>
+                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
+                                onclick="setActive(this)">
+                                Creatives</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
+                                onclick="setActive(this)">Publish</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
+                            <a class="nav-link mb-2 mt-2"  style="padding: 10px;" href="{{ url('admin/podcast-report') }}"
                                 onclick="setActive(this)">Report</a>
-
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-planning') }}" onclick="setActive(this)">Planning</a>
                         </nav>
                     </div>
                 </div>
@@ -125,7 +125,8 @@
                                             @csrf
                                             <td>
                                                 <input type="text" class="form-control" id="script_verified_by"
-                                                    name="script_verified_by" placeholder="Enter Verified By" value="{{ $podcast->script_verified_by}}">
+                                                    name="script_verified_by" placeholder="Enter Verified By"
+                                                    value="{{ $podcast->script_verified_by }}">
                                             </td>
                                             <td>
                                                 <div class="d-flex align-items-center">
@@ -143,17 +144,20 @@
 
                                         <!-- Approve and Reject Buttons -->
                                         <td>
-                                            <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
+                                            <div
+                                                style="display: flex; gap: 10px; justify-content: center; align-items: center;">
                                                 <!-- Approve Button -->
-                                                <form action="{{ route('approvePodcastScript', $podcast->podcast_id) }}" method="POST" class="approve-form">
+                                                <form action="{{ route('approvePodcastScript', $podcast->podcast_id) }}"
+                                                    method="POST" class="approve-form">
                                                     @csrf
-                                                    <button type="button" class="btn btn-success btn-md approve-btn" >
+                                                    <button type="button" class="btn btn-success btn-md approve-btn">
                                                         <i class="icon ion-ios-checkmark-circle-outline"></i>
                                                     </button>
                                                 </form>
-                                        
+
                                                 <!-- Reject Button -->
-                                                <form action="{{ route('rejectPodcastScript', $podcast->podcast_id) }}" method="POST" class="reject-form">
+                                                <form action="{{ route('rejectPodcastScript', $podcast->podcast_id) }}"
+                                                    method="POST" class="reject-form">
                                                     @csrf
                                                     <button type="button" class="btn btn-danger btn-md reject-btn">
                                                         <i class="icon ion-ios-close-circle"></i>
@@ -161,7 +165,7 @@
                                                 </form>
                                             </div>
                                         </td>
-                                        
+
                                     </tr>
                                 @empty
                                     <tr>
@@ -212,17 +216,17 @@
     <script src="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.js') }}"></script>
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get today's date in YYYY-MM-DD format
-        const today = new Date().toISOString().split('T')[0];
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date().toISOString().split('T')[0];
 
-        // Select all elements with the class 'script-created-date'
-        document.querySelectorAll('#script_verified_date').forEach(input => {
-            input.value = today;
+            // Select all elements with the class 'script-created-date'
+            document.querySelectorAll('#script_verified_date').forEach(input => {
+                input.value = today;
+            });
         });
-    });
-</script>
+    </script>
 
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -308,7 +312,7 @@
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = scriptEditor;
                     scriptEditorContent.value = tempDiv.innerText
-                .trim(); // Get clean text and set it
+                        .trim(); // Get clean text and set it
                 });
             });
         });

@@ -54,38 +54,40 @@
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 ">
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-create') }}"
-                                onclick="setActive(this)">Create Podcast</a>
-                            <a class="nav-link mb-2 mt-2 bg-warning"
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-create') }}" onclick="setActive(this)">Create Podcast</a>
+                                <a class="nav-link mb-2 mt-2 bg-warning"
                                 style="  color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
-                                href="{{ url('admin/podcast-script') }}" onclick="setActive(this)">Script Of Podcast</a>
-
+                                href="{{ url('admin/podcast-script') }}" onclick="setActive(this)">Script</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
-                                Verified</a>
+                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">
+                                Verification</a>
                             <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-recording') }}"
-                                onclick="setActive(this)">Recording Of Podcast</a>
+                                onclick="setActive(this)">Recording</a>
                             <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-editing') }}"
-                                onclick="setActive(this)">Editing Of Podcast</a>
+                                onclick="setActive(this)">Editing</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">Editing
+                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">
                                 Verified</a>
-                            
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
-                                onclick="setActive(this)">Podcast
-                                Media</a>
+                                <a class="nav-link mb-2 mt-2" style="padding: 10px;"
+                                href="{{ url('admin/podcast-media') }}" onclick="setActive(this)">
+                                Creatives</a>
                                 <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
-                                onclick="setActive(this)">Publish Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
+                                onclick="setActive(this)">Publish</a>
+                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
+                            <a class="nav-link mb-2 mt-2" href="{{ url('admin/podcast-report') }}"
                                 onclick="setActive(this)">Report</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-planning') }}"
+                                onclick="setActive(this)">Planning</a>
                         </nav>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+
 
     <!-- Row -->
     <div class="row row-sm">
@@ -125,6 +127,8 @@
                                     <div id="collapse{{ $loop->index }}" class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" aria-labelledby="heading{{ $loop->index }}" data-bs-parent="#podcastAccordion">
                                         <div class="accordion-body">
                                             <div class="table-responsive">
+                                               
+
                                                 <table class="table table-bordered table-striped text-nowrap key-buttons border-bottom">
                                                     <thead class="bg-info text-dark">
                                                         <tr>
@@ -143,31 +147,31 @@
                                                         @foreach ($podcasts as $index => $podcast)
                                                             <tr>
                                                                 <td>{{ $index + 1 }}</td>
-                                                                <td>{{ $podcast->podcast_name }}</td>
                                                                 <td>
-                                                                    <a href="{{ route('scriptEditor', ['podcast_id' => $podcast->podcast_id]) }}"
-                                                                        class="btn btn-success" style="font-size: 16px">+</a>
+                                                                    {{ $podcast->podcast_name }}
+                                                                    <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ $podcast->id }}">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </a>
                                                                 </td>
-                                                                <!-- Form to Update Script -->
-                                                                <form action="{{ route('updatePodcastScript', $podcast->podcast_id) }}" method="post"
-                                                                    enctype="multipart/form-data">
+                                                                <td>
+                                                                    <a href="{{ route('scriptEditor', ['podcast_id' => $podcast->podcast_id]) }}" class="btn btn-success" style="font-size: 16px">+</a>
+                                                                </td>
+                                                                <form action="{{ route('updatePodcastScript', $podcast->podcast_id) }}" method="post" enctype="multipart/form-data">
                                                                     @csrf
                                                                     <td>
-                                                                        <input type="text" class="form-control" name="script_location"
-                                                                            placeholder="Enter Script File Location" value="{{ $podcast->script_location }}"
-                                                                            required>
+                                                                        <input type="text" class="form-control" name="script_location" placeholder="Enter Script File Location" value="{{ $podcast->script_location }}" required>
                                                                     </td>
                                                                     <td>
-                                                                        <input class="form-control script-created-date" name="script_created_date" type="date"
-                                                                            value="{{ $podcast->podcast_create_date }}" readonly>
+                                                                        {{ $podcast->podcast_create_date }}
+                                                                        <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#editModal{{ $podcast->id }}">
+                                                                            <i class="fas fa-edit"></i>
+                                                                        </a>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control" name="story_source"
-                                                                            placeholder="Enter Source Of The Story" value="{{ $podcast->story_source }}" required>
+                                                                        <input type="text" class="form-control" name="story_source" placeholder="Enter Source Of The Story" value="{{ $podcast->story_source }}" required>
                                                                     </td>
                                                                     <td>
-                                                                        <input type="text" class="form-control" name="script_created_by"
-                                                                            placeholder="Enter Script Created By" value="{{ $podcast->script_created_by }}" required>
+                                                                        <input type="text" class="form-control" name="script_created_by" placeholder="Enter Script Created By" value="{{ $podcast->script_created_by }}" required>
                                                                     </td>
                                                                     <td>
                                                                         <button type="submit" class="btn btn-success btn-md">Save</button>
@@ -181,9 +185,39 @@
                                                                     </td>
                                                                 </form>
                                                             </tr>
+                                                
+                                                            <!-- Modal for Editing Podcast Name and Script Create Date -->
+                                                            <div class="modal fade" id="editModal{{ $podcast->id }}" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+                                                                <div class="modal-dialog">
+                                                                    <div class="modal-content">
+                                                                        <form action="{{ route('updatePodcastDetails', $podcast->id) }}" method="POST">
+                                                                            @csrf
+                                                                            <div class="modal-header">
+                                                                                <h5 class="modal-title" id="editModalLabel">Edit Podcast Details</h5>
+                                                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                            </div>
+                                                                            <div class="modal-body">
+                                                                                <div class="mb-3">
+                                                                                    <label for="podcast_name" class="form-label">Podcast Name</label>
+                                                                                    <input type="text" class="form-control" id="podcast_name" name="podcast_name" value="{{ $podcast->podcast_name }}" required>
+                                                                                </div>
+                                                                                <div class="mb-3">
+                                                                                    <label for="podcast_create_date" class="form-label">Script Create Date</label>
+                                                                                    <input type="date" class="form-control" id="podcast_create_date" name="podcast_create_date" value="{{ $podcast->podcast_create_date }}" required>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="modal-footer">
+                                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
                                                         @endforeach
                                                     </tbody>
                                                 </table>
+                                                
                                             </div>
                                         </div>
                                     </div>

@@ -40,6 +40,8 @@ use App\Http\Controllers\Admin\FollowUpController;
 use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\CustomizeProductController;
 use App\Http\Controllers\Admin\FlowerDashboardController;
+use App\Http\Controllers\Admin\PodcastPlanningController;
+
 
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 use App\Http\Controllers\Admin\ProductRequestController;
@@ -491,6 +493,8 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
     Route::controller(PodcastScriptController::class)->group(function() {
 
         Route::get('/podcast-script', 'podcastScript')->name('podcastScript');
+        Route::post('/update-podcast-details/{id}', 'updatePodcastDetails')->name('updatePodcastDetails');
+
         Route::post('/update-podcast-script/{podcast_id}', 'updatePodcastScript')->name('updatePodcastScript');
         Route::get('/podcast-recording', 'podcastRecording')->name('podcastRecording');
 
@@ -525,7 +529,10 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::post('/update-podcast-social-media/{podcast_id}', 'updatePodcastSocialMedia')->name('updatePodcastSocialMedia');
     });
 
-
+    Route::controller(PodcastPlanningController::class)->group(function() {
+        Route::get('/podcast-planning', 'podcastPlanning')->name('PodcastSocialMedia');
+       
+    });
 
     Route::controller(PodcastController::class)->group(function() {
         Route::get('/manage-podcast', 'managepodcast')->name('managepodcast');

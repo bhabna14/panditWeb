@@ -23,39 +23,39 @@
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 ">
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-create') }}"
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-create') }}"
                                 onclick="setActive(this)">Create Podcast</a>
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-script') }}"
-                                onclick="setActive(this)">Script Of Podcast</a>
-                           
-                            <a class="nav-link mb-2 mt-2"
-                                style="padding: 10px;"
-                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
+                            <a class="nav-link mb-2 mt-2"  style=" padding: 10px;"  href="{{ url('admin/podcast-script') }}"
+                                onclick="setActive(this)">Script</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-script-verified') }}"
+                                onclick="setActive(this)">
+                                Verification</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-recording') }}"
+                                onclick="setActive(this)">Recording</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-editing') }}"
+                                onclick="setActive(this)">Editing</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-editing-verified') }}"
+                                onclick="setActive(this)">
                                 Verified</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-recording') }}"
-                                onclick="setActive(this)">Recording Of Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-editing') }}"
-                                onclick="setActive(this)">Editing Of Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">Editing
-                                Verified</a>
-                           
-                                <a class="nav-link mb-2 mt-2 bg-warning"
+                            <a class="nav-link mb-2 mt-2 bg-warning"
                                 style="color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
-                                href="{{ url('admin/podcast-media') }}" onclick="setActive(this)">Podcast
-                                Media</a>  
-                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
-                                onclick="setActive(this)">Publish Podcast</a>
+                                href="{{ url('admin/podcast-media') }}" onclick="setActive(this)">Creatives
+                            </a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
+                                onclick="setActive(this)">Publish</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
+                            <a class="nav-link mb-2 mt-2"  style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
                                 onclick="setActive(this)">Report</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-planning') }}" onclick="setActive(this)">Planning</a>
                         </nav>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Row -->
     <div class="row row-sm">
@@ -101,7 +101,7 @@
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
                                         <td>{{ $podcast->podcast_name }}</td>
-                        
+
                                         <!-- View Script Button -->
                                         <td>
                                             <button type="button" class="btn btn-success view-script-btn"
@@ -110,21 +110,29 @@
                                                 Script
                                             </button>
                                         </td>
-                        
-                                        <form action="{{ route('updatePodcastMedia', ['podcast_id' => $podcast->podcast_id]) }}" method="post" enctype="multipart/form-data">
+
+                                        <form
+                                            action="{{ route('updatePodcastMedia', ['podcast_id' => $podcast->podcast_id]) }}"
+                                            method="post" enctype="multipart/form-data">
                                             @csrf
                                             <td>
-                                                <input type="text" class="form-control" id="podcast_image_path" name="podcast_image_path" placeholder="Enter Image Path" required onchange="validateUrl(this)">
+                                                <input type="text" class="form-control" id="podcast_image_path"
+                                                    name="podcast_image_path" placeholder="Enter Image Path" required
+                                                    onchange="validateUrl(this)">
                                             </td>
-                                        
+
                                             <td>
-                                                <input type="text" class="form-control" id="podcast_video_path" name="podcast_video_path" placeholder="Enter Video Path" required onchange="validateUrl(this)">
+                                                <input type="text" class="form-control" id="podcast_video_path"
+                                                    name="podcast_video_path" placeholder="Enter Video Path" required
+                                                    onchange="validateUrl(this)">
                                             </td>
-                                        
+
                                             <td>
-                                                <input type="text" class="form-control" id="podcast_audio_path" name="podcast_audio_path" placeholder="Enter Audio Path" required onchange="validateUrl(this)">
+                                                <input type="text" class="form-control" id="podcast_audio_path"
+                                                    name="podcast_audio_path" placeholder="Enter Audio Path" required
+                                                    onchange="validateUrl(this)">
                                             </td>
-                                        
+
                                             <td>
                                                 <button type="submit" class="btn btn-dark">SAVE</button>
                                             </td>
@@ -137,7 +145,7 @@
                                 @endforelse
                             </tbody>
                         </table>
-                        
+
 
                         <!-- Modal -->
                         <div class="modal fade" id="scriptEditorModal" tabindex="-1"
@@ -200,45 +208,44 @@
         });
     </script>
 
-<script>
-    // Show/Hide inputs and update hidden field dynamically
-    document.querySelectorAll('.path-type-radio').forEach(radio => {
-        radio.addEventListener('change', function () {
-            const pathId = this.getAttribute('data-path-id');
-            const audioInput = document.getElementById(`audio-input-${pathId}`);
-            const videoInput = document.getElementById(`video-input-${pathId}`);
+    <script>
+        // Show/Hide inputs and update hidden field dynamically
+        document.querySelectorAll('.path-type-radio').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const pathId = this.getAttribute('data-path-id');
+                const audioInput = document.getElementById(`audio-input-${pathId}`);
+                const videoInput = document.getElementById(`video-input-${pathId}`);
 
-            if (this.value === 'audio') {
-                audioInput.style.display = 'block';
-                videoInput.style.display = 'none';
-            } else if (this.value === 'video') {
-                audioInput.style.display = 'none';
-                videoInput.style.display = 'block';
-            }
+                if (this.value === 'audio') {
+                    audioInput.style.display = 'block';
+                    videoInput.style.display = 'none';
+                } else if (this.value === 'video') {
+                    audioInput.style.display = 'none';
+                    videoInput.style.display = 'block';
+                }
+            });
         });
-    });
 
-    function updatePathLocation(inputElement, pathId) {
-        const hiddenInput = document.getElementById(`path_location_url-${pathId}`);
-        hiddenInput.value = inputElement.value;
-    }
-</script>
-
-<script>
-    function validateUrl(input) {
-        // Regex for URL validation
-        const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,})(\/[^\s]*)?$/;
-
-        // Get the input value
-        const url = input.value.trim();
-
-        // Check if the URL is valid
-        if (!urlPattern.test(url)) {
-            alert('Invalid URL! Please enter a valid URL.');
-            input.value = ''; // Clear the invalid value
-            input.focus(); // Focus the field for correction
+        function updatePathLocation(inputElement, pathId) {
+            const hiddenInput = document.getElementById(`path_location_url-${pathId}`);
+            hiddenInput.value = inputElement.value;
         }
-    }
-</script>
+    </script>
 
+    <script>
+        function validateUrl(input) {
+            // Regex for URL validation
+            const urlPattern = /^(https?:\/\/)?([a-zA-Z0-9.-]+)\.([a-zA-Z]{2,})(\/[^\s]*)?$/;
+
+            // Get the input value
+            const url = input.value.trim();
+
+            // Check if the URL is valid
+            if (!urlPattern.test(url)) {
+                alert('Invalid URL! Please enter a valid URL.');
+                input.value = ''; // Clear the invalid value
+                input.focus(); // Focus the field for correction
+            }
+        }
+    </script>
 @endsection

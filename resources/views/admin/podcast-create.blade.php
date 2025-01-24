@@ -43,28 +43,32 @@
                                 style=" color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
                                 href="{{ url('admin/podcast-create') }}" onclick="setActive(this)">Create Podcast</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-script') }}"
-                                onclick="setActive(this)">Script Of Podcast</a>
-                           
+                                onclick="setActive(this)">Script</a>
+
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
-                                Verified</a>
+                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">
+                                Verification</a>
                             <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-recording') }}"
-                                onclick="setActive(this)">Recording Of Podcast</a>
+                                onclick="setActive(this)">Recording</a>
                             <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-editing') }}"
-                                onclick="setActive(this)">Editing Of Podcast</a>
+                                onclick="setActive(this)">Editing</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">Editing
+                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">
                                 Verified</a>
-                           
-                                <a class="nav-link mb-2 mt-2" style="padding: 10px;"
-                                href="{{ url('admin/podcast-media') }}" onclick="setActive(this)">Podcast
-                                Media</a>
-                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
-                                onclick="setActive(this)">Publish Podcast</a>
-                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
+
+                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
+                                onclick="setActive(this)">
+                                Creatives</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
+                                onclick="setActive(this)">Publish</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
                                 onclick="setActive(this)">Report</a>
+
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-planning') }}" onclick="setActive(this)">Planning</a>
+
                         </nav>
                     </div>
                 </div>
@@ -137,22 +141,36 @@
                                                         <div class="main-content-label mg-b-5">Create Date</div>
                                                         <div class="input-group">
                                                             <div class="input-group-text">
-                                                                <i class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
+                                                                <i
+                                                                    class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
                                                             </div>
-                                                            <input class="form-control" id="create_date" name="create_date"  type="date">
-                                                              
+                                                            <input class="form-control" id="create_date"
+                                                                name="create_date" type="date">
+
                                                         </div>
                                                     </div>
                                                 </div>
 
-
                                             </div>
                                             <div class="row">
+
+                                                <div class="col-md-4">
+                                                    <div class="form-group">
+                                                        <div class="main-content-label mg-b-5">Podcast Type</div>
+                                                        <select class="form-control" id="podcast_type"
+                                                            name="podcast_type" required>
+                                                            <option value="">Select Type of Podcast</option>
+                                                            <option value="Video Podcast">Video Podcast</option>
+                                                            <option value="Temple Story">Temple Story</option>
+                                                            <option value="Audio Podcast">Audio Podcast</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <div class="main-content-label mg-b-5">Deity</div>
                                                         <select class="form-control" id="deity_category"
-                                                            name="deity_category" required>
+                                                            name="deity_category">
                                                             <option value="">Select Deity</option>
                                                             @foreach ($categories as $category)
                                                                 <option value="{{ $category->category_name }}">
@@ -176,23 +194,25 @@
                                                         </select>
                                                     </div>
                                                 </div>
-
+                                            </div>
+                                            <div class="row">
                                                 <div class="col-md-4">
                                                     <div class="form-group">
                                                         <div class="main-content-label mg-b-5">Estimate Publish Date</div>
                                                         <div class="input-group">
                                                             <div class="input-group-text">
-                                                                <i class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
+                                                                <i
+                                                                    class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
                                                             </div>
-                                                            <input class="form-control" id="date" name="date"  type="date">
+                                                            <input class="form-control" id="date" name="date"
+                                                                type="date">
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="row">
                                                 <div class="col-md-4">
-                                                    <div class="form-group" style="padding-top: 27px">
+                                                    <div class="form-group" style="padding-top: 10px">
                                                         <input type="submit" class="btn btn-primary" value="Submit">
                                                     </div>
                                                 </div>
@@ -235,9 +255,6 @@
             document.getElementById('date').value = festivalDate;
         }
     </script>
-
-
-
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

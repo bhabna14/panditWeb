@@ -17,38 +17,39 @@
         </div>
     </div>
 
+
     <div class="row">
         <div class="col-lg-12 col-md-12">
             <div class="card custom-card">
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 ">
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-create') }}"
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-create') }}"
                                 onclick="setActive(this)">Create Podcast</a>
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-script') }}"
-                                onclick="setActive(this)">Script Of Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;"
-                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
-                                Verified</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-recording') }}"
-                                onclick="setActive(this)">Recording Of Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-editing') }}"
-                                onclick="setActive(this)">Editing Of Podcast</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-script') }}"
+                                onclick="setActive(this)">Script</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-script-verified') }}"
+                                onclick="setActive(this)">
+                                Verification</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-recording') }}"
+                                onclick="setActive(this)" style=" padding: 10px;" >Recording</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-editing') }}"
+                                onclick="setActive(this)">Editing</a>
                             <a class="nav-link mb-2 mt-2 bg-warning"
                                 style="color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
-                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">Editing
+                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">
                                 Verified</a>
-                           
                             <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
-                                onclick="setActive(this)">Podcast
-                                Media</a>
-                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
-                                onclick="setActive(this)">Publish Podcast</a>
+                                onclick="setActive(this)">
+                                Creatives</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
+                                onclick="setActive(this)">Publish</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
+                            <a class="nav-link mb-2 mt-2"  style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
                                 onclick="setActive(this)">Report</a>
-
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-planning') }}" onclick="setActive(this)">Planning</a>
                         </nav>
                     </div>
                 </div>
@@ -84,101 +85,110 @@
                             </div>
                         @endif
 
-  <div class="table-responsive">
-                            <table class="table table-bordered text-nowrap border-bottom" id="input-fields">                            <thead>
-                                <tr>
-                                    <th class="border-bottom-0 bg-info text-white">SlNo</th>
-                                    <th class="border-bottom-0 bg-info text-white">Podcast Name</th>
-                                    <th class="border-bottom-0 bg-info text-white">Editing Location</th>
-                                    <th class="border-bottom-0 bg-info text-white">View Music Source</th>
-                                    <th class="border-bottom-0 bg-info text-white">Editing Verified By</th>
-                                    <th class="border-bottom-0 bg-info text-white">Editing Verified Date</th>
-                                    <th class="border-bottom-0 bg-info text-white">Action</th>
-
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($podcast_details as $index => $podcast)
+                        <div class="table-responsive">
+                            <table class="table table-bordered text-nowrap border-bottom" id="input-fields">
+                                <thead>
                                     <tr>
-                                        <td>{{ $index + 1 }}</td>
-                                        <td>{{ $podcast->podcast_name }}</td>
-                                        <td>
-                                            @if ($podcast->script_location)
-                                                <a href="{{ $podcast->script_location }}" target="_blank"
-                                                    class="btn btn-primary btn-sm text-white">
-                                                    View Editing
-                                                </a>
-                                            @else
-                                                <span class="text-muted">Not Available</span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($podcast->music_source)
-                                                @foreach (explode(',', $podcast->music_source) as $key => $url)
-                                                    <a href="{{ trim($url) }}" target="_blank" class="btn btn-dark btn-sm text-white mb-1">
-                                                        Music Source {{ $key + 1 }}
+                                        <th class="border-bottom-0 bg-info text-white">SlNo</th>
+                                        <th class="border-bottom-0 bg-info text-white">Podcast Name</th>
+                                        <th class="border-bottom-0 bg-info text-white">Editing Location</th>
+                                        <th class="border-bottom-0 bg-info text-white">View Music Source</th>
+                                        <th class="border-bottom-0 bg-info text-white">Editing Verified By</th>
+                                        <th class="border-bottom-0 bg-info text-white">Editing Verified Date</th>
+                                        <th class="border-bottom-0 bg-info text-white">Action</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse ($podcast_details as $index => $podcast)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $podcast->podcast_name }}</td>
+                                            <td>
+                                                @if ($podcast->script_location)
+                                                    <a href="{{ $podcast->script_location }}" target="_blank"
+                                                        class="btn btn-primary btn-sm text-white">
+                                                        View Editing
                                                     </a>
-                                                @endforeach
-                                            @else
-                                                <span class="text-muted">Not Available</span>
-                                            @endif
-                                        </td>
-                                        
-
-                                        <form action="{{ route('updateEditingVerified', $podcast->podcast_id) }}"
-                                            method="post" enctype="multipart/form-data">
-                                            @csrf
-                                            <td>
-                                                <input type="text" class="form-control" id="editing_verified_by"
-                                                    name="editing_verified_by" placeholder="Enter Editing By"
-                                                    value="{{ $podcast->editing_verified_by }}">
+                                                @else
+                                                    <span class="text-muted">Not Available</span>
+                                                @endif
                                             </td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="input-group me-2" style="flex: 1;">
-                                                        <div class="input-group-text">
-                                                            <i class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
+                                                @if ($podcast->music_source)
+                                                    @foreach (explode(',', $podcast->music_source) as $key => $url)
+                                                        <a href="{{ trim($url) }}" target="_blank"
+                                                            class="btn btn-dark btn-sm text-white mb-1">
+                                                            Music Source {{ $key + 1 }}
+                                                        </a>
+                                                    @endforeach
+                                                @else
+                                                    <span class="text-muted">Not Available</span>
+                                                @endif
+                                            </td>
+
+
+                                            <form action="{{ route('updateEditingVerified', $podcast->podcast_id) }}"
+                                                method="post" enctype="multipart/form-data">
+                                                @csrf
+                                                <td>
+                                                    <input type="text" class="form-control" id="editing_verified_by"
+                                                        name="editing_verified_by" placeholder="Enter Editing By"
+                                                        value="{{ $podcast->editing_verified_by }}">
+                                                </td>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="input-group me-2" style="flex: 1;">
+                                                            <div class="input-group-text">
+                                                                <i
+                                                                    class="typcn typcn-calendar-outline tx-24 lh--9 op-6"></i>
+                                                            </div>
+                                                            <input class="form-control" id="editing_verified_date"
+                                                                name="editing_verified_date" type="date" readonly>
                                                         </div>
-                                                        <input class="form-control" id="editing_verified_date"
-                                                            name="editing_verified_date" type="date" readonly>
+                                                        <button type="submit"
+                                                            class="btn btn-warning btn-md">Save</button>
                                                     </div>
-                                                    <button type="submit" class="btn btn-warning btn-md">Save</button>
+                                                </td>
+
+                                            </form>
+
+                                            <!-- Approve and Reject Buttons -->
+                                            <td>
+                                                <div
+                                                    style="display: flex; gap: 10px; justify-content: center; align-items: center;">
+                                                    <!-- Approve Button -->
+                                                    <form
+                                                        action="{{ route('approvePodcastEditing', $podcast->podcast_id) }}"
+                                                        method="POST" class="approve-form">
+                                                        @csrf
+                                                        <button type="button" class="btn btn-success btn-md approve-btn">
+                                                            <i class="icon ion-ios-checkmark-circle-outline"></i>
+                                                        </button>
+                                                    </form>
+
+                                                    <!-- Reject Button -->
+                                                    <form
+                                                        action="{{ route('rejectPodcastEditing', $podcast->podcast_id) }}"
+                                                        method="POST" class="reject-form">
+                                                        @csrf
+                                                        <button type="button" class="btn btn-danger btn-md reject-btn">
+                                                            <i class="icon ion-ios-close-circle"></i>
+                                                        </button>
+                                                    </form>
                                                 </div>
+
                                             </td>
-
-                                        </form>
-
-                                        <!-- Approve and Reject Buttons -->
-                                        <td>
-                                            <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
-                                                <!-- Approve Button -->
-                                                <form action="{{ route('approvePodcastEditing', $podcast->podcast_id) }}" method="POST" class="approve-form">
-                                                    @csrf
-                                                    <button type="button" class="btn btn-success btn-md approve-btn">
-                                                        <i class="icon ion-ios-checkmark-circle-outline"></i>
-                                                    </button>
-                                                </form>
-                                            
-                                                <!-- Reject Button -->
-                                                <form action="{{ route('rejectPodcastEditing', $podcast->podcast_id) }}" method="POST" class="reject-form">
-                                                    @csrf
-                                                    <button type="button" class="btn btn-danger btn-md reject-btn">
-                                                        <i class="icon ion-ios-close-circle"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                            
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center">No completed podcasts available for
-                                            editing.</td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="8" class="text-center">No completed podcasts available for
+                                                editing.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
 
 
                     </div>
@@ -201,17 +211,17 @@
     <script src="{{ asset('assets/js/gallery.js') }}"></script>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Get today's date in YYYY-MM-DD format
-        const today = new Date().toISOString().split('T')[0];
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get today's date in YYYY-MM-DD format
+            const today = new Date().toISOString().split('T')[0];
 
-        // Select all elements with the class 'script-created-date'
-        document.querySelectorAll('#editing_verified_date').forEach(input => {
-            input.value = today;
+            // Select all elements with the class 'script-created-date'
+            document.querySelectorAll('#editing_verified_date').forEach(input => {
+                input.value = today;
+            });
         });
-    });
-</script>
+    </script>
 
 
 

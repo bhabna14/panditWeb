@@ -22,37 +22,39 @@
         </div>
     </div>
 
+
     <div class="row">
         <div class="col-lg-12 col-md-12">
             <div class="card custom-card">
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 ">
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-create') }}"
-                                onclick="setActive(this)">Create Podcast</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-create') }}" onclick="setActive(this)">Create Podcast</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-script') }}"
-                                onclick="setActive(this)">Script Of Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
-                                Verified</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-recording') }}"
-                                onclick="setActive(this)">Recording Of Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-editing') }}"
-                                onclick="setActive(this)">Editing Of Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">Editing
-                                Verified</a>
+                                onclick="setActive(this)">Script</a>
                            
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
-                                onclick="setActive(this)">Podcast
-                                Media</a>
-                                <a class="nav-link mb-2 mt-2 " style="padding: 10px" href="{{ url('admin/publish-podcast') }}"
-                                onclick="setActive(this)">Publish Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">
+                                Verification</a>
+                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-recording') }}"
+                                onclick="setActive(this)">Recording</a>
+                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-editing') }}"
+                                onclick="setActive(this)">Editing</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">
+                                Verified</a>
+                                <a class="nav-link mb-2 mt-2" style="padding: 10px;"
+                                href="{{ url('admin/podcast-media') }}" onclick="setActive(this)">
+                                Creatives</a>
+                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
+                                onclick="setActive(this)">Publish</a>
+                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
-                            <a class="nav-link mb-2 mt-2 bg-warning"
-                                style="  color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
-                                href="{{ url('admin/podcast-report') }}" onclick="setActive(this)">Report</a>
+                            <a class="nav-link mb-2 mt-2   bg-warning" style=" color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;" href="{{ url('admin/podcast-report') }}"
+                                onclick="setActive(this)">Report</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"  href="{{ url('admin/podcast-planning') }}"
+                                onclick="setActive(this)">Planning</a>
                         </nav>
                     </div>
                 </div>
@@ -61,35 +63,31 @@
     </div>
 
 
+
     <!-- Row -->
-    <div class="row row-sm">
-        <div class="col-lg-12 col-md-12">
-            <div class="custom-card main-content-body-profile">
-                <div class="tab-content">
-                    <div class="main-content-body tab-pane border-top-0 active" id="poojaskill">
-                        @if ($errors->any())
-                            <div class="alert alert-danger">
-                                <ul>
-                                    @foreach ($errors->all() as $error)
-                                        <li>{{ $error }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        @endif
-
-                        @if (session()->has('success'))
-                            <div class="alert alert-success" id="Message">
-                                {{ session()->get('success') }}
-                            </div>
-                        @endif
-
-                        @if ($errors->has('danger'))
-                            <div class="alert alert-danger" id="Message">
-                                {{ $errors->first('danger') }}
-                            </div>
-                        @endif
+    <div class="accordion" id="podcastAccordion">
+        @foreach ($groupedPodcasts as $month => $podcasts)
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading{{ $loop->index }}">
+                    <button 
+                        style="background: linear-gradient(120deg, #87f0cf, #f866b8);" 
+                        class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" 
+                        type="button" 
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapse{{ $loop->index }}" 
+                        aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
+                        aria-controls="collapse{{ $loop->index }}">
+                        {{ $month ?? 'Unpublished' }}
+                    </button>
+                </h2>
+                <div 
+                    id="collapse{{ $loop->index }}" 
+                    class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" 
+                    aria-labelledby="heading{{ $loop->index }}" 
+                    data-bs-parent="#podcastAccordion">
+                    <div class="accordion-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered text-nowrap border-bottom" id="input-fields">
+                            <table class="table table-bordered text-nowrap border-bottom">
                                 <thead>
                                     <tr>
                                         <th class="border-bottom-0 bg-info text-white">SlNo</th>
@@ -107,66 +105,60 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($groupedPodcasts as $month => $podcasts)
+                                    @foreach ($podcasts as $index => $podcastData)
                                         <tr>
-                                            <td colspan="12" class=" text-white text-center" style="background: linear-gradient(90deg, #f94d8f, #690230);font-size: 20px;font-weight: bold">{{ $month }}</td>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>{{ $podcastData['podcast']->podcast_name }}</td>
+                                            <td>{{ $podcastData['podcast']->language }}</td>
+                                            <td>{{ $podcastData['podcast']->deity_category }}</td>
+                                            <td>{{ $podcastData['podcast']->script_verified_date }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-primary p-2">{{ $podcastData['podcast']->podcast_script_status }}</span>
+                                                    <button type="button" class="btn btn-success btn-sm script-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td>{{ $podcastData['podcast']->recording_date }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-success text-white p-2">{{ $podcastData['podcast']->podcast_recording_status }}</span>
+                                                    <button type="button" class="btn btn-warning btn-sm recording-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td>{{ $podcastData['podcast']->editing_date }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-secondary p-2">{{ $podcastData['podcast']->podcast_editing_status }}</span>
+                                                    <button type="button" class="btn btn-warning btn-sm editing-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td>{{ $podcastData['publish_date'] }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-dark p-2">{{ $podcastData['podcast']->podcast_status }}</span>
+                                                    <button type="button" class="btn btn-primary btn-sm publish-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
+                                                        <i class="fa fa-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
                                         </tr>
-                                        @foreach ($podcasts as $index => $podcastData)
-                                            <tr>
-                                                <td>{{ $index + 1 }}</td>
-                                                <td>{{ $podcastData['podcast']->podcast_name }}</td>
-                                                <td>{{ $podcastData['podcast']->language }}</td>
-                                                <td>{{ $podcastData['podcast']->deity_category }}</td>
-                                                <td>{{ $podcastData['podcast']->script_verified_date }}</td>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="badge bg-primary p-2">{{ $podcastData['podcast']->podcast_script_status }}</span>
-                                                        <button type="button" class="btn btn-success btn-sm script-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
-                                                            <i class="fa fa-eye"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td>{{ $podcastData['podcast']->recording_date }}</td>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="badge bg-success text-white p-2">{{ $podcastData['podcast']->podcast_recording_status }}</span>
-                                                        <button type="button" class="btn btn-warning btn-sm recording-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
-                                                            <i class="fa fa-eye"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td>{{ $podcastData['podcast']->editing_date }}</td>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="badge bg-secondary p-2">{{ $podcastData['podcast']->podcast_editing_status }}</span>
-                                                        <button type="button" class="btn btn-warning btn-sm editing-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
-                                                            <i class="fa fa-eye"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                                <td>{{ $podcastData['publish_date'] }}</td>
-                                                <td>
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span class="badge bg-dark p-2">{{ $podcastData['podcast']->podcast_status }}</span>
-                                                        <button type="button" class="btn btn-primary btn-sm publish-details" data-id="{{ $podcastData['podcast']->podcast_id }}">
-                                                            <i class="fa fa-eye"></i>
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforeach
                                     @endforeach
                                 </tbody>
                             </table>
                         </div>
-                        
-                        
                     </div>
                 </div>
             </div>
-        </div>
+        @endforeach
     </div>
-
+        
+    
 
     <!-- Script Details Modal -->
     <div class="modal fade" id="scriptDetailsModal" tabindex="-1" role="dialog" aria-labelledby="scriptDetailsLabel"

@@ -12,15 +12,15 @@ use App\Models\PodcastCategory;
 
 class PodcastCreateController extends Controller
 {
+
     public function podcastCreate()
     {
         $pooja_list = Poojalist::where('status', 'active')->get(['pooja_name', 'pooja_date']);
         $categories = PodcastCategory::where('status', 'active')->get();
-    
+
         return view('admin/podcast-create', compact('categories', 'pooja_list'));
     }
     
-
     public function savePodcastCreate(Request $request)
     {
         // Wrap everything in a try-catch block for error handling
@@ -41,6 +41,7 @@ class PodcastCreateController extends Controller
                 'language' => $request->language,
                 'podcast_name' => $request->podcast_name,
                 'deity_category' => $request->deity_category,
+                'podcast_type' => $request->podcast_type,
                 'festival_name' => $request->festival_name,
                 'podcast_create_date' => $request->create_date,
                 'estimate_publish_date' => $request->date,

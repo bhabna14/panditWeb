@@ -19,44 +19,48 @@
     </div>
     <!-- /breadcrumb -->
 
+
+
+
     <div class="row">
         <div class="col-lg-12 col-md-12">
             <div class="card custom-card">
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 ">
-                            <a class="nav-link mb-2 mt-2 " style="padding: 10px;" href="{{ url('admin/podcast-create') }}"
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-create') }}"
                                 onclick="setActive(this)">Create Podcast</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px " href="{{ url('admin/podcast-script') }}"
-                                onclick="setActive(this)">Script Of Podcast</a>
-
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-script-verified') }}" onclick="setActive(this)">Script
-                                Verified</a>
-                            <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-recording') }}"
-                                onclick="setActive(this)">Recording Of Podcast</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-script') }}"
+                                onclick="setActive(this)">Script</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-script-verified') }}"
+                                onclick="setActive(this)">
+                                Verification</a>
+                            <a class="nav-link mb-2 mt-2"
+                                href="{{ url('admin/podcast-recording') }}"  style=" padding: 10px;"  onclick="setActive(this)">Recording</a>
                             <a class="nav-link mb-2 mt-2 bg-warning"
                                 style=" color: white;padding: 10px;box-shadow: 3px 3px 5px rgba(0,0,0,0.2);border-radius: 15px;"
-                                href="{{ url('admin/podcast-editing') }}" onclick="setActive(this)">Podcast Editing</a>
+                                href="{{ url('admin/podcast-editing') }}" onclick="setActive(this)">Editing</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
-                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">Editing
+                                href="{{ url('admin/podcast-editing-verified') }}" onclick="setActive(this)">
                                 Verified</a>
-                          
                             <a class="nav-link mb-2 mt-2" style="padding: 10px;" href="{{ url('admin/podcast-media') }}"
-                                onclick="setActive(this)">Podcast
-                                Media</a>
-                                <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
-                                onclick="setActive(this)">Publish Podcast</a>
+                                onclick="setActive(this)">
+                                Creatives</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/publish-podcast') }}"
+                                onclick="setActive(this)">Publish</a>
                             <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/social-media') }}"
                                 onclick="setActive(this)">Social Media</a>
-                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;" href="{{ url('admin/podcast-report') }}"
+                            <a class="nav-link mb-2 mt-2"  style=" padding: 10px;"  href="{{ url('admin/podcast-report') }}"
                                 onclick="setActive(this)">Report</a>
+                            <a class="nav-link mb-2 mt-2" style=" padding: 10px;"
+                                href="{{ url('admin/podcast-planning') }}" onclick="setActive(this)">Planning</a>
                         </nav>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Row -->
     <div class="row row-sm">
@@ -102,7 +106,8 @@
                                                         <th class="border-bottom-0 bg-info text-white">Recording URL</th>
                                                         <th class="border-bottom-0 bg-info text-white">Action</th>
                                                         <th class="border-bottom-0 bg-info text-white">Audio Edited By</th>
-                                                        <th class="border-bottom-0 bg-info text-white">Music Source Url</th>
+                                                        <th class="border-bottom-0 bg-info text-white">Music Source Url
+                                                        </th>
                                                         <th class="border-bottom-0 bg-info text-white">Editing Date</th>
                                                         <th class="border-bottom-0 bg-info text-white">Enter Complete URL
                                                         </th>
@@ -170,8 +175,7 @@
                                                                         value="{{ $podcast->audio_edited_by }}" required>
                                                             </td>
                                                             <td>
-                                                                <textarea type="text" class="form-control"
-                                                                    name="music_source">
+                                                                <textarea type="text" class="form-control" name="music_source">
                                                                     {{ $podcast->music_source }}</textarea>
 
                                                             </td>
