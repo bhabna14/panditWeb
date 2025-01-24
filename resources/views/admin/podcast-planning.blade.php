@@ -74,7 +74,7 @@
     </div>
 
     <div class="accordion" id="podcastAccordion">
-        @forelse ($podcastDetails as $month => $podcasts)
+        @forelse ($sortedPodcastDetails as $month => $podcasts)
             <div class="accordion-item">
                 <h2 class="accordion-header" id="heading{{ $loop->index }}">
                     <button 
