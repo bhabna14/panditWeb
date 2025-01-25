@@ -88,8 +88,9 @@ class FlowerOrderController extends Controller
                     ->from('subscriptions')
                     ->whereIn('status', ['active', 'paused', 'resume']);
             })
-            ->distinct('user_id')
-            ->latest('end_date');
+            ->selectRaw('*, MAX(end_date) as latest_end_date')
+            ->groupBy('user_id')
+            ->orderByDesc('latest_end_date');
     }
    
     // Filter for paused subscriptions
