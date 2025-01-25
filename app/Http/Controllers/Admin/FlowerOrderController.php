@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\SubscriptionPauseResumeLog;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -80,18 +81,24 @@ class FlowerOrderController extends Controller
     if ($request->query('filter') === 'active') {
         $query->where('status', 'active');
     }
-
     if ($request->query('filter') === 'expired') {
-        $query->where('status', 'expired')
+        $subQuery = DB::table('subscriptions')
+            ->select('user_id', DB::raw('MAX(end_date) as latest_end_date'))
+            ->where('status', 'expired')
             ->whereNotIn('user_id', function ($query) {
                 $query->select('user_id')
                     ->from('subscriptions')
                     ->whereIn('status', ['active', 'paused', 'resume']);
             })
-            ->selectRaw('*, MAX(end_date) as latest_end_date')
-            ->groupBy('user_id')
-            ->orderByDesc('latest_end_date');
+            ->groupBy('user_id');
+    
+        $query->joinSub($subQuery, 'latest_subscriptions', function ($join) {
+                $join->on('subscriptions.user_id', '=', 'latest_subscriptions.user_id')
+                     ->on('subscriptions.end_date', '=', 'latest_subscriptions.latest_end_date');
+            })
+            ->orderByDesc('subscriptions.end_date');
     }
+    
    
     // Filter for paused subscriptions
     if ($request->query('filter') === 'paused') {
