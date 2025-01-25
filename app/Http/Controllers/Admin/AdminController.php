@@ -91,7 +91,7 @@ public function admindashboard()
 
 // new user count
 
-        $newUserSubscription = Order::whereDate('created_at', Carbon::today())
+        $newUserSubscription = Subscription::whereDate('created_at', Carbon::today())
         ->distinct('user_id')                   
          ->count('user_id');  
 
@@ -139,9 +139,7 @@ public function admindashboard()
     ->latest('end_date')
     ->count();
 
-
-
-        $todayEndSubscription = Subscription::where(function ($query) {
+    $todayEndSubscription = Subscription::where(function ($query) {
             $query->where(function ($subQuery) {
                 $subQuery->whereNotNull('new_date') // Check if new_date is available
                          ->whereDate('new_date', Carbon::today()); // Count using new_date if available
