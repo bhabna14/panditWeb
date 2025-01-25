@@ -192,7 +192,7 @@ public function admindashboard()
     $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
   
     //Total Expenses in a Day
-    $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())->sum('total_price');
+    $totalExpensesday = FlowerPickupDetails::where('pickup_date', Carbon::today())->sum('total_price');
     // total paid expenses in a day
     $totalPaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
         ->where('payment_status', 'Paid')
