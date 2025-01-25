@@ -23,10 +23,15 @@
 								<span id="google_translate_element"></span>
 							</li>
 						</div>
+						<div class="main-header-center">
+							<img src="{{asset('assets/img/brand/yantra.png')}}" class="header-center-image" style="margin-left:40%;height:40px;width:40px" alt="center image">
+						</div>
 						<div class="main-header-right">
 							<button class="navbar-toggler navresponsive-toggler d-md-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
 								<span class="navbar-toggler-icon fe fe-more-vertical "></span>
 							</button>
+						
+
 							<div class="mb-0 navbar navbar-expand-lg navbar-nav-right responsive-navbar navbar-dark p-0">
 								<div class="collapse navbar-collapse" id="navbarSupportedContent-4">
 									<ul class="nav nav-item header-icons navbar-nav-right ms-auto">
@@ -37,31 +42,16 @@
 												</svg>
 												<span class="pulse"></span>
 											</a>
+											
+
 											<div class="dropdown-menu">
 												<div class="menu-header-content text-start border-bottom">
 													<div class="d-flex">
 														<h6 class="dropdown-title mb-1 tx-15 font-weight-semibold">Notifications</h6>
 													</div>
-													{{-- <p class="dropdown-title-text subtext mb-0 op-6 pb-0 tx-12 ">You have {{ count($notifications) }} unread Notifications</p> --}}
 												</div>
-												{{-- <div class="main-notification-list Notification-scroll">
-													@foreach($notifications as $notification)
-														<a class="d-flex p-3 border-bottom" href="{{url('mail')}}">
-															<div class="notifyimg bg-pink">
-																<i class="far fa-folder-open text-white"></i>
-															</div>
-															<div class="ms-3">
-																<h5 class="notification-label mb-1">{{ $notification->data['message'] }}</h5>
-																<div class="notification-subtext">{{ $notification->created_at->diffForHumans() }}</div>
-															</div>
-															<div class="ms-auto">
-																<i class="las la-angle-right text-end text-muted"></i>
-															</div>
-														</a>
-													@endforeach
-												</div> --}}
+												
 												<div class="main-notification-list Notification-scroll">
-													<!-- This will be dynamically populated with notifications -->
 												</div>
 												<div class="dropdown-footer">
 													<a class="btn btn-primary btn-sm btn-block" href="#">VIEW ALL</a>
