@@ -106,7 +106,7 @@ class FlowerBookingController extends Controller
                 'payment_id' => $paymentId,
                 'user_id' => $user->userid,
                 'payment_method' => 'Razorpay',
-                'paid_amount' => $request->price,
+                'paid_amount' => $request->paid_amount,
                 'payment_status' => 'paid',
             ]);
     
