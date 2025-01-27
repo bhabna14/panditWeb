@@ -31,77 +31,60 @@ class FlowerBookingController extends Controller
    
 public function purchaseSubscription(Request $request)
 {
-    $user = Auth::guard('sanctum')->user(); 
-  
-    $orderId = $request->order_id;
-    $productId = $request->product_id;
-    $addressId = $request->address_id;
-    $suggestion = $request->suggestion;
-    $paymentId = $request->razorpay_payment_id;
-    
-    Log::info('Processing booking', [
-        'order_id' => $orderId,
-        'user_id' => $user->userid,
-        'payment_id' => $paymentId,
-        'total_price' => $request->price,
-        'address_id' => $addressId,
-        'suggestion' => $suggestion,
-    ]);
+    \Log::info('Purchase subscription called', ['request' => $request->all()]);
 
-    try {
-        if ($orderId) {
-            $order = Order::where('order_id', $orderId)->first();
-            if ($order) {
-                $order->update([
-                    'product_id' => $productId,
-                    'user_id' => $user->userid,
-                    'quantity' => 1,
-                    'total_price' => $request->price,
-                    'address_id' => $addressId,
-                    'suggestion' => $suggestion,
-                ]);
-                Log::info('Order updated successfully', ['order_id' => $orderId]);
-            } else {
-                return response()->json(['message' => 'Order not found for update'], 404);
-            }
-        } else {
-            $orderId = 'ORD-' . strtoupper(Str::random(12));
-            $order = Order::create([
-                'order_id' => $orderId,
-                'product_id' => $productId,
-                'user_id' => $user->userid,
-                'quantity' => 1,
-                'total_price' => $request->price,
-                'address_id' => $addressId,
-                'suggestion' => $suggestion,
-            ]);
-            Log::info('Order created successfully', ['order_id' => $orderId]);
-        }
-    } catch (\Exception $e) {
-        Log::error('Error processing order', ['error' => $e->getMessage()]);
-        return response()->json(['message' => 'Failed to create or update order'], 500);
+    $productId = $request->product_id;
+    $user = Auth::guard('sanctum')->user();
+
+    if (!$user) {
+        \Log::error('User not authenticated');
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
 
-    // Razorpay Payment Processing Section
+    $orderId = 'ORD-' . strtoupper(Str::random(12));
+    $addressId = $request->address_id;
+    $suggestion = $request->suggestion;
+
+    \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
+
+    try {
+        $order = Order::create([
+            'order_id' => $orderId,
+            'product_id' => $productId,
+            'user_id' => $user->userid,
+            'quantity' => 1,
+            'total_price' => $request->paid_amount,
+            'address_id' => $addressId,
+            'suggestion' => $suggestion,
+        ]);
+        \Log::info('Order created successfully', ['order' => $order]);
+    } catch (\Exception $e) {
+        \Log::error('Failed to create order', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to create order'], 500);
+    }
+
+    // Initialize Razorpay API
     $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+    $paymentId = $request->payment_id;
 
     try {
         // Fetch the payment details from Razorpay
         $payment = $razorpayApi->payment->fetch($paymentId);
-        Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
+        \Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
 
         // Check if the payment is captured
         if ($payment->status !== 'captured') {
+            // Attempt to capture the payment if it is authorized
             if ($payment->status === 'authorized') {
                 $capture = $razorpayApi->payment->fetch($paymentId)->capture(['amount' => $payment->amount]);
-                Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
+                \Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
             } else {
-                Log::error('Payment not captured', ['payment_id' => $paymentId]);
-                return response()->json(['message' => 'Payment was not successful. Your payment will be refunded within 7 days.'], 400);
+                \Log::error('Payment not captured', ['payment_id' => $paymentId]);
+                return response()->json(['message' => 'Payment was not successful, Your payment will be refunded within 7 days.'], 400);
             }
         }
     } catch (\Exception $e) {
-        Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
+        \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
         return response()->json(['message' => 'Failed to fetch payment status'], 500);
     }
 
@@ -178,7 +161,7 @@ public function purchaseSubscription(Request $request)
     }
 
     $emails = [
-        'soumyaranjan.puhan@33crores.com',
+        'bhabana.samantara@33crores.com',
         'pankaj.sial@33crores.com',
         'basudha@33crores.com',
         'priya@33crores.com',
@@ -351,6 +334,8 @@ try {
         ], 500);
     }
 }
+
+
     public function ordersList()
     {
         try {
@@ -435,6 +420,7 @@ try {
             ], 500);
         }
     }
+
     public function pause(Request $request, $order_id)
 {
     try {
@@ -507,6 +493,8 @@ try {
         ], 500);
     }
 }
+
+ 
     public function markPaymentApi(Request $request, $id)
     {
         try {
@@ -589,7 +577,8 @@ try {
             ], 500);
         }
     }
-
+    
+    
 public function resume(Request $request, $order_id)
 {
     try {
