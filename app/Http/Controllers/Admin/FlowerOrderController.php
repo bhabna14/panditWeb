@@ -138,12 +138,15 @@ public function showNotifications()
         $addressdata = UserAddress::where('user_id', $userid)
                                 ->where('status','active')
                                 ->get();
-        $orders = Order::where('user_id', $userid)
-    ->whereHas('subscription', function ($query) {
-        // This ensures that only orders with a related subscription are included
-        $query->whereColumn('orders.order_id', 'subscriptions.order_id');
+
+                              
+
+
+        $orders = Subscription::where('user_id', $userid)
+    ->whereHas('order', function ($query) {
+        $query->whereColumn('orders.order_id', 'orders.order_id');
     })
-    ->with(['flowerProduct', 'subscription', 'flowerPayments', 'address.localityDetails'])
+    ->with(['flowerProducts', 'order', 'flowerPayments', 'order.address.localityDetails'])
     ->orderBy('id', 'desc')
     ->get();
 
@@ -160,24 +163,20 @@ public function showNotifications()
     
     // Step 2: For each flower request, check if an associated order exists
     foreach ($pendingRequests as $request) {
+
         $request->order = Order::where('request_id', $request->request_id)
             ->with('flowerPayments')
             ->first();
-    }
+        }
     
-    // Now $flowerRequests will have the associated order data if it exists
-    
-    
+        $totalOrders = Subscription::where('user_id', $userid)->count();
 
-        $totalOrders = Order::where('user_id', $userid)->count();
-        $ongoingOrders = Order::where('user_id', $userid)
-                          ->whereHas('subscription', function ($query) {
-                              $query->where('status', 'active'); // Adjust status value as needed
-                          })
+        $ongoingOrders = Subscription::where('user_id', $userid)
+                          ->where('status','active') 
                           ->count();
-
     // Total spend
-    $totalSpend = Order::where('user_id', $userid)->sum('total_price'); // Adjust column name if necessary
+    $totalSpend = FlowerPayment::where('user_id', $userid)->sum('paid_amount'); 
+
         // Return the view with user and orders data
         return view('admin.flower-order.show-customer-details', compact('user','addressdata','pendingRequests', 'orders','totalOrders', 'ongoingOrders', 'totalSpend'));
     }
