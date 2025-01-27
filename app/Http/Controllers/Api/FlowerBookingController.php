@@ -34,14 +34,6 @@ class FlowerBookingController extends Controller
         $user = Auth::guard('sanctum')->user(); // Get the authenticated user
     
         try {
-            // Validate input
-            $request->validate([
-                'product_id' => 'required',
-                'price' => 'required|numeric',
-                'address_id' => 'required',
-                'payment_id' => 'required',
-                'duration' => 'required|integer',
-            ]);
     
             $orderId = $request->order_id;
             $productId = $request->product_id;
@@ -57,7 +49,7 @@ class FlowerBookingController extends Controller
                         'product_id' => $productId,
                         'user_id' => $user->userid,
                         'quantity' => 1,
-                        'total_price' => $request->price,
+                        'total_price' => $request->paid_amount,
                         'address_id' => $addressId,
                         'suggestion' => $suggestion,
                     ]);
@@ -71,7 +63,7 @@ class FlowerBookingController extends Controller
                     'product_id' => $productId,
                     'user_id' => $user->userid,
                     'quantity' => 1,
-                    'total_price' => $request->price,
+                    'total_price' => $request->paid_amount,
                     'address_id' => $addressId,
                     'suggestion' => $suggestion,
                 ]);
