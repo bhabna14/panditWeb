@@ -31,36 +31,55 @@ class FlowerBookingController extends Controller
    
 public function purchaseSubscription(Request $request)
 {
-    \Log::info('Purchase subscription called', ['request' => $request->all()]);
-
+    $user = Auth::guard('sanctum')->user(); 
+  
+    $orderId = $request->order_id;
     $productId = $request->product_id;
-    $user = Auth::guard('sanctum')->user();
-
-    if (!$user) {
-        \Log::error('User not authenticated');
-        return response()->json(['message' => 'Unauthorized'], 401);
-    }
-
-    $orderId = 'ORD-' . strtoupper(Str::random(12));
     $addressId = $request->address_id;
     $suggestion = $request->suggestion;
-
-    \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
+    $paymentId = $request->razorpay_payment_id;
+    
+    Log::info('Processing booking', [
+        'order_id' => $orderId,
+        'user_id' => $user->userid,
+        'payment_id' => $paymentId,
+        'total_price' => $request->price,
+        'address_id' => $addressId,
+        'suggestion' => $suggestion,
+    ]);
 
     try {
-        $order = Order::create([
-            'order_id' => $orderId,
-            'product_id' => $productId,
-            'user_id' => $user->userid,
-            'quantity' => 1,
-            'total_price' => $request->paid_amount,
-            'address_id' => $addressId,
-            'suggestion' => $suggestion,
-        ]);
-        \Log::info('Order created successfully', ['order' => $order]);
+        if ($orderId) {
+            $order = Order::where('order_id', $orderId)->first();
+            if ($order) {
+                $order->update([
+                    'product_id' => $productId,
+                    'user_id' => $user->userid,
+                    'quantity' => 1,
+                    'total_price' => $request->price,
+                    'address_id' => $addressId,
+                    'suggestion' => $suggestion,
+                ]);
+                Log::info('Order updated successfully', ['order_id' => $orderId]);
+            } else {
+                return response()->json(['message' => 'Order not found for update'], 404);
+            }
+        } else {
+            $orderId = 'ORD-' . strtoupper(Str::random(12));
+            $order = Order::create([
+                'order_id' => $orderId,
+                'product_id' => $productId,
+                'user_id' => $user->userid,
+                'quantity' => 1,
+                'total_price' => $request->price,
+                'address_id' => $addressId,
+                'suggestion' => $suggestion,
+            ]);
+            Log::info('Order created successfully', ['order_id' => $orderId]);
+        }
     } catch (\Exception $e) {
-        \Log::error('Failed to create order', ['error' => $e->getMessage()]);
-        return response()->json(['message' => 'Failed to create order'], 500);
+        Log::error('Error processing order', ['error' => $e->getMessage()]);
+        return response()->json(['message' => 'Failed to create or update order'], 500);
     }
 
     // Initialize Razorpay API
@@ -161,7 +180,7 @@ public function purchaseSubscription(Request $request)
     }
 
     $emails = [
-        'bhabana.samantara@33crores.com',
+        'soumyaranjan.puhan@33crores.com',
         'pankaj.sial@33crores.com',
         'basudha@33crores.com',
         'priya@33crores.com',
@@ -334,8 +353,6 @@ try {
         ], 500);
     }
 }
-
-
     public function ordersList()
     {
         try {
@@ -420,7 +437,6 @@ try {
             ], 500);
         }
     }
-
     public function pause(Request $request, $order_id)
 {
     try {
@@ -493,8 +509,6 @@ try {
         ], 500);
     }
 }
-
- 
     public function markPaymentApi(Request $request, $id)
     {
         try {
@@ -577,8 +591,7 @@ try {
             ], 500);
         }
     }
-    
-    
+
 public function resume(Request $request, $order_id)
 {
     try {
