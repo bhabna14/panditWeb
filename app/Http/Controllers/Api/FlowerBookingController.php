@@ -41,27 +41,39 @@ public function purchaseSubscription(Request $request)
         return response()->json(['message' => 'Unauthorized'], 401);
     }
 
-    $orderId = 'ORD-' . strtoupper(Str::random(12));
+    $orderId = $request->order_id;
     $addressId = $request->address_id;
     $suggestion = $request->suggestion;
-
-    \Log::info('Creating order', ['order_id' => $orderId, 'product_id' => $productId, 'user_id' => $user->userid, 'address_id' => $addressId]);
-
-    try {
-        $order = Order::create([
-            'order_id' => $orderId,
-            'product_id' => $productId,
-            'user_id' => $user->userid,
-            'quantity' => 1,
-            'total_price' => $request->paid_amount,
-            'address_id' => $addressId,
-            'suggestion' => $suggestion,
-        ]);
-        \Log::info('Order created successfully', ['order' => $order]);
-    } catch (\Exception $e) {
-        \Log::error('Failed to create order', ['error' => $e->getMessage()]);
-        return response()->json(['message' => 'Failed to create order'], 500);
-    }
+ try {
+            // Order creation or update
+            if ($orderId) {
+                $order = Order::where('order_id', $orderId)->first();
+                if ($order) {
+                    $order->update([
+                        'product_id' => $productId,
+                        'user_id' => $user->userid,
+                        'quantity' => 1,
+                        'total_price' => $request->price,
+                        'address_id' => $addressId,
+                        'suggestion' => $suggestion,
+                    ]);
+                    Log::info('Order updated successfully', ['order_id' => $orderId]);
+                } else {
+                    return response()->json(['message' => 'Order not found for update'], 404);
+                }
+            } else {
+                $orderId = 'ORD-' . strtoupper(Str::random(12));
+                Order::create([
+                    'order_id' => $orderId,
+                    'product_id' => $productId,
+                    'user_id' => $user->userid,
+                    'quantity' => 1,
+                    'total_price' => $request->price,
+                    'address_id' => $addressId,
+                    'suggestion' => $suggestion,
+                ]);
+                Log::info('Order created successfully', ['order_id' => $orderId]);
+            }
 
     // Initialize Razorpay API
     $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
@@ -180,6 +192,12 @@ public function purchaseSubscription(Request $request)
         'end_date' => $endDate,
         'order_id' => $orderId,
     ]);
+
+} catch (\Exception $e) {
+    Log::error('Error processing subscription', ['error' => $e->getMessage()]);
+    return response()->json(['message' => 'Failed to process subscription'], 500);
+}
+
 }
 
 public function storerequest(Request $request)
