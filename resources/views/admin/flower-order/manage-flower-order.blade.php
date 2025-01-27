@@ -10,7 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
 
 
     <!-- INTERNAL Select2 css -->
@@ -345,8 +346,15 @@
                                 @foreach ($orders as $order)
                                     <tr>
                                         <td style="padding: 15px; vertical-align: top;">
-                                            <div class="order-details">
-                                                <!-- Order ID -->
+                                            <div class="order-details" data-bs-toggle="tooltip" 
+                                            data-bs-html="true" 
+                                            title="
+                                                <p><i class='fas fa-map-marker-alt text-primary'></i>
+                                                <strong>Address:</strong>
+                                                {{ $order->order->address->apartment_flat_plot ?? '' }},
+                                                {{ $order->order->address->apartment_name ?? '' }},
+                                                {{ $order->order->address->localityDetails->locality_name ?? '' }}</p>
+                                            ">                                                <!-- Order ID -->
                                                 <p class="order-id">
                                                     <strong>Ord No :</strong> {{ $order->order_id }}
                                                 </p>
@@ -862,6 +870,16 @@
         }
     </script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+
+
     @if (session('success'))
         <script>
             Swal.fire({
@@ -879,5 +897,8 @@
             document.getElementById('pause_end_date').setAttribute('min', startDate);
         });
     </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <!-- Updated JavaScript -->
 @endsection
