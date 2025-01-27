@@ -82,28 +82,26 @@ public function purchaseSubscription(Request $request)
         return response()->json(['message' => 'Failed to create or update order'], 500);
     }
 
-    // Initialize Razorpay API
+    // Razorpay Payment Processing Section
     $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
-    $paymentId = $request->payment_id;
 
     try {
         // Fetch the payment details from Razorpay
         $payment = $razorpayApi->payment->fetch($paymentId);
-        \Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
+        Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
 
         // Check if the payment is captured
         if ($payment->status !== 'captured') {
-            // Attempt to capture the payment if it is authorized
             if ($payment->status === 'authorized') {
                 $capture = $razorpayApi->payment->fetch($paymentId)->capture(['amount' => $payment->amount]);
-                \Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
+                Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
             } else {
-                \Log::error('Payment not captured', ['payment_id' => $paymentId]);
-                return response()->json(['message' => 'Payment was not successful, Your payment will be refunded within 7 days.'], 400);
+                Log::error('Payment not captured', ['payment_id' => $paymentId]);
+                return response()->json(['message' => 'Payment was not successful. Your payment will be refunded within 7 days.'], 400);
             }
         }
     } catch (\Exception $e) {
-        \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
+        Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
         return response()->json(['message' => 'Failed to fetch payment status'], 500);
     }
 
