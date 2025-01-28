@@ -29,7 +29,19 @@ class Kernel extends ConsoleKernel
         $schedule->command('subscriptions:sendEndingNotifications')
                  ->at('18:57')
                  ->runInBackground();
+
+       $schedule->command('subscription:resume-paused')->dailyAt('00:00'); // Runs every day at midnight
+
     }
+
+    
+    protected $commands = [
+        \App\Console\Commands\ResumePausedSubscriptions::class,
+        \App\Console\Commands\SendEndingSubscriptionNotifications::class,
+
+    ];
+
+
 
     /**
      * Register the commands for the application.
@@ -48,8 +60,5 @@ class Kernel extends ConsoleKernel
      *
      * @var array
      */
-    protected $commands = [
-        \App\Console\Commands\SendEndingSubscriptionNotifications::class,
-        // Add other commands here if necessary
-    ];
+   
 }

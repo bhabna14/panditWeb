@@ -611,9 +611,6 @@ public function resume(Request $request, $order_id)
         }
 
         // Update the subscription status and clear pause dates
-        $subscription->status = 'active';
-        $subscription->pause_start_date = null;
-        $subscription->pause_end_date = null;
         $subscription->new_date = $newEndDate;
         $subscription->save();
 
@@ -624,6 +621,7 @@ public function resume(Request $request, $order_id)
             'action' => 'resumed',
             'resume_date' => $resumeDate,
             'pause_start_date' => $pauseStartDate,
+            'pause_end_date' => $pauseEndDate,
             'new_end_date' => $newEndDate,
             'paused_days' => $actualPausedDays,
         ]);
