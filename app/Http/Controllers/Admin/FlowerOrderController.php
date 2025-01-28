@@ -74,6 +74,7 @@ class FlowerOrderController extends Controller
     // Filter for new user subscriptions
     if ($request->query('filter') === 'new') {
         $query->whereDate('created_at', Carbon::today())
+        ->where('status', 'pending')                   
         ->distinct('user_id');                  
     }
 
