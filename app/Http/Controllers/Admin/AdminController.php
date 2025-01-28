@@ -91,12 +91,9 @@ public function admindashboard()
 
 // new user count
 
-$newUserSubscription = Subscription::whereDate('created_at', Carbon::today())
-->whereNotIn('user_id', Subscription::whereDate('created_at', Carbon::today())
-                                ->pluck('user_id'))
-->distinct('user_id')
-->count('user_id');
-
+        $newUserSubscription = Subscription::whereDate('created_at', Carbon::today())
+        ->distinct('user_id')                   
+         ->count('user_id');  
 
         $nonAssignedRidersCount = Subscription::with('relatedOrder')
         ->where('status', 'active')
