@@ -562,7 +562,7 @@ public function resume(Request $request, $order_id)
 {
     try {
         // Find the subscription by order_id
-        $subscription = Subscription::where('order_id', $order_id)->where('status','active')->firstOrFail();
+        $subscription = Subscription::where('order_id', $order_id)->where('status','paused')->firstOrFail();
 
         // Validate that the subscription is currently paused
         if ($subscription->status !== 'paused') {
