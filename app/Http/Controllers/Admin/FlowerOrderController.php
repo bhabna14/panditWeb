@@ -74,6 +74,8 @@ class FlowerOrderController extends Controller
     // Filter for new user subscriptions
     if ($request->query('filter') === 'new') {
         $query->whereDate('created_at', Carbon::today())
+        ->whereNotIn('user_id', Subscription::whereDate('created_at', Carbon::today())
+                                ->pluck('user_id'))
         ->distinct('user_id');                  
     }
 
