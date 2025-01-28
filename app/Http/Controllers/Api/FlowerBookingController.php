@@ -386,8 +386,8 @@ try {
     try {
         // Find the active subscription by order_id
         $subscription = Subscription::where('order_id', $order_id)
-            ->where('status', 'active')
-            ->firstOrFail();
+        ->whereIn('status', ['active', 'paused'])
+        ->firstOrFail();
 
         // Parse the input dates
         $pauseStartDate = Carbon::parse($request->pause_start_date);
