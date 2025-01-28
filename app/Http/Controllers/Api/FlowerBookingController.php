@@ -384,77 +384,97 @@ try {
     public function pause(Request $request, $order_id)
 {
     try {
-        // Find the subscription by order_id
-        $subscription = Subscription::where('order_id', $order_id)->where('status','active')->firstOrFail();
+        // Find the active subscription by order_id
+        $subscription = Subscription::where('order_id', $order_id)
+            ->where('status', 'active')
+            ->firstOrFail();
 
-        // Calculate pause start and end dates
+        // Parse the input dates
         $pauseStartDate = Carbon::parse($request->pause_start_date);
         $pauseEndDate = Carbon::parse($request->pause_end_date);
         $pausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1; // Include both dates
 
-        // Get the most recent new_end_date or default to the original end_date
-        $lastNewEndDate = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-            ->orderBy('id', 'desc')
-            ->value('new_end_date');
+        // Check if there is already a pause log for the same start and end dates
+        $existingPauseLog = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+            ->where('pause_start_date', $pauseStartDate)
+            ->where('pause_end_date', $pauseEndDate)
+            ->first();
 
-        // Use the most recent new_end_date for recalculating the new end date
-        $currentEndDate = $lastNewEndDate ? Carbon::parse($lastNewEndDate) : Carbon::parse($subscription->end_date);
-
-        // Calculate the new end date by adding paused days
+        // Calculate the current and new end dates
+        $currentEndDate = $existingPauseLog
+            ? Carbon::parse($existingPauseLog->new_end_date)
+            : Carbon::parse($subscription->end_date);
         $newEndDate = $currentEndDate->addDays($pausedDays);
 
-        // Check if today matches the pause start date
-        $today = Carbon::today();
-        if ($today->eq($pauseStartDate)) {
-            // Update the subscription status and new date field if today is the pause start date
-            $subscription->status = 'paused';
-            $subscription->is_active = true;
+        if ($existingPauseLog) {
+            // If a pause log exists, update it
+            $existingPauseLog->update([
+                'pause_start_date' => $pauseStartDate,
+                'pause_end_date' => $pauseEndDate,
+                'paused_days' => $pausedDays,
+                'new_end_date' => $newEndDate,
+            ]);
+
+            $subscription->update([
+                'pause_start_date' => $pauseStartDate,
+                'pause_end_date' => $pauseEndDate,
+                'new_date' => $newEndDate,
+            ]);
+        } else {
+            // Create a new pause log and update subscription details
+            SubscriptionPauseResumeLog::create([
+                'subscription_id' => $subscription->subscription_id,
+                'order_id' => $order_id,
+                'action' => 'paused',
+                'pause_start_date' => $pauseStartDate,
+                'pause_end_date' => $pauseEndDate,
+                'paused_days' => $pausedDays,
+                'new_end_date' => $newEndDate,
+            ]);
+
+            $subscription->update([
+                'pause_start_date' => $pauseStartDate,
+                'pause_end_date' => $pauseEndDate,
+                'new_date' => $newEndDate,
+            ]);
         }
 
-        // Always update pause dates and new end date
-        $subscription->pause_start_date = $pauseStartDate;
-        $subscription->pause_end_date = $pauseEndDate;
-        $subscription->new_date = $newEndDate; // Update with recalculated end date
-
-        // Save the changes
-        $subscription->save();
-
-        // Log the pause action
-        SubscriptionPauseResumeLog::create([
-            'subscription_id' => $subscription->subscription_id,
-            'order_id' => $order_id,
-            'action' => 'paused',
-            'pause_start_date' => $pauseStartDate,
-            'pause_end_date' => $pauseEndDate,
-            'paused_days' => $pausedDays,
-            'new_end_date' => $newEndDate,
-        ]);
-
-        // Log the creation of the pause resume log
-        Log::info('Pause resume log created successfully');
-
+        // Return success response
         return response()->json([
             'success' => 200,
-            'message' => 'Subscription pause scheduled successfully.',
-            'subscription' => $subscription
+            'message' => 'Subscription pause details updated successfully.',
+            'data' => [
+                'subscription_id' => $subscription->subscription_id,
+                'order_id' => $order_id,
+                'pause_start_date' => $pauseStartDate->toDateString(),
+                'pause_end_date' => $pauseEndDate->toDateString(),
+                'paused_days' => $pausedDays,
+                'new_end_date' => $newEndDate->toDateString(),
+            ]
         ], 200);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        // Handle case where subscription is not found
+        return response()->json([
+            'success' => 404,
+            'message' => 'Subscription not found or inactive.',
+            'error' => $e->getMessage()
+        ], 404);
     } catch (\Exception $e) {
-        // Log any errors that occur during the process
+        // Log and handle general errors
         Log::error('Error pausing subscription', [
             'order_id' => $order_id,
             'error_message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
         ]);
 
         return response()->json([
             'success' => 500,
-            'message' => 'An error occurred while scheduling the subscription pause.',
+            'message' => 'An error occurred while updating the pause details.',
             'error' => $e->getMessage()
         ], 500);
     }
 }
 
- 
     public function markPaymentApi(Request $request, $id)
     {
         try {
@@ -537,7 +557,6 @@ try {
             ], 500);
         }
     }
-    
     
 public function resume(Request $request, $order_id)
 {
