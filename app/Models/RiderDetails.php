@@ -24,6 +24,11 @@ class RiderDetails extends Model
     {
         return $this->hasMany(FlowerPickupDetails::class, 'rider_id','rider_id');
     }
+// In RiderDetails.php model
+public function orders()
+{
+    return $this->hasMany(Order::class, 'rider_id', 'rider_id');
+}
 
     
 

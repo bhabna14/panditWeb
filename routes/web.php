@@ -407,6 +407,9 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/add-panditCareer', 'addCareer')->name('addCareer');
         Route::post('/save-profile', 'saveprofile');
         Route::post('/save-career', 'savecareer');
+        Route::get('admin/order-assign/{riderId}', 'showRiderDetails')->name('admin.orderAssign');
+        Route::post('/admin/transfer-order', 'transferOrders')->name('admin.transferOrder');
+
     });
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');

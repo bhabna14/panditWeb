@@ -30,24 +30,20 @@ class Kernel extends ConsoleKernel
                  ->at('18:57')
                  ->runInBackground();
 
-       $schedule->command('subscription:resume-paused')->dailyAt('00:00'); // Runs every day at midnight
+                 Log::info('Scheduler running at: ' . now());
 
+    $schedule->command('subscription:resume-paused')
+             ->dailyAt('00:00')
+             ->onSuccess(fn () => Log::info('subscription:resume-paused executed successfully'))
+             ->onFailure(fn () => Log::error('subscription:resume-paused failed to execute'));
     }
-
-    
-    protected $commands = [
-        \App\Console\Commands\ResumePausedSubscriptions::class,
-        \App\Console\Commands\SendEndingSubscriptionNotifications::class,
-
-    ];
-
-
 
     /**
      * Register the commands for the application.
      *
      * @return void
      */
+
     protected function commands()
     {
         $this->load(__DIR__.'/Commands');
@@ -55,10 +51,14 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 
+    protected $commands = [
+        \App\Console\Commands\ResumePausedSubscriptions::class,
+    ];
+
     /**
      * The Artisan commands provided by your application.
      *
      * @var array
      */
-   
+
 }

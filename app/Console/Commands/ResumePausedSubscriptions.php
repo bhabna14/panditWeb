@@ -6,6 +6,7 @@ use App\Models\Subscription;
 use App\Models\SubscriptionPauseResumeLog;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ResumePausedSubscriptions extends Command
@@ -16,6 +17,7 @@ class ResumePausedSubscriptions extends Command
      * @var string
      */
     protected $signature = 'subscription:resume-paused';
+
     /**
      * The console command description.
      *
@@ -25,14 +27,15 @@ class ResumePausedSubscriptions extends Command
 
     /**
      * Execute the console command.
-     *
-     * @return int
      */
     public function handle()
     {
-        $today = Carbon::today();
+        Log::info('subscription:resume-paused command started.');
 
-        // Fetch logs with resume date matching today and join with subscriptions
+        // Get today's date
+        $today = Carbon::now()->format('Y-m-d');
+
+        // Fetch logs with resume date matching today
         $logs = SubscriptionPauseResumeLog::whereDate('resume_date', $today)
             ->whereHas('subscription', function ($query) {
                 $query->where('status', 'paused');
@@ -40,20 +43,28 @@ class ResumePausedSubscriptions extends Command
             ->with('subscription')
             ->get();
 
+        if ($logs->isEmpty()) {
+            Log::info('No paused subscriptions to resume today.');
+            return Command::SUCCESS;
+        }
+
         foreach ($logs as $log) {
-            $subscription = $log->subscription; // Access linked subscription
+            $subscription = $log->subscription;
+
+            if (!$subscription || $subscription->status !== 'paused') {
+                Log::warning('Invalid subscription state for resume', ['log_id' => $log->id]);
+                continue;
+            }
 
             try {
-                if (!$subscription || $subscription->status !== 'paused') {
-                    Log::warning('Invalid subscription state for resume', ['log_id' => $log->id]);
-                    continue;
-                }
+                DB::beginTransaction(); // Start transaction
 
+                // Parse dates
                 $pauseStartDate = Carbon::parse($subscription->pause_start_date);
                 $resumeDate = Carbon::parse($log->resume_date);
                 $pauseEndDate = Carbon::parse($subscription->pause_end_date);
-                $currentEndDate = $subscription->new_date 
-                    ? Carbon::parse($subscription->new_date) 
+                $currentEndDate = $subscription->new_date
+                    ? Carbon::parse($subscription->new_date)
                     : Carbon::parse($subscription->end_date);
 
                 // Calculate paused days and remaining paused days
@@ -74,13 +85,17 @@ class ResumePausedSubscriptions extends Command
                     'new_date' => $newEndDate,
                 ]);
 
-                // Log the resume action
+                // Log success
                 Log::info('Subscription resumed successfully', [
                     'subscription_id' => $subscription->subscription_id,
                     'order_id' => $subscription->order_id,
-                    'new_end_date' => $newEndDate,
+                    'new_end_date' => $newEndDate->toDateString(),
                 ]);
+
+                DB::commit(); // Commit transaction
             } catch (\Exception $e) {
+                DB::rollBack(); // Rollback transaction on error
+
                 Log::error('Error processing subscription resume', [
                     'log_id' => $log->id,
                     'error' => $e->getMessage(),
@@ -88,6 +103,7 @@ class ResumePausedSubscriptions extends Command
             }
         }
 
+        Log::info('subscription:resume-paused command completed.');
         $this->info('Paused subscriptions processed successfully.');
         return Command::SUCCESS;
     }

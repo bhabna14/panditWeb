@@ -346,16 +346,14 @@
         </div>
     </div>
     
-    
     <!-- row closed -->
     <div class="row">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <h4 class="card-title-custom mb-4">Individual Rider Details</h4>
-    
             <div class="row">
                 @foreach ($ridersData as $data)
                     <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
-                        <a href="{{ route('admin.manageRiderDetails') }}" target="_blank" class="text-decoration-none">
+                        <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank" class="text-decoration-none">
                             <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
                                 <div class="row">
                                     <div class="col-8">
