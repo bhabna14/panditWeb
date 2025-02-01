@@ -12,6 +12,7 @@ use App\Models\FlowerProduct;
 use App\Models\Locality;
 use Illuminate\Support\Str;
 
+
 use App\Models\Apartment;
 
 use Carbon\Carbon; // Add this at the top of the controller
@@ -46,79 +47,92 @@ class UserManagementController extends Controller
         return response()->json(['addresses' => $addresses]);
     }
 
-
+  
 public function handleUserData(Request $request)
 {
     try {
-        // Start a database transaction
-        \DB::beginTransaction();
+        DB::beginTransaction();
 
-        // Validate user details
-        $validatedUserData = $request->validate([
+        // Validate request data
+        $validated = $request->validate([
             'userid' => 'required|string',
             'address_id' => 'required|numeric',
-            'product_id' => 'nullable',
             'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
+            'duration' => 'nullable|integer|in:1,3,6',
             'payment_method' => 'nullable|string',
             'payment_status' => 'nullable|string',
-            'paid_amount' => 'nullable|numeric',
+            'paid_amount' => 'nullable|numeric|min:0',
             'status' => 'nullable|string',
         ]);
 
-        // Generate unique order ID
-        $orderId = 'ORD-' . strtoupper(Str::random(12));
+        $existingSubscription = Subscription::where('user_id', $validated['userid'])->first();
 
-        // Create order
-        $order = Order::create([
-            'user_id' => $validatedUserData['userid'],
-            'order_id' => $orderId,
-            'product_id' => $validatedUserData['product_id'],
-            'quantity' => '1',
-            'start_date' => $validatedUserData['start_date'],
-            'address_id' => $validatedUserData['address_id'],
-            'total_price' => $validatedUserData['paid_amount'],
-            'created_at' => $validatedUserData['start_date'],
-            
-        ]);
+        if ($existingSubscription) {
+            $order = Order::where('order_id', $existingSubscription->order_id)->first();
+            if ($order) {
+                $order->update([
+                    'user_id' => $validated['userid'],
+                    'quantity' => 1,
+                    'total_price' => $validated['paid_amount'] ?? 0,
+                    'address_id' => $validated['address_id'],
+                ]);
+                Log::info('Order updated successfully', ['order_id' => $order->order_id]);
+            } else {
+                return back()->with('error', 'Order ID not found for update.');
+            }
+        } else {
+            $orderId = 'ORD-' . strtoupper(Str::random(12));
+            $order = Order::create([
+                'user_id' => $validated['userid'],
+                'order_id' => $orderId,
+                'quantity' => 1,
+                'start_date' => $validated['start_date'] ?? now(),
+                'address_id' => $validated['address_id'],
+                'total_price' => $validated['paid_amount'] ?? 0,
+            ]);
+        }
 
-        // Generate unique subscription ID
-        $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
-
+        // Calculate end date
+        $startDate = $validated['start_date'] ? Carbon::parse($validated['start_date']) : now();
+        $endDate = match ((int) $validated['duration']) {
+            1 => $startDate->copy()->addDays(29),
+            3 => $startDate->copy()->addDays(89),
+            6 => $startDate->copy()->addDays(179),
+            default => now(), // Provide a fallback value instead of throwing an exception
+        };
+        
         // Create subscription
         Subscription::create([
-            'subscription_id' => $subscriptionId,
-            'user_id' => $validatedUserData['userid'],
+            'subscription_id' => 'SUB-' . strtoupper(Str::random(12)),
+            'user_id' => $validated['userid'],
+            'product_id' => $order->product_id ?? null,
             'order_id' => $order->order_id,
-            'product_id' => $validatedUserData['product_id'],
-            'start_date' => $validatedUserData['start_date'],
-            'end_date' => $validatedUserData['end_date'],
-            'status' => $validatedUserData['status'],
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'is_active' => true,
+            'status' => $validated['status'] ?? 'active',
         ]);
 
-        // Add flower payment
+     
+        // Create payment record
         FlowerPayment::create([
             'order_id' => $order->order_id,
-            'payment_id' => 'NULL',
-            'user_id' => $validatedUserData['userid'],
-            'payment_method' => $validatedUserData['payment_method'],
-            'paid_amount' => $validatedUserData['paid_amount'],
-            'payment_status' => $validatedUserData['payment_status'],
+            'payment_id' => null,
+            'user_id' => $validated['userid'],
+            'payment_method' => $validated['payment_method'],
+            'paid_amount' => $validated['paid_amount'] ?? 0,
+            'payment_status' => $validated['payment_status'] ?? 'pending',
         ]);
 
-        // Commit the transaction
-        \DB::commit();
-
-               return redirect()->back()->with('success', 'existing user add succesful!');
-
+        DB::commit();
+        return back()->with('success', 'User data processed successfully!');
     } catch (\Exception $e) {
-        // Rollback the transaction on error
-        \DB::rollBack();
-
-        return redirect()->back()->with('error', 'An error occurred while adding the existing user. Please try again.');
-
+        DB::rollBack();
+        Log::error('Error processing user data', ['error' => $e->getMessage()]);
+        return back()->with('error', 'An error occurred: ' . $e->getMessage());
     }
 }
 
-
+    
+    
 }

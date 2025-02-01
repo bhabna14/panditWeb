@@ -40,6 +40,14 @@
         </div>
     @endif
 
+
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
+
     <form action="{{ route('saveDemoOrderDetails') }}" method="post" enctype="multipart/form-data">
         @csrf
         <!-- User Details -->
@@ -72,25 +80,13 @@
 
         <!-- Product Details -->
         <div class="row mt-3">
-            <div class="col-md-3">
-                <label for="product" class="form-label">Flower</label>
-                <select name="product_id" id="product" class="form-control" required>
-                    <option value="">Select Flower</option>
-                    @foreach ($flowers as $flower)
-                        <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
-                    @endforeach
-                </select>
-            </div>
+          
             <div class="col-md-3">
                 <label for="start_date" class="form-label">Start Date</label>
                 <input type="date" name="start_date" class="form-control" id="start_date"
                     placeholder="Enter Amount" required>
             </div>
-            <div class="col-md-3">
-                <label for="start_date" class="form-label">End Date</label>
-                <input type="date" name="end_date" class="form-control" id="end_date"
-                    placeholder="Enter Amount" required>
-            </div>
+           
             <div class="col-md-3">
                 <label for="duration" class="form-label">duration</label>
                 <select name="duration" id="duration" class="form-control" required>
@@ -100,11 +96,7 @@
 
                 </select>
             </div>
-        </div>
 
-        <!-- Payment Details -->
-        <div class="row mt-3">
-            
             <div class="col-md-3">
                 <label for="paid_amount" class="form-label">Paid Amount</label>
                 <input type="number" name="paid_amount" class="form-control" id="paid_amount"
@@ -113,18 +105,24 @@
             <div class="col-md-3">
                 <label for="payment_method" class="form-label mt-2">Payment Mode</label>          
                 <select name="payment_method" id="payment_method" class="form-control" required>
-                    <option value=" ">Select payment method</option>
                     <option value="cash">Cash</option>
                     <option value="upi">Upi</option>
                 </select>
             </div>
+        </div>
+
+
+
+        <!-- Payment Details -->
+        <div class="row mt-3">
+            
+            
 
             <div class="col-md-3">
                 <label for="payment_status" class="form-label mt-2">Payment Status</label>
                 <select name="payment_status" id="payment_status" class="form-control" required>
-                    <option value=" ">Select payment status</option>
-                    <option value="pending">Pending</option>
                     <option value="paid">Paid</option>
+                    <option value="pending">Pending</option>
                 </select>
             </div>
 

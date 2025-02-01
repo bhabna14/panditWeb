@@ -25,7 +25,7 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     //
-    public function showOrders(Request $request)
+public function showOrders(Request $request)
 {
 
     $query = Subscription::with([
@@ -140,9 +140,6 @@ public function showNotifications()
                                 ->where('status','active')
                                 ->get();
 
-                              
-
-
         $orders = Subscription::where('user_id', $userid)
     ->whereHas('order', function ($query) {
         $query->whereColumn('orders.order_id', 'orders.order_id');
@@ -251,6 +248,8 @@ public function assignRider(Request $request, $orderId)
 
     return redirect()->back()->with('success', 'Rider assigned successfully.');
 }
+
+
 public function refferRider(Request $request, $orderId)
 {
     $request->validate([
