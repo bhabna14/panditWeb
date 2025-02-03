@@ -105,6 +105,14 @@ public function showOrders(Request $request)
     if ($request->query('filter') === 'paused') {
             $query->where('status', 'paused');
     }
+    
+    $tomorrow = Carbon::tomorrow()->toDateString();
+
+    // Filter for paused subscriptions
+    if ($request->query('filter') === 'tommorow') {
+        $query->where('status', 'active')
+        ->whereDate('pause_start_date', $tomorrow);
+}
     // Retrieve the filtered orders
     $orders = $query->get();
 
