@@ -157,7 +157,7 @@
       
         <div class="card-body">
             @if ($action === 'pause')
-            <form id="pauseForm" action="{{ route('subscription.pause', $order->order_id) }}" method="POST">
+            <form id="pauseForm" action="{{ route('subscription.pause', $order->id) }}" method="POST">
                 @csrf
                 <div class="form-section">
                     <h4>Pause Details</h4>

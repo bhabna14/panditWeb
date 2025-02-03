@@ -574,8 +574,6 @@
 
                                         <!-- Button to Open Modal -->
 
-
-
                                         <td style="text-align: left; padding: 10px; font-size: 14px; color: #333;">
                                             {{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') : 'N/A' }}
 
@@ -685,8 +683,8 @@
 
                                         <td>
                                             @if ($order->order->rider_id)
-                                                <span>{{ $order->order->rider->rider_name }}</span>
-                                                <a href="#editRiderModal{{ $order->order->id }}"
+                                            <span>{{ $order->order->rider->rider_name ?? '' }}</span>
+                                            <a href="#editRiderModal{{ $order->order->id }}"
                                                     class="btn btn-sm btn-outline-info" data-bs-toggle="modal"><i
                                                         class="fas fa-edit"></i></a>
                                             @else

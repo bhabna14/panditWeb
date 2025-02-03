@@ -129,6 +129,12 @@ public function admindashboard()
     // Fetch the total number of paused subscriptions
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
 
+    $tomorrow = Carbon::tomorrow()->toDateString();
+
+    $nextDayPaused = Subscription::where('status', 'active')
+        ->whereDate('pause_start_date', $tomorrow)
+        ->count();
+
     // fetch the expired subscriptions whose new subscription is not created ( expired )
     $expiredSubscriptions = Subscription::where('status', 'expired')
     ->whereNotIn('user_id', function ($query) {
@@ -272,6 +278,7 @@ if ($payment) {
         'totalFlowerPickupPrice',
         'activeSubscriptions',
         'pausedSubscriptions',
+        'nextDayPaused',
         'expiredSubscriptions',
         'todayEndSubscription',
         'ordersRequestedToday',
