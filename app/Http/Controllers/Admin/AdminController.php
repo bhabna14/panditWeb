@@ -548,34 +548,21 @@ if ($profileSaved && $careerSaved) {
 
 public function transferOrders(Request $request)
 {
-    // Validate the input
+    // Validate the request
     $request->validate([
-        'order_ids' => 'required|array|min:1', // Ensure at least one order is selected
-        'new_rider_id' => 'required|exists:flower__rider_details,id', // Ensure the new rider exists
+        'order_ids' => 'required|array',
+        'order_ids.*' => 'exists:orders,order_id',
+        'new_rider_id' => 'required|exists:flower__rider_details,rider_id',
     ]);
-
-    // Get the new rider's ID
-    $newRiderId = $request->new_rider_id;
-
-    // Begin a transaction to ensure all updates happen together
-    DB::beginTransaction();
 
     try {
         // Update the rider_id for all selected orders
-        Order::whereIn('order_id', $request->order_ids)->update(['rider_id' => $newRiderId]);
+        Order::whereIn('order_id', $request->order_ids)
+            ->update(['rider_id' => $request->new_rider_id]);
 
-        // Commit the transaction
-        DB::commit();
-
-        // Redirect back with success message
-        return redirect()->route('admin.rider.details', ['riderId' => $newRiderId])
-                         ->with('success', 'Orders transferred successfully!');
+        return redirect()->back()->with('success', 'Orders transferred successfully.');
     } catch (\Exception $e) {
-        // Rollback the transaction in case of error
-        DB::rollBack();
-
-        // Redirect back with error message
-        return back()->with('error', 'There was an issue transferring the orders.');
+        return redirect()->back()->with('error', 'Failed to transfer orders: ' . $e->getMessage());
     }
 }
 

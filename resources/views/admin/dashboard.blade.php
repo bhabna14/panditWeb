@@ -190,7 +190,7 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-gift tx-16 text-white"></i> <!-- New Subscription Icon -->
+                                        <i class="fa fa-gift tx-16 text-white"></i> 
                                     </div>
                                 </div>
                             </div>
