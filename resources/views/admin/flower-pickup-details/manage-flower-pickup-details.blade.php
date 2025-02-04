@@ -81,18 +81,21 @@
                                         <td>
                                             <!-- Button to Open Modal -->
                                             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                                data-bs-target="#flowerDetailsModal">
+                                                data-bs-target="#flowerDetailsModal{{ $detail->id }}">
                                                 <i class="fas fa-eye"></i> View
                                             </button>
 
                                             <!-- Modal -->
-                                            <div class="modal fade" id="flowerDetailsModal" tabindex="-1"
-                                                aria-labelledby="flowerDetailsModalLabel" aria-hidden="true">
+                                            <div class="modal fade" id="flowerDetailsModal{{ $detail->id }}"
+                                                tabindex="-1" aria-labelledby="flowerDetailsModalLabel{{ $detail->id }}"
+                                                aria-hidden="true">
                                                 <div class="modal-dialog modal-lg">
                                                     <div class="modal-content">
                                                         <div class="modal-header bg-primary text-white">
-                                                            <h5 class="modal-title" id="flowerDetailsModalLabel"><i
-                                                                    class="fas fa-seedling"></i> Flower Pickup Details</h5>
+                                                            <h5 class="modal-title"
+                                                                id="flowerDetailsModalLabel{{ $detail->id }}">
+                                                                <i class="fas fa-seedling"></i> Flower Pickup Details
+                                                            </h5>
                                                             <button type="button" class="btn-close text-white"
                                                                 data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
@@ -100,8 +103,7 @@
                                                             <ul class="list-group">
                                                                 @foreach ($detail->flowerPickupItems as $item)
                                                                     <li class="list-group-item">
-                                                                        <i class="fas fa-flower"></i>
-                                                                        <strong>Flower:</strong>
+                                                                        <i class="fas fa-leaf"></i> <strong>Flower:</strong>
                                                                         {{ $item->flower?->name ?? 'N/A' }} <br>
                                                                         <i class="fas fa-box"></i>
                                                                         <strong>Quantity:</strong>
@@ -126,8 +128,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
-
                                         </td>
                                         <td>
                                             {{ \Carbon\Carbon::parse($detail->pickup_date)->format('d-m-Y') }}</td>
@@ -141,20 +141,22 @@
                                         </td>
                                         <td>
                                             @if ($detail->payment_status === 'Paid')
-                                                <span class="badge bg-success" style="font-size: 12px;width: 70px;padding: 10px">Paid</span>
+                                                <span class="badge bg-success"
+                                                    style="font-size: 12px;width: 70px;padding: 10px">Paid</span>
                                             @else
-                                                <span class="badge bg-danger" style="font-size: 12px;width: 70px;padding: 10px">Unpaid</span>
+                                                <span class="badge bg-danger"
+                                                    style="font-size: 12px;width: 70px;padding: 10px">Unpaid</span>
                                             @endif
                                         </td>
                                         <td>
                                             @if ($detail->status == 'pending')
-                                               
-                                                <span class="badge bg-danger" style="font-size: 12px;width: 100px;padding: 10px"> <i class="fas fa-hourglass-half"></i> Pending</span>
-
+                                                <span class="badge bg-danger"
+                                                    style="font-size: 12px;width: 100px;padding: 10px"> <i
+                                                        class="fas fa-hourglass-half"></i> Pending</span>
                                             @elseif ($detail->status == 'Completed')
-                                             
-                                                <span class="badge bg-success" style="font-size: 12px;width: 100px;padding: 10px"> <i class="fas fa-check-circle"></i> Completed</span>
-
+                                                <span class="badge bg-success"
+                                                    style="font-size: 12px;width: 100px;padding: 10px"> <i
+                                                        class="fas fa-check-circle"></i> Completed</span>
                                             @else
                                                 <span class="badge bg-secondary">
                                                     <i class="fas fa-question-circle"></i> {{ $detail->status ?? 'N/A' }}
@@ -163,15 +165,17 @@
                                         </td>
                                         <td class="d-flex align-items-center gap-2">
                                             <!-- Edit Button with Icon -->
-                                            <a href="{{ route('flower-pickup.edit', $detail->id) }}" class="btn btn-primary d-flex align-items-center justify-content-center"
-                                               style="width: 40px; padding: 10px; font-size: 12px;">
+                                            <a href="{{ route('flower-pickup.edit', $detail->id) }}"
+                                                class="btn btn-primary d-flex align-items-center justify-content-center"
+                                                style="width: 40px; padding: 10px; font-size: 12px;">
                                                 <i class="fas fa-edit me-1"></i>
                                             </a>
-                                        
+
                                             <!-- Payment Button with Icon -->
-                                            <button class="btn btn-secondary d-flex align-items-center justify-content-center"
-                                                    style="width: 40px; padding: 10px; font-size: 12px;"
-                                                    data-bs-toggle="modal" data-bs-target="#paymentModal{{ $detail->id }}">
+                                            <button
+                                                class="btn btn-secondary d-flex align-items-center justify-content-center"
+                                                style="width: 40px; padding: 10px; font-size: 12px;" data-bs-toggle="modal"
+                                                data-bs-target="#paymentModal{{ $detail->id }}">
                                                 <i class="fas fa-credit-card me-1"></i>
                                             </button>
                                         </td>
