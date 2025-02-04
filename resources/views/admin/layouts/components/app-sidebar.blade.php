@@ -202,17 +202,17 @@
 									<a class="side-menu__item" href="{{route('admin.manageRiderDetails')}}"><img src="{{asset('assets/img/brand/rider.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Manage Rider</span></a>
 								</li>
 								<li class="slide">
-									<a class="side-menu__item" href="{{route('admin.manageOrderAssign')}}"><img src="{{asset('assets/img/brand/podcast.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Apartment Assign</span></a>
+									<a class="side-menu__item" href="{{route('admin.manageOrderAssign')}}"><img src="{{asset('assets/img/brand/graph.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Apartment Assign</span></a>
 								</li>
 								<li class="slide">
-									<a class="side-menu__item" href="{{route('admin.manageflowerpickupdetails')}}"><img src="{{asset('assets/img/brand/podcast.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Manage Flower Pickup</span></a>
+									<a class="side-menu__item" href="{{route('admin.manageflowerpickupdetails')}}"><img src="{{asset('assets/img/brand/order-delivery.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Manage Flower Pickup</span></a>
 								</li>
 								<li class="slide">
-									<a class="side-menu__item" href="{{url('admin/manage-delivery-history')}}"><svg xmlns="http://www.w3.org/2000/svg"  class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M10 3H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4a1 1 0 0 0-1-1zM9 9H5V5h4v4zm11 4h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1zm-1 6h-4v-4h4v4zM17 3c-2.206 0-4 1.794-4 4s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4zm0 6c-1.103 0-2-.897-2-2s.897-2 2-2 2 .897 2 2-.897 2-2 2zM7 13c-2.206 0-4 1.794-4 4s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4zm0 6c-1.103 0-2-.897-2-2s.897-2 2-2 2 .897 2 2-.897 2-2 2z"/></svg><span class="side-menu__label">Delivery History</span></a>
+									<a class="side-menu__item" href="{{url('admin/manage-delivery-history')}}"><img src="{{asset('assets/img/brand/file.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Delivery History</span></a>
 								</li>
 								
 								<li class="slide">
-									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><svg xmlns="http://www.w3.org/2000/svg"  class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M22 7.999a1 1 0 0 0-.516-.874l-9.022-5a1.003 1.003 0 0 0-.968 0l-8.978 4.96a1 1 0 0 0-.003 1.748l9.022 5.04a.995.995 0 0 0 .973.001l8.978-5A1 1 0 0 0 22 7.999zm-9.977 3.855L5.06 7.965l6.917-3.822 6.964 3.859-6.918 3.852z"/><path d="M20.515 11.126 12 15.856l-8.515-4.73-.971 1.748 9 5a1 1 0 0 0 .971 0l9-5-.97-1.748z"/><path d="M20.515 15.126 12 19.856l-8.515-4.73-.971 1.748 9 5a1 1 0 0 0 .971 0l9-5-.97-1.748z"/></svg><span class="side-menu__label">Order Creation</span><i class="angle fe fe-chevron-right"></i></a>
+									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><img src="{{asset('assets/img/brand/check-out.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Order Creation</span><i class="angle fe fe-chevron-right"></i></a>
 									<ul class="slide-menu">
 										<li><a class="sub-side-menu__item" href="{{url('admin/existing-user')}}">Subscription Order (Existing User)</a></li>
 										<li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Subscription Order (New User)</a></li>
@@ -222,14 +222,14 @@
 									</ul>
 								</li>
 								<li class="slide">
-									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><svg xmlns="http://www.w3.org/2000/svg"  class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M22 7.999a1 1 0 0 0-.516-.874l-9.022-5a1.003 1.003 0 0 0-.968 0l-8.978 4.96a1 1 0 0 0-.003 1.748l9.022 5.04a.995.995 0 0 0 .973.001l8.978-5A1 1 0 0 0 22 7.999zm-9.977 3.855L5.06 7.965l6.917-3.822 6.964 3.859-6.918 3.852z"/><path d="M20.515 11.126 12 15.856l-8.515-4.73-.971 1.748 9 5a1 1 0 0 0 .971 0l9-5-.97-1.748z"/><path d="M20.515 15.126 12 19.856l-8.515-4.73-.971 1.748 9 5a1 1 0 0 0 .971 0l9-5-.97-1.748z"/></svg><span class="side-menu__label">Marketing</span><i class="angle fe fe-chevron-right"></i></a>
+									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><img src="{{asset('assets/img/brand/channel.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Marketing</span><i class="angle fe fe-chevron-right"></i></a>
 									<ul class="slide-menu">
 										<li><a class="sub-side-menu__item" href="{{route('admin.followUpSubscriptions')}}">Follow Up</a></li>
 										
 									</ul>
 								</li>
 								<li class="slide">
-									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><svg xmlns="http://www.w3.org/2000/svg"  class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M22 7.999a1 1 0 0 0-.516-.874l-9.022-5a1.003 1.003 0 0 0-.968 0l-8.978 4.96a1 1 0 0 0-.003 1.748l9.022 5.04a.995.995 0 0 0 .973.001l8.978-5A1 1 0 0 0 22 7.999zm-9.977 3.855L5.06 7.965l6.917-3.822 6.964 3.859-6.918 3.852z"/><path d="M20.515 11.126 12 15.856l-8.515-4.73-.971 1.748 9 5a1 1 0 0 0 .971 0l9-5-.97-1.748z"/><path d="M20.515 15.126 12 19.856l-8.515-4.73-.971 1.748 9 5a1 1 0 0 0 .971 0l9-5-.97-1.748z"/></svg><span class="side-menu__label">Reports</span><i class="angle fe fe-chevron-right"></i></a>
+									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><img src="{{asset('assets/img/brand/report.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Reports</span><i class="angle fe fe-chevron-right"></i></a>
 									<ul class="slide-menu">
 										<li><a class="sub-side-menu__item" href="{{route('admin.flowerPickupReport')}}">Pickup Reports</a></li>
 										<li><a class="sub-side-menu__item" href="{{route('admin.revenueReport')}}">Revenue Reports</a></li>
@@ -239,7 +239,7 @@
 
 								
 								<li class="slide">
-									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><svg xmlns="http://www.w3.org/2000/svg"  class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M22 7.999a1 1 0 0 0-.516-.874l-9.022-5a1.003 1.003 0 0 0-.968 0l-8.978 4.96a1 1 0 0 0-.003 1.748l9.022 5.04a.995.995 0 0 0 .973.001l8.978-5A1 1 0 0 0 22 7.999zm-9.977 3.855L5.06 7.965l6.917-3.822 6.964 3.859-6.918 3.852z"/><path d="M20.515 11.126 12 15.856l-8.515-4.73-.971 1.748 9 5a1 1 0 0 0 .971 0l9-5-.97-1.748z"/><path d="M20.515 15.126 12 19.856l-8.515-4.73-.971 1.748 9 5a1 1 0 0 0 .971 0l9-5-.97-1.748z"/></svg><span class="side-menu__label">Product Admin</span><i class="angle fe fe-chevron-right"></i></a>
+									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><img src="{{asset('assets/img/brand/settings.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Product Admin</span><i class="angle fe fe-chevron-right"></i></a>
 									<ul class="slide-menu">
 										<li><a class="sub-side-menu__item" href="{{route('admin.productSubscriptionOrder')}}">Manage Order</a></li>
 										
