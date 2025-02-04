@@ -146,7 +146,21 @@
                                                 <span class="badge bg-danger" style="font-size: 12px;width: 70px;padding: 10px">Unpaid</span>
                                             @endif
                                         </td>
-                                        <td>{{ $detail->status ?? 'N/A' }}</td>
+                                        <td>
+                                            @if ($detail->status == 'pending')
+                                               
+                                                <span class="badge bg-danger" style="font-size: 12px;width: 100px;padding: 10px"> <i class="fas fa-hourglass-half"></i> Pending</span>
+
+                                            @elseif ($detail->status == 'Completed')
+                                             
+                                                <span class="badge bg-success" style="font-size: 12px;width: 100px;padding: 10px"> <i class="fas fa-check-circle"></i> Completed</span>
+
+                                            @else
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-question-circle"></i> {{ $detail->status ?? 'N/A' }}
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="d-flex align-items-center gap-2">
                                             <!-- Edit Button with Icon -->
                                             <a href="{{ route('flower-pickup.edit', $detail->id) }}" class="btn btn-primary d-flex align-items-center justify-content-center"
