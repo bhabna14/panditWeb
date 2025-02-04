@@ -334,7 +334,7 @@
                                 <tr>
                                     <th>Customer Details</th>
                                     <th>Purchase Date</th>
-                                    <th>Product Details</th>
+                                    <th>Duration</th>
                                     <th>Price</th>
                                     <th>Status</th>
                                     <th>Assigned Rider</th>

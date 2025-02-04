@@ -354,8 +354,28 @@
                                     </div>
                                 </div>
                                 <div class="col-4">
-                                    <div class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
+                                    <div class="circle-icon bg-gradient-to-r from-green-400 to-red-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}" target="_blank">
+                        <div class="card sales-card">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Current User</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $currentUser }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="circle-icon bg-gradient-to-r from-teal-500 to-orange-600 text-center align-self-center overflow-hidden">
+                                        <i class="si si-user-follow tx-16 text-info"></i>
                                     </div>
                                 </div>
                             </div>

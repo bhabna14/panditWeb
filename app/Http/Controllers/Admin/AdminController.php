@@ -126,6 +126,7 @@ public function admindashboard()
     // Fetch the total number of active subscriptions
     $activeSubscriptions = Subscription::where('status', 'active')->count();
 
+
     // Fetch the total number of paused subscriptions
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
 
@@ -145,6 +146,9 @@ public function admindashboard()
     ->distinct('user_id')
     ->latest('end_date')
     ->count();
+
+    $currentUser = $activeSubscriptions + $pausedSubscriptions + $expiredSubscriptions;
+
 
     $todayEndSubscription = Subscription::where(function ($query) {
             $query->where(function ($subQuery) {
@@ -277,6 +281,7 @@ if ($payment) {
         'totalActivePodcasts',
         'totalFlowerPickupPrice',
         'activeSubscriptions',
+        'currentUser',
         'pausedSubscriptions',
         'nextDayPaused',
         'expiredSubscriptions',
