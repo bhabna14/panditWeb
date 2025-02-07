@@ -334,7 +334,8 @@
                                 </div>
                                 <div class="col-4">
                                     <div class="circle-icon bg-gradient-to-r from-red-600 to-orange-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-skull-crossbones tx-16 text-white"></i>
+                                        <img src="{{ asset('assets/img/s.png') }}" alt="Image">
+
                                         <!-- Expired Subscription Icon -->
                                     </div>
                                 </div>
