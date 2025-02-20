@@ -40,11 +40,7 @@ class User extends Authenticatable
         'expiry' => 'datetime',
     ];
 
-    //    public function isAdmin()
-    // {
-    //     return $this->role === 'admin';
-    // }
-
+    
     public function bankdetail()
     {
         return $this->hasOne(Bankdetail::class);

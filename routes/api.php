@@ -41,10 +41,7 @@ use App\Http\Controllers\Notification\PushNotificationController;
 Route::post('/save-token', [PushNotificationController::class, 'saveToken']);
 // Routes for Rider Login
 Route::prefix('rider')->group(function () {
-    // Send OTP
     Route::post('/send-otp', [RiderLoginController::class, 'sendOtp'])->name('rider.sendOtp');
-
-    // Verify OTP
     Route::post('/verify-otp', [RiderLoginController::class, 'verifyOtp'])->name('rider.verifyOtp');
 });
 
@@ -52,7 +49,6 @@ Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/details', [RiderLoginController::class, 'getRiderDetails']);
     Route::get('rider/get-assign-pickup', [OrderController::class, 'getAssignPickup']);
     Route::post('/rider/update-flower-prices/{pickup_id}', [OrderController::class, 'updateFlowerPrices']);
-    // Route for fetching today's requested orders and saving in delivery history table
     Route::post('/start-delivery', [OrderController::class, 'startDelivery']);
 
    // assign order to rider
@@ -85,11 +81,8 @@ Route::controller(PanditLoginController::class)->group(function() {
     Route::middleware('auth:sanctum')->post('/panditlogout','panditLogout');
 });
 
-// Route::controller(LoginController::class)->group(function() {
-//     Route::post('/pandit-send-otp',  'storeLoginData');
-//     Route::post('/pandit-verify-otp', 'checkOtp');
-// });
 Route::get('/check-new-notifications', [NotificationController::class, 'checkNewNotifications']);
+
 Route::controller(AreaController::class)->group(function() {
     Route::get('/get-districts/{stateCode}', 'getDistrict');
     Route::get('/get-subdistricts/{districtCode}', 'getSubdistrict');
