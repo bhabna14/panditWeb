@@ -2,55 +2,49 @@
 
 @section('styles')
     <style>
-        /* Premium Design Styles */
-        .privacy-section {
-            background-color: #f8f9fa;
+        .policy-section {
+            background-color: #f9f9f9;
             padding: 60px 0;
+        }
+        .policy-title {
+            font-size: 36px;
+            font-weight: 600;
             text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            margin-bottom: 40px;
-        }
-        .privacy-section h1 {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .privacy-section p {
-            font-size: 1.2rem;
-            line-height: 1.8;
-            color: #555;
-            text-align: justify;
-            margin-bottom: 20px;
-        }
-        .privacy-section .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .cta-note {
-            background-color: #e2f3e6;
-            color: #2d6a4f;
-            padding: 20px;
-            border-radius: 5px;
-            font-size: 1.1rem;
-            margin-top: 40px;
-            text-align: center;
-        }
-        .cta-note a {
-            color: #2d6a4f;
-            text-decoration: underline;
-        }
-        .privacy-section .logo {
-            height: 6rem;
-            width: 30rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             margin-bottom: 30px;
+            color: #333;
         }
-        .privacy-section .logo img {
-            max-width: 100%;
+        .policy-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        .policy-item:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        .policy-item i {
+            font-size: 24px;
+            color: #f57c00;
+            margin-top: 5px;
+        }
+        .policy-content {
+            flex: 1;
+        }
+        .policy-content h5 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .policy-content p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            margin: 0;
         }
     </style>
 @endsection
@@ -60,64 +54,84 @@
 <section class="pt-40 pb-40 search-bg-pooja">
     <div class="container">
         <div class="row">
-            <div class="contents-wrapper">
-                <div class="sc-gJqsIT bdDCMj logo" height="6rem" width="30rem">
-                    <div class="low-res-container">
-                    </div>
-                </div>
-                <h1 class="sc-7kepeu-0 kYnyFA description">Privacy policy</h1>
-               
+            <div class="contents-wrapper text-center">
+                <h1 class="sc-7kepeu-0 kYnyFA description">Privacy & Data Policy</h1>
             </div>
         </div>
+    </div>
 </section>
 
-<section class="pt-40 pb-40">
+<section class="policy-section">
     <div class="container">
-        <ul>
-            <li>This Website will be constantly availabler</li>
+        <div class="policy-title">Our Commitment to Your Privacy</div>
 
-        </ul>
-        <p>
-            We view protection of Your privacy as a very important principle. We understand clearly that You and Your Personal Information is one of Our most important assets. We store and process Your Information including any sensitive financial information collected (as defined under the Information Technology Act, 2000), if any, on computers that may be protected by physical as well as reasonable technological security measures and procedures in accordance with Information Technology Act 2000 and Rules thereunder.
-        </p>
-        <p>
-            Our current Privacy Policy is available at Privacy. If You object to Your Information being transferred or used in this way, please do not use the Website.
-        </p>
-        <p>
-            We may share personal information with our other corporate entities and affiliates. These entities and affiliates may market to you as a result of such sharing unless you explicitly opt-out.
-        </p>
-        <p>
-            We may disclose personal information to third parties. This disclosure may be required for us to provide you access to our Services, to comply with our legal obligations, to enforce our User Agreement, to facilitate our marketing and advertising activities, or to prevent, detect, mitigate, and investigate fraudulent or illegal activities related to our Services. We do not disclose your personal information to third parties for their marketing and advertising purposes without your explicit consent.
-        </p>
-        <p>
-            We may disclose personal information if required to do so by law or in the good faith belief that such disclosure is reasonably necessary to respond to subpoenas, court orders, or other legal process. We may disclose personal information to law enforcement offices, third party rights owners, or others in the good faith belief that such disclosure is reasonably necessary to: enforce our Terms or Privacy Policy; respond to claims that an advertisement, posting or other content violates the rights of a third party; or protect the rights, property or personal safety of our users or the general public.
-        </p>
-
-
-        <p>
-            This Website, all the materials and products (including but not limited to software) and services, included on or otherwise made available to You through this site are provided on an "as is" and "as available" basis without any representation or warranties, express or implied except otherwise specified in writing. Without prejudice to the foregoing paragraph, 33crores does not warrant that:
-        </p>
-        <ul>
-            <li>The information on this Website is complete, true, accurate, or non-misleading.</li>
-        </ul>
-        <p>
-            33crores will not be liable to You in any way or in relation to the contents of, or use of, or otherwise in connection with, the Website. 33crores does not warrant that this site; information, Content, materials, products (including software) or services included on or otherwise made available to You through the Website; their servers; or electronic communication sent from Us are free of viruses or other harmful components.
-        </p>
-        <p>
-            Nothing on the Website constitutes, or is meant to constitute, advice of any kind. All the Products sold on the Website are governed by different state laws and if the Seller is unable to deliver such Products due to implications of different state laws, the Seller will return or give credit for the amount (if any) received in advance by the Seller from the sale of such Product that could not be delivered to You.
-        </p>
-        <p>
-            You will be required to enter a valid phone number while placing an order on the Website. By registering Your phone number with us, You consent to be contacted by Us via phone calls, SMS notifications, mobile applications, and/or any other electronic mode of communication in case of any order or shipment or delivery-related updates. We will not use your personal information to initiate any promotional phone calls or SMS.
-        </p>
-
-
-        <div class="cta-note">
-            By using this website, you consent to the collection and use of your personal information as described in our Privacy Policy. For more details, please refer to our <a href="#">Privacy Policy</a>.
+        <div class="policy-item">
+            <i class="fas fa-user-shield"></i>
+            <div class="policy-content">
+                <h5>1. Information We Collect</h5>
+                <p>We collect personal information such as your name, email address, phone number, and shipping details when you place an order or sign up for our services. We also gather non-personal data like browser type, IP address, and device information to enhance your experience.</p>
+            </div>
         </div>
+
+        <div class="policy-item">
+            <i class="fas fa-tasks"></i>
+            <div class="policy-content">
+                <h5>2. How We Use Your Data</h5>
+                <p>
+                    - To process your orders and ensure timely delivery.<br>
+                    - To send updates on new products, offers, and spiritual content.<br>
+                    - To improve our website experience and customer support.<br>
+                    - To comply with legal requirements and prevent fraud.
+                </p>
+            </div>
+        </div>
+
+        <div class="policy-item">
+            <i class="fas fa-lock"></i>
+            <div class="policy-content">
+                <h5>3. Data Protection Measures</h5>
+                <p>We implement industry-standard security measures to protect your data from unauthorized access, loss, or misuse. Your payment details are encrypted and processed through secure gateways.</p>
+            </div>
+        </div>
+
+        <div class="policy-item">
+            <i class="fas fa-share-alt"></i>
+            <div class="policy-content">
+                <h5>4. Sharing of Information</h5>
+                <p>We do not sell or trade your personal information. However, we may share it with trusted third-party partners for logistics, payment processing, and customer support.</p>
+            </div>
+        </div>
+
+        <div class="policy-item">
+            <i class="fas fa-user-cog"></i>
+            <div class="policy-content">
+                <h5>5. Your Rights</h5>
+                <p>You have the right to request access, modification, or deletion of your personal data. If you wish to opt out of promotional communications, you can do so anytime.</p>
+            </div>
+        </div>
+
+        <div class="policy-item">
+            <i class="fas fa-history"></i>
+            <div class="policy-content">
+                <h5>6. Updates to Privacy Policy</h5>
+                <p>We may update this policy periodically. Any changes will be communicated through our website and email notifications.</p>
+            </div>
+        </div>
+
+        <div class="policy-item">
+            <i class="fas fa-envelope"></i>
+            <div class="policy-content">
+                <h5>For Queries</h5>
+                <p>If you have any questions or concerns about your privacy, contact us at <a href="mailto:support@33crores.com">support@33crores.com</a>.</p>
+            </div>
+        </div>
+
     </div>
 </section>
 
 @endsection
 
 @section('scripts')
+<!-- FontAwesome for icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 @endsection

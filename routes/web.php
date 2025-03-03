@@ -65,11 +65,6 @@ use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
 use App\Http\Controllers\Pandit\PoojaHistoryController;
 
-
-
-
-
-
 use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
 use Twilio\Rest\Client;
@@ -82,8 +77,11 @@ Route::fallback(function () {
 Route::controller(FooterController::class)->group(function() {
     Route::get('/contact-us','contactUs')->name('user.contactUs');
     Route::get('/about-us','aboutUs')->name('user.aboutUs');
-    Route::get('/term-condition','termsAndConditions')->name('user.contactUs');
+    Route::get('/our-story','ourStory')->name('user.ourStory');
+    Route::get('/crores','crores')->name('user.crores');
+    Route::get('/term-condition','termsAndConditions')->name('user.termsAndConditions');
     Route::get('/privacy-data','privacyPolicy')->name('user.privacyData');
+    Route::get('/cancel-return','cancelReturn')->name('user.cancelReturn');
     Route::get('/business-enrolledment','businessEnrollment')->name('user.businessEnrollment');
     Route::get('/religious-service-provider','religiousProvider')->name('user.religiousProvider');
 

@@ -17,6 +17,16 @@ class FooterController extends Controller
         return view('user.about-us');
     }
 
+    public function ourStory()
+    {
+        return view('user.our-story');
+    }
+
+    public function crores()
+    {
+        return view('user.crores');
+    }
+
     public function privacyPolicy()
     {
         return view('user.privacy-policy');
@@ -35,5 +45,10 @@ class FooterController extends Controller
     public function religiousProvider()
     {
         return view('user.religious-provider');
+    }
+
+    public function cancelReturn()
+    {
+        return view('user.cancel-return');
     }
 }
