@@ -4,24 +4,22 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log; // ✅ Add this line
 
 class Kernel extends ConsoleKernel
 {
     /**
      * Define the application's command schedule.
-     *
-     * @param  \Illuminate\Console\Scheduling\Schedule  $schedule
-     * @return void
      */
     protected function schedule(Schedule $schedule)
     {
-        // Schedule subscription status updates
+        // ✅ Subscription status update schedules
         $schedule->command('subscription:update-status-active')->daily();
         $schedule->command('subscription:update-status-expired')->daily();
         $schedule->command('subscription:update-paused-to-active')->daily();
         $schedule->command('subscription:update-status-active-to-pause')->daily();
 
-        // Schedule for sending subscription ending notifications
+        // ✅ Send subscription ending notifications
         $schedule->command('subscriptions:sendEndingNotifications')
                  ->at('18:55')
                  ->runInBackground();
@@ -30,20 +28,23 @@ class Kernel extends ConsoleKernel
                  ->at('18:57')
                  ->runInBackground();
 
-                 Log::info('Scheduler running at: ' . now());
+        // ✅ Log scheduler run (for debugging)
+        Log::info('Scheduler running at: ' . now());
 
-    $schedule->command('subscription:resume-paused')
-             ->dailyAt('00:00')
-             ->onSuccess(fn () => Log::info('subscription:resume-paused executed successfully'))
-             ->onFailure(fn () => Log::error('subscription:resume-paused failed to execute'));
+        // ✅ Resume paused subscriptions daily at midnight
+        $schedule->command('subscription:resume-paused')
+                 ->dailyAt('00:00')
+                 ->onSuccess(function () {
+                     Log::info('subscription:resume-paused executed successfully');
+                 })
+                 ->onFailure(function () {
+                     Log::error('subscription:resume-paused failed to execute');
+                 });
     }
 
     /**
      * Register the commands for the application.
-     *
-     * @return void
      */
-
     protected function commands()
     {
         $this->load(__DIR__.'/Commands');
@@ -51,14 +52,12 @@ class Kernel extends ConsoleKernel
         require base_path('routes/console.php');
     }
 
-    protected $commands = [
-        \App\Console\Commands\ResumePausedSubscriptions::class,
-    ];
-
     /**
-     * The Artisan commands provided by your application.
+     * List of artisan commands for the application.
      *
      * @var array
      */
-
+    protected $commands = [
+        \App\Console\Commands\ResumePausedSubscriptions::class,
+    ];
 }

@@ -94,6 +94,7 @@ Route::post('/verify-otp-user', [OtplessLoginController::class, 'verifyOtp']);
 Route::get('/admin/switcherpage', function () {
     return view('admin.switcherpage');
 });
+
 ## flowerregistration
 Route::controller(FlowerRegistrationController::class)->group(function() {
     Route::get('/flower-registration', 'flowerregistration')->name('flowerregistration');
@@ -104,18 +105,17 @@ Route::controller(FlowerRegistrationController::class)->group(function() {
     Route::post('/flowersaveaddress', 'flowersaveaddress')->name('flowersaveaddress');
     
 });
+
 Route::group(['middleware' => ['auth:users']], function () {
     Route::controller(FlowerRegistrationController::class)->group(function() {
-
-   
     });
 });
+
 ## user login
 Route::controller(userController::class)->group(function() {
     Route::get('/register', 'userregister')->name('user-register');
     Route::post('store', 'store')->name('store');
     Route::get('/', 'userindex')->name('userindex');
-   
 
     Route::get('/pandit-list', 'panditlist')->name('panditlist');
     Route::get('/pandits/{pooja_id}/{pandit_id}',  'list')->name('pandit.list');
@@ -159,7 +159,6 @@ Route::controller(FlowerUserBookingController::class)->group(function() {
         Route::get('/checkout/{product_id}',  'show')->name('checkout');
         Route::post('/booking/flower/subscription', 'processBooking')->name('booking.flower.subscription');
         Route::get('/flower-booking/success/{order_id}',  'showSuccessPage')->name('flower-booking.success');
-
 });
 //user middleware routes
 
