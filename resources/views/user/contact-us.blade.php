@@ -80,13 +80,15 @@
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-6">
-                    <div class="contact-item">
-                        <i class="fa fa-phone-alt"></i>
-                        <h5 class="fw-600">Toll Free Customer Care</h5>
-                        <p>(91)-9776-88888-7</p>
-                    </div>
-                </div>
+               <div class="col-lg-4 col-md-6">
+    <a href="tel:+919776888887" style="text-decoration: none; color: inherit;">
+        <div class="contact-item cursor-pointer">
+            <i class="fa fa-phone-alt"></i>
+            <h5 class="fw-600">Toll Free Customer Care</h5>
+            <p>(91)-9776-88888-7</p>
+        </div>
+    </a>
+</div>
 
                 <div class="col-lg-4 col-md-6">
                     <a href="mailto:contact@33crores.com" style="text-decoration: none; color: inherit;">
