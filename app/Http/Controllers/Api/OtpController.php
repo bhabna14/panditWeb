@@ -183,51 +183,57 @@ class OtpController extends Controller
             ], 500);
         }
     }
+public function loginWithMobile(Request $request)
+{
+    // Validate the input
+    $validator = Validator::make($request->all(), [
+        'mobile_number' => 'required|string',
+        'otp' => 'required|string|size:6',
+    ]);
 
-     public function loginWithMobile(Request $request)
-    {
-        // Validate the input
-        $validator = Validator::make($request->all(), [
-            'mobile_number' => 'required|string',
-            'otp' => 'required|string|size:6',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed.',
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $phoneNumber = $request->input('mobile_number');
-        $otp = $request->input('otp');
-
-        // Static OTP check
-        if ($otp !== '000000') {
-            return response()->json([
-                'message' => 'Invalid OTP.'
-            ], 401);
-        }
-
-        // Find or create user
-        $user = User::where('mobile_number', $phoneNumber)->first();
-
-        if (!$user) {
-            $user = User::create([
-                'userid' => 'USER' . rand(10000, 99999),
-                'mobile_number' => $phoneNumber,
-            ]);
-        }
-
-        // Create token
-        $token = $user->createToken('API Token')->plainTextToken;
-
+    if ($validator->fails()) {
         return response()->json([
-            'message' => 'User authenticated successfully.',
-            'user' => $user,
-            'token' => $token,
-            'token_type' => 'Bearer'
-        ], 200);
+            'message' => 'Validation failed.',
+            'errors' => $validator->errors()
+        ], 422);
     }
+
+    $phoneNumber = $request->input('mobile_number');
+    $otp = $request->input('otp');
+
+    // Static OTP check
+    if ($otp !== '000000') {
+        return response()->json([
+            'message' => 'Invalid OTP.'
+        ], 401);
+    }
+
+    // Find user by mobile number
+    $user = User::where('mobile_number', $phoneNumber)->first();
+
+    if ($user) {
+        // Optional: Update any fields if needed
+        $user->update([
+            'mobile_number' => $phoneNumber, // redundant but you can add more fields to update
+        ]);
+    } else {
+        // Create new user
+        $user = User::create([
+            'userid' => 'USER' . rand(10000, 99999),
+            'mobile_number' => $phoneNumber,
+        ]);
+    }
+
+    // Create token
+    $token = $user->createToken('API Token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'User authenticated successfully.',
+        'user' => $user,
+        'token' => $token,
+        'token_type' => 'Bearer'
+    ], 200);
+}
+
 
 }
