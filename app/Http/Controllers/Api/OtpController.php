@@ -140,16 +140,19 @@ class OtpController extends Controller
             return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
         }
     }
-
-    public function userLogout(Request $request)
+public function userLogout(Request $request)
 {
-    // Revoke the token that was used to authenticate the current request
+    if (!$request->user()) {
+        return response()->json(['message' => 'No authenticated user found.'], 401);
+    }
+
     $request->user()->currentAccessToken()->delete();
 
     return response()->json([
         'message' => 'User logged out successfully.'
     ], 200);
 }
+
 
 public function loginWithMobile(Request $request)
 {
