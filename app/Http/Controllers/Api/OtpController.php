@@ -140,6 +140,7 @@ class OtpController extends Controller
             return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
         }
     }
+
 public function userLogout(Request $request)
 {
     if (!$request->user()) {
@@ -149,6 +150,7 @@ public function userLogout(Request $request)
     $request->user()->currentAccessToken()->delete();
 
     return response()->json([
+        'status' => 200,
         'message' => 'User logged out successfully.'
     ], 200);
 }
