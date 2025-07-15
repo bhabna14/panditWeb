@@ -60,35 +60,33 @@ class LoginController extends Controller
         }
     }
 
+    public function checkOtp(Request $request)
+    {
+        // Validate the input data
+        $request->validate([
+            'otp' => 'required|integer',
+        ]);
 
-   public function checkOtp(Request $request)
-{
-    // Validate the input data
-    $request->validate([
-        'otp' => 'required|integer',
-    ]);
+        // Retrieve the authenticated user
+        $user = PanditLogin::where('otp', $request->otp)->first();
 
-    // Retrieve the authenticated user
-    $user = PanditLogin::where('otp', $request->otp)->first();
+        // Check if the user exists and the OTP matches
+        if ($user) {
+            // Clear the OTP after successful validation
+            $user->otp = null;
+            $user->save();
 
-    // Check if the user exists and the OTP matches
-    if ($user) {
-        // Clear the OTP after successful validation
-        $user->otp = null;
-        $user->save();
+            // Generate a new token
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-        // Generate a new token
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Login successful.',
-            'user' => $user,
-            'access_token' => $token,
-            'token_type' => 'Bearer'
-        ], 200);
-    } else {
-        return response()->json(['message' => 'Invalid OTP.'], 401);
+            return response()->json([
+                'message' => 'Login successful.',
+                'user' => $user,
+                'access_token' => $token,
+                'token_type' => 'Bearer'
+            ], 200);
+        } else {
+            return response()->json(['message' => 'Invalid OTP.'], 401);
+        }
     }
-}
-    
 }

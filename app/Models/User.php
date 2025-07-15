@@ -40,15 +40,16 @@ class User extends Authenticatable
         'expiry' => 'datetime',
     ];
 
-    
     public function bankdetail()
     {
         return $this->hasOne(Bankdetail::class);
     }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'user_id');
     }
+
     public function devices()
     {
         return $this->hasMany(UserDevice::class, 'user_id', 'userid');

@@ -251,14 +251,6 @@ public function orderHistory(Request $request)
     ], 200);
 }
 
-
-
-
-
-
-
-
-
 // public function orderHistory(Request $request)
 // {
 //     // Get the authenticated user
@@ -315,7 +307,8 @@ public function orderHistory(Request $request)
 //         'bookings' => $bookings,
 //     ], 200);
 // }
-public function deletePhoto()
+
+    public function deletePhoto()
     {
         // Authenticate the user
         $user = Auth::guard('sanctum')->user();
@@ -411,6 +404,7 @@ public function deletePhoto()
             'data' => $promonations
         ], 200);
     }
+
     public function manageAddress(Request $request)
     {
         $user = Auth::guard('sanctum')->user();
@@ -483,72 +477,69 @@ public function deletePhoto()
     // }
     
     public function saveAddress(Request $request)
-{
-    try {
-        $user = Auth::guard('api')->user();
+    {
+        try {
+            $user = Auth::guard('api')->user();
 
-        if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            if (!$user) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+
+            $userid = $user->userid;
+
+            // Check if the user already has addresses
+            $hasAddresses = UserAddress::where('user_id', $userid)
+                                        ->where('status', 'active')
+                                        ->exists();
+
+            // Check if the apartment name exists in flower__apartment table
+            $apartment = Apartment::where('apartment_name', $request->apartment_name)->first();
+
+            if (!$apartment) {
+                // Save the new apartment if it doesn't exist
+                $apartment = Apartment::create([
+                    'locality_id' => $request->locality, // Assuming locality is passed as an ID
+                    'apartment_name' => $request->apartment_name,
+                ]);
+            }
+
+            // Create the new address
+            $addressdata = new UserAddress();
+            $addressdata->user_id = $userid;
+            $addressdata->country = 'India';
+            $addressdata->state = $request->state;
+            $addressdata->city = $request->city;
+            $addressdata->pincode = $request->pincode;
+            $addressdata->area = $request->area;
+            $addressdata->address_type = $request->address_type;
+            $addressdata->locality = $request->locality;
+            $addressdata->apartment_name = $request->apartment_name;
+            $addressdata->place_category = $request->place_category;
+            $addressdata->apartment_flat_plot = $request->apartment_flat_plot;
+            $addressdata->landmark = $request->landmark;
+            $addressdata->status = 'active';
+
+            // Set as default if it's the first address
+            if (!$hasAddresses) {
+                $addressdata->default = 1;
+            }
+
+            $addressdata->save();
+
+            return response()->json([
+                'success' => 200,
+                'message' => 'Address created successfully.',
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['error' => 500, 'message' => $e->getMessage()], 500);
         }
-
-        $userid = $user->userid;
-
-        // Check if the user already has addresses
-        $hasAddresses = UserAddress::where('user_id', $userid)
-                                    ->where('status', 'active')
-                                    ->exists();
-
-        // Check if the apartment name exists in flower__apartment table
-        $apartment = Apartment::where('apartment_name', $request->apartment_name)->first();
-
-        if (!$apartment) {
-            // Save the new apartment if it doesn't exist
-            $apartment = Apartment::create([
-                'locality_id' => $request->locality, // Assuming locality is passed as an ID
-                'apartment_name' => $request->apartment_name,
-            ]);
-        }
-
-        // Create the new address
-        $addressdata = new UserAddress();
-        $addressdata->user_id = $userid;
-        $addressdata->country = 'India';
-        $addressdata->state = $request->state;
-        $addressdata->city = $request->city;
-        $addressdata->pincode = $request->pincode;
-        $addressdata->area = $request->area;
-        $addressdata->address_type = $request->address_type;
-        $addressdata->locality = $request->locality;
-        $addressdata->apartment_name = $request->apartment_name;
-        $addressdata->place_category = $request->place_category;
-        $addressdata->apartment_flat_plot = $request->apartment_flat_plot;
-        $addressdata->landmark = $request->landmark;
-        $addressdata->status = 'active';
-
-        // Set as default if it's the first address
-        if (!$hasAddresses) {
-            $addressdata->default = 1;
-        }
-
-        $addressdata->save();
-
-        return response()->json([
-            'success' => 200,
-            'message' => 'Address created successfully.',
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json(['error' => 500, 'message' => $e->getMessage()], 500);
     }
-}
-
-
 
     // public function removeAddress($id)
     // {
     //     // Find the address by ID
     //     $address = UserAddress::find($id);
-
     //     if ($address) {
     //         // Delete the address
     //         $address->delete();
@@ -633,7 +624,7 @@ public function deletePhoto()
             ], 500);
         }
     }
-    
+
     public function combinedSearch(Request $request)
     {
         $searchTerm = $request->input('searchTerm');
@@ -672,6 +663,7 @@ public function deletePhoto()
             'date' => $data
         ]);
     }
+
     public function setDefault($id)
     {
         $address = UserAddress::findOrFail($id);
@@ -686,6 +678,5 @@ public function deletePhoto()
 
         return response()->json(['success' => 'Address set as default successfully.'], 200);
     }
-    
-    
+
 }

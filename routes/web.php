@@ -384,7 +384,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::put('/update-order-assign/{id}', 'updateOrderAssign')->name('admin.updateOrderAssign');
         Route::post('/delete-order-assign/{id}', 'deleteOrderAssign')->name('admin.deleteOrderAssign');
         Route::get('/deactive-order-assign/{rider_id}',  'deactiveOrderAssign')->name('admin.deactiveOrderAssign');
-
     });
 
     Route::controller(AdminController::class)->group(function() {

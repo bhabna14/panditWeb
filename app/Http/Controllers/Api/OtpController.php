@@ -8,11 +8,9 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\UserDevice;
-
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
-
 
 class OtpController extends Controller
 {
@@ -26,7 +24,6 @@ class OtpController extends Controller
         $this->clientId = 'Q9Z0F0NXFT3KG3IHUMA4U4LADMILH1CB';
         $this->clientSecret = '5rjidx7nav2mkrz9jo7f56bmj8zuc1r2';
     }
-
 
     public function sendOtp(Request $request)
     {
@@ -143,6 +140,7 @@ class OtpController extends Controller
             return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
         }
     }
+
     public function userLogout(Request $request)
     {
         $user = Auth::guard('sanctum')->user(); // Get the authenticated user
@@ -185,6 +183,51 @@ class OtpController extends Controller
             ], 500);
         }
     }
-    
-}
 
+     public function loginWithMobile(Request $request)
+    {
+        // Validate the input
+        $validator = Validator::make($request->all(), [
+            'mobile_number' => 'required|string',
+            'otp' => 'required|string|size:6',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $phoneNumber = $request->input('mobile_number');
+        $otp = $request->input('otp');
+
+        // Static OTP check
+        if ($otp !== '000000') {
+            return response()->json([
+                'message' => 'Invalid OTP.'
+            ], 401);
+        }
+
+        // Find or create user
+        $user = User::where('mobile_number', $phoneNumber)->first();
+
+        if (!$user) {
+            $user = User::create([
+                'userid' => 'USER' . rand(10000, 99999),
+                'mobile_number' => $phoneNumber,
+            ]);
+        }
+
+        // Create token
+        $token = $user->createToken('API Token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'User authenticated successfully.',
+            'user' => $user,
+            'token' => $token,
+            'token_type' => 'Bearer'
+        ], 200);
+    }
+
+}
