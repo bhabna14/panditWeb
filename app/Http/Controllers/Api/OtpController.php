@@ -142,47 +142,15 @@ class OtpController extends Controller
     }
 
     public function userLogout(Request $request)
-    {
-        $user = Auth::guard('sanctum')->user(); // Get the authenticated user
-        $deviceId = $request->input('device_id'); // Received from the client
-    
-        try {
-            // Manually find the device entry by user_id and device_id without using the relationship
-            $device = UserDevice::where('user_id', $user->userid)
-                ->where('device_id', $deviceId)
-                ->first();
-    
-            if ($device) {
-                // Delete the device entry
-                $device->delete();
-    
-                // Revoke the token associated with the current request
-                $user->currentAccessToken()->delete();
-    
-                Log::info('User logged out successfully and device removed.', ['user_id' => $user->id, 'device_id' => $deviceId]);
-    
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'User logged out successfully and device removed.'
-                ], 200);
-            } else {
-                Log::warning('Device not found for user.', ['user_id' => $user->id, 'device_id' => $deviceId]);
-    
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Device not found.'
-                ], 404);
-            }
-        } catch (\Exception $e) {
-            Log::error('An error occurred while logging out the user.', ['error' => $e->getMessage()]);
-    
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred while logging out.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+{
+    // Revoke the token that was used to authenticate the current request
+    $request->user()->currentAccessToken()->delete();
+
+    return response()->json([
+        'message' => 'User logged out successfully.'
+    ], 200);
+}
+
 public function loginWithMobile(Request $request)
 {
     // Validate the input
