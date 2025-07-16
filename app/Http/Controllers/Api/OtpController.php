@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
-use GuzzleHttp\Exception\RequestException;
+
 
 class OtpController extends Controller
 {
@@ -250,36 +250,36 @@ class OtpController extends Controller
     //     return response()->json(['message' => 'Invalid or expired OTP.'], 401);
     // }
 
-
+    
 public function sendOtp(Request $request)
 {
     $request->validate([
         'phone' => 'required|string',
     ]);
 
-    $otp = rand(100000, 999999); // 6-digit OTP
+    $otp = rand(100000, 999999);
     $phone = $request->phone;
-    $shortToken = Str::random(6); // Max 15 characters for WhatsApp button
+    $shortToken = Str::random(6); // Optional
 
-    // Update or create user with new OTP
+    // Update or create the user with new OTP
     $user = User::updateOrCreate(
         ['mobile_number' => $phone],
         ['otp' => $otp]
     );
 
     $payload = [
-        "integrated_number" => env('MSG91_WA_NUMBER'),
+        "integrated_number" => "917327096968",
         "content_type" => "template",
         "payload" => [
             "messaging_product" => "whatsapp",
             "type" => "template",
             "template" => [
-                "name" => env('MSG91_WA_TEMPLATE'),
+                "name" => "nitiapp",
                 "language" => [
                     "code" => "en",
                     "policy" => "deterministic"
                 ],
-                "namespace" => env('MSG91_WA_NAMESPACE'),
+                "namespace" => "056c4901_e898_4095_b785_35dfb2274255",
                 "to_and_components" => [
                     [
                         "to" => [$phone],
@@ -291,7 +291,7 @@ public function sendOtp(Request $request)
                             "button_1" => [
                                 "subtype" => "url",
                                 "type" => "text",
-                                "value" => $shortToken // WhatsApp allows max 15 chars
+                                "value" => $shortToken // must be <= 15 chars
                             ]
                         ]
                     ]
@@ -300,40 +300,19 @@ public function sendOtp(Request $request)
         ]
     ];
 
-    try {
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'authkey' => env('MSG91_AUTHKEY'),
-        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
+    $response = Http::withHeaders([
+        'Content-Type' => 'application/json',
+        'authkey' => env('MSG91_AUTHKEY'),
+    ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
 
-        $apiResult = $response->json();
-
-        // Handle 401 Unauthorized (auth key or config issue)
-        if ($response->status() === 401 || ($apiResult['status'] ?? '') === 'fail') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to send OTP',
-                'error' => $apiResult
-            ], 401);
-        }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'OTP sent successfully',
-            'token' => $shortToken, // Optional for WhatsApp button
-            // 'otp' => $otp, // ⚠️ Uncomment only for development/testing
-            'api_response' => $apiResult
-        ]);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Exception occurred while sending OTP',
-            'error' => $e->getMessage()
-        ], 500);
-    }
+    return response()->json([
+        'success' => true,
+        'message' => 'OTP sent successfully',
+        'otp' => $otp, // ❗️Remove in production
+        'token' => $shortToken,
+        'api_response' => $response->json()
+    ]);
 }
-
    public function verifyOtp(Request $request)
 {
     $request->validate([
