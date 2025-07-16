@@ -8,6 +8,8 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Auth;
 use App\Models\PanditLogin;
 use App\Models\PanditDevice;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
@@ -24,50 +26,49 @@ class PanditLoginController extends Controller
         $this->clientSecret = '5rjidx7nav2mkrz9jo7f56bmj8zuc1r2';
     }
 
-    public function sendOtp(Request $request)
-    {
-        $fullPhoneNumber = $request->input('phone');
-        // $countryCode = '+91'; // Assuming the country code is +91
-        // $fullPhoneNumber = $countryCode . $phoneNumber;
+    // public function sendOtp(Request $request)
+    // {
+    //     $fullPhoneNumber = $request->input('phone');
+    //     // $countryCode = '+91'; // Assuming the country code is +91
+    //     // $fullPhoneNumber = $countryCode . $phoneNumber;
     
-        // Log the full phone number for debugging
-        Log::info("Sending OTP to: " . $fullPhoneNumber);
+    //     // Log the full phone number for debugging
+    //     Log::info("Sending OTP to: " . $fullPhoneNumber);
     
-        $client = new Client();
-        $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
+    //     $client = new Client();
+    //     $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
     
-        try {
-            $response = $client->post($url, [
-                'headers' => [
-                    'Content-Type'  => 'application/json',
-                    'clientId'      => $this->clientId,
-                    'clientSecret'  => $this->clientSecret,
-                ],
-                'json' => [
-                    'phoneNumber' => $fullPhoneNumber,
-                ],
-            ]);
+    //     try {
+    //         $response = $client->post($url, [
+    //             'headers' => [
+    //                 'Content-Type'  => 'application/json',
+    //                 'clientId'      => $this->clientId,
+    //                 'clientSecret'  => $this->clientSecret,
+    //             ],
+    //             'json' => [
+    //                 'phoneNumber' => $fullPhoneNumber,
+    //             ],
+    //         ]);
     
-            $body = json_decode($response->getBody(), true);
+    //         $body = json_decode($response->getBody(), true);
     
-            Log::info("Response Body: " . print_r($body, true));
+    //         Log::info("Response Body: " . print_r($body, true));
     
-            if (isset($body['orderId'])) {
-                $orderId = $body['orderId'];
+    //         if (isset($body['orderId'])) {
+    //             $orderId = $body['orderId'];
     
-                session(['otp_order_id' => $orderId]);
-                session(['otp_phone' => $fullPhoneNumber]);
+    //             session(['otp_order_id' => $orderId]);
+    //             session(['otp_phone' => $fullPhoneNumber]);
     
-                return response()->json(['message' => 'OTP sent successfully', 'order_id' => $orderId, 'phone' => $fullPhoneNumber], 200);
-            } else {
-                return response()->json(['message' => 'Failed to send OTP. Please try again.'], 400);
-            }
-        } catch (RequestException $e) {
-            Log::error("Request Exception: " . $e->getMessage());
-            return response()->json(['message' => 'Failed to send OTP due to an error.'], 500);
-        }
-    }
-    
+    //             return response()->json(['message' => 'OTP sent successfully', 'order_id' => $orderId, 'phone' => $fullPhoneNumber], 200);
+    //         } else {
+    //             return response()->json(['message' => 'Failed to send OTP. Please try again.'], 400);
+    //         }
+    //     } catch (RequestException $e) {
+    //         Log::error("Request Exception: " . $e->getMessage());
+    //         return response()->json(['message' => 'Failed to send OTP due to an error.'], 500);
+    //     }
+    // }
     
     // public function verifyOtp(Request $request)
     // {
@@ -127,90 +128,89 @@ class PanditLoginController extends Controller
     //     }
     // }
     
-    public function verifyOtp(Request $request)
-    {
-        $orderId = $request->input('orderId');
-        $otp = $request->input('otp');
-        $phoneNumber = $request->input('phoneNumber');
-        $deviceId = $request->input('device_id'); // Received from the client
-        $platform = $request->input('platform'); // 'web', 'android', or 'ios'
-        $device_model = $request->input('device_model');
+    // public function verifyOtp(Request $request)
+    // {
+    //     $orderId = $request->input('orderId');
+    //     $otp = $request->input('otp');
+    //     $phoneNumber = $request->input('phoneNumber');
+    //     $deviceId = $request->input('device_id'); // Received from the client
+    //     $platform = $request->input('platform'); // 'web', 'android', or 'ios'
+    //     $device_model = $request->input('device_model');
     
-        // Log the inputs for debugging
-        Log::info("Verifying OTP for Order ID: " . $orderId . ", Phone Number: " . $phoneNumber . ", OTP: " . $otp);
+    //     // Log the inputs for debugging
+    //     Log::info("Verifying OTP for Order ID: " . $orderId . ", Phone Number: " . $phoneNumber . ", OTP: " . $otp);
     
-        $client = new Client();
-        $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
+    //     $client = new Client();
+    //     $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
     
-        try {
-            $response = $client->post($url, [
-                'headers' => [
-                    'Content-Type'  => 'application/json',
-                    'clientId'      => $this->clientId,
-                    'clientSecret'  => $this->clientSecret,
-                ],
-                'json' => [
-                    'orderId' => $orderId,
-                    'otp' => $otp,
-                    'phoneNumber' => $phoneNumber,
-                ],
-            ]);
+    //     try {
+    //         $response = $client->post($url, [
+    //             'headers' => [
+    //                 'Content-Type'  => 'application/json',
+    //                 'clientId'      => $this->clientId,
+    //                 'clientSecret'  => $this->clientSecret,
+    //             ],
+    //             'json' => [
+    //                 'orderId' => $orderId,
+    //                 'otp' => $otp,
+    //                 'phoneNumber' => $phoneNumber,
+    //             ],
+    //         ]);
     
-            $body = json_decode($response->getBody(), true);
+    //         $body = json_decode($response->getBody(), true);
     
-            Log::info("Response Body: " . print_r($body, true));
+    //         Log::info("Response Body: " . print_r($body, true));
     
-            if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
-                $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
+    //         if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
+    //             $pandit = PanditLogin::where('mobile_no', $phoneNumber)->first();
     
-                if (!$pandit) {
-                    // Create a new PanditLogin record if it doesn't exist
-                    $pandit = PanditLogin::create([
-                        'pandit_id' => 'PANDIT' . rand(10000, 99999),
-                        'mobile_no' => $phoneNumber,
-                        'order_id' => $orderId,
-                        'status' => 'active', // Set status to active for new record
-                    ]);
-                } else {
-                    // If Pandit already exists, update the status to active
-                    $pandit->status = 'active';
-                    $pandit->save();
-                }
+    //             if (!$pandit) {
+    //                 // Create a new PanditLogin record if it doesn't exist
+    //                 $pandit = PanditLogin::create([
+    //                     'pandit_id' => 'PANDIT' . rand(10000, 99999),
+    //                     'mobile_no' => $phoneNumber,
+    //                     'order_id' => $orderId,
+    //                     'status' => 'active', // Set status to active for new record
+    //                 ]);
+    //             } else {
+    //                 // If Pandit already exists, update the status to active
+    //                 $pandit->status = 'active';
+    //                 $pandit->save();
+    //             }
     
-                // Update or insert device info
-                // $pandit->devices()->updateOrCreate(
-                //     ['pandit_id' => $pandit->pandit_id],
-                //     ['device_id' => $deviceId],
-                //     ['platform' => $platform]
-                // );
+    //             // Update or insert device info
+    //             // $pandit->devices()->updateOrCreate(
+    //             //     ['pandit_id' => $pandit->pandit_id],
+    //             //     ['device_id' => $deviceId],
+    //             //     ['platform' => $platform]
+    //             // );
 
-                $pandit->devices()->create([
-                    'pandit_id' => $pandit->pandit_id,
-                    'device_id' => $deviceId,
-                    'platform' => $platform,
-                    'device_model' => $device_model
-                ]);
+    //             $pandit->devices()->create([
+    //                 'pandit_id' => $pandit->pandit_id,
+    //                 'device_id' => $deviceId,
+    //                 'platform' => $platform,
+    //                 'device_model' => $device_model
+    //             ]);
     
     
-                // Generate token
-                $token = $pandit->createToken('API Token')->plainTextToken;
+    //             // Generate token
+    //             $token = $pandit->createToken('API Token')->plainTextToken;
     
-                return response()->json([
-                    'message' => 'Pandit authenticated successfully.',
-                    'user' => $pandit,
-                    'token' => $token,
-                    'token_type' => 'Bearer'
-                ], 200);
-            } else {
-                $message = $body['message'] ?? 'Invalid OTP';
-                return response()->json(['message' => $message], 400);
-            }
-        } catch (RequestException $e) {
-            Log::error("Request Exception: " . $e->getMessage());
-            return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
-        }
-    }
-    
+    //             return response()->json([
+    //                 'message' => 'Pandit authenticated successfully.',
+    //                 'user' => $pandit,
+    //                 'token' => $token,
+    //                 'token_type' => 'Bearer'
+    //             ], 200);
+    //         } else {
+    //             $message = $body['message'] ?? 'Invalid OTP';
+    //             return response()->json(['message' => $message], 400);
+    //         }
+    //     } catch (RequestException $e) {
+    //         Log::error("Request Exception: " . $e->getMessage());
+    //         return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
+    //     }
+    // }
     
     // public function panditLogout()
     // {
@@ -250,74 +250,184 @@ class PanditLoginController extends Controller
     //     }
     // }
 
-    public function panditLogout(Request $request)
-    {
-        // Get the authenticated pandit
-        $pandit = Auth::guard('sanctum')->user(); 
-        $deviceId = $request->input('device_id'); // Received from the client
+    // public function panditLogout(Request $request)
+    // {
+    //     // Get the authenticated pandit
+    //     $pandit = Auth::guard('sanctum')->user(); 
+    //     $deviceId = $request->input('device_id'); // Received from the client
     
-        // Log the pandit ID and device ID for debugging
-        Log::info("Pandit Logout Attempt:", [
-            'pandit_id' => $pandit->pandit_id, 
-            'device_id' => $deviceId
+    //     // Log the pandit ID and device ID for debugging
+    //     Log::info("Pandit Logout Attempt:", [
+    //         'pandit_id' => $pandit->pandit_id, 
+    //         'device_id' => $deviceId
+    //     ]);
+    
+    //     try {
+    //         // Manually find the device entry by pandit_id and device_id without using the relationship
+    //         $device = PanditDevice::where('pandit_id', $pandit->pandit_id)
+    //             ->where('device_id', $deviceId)
+    //             ->first();
+    
+    //         if ($device) {
+    //             // Log that the device was found
+    //             Log::info("Device found. Proceeding with logout.", [
+    //                 'device_id' => $deviceId
+    //             ]);
+    
+    //             // Delete the device entry
+    //             $device->delete();
+    
+    //             // Revoke all tokens for the pandit (logout from all devices)
+    //             $pandit->tokens()->delete();
+    
+    //             // Log successful logout
+    //             Log::info("Pandit logged out successfully and device removed.", [
+    //                 'pandit_id' => $pandit->pandit_id, 
+    //                 'device_id' => $deviceId
+    //             ]);
+    
+    //             return response()->json([
+    //                 'status' => 200,
+    //                 'message' => 'Pandit logged out successfully and device removed.'
+    //             ], 200);
+    //         } else {
+    //             // Log that the device was not found
+    //             Log::warning("Device not found for logout.", [
+    //                 'pandit_id' => $pandit->pandit_id, 
+    //                 'device_id' => $deviceId
+    //             ]);
+    
+    //             return response()->json([
+    //                 'status' => 404,
+    //                 'message' => 'Device not found.'
+    //             ], 404);
+    //         }
+    //     } catch (\Exception $e) {
+    //         // Log the error details
+    //         Log::error('An error occurred while logging out the pandit.', [
+    //             'pandit_id' => $pandit->pandit_id, 
+    //             'device_id' => $deviceId,
+    //             'error' => $e->getMessage()
+    //         ]);
+    
+    //         return response()->json([
+    //             'status' => 500,
+    //             'message' => 'An error occurred while logging out.',
+    //             'error' => $e->getMessage()
+    //         ], 500);
+    //     }
+    // }
+
+    public function sendOtp(Request $request)
+{
+    $request->validate([
+        'phone' => 'required|string',
+    ]);
+
+    $otp = rand(100000, 999999);
+    $phone = $request->phone;
+    $shortToken = Str::random(6); // WhatsApp max 15 chars
+
+    // Update or create Pandit with new OTP
+    $pandit = PanditLogin::updateOrCreate(
+        ['mobile_no' => $phone],
+        ['otp' => $otp]
+    );
+
+    $payload = [
+        "integrated_number" => env('MSG91_WA_NUMBER'),
+        "content_type" => "template",
+        "payload" => [
+            "messaging_product" => "whatsapp",
+            "type" => "template",
+            "template" => [
+                "name" => env('MSG91_WA_TEMPLATE'),
+                "language" => [
+                    "code" => "en",
+                    "policy" => "deterministic"
+                ],
+                "namespace" => env('MSG91_WA_NAMESPACE'),
+                "to_and_components" => [
+                    [
+                        "to" => [$phone],
+                        "components" => [
+                            "body_1" => [
+                                "type" => "text",
+                                "value" => (string) $otp
+                            ],
+                            "button_1" => [
+                                "subtype" => "url",
+                                "type" => "text",
+                                "value" => $shortToken
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ];
+
+    try {
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'authkey' => env('MSG91_AUTHKEY'),
+        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'OTP sent successfully',
+            'otp' => $otp, // ⚠️ Remove in production
+            'token' => $shortToken,
+            'api_response' => $response->json()
         ]);
-    
-        try {
-            // Manually find the device entry by pandit_id and device_id without using the relationship
-            $device = PanditDevice::where('pandit_id', $pandit->pandit_id)
-                ->where('device_id', $deviceId)
-                ->first();
-    
-            if ($device) {
-                // Log that the device was found
-                Log::info("Device found. Proceeding with logout.", [
-                    'device_id' => $deviceId
-                ]);
-    
-                // Delete the device entry
-                $device->delete();
-    
-                // Revoke all tokens for the pandit (logout from all devices)
-                $pandit->tokens()->delete();
-    
-                // Log successful logout
-                Log::info("Pandit logged out successfully and device removed.", [
-                    'pandit_id' => $pandit->pandit_id, 
-                    'device_id' => $deviceId
-                ]);
-    
-                return response()->json([
-                    'status' => 200,
-                    'message' => 'Pandit logged out successfully and device removed.'
-                ], 200);
-            } else {
-                // Log that the device was not found
-                Log::warning("Device not found for logout.", [
-                    'pandit_id' => $pandit->pandit_id, 
-                    'device_id' => $deviceId
-                ]);
-    
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Device not found.'
-                ], 404);
-            }
-        } catch (\Exception $e) {
-            // Log the error details
-            Log::error('An error occurred while logging out the pandit.', [
-                'pandit_id' => $pandit->pandit_id, 
-                'device_id' => $deviceId,
-                'error' => $e->getMessage()
-            ]);
-    
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred while logging out.',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to send OTP',
+            'error' => $e->getMessage()
+        ], 500);
     }
-    
-    
+}
+public function verifyOtp(Request $request)
+{
+    $request->validate([
+        'mobile_no' => 'required|string',
+        'otp' => 'required|string'
+    ]);
+
+    // Check if Pandit exists
+    $pandit = PanditLogin::where('mobile_no', $request->mobile_no)->first();
+
+    // If not, create new Pandit record with unique pandit_id
+    if (!$pandit) {
+        $pandit = PanditLogin::create([
+            'mobile_no' => $request->mobile_no,
+            'otp' => $request->otp,
+            'pandit_id' => 'PANDIT' . rand(10000, 99999),
+        ]);
+    }
+
+    // Verify OTP
+    if ($pandit->otp !== $request->otp) {
+        return response()->json([
+            'message' => 'Invalid OTP or mobile number.'
+        ], 401);
+    }
+
+    // OTP is valid — clear it
+    $pandit->otp = null;
+    $pandit->save();
+
+    // Generate Sanctum token
+    $token = $pandit->createToken('API Token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Pandit authenticated successfully.',
+        'token' => $token,
+        'token_type' => 'Bearer'
+    ], 200);
+}
+
     
 }
