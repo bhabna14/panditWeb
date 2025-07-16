@@ -39,11 +39,12 @@ use App\Http\Controllers\Notification\PushNotificationController;
 
 
 Route::post('/save-token', [PushNotificationController::class, 'saveToken']);
+
 // Routes for Rider Login
-Route::prefix('rider')->group(function () {
-    Route::post('/send-otp', [RiderLoginController::class, 'sendOtp'])->name('rider.sendOtp');
-    Route::post('/verify-otp', [RiderLoginController::class, 'verifyOtp'])->name('rider.verifyOtp');
-});
+// Route::prefix('rider')->group(function () {
+//     Route::post('/send-otp', [RiderLoginController::class, 'sendOtp'])->name('rider.sendOtp');
+//     Route::post('/verify-otp', [RiderLoginController::class, 'verifyOtp'])->name('rider.verifyOtp');
+// });
 
 Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/details', [RiderLoginController::class, 'getRiderDetails']);

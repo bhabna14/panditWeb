@@ -4,26 +4,27 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use GuzzleHttp\Client;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Twilio\Rest\Client;
 use App\Models\User;
-use App\Models\UserDevice;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use GuzzleHttp\Exception\RequestException;
 
 class OtpController extends Controller
 {
-    private $apiUrl;
-    private $clientId;
-    private $clientSecret;
+    // private $apiUrl;
+    // private $clientId;
+    // private $clientSecret;
 
-    public function __construct()
-    {
-        $this->apiUrl = 'https://auth.otpless.app';
-        $this->clientId = 'Q9Z0F0NXFT3KG3IHUMA4U4LADMILH1CB';
-        $this->clientSecret = '5rjidx7nav2mkrz9jo7f56bmj8zuc1r2';
-    }
+    // public function __construct()
+    // {
+    //     $this->apiUrl = 'https://auth.otpless.app';
+    //     $this->clientId = 'Q9Z0F0NXFT3KG3IHUMA4U4LADMILH1CB';
+    //     $this->clientSecret = '5rjidx7nav2mkrz9jo7f56bmj8zuc1r2';
+    // }
 
     // public function sendOtp(Request $request)
     // {
@@ -207,47 +208,149 @@ class OtpController extends Controller
         ], 200);
     }
 
-    public function sendOTP(Request $request)
-    {
-        $request->validate([
-            'phone' => 'required|string',
-        ]);
+    //  public function sendOtp(Request $request)
+    // {
+    //     $request->validate([
+    //         'phone' => 'required|string',
+    //     ]);
 
-        $otp = rand(100000, 999999);
-        $phone = 'whatsapp:' . $request->phone;
+    //     $otp = rand(100000, 999999);
+    //     $phone = 'whatsapp:' . $request->phone;
 
-        // Store OTP in cache for 5 minutes
-        Cache::put('otp_' . $request->phone, $otp, now()->addMinutes(5));
+    //     // Store OTP in cache for 5 minutes
+    //     Cache::put('otp_' . $request->phone, $otp, now()->addMinutes(5));
 
-        $twilio = new Client(env('TWILIO_SID'), env('TWILIO_AUTH_TOKEN'));
+    //     $twilio = new Client(env('TWILIO_SID'), env('TWILIO_AUTH_TOKEN'));
 
-        $twilio->messages->create(
-            $phone,
-            [
-                'from' => env('TWILIO_WHATSAPP_FROM'),
-                'body' => "Your WhatsApp OTP is: $otp"
+    //     $twilio->messages->create(
+    //         $phone,
+    //         [
+    //             'from' => env('TWILIO_WHATSAPP_FROM'),
+    //             'body' => "Your WhatsApp OTP is: $otp"
+    //         ]
+    //     );
+
+    //     return response()->json(['message' => 'OTP sent successfully.']);
+    // }
+
+    // public function verifyOtp(Request $request)
+    // {
+    //     $request->validate([
+    //         'phone' => 'required|string',
+    //         'otp' => 'required|string',
+    //     ]);
+
+    //     $cachedOtp = Cache::get('otp_' . $request->phone);
+
+    //     if ($cachedOtp && $cachedOtp == $request->otp) {
+    //         Cache::forget('otp_' . $request->phone);
+    //         return response()->json(['message' => 'OTP verified successfully.']);
+    //     }
+
+    //     return response()->json(['message' => 'Invalid or expired OTP.'], 401);
+    // }
+
+    
+public function sendOtp(Request $request)
+{
+    $request->validate([
+        'phone' => 'required|string',
+    ]);
+
+    $otp = rand(100000, 999999);
+    $phone = $request->phone;
+    $shortToken = Str::random(6); // Optional
+
+    // Update or create the user with new OTP
+    $user = User::updateOrCreate(
+        ['mobile_number' => $phone],
+        ['otp' => $otp]
+    );
+
+    $payload = [
+        "integrated_number" => "917327096968",
+        "content_type" => "template",
+        "payload" => [
+            "messaging_product" => "whatsapp",
+            "type" => "template",
+            "template" => [
+                "name" => "nitiapp",
+                "language" => [
+                    "code" => "en",
+                    "policy" => "deterministic"
+                ],
+                "namespace" => "056c4901_e898_4095_b785_35dfb2274255",
+                "to_and_components" => [
+                    [
+                        "to" => [$phone],
+                        "components" => [
+                            "body_1" => [
+                                "type" => "text",
+                                "value" => (string) $otp
+                            ],
+                            "button_1" => [
+                                "subtype" => "url",
+                                "type" => "text",
+                                "value" => $shortToken // must be <= 15 chars
+                            ]
+                        ]
+                    ]
+                ]
             ]
-        );
+        ]
+    ];
 
-        return response()->json(['message' => 'OTP sent successfully.']);
-    }
+    $response = Http::withHeaders([
+        'Content-Type' => 'application/json',
+        'authkey' => env('MSG91_AUTHKEY'),
+    ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
 
-    public function verifyOTP(Request $request)
-    {
-        $request->validate([
-            'phone' => 'required|string',
-            'otp' => 'required|string',
+    return response()->json([
+        'success' => true,
+        'message' => 'OTP sent successfully',
+        'otp' => $otp, // ❗️Remove in production
+        'token' => $shortToken,
+        'api_response' => $response->json()
+    ]);
+}
+   public function verifyOtp(Request $request)
+{
+    $request->validate([
+        'mobile_number' => 'required|string',
+        'otp' => 'required|string'
+    ]);
+
+    // Try to find existing user
+    $user = User::where('mobile_number', $request->mobile_number)->first();
+
+    // If user does not exist, create a new one with a generated userid
+    if (!$user) {
+        $user = User::create([
+            'mobile_number' => $request->mobile_number,
+            'otp' => $request->otp,
+            'pratihari_id' => 'USER' . rand(10000, 99999),
         ]);
-
-        $cachedOtp = Cache::get('otp_' . $request->phone);
-
-        if ($cachedOtp && $cachedOtp == $request->otp) {
-            Cache::forget('otp_' . $request->phone);
-            // Logic for successful login goes here
-            return response()->json(['message' => 'OTP verified successfully.']);
-        }
-
-        return response()->json(['message' => 'Invalid or expired OTP.'], 401);
     }
+
+    // Now check if the OTP is correct
+    if ($user->otp !== $request->otp) {
+        return response()->json([
+            'message' => 'Invalid OTP or mobile number.'
+        ], 401);
+    }
+
+    // OTP is valid — clear it
+    $user->otp = null;
+    $user->save();
+
+    // Generate Sanctum token
+    $token = $user->createToken('API Token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'User authenticated successfully.',
+        'token' => $token,
+        'token_type' => 'Bearer'
+    ], 200);
+}
 
 }
