@@ -25,188 +25,229 @@ class OtpController extends Controller
         $this->clientSecret = '5rjidx7nav2mkrz9jo7f56bmj8zuc1r2';
     }
 
-    public function sendOtp(Request $request)
+    // public function sendOtp(Request $request)
+    // {
+    //     $phoneNumber = $request->input('phone');
+    //     $client = new Client();
+
+    //     $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
+
+    //     try {
+    //         $response = $client->post($url, [
+    //             'headers' => [
+    //                 'Content-Type'  => 'application/json',
+    //                 'clientId'      => $this->clientId,
+    //                 'clientSecret'  => $this->clientSecret,
+    //             ],
+    //             'json' => [
+    //                 'phoneNumber' => $phoneNumber,
+    //             ],
+    //         ]);
+
+    //         $body = json_decode($response->getBody(), true);
+
+    //         Log::info("Response Body: " . print_r($body, true));
+
+    //         if (isset($body['orderId'])) {
+    //             $orderId = $body['orderId'];
+
+    //             session(['otp_order_id' => $orderId]);
+    //             session(['otp_phone' => $phoneNumber]);
+
+    //             return response()->json(['message' => 'OTP sent successfully', 'order_id' => $orderId, 'phone' => $phoneNumber], 200);
+    //         } else {
+    //             return response()->json(['message' => 'Failed to send OTP. Please try again.'], 400);
+    //         }
+    //     } catch (RequestException $e) {
+    //         Log::error("Request Exception: " . $e->getMessage());
+    //         return response()->json(['message' => 'Failed to send OTP due to an error.'], 500);
+    //     }
+    // }
+
+    // public function verifyOtp(Request $request)
+    // {
+    //     // Validate the required fields
+    //     $validator = Validator::make($request->all(), [
+    //         'otp' => 'required|digits:6', // Ensure OTP is exactly 6 digits
+    //         'device_id' => 'required|string', // Validate device_id
+    //         'platform' => 'required|string', // Validate platform
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json(['message' => $validator->errors()->first()], 422);
+    //     }
+
+    //     $orderId = $request->input('orderId');
+    //     $otp = $request->input('otp');
+    //     $phoneNumber = $request->input('phoneNumber');
+    //     $deviceId = $request->input('device_id');
+    //     $platform = $request->input('platform');
+    //     $device_model = $request->input('device_model');
+
+    //     $client = new Client();
+    //     $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
+
+    //     try {
+    //         $response = $client->post($url, [
+    //             'headers' => [
+    //                 'Content-Type'  => 'application/json',
+    //                 'clientId'      => $this->clientId,
+    //                 'clientSecret'  => $this->clientSecret,
+    //             ],
+    //             'json' => [
+    //                 'orderId' => $orderId,
+    //                 'otp' => $otp,
+    //                 'phoneNumber' => $phoneNumber,
+    //             ],
+    //         ]);
+
+    //         $body = json_decode($response->getBody(), true);
+    //         Log::info("Response Body: " . print_r($body, true));
+
+    //         if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
+    //             $user = User::where('mobile_number', $phoneNumber)->first();
+
+    //             if (!$user) {
+    //                 $user = User::create([
+    //                     'userid' => 'USER' . rand(10000, 99999),
+    //                     'mobile_number' => $phoneNumber,
+    //                     'order_id' => $orderId,
+    //                 ]);
+    //             }
+
+    //             $user->devices()->create([
+    //                 'user_id' => $user->userid,
+    //                 'device_id' => $deviceId,
+    //                 'platform' => $platform,
+    //                 'device_model' => $device_model
+    //             ]);
+    
+
+    //             $token = $user->createToken('API Token')->plainTextToken;
+
+    //             return response()->json([
+    //                 'message' => 'User authenticated successfully.',
+    //                 'user' => $user,
+    //                 'token' => $token,
+    //                 'token_type' => 'Bearer'
+    //             ], 200);
+    //         } else {
+    //             $message = $body['message'] ?? 'Invalid OTP';
+    //             return response()->json(['message' => $message], 400);
+    //         }
+    //     } catch (RequestException $e) {
+    //         Log::error("Request Exception: " . $e->getMessage());
+    //         return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
+    //     }
+    // }
+
+    public function userLogout(Request $request)
     {
-        $phoneNumber = $request->input('phone');
-        $client = new Client();
-
-        $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
-
-        try {
-            $response = $client->post($url, [
-                'headers' => [
-                    'Content-Type'  => 'application/json',
-                    'clientId'      => $this->clientId,
-                    'clientSecret'  => $this->clientSecret,
-                ],
-                'json' => [
-                    'phoneNumber' => $phoneNumber,
-                ],
-            ]);
-
-            $body = json_decode($response->getBody(), true);
-
-            Log::info("Response Body: " . print_r($body, true));
-
-            if (isset($body['orderId'])) {
-                $orderId = $body['orderId'];
-
-                session(['otp_order_id' => $orderId]);
-                session(['otp_phone' => $phoneNumber]);
-
-                return response()->json(['message' => 'OTP sent successfully', 'order_id' => $orderId, 'phone' => $phoneNumber], 200);
-            } else {
-                return response()->json(['message' => 'Failed to send OTP. Please try again.'], 400);
-            }
-        } catch (RequestException $e) {
-            Log::error("Request Exception: " . $e->getMessage());
-            return response()->json(['message' => 'Failed to send OTP due to an error.'], 500);
+        if (!$request->user()) {
+            return response()->json(['message' => 'No authenticated user found.'], 401);
         }
+
+        $request->user()->currentAccessToken()->delete();
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'User logged out successfully.'
+        ], 200);
     }
 
-    public function verifyOtp(Request $request)
+    public function loginWithMobile(Request $request)
     {
-        // Validate the required fields
+        // Validate the input
         $validator = Validator::make($request->all(), [
-            'otp' => 'required|digits:6', // Ensure OTP is exactly 6 digits
-            'device_id' => 'required|string', // Validate device_id
-            'platform' => 'required|string', // Validate platform
+            'mobile_number' => 'required|string',
+            'otp' => 'required|string|size:6',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()->first()], 422);
+            return response()->json([
+                'message' => 'Validation failed.',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
-        $orderId = $request->input('orderId');
+        $phoneNumber = $request->input('mobile_number');
         $otp = $request->input('otp');
-        $phoneNumber = $request->input('phoneNumber');
-        $deviceId = $request->input('device_id');
-        $platform = $request->input('platform');
-        $device_model = $request->input('device_model');
 
-        $client = new Client();
-        $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/verify';
-
-        try {
-            $response = $client->post($url, [
-                'headers' => [
-                    'Content-Type'  => 'application/json',
-                    'clientId'      => $this->clientId,
-                    'clientSecret'  => $this->clientSecret,
-                ],
-                'json' => [
-                    'orderId' => $orderId,
-                    'otp' => $otp,
-                    'phoneNumber' => $phoneNumber,
-                ],
-            ]);
-
-            $body = json_decode($response->getBody(), true);
-            Log::info("Response Body: " . print_r($body, true));
-
-            if (isset($body['isOTPVerified']) && $body['isOTPVerified']) {
-                $user = User::where('mobile_number', $phoneNumber)->first();
-
-                if (!$user) {
-                    $user = User::create([
-                        'userid' => 'USER' . rand(10000, 99999),
-                        'mobile_number' => $phoneNumber,
-                        'order_id' => $orderId,
-                    ]);
-                }
-
-                $user->devices()->create([
-                    'user_id' => $user->userid,
-                    'device_id' => $deviceId,
-                    'platform' => $platform,
-                    'device_model' => $device_model
-                ]);
-    
-
-                $token = $user->createToken('API Token')->plainTextToken;
-
-                return response()->json([
-                    'message' => 'User authenticated successfully.',
-                    'user' => $user,
-                    'token' => $token,
-                    'token_type' => 'Bearer'
-                ], 200);
-            } else {
-                $message = $body['message'] ?? 'Invalid OTP';
-                return response()->json(['message' => $message], 400);
-            }
-        } catch (RequestException $e) {
-            Log::error("Request Exception: " . $e->getMessage());
-            return response()->json(['message' => 'Failed to verify OTP due to an error.'], 500);
+        // Static OTP check
+        if ($otp !== '000000') {
+            return response()->json([
+                'message' => 'Invalid OTP.'
+            ], 401);
         }
-    }
 
-public function userLogout(Request $request)
-{
-    if (!$request->user()) {
-        return response()->json(['message' => 'No authenticated user found.'], 401);
-    }
+        // Find user by mobile number
+        $user = User::where('mobile_number', $phoneNumber)->first();
 
-    $request->user()->currentAccessToken()->delete();
+        if ($user) {
+            // Optional: Update any fields if needed
+            $user->update([
+                'mobile_number' => $phoneNumber, // redundant but you can add more fields to update
+            ]);
+        } else {
+            // Create new user
+            $user = User::create([
+                'userid' => 'USER' . rand(10000, 99999),
+                'mobile_number' => $phoneNumber,
+            ]);
+        }
 
-    return response()->json([
-        'status' => 200,
-        'message' => 'User logged out successfully.'
-    ], 200);
-}
+        // Create token
+        $token = $user->createToken('API Token')->plainTextToken;
 
-
-public function loginWithMobile(Request $request)
-{
-    // Validate the input
-    $validator = Validator::make($request->all(), [
-        'mobile_number' => 'required|string',
-        'otp' => 'required|string|size:6',
-    ]);
-
-    if ($validator->fails()) {
         return response()->json([
-            'message' => 'Validation failed.',
-            'errors' => $validator->errors()
-        ], 422);
+            'message' => 'User authenticated successfully.',
+            'user' => $user,
+            'token' => $token,
+            'token_type' => 'Bearer'
+        ], 200);
     }
 
-    $phoneNumber = $request->input('mobile_number');
-    $otp = $request->input('otp');
-
-    // Static OTP check
-    if ($otp !== '000000') {
-        return response()->json([
-            'message' => 'Invalid OTP.'
-        ], 401);
-    }
-
-    // Find user by mobile number
-    $user = User::where('mobile_number', $phoneNumber)->first();
-
-    if ($user) {
-        // Optional: Update any fields if needed
-        $user->update([
-            'mobile_number' => $phoneNumber, // redundant but you can add more fields to update
+    public function sendOTP(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
         ]);
-    } else {
-        // Create new user
-        $user = User::create([
-            'userid' => 'USER' . rand(10000, 99999),
-            'mobile_number' => $phoneNumber,
-        ]);
+
+        $otp = rand(100000, 999999);
+        $phone = 'whatsapp:' . $request->phone;
+
+        // Store OTP in cache for 5 minutes
+        Cache::put('otp_' . $request->phone, $otp, now()->addMinutes(5));
+
+        $twilio = new Client(env('TWILIO_SID'), env('TWILIO_AUTH_TOKEN'));
+
+        $twilio->messages->create(
+            $phone,
+            [
+                'from' => env('TWILIO_WHATSAPP_FROM'),
+                'body' => "Your WhatsApp OTP is: $otp"
+            ]
+        );
+
+        return response()->json(['message' => 'OTP sent successfully.']);
     }
 
-    // Create token
-    $token = $user->createToken('API Token')->plainTextToken;
+    public function verifyOTP(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+            'otp' => 'required|string',
+        ]);
 
-    return response()->json([
-        'message' => 'User authenticated successfully.',
-        'user' => $user,
-        'token' => $token,
-        'token_type' => 'Bearer'
-    ], 200);
-}
+        $cachedOtp = Cache::get('otp_' . $request->phone);
 
+        if ($cachedOtp && $cachedOtp == $request->otp) {
+            Cache::forget('otp_' . $request->phone);
+            // Logic for successful login goes here
+            return response()->json(['message' => 'OTP verified successfully.']);
+        }
+
+        return response()->json(['message' => 'Invalid or expired OTP.'], 401);
+    }
 
 }
