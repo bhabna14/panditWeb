@@ -349,41 +349,41 @@ class OtpController extends Controller
         }
     }
 
-   public function verifyOtp(Request $request)
-{
-    $request->validate([
-        'phoneNo' => 'required|string',
-        'otp' => 'required|string'
-    ]);
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'phoneNumber' => 'required|string',
+            'otp' => 'required|string'
+        ]);
 
-    // Find user by phone number
-    $user = User::where('mobile_number', $request->phoneNo)->first();
+        // Find user by phone number
+        $user = User::where('mobile_number', $request->phoneNumber)->first();
 
-    if (!$user) {
+        if (!$user) {
+            return response()->json([
+                'message' => 'Mobile number not found. Please request OTP first.'
+            ], 404);
+        }
+
+        // Check OTP match
+        if ($user->otp !== $request->otp) {
+            return response()->json([
+                'message' => 'Invalid OTP.'
+            ], 401);
+        }
+
+        // OTP is valid — clear it
+        $user->otp = null;
+        $user->save();
+
+        // Generate Sanctum token
+        $token = $user->createToken('API Token')->plainTextToken;
+
         return response()->json([
-            'message' => 'Mobile number not found. Please request OTP first.'
-        ], 404);
+            'message' => 'User authenticated successfully.',
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'user' => $user
+        ], 200);
     }
-
-    // Check OTP match
-    if ($user->otp !== $request->otp) {
-        return response()->json([
-            'message' => 'Invalid OTP.'
-        ], 401);
-    }
-
-    // OTP is valid — clear it
-    $user->otp = null;
-    $user->save();
-
-    // Generate Sanctum token
-    $token = $user->createToken('API Token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'User authenticated successfully.',
-        'token' => $token,
-        'token_type' => 'Bearer',
-        'user' => $user
-    ], 200);
-}
 }
