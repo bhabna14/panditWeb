@@ -422,17 +422,17 @@ class PanditLoginController extends Controller
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string',
+            'phoneNumber' => 'required|string',
             'otp' => 'required|string'
         ]);
 
         // Check if Pandit exists
-        $pandit = PanditLogin::where('mobile_no', $request->phone)->first();
+        $pandit = PanditLogin::where('mobile_no', $request->phoneNumber)->first();
 
         // If not, create new Pandit record with unique pandit_id
         if (!$pandit) {
             $pandit = PanditLogin::create([
-                'mobile_no' => $request->phone,
+                'mobile_no' => $request->phoneNumber,
                 'otp' => $request->otp,
                 'pandit_id' => 'PANDIT' . rand(10000, 99999),
             ]);
