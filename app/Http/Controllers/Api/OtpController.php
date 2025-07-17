@@ -248,107 +248,106 @@ class OtpController extends Controller
     //     return response()->json(['message' => 'Invalid or expired OTP.'], 401);
     // }
 
-public function sendOtp(Request $request)
-{
-    $request->validate([
-        'phone' => 'required|string',
-    ]);
-
-    $otp = rand(100000, 999999);
-    $phone = $request->phone;
-    $shortToken = Str::random(6); // max 15 characters
-
-    // Check if pandit already exists
-    $pandit = User::where('mobile_number', $phone)->first();
-
-    if ($pandit) {
-        // ✅ Existing: update OTP
-        $pandit->otp = $otp;
-        $pandit->save();
-        $status = 'existing';
-    } else {
-        // ✅ New: create with new pandit_id
-        $pandit = User::create([
-            'mobile_number' => $phone,
-            'otp' => $otp,
-            'userid' => 'USER' . rand(10000, 99999)
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
         ]);
-        $status = 'new';
-    }
 
-    // ✅ Corrected MSG91 WhatsApp template payload
-    $payload = [
-        "integrated_number" => env('MSG91_WA_NUMBER'),
-        "content_type" => "template",
-        "payload" => [
-            "messaging_product" => "whatsapp",
-            "to" => $phone, // ✅ must be here
-            "type" => "template",
-            "template" => [
-                "name" => env('MSG91_WA_TEMPLATE'),
-                "language" => [
-                    "code" => "en",
-                    "policy" => "deterministic"
-                ],
-                "namespace" => env('MSG91_WA_NAMESPACE'),
-                "components" => [
-                    [
-                        "type" => "body",
-                        "parameters" => [
-                            [
-                                "type" => "text",
-                                "text" => (string) $otp
-                            ]
-                        ]
+        $otp = rand(100000, 999999);
+        $phone = $request->phone;
+        $shortToken = Str::random(6); // max 15 characters
+
+        // Check if pandit already exists
+        $pandit = User::where('mobile_number', $phone)->first();
+
+        if ($pandit) {
+            // ✅ Existing: update OTP
+            $pandit->otp = $otp;
+            $pandit->save();
+            $status = 'existing';
+        } else {
+            // ✅ New: create with new pandit_id
+            $pandit = User::create([
+                'mobile_number' => $phone,
+                'otp' => $otp,
+                'userid' => 'USER' . rand(10000, 99999)
+            ]);
+            $status = 'new';
+        }
+
+        // ✅ Corrected MSG91 WhatsApp template payload
+        $payload = [
+            "integrated_number" => env('MSG91_WA_NUMBER'),
+            "content_type" => "template",
+            "payload" => [
+                "messaging_product" => "whatsapp",
+                "to" => $phone, // ✅ must be here
+                "type" => "template",
+                "template" => [
+                    "name" => env('MSG91_WA_TEMPLATE'),
+                    "language" => [
+                        "code" => "en",
+                        "policy" => "deterministic"
                     ],
-                    [
-                        "type" => "button",
-                        "sub_type" => "url",
-                        "index" => 0,
-                        "parameters" => [
-                            [
-                                "type" => "text",
-                                "text" => $shortToken
+                    "namespace" => env('MSG91_WA_NAMESPACE'),
+                    "components" => [
+                        [
+                            "type" => "body",
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => (string) $otp
+                                ]
+                            ]
+                        ],
+                        [
+                            "type" => "button",
+                            "sub_type" => "url",
+                            "index" => 0,
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => $shortToken
+                                ]
                             ]
                         ]
                     ]
                 ]
             ]
-        ]
-    ];
+        ];
 
-    try {
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'authkey' => env('MSG91_AUTHKEY'),
-        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'authkey' => env('MSG91_AUTHKEY'),
+            ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
 
-        $result = $response->json();
+            $result = $response->json();
 
-        if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+            if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
+                    'error' => $result
+                ], 401);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP sent successfully',
+                'user_status' => $status,
+                'token' => $shortToken,
+                'api_response' => $result
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
-                'error' => $result
-            ], 401);
+                'message' => 'Failed to send OTP',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'message' => 'OTP sent successfully',
-            'user_status' => $status,
-            'token' => $shortToken,
-            'api_response' => $result
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to send OTP',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
-
 
     public function verifyOtp(Request $request)
     {
@@ -358,7 +357,7 @@ public function sendOtp(Request $request)
         ]);
 
         // Try to find existing user
-        $user = User::where('mobile_number', $request->mobile_number)->first();
+        $user = User::where('mobile_number', $request->phoneNumber)->first();
 
         // If user does not exist, create a new one with a generated userid
         if (!$user) {
