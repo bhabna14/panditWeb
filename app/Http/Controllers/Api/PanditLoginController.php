@@ -480,6 +480,7 @@ class PanditLoginController extends Controller
         ], 200);
     } catch (\Exception $e) {
         return response()->json([
+            'status' => 200,
             'success' => false,
             'message' => 'Logout failed.',
             'error' => $e->getMessage()
