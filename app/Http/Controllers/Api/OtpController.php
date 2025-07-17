@@ -349,44 +349,41 @@ class OtpController extends Controller
         }
     }
 
-    public function verifyOtp(Request $request)
-    {
-        $request->validate([
-            'phoneNumber' => 'required|string',
-            'otp' => 'required|string'
-        ]);
+   public function verifyOtp(Request $request)
+{
+    $request->validate([
+        'phoneNo' => 'required|string',
+        'otp' => 'required|string'
+    ]);
 
-        // Try to find existing user
-        $user = User::where('mobile_number', $request->phoneNumber)->first();
+    // Find user by phone number
+    $user = User::where('mobile_number', $request->phoneNo)->first();
 
-        // If user does not exist, create a new one with a generated userid
-        if (!$user) {
-            $user = User::create([
-                'mobile_number' => $request->phoneNumber,
-                'otp' => $request->otp,
-                'pratihari_id' => 'USER' . rand(10000, 99999),
-            ]);
-        }
-
-        // Now check if the OTP is correct
-        if ($user->otp !== $request->otp) {
-            return response()->json([
-                'message' => 'Invalid OTP or mobile number.'
-            ], 401);
-        }
-
-        // OTP is valid — clear it
-        $user->otp = null;
-        $user->save();
-
-        // Generate Sanctum token
-        $token = $user->createToken('API Token')->plainTextToken;
-
+    if (!$user) {
         return response()->json([
-            'message' => 'User authenticated successfully.',
-            'token' => $token,
-            'token_type' => 'Bearer'
-        ], 200);
+            'message' => 'Mobile number not found. Please request OTP first.'
+        ], 404);
     }
 
+    // Check OTP match
+    if ($user->otp !== $request->otp) {
+        return response()->json([
+            'message' => 'Invalid OTP.'
+        ], 401);
+    }
+
+    // OTP is valid — clear it
+    $user->otp = null;
+    $user->save();
+
+    // Generate Sanctum token
+    $token = $user->createToken('API Token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'User authenticated successfully.',
+        'token' => $token,
+        'token_type' => 'Bearer',
+        'user' => $user
+    ], 200);
+}
 }
