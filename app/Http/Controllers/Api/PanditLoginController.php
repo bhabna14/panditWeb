@@ -475,12 +475,12 @@ class PanditLoginController extends Controller
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
+            'status' => 200,
             'success' => true,
             'message' => 'Logout successful.',
         ], 200);
     } catch (\Exception $e) {
         return response()->json([
-            'status' => 200,
             'success' => false,
             'message' => 'Logout failed.',
             'error' => $e->getMessage()
