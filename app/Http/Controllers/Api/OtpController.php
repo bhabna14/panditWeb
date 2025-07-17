@@ -259,7 +259,7 @@ class OtpController extends Controller
         $shortToken = Str::random(6); // WhatsApp buttons max 15 characters
 
         // Check if pandit already exists
-        $pandit = User::where('mobile_no', $phone)->first();
+        $pandit = User::where('mobile_number', $phone)->first();
 
         if ($pandit) {
             // ✅ Existing: update OTP
@@ -269,7 +269,7 @@ class OtpController extends Controller
         } else {
             // ✅ New: create with new pandit_id
             $pandit = User::create([
-                'mobile_no' => $phone,
+                'mobile_number' => $phone,
                 'otp' => $otp,
                 'userid' => 'USER' . rand(10000, 99999)
             ]);
@@ -346,7 +346,7 @@ class OtpController extends Controller
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'phone' => 'required|string',
+            'phoneNumber' => 'required|string',
             'otp' => 'required|string'
         ]);
 
@@ -356,7 +356,7 @@ class OtpController extends Controller
         // If user does not exist, create a new one with a generated userid
         if (!$user) {
             $user = User::create([
-                'mobile_number' => $request->phone,
+                'mobile_number' => $request->phoneNumber,
                 'otp' => $request->otp,
                 'pratihari_id' => 'USER' . rand(10000, 99999),
             ]);
