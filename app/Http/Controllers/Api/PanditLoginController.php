@@ -321,11 +321,11 @@ class PanditLoginController extends Controller
     public function sendOtp(Request $request)
     {
         $request->validate([
-            'mobile_no' => 'required|string',
+            'phone' => 'required|string',
         ]);
 
         $otp = rand(100000, 999999);
-        $mobile_no = $request->mobile_no;
+        $mobile_no = $request->phone;
         $shortToken = Str::random(6); // WhatsApp button value limit: 15 characters
 
         // Check if mobile number exists
@@ -415,17 +415,17 @@ class PanditLoginController extends Controller
     public function verifyOtp(Request $request)
     {
         $request->validate([
-            'mobile_no' => 'required|string',
+            'phone' => 'required|string',
             'otp' => 'required|string'
         ]);
 
         // Check if Pandit exists
-        $pandit = PanditLogin::where('mobile_no', $request->mobile_no)->first();
+        $pandit = PanditLogin::where('mobile_no', $request->phone)->first();
 
         // If not, create new Pandit record with unique pandit_id
         if (!$pandit) {
             $pandit = PanditLogin::create([
-                'mobile_no' => $request->mobile_no,
+                'mobile_no' => $request->phone,
                 'otp' => $request->otp,
                 'pandit_id' => 'PANDIT' . rand(10000, 99999),
             ]);
