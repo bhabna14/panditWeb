@@ -122,8 +122,6 @@ class OtpController extends Controller
     //                 'platform' => $platform,
     //                 'device_model' => $device_model
     //             ]);
-    
-
     //             $token = $user->createToken('API Token')->plainTextToken;
 
     //             return response()->json([
@@ -250,107 +248,139 @@ class OtpController extends Controller
     //     return response()->json(['message' => 'Invalid or expired OTP.'], 401);
     // }
 
-    
-public function sendOtp(Request $request)
-{
-    $request->validate([
-        'phone' => 'required|string',
-    ]);
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+        ]);
 
-    $otp = rand(100000, 999999);
-    $phone = $request->phone;
-    $shortToken = Str::random(6); // Optional
+        $otp = rand(100000, 999999);
+        $phone = $request->phone;
+        $shortToken = Str::random(6); // WhatsApp buttons max 15 characters
 
-    // Update or create the user with new OTP
-    $user = User::updateOrCreate(
-        ['mobile_number' => $phone],
-        ['otp' => $otp]
-    );
+        // Check if pandit already exists
+        $pandit = User::where('mobile_no', $phone)->first();
 
-    $payload = [
-        "integrated_number" => "917327096968",
-        "content_type" => "template",
-        "payload" => [
-            "messaging_product" => "whatsapp",
-            "type" => "template",
-            "template" => [
-                "name" => "nitiapp",
-                "language" => [
-                    "code" => "en",
-                    "policy" => "deterministic"
-                ],
-                "namespace" => "056c4901_e898_4095_b785_35dfb2274255",
-                "to_and_components" => [
-                    [
-                        "to" => [$phone],
-                        "components" => [
-                            "body_1" => [
-                                "type" => "text",
-                                "value" => (string) $otp
-                            ],
-                            "button_1" => [
-                                "subtype" => "url",
-                                "type" => "text",
-                                "value" => $shortToken // must be <= 15 chars
+        if ($pandit) {
+            // ✅ Existing: update OTP
+            $pandit->otp = $otp;
+            $pandit->save();
+            $status = 'existing';
+        } else {
+            // ✅ New: create with new pandit_id
+            $pandit = User::create([
+                'mobile_no' => $phone,
+                'otp' => $otp,
+                'userid' => 'USER' . rand(10000, 99999)
+            ]);
+            $status = 'new';
+        }
+
+        // WhatsApp payload
+        $payload = [
+            "integrated_number" => env('MSG91_WA_NUMBER'),
+            "content_type" => "template",
+            "payload" => [
+                "messaging_product" => "whatsapp",
+                "type" => "template",
+                "template" => [
+                    "name" => env('MSG91_WA_TEMPLATE'),
+                    "language" => [
+                        "code" => "en",
+                        "policy" => "deterministic"
+                    ],
+                    "namespace" => env('MSG91_WA_NAMESPACE'),
+                    "to_and_components" => [
+                        [
+                            "to" => [$phone],
+                            "components" => [
+                                "body_1" => [
+                                    "type" => "text",
+                                    "value" => (string) $otp
+                                ],
+                                "button_1" => [
+                                    "subtype" => "url",
+                                    "type" => "text",
+                                    "value" => $shortToken
+                                ]
                             ]
                         ]
                     ]
                 ]
             ]
-        ]
-    ];
+        ];
 
-    $response = Http::withHeaders([
-        'Content-Type' => 'application/json',
-        'authkey' => env('MSG91_AUTHKEY'),
-    ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/bulk/', $payload);
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'authkey' => env('MSG91_AUTHKEY'),
+            ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
 
-    return response()->json([
-        'success' => true,
-        'message' => 'OTP sent successfully',
-        'otp' => $otp, // ❗️Remove in production
-        'token' => $shortToken,
-        'api_response' => $response->json()
-    ]);
-}
-   public function verifyOtp(Request $request)
-{
-    $request->validate([
-        'mobile_number' => 'required|string',
-        'otp' => 'required|string'
-    ]);
+            $result = $response->json();
 
-    // Try to find existing user
-    $user = User::where('mobile_number', $request->mobile_number)->first();
+            if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
+                    'error' => $result
+                ], 401);
+            }
 
-    // If user does not exist, create a new one with a generated userid
-    if (!$user) {
-        $user = User::create([
-            'mobile_number' => $request->mobile_number,
-            'otp' => $request->otp,
-            'pratihari_id' => 'USER' . rand(10000, 99999),
+            return response()->json([
+                'success' => true,
+                'message' => 'OTP sent successfully',
+                'user_status' => $status, // 'new' or 'existing'
+                // 'otp' => $otp, // Uncomment for testing only
+                'token' => $shortToken,
+                'api_response' => $result
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send OTP',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+            'otp' => 'required|string'
         ]);
-    }
 
-    // Now check if the OTP is correct
-    if ($user->otp !== $request->otp) {
+        // Try to find existing user
+        $user = User::where('mobile_number', $request->mobile_number)->first();
+
+        // If user does not exist, create a new one with a generated userid
+        if (!$user) {
+            $user = User::create([
+                'mobile_number' => $request->phone,
+                'otp' => $request->otp,
+                'pratihari_id' => 'USER' . rand(10000, 99999),
+            ]);
+        }
+
+        // Now check if the OTP is correct
+        if ($user->otp !== $request->otp) {
+            return response()->json([
+                'message' => 'Invalid OTP or mobile number.'
+            ], 401);
+        }
+
+        // OTP is valid — clear it
+        $user->otp = null;
+        $user->save();
+
+        // Generate Sanctum token
+        $token = $user->createToken('API Token')->plainTextToken;
+
         return response()->json([
-            'message' => 'Invalid OTP or mobile number.'
-        ], 401);
+            'message' => 'User authenticated successfully.',
+            'token' => $token,
+            'token_type' => 'Bearer'
+        ], 200);
     }
-
-    // OTP is valid — clear it
-    $user->otp = null;
-    $user->save();
-
-    // Generate Sanctum token
-    $token = $user->createToken('API Token')->plainTextToken;
-
-    return response()->json([
-        'message' => 'User authenticated successfully.',
-        'token' => $token,
-        'token_type' => 'Bearer'
-    ], 200);
-}
 
 }
