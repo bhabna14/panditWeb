@@ -11,31 +11,16 @@ use Illuminate\Support\Facades\Log;
 
 class ResumePausedSubscriptions extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'subscription:resume-paused';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Automatically resume paused subscriptions when the resume date is reached';
 
-    /**
-     * Execute the console command.
-     */
     public function handle()
     {
         Log::info('subscription:resume-paused command started.');
 
-        // Get today's date
-        $today = Carbon::now()->format('Y-m-d');
+        $today = Carbon::today();
 
-        // Fetch logs with resume date matching today
+        // Fetch logs with resume date = today and linked to paused subscriptions
         $logs = SubscriptionPauseResumeLog::whereDate('resume_date', $today)
             ->whereHas('subscription', function ($query) {
                 $query->where('status', 'paused');
@@ -45,6 +30,7 @@ class ResumePausedSubscriptions extends Command
 
         if ($logs->isEmpty()) {
             Log::info('No paused subscriptions to resume today.');
+            $this->info('No paused subscriptions to resume today.');
             return Command::SUCCESS;
         }
 
@@ -57,7 +43,7 @@ class ResumePausedSubscriptions extends Command
             }
 
             try {
-                DB::beginTransaction(); // Start transaction
+                DB::beginTransaction();
 
                 // Parse dates
                 $pauseStartDate = Carbon::parse($subscription->pause_start_date);
@@ -67,9 +53,10 @@ class ResumePausedSubscriptions extends Command
                     ? Carbon::parse($subscription->new_date)
                     : Carbon::parse($subscription->end_date);
 
-                // Calculate paused days and remaining paused days
+                // Calculate days paused
                 $actualPausedDays = $resumeDate->diffInDays($pauseStartDate);
                 $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1;
+
                 $remainingPausedDays = $totalPausedDays - $actualPausedDays;
 
                 // Adjust end date
@@ -85,16 +72,15 @@ class ResumePausedSubscriptions extends Command
                     'new_date' => $newEndDate,
                 ]);
 
-                // Log success
                 Log::info('Subscription resumed successfully', [
                     'subscription_id' => $subscription->subscription_id,
                     'order_id' => $subscription->order_id,
                     'new_end_date' => $newEndDate->toDateString(),
                 ]);
 
-                DB::commit(); // Commit transaction
+                DB::commit();
             } catch (\Exception $e) {
-                DB::rollBack(); // Rollback transaction on error
+                DB::rollBack();
 
                 Log::error('Error processing subscription resume', [
                     'log_id' => $log->id,

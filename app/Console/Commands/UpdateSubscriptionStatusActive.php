@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 
 class UpdateSubscriptionStatus extends Command
 {
+
     protected $signature = 'subscription:update-status-active';
     protected $description = 'Update subscription status to active if the start date is today';
 
@@ -18,8 +19,8 @@ class UpdateSubscriptionStatus extends Command
         Log::info('Running subscription:update-status-active for date: ' . $today);
 
         $subscriptions = Subscription::whereDate('start_date', $today)
-                                      ->where('status', 'pending')
-                                      ->get();
+        ->where('status', 'pending')
+        ->get();
 
         if ($subscriptions->isEmpty()) {
             $this->info('No subscriptions found for today.');

@@ -6,49 +6,36 @@ use Illuminate\Console\Command;
 use App\Models\Subscription;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+
 class UpdateSubscriptionStatusActivetoPause extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'subscription:update-status-active-to-pause';
+    protected $description = 'Pause active subscriptions where pause_start_date is today';
 
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'Update subscription status to paused if the pause start date is today';
-
-    /**
-     * Execute the console command.
-     *
-     * @return int
-     */
     public function handle()
     {
         $today = Carbon::today();
-    
-        // Find subscriptions scheduled to be paused today
-        $subscriptions = Subscription::where('pause_start_date', $today)
-            ->where('status', '!=', 'paused')
+
+        $subscriptions = Subscription::whereDate('pause_start_date', $today)
+            ->where('status', 'active')
             ->get();
-    
-        foreach ($subscriptions as $subscription) {
-            $subscription->status = 'paused';
-            // $subscription->is_active = false; // Assuming paused subscriptions are inactive
-            $subscription->save();
-    
-            // Log the status update
-            Log::info('Subscription status updated to paused', [
-                'subscription_id' => $subscription->subscription_id,
-                'order_id' => $subscription->order_id,
-            ]);
+
+        if ($subscriptions->isEmpty()) {
+            $this->info('No subscriptions found to pause today.');
+            Log::info('No active subscriptions to pause on ' . $today);
+        } else {
+            foreach ($subscriptions as $subscription) {
+                $subscription->status = 'paused';
+                $subscription->save();
+
+                Log::info('Subscription paused', [
+                    'subscription_id' => $subscription->subscription_id,
+                    'order_id' => $subscription->order_id,
+                ]);
+            }
+
+            $this->info('Subscription statuses updated successfully to paused.');
+            Log::info('subscription:update-status-active-to-pause completed.');
         }
-    
-        $this->info('Subscription statuses updated successfully for paused subscriptions.');
     }
-    
 }

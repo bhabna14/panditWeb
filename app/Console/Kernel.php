@@ -14,7 +14,9 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         \App\Console\Commands\ResumePausedSubscriptions::class,
         \App\Console\Commands\UpdateSubscriptionStatus::class,
-        // Add more command classes here if needed
+        \App\Console\Commands\UpdateSubscriptionStatusActivetoPause::class,
+        \App\Console\Commands\UpdateSubscriptionStatusExpired::class,
+        \App\Console\Commands\UpdatePausedSubscriptions::class, // ✅ REGISTERED HERE
     ];
 
     /**
@@ -27,7 +29,7 @@ class Kernel extends ConsoleKernel
                  ->dailyAt('00:00');
 
         $schedule->command('subscription:update-status-expired')
-                 ->daily();
+                 ->daily(); // ⏰ Will run every day
 
         $schedule->command('subscription:update-paused-to-active')
                  ->daily();
@@ -54,7 +56,7 @@ class Kernel extends ConsoleKernel
                      Log::error('subscription:resume-paused failed to execute');
                  });
 
-        // ✅ Log scheduler run (for debugging)
+        // ✅ Log that scheduler is running
         Log::info('Scheduler running at: ' . now());
     }
 
