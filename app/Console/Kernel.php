@@ -14,7 +14,8 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // ✅ Subscription status update schedules
-        $schedule->command('subscription:update-status-active')->daily();
+         $schedule->command('subscription:update-status-active')
+             ->dailyAt('00:00');
         $schedule->command('subscription:update-status-expired')->daily();
         $schedule->command('subscription:update-paused-to-active')->daily();
         $schedule->command('subscription:update-status-active-to-pause')->daily();

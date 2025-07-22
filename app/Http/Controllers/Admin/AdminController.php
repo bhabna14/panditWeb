@@ -30,9 +30,6 @@ use App\Models\Notification;
 use App\Models\ProductOrder;
 use App\Models\ProductRequest;
 use App\Models\ProductSucription;
-
-
-
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
 use App\Http\Controllers\Controller;
@@ -43,265 +40,264 @@ use Illuminate\Support\Facades\DB;
 class AdminController extends Controller
 {
     //
-    public function adminlogin(){
+    public function adminlogin()
+    {
 
         return view("adminlogin");
     }
+
     public function authenticate(Request $request)
-{
-    $credentials = $request->validate([
-        'email' => 'required',
-        'password' => 'required'
-    ]);
+    {
+        $credentials = $request->validate([
+            'email' => 'required',
+            'password' => 'required'
+        ]);
 
-    if (Auth::guard('admins')->attempt($credentials)) {
-        
-        $admin = Auth::guard('admins')->user();
+        if (Auth::guard('admins')->attempt($credentials)) {
+            
+            $admin = Auth::guard('admins')->user();
 
-        session(['admin_role' => $admin->role]); // Store role in session
-        
-        return redirect()->intended('/admin/dashboard');
+            session(['admin_role' => $admin->role]); // Store role in session
+            
+            return redirect()->intended('/admin/dashboard');
 
-    } else {
-        return redirect()->back()->withInput()->withErrors(['login_error' => 'Invalid email or password']);
+        } else {
+            return redirect()->back()->withInput()->withErrors(['login_error' => 'Invalid email or password']);
+        }
     }
-}
 
-public function admindashboard()
-{
-    // Fetch the total number of pandits and pending pandits
-    $totalPandit = Profile::where('status', 'active')->count();
+    public function admindashboard()
+    {
+        // Fetch the total number of pandits and pending pandits
+        $totalPandit = Profile::where('status', 'active')->count();
 
-    // Count the total number of pandits and pending pandits
-    $pendingPandit = Profile::where('pandit_status', 'pending')->count();
+        // Count the total number of pandits and pending pandits
+        $pendingPandit = Profile::where('pandit_status', 'pending')->count();
 
-    // Fetch the total number of orders and users
-    $totalOrder = Booking::count();
+        // Fetch the total number of orders and users
+        $totalOrder = Booking::count();
 
-    // Fetch the total number of orders and users
-    $totalUser = User::count();
+        // Fetch the total number of orders and users
+        $totalUser = User::count();
 
-    // Fetch the total number of pandits and pending pandits
-    $pandit_profiles = Profile::orderBy('id', 'desc')
-                                ->where('pandit_status', 'pending')                        
-                                ->get(); // Fetch all profiles      
-    
-    // Fetch the total number of notifications (unread) (latest first)(not required now)
-    $notifications = Notification::where('is_read', false)->latest()->get();  
-
-// new user count
+        // Fetch the total number of pandits and pending pandits
+        $pandit_profiles = Profile::orderBy('id', 'desc')
+                                    ->where('pandit_status', 'pending')                        
+                                    ->get(); // Fetch all profiles      
+        
+        // Fetch the total number of notifications (unread) (latest first)(not required now)
+        $notifications = Notification::where('is_read', false)->latest()->get();  
 
         $newUserSubscription = Subscription::whereDate('created_at', Carbon::today())
         ->distinct('user_id')
         ->where('status', 'pending')                   
-         ->count('user_id');
+            ->count('user_id');
 
         $nonAssignedRidersCount = Subscription::with('relatedOrder')
         ->where('status', 'active')
         ->whereHas('relatedOrder', function ($query) {
             $query->where(function ($q) {
                 $q->whereNull('rider_id')
-                  ->orWhere('rider_id', '');
+                    ->orWhere('rider_id', '');
             });
         })
         ->count();
-    
-    $renewSubscription = Subscription::whereDate('created_at', Carbon::today()) // Check rows created today
-    ->whereIn('order_id', function ($query) {
-        $query->select('order_id')
-            ->from('subscriptions')
-            ->groupBy('order_id')
-            ->havingRaw('COUNT(order_id) > 1'); // Find duplicate order IDs
-    })
-    ->count();
-
-    // Fetch the total number of subscription orders requested today ( not used in dashboard )
-    $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
-                                ->whereNull('request_id')
-                                ->count();
-
-    // Fetch the total number of flower requests requested today (customized order)
-    $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
-
-    // Fetch the total number of active subscriptions
-    $activeSubscriptions = Subscription::where('status', 'active')->count();
-
-
-    // Fetch the total number of paused subscriptions
-    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-
-    $tomorrow = Carbon::tomorrow()->toDateString();
-
-    $nextDayPaused = Subscription::where('status', 'active')
-        ->whereDate('pause_start_date', $tomorrow)
-        ->count();
-
-    // fetch the expired subscriptions whose new subscription is not created ( expired )
-    $expiredSubscriptions = Subscription::where('status', 'expired')
-    ->whereNotIn('user_id', function ($query) {
-        $query->select('user_id')
-            ->from('subscriptions')
-            ->whereIn('status', ['active', 'paused', 'resume']);
-    })
-    ->distinct('user_id')
-    ->latest('end_date')
-    ->count();
-
-    $currentUser = $activeSubscriptions + $pausedSubscriptions + $expiredSubscriptions;
-
-
-    $todayEndSubscription = Subscription::where(function ($query) {
-            $query->where(function ($subQuery) {
-                $subQuery->whereNotNull('new_date') // Check if new_date is available
-                         ->whereDate('new_date', Carbon::today()); // Count using new_date if available
-            })
-            ->orWhere(function ($subQuery) {
-                $subQuery->whereNull('new_date') // Check if new_date is not available
-                         ->whereDate('end_date', Carbon::today()); // Count using end_date
-            });
-        })
-        ->where('status', 'active') // Status must be active
-        ->count();
-    
-        $riders = RiderDetails::where('status','active')->get();
-
-    // Fetch dynamic data for each rider
-    $ridersData = $riders->map(function ($rider) {
-        // Total assigned orders to this rider
-        $totalAssignedOrders = Order::where('rider_id', $rider->rider_id) // Filter by rider_id
-        ->whereHas('subscription', function ($query) {
-            $query->where('status', 'active'); // Check subscription status
+        
+        $renewSubscription = Subscription::whereDate('created_at', Carbon::today()) // Check rows created today
+        ->whereIn('order_id', function ($query) {
+            $query->select('order_id')
+                ->from('subscriptions')
+                ->groupBy('order_id')
+                ->havingRaw('COUNT(order_id) > 1'); // Find duplicate order IDs
         })
         ->count();
 
-        // Total delivered orders today by this rider
-        $totalDeliveredToday = DeliveryHistory::whereDate('created_at', Carbon::today())
-            ->where('rider_id', $rider->rider_id)
-            ->where('delivery_status', 'delivered')
+        // Fetch the total number of subscription orders requested today ( not used in dashboard )
+        $subscriptionOrderToday = Order::whereDate('created_at', Carbon::today())
+                                    ->whereNull('request_id')
+                                    ->count();
+
+        // Fetch the total number of flower requests requested today (customized order)
+        $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
+
+        // Fetch the total number of active subscriptions
+        $activeSubscriptions = Subscription::where('status', 'active')->count();
+
+
+        // Fetch the total number of paused subscriptions
+        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+
+        $tomorrow = Carbon::tomorrow()->toDateString();
+
+        $nextDayPaused = Subscription::where('status', 'active')
+            ->whereDate('pause_start_date', $tomorrow)
             ->count();
 
-        return [
-            'rider' => $rider,
-            'totalAssignedOrders' => $totalAssignedOrders,
-            'totalDeliveredToday' => $totalDeliveredToday,
-        ];
-    });
-
-    // Total Riders
-    $totalRiders = RiderDetails::where('status','active')->count();
-
-    // Total Deliveries This Month
-    $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
-        ->whereMonth('created_at', now()->month)
-        ->where('delivery_status', 'delivered')
-        ->count();
-        // Total Deliveries Today
-        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
+        // fetch the expired subscriptions whose new subscription is not created ( expired )
+        $expiredSubscriptions = Subscription::where('status', 'expired')
+        ->whereNotIn('user_id', function ($query) {
+            $query->select('user_id')
+                ->from('subscriptions')
+                ->whereIn('status', ['active', 'paused', 'resume']);
+        })
+        ->distinct('user_id')
+        ->latest('end_date')
         ->count();
 
-    // Total Deliveries
-    $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
-  
-    //Total Expenses in a Day
-    $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())->sum('total_price');
-    // total paid expenses in a day
-    $totalPaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
-        ->where('payment_status', 'Paid')
-        ->sum('total_price');
-    // total unpaid expenses in a day
-    $totalUnpaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
-        ->where('payment_status', 'Pending')
-        ->sum('total_price');
+        $currentUser = $activeSubscriptions + $pausedSubscriptions + $expiredSubscriptions;
 
-    //Expenses Details in The month
-    // Total Amount Paid This Month
-   $totalPaidThisMonth = FlowerPickupDetails::where('payment_status', 'Paid')
-   ->whereYear('created_at', now()->year)
-   ->whereMonth('created_at', now()->month)
-   ->sum('total_price');
+        $todayEndSubscription = Subscription::where(function ($query) {
+                $query->where(function ($subQuery) {
+                    $subQuery->whereNotNull('new_date') // Check if new_date is available
+                            ->whereDate('new_date', Carbon::today()); // Count using new_date if available
+                })
+                ->orWhere(function ($subQuery) {
+                    $subQuery->whereNull('new_date') // Check if new_date is not available
+                            ->whereDate('end_date', Carbon::today()); // Count using end_date
+                });
+            })
+            ->where('status', 'active') // Status must be active
+            ->count();
+        
+            $riders = RiderDetails::where('status','active')->get();
 
-    // Total Amount Unpaid This Month
-    $totalUnpaidThisMonth = FlowerPickupDetails::where('payment_status', 'Pending')
-    ->whereYear('created_at', now()->year)
-    ->whereMonth('created_at', now()->month)
-    ->sum('total_price');
+        // Fetch dynamic data for each rider
+        $ridersData = $riders->map(function ($rider) {
+            // Total assigned orders to this rider
+            $totalAssignedOrders = Order::where('rider_id', $rider->rider_id) // Filter by rider_id
+            ->whereHas('subscription', function ($query) {
+                $query->where('status', 'active'); // Check subscription status
+            })
+            ->count();
 
-    // Total Amount This Month (No Status Condition)
-    $totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year)
-    ->whereMonth('created_at', now()->month)
-    ->sum('total_price');
-      
-    // Calculate the total price from the flower_pickup_details table ( total expenses )
-    $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
+            // Total delivered orders today by this rider
+            $totalDeliveredToday = DeliveryHistory::whereDate('created_at', Carbon::today())
+                ->where('rider_id', $rider->rider_id)
+                ->where('delivery_status', 'delivered')
+                ->count();
+
+            return [
+                'rider' => $rider,
+                'totalAssignedOrders' => $totalAssignedOrders,
+                'totalDeliveredToday' => $totalDeliveredToday,
+            ];
+        });
+
+        // Total Riders
+        $totalRiders = RiderDetails::where('status','active')->count();
+
+        // Total Deliveries This Month
+        $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->where('delivery_status', 'delivered')
+            ->count();
+            // Total Deliveries Today
+            $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
+            ->count();
+
+        // Total Deliveries
+        $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
     
-    $ordersWithoutRequestId = Order::whereNull('request_id')
-    ->get();
+        //Total Expenses in a Day
+        $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())->sum('total_price');
+        // total paid expenses in a day
+        $totalPaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
+            ->where('payment_status', 'Paid')
+            ->sum('total_price');
+        // total unpaid expenses in a day
+        $totalUnpaidExpensesday = FlowerPickupDetails::whereDate('created_at', Carbon::today())
+            ->where('payment_status', 'Pending')
+            ->sum('total_price');
 
-$totalPriceWithoutRequestId = 0;
-foreach ($ordersWithoutRequestId as $order) {
-$payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
-if ($payment) {
-    $totalPriceWithoutRequestId += $order->total_price;
-}
-}
+        //Expenses Details in The month
+        // Total Amount Paid This Month
+        $totalPaidThisMonth = FlowerPickupDetails::where('payment_status', 'Paid')
+        ->whereYear('created_at', now()->year)
+        ->whereMonth('created_at', now()->month)
+        ->sum('total_price');
 
+        // Total Amount Unpaid This Month
+        $totalUnpaidThisMonth = FlowerPickupDetails::where('payment_status', 'Pending')
+        ->whereYear('created_at', now()->year)
+        ->whereMonth('created_at', now()->month)
+        ->sum('total_price');
 
-    // Calculate the total price for orders with request_id ( total income of customized orders )
-    $ordersWithRequestId = Order::whereNotNull('request_id')
+        // Total Amount This Month (No Status Condition)
+        $totalAmountThisMonth = FlowerPickupDetails::whereYear('created_at', now()->year)
+        ->whereMonth('created_at', now()->month)
+        ->sum('total_price');
+        
+        // Calculate the total price from the flower_pickup_details table ( total expenses )
+        $totalFlowerPickupPrice = FlowerPickupDetails::sum('total_price');
+        
+        $ordersWithoutRequestId = Order::whereNull('request_id')
         ->get();
 
-    $totalPriceWithRequestId = 0;
-    foreach ($ordersWithRequestId as $order) {
+        $totalPriceWithoutRequestId = 0;
+        foreach ($ordersWithoutRequestId as $order) {
         $payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
         if ($payment) {
-            $totalPriceWithRequestId += $order->total_price;
+            $totalPriceWithoutRequestId += $order->total_price;
         }
+        }
+
+
+            // Calculate the total price for orders with request_id ( total income of customized orders )
+            $ordersWithRequestId = Order::whereNotNull('request_id')
+                ->get();
+
+            $totalPriceWithRequestId = 0;
+            foreach ($ordersWithRequestId as $order) {
+                $payment = $order->flowerPayments()->where('payment_status', 'paid')->first();
+                if ($payment) {
+                    $totalPriceWithRequestId += $order->total_price;
+                }
+            }
+
+            // Count total podcasts with status 'active'
+            $totalActivePodcasts = PublishPodcast::where('status', 'active')->count();
+            $totalCompletedScripts = PodcastPrepair::where('podcast_script_status', 'COMPLETED')->count();
+            $totalCompletedRecoding = PodcastPrepair::where('podcast_recording_status', 'COMPLETED')->count();
+            $totalCompletedEditing = PodcastPrepair::where('podcast_editing_status', 'COMPLETED')->count();
+
+            return view('admin/dashboard', compact(
+                'ridersData',
+                'renewSubscription' ,
+                'newUserSubscription',
+                'totalCompletedEditing',
+                'totalCompletedRecoding',
+                'totalCompletedScripts',
+                'totalPaidThisMonth' ,
+                'totalUnpaidThisMonth',
+                'totalAmountThisMonth',
+                'totalRiders' ,
+                'totalDeliveriesThisMonth',
+                'totalDeliveriesToday',
+                'totalDeliveries' ,
+                'totalActivePodcasts',
+                'totalFlowerPickupPrice',
+                'activeSubscriptions',
+                'currentUser',
+                'pausedSubscriptions',
+                'nextDayPaused',
+                'expiredSubscriptions',
+                'todayEndSubscription',
+                'ordersRequestedToday',
+                'subscriptionOrderToday',
+                'notifications',
+                'pandit_profiles',
+                'totalPandit',
+                'pendingPandit',
+                'totalOrder',
+                'totalUser',
+                'totalPriceWithoutRequestId',
+                'totalPriceWithRequestId',
+                'totalExpensesday',
+                'totalPaidExpensesday',
+                'totalUnpaidExpensesday',
+                'nonAssignedRidersCount'
+            ));
     }
-
-    // Count total podcasts with status 'active'
-    $totalActivePodcasts = PublishPodcast::where('status', 'active')->count();
-    $totalCompletedScripts = PodcastPrepair::where('podcast_script_status', 'COMPLETED')->count();
-    $totalCompletedRecoding = PodcastPrepair::where('podcast_recording_status', 'COMPLETED')->count();
-    $totalCompletedEditing = PodcastPrepair::where('podcast_editing_status', 'COMPLETED')->count();
-
-    return view('admin/dashboard', compact(
-        'ridersData',
-        'renewSubscription' ,
-        'newUserSubscription',
-        'totalCompletedEditing',
-        'totalCompletedRecoding',
-        'totalCompletedScripts',
-        'totalPaidThisMonth' ,
-        'totalUnpaidThisMonth',
-        'totalAmountThisMonth',
-        'totalRiders' ,
-        'totalDeliveriesThisMonth',
-        'totalDeliveriesToday',
-        'totalDeliveries' ,
-        'totalActivePodcasts',
-        'totalFlowerPickupPrice',
-        'activeSubscriptions',
-        'currentUser',
-        'pausedSubscriptions',
-        'nextDayPaused',
-        'expiredSubscriptions',
-        'todayEndSubscription',
-        'ordersRequestedToday',
-        'subscriptionOrderToday',
-        'notifications',
-        'pandit_profiles',
-        'totalPandit',
-        'pendingPandit',
-        'totalOrder',
-        'totalUser',
-        'totalPriceWithoutRequestId',
-        'totalPriceWithRequestId',
-        'totalExpensesday',
-        'totalPaidExpensesday',
-        'totalUnpaidExpensesday',
-        'nonAssignedRidersCount'
-    ));
-}
 
     public function adminlogout()
     {
@@ -355,31 +351,34 @@ if ($payment) {
                 return redirect()->back()->with('danger', 'Data delete unsuccessfully.');
             }
       
-        }
-        public function deletEducation($id)
-        {
-                $affected = PanditEducation::where('id', $id)->update(['status' => 'deleted']);
-                            
-                if ($affected) {
-                    return redirect()->back()->with('success', 'Data delete successfully.');
-                } else {
-                    return redirect()->back()->with('danger', 'Data delete unsuccessfully.');
-                }
-          
-            }
-            public function deletVedic($id)
-            {
-                    $affected = PanditVedic::where('id', $id)->update(['status' => 'deleted']);
-                                
-                    if ($affected) {
-                        return redirect()->back()->with('success', 'Data delete successfully.');
-                    } else {
-                        return redirect()->back()->with('danger', 'Data delete unsuccessfully.');
-                    }
-              
-                }
+    }
 
-    public function acceptPandit($id) {
+    public function deletEducation($id)
+    {
+            $affected = PanditEducation::where('id', $id)->update(['status' => 'deleted']);
+                        
+            if ($affected) {
+                return redirect()->back()->with('success', 'Data delete successfully.');
+            } else {
+                return redirect()->back()->with('danger', 'Data delete unsuccessfully.');
+            }
+        
+    }
+
+    public function deletVedic($id)
+    {
+            $affected = PanditVedic::where('id', $id)->update(['status' => 'deleted']);
+                        
+            if ($affected) {
+                return redirect()->back()->with('success', 'Data delete successfully.');
+            } else {
+                return redirect()->back()->with('danger', 'Data delete unsuccessfully.');
+            }
+        
+    }
+
+    public function acceptPandit($id)
+    {
         $profile = Profile::find($id);
         if ($profile) {
             $profile->pandit_status = 'accepted';
@@ -389,7 +388,8 @@ if ($payment) {
         } 
     }
 
-    public function rejectPandit($id) {
+    public function rejectPandit($id)
+    {
         $profile = Profile::find($id);
         if ($profile) {
             $profile->pandit_status = 'rejected';
@@ -408,11 +408,13 @@ if ($payment) {
                 'Sanskrit', 'Santali', 'Sindhi', 'Tamil', 'Telugu', 'Urdu'
             ];
             return view('admin/add-profile',compact('languages'));
-        }
+    }
 
-    public function panditprofile(){
+    public function panditprofile()
+    {
         return view('admin/pandit-profile');
     }
+
     public function saveprofile(Request $request)
     {
         $request->validate([
@@ -451,80 +453,84 @@ if ($payment) {
             $file->move(public_path('uploads/profile_photo'), $filename);
             $profile->profile_photo = $filePath;
         }
-// add career information
+        // add career information
 
-$career = new Career();
+        $career = new Career();
 
-$career->pandit_id = $request->profile_id;
-$career->qualification = $request->qualification;
-$career->total_experience = $request->experience;
+        $career->pandit_id = $request->profile_id;
+        $career->qualification = $request->qualification;
+        $career->total_experience = $request->experience;
 
- // Pandit Career Photo Upload
+        // Pandit Career Photo Upload
 
- foreach ($request->id_type as $key => $id_type) {
-    $file = $request->file('upload_id')[$key];
-    $fileName = time().'_'.$file->getClientOriginalName();
-    $filePath = $file->move(public_path('uploads/id_proof'), $fileName);
+        foreach ($request->id_type as $key => $id_type) {
+            $file = $request->file('upload_id')[$key];
+            $fileName = time().'_'.$file->getClientOriginalName();
+            $filePath = $file->move(public_path('uploads/id_proof'), $fileName);
 
-    // Save form data to the database
-    $iddata = new IdcardDetail();
-    $iddata->pandit_id = $request->profile_id;
-    $iddata->id_type =  $id_type;
-    $iddata->upload_id = $fileName; // Save file path in the database
-    $iddata->save();
-}
+            // Save form data to the database
+            $iddata = new IdcardDetail();
+            $iddata->pandit_id = $request->profile_id;
+            $iddata->id_type =  $id_type;
+            $iddata->upload_id = $fileName; // Save file path in the database
+            $iddata->save();
+        }
 
-//Pandit Education Photo Upload
+        //Pandit Education Photo Upload
 
-foreach ($request->education_type as $key => $education_type) {
-    $file = $request->file('upload_edu')[$key];
+        foreach ($request->education_type as $key => $education_type) {
+            $file = $request->file('upload_edu')[$key];
 
-    $fileName = time().'_'.$file->getClientOriginalName();
-    $filePath = $file->move(public_path('uploads/edu_details'), $fileName);
+            $fileName = time().'_'.$file->getClientOriginalName();
+            $filePath = $file->move(public_path('uploads/edu_details'), $fileName);
 
-    // Save form data to the database
-    $edudata = new EduDetail();
-    $edudata->pandit_id = $request->profile_id;
-    $edudata->education_type = $education_type;
-    $edudata->upload_education = $fileName; // Save file path in the database
-    $edudata->save();
-}
+            // Save form data to the database
+            $edudata = new EduDetail();
+            $edudata->pandit_id = $request->profile_id;
+            $edudata->education_type = $education_type;
+            $edudata->upload_education = $fileName; // Save file path in the database
+            $edudata->save();
+        }
 
-// Pandit Vedic Photo Upload
+        // Pandit Vedic Photo Upload
 
 
-foreach ($request->vedic_type as $key => $vedic_type) {
-    $file = $request->file('upload_vedic')[$key];
+        foreach ($request->vedic_type as $key => $vedic_type) {
+            $file = $request->file('upload_vedic')[$key];
 
-    $fileName = time().'_'.$file->getClientOriginalName();
-    $filePath = $file->move(public_path('uploads/vedic_details'), $fileName);
+            $fileName = time().'_'.$file->getClientOriginalName();
+            $filePath = $file->move(public_path('uploads/vedic_details'), $fileName);
 
-    // Save form data to the database
-    $vedicdata = new VedicDetail();
-    $vedicdata->pandit_id = $request->profile_id;
-    $vedicdata->vedic_type = $vedic_type;
-    $vedicdata->upload_vedic = $fileName; // Save file path in the database
-    $vedicdata->save();
-}
+            // Save form data to the database
+            $vedicdata = new VedicDetail();
+            $vedicdata->pandit_id = $request->profile_id;
+            $vedicdata->vedic_type = $vedic_type;
+            $vedicdata->upload_vedic = $fileName; // Save file path in the database
+            $vedicdata->save();
+        }
 
-$profileSaved = $profile->save();
-$careerSaved = $career->save();
+        $profileSaved = $profile->save();
+        $careerSaved = $career->save();
 
-if ($profileSaved && $careerSaved) {
-    return redirect()->back()->with('success', 'Data saved successfully.');
-} else {
-    return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
-}
+        if ($profileSaved && $careerSaved) {
+            return redirect()->back()->with('success', 'Data saved successfully.');
+        } else {
+            return redirect()->back()->withErrors(['danger' => 'Failed to save data.']);
+        }
     }
-    public function addCareer(){
+
+    public function addCareer()
+    {
         return view('admin/add-career');
     }
   
-    public function manageuser(){
+    public function manageuser()
+    {
         $users = User::all(); // Fetch all users using Eloquent
         
         return view('admin/manageuser', compact('users'));
     }
+
     public function userProfile($id)
     {
         // Fetch the user and their bookings
@@ -537,45 +543,44 @@ if ($profileSaved && $careerSaved) {
         return view('admin.user-profile', compact('user', 'bookings','user_logins'));
     }
 
+    public function showRiderDetails($riderId)
+    {
+        // Fetch rider details
+        $rider = RiderDetails::where('rider_id', $riderId)->firstOrFail();
 
- public function showRiderDetails($riderId)
-{
-    // Fetch rider details
-    $rider = RiderDetails::where('rider_id', $riderId)->firstOrFail();
+        // Fetch all riders except the current rider
+        $allRiders = RiderDetails::where('rider_id', '!=', $riderId)->get();
 
-    // Fetch all riders except the current rider
-    $allRiders = RiderDetails::where('rider_id', '!=', $riderId)->get();
+        // Fetch orders assigned to the rider where the subscription is active
+        $orders = Order::where('rider_id', $riderId)
+            ->whereHas('subscription', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->with(['flowerProduct', 'user', 'subscription'])
+            ->get();
 
-    // Fetch orders assigned to the rider where the subscription is active
-    $orders = Order::where('rider_id', $riderId)
-        ->whereHas('subscription', function ($query) {
-            $query->where('status', 'active');
-        })
-        ->with(['flowerProduct', 'user', 'subscription'])
-        ->get();
-
-    // Pass the rider details, orders, and all riders to the view
-    return view('admin.delivery-assign', compact('rider', 'orders', 'allRiders'));
-}
-
-public function transferOrders(Request $request)
-{
-    // Validate the request
-    $request->validate([
-        'order_ids' => 'required|array',
-        'order_ids.*' => 'exists:orders,order_id',
-        'new_rider_id' => 'required|exists:flower__rider_details,rider_id',
-    ]);
-
-    try {
-        // Update the rider_id for all selected orders
-        Order::whereIn('order_id', $request->order_ids)
-            ->update(['rider_id' => $request->new_rider_id]);
-
-        return redirect()->back()->with('success', 'Orders transferred successfully.');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Failed to transfer orders: ' . $e->getMessage());
+        // Pass the rider details, orders, and all riders to the view
+        return view('admin.delivery-assign', compact('rider', 'orders', 'allRiders'));
     }
-}
+
+    public function transferOrders(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'order_ids' => 'required|array',
+            'order_ids.*' => 'exists:orders,order_id',
+            'new_rider_id' => 'required|exists:flower__rider_details,rider_id',
+        ]);
+
+        try {
+            // Update the rider_id for all selected orders
+            Order::whereIn('order_id', $request->order_ids)
+                ->update(['rider_id' => $request->new_rider_id]);
+
+            return redirect()->back()->with('success', 'Orders transferred successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to transfer orders: ' . $e->getMessage());
+        }
+    }
 
 }

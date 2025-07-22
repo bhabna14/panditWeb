@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
@@ -12,9 +13,8 @@ class UpdateSubscriptionStatus extends Command
 
     public function handle()
     {
-        $today = Carbon::now()->format('Y-m-d');
+        $today = Carbon::today();
 
-        // Fix: Use whereDate to match date correctly (ignores time part)
         $subscriptions = Subscription::whereDate('start_date', $today)
                                       ->where('status', 'pending')
                                       ->get();
