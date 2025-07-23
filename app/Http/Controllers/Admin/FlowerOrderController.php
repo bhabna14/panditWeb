@@ -192,6 +192,20 @@ public function updateStatus(Request $request, $id)
 
         return redirect()->back()->with('success', 'Subscription dates updated successfully.');
 }
+public function updatePauseDates(Request $request, $id)
+{
+    $request->validate([
+        'pause_start_date' => 'required|date',
+        'pause_end_date' => 'required|date|after_or_equal:pause_start_date',
+    ]);
+
+    $subscription = Subscription::findOrFail($id);
+    $subscription->pause_start_date = Carbon::parse($request->pause_start_date)->toDateString();
+    $subscription->pause_end_date = Carbon::parse($request->pause_end_date)->toDateString();
+    $subscription->save();
+
+    return redirect()->back()->with('success', 'Pause dates updated successfully.');
+}
 
     public function markAsViewed()
     {

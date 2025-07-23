@@ -578,9 +578,19 @@
                                                     {{ \Carbon\Carbon::parse($order->pause_start_date)->format('d-m-Y') }}<br>
                                                     <strong><i class="fas fa-play-circle me-2"></i></strong>
                                                     {{ \Carbon\Carbon::parse($order->pause_end_date)->format('d-m-Y') }}
+
+                                                    <!-- ✏️ Edit icon for modal -->
+                                                    <button class="btn btn-sm btn-outline-secondary edit-pause-dates mt-2"
+                                                        data-id="{{ $order->id }}"
+                                                        data-start="{{ $order->pause_start_date }}"
+                                                        data-end="{{ $order->pause_end_date }}" data-bs-toggle="modal"
+                                                        data-bs-target="#editPauseModal">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
                                                 </div>
                                             @endif
                                         </td>
+
 
                                         <td style="padding: 15px; vertical-align: top;">
                                             <div class="product-details">
@@ -826,35 +836,65 @@
             </div>
         </div>
     </div>
-   <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <form id="edit-status-form" method="POST" action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
-            @csrf
-            <div class="modal-content">
-                <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title">Update Subscription Status</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" name="subscription_id" id="status-sub-id">
-                    <div class="mb-3">
-                        <label for="status-select">Status</label>
-                        <select class="form-select" name="status" id="status-select" required>
-                            <option value="active">Active</option>
-                            <option value="paused">Paused</option>
-                            <option value="pending">Pending</option>
-                            <option value="expired">Expired</option>
-                        </select>
+    <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="edit-status-form" method="POST"
+                action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header bg-info text-white">
+                        <h5 class="modal-title">Update Subscription Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="subscription_id" id="status-sub-id">
+                        <div class="mb-3">
+                            <label for="status-select">Status</label>
+                            <select class="form-select" name="status" id="status-select" required>
+                                <option value="active">Active</option>
+                                <option value="paused">Paused</option>
+                                <option value="pending">Pending</option>
+                                <option value="expired">Expired</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">Update</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
+    <div class="modal fade" id="editPauseModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="edit-pause-form" method="POST" action="">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">Edit Pause Dates</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="subscription_id" id="pause-sub-id">
+                        <div class="mb-3">
+                            <label for="pause-start">Pause Start Date</label>
+                            <input type="date" name="pause_start_date" id="pause-start" class="form-control"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="pause-end">Pause End Date</label>
+                            <input type="date" name="pause_end_date" id="pause-end" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 
 
     <!-- End Row -->
@@ -930,22 +970,30 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-    // Open modal and populate
-$('#file-datatable').on('click', '.edit-status-btn', function () {
-    const subId = $(this).data('id');
-    const currentStatus = $(this).data('status');
+    <script>
+        // Open modal and populate
+        $('#file-datatable').on('click', '.edit-status-btn', function() {
+            const subId = $(this).data('id');
+            const currentStatus = $(this).data('status');
 
-    $('#status-sub-id').val(subId);
-    $('#status-select').val(currentStatus);
-    $('#edit-status-form').attr('action', `/admin/subscriptions/${subId}/update-status`);
-});
+            $('#status-sub-id').val(subId);
+            $('#status-select').val(currentStatus);
+            $('#edit-status-form').attr('action', `/admin/subscriptions/${subId}/update-status`);
+        });
+    </script>
 
-</script>
+    <script>
+        // Open modal and populate pause dates
+        $('#file-datatable').on('click', '.edit-pause-dates', function() {
+            const id = $(this).data('id');
+            const start = $(this).data('start');
+            const end = $(this).data('end');
 
+            $('#pause-sub-id').val(id);
+            $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
+            $('#pause-end').val(moment(end).format('YYYY-MM-DD'));
+            $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/update-pause-dates`);
+        });
+    </script>
 
-
-    
-
-    <!-- Updated JavaScript -->
 @endsection

@@ -286,6 +286,8 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 Route::post('/subscriptions/{id}/updateDates', [FlowerOrderController::class, 'updateDates'])->name('admin.subscriptions.updateDates');
 Route::post('/subscriptions/{id}/update-status', [FlowerOrderController::class, 'updateStatus'])
     ->name('admin.subscriptions.updateStatus');
+    Route::post('/subscriptions/{id}/update-pause-dates', [FlowerOrderController::class, 'updatePauseDates'])->name('admin.subscriptions.updatePauseDates');
+
 
     Route::get('/product-orders', [ProductSubscriptionController::class, 'showProductOrder'])->name('admin.product.index');
 
