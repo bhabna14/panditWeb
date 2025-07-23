@@ -26,36 +26,137 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     
-   public function showOrders(Request $request)
-{
-    if ($request->ajax()) {
+//    public function showOrders(Request $request)
+// {
+//     if ($request->ajax()) {
+//         $query = Subscription::with([
+//             'order.rider',
+//             'order.address.localityDetails',
+//             'flowerPayments',
+//             'users',
+//             'flowerProducts',
+//             'pauseResumeLog',
+//         ])->orderBy('id', 'desc');
+
+//         // Add filters if any
+//         if ($request->query('filter') === 'active') {
+//             $query->where('status', 'active');
+//         }
+
+//         return DataTables::of($query)->make(true);
+//     }
+
+//     // When not an AJAX call (first page load)
+//     $activeSubscriptions = Subscription::where('status', 'active')->count();
+//     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+//     $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+//     $riders = \App\Models\RiderDetails::where('status', 'active')->get();
+
+//     return view('admin.flower-order.manage-flower-order', compact(
+//         'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
+//     ));
+// }  
+
+ public function showOrders(Request $request)
+    {
+
         $query = Subscription::with([
-            'order.rider',
-            'order.address.localityDetails',
+            'order',
             'flowerPayments',
             'users',
             'flowerProducts',
             'pauseResumeLog',
-        ])->orderBy('id', 'desc');
+            'order.address.localityDetails'
+            ])
+        ->orderBy('id', 'desc'); 
 
-        // Add filters if any
+        // Filter for non-assigned riders
+        if ($request->query('filter') === 'rider') {
+            $query->whereHas('order', function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNull('rider_id')
+                    ->orWhere('rider_id', '');
+                });
+            });
+        }
+
+        // Check if the filter is for renewed subscriptions
+        if ($request->query('filter') === 'renewed') {
+        $query->whereDate('created_at', Carbon::today()) // Check rows created today
+            ->whereIn('order_id', function ($query) {
+                $query->select('order_id')
+                    ->from('subscriptions')
+                    ->groupBy('order_id')
+                    ->havingRaw('COUNT(order_id) > 1'); // Find duplicate order IDs
+            });
+        }
+
+        if ($request->query('filter') === 'end') {
+
+                $query->where(function ($dateQuery) {
+                    $dateQuery->whereNotNull('new_date')
+                            ->whereDate('new_date', Carbon::today());
+                })->orWhere(function ($dateQuery) {
+                    $dateQuery->whereNull('new_date')
+                            ->whereDate('end_date', Carbon::today());
+                })->where('status', 'active');
+        }
+        
+
+        // Filter for new user subscriptions
+        if ($request->query('filter') === 'new') {
+            $query->whereDate('created_at', Carbon::today())
+            ->where('status', 'pending')                   
+            ->distinct('user_id');                  
+        }
+
+        // Filter for active subscriptions
         if ($request->query('filter') === 'active') {
             $query->where('status', 'active');
         }
+        if ($request->query('filter') === 'expired') {
+            $subQuery = DB::table('subscriptions')
+                ->select('user_id', DB::raw('MAX(end_date) as latest_end_date'))
+                ->where('status', 'expired')
+                ->whereNotIn('user_id', function ($query) {
+                    $query->select('user_id')
+                        ->from('subscriptions')
+                        ->whereIn('status', ['active', 'paused', 'resume']);
+                })
+                ->groupBy('user_id');
+        
+            $query->joinSub($subQuery, 'latest_subscriptions', function ($join) {
+                    $join->on('subscriptions.user_id', '=', 'latest_subscriptions.user_id')
+                        ->on('subscriptions.end_date', '=', 'latest_subscriptions.latest_end_date');
+                })
+                ->orderByDesc('subscriptions.end_date');
+        }
+        
+    
+        // Filter for paused subscriptions
+        if ($request->query('filter') === 'paused') {
+                $query->where('status', 'paused');
+        }
+        
+        $tomorrow = Carbon::tomorrow()->toDateString();
 
-        return DataTables::of($query)->make(true);
+        // Filter for paused subscriptions
+        if ($request->query('filter') === 'tommorow') {
+            $query->where('status', 'active')
+            ->whereDate('pause_start_date', $tomorrow);
+        }
+            // Retrieve the filtered orders
+            $orders = $query->get();
+
+            $activeSubscriptions = Subscription::where('status', 'active')->count();
+            $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+            $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+            $riders = RiderDetails::where('status', 'active')->get();
+            
+            return view('admin.flower-order.manage-flower-order', compact(
+                'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
+            ));
     }
-
-    // When not an AJAX call (first page load)
-    $activeSubscriptions = Subscription::where('status', 'active')->count();
-    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
-    $riders = \App\Models\RiderDetails::where('status', 'active')->get();
-
-    return view('admin.flower-order.manage-flower-order', compact(
-        'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
-    ));
-}  
 
 public function updateDates(Request $request, $id)
 {
