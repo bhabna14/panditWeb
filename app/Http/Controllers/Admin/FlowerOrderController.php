@@ -26,54 +26,51 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     
+use DataTables;
 
 public function showOrders(Request $request)
 {
     if ($request->ajax()) {
         $query = Subscription::with([
-            'order.rider',
-            'order.address.localityDetails',
-            'flowerPayments',
             'users',
-            'flowerProducts',
-            'pauseResumeLog',
-        ])->orderBy('id', 'desc');
-
-        // Apply status filter
-        if ($request->query('filter') === 'active') {
-            $query->where('status', 'active');
-        }
+            'order.address',
+            'order.rider',
+        ])->select('subscriptions.*');
 
         return DataTables::of($query)
-            ->filter(function ($q) use ($request) {
-                if ($request->has('search') && $search = $request->input('search.value')) {
-                    $q->where(function ($subQ) use ($search) {
-                        $subQ->whereHas('users', fn($u) =>
-                            $u->where('name', 'like', "%{$search}%")
-                              ->orWhere('mobile_number', 'like', "%{$search}%")
-                        )->orWhereHas('order.address', fn($a) =>
-                            $a->where('apartment_flat_plot', 'like', "%{$search}%")
-                              ->orWhere('apartment_name', 'like', "%{$search}%")
-                              ->orWhere('city', 'like', "%{$search}%")
-                              ->orWhere('state', 'like', "%{$search}%")
-                              ->orWhere('pincode', 'like', "%{$search}%")
-                        );
-                    });
-                }
+            // Search for user name or mobile_number
+            ->filterColumn('user_search', function ($query, $keyword) {
+                $query->whereHas('users', function ($q) use ($keyword) {
+                    $q->where('name', 'like', "%$keyword%")
+                      ->orWhere('mobile_number', 'like', "%$keyword%");
+                });
             })
+            // Search in address fields
+            ->filterColumn('address_search', function ($query, $keyword) {
+                $query->whereHas('order.address', function ($q) use ($keyword) {
+                    $q->where('apartment_flat_plot', 'like', "%$keyword%")
+                      ->orWhere('apartment_name', 'like', "%$keyword%")
+                      ->orWhere('city', 'like', "%$keyword%")
+                      ->orWhere('state', 'like', "%$keyword%")
+                      ->orWhere('pincode', 'like', "%$keyword%");
+                });
+            })
+            // Optional: Return additional columns to help search
+            ->addColumn('user_search', fn($r) => $r->users->name . ' ' . $r->users->mobile_number)
+            ->addColumn('address_search', fn($r) => optional($r->order->address)->apartment_name)
+            ->rawColumns(['user_search', 'address_search']) // Optional, if HTML
             ->make(true);
     }
 
-    // Normal (non-AJAX) response
-    $activeSubscriptions = Subscription::where('status', 'active')->count();
-    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
-    $riders = \App\Models\RiderDetails::where('status', 'active')->get();
-
-    return view('admin.flower-order.manage-flower-order', compact(
-        'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
-    ));
+    // Page load (non-AJAX)
+    return view('admin.flower-order.manage-flower-order', [
+        'riders' => \App\Models\RiderDetails::where('status', 'active')->get(),
+        'activeSubscriptions' => Subscription::where('status', 'active')->count(),
+        'pausedSubscriptions' => Subscription::where('status', 'paused')->count(),
+        'ordersRequestedToday' => Subscription::whereDate('created_at', \Carbon\Carbon::today())->count(),
+    ]);
 }
+
 
 
 public function updateDates(Request $request, $id)
