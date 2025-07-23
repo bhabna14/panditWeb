@@ -329,7 +329,6 @@
                                         <th>Price</th>
                                         <th>Status</th>
                                         <th>Assigned Rider</th>
-                                        <th>Referred By</th>
                                         <th>Subscription</th>
                                     </tr>
                                 </thead>
@@ -575,10 +574,6 @@ $(function() {
                         <i class="fas fa-edit"></i>
                     </button>
                 `
-            },
-            {
-                data: 'order.referral_id',
-                render: x => x || 'N/A'
             },
             {
                 data: null,
