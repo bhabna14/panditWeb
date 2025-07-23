@@ -324,7 +324,6 @@
                                 <thead>
                                     <tr>
                                         <th>Customer Details</th>
-                                        <th>Purchase Date</th>
                                         <th>Duration</th>
                                         <th>Price</th>
                                         <th>Status</th>
@@ -523,10 +522,7 @@ $(function() {
             return html;
         }
     },
-    {
-        data: 'created_at',
-        name: 'created_at'
-    },
+   
     {
         data: 'start_date',
         name: 'start_date',
