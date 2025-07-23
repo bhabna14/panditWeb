@@ -75,10 +75,7 @@ public function updateDates(Request $request, $id)
 
     $subscription->save();
 
-    // Respond properly to AJAX
-    return response()->json([
-        'message' => 'Subscription dates updated successfully.',
-    ]);
+    return response()->json(['message' => 'Subscription dates updated successfully.']);
 }
 
     public function markAsViewed()
