@@ -18,6 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\SubscriptionPauseResumeLog;
 use Illuminate\Support\Facades\DB;
+use Yajra\DataTables\Facades\DataTables;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
