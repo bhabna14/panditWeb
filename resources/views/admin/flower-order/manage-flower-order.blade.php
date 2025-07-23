@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
 
 
     <!-- INTERNAL Select2 css -->
@@ -54,13 +54,9 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-
-
         .modal-footer {
             border-top: none;
         }
-
-
 
         .modal-header {
             background-color: #007bff;
@@ -243,8 +239,6 @@
     </div>
     <!-- /breadcrumb -->
 
-
-
     <div class="row">
         <div class="col-lg-12 col-md-12">
             <div class="card custom-card">
@@ -308,15 +302,11 @@
         </div>
     </div>
 
-
-
     <!-- Row -->
     <div class="row row-sm">
         <div class="col-lg-12">
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
-
-
                     @if (session()->has('success'))
                         <div class="alert alert-success" id="Message">
                             {{ session()->get('success') }}
@@ -346,15 +336,15 @@
                                 @foreach ($orders as $order)
                                     <tr>
                                         <td style="padding: 15px; vertical-align: top;">
-                                            <div class="order-details" data-bs-toggle="tooltip" 
-                                            data-bs-html="true" 
-                                            title="
+                                            <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true"
+                                                title="
                                                 <p><i class='fas fa-map-marker-alt text-primary'></i>
                                                 <strong>Address:</strong>
                                                 {{ $order->order->address->apartment_flat_plot ?? '' }},
                                                 {{ $order->order->address->apartment_name ?? '' }},
                                                 {{ $order->order->address->localityDetails->locality_name ?? '' }}</p>
-                                            ">                                                <!-- Order ID -->
+                                            ">
+                                                <!-- Order ID -->
                                                 <p class="order-id">
                                                     <strong>Ord No :</strong> {{ $order->order_id }}
                                                 </p>
@@ -572,8 +562,6 @@
                                             </div>
                                         </td>
 
-                                        <!-- Button to Open Modal -->
-
                                         <td style="text-align: left; padding: 10px; font-size: 14px; color: #333;">
                                             {{ $order->created_at ? \Carbon\Carbon::parse($order->created_at)->format('d-m-Y h:i A') : 'N/A' }}
 
@@ -588,11 +576,8 @@
                                             @endif
                                         </td>
 
-
                                         <td style="padding: 15px; vertical-align: top;">
                                             <div class="product-details">
-
-                                                <!-- Subscription Dates -->
                                                 @if ($order)
                                                     <p class="subscription-dates">
                                                         {{ \Carbon\Carbon::parse($order->start_date)->format('F j, Y') }}
@@ -602,6 +587,67 @@
                                                             ? \Carbon\Carbon::parse($order->new_date)->format('F j, Y')
                                                             : \Carbon\Carbon::parse($order->end_date)->format('F j, Y') }}
                                                     </p>
+
+                                                    <!-- Edit Icon -->
+                                                    <a href="#" class="btn btn-sm btn-outline-secondary"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#editDatesModal{{ $order->id }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+
+                                                    <!-- Edit Modal -->
+                                                    <div class="modal fade" id="editDatesModal{{ $order->id }}"
+                                                        tabindex="-1"
+                                                        aria-labelledby="editDatesModalLabel{{ $order->id }}"
+                                                        aria-hidden="true">
+                                                        <div class="modal-dialog">
+                                                            <form method="POST"
+                                                                action="{{ route('admin.subscriptions.updateDates', $order->id) }}">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header bg-primary text-white">
+                                                                        <h5 class="modal-title"
+                                                                            id="editDatesModalLabel{{ $order->id }}">
+                                                                            Edit Subscription Dates
+                                                                        </h5>
+                                                                        <button type="button" class="btn-close"
+                                                                            data-bs-dismiss="modal"
+                                                                            aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <div class="mb-3">
+                                                                            <label for="start_date{{ $order->id }}"
+                                                                                class="form-label">Start Date</label>
+                                                                            <input type="date" class="form-control"
+                                                                                id="start_date{{ $order->id }}"
+                                                                                name="start_date"
+                                                                                value="{{ \Carbon\Carbon::parse($order->start_date)->toDateString() }}"
+                                                                                required>
+                                                                        </div>
+                                                                        <div class="mb-3">
+                                                                            <label for="end_date{{ $order->id }}"
+                                                                                class="form-label">End Date</label>
+                                                                            <input type="date" class="form-control"
+                                                                                id="end_date{{ $order->id }}"
+                                                                                name="end_date"
+                                                                                value="{{ \Carbon\Carbon::parse($order->new_date ?? $order->end_date)->toDateString() }}"
+                                                                                required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="submit" class="btn btn-success">
+                                                                            <i class="fas fa-save me-1"></i> Save
+                                                                        </button>
+                                                                        <button type="button" class="btn btn-secondary"
+                                                                            data-bs-dismiss="modal">
+                                                                            <i class="fas fa-times me-1"></i> Cancel
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
                                                 @else
                                                     <p class="no-subscription text-muted">
                                                         <strong>Subscription:</strong> No subscription data
@@ -613,60 +659,6 @@
                                         <td>
                                             <span style="font-weight: bold">₹
                                                 {{ number_format($order->order->total_price, 2) }}</span>
-                                            <!-- Edit Price Button -->
-                                            {{-- <a href="#" class="btn btn-outline-secondary btn-sm"
-                                                data-bs-toggle="modal"
-                                                data-bs-target="#editPriceModal{{ $order->id }}">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-
-                                            <!-- Edit Price Modal -->
-                                            <div class="modal fade" id="editPriceModal{{ $order->id }}"
-                                                tabindex="-1" aria-labelledby="editPriceModalLabel{{ $order->id }}"
-                                                aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <!-- Modal Header -->
-                                                        <div class="modal-header bg-primary text-white">
-                                                            <h5 class="modal-title"
-                                                                id="editPriceModalLabel{{ $order->id }}">
-                                                                <i class="fas fa-edit"></i> Edit Total Price
-                                                            </h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-
-                                                        <!-- Modal Body -->
-                                                        <div class="modal-body">
-                                                            <form
-                                                                action="{{ route('admin.orders.updatePrice', $order->id) }}"
-                                                                method="POST">
-                                                                @csrf
-                                                                @method('PUT')
-                                                                <div class="mb-3">
-                                                                    <label for="total_price" class="form-label">Total
-                                                                        Price</label>
-                                                                    <input type="number" class="form-control"
-                                                                        id="total_price" name="total_price"
-                                                                        value="{{ $order->total_price }}" step="0.01"
-                                                                        required>
-                                                                </div>
-
-                                                                <!-- Modal Footer -->
-                                                                <div class="modal-footer">
-                                                                    <button type="submit" class="btn btn-primary">
-                                                                        <i class="fas fa-save"></i> Save Changes
-                                                                    </button>
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">
-                                                                        <i class="fas fa-times"></i> Close
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div> --}}
                                         </td>
 
                                         <td>
@@ -683,8 +675,8 @@
 
                                         <td>
                                             @if ($order->order->rider_id)
-                                            <span>{{ $order->order->rider->rider_name ?? '' }}</span>
-                                            <a href="#editRiderModal{{ $order->order->id }}"
+                                                <span>{{ $order->order->rider->rider_name ?? '' }}</span>
+                                                <a href="#editRiderModal{{ $order->order->id }}"
                                                     class="btn btn-sm btn-outline-info" data-bs-toggle="modal"><i
                                                         class="fas fa-edit"></i></a>
                                             @else
@@ -868,14 +860,14 @@
         }
     </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
-    });
-</script>
+    </script>
 
 
     @if (session('success'))
@@ -896,7 +888,7 @@
         });
     </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Updated JavaScript -->
 @endsection

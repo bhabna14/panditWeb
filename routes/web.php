@@ -282,6 +282,8 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/notifications', [FlowerOrderController::class, 'showNotifications']);
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
+    Route::put('/subscriptions/{id}/update-dates', [FlowerOrderController::class, 'updateDates'])->name('admin.subscriptions.updateDates');
+
     Route::get('/product-orders', [ProductSubscriptionController::class, 'showProductOrder'])->name('admin.product.index');
 
 
