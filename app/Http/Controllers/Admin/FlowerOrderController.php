@@ -18,7 +18,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\SubscriptionPauseResumeLog;
  use Illuminate\Support\Facades\DB;
-use Yajra\DataTables\Facades\DataTables;
+use Yajra\DataTables\Facades\DataTables; // ✅ Correct import
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -26,7 +26,6 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     
-use DataTables;
 
 public function showOrders(Request $request)
 {
