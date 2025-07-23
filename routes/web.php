@@ -284,6 +284,8 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
 // ✅ Route must match the request you're making
 Route::post('/subscriptions/{id}/updateDates', [FlowerOrderController::class, 'updateDates'])->name('admin.subscriptions.updateDates');
+Route::post('/subscriptions/{id}/update-status', [FlowerOrderController::class, 'updateStatus'])
+    ->name('admin.subscriptions.updateStatus');
 
     Route::get('/product-orders', [ProductSubscriptionController::class, 'showProductOrder'])->name('admin.product.index');
 

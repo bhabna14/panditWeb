@@ -78,6 +78,19 @@ public function updateDates(Request $request, $id)
     return response()->json(['message' => 'Subscription dates updated successfully.']);
 }
 
+public function updateStatus(Request $request, $id)
+{
+    $request->validate([
+        'status' => 'required|in:active,paused,pending,expired'
+    ]);
+
+    $subscription = Subscription::findOrFail($id);
+    $subscription->status = $request->status;
+    $subscription->save();
+
+    return response()->json(['message' => 'Subscription status updated successfully.']);
+}
+
     public function markAsViewed()
     {
         Order::where('is_viewed', false)->update(['is_viewed' => true]);

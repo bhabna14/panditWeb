@@ -401,7 +401,7 @@
                         <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form id="edit-dates-form" method="POST">
-                                    @csrf 
+                                    @csrf
                                     <div class="modal-content">
                                         <div class="modal-header bg-primary text-white">
                                             <h5 class="modal-title">Edit Subscription Dates</h5>
@@ -463,6 +463,40 @@
                             </div>
                         </div>
 
+                        <!-- Edit Status Modal -->
+                        <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="edit-status-form" method="POST">
+                                    @csrf
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-info text-white">
+                                            <h5 class="modal-title">Edit Subscription Status</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" id="status-sub-id" name="subscription_id">
+                                            <div class="mb-3">
+                                                <label for="new-status" class="form-label">Status</label>
+                                                <select name="status" id="new-status" class="form-select" required>
+                                                    <option value="">Select Status</option>
+                                                    <option value="active">Active</option>
+                                                    <option value="paused">Paused</option>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="expired">Expired</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Update</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+
                     </div>
 
                 </div>
@@ -472,48 +506,50 @@
     <!-- End Row -->
 @endsection
 @section('scripts')
-<!-- Dependencies -->
-<script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <!-- Dependencies -->
+    <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
 
-<script>
-$(function() {
-    const table = $('#file-datatable').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ route('admin.orders.index') }}",
-            data: { filter: '{{ request('filter', '') }}' }
-        },
-        columns: [
-            {
-                data: null,
-                orderable: false,
-                render: function(r) {
-                    const userId = r.users?.userid;
-                    const orderId = r.id;
-                    const order = r.order || {};
-                    const address = order.address || {};
-                    const locality = address.localityDetails?.locality_name || address.locality || '';
-                    const apartmentPlot = address.apartment_flat_plot || '';
-                    const apartmentName = address.apartment_name || '';
-                    const landmark = address.landmark || '';
-                    const pincode = address.pincode || '';
-                    const city = address.city || '';
-                    const state = address.state || '';
-                    const addressId = address.id;
+    <script>
+        $(function() {
+            const table = $('#file-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('admin.orders.index') }}",
+                    data: {
+                        filter: '{{ request('filter', '') }}'
+                    }
+                },
+                columns: [{
+                        data: null,
+                        orderable: false,
+                        render: function(r) {
+                            const userId = r.users?.userid;
+                            const orderId = r.id;
+                            const order = r.order || {};
+                            const address = order.address || {};
+                            const locality = address.localityDetails?.locality_name || address
+                                .locality || '';
+                            const apartmentPlot = address.apartment_flat_plot || '';
+                            const apartmentName = address.apartment_name || '';
+                            const landmark = address.landmark || '';
+                            const pincode = address.pincode || '';
+                            const city = address.city || '';
+                            const state = address.state || '';
+                            const addressId = address.id;
 
-                    let html = `
+                            let html = `
                         <p><strong>Ord No:</strong> ${order.order_id || 'N/A'}</p>
                         <p><strong>Name:</strong> ${r.users?.name || 'N/A'}</p>
                         <p><strong>No:</strong> ${r.users?.mobile_number || 'N/A'}</p>
                     `;
 
-                    if (userId) {
-                        html += `
+                            if (userId) {
+                                html += `
                             <a href="/admin/showCustomerDetails/${userId}" class="btn btn-outline-info btn-sm me-1">
                                 <i class="fas fa-eye"></i>
                             </a>
@@ -528,19 +564,19 @@ $(function() {
                                 <i class="fas fa-edit"></i>
                             </button>
                         `;
-                    }
+                            }
 
-                    return html;
-                }
-            },
-            {
-                data: 'created_at',
-                render: d => d ? moment(d).format('DD-MM-YYYY h:mm A') : 'N/A'
-            },
-            {
-                data: null,
-                orderable: false,
-                render: r => `
+                            return html;
+                        }
+                    },
+                    {
+                        data: 'created_at',
+                        render: d => d ? moment(d).format('DD-MM-YYYY h:mm A') : 'N/A'
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        render: r => `
                     ${moment(r.start_date).format('MMM D, YYYY')}<br> — <br>
                     ${r.new_date ? moment(r.new_date).format('MMM D, YYYY') : moment(r.end_date).format('MMM D, YYYY')}
                     <br>
@@ -548,169 +584,215 @@ $(function() {
                         <i class="fas fa-edit"></i>
                     </button>
                 `
-            },
-            {
-                data: 'order.total_price',
-                render: p => `₹ ${parseFloat(p).toFixed(2)}`
-            },
-            {
-                data: 'status',
-                render: s => {
-                    const classes = {
-                        active: 'bg-success',
-                        paused: 'bg-warning',
-                        expired: 'bg-primary',
-                        dead: 'bg-danger',
-                        pending: 'bg-danger'
-                    };
-                    return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>`;
-                }
-            },
-            {
-                data: null,
-                render: r => `
+                    },
+                    {
+                        data: 'order.total_price',
+                        render: p => `₹ ${parseFloat(p).toFixed(2)}`
+                    },
+                    {
+                        data: 'status',
+                        render: function(s, type, row) {
+                            const classes = {
+                                active: 'bg-success',
+                                paused: 'bg-warning',
+                                expired: 'bg-primary',
+                                dead: 'bg-danger',
+                                pending: 'bg-danger'
+                            };
+                            return `
+            <span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span><br>
+            <button class="btn btn-sm btn-outline-info mt-1 edit-status"
+                data-id="${row.id}" data-status="${s}">
+                <i class="fas fa-edit"></i>
+            </button>
+        `;
+                        }
+                    },
+
+                    {
+                        data: null,
+                        render: r => `
                     ${r.order?.rider?.rider_name || 'Unassigned'}<br>
                     <button class="btn btn-sm btn-info edit-rider" data-subscription="${r.id}" data-order="${r.order?.id}" data-rider="${r.order?.rider?.rider_id || ''}">
                         <i class="fas fa-edit"></i>
                     </button>
                 `
-            },
-            {
-                data: null,
-                orderable: false,
-                render: r => {
-                    let btn = `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
-                    if (r.status === 'active')
-                        btn += ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
-                    if (r.status === 'paused')
-                        btn += ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
-                    return btn;
-                }
-            }
-        ],
-        order: [[1, 'desc']]
-    });
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        render: r => {
+                            let btn =
+                                `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
+                            if (r.status === 'active')
+                                btn +=
+                                ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
+                            if (r.status === 'paused')
+                                btn +=
+                                ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
+                            return btn;
+                        }
+                    }
+                ],
+                order: [
+                    [1, 'desc']
+                ]
+            });
 
-    // Show View Address Modal
-    $('#file-datatable').on('click', '.show-address-modal', function() {
-        const row = table.row($(this).closest('tr')).data();
-        const address = row.order?.address || {};
-        const body = `
+            // Show View Address Modal
+            $('#file-datatable').on('click', '.show-address-modal', function() {
+                const row = table.row($(this).closest('tr')).data();
+                const address = row.order?.address || {};
+                const body = `
             <p><strong>Address:</strong> ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${address.localityDetails?.locality_name || ''}</p>
             <p><strong>Landmark:</strong> ${address.landmark || ''}</p>
             <p><strong>Pin Code:</strong> ${address.pincode || ''}</p>
             <p><strong>City:</strong> ${address.city || ''}</p>
             <p><strong>State:</strong> ${address.state || ''}</p>
         `;
-        $('#addressModalBody').html(body);
-    });
+                $('#addressModalBody').html(body);
+            });
 
-    // Open Edit Address Modal
-    $('#file-datatable').on('click', '.edit-address-modal', function() {
-        const form = $('#edit-address-form');
-        const id = $(this).data('address-id');
-        form.attr('action', `/admin/orders/${id}/updateAddress`);
+            // Open Edit Address Modal
+            $('#file-datatable').on('click', '.edit-address-modal', function() {
+                const form = $('#edit-address-form');
+                const id = $(this).data('address-id');
+                form.attr('action', `/admin/orders/${id}/updateAddress`);
 
-        $('#edit-flat').val($(this).data('flat'));
-        $('#edit-apartment').val($(this).data('name'));
-        $('#edit-locality').val($(this).data('locality'));
-        $('#edit-landmark').val($(this).data('landmark'));
-        $('#edit-pincode').val($(this).data('pincode'));
-        $('#edit-city').val($(this).data('city'));
-        $('#edit-state').val($(this).data('state'));
-    });
+                $('#edit-flat').val($(this).data('flat'));
+                $('#edit-apartment').val($(this).data('name'));
+                $('#edit-locality').val($(this).data('locality'));
+                $('#edit-landmark').val($(this).data('landmark'));
+                $('#edit-pincode').val($(this).data('pincode'));
+                $('#edit-city').val($(this).data('city'));
+                $('#edit-state').val($(this).data('state'));
+            });
 
-    // Submit Edit Address
-    $('#edit-address-form').submit(function(e) {
-        e.preventDefault();
-        $.ajax({
-            url: this.action,
-            type: 'POST',
-            data: $(this).serialize(),
-            success: () => {
-                Swal.fire('Updated', 'Address updated.', 'success');
-                $('#editAddressModal').modal('hide');
-                table.ajax.reload(null, false);
-            },
-            error: () => {
-                Swal.fire('Error', 'Failed to update address.', 'error');
-            }
+            // Submit Edit Address
+            $('#edit-address-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: () => {
+                        Swal.fire('Updated', 'Address updated.', 'success');
+                        $('#editAddressModal').modal('hide');
+                        table.ajax.reload(null, false);
+                    },
+                    error: () => {
+                        Swal.fire('Error', 'Failed to update address.', 'error');
+                    }
+                });
+            });
+
+            // Open Edit Dates Modal
+            $('#file-datatable').on('click', '.edit-dates', function() {
+                const subId = $(this).data('id');
+                const startDate = $(this).data('start');
+                const endDate = $(this).data('end');
+
+                $('#sub-id').val(subId);
+                $('#sub-start').val(moment(startDate).format('YYYY-MM-DD'));
+                $('#sub-end').val(moment(endDate).format('YYYY-MM-DD'));
+
+                // ✅ Correct action assignment (must match route)
+                $('#edit-dates-form').attr('action', `/admin/subscriptions/${subId}/updateDates`);
+
+                new bootstrap.Modal($('#editDatesModal')[0]).show();
+            });
+
+            // Open Edit Status Modal
+            $('#file-datatable').on('click', '.edit-status', function() {
+                const subId = $(this).data('id');
+                const currentStatus = $(this).data('status');
+
+                $('#status-sub-id').val(subId);
+                $('#new-status').val(currentStatus);
+                $('#edit-status-form').attr('action', `/admin/subscriptions/${subId}/update-status`);
+
+                new bootstrap.Modal($('#editStatusModal')[0]).show();
+            });
+
+            // Submit Edit Status Form
+            $('#edit-status-form').submit(function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function(res) {
+                        Swal.fire('Updated', res.message, 'success');
+                        bootstrap.Modal.getInstance($('#editStatusModal')[0]).hide();
+                        $('#file-datatable').DataTable().ajax.reload(null, false);
+                    },
+                    error: function(xhr) {
+                        const msg = xhr.responseJSON?.message || 'Failed to update status.';
+                        Swal.fire('Error', msg, 'error');
+                    }
+                });
+            });
+
+
+            // Submit Edit Dates Form
+            $('#edit-dates-form').submit(function(e) {
+                e.preventDefault();
+
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: (res) => {
+                        Swal.fire('Updated', res.message, 'success');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById(
+                            'editDatesModal'));
+                        modal.hide(); // Close modal
+                        $('#edit-dates-form')[0].reset(); // Optional: reset form
+                        $('#file-datatable').DataTable().ajax.reload(null,
+                            false); // Refresh row
+                    },
+                    error: (xhr) => {
+                        let msg = 'Failed to update dates.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            msg = xhr.responseJSON.message;
+                        }
+                        Swal.fire('Error', msg, 'error');
+                    }
+                });
+            });
+
+
+            // Open Edit Rider Modal
+            $('#file-datatable').on('click', '.edit-rider', function() {
+                const subId = $(this).data('subscription');
+                const orderId = $(this).data('order');
+                const riderId = $(this).data('rider');
+
+                $('#rider-sub-id').val(subId);
+                $('#rider-select').val(riderId);
+                $('#edit-rider-form').attr('action', `/admin/orders/${orderId}/updateRider`);
+
+                new bootstrap.Modal($('#editRiderModal')[0]).show();
+            });
+
+            // Submit Edit Rider Form
+            $('#edit-rider-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: () => {
+                        Swal.fire('Updated', 'Rider assigned successfully.', 'success');
+                        $('#editRiderModal').modal('hide');
+                        table.ajax.reload(null, false);
+                    },
+                    error: () => {
+                        Swal.fire('Error', 'Failed to assign rider.', 'error');
+                    }
+                });
+            });
         });
-    });
-
-    // Open Edit Dates Modal
-   $('#file-datatable').on('click', '.edit-dates', function() {
-    const subId = $(this).data('id');
-    const startDate = $(this).data('start');
-    const endDate = $(this).data('end');
-
-    $('#sub-id').val(subId);
-    $('#sub-start').val(moment(startDate).format('YYYY-MM-DD'));
-    $('#sub-end').val(moment(endDate).format('YYYY-MM-DD'));
-
-    // ✅ Correct action assignment (must match route)
-    $('#edit-dates-form').attr('action', `/admin/subscriptions/${subId}/updateDates`);
-
-    new bootstrap.Modal($('#editDatesModal')[0]).show();
-});
-
-    // Submit Edit Dates Form
-$('#edit-dates-form').submit(function(e) {
-    e.preventDefault();
-
-    $.ajax({
-        url: this.action,
-        type: 'POST',
-        data: $(this).serialize(),
-        success: (res) => {
-            Swal.fire('Updated', res.message, 'success');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editDatesModal'));
-            modal.hide();  // Close modal
-            $('#edit-dates-form')[0].reset(); // Optional: reset form
-            $('#file-datatable').DataTable().ajax.reload(null, false); // Refresh row
-        },
-        error: (xhr) => {
-            let msg = 'Failed to update dates.';
-            if (xhr.responseJSON && xhr.responseJSON.message) {
-                msg = xhr.responseJSON.message;
-            }
-            Swal.fire('Error', msg, 'error');
-        }
-    });
-});
-
-
-    // Open Edit Rider Modal
-    $('#file-datatable').on('click', '.edit-rider', function() {
-        const subId = $(this).data('subscription');
-        const orderId = $(this).data('order');
-        const riderId = $(this).data('rider');
-
-        $('#rider-sub-id').val(subId);
-        $('#rider-select').val(riderId);
-        $('#edit-rider-form').attr('action', `/admin/orders/${orderId}/updateRider`);
-
-        new bootstrap.Modal($('#editRiderModal')[0]).show();
-    });
-
-    // Submit Edit Rider Form
-    $('#edit-rider-form').submit(function(e) {
-        e.preventDefault();
-        $.ajax({
-            url: this.action,
-            type: 'POST',
-            data: $(this).serialize(),
-            success: () => {
-                Swal.fire('Updated', 'Rider assigned successfully.', 'success');
-                $('#editRiderModal').modal('hide');
-                table.ajax.reload(null, false);
-            },
-            error: () => {
-                Swal.fire('Error', 'Failed to assign rider.', 'error');
-            }
-        });
-    });
-});
-</script>
+    </script>
 @endsection
-
