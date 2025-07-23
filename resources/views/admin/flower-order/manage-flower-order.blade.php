@@ -639,7 +639,20 @@ $(function() {
     });
 
     // Open Edit Dates Modal
-   // Submit Edit Dates Form
+    $('#file-datatable').on('click', '.edit-dates', function() {
+        const subId = $(this).data('id');
+        const startDate = $(this).data('start');
+        const endDate = $(this).data('end');
+
+        $('#sub-id').val(subId);
+        $('#sub-start').val(moment(startDate).format('YYYY-MM-DD'));
+        $('#sub-end').val(moment(endDate).format('YYYY-MM-DD'));
+        $('#edit-dates-form').attr('action', `/admin/subscriptions/${subId}/updateDates`);
+
+        new bootstrap.Modal($('#editDatesModal')[0]).show();
+    });
+
+    // Submit Edit Dates Form
 $('#edit-dates-form').submit(function(e) {
     e.preventDefault();
 
@@ -664,23 +677,6 @@ $('#edit-dates-form').submit(function(e) {
     });
 });
 
-    // Submit Edit Dates Form
-    $('#edit-dates-form').submit(function(e) {
-        e.preventDefault();
-        $.ajax({
-            url: this.action,
-            type: 'POST',
-            data: $(this).serialize(),
-            success: () => {
-                Swal.fire('Updated', 'Subscription dates updated.', 'success');
-                $('#editDatesModal').modal('hide');
-                table.ajax.reload(null, false);
-            },
-            error: () => {
-                Swal.fire('Error', 'Failed to update dates.', 'error');
-            }
-        });
-    });
 
     // Open Edit Rider Modal
     $('#file-datatable').on('click', '.edit-rider', function() {
