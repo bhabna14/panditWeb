@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
 
 
     <!-- INTERNAL Select2 css -->
@@ -57,7 +57,7 @@
         .modal-footer {
             border-top: none;
         }
-        
+
         .modal-header {
             background-color: #007bff;
             color: #fff;
@@ -661,7 +661,6 @@
                                             </div>
                                         </td>
 
-
                                         <td>
                                             <span style="font-weight: bold">₹
                                                 {{ number_format($order->order->total_price, 2) }}</span>
@@ -669,15 +668,20 @@
 
                                         <td>
                                             <span
-                                                class="status-badge
-                                                {{ optional($order)->status === 'active' ? 'status-running bg-success' : '' }}
-                                                {{ optional($order)->status === 'paused' ? 'status-paused bg-warning' : '' }}
-                                                {{ optional($order)->status === 'expired' ? 'status-expired bg-primary' : '' }}
-                                                {{ optional($order)->status === 'dead' ? 'status-expired bg-danger' : '' }}
-                                                {{ optional($order)->status === 'pending' ? 'status-expired bg-danger' : '' }}">
-                                                {{ ucfirst(optional($order)->status) }}
+                                                class="badge 
+                                                    {{ $order->status === 'active' ? 'bg-success' : '' }}
+                                                    {{ $order->status === 'paused' ? 'bg-warning' : '' }}
+                                                    {{ $order->status === 'expired' ? 'bg-primary' : '' }}
+                                                    {{ in_array($order->status, ['dead', 'pending']) ? 'bg-danger' : '' }}">
+                                                {{ ucfirst($order->status) }}
                                             </span>
+                                            <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
+                                                data-id="{{ $order->id }}" data-status="{{ $order->status }}"
+                                                data-bs-toggle="modal" data-bs-target="#editStatusModal">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
                                         </td>
+
 
                                         <td>
                                             @if ($order->order->rider_id)
@@ -817,11 +821,41 @@
                                 </div>
                             </div>
                         @endforeach
-                    </div> 
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="edit-status-form" method="POST">
+            @csrf
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title">Update Subscription Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="subscription_id" id="status-sub-id">
+                    <div class="mb-3">
+                        <label for="status-select">Status</label>
+                        <select class="form-select" name="status" id="status-select" required>
+                            <option value="active">Active</option>
+                            <option value="paused">Paused</option>
+                            <option value="pending">Pending</option>
+                            <option value="expired">Expired</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
     <!-- End Row -->
 @endsection
 
@@ -866,14 +900,14 @@
         }
     </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
         });
-    });
-</script>
+    </script>
 
 
     @if (session('success'))
@@ -894,7 +928,44 @@
         });
     </script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Open modal and populate
+$('#file-datatable').on('click', '.edit-status-btn', function () {
+    const subId = $(this).data('id');
+    const currentStatus = $(this).data('status');
+
+    $('#status-sub-id').val(subId);
+    $('#status-select').val(currentStatus);
+    $('#edit-status-form').attr('action', `/admin/subscriptions/${subId}/update-status`);
+});
+
+// Submit status update
+$('#edit-status-form').submit(function (e) {
+    e.preventDefault();
+
+    $.ajax({
+        url: this.action,
+        type: 'POST',
+        data: $(this).serialize(),
+        success: function (res) {
+            Swal.fire('Updated', res.message, 'success');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editStatusModal'));
+            modal.hide();
+            $('#edit-status-form')[0].reset();
+            $('#file-datatable').DataTable().ajax.reload(null, false);
+        },
+        error: function () {
+            Swal.fire('Error', 'Failed to update status.', 'error');
+        }
+    });
+});
+
+</script>
+
+
+
+    
 
     <!-- Updated JavaScript -->
 @endsection
