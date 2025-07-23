@@ -401,7 +401,7 @@
                         <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form id="edit-dates-form" method="POST">
-                                    @csrf @method('PUT')
+                                    @csrf 
                                     <div class="modal-content">
                                         <div class="modal-header bg-primary text-white">
                                             <h5 class="modal-title">Edit Subscription Dates</h5>
