@@ -47,22 +47,23 @@ class FlowerOrderController extends Controller
                     return $a->apartment_flat_plot . ' ' . $a->apartment_name . ' ' . $a->city;
                 })
                 ->filter(function ($query) use ($request) {
-                    $search = $request->input('search.value');
-                    if ($search) {
-                        $query->where(function ($q) use ($search) {
-                            $q->whereHas('users', function ($u) use ($search) {
-                                $u->where('name', 'like', "%$search%")
-                                  ->orWhere('mobile_number', 'like', "%$search%");
-                            })->orWhereHas('order.address', function ($a) use ($search) {
-                                $a->where('apartment_flat_plot', 'like', "%$search%")
-                                  ->orWhere('apartment_name', 'like', "%$search%")
-                                  ->orWhere('city', 'like', "%$search%")
-                                  ->orWhere('state', 'like', "%$search%")
-                                  ->orWhere('pincode', 'like', "%$search%");
-                            });
-                        });
-                    }
-                })
+    $search = $request->input('search.value');
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->whereHas('users', function ($u) use ($search) {
+                $u->whereRaw("CONVERT(`name` USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE ?", ["%$search%"])
+                  ->orWhereRaw("CONVERT(`mobile_number` USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE ?", ["%$search%"]);
+            })->orWhereHas('order.address', function ($a) use ($search) {
+                $a->whereRaw("CONVERT(`apartment_flat_plot` USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE ?", ["%$search%"])
+                  ->orWhereRaw("CONVERT(`apartment_name` USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE ?", ["%$search%"])
+                  ->orWhereRaw("CONVERT(`city` USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE ?", ["%$search%"])
+                  ->orWhereRaw("CONVERT(`state` USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE ?", ["%$search%"])
+                  ->orWhereRaw("CONVERT(`pincode` USING utf8mb4) COLLATE utf8mb4_unicode_ci LIKE ?", ["%$search%"]);
+            });
+        });
+    }
+})
+
                 ->make(true);
         }
 
