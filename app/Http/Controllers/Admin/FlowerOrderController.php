@@ -26,55 +26,36 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     
- public function showOrders(Request $request)
+   public function showOrders(Request $request)
 {
     if ($request->ajax()) {
         $query = Subscription::with([
-            'users',
-            'order.address.localityDetails',
             'order.rider',
-        ])->select('subscriptions.*');
+            'order.address.localityDetails',
+            'flowerPayments',
+            'users',
+            'flowerProducts',
+            'pauseResumeLog',
+        ])->orderBy('id', 'desc');
 
-        return DataTables::of($query)
-            ->addColumn('user_name', function ($r) {
-                return $r->users->name ?? '';
-            })
-            ->addColumn('mobile_number', function ($r) {
-                return $r->users->mobile_number ?? '';
-            })
-            ->addColumn('address_column', function ($r) {
-                $a = optional($r->order->address);
-                return $a->apartment_flat_plot . ' ' . $a->apartment_name . ' ' . $a->city;
-            })
-            ->filter(function ($query) use ($request) {
-                $search = $request->input('search.value');
+        // Add filters if any
+        if ($request->query('filter') === 'active') {
+            $query->where('status', 'active');
+        }
 
-                if ($search) {
-                    $query->where(function ($q) use ($search) {
-                        $q->whereHas('users', function ($u) use ($search) {
-                            $u->whereRaw("CONVERT(name USING utf8mb4) COLLATE utf8mb4_general_ci LIKE ?", ["%$search%"])
-                              ->orWhereRaw("CONVERT(mobile_number USING utf8mb4) COLLATE utf8mb4_general_ci LIKE ?", ["%$search%"]);
-                        })->orWhereHas('order.address', function ($a) use ($search) {
-                            $a->whereRaw("CONVERT(apartment_flat_plot USING utf8mb4) COLLATE utf8mb4_general_ci LIKE ?", ["%$search%"])
-                              ->orWhereRaw("CONVERT(apartment_name USING utf8mb4) COLLATE utf8mb4_general_ci LIKE ?", ["%$search%"])
-                              ->orWhereRaw("CONVERT(city USING utf8mb4) COLLATE utf8mb4_general_ci LIKE ?", ["%$search%"])
-                              ->orWhereRaw("CONVERT(state USING utf8mb4) COLLATE utf8mb4_general_ci LIKE ?", ["%$search%"])
-                              ->orWhereRaw("CONVERT(pincode USING utf8mb4) COLLATE utf8mb4_general_ci LIKE ?", ["%$search%"]);
-                        });
-                    });
-                }
-            })
-            ->make(true);
+        return DataTables::of($query)->make(true);
     }
 
-    return view('admin.flower-order.manage-flower-order', [
-        'riders' => \App\Models\RiderDetails::where('status', 'active')->get(),
-        'activeSubscriptions' => Subscription::where('status', 'active')->count(),
-        'pausedSubscriptions' => Subscription::where('status', 'paused')->count(),
-        'ordersRequestedToday' => Subscription::whereDate('created_at', Carbon::today())->count(),
-    ]);
-}
+    // When not an AJAX call (first page load)
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
+    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+    $riders = \App\Models\RiderDetails::where('status', 'active')->get();
 
+    return view('admin.flower-order.manage-flower-order', compact(
+        'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
+    ));
+}  
 
 public function updateDates(Request $request, $id)
 {
