@@ -26,7 +26,7 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     
-  public function showOrders(Request $request)
+ public function showOrders(Request $request)
 {
     if ($request->ajax()) {
         $query = Subscription::with([
@@ -38,15 +38,32 @@ class FlowerOrderController extends Controller
             'pauseResumeLog',
         ])->orderBy('id', 'desc');
 
-        // Add filters if any
+        // Optional filter (e.g., ?filter=active)
         if ($request->query('filter') === 'active') {
             $query->where('status', 'active');
         }
 
-        return DataTables::of($query)->make(true);
+        return DataTables::of($query)
+            ->filter(function ($query) use ($request) {
+                if ($search = $request->get('search')['value']) {
+                    $query->where(function ($q) use ($search) {
+                        $q->whereHas('users', function ($q2) use ($search) {
+                            $q2->where('name', 'like', "%{$search}%")
+                               ->orWhere('mobile_number', 'like', "%{$search}%");
+                        })->orWhereHas('order', function ($q3) use ($search) {
+                            $q3->where('order_id', 'like', "%{$search}%")
+                               ->orWhere('total_price', 'like', "%{$search}%");
+                        })->orWhere('status', 'like', "%{$search}%")
+                          ->orWhere('start_date', 'like', "%{$search}%")
+                          ->orWhere('end_date', 'like', "%{$search}%")
+                          ->orWhere('new_date', 'like', "%{$search}%");
+                    });
+                }
+            })
+            ->make(true);
     }
 
-    // When not an AJAX call (first page load)
+    // Page load
     $activeSubscriptions = Subscription::where('status', 'active')->count();
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
     $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();

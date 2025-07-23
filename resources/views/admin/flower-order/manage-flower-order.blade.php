@@ -489,105 +489,106 @@ $(function() {
             data: { filter: '{{ request('filter', '') }}' }
         },
         columns: [
-            {
-                data: null,
-                orderable: false,
-                render: function(r) {
-                    const userId = r.users?.userid;
-                    const orderId = r.id;
-                    const order = r.order || {};
-                    const address = order.address || {};
-                    const locality = address.localityDetails?.locality_name || address.locality || '';
-                    const apartmentPlot = address.apartment_flat_plot || '';
-                    const apartmentName = address.apartment_name || '';
-                    const landmark = address.landmark || '';
-                    const pincode = address.pincode || '';
-                    const city = address.city || '';
-                    const state = address.state || '';
-                    const addressId = address.id;
+    {
+        data: 'users.name',
+        name: 'users.name', // <-- searchable & sortable
+        render: function (data, type, r) {
+            const userId = r.users?.userid;
+            const order = r.order || {};
+            const address = order.address || {};
+            const locality = address.localityDetails?.locality_name || address.locality || '';
+            const html = `
+                <p><strong>Ord No:</strong> ${order.order_id || 'N/A'}</p>
+                <p><strong>Name:</strong> ${r.users?.name || 'N/A'}</p>
+                <p><strong>No:</strong> ${r.users?.mobile_number || 'N/A'}</p>
+                <a href="/admin/showCustomerDetails/${userId}" class="btn btn-outline-info btn-sm me-1">
+                    <i class="fas fa-eye"></i>
+                </a>
+                <button class="btn btn-outline-success btn-sm me-1 show-address-modal" data-order-id="${r.id}" data-bs-toggle="modal" data-bs-target="#addressModal">
+                    <i class="fas fa-map-marker-alt"></i>
+                </button>
+                <button class="btn btn-outline-secondary btn-sm edit-address-modal"
+                    data-address-id="${address.id || ''}"
+                    data-flat="${address.apartment_flat_plot || ''}"
+                    data-name="${address.apartment_name || ''}"
+                    data-locality="${locality}"
+                    data-landmark="${address.landmark || ''}"
+                    data-pincode="${address.pincode || ''}"
+                    data-city="${address.city || ''}"
+                    data-state="${address.state || ''}"
+                    data-bs-toggle="modal" data-bs-target="#editAddressModal">
+                    <i class="fas fa-edit"></i>
+                </button>
+            `;
+            return html;
+        }
+    },
+    {
+        data: 'created_at',
+        name: 'created_at'
+    },
+    {
+        data: 'start_date',
+        name: 'start_date',
+        render: function (data, type, r) {
+            return `
+                ${moment(r.start_date).format('MMM D, YYYY')}<br> — <br>
+                ${r.new_date ? moment(r.new_date).format('MMM D, YYYY') : moment(r.end_date).format('MMM D, YYYY')}
+                <br>
+                <button class="btn btn-sm btn-outline-secondary edit-dates"
+                    data-id="${r.id}" data-start="${r.start_date}" data-end="${r.new_date || r.end_date}">
+                    <i class="fas fa-edit"></i>
+                </button>
+            `;
+        }
+    },
+    {
+        data: 'order.total_price',
+        name: 'order.total_price',
+        render: d => `₹ ${parseFloat(d).toFixed(2)}`
+    },
+    {
+        data: 'status',
+        name: 'status',
+        render: s => {
+            const classes = {
+                active: 'bg-success',
+                paused: 'bg-warning',
+                expired: 'bg-primary',
+                dead: 'bg-danger',
+                pending: 'bg-danger'
+            };
+            return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>`;
+        }
+    },
+    {
+        data: 'order.rider.rider_name',
+        name: 'order.rider.rider_name',
+        render: function (data, type, r) {
+            return `
+                ${data || 'Unassigned'}<br>
+                <button class="btn btn-sm btn-info edit-rider"
+                    data-subscription="${r.id}" data-order="${r.order?.id}" data-rider="${r.order?.rider?.rider_id || ''}">
+                    <i class="fas fa-edit"></i>
+                </button>
+            `;
+        }
+    },
+    {
+        data: 'id',
+        orderable: false,
+        searchable: false,
+        render: r => {
+            let btn = `<a href="/admin/flower-orders/${r}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
+            if (r.status === 'active')
+                btn += ` <a href="/admin/subscription/pause-page/${r}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
+            if (r.status === 'paused')
+                btn += ` <a href="/admin/subscription/resume-page/${r}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
+            return btn;
+        }
+    }
+],
 
-                    let html = `
-                        <p><strong>Ord No:</strong> ${order.order_id || 'N/A'}</p>
-                        <p><strong>Name:</strong> ${r.users?.name || 'N/A'}</p>
-                        <p><strong>No:</strong> ${r.users?.mobile_number || 'N/A'}</p>
-                    `;
-
-                    if (userId) {
-                        html += `
-                            <a href="/admin/showCustomerDetails/${userId}" class="btn btn-outline-info btn-sm me-1">
-                                <i class="fas fa-eye"></i>
-                            </a>
-                            <button class="btn btn-outline-success btn-sm me-1 show-address-modal" data-order-id="${orderId}" data-bs-toggle="modal" data-bs-target="#addressModal">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </button>
-                            <button class="btn btn-outline-secondary btn-sm edit-address-modal" data-order-id="${orderId}"
-                                data-address-id="${addressId}"
-                                data-flat="${apartmentPlot}" data-name="${apartmentName}" data-locality="${locality}"
-                                data-landmark="${landmark}" data-pincode="${pincode}" data-city="${city}" data-state="${state}"
-                                data-bs-toggle="modal" data-bs-target="#editAddressModal">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        `;
-                    }
-
-                    return html;
-                }
-            },
-            {
-                data: 'created_at',
-                render: d => d ? moment(d).format('DD-MM-YYYY h:mm A') : 'N/A'
-            },
-            {
-                data: null,
-                orderable: false,
-                render: r => `
-                    ${moment(r.start_date).format('MMM D, YYYY')}<br> — <br>
-                    ${r.new_date ? moment(r.new_date).format('MMM D, YYYY') : moment(r.end_date).format('MMM D, YYYY')}
-                    <br>
-                    <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}" data-start="${r.start_date}" data-end="${r.new_date || r.end_date}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                `
-            },
-            {
-                data: 'order.total_price',
-                render: p => `₹ ${parseFloat(p).toFixed(2)}`
-            },
-            {
-                data: 'status',
-                render: s => {
-                    const classes = {
-                        active: 'bg-success',
-                        paused: 'bg-warning',
-                        expired: 'bg-primary',
-                        dead: 'bg-danger',
-                        pending: 'bg-danger'
-                    };
-                    return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>`;
-                }
-            },
-            {
-                data: null,
-                render: r => `
-                    ${r.order?.rider?.rider_name || 'Unassigned'}<br>
-                    <button class="btn btn-sm btn-info edit-rider" data-subscription="${r.id}" data-order="${r.order?.id}" data-rider="${r.order?.rider?.rider_id || ''}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                `
-            },
-            {
-                data: null,
-                orderable: false,
-                render: r => {
-                    let btn = `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
-                    if (r.status === 'active')
-                        btn += ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
-                    if (r.status === 'paused')
-                        btn += ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
-                    return btn;
-                }
-            }
-        ],
         order: [[1, 'desc']]
     });
 
