@@ -639,18 +639,30 @@ $(function() {
     });
 
     // Open Edit Dates Modal
-    $('#file-datatable').on('click', '.edit-dates', function() {
-        const subId = $(this).data('id');
-        const startDate = $(this).data('start');
-        const endDate = $(this).data('end');
+   // Submit Edit Dates Form
+$('#edit-dates-form').submit(function(e) {
+    e.preventDefault();
 
-        $('#sub-id').val(subId);
-        $('#sub-start').val(moment(startDate).format('YYYY-MM-DD'));
-        $('#sub-end').val(moment(endDate).format('YYYY-MM-DD'));
-        $('#edit-dates-form').attr('action', `/admin/subscriptions/${subId}/updateDates`);
-
-        new bootstrap.Modal($('#editDatesModal')[0]).show();
+    $.ajax({
+        url: this.action,
+        type: 'POST',
+        data: $(this).serialize(),
+        success: (res) => {
+            Swal.fire('Updated', res.message, 'success');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editDatesModal'));
+            modal.hide();  // Close modal
+            $('#edit-dates-form')[0].reset(); // Optional: reset form
+            $('#file-datatable').DataTable().ajax.reload(null, false); // Refresh row
+        },
+        error: (xhr) => {
+            let msg = 'Failed to update dates.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                msg = xhr.responseJSON.message;
+            }
+            Swal.fire('Error', msg, 'error');
+        }
     });
+});
 
     // Submit Edit Dates Form
     $('#edit-dates-form').submit(function(e) {

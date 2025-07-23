@@ -56,30 +56,30 @@ class FlowerOrderController extends Controller
         'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
     ));
 }
+public function updateDates(Request $request, $id)
+{
+    $request->validate([
+        'start_date' => 'required|date',
+        'end_date'   => 'required|date|after_or_equal:start_date',
+    ]);
 
-    public function updateDates(Request $request, $id)
-    {
-        $request->validate([
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after_or_equal:start_date',
-        ]);
+    $subscription = Subscription::findOrFail($id);
+    $subscription->start_date = Carbon::parse($request->start_date)->toDateString();
 
-        $subscription = Subscription::findOrFail($id);
+    $submittedEndDate = Carbon::parse($request->end_date)->toDateString();
+    $originalEndDate = Carbon::parse($subscription->end_date)->toDateString();
 
-        $subscription->start_date = Carbon::parse($request->start_date)->toDateString();
-
-        // If new end date is different, update new_date, else keep end_date
-        $submittedEndDate = Carbon::parse($request->end_date)->toDateString();
-        $originalEndDate = Carbon::parse($subscription->end_date)->toDateString();
-
-        if ($submittedEndDate !== $originalEndDate) {
-            $subscription->new_date = $submittedEndDate;
-        }
-
-        $subscription->save();
-
-        return redirect()->back()->with('success', 'Subscription dates updated successfully.');
+    if ($submittedEndDate !== $originalEndDate) {
+        $subscription->new_date = $submittedEndDate;
     }
+
+    $subscription->save();
+
+    // Respond properly to AJAX
+    return response()->json([
+        'message' => 'Subscription dates updated successfully.',
+    ]);
+}
 
     public function markAsViewed()
     {
