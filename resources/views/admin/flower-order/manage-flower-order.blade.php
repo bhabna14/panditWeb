@@ -478,7 +478,6 @@
                                                                         action="{{ route('admin.orders.updateAddress', $order->order->address->id) }}"
                                                                         method="POST">
                                                                         @csrf
-                                                                        @method('PUT')
                                                                         <div class="row">
                                                                             <div class="mb-3">
                                                                                 <label for="apartment_flat_plot"
