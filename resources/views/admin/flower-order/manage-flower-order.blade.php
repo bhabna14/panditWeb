@@ -995,5 +995,4 @@
             $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/update-pause-dates`);
         });
     </script>
-
 @endsection

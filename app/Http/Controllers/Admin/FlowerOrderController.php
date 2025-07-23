@@ -196,15 +196,66 @@ public function updatePauseDates(Request $request, $id)
 {
     $request->validate([
         'pause_start_date' => 'required|date',
-        'pause_end_date' => 'required|date|after_or_equal:pause_start_date',
+        'pause_end_date'   => 'required|date|after_or_equal:pause_start_date',
+        'resume_date'      => 'nullable|date',
     ]);
 
     $subscription = Subscription::findOrFail($id);
-    $subscription->pause_start_date = Carbon::parse($request->pause_start_date)->toDateString();
-    $subscription->pause_end_date = Carbon::parse($request->pause_end_date)->toDateString();
+
+    $pauseStart = Carbon::parse($request->pause_start_date);
+    $pauseEnd   = Carbon::parse($request->pause_end_date);
+    $resumeDate = $request->resume_date ? Carbon::parse($request->resume_date) : null;
+    $currentEnd = $subscription->new_date ? Carbon::parse($subscription->new_date) : Carbon::parse($subscription->end_date);
+
+    $newEndDate = null;
+    $pausedDays = 0;
+
+    if ($resumeDate) {
+        if ($resumeDate->lt($pauseStart) || $resumeDate->gt($pauseEnd)) {
+            return redirect()->back()->with('error', 'Resume date must be within the pause period.');
+        }
+
+        $pausedDays = $resumeDate->diffInDays($pauseStart) + 1;
+        $newEndDate = $currentEnd->addDays($pausedDays);
+        $subscription->new_date = $newEndDate->toDateString();
+    }
+
+    // ✅ Update subscription pause columns
+    $subscription->pause_start_date = $pauseStart->toDateString();
+    $subscription->pause_end_date   = $pauseEnd->toDateString();
     $subscription->save();
 
-    return redirect()->back()->with('success', 'Pause dates updated successfully.');
+    // ✅ Check if log exists for same subscription & order
+    $existingLog = SubscriptionPauseResumeLog::where('subscription_id', $subscription->id)
+        ->where('order_id', $subscription->order_id)
+        ->where('action', 'pause-update') // optional filter
+        ->latest()
+        ->first();
+
+    if ($existingLog) {
+        // Update existing log
+        $existingLog->update([
+            'pause_start_date' => $pauseStart->toDateString(),
+            'pause_end_date'   => $pauseEnd->toDateString(),
+            'resume_date'      => $resumeDate?->toDateString(),
+            'new_end_date'     => $newEndDate?->toDateString(),
+            'paused_days'      => $pausedDays,
+        ]);
+    } else {
+        // Insert new log
+        SubscriptionPauseResumeLog::create([
+            'subscription_id'  => $subscription->id,
+            'order_id'         => $subscription->order_id,
+            'action'           => 'pause-update',
+            'pause_start_date' => $pauseStart->toDateString(),
+            'pause_end_date'   => $pauseEnd->toDateString(),
+            'resume_date'      => $resumeDate?->toDateString(),
+            'new_end_date'     => $newEndDate?->toDateString(),
+            'paused_days'      => $pausedDays,
+        ]);
+    }
+
+    return redirect()->back()->with('success', 'Pause dates and log updated successfully.');
 }
 
     public function markAsViewed()
