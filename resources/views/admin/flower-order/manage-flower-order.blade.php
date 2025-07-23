@@ -818,11 +818,11 @@
     </div>
     <!-- End Row -->
 @endsection
-
 @section('scripts')
-    <!-- Internal Data tables -->
+
+    <!-- DataTables Core & Extensions -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
+    <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/buttons.bootstrap5.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
@@ -833,15 +833,43 @@
     <script src="{{ asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
+
+    <!-- Optional Helper Scripts -->
+    <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/table-data.js') }}"></script>
 
-    <!-- INTERNAL Select2 js -->
-    <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Bootstrap Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap 5 -->
 
+    <!-- SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Moment.js for date formatting -->
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+
+    <!-- Tooltip Init -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (el) {
+                new bootstrap.Tooltip(el);
+            });
+        });
+    </script>
+
+    <!-- SweetAlert for flash message -->
+    @if (session('success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: '{{ session('success') }}',
+                timer: 3000
+            });
+        </script>
+    @endif
+
+    <!-- Discontinue Confirmation -->
     <script>
         function confirmDiscontinue(url) {
             Swal.fire({
@@ -860,35 +888,111 @@
         }
     </script>
 
+    <!-- Pause Date Picker Constraint -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            const tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
-                return new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        });
-    </script>
-
-
-    @if (session('success'))
-        <script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: '{{ session('success') }}',
-                timer: 3000
-            });
-        </script>
-    @endif
-    <script>
-        // Function to set the min attribute of the Pause End Date
-        document.getElementById('pause_start_date').addEventListener('change', function() {
+        document.getElementById('pause_start_date')?.addEventListener('change', function () {
             let startDate = this.value;
-            document.getElementById('pause_end_date').setAttribute('min', startDate);
+            document.getElementById('pause_end_date')?.setAttribute('min', startDate);
         });
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTable Initialization with Server-side Processing -->
+    <script>
+        $(document).ready(function () {
+            let filter = '{{ request()->get('filter', '') }}';
 
-    <!-- Updated JavaScript -->
+            $('#file-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('admin.orders.index') }}",
+                    data: { filter: filter }
+                },
+                columns: [
+                    { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
+                    {
+                        data: 'users.name',
+                        name: 'users.name',
+                        render: function (data, type, row) {
+                            let mobile = row.users?.mobile_number ?? 'N/A';
+                            let orderId = row.order_id ?? 'N/A';
+                            return `<strong>Ord No:</strong> ${orderId}<br>
+                                    <strong>Name:</strong> ${data ?? 'N/A'}<br>
+                                    <strong>No:</strong> ${mobile}`;
+                        }
+                    },
+                    {
+                        data: 'created_at',
+                        name: 'created_at',
+                        render: function (data) {
+                            return data ? moment(data).format('DD-MM-YYYY h:mm A') : 'N/A';
+                        }
+                    },
+                    {
+                        data: 'start_date',
+                        name: 'start_date',
+                        render: function (data, type, row) {
+                            let start = moment(row.start_date).format('MMM D, YYYY');
+                            let end = row.new_date
+                                ? moment(row.new_date).format('MMM D, YYYY')
+                                : moment(row.end_date).format('MMM D, YYYY');
+                            return `${start} <br><strong> - </strong><br>${end}`;
+                        }
+                    },
+                    {
+                        data: 'order.total_price',
+                        name: 'order.total_price',
+                        render: function (data) {
+                            return `₹ ${parseFloat(data).toFixed(2)}`;
+                        }
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        render: function (data) {
+                            let badge = {
+                                active: 'bg-success',
+                                paused: 'bg-warning',
+                                expired: 'bg-primary',
+                                dead: 'bg-danger',
+                                pending: 'bg-danger'
+                            }[data] || 'bg-secondary';
+
+                            return `<span class="badge ${badge}">${data.toUpperCase()}</span>`;
+                        }
+                    },
+                    {
+                        data: 'order.rider.rider_name',
+                        name: 'order.rider.rider_name',
+                        defaultContent: 'Unassigned'
+                    },
+                    {
+                        data: 'order.referral_id',
+                        name: 'order.referral_id',
+                        render: function (data) {
+                            return data ?? 'N/A';
+                        }
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: function (data, type, row) {
+                            let viewBtn = `<a href="/admin/flower-orders/${row.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
+                            let pauseBtn = '';
+                            if (row.status === 'active') {
+                                pauseBtn = `<a href="/admin/subscription/pause-page/${row.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
+                            } else if (row.status === 'paused') {
+                                pauseBtn = `<a href="/admin/subscription/resume-page/${row.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
+                            }
+                            return `${viewBtn} ${pauseBtn}`;
+                        }
+                    }
+                ],
+                order: [[2, 'desc']]
+            });
+        });
+    </script>
+
 @endsection
+
