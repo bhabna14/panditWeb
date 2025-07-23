@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\SubscriptionPauseResumeLog;
-use DB;
+ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables;
 
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +26,8 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     
-  public function showOrders(Request $request)
+
+public function showOrders(Request $request)
 {
     if ($request->ajax()) {
         $query = Subscription::with([
@@ -38,15 +39,32 @@ class FlowerOrderController extends Controller
             'pauseResumeLog',
         ])->orderBy('id', 'desc');
 
-        // Add filters if any
+        // Apply status filter
         if ($request->query('filter') === 'active') {
             $query->where('status', 'active');
         }
 
-        return DataTables::of($query)->make(true);
+        return DataTables::of($query)
+            ->filter(function ($q) use ($request) {
+                if ($request->has('search') && $search = $request->input('search.value')) {
+                    $q->where(function ($subQ) use ($search) {
+                        $subQ->whereHas('users', fn($u) =>
+                            $u->where('name', 'like', "%{$search}%")
+                              ->orWhere('mobile_number', 'like', "%{$search}%")
+                        )->orWhereHas('order.address', fn($a) =>
+                            $a->where('apartment_flat_plot', 'like', "%{$search}%")
+                              ->orWhere('apartment_name', 'like', "%{$search}%")
+                              ->orWhere('city', 'like', "%{$search}%")
+                              ->orWhere('state', 'like', "%{$search}%")
+                              ->orWhere('pincode', 'like', "%{$search}%")
+                        );
+                    });
+                }
+            })
+            ->make(true);
     }
 
-    // When not an AJAX call (first page load)
+    // Normal (non-AJAX) response
     $activeSubscriptions = Subscription::where('status', 'active')->count();
     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
     $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
@@ -56,6 +74,8 @@ class FlowerOrderController extends Controller
         'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
     ));
 }
+
+
 public function updateDates(Request $request, $id)
 {
     $request->validate([
