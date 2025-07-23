@@ -826,9 +826,9 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
+   <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="edit-status-form" method="POST">
+        <form id="edit-status-form" method="POST" action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
             @csrf
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
@@ -855,6 +855,7 @@
         </form>
     </div>
 </div>
+
 
     <!-- End Row -->
 @endsection
@@ -938,27 +939,6 @@ $('#file-datatable').on('click', '.edit-status-btn', function () {
     $('#status-sub-id').val(subId);
     $('#status-select').val(currentStatus);
     $('#edit-status-form').attr('action', `/admin/subscriptions/${subId}/update-status`);
-});
-
-// Submit status update
-$('#edit-status-form').submit(function (e) {
-    e.preventDefault();
-
-    $.ajax({
-        url: this.action,
-        type: 'POST',
-        data: $(this).serialize(),
-        success: function (res) {
-            Swal.fire('Updated', res.message, 'success');
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editStatusModal'));
-            modal.hide();
-            $('#edit-status-form')[0].reset();
-            $('#file-datatable').DataTable().ajax.reload(null, false);
-        },
-        error: function () {
-            Swal.fire('Error', 'Failed to update status.', 'error');
-        }
-    });
 });
 
 </script>
