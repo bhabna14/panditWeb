@@ -177,7 +177,7 @@ public function updateDates(Request $request, $id)
 
     $subscription->save();
 
-    return response()->json(['message' => 'Subscription dates updated successfully.']);
+        return redirect()->back()->with('success', 'Subscription dates updated successfully.');
 }
 
 public function updateStatus(Request $request, $id)
@@ -190,7 +190,7 @@ public function updateStatus(Request $request, $id)
     $subscription->status = $request->status;
     $subscription->save();
 
-    return response()->json(['message' => 'Subscription status updated successfully.']);
+        return redirect()->back()->with('success', 'Subscription dates updated successfully.');
 }
 
     public function markAsViewed()
