@@ -478,6 +478,7 @@
                                                                         action="{{ route('admin.orders.updateAddress', $order->order->address->id) }}"
                                                                         method="POST">
                                                                         @csrf
+                                                                        @method('PUT')
                                                                         <div class="row">
                                                                             <div class="mb-3">
                                                                                 <label for="apartment_flat_plot"
@@ -609,7 +610,6 @@
                                                             <form method="POST"
                                                                 action="{{ route('admin.subscriptions.updateDates', $order->id) }}">
                                                                 @csrf
-                                                                @method('PUT')
                                                                 <div class="modal-content">
                                                                     <div class="modal-header bg-primary text-white">
                                                                         <h5 class="modal-title"
