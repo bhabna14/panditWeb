@@ -54,7 +54,7 @@
             <div class="row">
 				   <!-- Active Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}" target="_blank">
+                   <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">

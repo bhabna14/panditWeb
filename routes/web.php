@@ -243,11 +243,11 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
 ## admin routes
     Route::prefix('admin')->middleware(['admin'])->group(function () {
-// flower dashboard
-Route::controller(FlowerDashboardController::class)->group(function() {
-       Route::get('/flower-dashboard', 'flowerDashboard')->name('flowerDashboard');
-});
-
+    // flower dashboard
+    Route::controller(FlowerDashboardController::class)->group(function() {
+        Route::get('/flower-dashboard', 'flowerDashboard')->name('flowerDashboard');
+        Route::get('/total-deliveries', 'showTodayDeliveries')->name('admin.totalDeliveries');
+    });
 
     Route::get('/manage-subadmins',  [SubadminController::class, 'managesubadmin'])->name('managesubadmin');
     Route::get('/subadmins/{id}/edit', [SubadminController::class, 'edit'])->name('subadmins.edit');
