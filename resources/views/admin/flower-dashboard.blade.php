@@ -364,14 +364,14 @@
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Subscription ends in 5 days</h6>
                                         <h4 class="tx-22 font-weight-semibold mb-2">
                                             {{ $subscriptionEndFiveDays }}</h4>
                                         </div>
                                     </div>
-                                <div class="col-4">
+                                <div>
                                     <div
                                         class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
                                         <i class="fas fa-calendar-check tx-16 text-white"></i>
@@ -386,13 +386,13 @@
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Subscription Renew Pending</h6>
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                <div>
                                     <div
                                         class="circle-icon bg-gradient-to-r from-red-600 to-orange-500 text-center align-self-center overflow-hidden">
                                         <img src="{{ asset('assets/img/s.png') }}" alt="Image">
