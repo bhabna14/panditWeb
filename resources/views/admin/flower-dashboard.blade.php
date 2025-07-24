@@ -59,7 +59,7 @@
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h6>
+                                        <h5 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h5>
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptions}}/{{ $totalDeliveriesToday }}</h4>
                                     </div>
                                 </div>
