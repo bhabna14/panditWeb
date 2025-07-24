@@ -244,8 +244,9 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 ## admin routes
     Route::prefix('admin')->middleware(['admin'])->group(function () {
 // flower dashboard
-
-    Route::get('/flower-dashboard',  [FlowerDashboardController::class, 'flowerDashboard'])->name('flowerDashboard');
+Route::controller(FlowerDashboardController::class)->group(function() {
+       Route::get('/flower-dashboard', 'flowerDashboard')->name('flowerDashboard');
+});
 
 
     Route::get('/manage-subadmins',  [SubadminController::class, 'managesubadmin'])->name('managesubadmin');

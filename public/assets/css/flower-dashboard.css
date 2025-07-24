@@ -1,0 +1,130 @@
+  /* General Card Styling */
+        .card.sales-card {
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            background-color: #ffffff;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card.sales-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(47, 41, 47, 0.2);
+        }
+
+        /* Title Styling */
+        .card .card-title-custom {
+            color: #444;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        /* Circle Icon Styling */
+        .circle-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .circle-icon:hover {
+            background: linear-gradient(45deg, #6a11cb, #fc4a1a);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .circle-icon i {
+            font-size: 24px;
+            color: #ffffff;
+        }
+
+        /* Subscription Stats */
+        .tx-20,
+        .tx-22 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .tx-12 {
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* Background Gradient for Each Card */
+        .bg-gradient-to-r.from-blue-500.to-teal-500 {
+            background: linear-gradient(45deg, #2196f3, #64b5f6);
+        }
+
+        .bg-gradient-to-r.from-pink-500.to-purple-600 {
+            background: linear-gradient(45deg, #f06292, #9c27b0);
+        }
+
+        .bg-gradient-to-r.from-green-400.to-teal-500 {
+            background: linear-gradient(45deg, #66bb6a, #26a69a);
+        }
+
+        .bg-gradient-to-r.from-orange-400.to-red-500 {
+            background: linear-gradient(45deg, #ff7043, #e57373);
+        }
+
+        .bg-gradient-to-r.from-teal-500.to-blue-600 {
+            background: linear-gradient(45deg, #00897b, #039be5);
+        }
+
+        .bg-gradient-to-r.from-red-600.to-orange-500 {
+            background: linear-gradient(45deg, #e53935, #ff7043);
+        }
+
+        /* Hover Effect on Card */
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .card.sales-card {
+                margin-bottom: 20px;
+            }
+
+            .circle-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .tx-20,
+            .tx-22 {
+                font-size: 18px;
+            }
+
+            .tx-12 {
+                font-size: 10px;
+            }
+        }
+
+        .card-title-custom {
+            margin-bottom: 0.75rem;
+        }
+
+        .card-title-custom {
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        .card-title-custom:before {
+            content: "";
+            width: 3px;
+            height: 16px;
+            background: var(--primary-bg-color);
+            position: absolute;
+            left: 13px;
+            display: block;
+            top: 1px;
+        }
