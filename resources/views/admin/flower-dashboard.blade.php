@@ -369,17 +369,17 @@
                                         <h6 class="mb-2 tx-12">Subscription ends in 5 days</h6>
                                         <h4 class="tx-22 font-weight-semibold mb-2">
                                             {{ $subscriptionEndFiveDays }}</h4>
-                                        </div>
                                     </div>
+                                </div>
                                 <div>
                                     <div
                                         class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
                                         <i class="fas fa-calendar-check tx-16 text-white"></i>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </a>
+                        </div>
+                    </a>
                 </div>
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
@@ -419,6 +419,97 @@
                                     <div
                                         class="circle-icon bg-gradient-to-r from-red-400 to-teal-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-users text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+            <h4 class="card-title-custom">Paused Subscription</h4>
+            <div class="row">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
+                        <div class="card sales-card">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Today Paused Request</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayPausedRequest }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div
+                                        class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
+                        <div class="card sales-card">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Paused Subscription</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div
+                                        class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'tommorow']) }}" target="_blank">
+                        <div class="card sales-card">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Next-Day Pause</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayPaused }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div
+                                        class="circle-icon bg-gradient-to-r from-green-400 to-red-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                  <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
+                        <div class="card sales-card">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Next-Day Resumed</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayResumed }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div
+                                        class="circle-icon bg-gradient-to-r from-green-400 to-red-500 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
                                     </div>
                                 </div>
                             </div>

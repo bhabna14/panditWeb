@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\FlowerPickupDetails;
 use App\Models\RiderDetails;
 use App\Models\FlowerRequest;
+use App\Models\SubscriptionPauseResumeLog;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -150,9 +151,23 @@ class FlowerDashboardController extends Controller
             })
             ->count();
         
+            $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
 
+            $pausedSubscriptions = Subscription::where('status', 'paused')->count();
 
-        $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
+            $tomorrow = Carbon::tomorrow()->toDateString();
+
+            $nextDayPaused = Subscription::where('status', 'active')
+            ->whereDate('pause_start_date', $tomorrow)
+            ->count();
+
+            $nextDayResumed = Subscription::where('status', 'active')
+            ->whereDate('pause_end_date', $tomorrow)
+            ->count();
+
+            $todayPausedRequest = SubscriptionPauseResumeLog::whereDate('created_at', Carbon::today())
+            ->where('action', 'paused') // Optional: only count pause actions
+            ->count();
 
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',
@@ -170,7 +185,8 @@ class FlowerDashboardController extends Controller
                 'todayEndSubscription',
                 'subscriptionEndFiveDays',
                 'expiredSubscriptions',
-                'nonAssignedRidersCount'
+                'nonAssignedRidersCount',
+                'todayPausedRequest'
             ));
 }
 

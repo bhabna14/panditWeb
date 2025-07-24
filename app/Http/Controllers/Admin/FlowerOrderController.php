@@ -59,7 +59,6 @@ class FlowerOrderController extends Controller
 
  public function showOrders(Request $request)
     {
-
         $query = Subscription::with([
             'order',
             'flowerPayments',
@@ -120,8 +119,16 @@ class FlowerOrderController extends Controller
             })
             ->where('status', 'active');
         }
-        
 
+        if ($request->query('filter') === 'todayrequest') {
+         $query = Subscription::whereIn('subscription_id', function ($subQuery) {
+            $subQuery->select('subscription_id')
+                ->from('subscription_pause_resume_logs')
+                ->whereDate('created_at', Carbon::today())
+                ->where('action', 'paused');
+        });
+    }
+        
         // Filter for new user subscriptions
         if ($request->query('filter') === 'new') {
             $query->whereDate('created_at', Carbon::today())
@@ -163,6 +170,11 @@ class FlowerOrderController extends Controller
         if ($request->query('filter') === 'tommorow') {
             $query->where('status', 'active')
             ->whereDate('pause_start_date', $tomorrow);
+        }
+
+          if ($request->query('filter') === 'nextdayresumed') {
+            $query->where('status', 'active')
+            ->whereDate('pause_end_date', $tomorrow);
         }
             // Retrieve the filtered orders
             $orders = $query->get();
