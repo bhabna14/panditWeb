@@ -118,134 +118,52 @@
                     </div>
                 </div>
 
+            </div>
+        </div>
 
-
-                <!-- Renewed Subscription -->
-                {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Renewed Subscription</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscription }}</h4>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-recycle tx-16 text-white"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div> --}}
-
-                <!-- Customize Order -->
-                {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
-                        <div class="card sales-card">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Customize Order</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $ordersRequestedToday }}</h4>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-green-400 to-teal-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-cogs tx-16 text-white"></i> <!-- Customize Order Icon -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+            <h4 class="card-title-custom">Flower Subscription</h4>
+            <div class="row">
+                <!-- Active Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
+                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12"> Non Assign Rider</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $nonAssignedRidersCount }}</h4>
+                                        <h5 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h5>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">
+                                            {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-red-400 to-teal-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-users text-white"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div> --}}
-
-                <!-- Paused Subscription -->
-                {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-                        <div class="card sales-card">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Paused Subscription</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Subscription Ends Today</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $todayEndSubscription }}</h4>
-                                    </div>
-                                </div>
-                                <div class="col-4">
+                                <div>
                                     <div
                                         class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
-                                        <i
-                                            class="fa fa-exclamation-triangle tx-16 text-white"></i><!-- Active Subscription Icon -->
+                                        <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </a>
-                </div> --}}
+                </div>
 
-                <!-- Expired Subscription -->
-                {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
+                <!-- New Subscription -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Ended Subscription</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}</h4>
+                                        <h6 class="mb-2 tx-12">Today Total Income</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">
+                                            ₹{{ number_format($totalIncomeToday, 2) }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div
-                                        class="circle-icon bg-gradient-to-r from-red-600 to-orange-500 text-center align-self-center overflow-hidden">
-                                        <img src="{{ asset('assets/img/s.png') }}" alt="Image">
-
-                                        <!-- Expired Subscription Icon -->
+                                        class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
+                                        <i class="fas fa-rupee-sign tx-16 text-white"></i>
                                     </div>
                                 </div>
                             </div>
@@ -254,46 +172,24 @@
                 </div>
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'tommorow']) }}" target="_blank">
-                        <div class="card sales-card">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Next-Day Pause</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayPaused }}</h4>
-                                    </div>
+                    <div class="card sales-card">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="ps-4 pt-4 pe-3 pb-4">
+                                    <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
+                                    <h4 class="tx-20 font-weight-semibold mb-2">
+                                        ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
                                 </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-green-400 to-red-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
-                                    </div>
+                            </div>
+                            <div class="col-4">
+                                <div
+                                    class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
+                                    <i class="fas fa-money-bill-wave tx-16 text-white"></i>
                                 </div>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 </div>
-
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}" target="_blank">
-                        <div class="card sales-card">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Current User</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $currentUser }}</h4>
-                                    </div>
-                                </div>
-                                <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-teal-500 to-orange-600 text-center align-self-center overflow-hidden">
-                                        <i class="si si-user-follow tx-16 text-info"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div> --}}
 
             </div>
         </div>
