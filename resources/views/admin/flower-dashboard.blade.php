@@ -56,7 +56,7 @@
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h5 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h5>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
