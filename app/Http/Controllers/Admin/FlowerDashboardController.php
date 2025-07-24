@@ -37,7 +37,7 @@ class FlowerDashboardController extends Controller
             return $delivery->order->total_price ?? 0; // Make sure `total_price` exists in the Order model
         });
 
-        return view('admin.today-deliveries', compact('deliveries', 'totalIncome'));
+        return view('admin.today-delivery-data', compact('deliveries', 'totalIncome'));
     }
 
 }
