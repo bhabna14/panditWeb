@@ -11,18 +11,37 @@ use Carbon\Carbon;
 class FlowerDashboardController extends Controller
 {
     public function flowerDashboard()
-    {
-        $activeSubscriptions = Subscription::where('status', 'active')->count();
+{
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
 
-        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
-        ->count();
+    $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())
+        ->where('delivery_status', 'delivered')
+        ->get();
 
+    $totalIncomeToday = 0;
 
-            return view('admin/flower-dashboard', compact(
-                'totalDeliveriesToday',
-                'activeSubscriptions',
-            ));
+    foreach ($totalDeliveriesToday as $delivery) {
+        $order = $delivery->order;
+        if (!$order) continue;
+
+        $subscription = Subscription::where('order_id', $order->order_id)->first();
+        if (!$subscription || !$subscription->start_date || !$subscription->end_date) continue;
+
+        $start = Carbon::parse($subscription->start_date);
+        $end = Carbon::parse($subscription->end_date);
+        $days = $start->diffInDays($end) + 1;
+
+        if ($days > 0 && $order->total_price > 0) {
+            $totalIncomeToday += $order->total_price / $days;
+        }
     }
+
+    return view('admin/flower-dashboard', compact(
+        'activeSubscriptions',
+        'totalDeliveriesToday',
+        'totalIncomeToday'
+    ));
+}
 
   public function showTodayDeliveries()
 {

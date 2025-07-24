@@ -8,8 +8,7 @@
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
-	<link href="{{asset('assets/css/flower-dashboard.css')}}" rel="stylesheet">
-
+    <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet">
 @endsection
 
 @section('content')
@@ -52,15 +51,16 @@
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom">Flower Subscription</h4>
             <div class="row">
-				   <!-- Active Subscription -->
+                <!-- Active Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                   <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
+                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h5 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h5>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $activeSubscriptions}}/{{ $totalDeliveriesToday }}</h4>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">
+                                            {{ $activeSubscriptions }}/{{ $totalDeliveriesToday }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
@@ -75,26 +75,27 @@
                 </div>
 
                 <!-- New Subscription -->
-                {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">New Subscription</h6>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscription }}</h4>
+                                        <h6 class="mb-2 tx-12">Today Total Income</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">
+                                            ₹{{ number_format($totalIncomeToday, 2) }}</h4>
+                                        </div>
                                     </div>
-                                </div>
                                 <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-gift tx-16 text-white"></i>
+                                        <i class="fas fa-rupee-sign tx-16 text-white"></i>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
-                </div> --}}
+                        </a>
+                </div>
 
                 <!-- Renewed Subscription -->
                 {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
