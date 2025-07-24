@@ -40,8 +40,7 @@
         font-weight: 700;
         font-size: 26px;
         color: #b91c1c;
-        display: flex;
-        align-items: center;
+      
         gap: 10px;
     }
 
