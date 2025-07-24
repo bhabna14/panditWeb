@@ -99,9 +99,38 @@ class FlowerDashboardController extends Controller
         })
         ->count();
 
+         $todayEndSubscription = Subscription::where(function ($query) {
+                $query->where(function ($subQuery) {
+                    $subQuery->whereNotNull('new_date') // Check if new_date is available
+                            ->whereDate('new_date', Carbon::today()); // Count using new_date if available
+                })
+                ->orWhere(function ($subQuery) {
+                    $subQuery->whereNull('new_date') // Check if new_date is not available
+                            ->whereDate('end_date', Carbon::today()); // Count using end_date
+                });
+            })
+            ->where('status', 'active') // Status must be active
+            ->count();
+
+            $subscriptionEndFiveDays = Subscription::where(function ($query) {
+                $query->where(function ($subQuery) {
+                    $subQuery->whereNotNull('new_date')
+                        ->whereBetween('new_date', [
+                            Carbon::today()->subDays(4), // 4 days ago
+                            Carbon::today()              // today
+                        ]);
+                })->orWhere(function ($subQuery) {
+                    $subQuery->whereNull('new_date')
+                        ->whereBetween('end_date', [
+                            Carbon::today()->subDays(4),
+                            Carbon::today()
+                        ]);
+                });
+            })
+            ->where('status', 'active')
+            ->count();
+
         $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
-
-
 
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',
@@ -115,7 +144,9 @@ class FlowerDashboardController extends Controller
                 'totalDeliveries',
                 'newUserSubscription',
                 'renewSubscription',
-                'ordersRequestedToday'
+                'ordersRequestedToday',
+                'todayEndSubscription',
+                'subscriptionEndFiveDays'
             ));
 }
 
