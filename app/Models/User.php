@@ -54,4 +54,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserDevice::class, 'user_id', 'userid');
     }
+
+    public function addressDetails()
+{
+    return $this->hasOne(UserAddress::class, 'user_id', 'userid')->where('default', 1);
+}
+
 }

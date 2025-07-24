@@ -24,20 +24,19 @@ class FlowerDashboardController extends Controller
             ));
     }
 
-    public function showTodayDeliveries()
-    {
-        $today = Carbon::today();
+   public function showTodayDeliveries()
+{
+    $today = Carbon::today();
 
-        $deliveries = DeliveryHistory::with(['order.user', 'rider'])
-            ->whereDate('created_at', $today)
-            ->where('delivery_status', 'delivered')
-            ->get();
+    $deliveries = DeliveryHistory::with(['order.user', 'rider'])
+        ->whereDate('created_at', $today)
+        ->where('delivery_status', 'delivered')
+        ->get();
 
-        $totalIncome = $deliveries->sum(function ($delivery) {
-            return $delivery->order->total_price ?? 0; // Make sure `total_price` exists in the Order model
-        });
+    $totalIncome = $deliveries->sum(function ($delivery) {
+        return $delivery->order->total_price ?? 0;
+    });
 
-        return view('admin.today-delivery-data', compact('deliveries', 'totalIncome'));
-    }
-
+    return view('admin.today-delivery-data', compact('deliveries', 'totalIncome'));
+}
 }
