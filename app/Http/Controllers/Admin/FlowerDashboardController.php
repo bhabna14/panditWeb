@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\DeliveryHistory;
 use App\Models\Subscription;
 use App\Models\FlowerPickupDetails;
+use App\Models\RiderDetails;
+use App\Models\Order;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -45,12 +49,50 @@ class FlowerDashboardController extends Controller
       $todayTotalExpenditure = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
         ->sum('total_price');
 
-    return view('admin/flower-dashboard', compact(
-        'activeSubscriptions',
-        'totalDeliveriesTodayCount',
-        'totalIncomeToday',
-        'todayTotalExpenditure'
-    ));
+          $ridersData = $riders->map(function ($rider) {
+            // Total assigned orders to this rider
+            $totalAssignedOrders = Order::where('rider_id', $rider->rider_id) // Filter by rider_id
+            ->whereHas('subscription', function ($query) {
+                $query->where('status', 'active'); // Check subscription status
+            })
+            ->count();
+
+            // Total delivered orders today by this rider
+            $totalDeliveredToday = DeliveryHistory::whereDate('created_at', Carbon::today())
+                ->where('rider_id', $rider->rider_id)
+                ->where('delivery_status', 'delivered')
+                ->count();
+
+            return [
+                'rider' => $rider,
+                'totalAssignedOrders' => $totalAssignedOrders,
+                'totalDeliveredToday' => $totalDeliveredToday,
+            ];
+        });
+
+        $totalRiders = RiderDetails::where('status','active')->count();
+
+        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
+            ->count();
+
+        $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
+            ->whereMonth('created_at', now()->month)
+            ->where('delivery_status', 'delivered')
+            ->count();
+
+        $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
+
+            return view('admin/flower-dashboard', compact(
+                'activeSubscriptions',
+                'totalDeliveriesTodayCount',
+                'totalIncomeToday',
+                'todayTotalExpenditure',
+                'ridersData',
+                'totalRiders',
+                'totalDeliveriesToday',
+                'totalDeliveriesThisMonth',
+                'totalDeliveries'
+            ));
 }
 
   public function showTodayDeliveries()
