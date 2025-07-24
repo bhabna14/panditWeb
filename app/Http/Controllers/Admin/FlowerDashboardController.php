@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DeliveryHistory;
 use App\Models\Subscription;
+use App\Models\FlowerPickupDetails;
+
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -40,10 +42,14 @@ class FlowerDashboardController extends Controller
         }
     }
 
+      $todayTotalExpenditure = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
+        ->sum('total_price');
+
     return view('admin/flower-dashboard', compact(
         'activeSubscriptions',
         'totalDeliveriesTodayCount',
-        'totalIncomeToday'
+        'totalIncomeToday',
+        'todayTotalExpenditure'
     ));
 }
 
