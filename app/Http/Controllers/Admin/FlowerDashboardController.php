@@ -49,6 +49,8 @@ class FlowerDashboardController extends Controller
       $todayTotalExpenditure = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
         ->sum('total_price');
 
+          $riders = RiderDetails::where('status','active')->get();
+
           $ridersData = $riders->map(function ($rider) {
             // Total assigned orders to this rider
             $totalAssignedOrders = Order::where('rider_id', $rider->rider_id) // Filter by rider_id
