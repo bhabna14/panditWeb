@@ -63,12 +63,13 @@
                                             {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                <div>
                                     <div
                                         class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     </a>
@@ -105,16 +106,16 @@
                                     <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
                                     <h4 class="tx-20 font-weight-semibold mb-2">
                                         ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
-                                    </div>
                                 </div>
+                            </div>
                             <div class="col-4">
                                 <div
                                     class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
                                     <i class="fas fa-money-bill-wave tx-16 text-white"></i>
-                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
                 </div>
 
 
