@@ -130,6 +130,17 @@ class FlowerDashboardController extends Controller
             ->where('status', 'active')
             ->count();
 
+               $expiredSubscriptions = Subscription::where('status', 'expired')
+                ->whereNotIn('user_id', function ($query) {
+                    $query->select('user_id')
+                        ->from('subscriptions')
+                        ->whereIn('status', ['active', 'paused', 'resume']);
+                })
+                ->distinct('user_id')
+                ->latest('end_date')
+                ->count();
+
+
         $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
 
             return view('admin/flower-dashboard', compact(
@@ -146,7 +157,8 @@ class FlowerDashboardController extends Controller
                 'renewSubscription',
                 'ordersRequestedToday',
                 'todayEndSubscription',
-                'subscriptionEndFiveDays'
+                'subscriptionEndFiveDays',
+                'expiredSubscriptions'
             ));
 }
 
