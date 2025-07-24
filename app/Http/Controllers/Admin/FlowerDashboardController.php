@@ -186,7 +186,10 @@ class FlowerDashboardController extends Controller
                 'subscriptionEndFiveDays',
                 'expiredSubscriptions',
                 'nonAssignedRidersCount',
-                'todayPausedRequest'
+                'todayPausedRequest',
+                'pausedSubscriptions',
+                'nextDayPaused',
+                'nextDayResumed'
             ));
 }
 
