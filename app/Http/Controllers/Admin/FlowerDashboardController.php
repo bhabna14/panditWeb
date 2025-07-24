@@ -84,6 +84,24 @@ class FlowerDashboardController extends Controller
 
         $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
 
+         $newUserSubscription = Subscription::whereDate('created_at', Carbon::today())
+        ->distinct('user_id')
+        ->where('status', 'pending')                   
+        ->count('user_id');
+
+        $renewSubscription = Subscription::whereDate('created_at', Carbon::today()) // Check rows created today
+        ->whereIn('order_id', function ($query) {
+            $query->select('order_id')
+                ->from('subscriptions')
+                ->groupBy('order_id')
+                ->havingRaw('COUNT(order_id) > 1'); // Find duplicate order IDs
+        })
+        ->count();
+
+        $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
+
+
+
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',
                 'totalDeliveriesTodayCount',
@@ -93,7 +111,10 @@ class FlowerDashboardController extends Controller
                 'totalRiders',
                 'totalDeliveriesToday',
                 'totalDeliveriesThisMonth',
-                'totalDeliveries'
+                'totalDeliveries',
+                'newUserSubscription',
+                'renewSubscription',
+                'ordersRequestedToday'
             ));
 }
 
