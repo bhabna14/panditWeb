@@ -14,6 +14,10 @@ class FlowerDashboardController extends Controller
 {
     $activeSubscriptions = Subscription::where('status', 'active')->count();
 
+     $totalDeliveriesTodayCount = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
+        ->count();
+
+
     $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())
         ->where('delivery_status', 'delivered')
         ->get();
@@ -38,7 +42,7 @@ class FlowerDashboardController extends Controller
 
     return view('admin/flower-dashboard', compact(
         'activeSubscriptions',
-        'totalDeliveriesToday',
+        'totalDeliveriesTodayCount',
         'totalIncomeToday'
     ));
 }
