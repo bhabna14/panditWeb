@@ -130,7 +130,7 @@ class FlowerDashboardController extends Controller
             ->where('status', 'active')
             ->count();
 
-               $expiredSubscriptions = Subscription::where('status', 'expired')
+            $expiredSubscriptions = Subscription::where('status', 'expired')
                 ->whereNotIn('user_id', function ($query) {
                     $query->select('user_id')
                         ->from('subscriptions')
@@ -139,6 +139,17 @@ class FlowerDashboardController extends Controller
                 ->distinct('user_id')
                 ->latest('end_date')
                 ->count();
+
+            $nonAssignedRidersCount = Subscription::with('relatedOrder')
+            ->where('status', 'active')
+            ->whereHas('relatedOrder', function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNull('rider_id')
+                        ->orWhere('rider_id', '');
+                });
+            })
+            ->count();
+        
 
 
         $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
@@ -158,7 +169,8 @@ class FlowerDashboardController extends Controller
                 'ordersRequestedToday',
                 'todayEndSubscription',
                 'subscriptionEndFiveDays',
-                'expiredSubscriptions'
+                'expiredSubscriptions',
+                'nonAssignedRidersCount'
             ));
 }
 
