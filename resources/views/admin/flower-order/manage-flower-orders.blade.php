@@ -476,6 +476,13 @@
                             const address = r.order?.address || {};
                             const locality = r.order?.address?.localityDetails?.locality_name || '';
 
+                            const tooltip = `
+                                <p><i class='fas fa-map-marker-alt text-primary'></i> <strong>Address:</strong>
+                                ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
+                                <p><strong>City:</strong> ${address.city || ''}, <strong>State:</strong> ${address.state || ''}</p>
+                                <p><strong>Pincode:</strong> ${address.pincode || ''}</p>
+                            `.replace(/"/g, '&quot;'); // Escape double quotes
+
                             return `
                                 <strong>Ord:</strong> ${r.order?.order_id || 'N/A'}<br>
                                 <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
