@@ -302,7 +302,7 @@ class FlowerOrderController extends Controller
 
         if ($request->filled('customer_name')) {
             $query->whereHas('users', function ($q) use ($request) {
-                $q->where('name', $request->customer_name);
+                $q->whereRaw("`name` COLLATE utf8mb4_unicode_ci = ?", [$request->customer_name]);
             });
         }
 
