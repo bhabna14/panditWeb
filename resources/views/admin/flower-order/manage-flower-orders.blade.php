@@ -94,134 +94,89 @@
         .customer-name,
         .customer-number {
             white-space: nowrap;
-            /* Prevent line breaks */
             overflow: hidden;
-            /* Ensure content doesn't overflow */
             text-overflow: ellipsis;
-            /* Show ellipsis for truncated content */
             display: block;
-            /* Ensure consistent block-level display */
         }
 
         .order-details {
             word-wrap: break-word;
-            /* Handle word wrapping for long text elsewhere */
             max-width: 100%;
-            /* Keep the div responsive */
         }
 
         .table-responsive {
             overflow-x: auto;
-            /* Enable horizontal scrolling for the table */
         }
 
         .table {
             width: 100%;
-            /* Ensure the table takes full width */
             table-layout: auto;
-            /* Allow dynamic column widths */
         }
 
         .order-details {
             background-color: #f9f9f9;
-            /* Light background for a premium feel */
             border: 1px solid #ddd;
-            /* Subtle border for separation */
             border-radius: 8px;
-            /* Rounded corners */
             padding: 15px;
-            /* Spacing inside the container */
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            /* Light shadow for depth */
         }
 
         .order-details p {
             margin: 0 0 6px;
-            /* Space between paragraphs */
             font-size: 12px;
-            /* Readable font size */
             color: #333;
-            /* Dark text for better readability */
         }
 
         .order-details .text-muted {
             color: #999;
-            /* Muted color for unavailable data */
         }
 
         .btn-view-customer {
             display: inline-block;
             background-color: #ffc107;
-            /* Bootstrap warning color */
             color: #fff;
-            /* White text */
             text-decoration: none;
-            /* Remove underline */
             font-weight: 600;
-            /* Semi-bold text */
             border-radius: 5px;
-            /* Rounded corners */
             transition: all 0.3s ease-in-out;
-            /* Smooth hover transition */
         }
 
         .btn-view-customer:hover {
             background-color: #ffca2c;
-            /* Slightly lighter hover effect */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            /* Shadow on hover */
             color: #fff;
-            /* Ensure text remains white */
         }
 
         .product-details {
             padding: 10px;
-            /* Add some spacing inside the cell */
             font-size: 14px;
-            /* Adjust font size for better readability */
             color: #333;
-            /* Dark text color for clarity */
             line-height: 1.5;
-            /* Ensure proper spacing between lines */
             word-wrap: break-word;
-            /* Prevents content from overflowing */
         }
 
         .product-details .product-name {
             margin-bottom: 8px;
-            /* Space after product name */
             font-weight: 600;
-            /* Make the product name bold */
             color: #0056b3;
-            /* Add a subtle color for emphasis */
             white-space: nowrap;
-            /* Prevent wrapping for the product name */
             overflow: hidden;
             text-overflow: ellipsis;
-            /* Use ellipsis if text overflows */
         }
 
         .subscription-dates {
             margin-bottom: 8px;
-            /* Space after subscription dates */
             font-size: 13px;
-            /* Slightly smaller text */
             color: #000;
-            /* Solid black for dates */
             white-space: nowrap;
-            /* Prevent wrapping for dates */
             overflow: hidden;
             text-overflow: ellipsis;
-            /* Use ellipsis if text overflows */
         }
 
         .no-subscription {
             font-size: 13px;
-            /* Smaller font size for muted text */
             color: #999;
-            /* Muted text for no subscription */
             white-space: nowrap;
-            /* Prevent wrapping for no subscription text */
         }
     </style>
 @endsection
@@ -365,7 +320,6 @@
                             </button>
                         </div>
                     </form>
-
 
                     <div class="table-responsive">
                         <div class="table-responsive">
@@ -517,10 +471,7 @@
                                 </form>
                             </div>
                         </div>
-
-
                     </div>
-
                 </div>
             </div>
         </div>
