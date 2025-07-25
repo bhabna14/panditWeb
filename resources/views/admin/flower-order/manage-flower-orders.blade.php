@@ -454,7 +454,7 @@ $(function () {
         processing: true,
         serverSide: true,
         ajax: {
-            url: "{{ route('admin.orders.show') }}",
+            url: "{{ route('admin.orders.index') }}",
             data: { filter: '{{ request('filter', '') }}' }
         },
         columns: [
