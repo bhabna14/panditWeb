@@ -52,13 +52,11 @@
             <h4 class="card-title-custom">Flower Subscription</h4>
             <div class="row">
 
-                <!-- Today Date & Running Time Card -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <div class="card sales-card">
                         <div class="row">
                             <div class="col-8">
                                 <div class="ps-4 pt-4 pe-3 pb-4">
-                                    <h6 class="mb-2 tx-12">Today's Date & Time</h6>
                                     <h4 class="tx-20 font-weight-semibold mb-2" id="todayDate"></h4>
                                     <h5 class="tx-16 font-weight-semibold mb-0" id="liveTime"></h5>
                                 </div>
