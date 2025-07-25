@@ -484,16 +484,18 @@
                             `.replace(/"/g, '&quot;'); // Escape double quotes
 
                             return `
-                                <strong>Ord:</strong> ${r.order?.order_id || 'N/A'}<br>
-                                <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
-                                <strong>No:</strong> ${r.users?.mobile_number || 'N/A'}<br>
-                                ${userId ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` : ''}
-                                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal${orderId}">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </button>
-                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal${orderId}">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                                <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
+                                    <strong>Ord:</strong> ${r.order?.order_id || 'N/A'}<br>
+                                    <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
+                                    <strong>No:</strong> ${r.users?.mobile_number || 'N/A'}<br>
+                                    ${userId ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` : ''}
+                                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal${orderId}">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal${orderId}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
 
                                 <!-- View Address Modal -->
                                 <div class="modal fade" id="addressModal${orderId}" tabindex="-1" aria-hidden="true">
@@ -654,6 +656,13 @@
                     [1, 'desc']
                 ]
             });
+
+            table.on('draw', function() {
+                // Re-initialize all Bootstrap tooltips
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
+            });
+
 
             // -- Edit Dates --
             $('#file-datatable').on('click', '.edit-dates', function() {
