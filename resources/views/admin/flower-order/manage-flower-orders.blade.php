@@ -514,7 +514,7 @@
                                 <div class="modal fade" id="editAddressModal${orderId}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <form method="POST" action="/admin/orders/${address.id}/updateAddress">
+                                            <form method="POST" action="/admin/orders/${address.id}/update-address">
                                                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                                 <input type="hidden" name="_method" value="PUT">
                                                 <div class="modal-header bg-primary text-white">
