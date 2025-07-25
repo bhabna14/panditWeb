@@ -318,6 +318,53 @@
                             {{ $errors->first('danger') }}
                         </div>
                     @endif
+
+                    <form id="filter-form" class="row g-2 align-items-end">
+                        <div class="col-md-2">
+                            <label class="form-label">Customer Name</label>
+                            <select class="form-select" name="customer_name" id="customer_name">
+                                <option value="">All</option>
+                                @foreach ($users as $user)
+                                    <option value="{{ $user->name }}">{{ $user->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Mobile Number</label>
+                            <select class="form-select" name="mobile_number" id="mobile_number">
+                                <option value="">All</option>
+                                @foreach ($users as $user)
+                                    <option value="{{ $user->mobile_number }}">{{ $user->mobile_number }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Apartment Name</label>
+                            <select class="form-select" name="apartment_name" id="apartment_name">
+                                <option value="">All</option>
+                                @foreach ($addresses as $addr)
+                                    <option value="{{ $addr->apartment_name }}">{{ $addr->apartment_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Apartment Number</label>
+                            <select class="form-select" name="apartment_flat_plot" id="apartment_flat_plot">
+                                <option value="">All</option>
+                                @foreach ($addresses as $addr)
+                                    <option value="{{ $addr->apartment_flat_plot }}">{{ $addr->apartment_flat_plot }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" id="search-btn" class="btn btn-primary w-100">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </div>
+                    </form>
+
+
                     <div class="table-responsive">
                         <div class="table-responsive">
                             <table id="file-datatable" class="table table-bordered w-100">

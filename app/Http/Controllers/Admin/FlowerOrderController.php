@@ -189,259 +189,263 @@ class FlowerOrderController extends Controller
     //         ));
     // }
 
-public function showOrders(Request $request)
-{
-    $query = Subscription::with([
-        'order.address.localityDetails',
-        'flowerPayments',
-        'users',
-        'flowerProducts',
-        'pauseResumeLog',
-        'order.rider'
-    ])->orderBy('id', 'desc');
+    public function showOrders(Request $request)
+    {
+        $query = Subscription::with([
+            'order.address.localityDetails',
+            'flowerPayments',
+            'users',
+            'flowerProducts',
+            'pauseResumeLog',
+            'order.rider'
+        ])->orderBy('id', 'desc');
 
-    $filter = $request->query('filter');
+        $filter = $request->query('filter');
 
-    if ($filter === 'rider') {
-        $query->whereHas('order', function ($query) {
-            $query->where(function ($q) {
-                $q->whereNull('rider_id')->orWhere('rider_id', '');
+        if ($filter === 'rider') {
+            $query->whereHas('order', function ($query) {
+                $query->where(function ($q) {
+                    $q->whereNull('rider_id')->orWhere('rider_id', '');
+                });
             });
-        });
-    }
+        }
 
-    if ($filter === 'renewed') {
-        $query->whereDate('created_at', Carbon::today())
-            ->whereIn('order_id', function ($query) {
-                $query->select('order_id')
-                    ->from('subscriptions')
-                    ->groupBy('order_id')
-                    ->havingRaw('COUNT(order_id) > 1');
+        if ($filter === 'renewed') {
+            $query->whereDate('created_at', Carbon::today())
+                ->whereIn('order_id', function ($query) {
+                    $query->select('order_id')
+                        ->from('subscriptions')
+                        ->groupBy('order_id')
+                        ->havingRaw('COUNT(order_id) > 1');
+                });
+        }
+
+        if ($filter === 'end') {
+            $query->where(function ($dateQuery) {
+                $dateQuery->whereNotNull('new_date')
+                    ->whereDate('new_date', Carbon::today());
+            })->orWhere(function ($dateQuery) {
+                $dateQuery->whereNull('new_date')
+                    ->whereDate('end_date', Carbon::today());
+            })->where('status', 'active');
+        }
+
+        if ($filter === 'fivedays') {
+            $query->where(function ($query) {
+                $query->where(function ($subQuery) {
+                    $subQuery->whereNotNull('new_date')
+                        ->whereBetween('new_date', [
+                            Carbon::today()->subDays(4),
+                            Carbon::today()
+                        ]);
+                })->orWhere(function ($subQuery) {
+                    $subQuery->whereNull('new_date')
+                        ->whereBetween('end_date', [
+                            Carbon::today()->subDays(4),
+                            Carbon::today()
+                        ]);
+                });
+            })->where('status', 'active');
+        }
+
+        if ($filter === 'todayrequest') {
+            $query = Subscription::whereIn('subscription_id', function ($subQuery) {
+                $subQuery->select('subscription_id')
+                    ->from('subscription_pause_resume_logs')
+                    ->whereDate('created_at', Carbon::today())
+                    ->where('action', 'paused');
             });
+        }
+
+        if ($filter === 'new') {
+            $query->whereDate('created_at', Carbon::today())
+                ->where('status', 'pending')
+                ->distinct('user_id');
+        }
+
+        if ($filter === 'active') {
+            $query->where('status', 'active');
+        }
+
+        if ($filter === 'expired') {
+            $subQuery = DB::table('subscriptions')
+                ->select('user_id', DB::raw('MAX(end_date) as latest_end_date'))
+                ->where('status', 'expired')
+                ->whereNotIn('user_id', function ($query) {
+                    $query->select('user_id')
+                        ->from('subscriptions')
+                        ->whereIn('status', ['active', 'paused', 'resume']);
+                })
+                ->groupBy('user_id');
+
+            $query->joinSub($subQuery, 'latest_subscriptions', function ($join) {
+                $join->on('subscriptions.user_id', '=', 'latest_subscriptions.user_id')
+                    ->on('subscriptions.end_date', '=', 'latest_subscriptions.latest_end_date');
+            })->orderByDesc('subscriptions.end_date');
+        }
+
+        if ($filter === 'paused') {
+            $query->where('status', 'paused');
+        }
+
+        $tomorrow = Carbon::tomorrow()->toDateString();
+
+        if ($filter === 'tommorow') {
+            $query->where('status', 'active')
+                ->whereDate('pause_start_date', $tomorrow);
+        }
+
+        if ($filter === 'nextdayresumed') {
+            $query->where('status', 'active')
+                ->whereDate('pause_end_date', $tomorrow);
+        }
+
+        if ($request->ajax()) {
+            return datatables()->eloquent($query)->toJson();
+        }
+
+        $activeSubscriptions = Subscription::where('status', 'active')->count();
+        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+        $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+        $riders = RiderDetails::where('status', 'active')->get();
+
+        $users = User::select('name', 'mobile_number')->distinct()->get();
+        $addresses = UserAddress::select('apartment_name', 'apartment_flat_plot')->distinct()->get();
+
+        return view('admin.flower-order.manage-flower-orders', compact(
+            'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday','users', 'addresses'
+        ));
     }
 
-    if ($filter === 'end') {
-        $query->where(function ($dateQuery) {
-            $dateQuery->whereNotNull('new_date')
-                ->whereDate('new_date', Carbon::today());
-        })->orWhere(function ($dateQuery) {
-            $dateQuery->whereNull('new_date')
-                ->whereDate('end_date', Carbon::today());
-        })->where('status', 'active');
+    public function updateDates(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date'   => 'required|date|after_or_equal:start_date',
+            ]);
+
+            $subscription = Subscription::findOrFail($id);
+            $subscription->start_date = Carbon::parse($request->start_date)->toDateString();
+
+            $submittedEndDate = Carbon::parse($request->end_date)->toDateString();
+            $originalEndDate = Carbon::parse($subscription->end_date)->toDateString();
+
+            if ($submittedEndDate !== $originalEndDate) {
+                $subscription->new_date = $submittedEndDate;
+            }
+
+            $subscription->save();
+
+            return response()->json(['status' => 'success', 'message' => 'Subscription dates updated successfully.']);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'validation_error',
+                'errors' => $e->validator->errors()
+            ], 422);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    if ($filter === 'fivedays') {
-        $query->where(function ($query) {
-            $query->where(function ($subQuery) {
-                $subQuery->whereNotNull('new_date')
-                    ->whereBetween('new_date', [
-                        Carbon::today()->subDays(4),
-                        Carbon::today()
-                    ]);
-            })->orWhere(function ($subQuery) {
-                $subQuery->whereNull('new_date')
-                    ->whereBetween('end_date', [
-                        Carbon::today()->subDays(4),
-                        Carbon::today()
-                    ]);
-            });
-        })->where('status', 'active');
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $request->validate([
+                'status' => 'required|in:active,paused,pending,expired'
+            ]);
+
+            $subscription = Subscription::findOrFail($id);
+            $subscription->status = $request->status;
+            $subscription->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Subscription status updated successfully.'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'status' => 'validation_error',
+                'errors' => $e->validator->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Something went wrong: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
-    if ($filter === 'todayrequest') {
-        $query = Subscription::whereIn('subscription_id', function ($subQuery) {
-            $subQuery->select('subscription_id')
-                ->from('subscription_pause_resume_logs')
-                ->whereDate('created_at', Carbon::today())
-                ->where('action', 'paused');
-        });
-    }
-
-    if ($filter === 'new') {
-        $query->whereDate('created_at', Carbon::today())
-            ->where('status', 'pending')
-            ->distinct('user_id');
-    }
-
-    if ($filter === 'active') {
-        $query->where('status', 'active');
-    }
-
-    if ($filter === 'expired') {
-        $subQuery = DB::table('subscriptions')
-            ->select('user_id', DB::raw('MAX(end_date) as latest_end_date'))
-            ->where('status', 'expired')
-            ->whereNotIn('user_id', function ($query) {
-                $query->select('user_id')
-                    ->from('subscriptions')
-                    ->whereIn('status', ['active', 'paused', 'resume']);
-            })
-            ->groupBy('user_id');
-
-        $query->joinSub($subQuery, 'latest_subscriptions', function ($join) {
-            $join->on('subscriptions.user_id', '=', 'latest_subscriptions.user_id')
-                ->on('subscriptions.end_date', '=', 'latest_subscriptions.latest_end_date');
-        })->orderByDesc('subscriptions.end_date');
-    }
-
-    if ($filter === 'paused') {
-        $query->where('status', 'paused');
-    }
-
-    $tomorrow = Carbon::tomorrow()->toDateString();
-
-    if ($filter === 'tommorow') {
-        $query->where('status', 'active')
-            ->whereDate('pause_start_date', $tomorrow);
-    }
-
-    if ($filter === 'nextdayresumed') {
-        $query->where('status', 'active')
-            ->whereDate('pause_end_date', $tomorrow);
-    }
-
-    if ($request->ajax()) {
-        return datatables()->eloquent($query)->toJson();
-    }
-
-    $activeSubscriptions = Subscription::where('status', 'active')->count();
-    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
-    $riders = RiderDetails::where('status', 'active')->get();
-
-    return view('admin.flower-order.manage-flower-orders', compact(
-        'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
-    ));
-}
-public function updateDates(Request $request, $id)
-{
-    try {
+    public function updatePauseDates(Request $request, $id)
+    {
         $request->validate([
-            'start_date' => 'required|date',
-            'end_date'   => 'required|date|after_or_equal:start_date',
+            'pause_start_date' => 'required|date',
+            'pause_end_date'   => 'required|date|after_or_equal:pause_start_date',
+            'resume_date'      => 'nullable|date',
         ]);
 
         $subscription = Subscription::findOrFail($id);
-        $subscription->start_date = Carbon::parse($request->start_date)->toDateString();
 
-        $submittedEndDate = Carbon::parse($request->end_date)->toDateString();
-        $originalEndDate = Carbon::parse($subscription->end_date)->toDateString();
+        $pauseStart = Carbon::parse($request->pause_start_date);
+        $pauseEnd   = Carbon::parse($request->pause_end_date);
+        $resumeDate = $request->resume_date ? Carbon::parse($request->resume_date) : null;
+        $currentEnd = $subscription->new_date ? Carbon::parse($subscription->new_date) : Carbon::parse($subscription->end_date);
 
-        if ($submittedEndDate !== $originalEndDate) {
-            $subscription->new_date = $submittedEndDate;
+        $newEndDate = null;
+        $pausedDays = 0;
+
+        if ($resumeDate) {
+            if ($resumeDate->lt($pauseStart) || $resumeDate->gt($pauseEnd)) {
+                return redirect()->back()->with('error', 'Resume date must be within the pause period.');
+            }
+
+            $pausedDays = $resumeDate->diffInDays($pauseStart) + 1;
+            $newEndDate = $currentEnd->addDays($pausedDays);
+            $subscription->new_date = $newEndDate->toDateString();
         }
 
+        // ✅ Update subscription pause columns
+        $subscription->pause_start_date = $pauseStart->toDateString();
+        $subscription->pause_end_date   = $pauseEnd->toDateString();
         $subscription->save();
 
-        return response()->json(['status' => 'success', 'message' => 'Subscription dates updated successfully.']);
+        // ✅ Check if log exists for same subscription & order
+        $existingLog = SubscriptionPauseResumeLog::where('subscription_id', $subscription->id)
+            ->where('order_id', $subscription->order_id)
+            ->where('action', 'pause-update') // optional filter
+            ->latest()
+            ->first();
 
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'status' => 'validation_error',
-            'errors' => $e->validator->errors()
-        ], 422);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Something went wrong: ' . $e->getMessage()
-        ], 500);
-    }
-}
-
-public function updateStatus(Request $request, $id)
-{
-    try {
-        $request->validate([
-            'status' => 'required|in:active,paused,pending,expired'
-        ]);
-
-        $subscription = Subscription::findOrFail($id);
-        $subscription->status = $request->status;
-        $subscription->save();
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Subscription status updated successfully.'
-        ]);
-    } catch (\Illuminate\Validation\ValidationException $e) {
-        return response()->json([
-            'status' => 'validation_error',
-            'errors' => $e->validator->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => 'Something went wrong: ' . $e->getMessage()
-        ], 500);
-    }
-}
-
-public function updatePauseDates(Request $request, $id)
-{
-    $request->validate([
-        'pause_start_date' => 'required|date',
-        'pause_end_date'   => 'required|date|after_or_equal:pause_start_date',
-        'resume_date'      => 'nullable|date',
-    ]);
-
-    $subscription = Subscription::findOrFail($id);
-
-    $pauseStart = Carbon::parse($request->pause_start_date);
-    $pauseEnd   = Carbon::parse($request->pause_end_date);
-    $resumeDate = $request->resume_date ? Carbon::parse($request->resume_date) : null;
-    $currentEnd = $subscription->new_date ? Carbon::parse($subscription->new_date) : Carbon::parse($subscription->end_date);
-
-    $newEndDate = null;
-    $pausedDays = 0;
-
-    if ($resumeDate) {
-        if ($resumeDate->lt($pauseStart) || $resumeDate->gt($pauseEnd)) {
-            return redirect()->back()->with('error', 'Resume date must be within the pause period.');
+        if ($existingLog) {
+            // Update existing log
+            $existingLog->update([
+                'pause_start_date' => $pauseStart->toDateString(),
+                'pause_end_date'   => $pauseEnd->toDateString(),
+                'resume_date'      => $resumeDate?->toDateString(),
+                'new_end_date'     => $newEndDate?->toDateString(),
+                'paused_days'      => $pausedDays,
+            ]);
+        } else {
+            // Insert new log
+            SubscriptionPauseResumeLog::create([
+                'subscription_id'  => $subscription->id,
+                'order_id'         => $subscription->order_id,
+                'action'           => 'pause-update',
+                'pause_start_date' => $pauseStart->toDateString(),
+                'pause_end_date'   => $pauseEnd->toDateString(),
+                'resume_date'      => $resumeDate?->toDateString(),
+                'new_end_date'     => $newEndDate?->toDateString(),
+                'paused_days'      => $pausedDays,
+            ]);
         }
 
-        $pausedDays = $resumeDate->diffInDays($pauseStart) + 1;
-        $newEndDate = $currentEnd->addDays($pausedDays);
-        $subscription->new_date = $newEndDate->toDateString();
+        return redirect()->back()->with('success', 'Pause dates and log updated successfully.');
     }
-
-    // ✅ Update subscription pause columns
-    $subscription->pause_start_date = $pauseStart->toDateString();
-    $subscription->pause_end_date   = $pauseEnd->toDateString();
-    $subscription->save();
-
-    // ✅ Check if log exists for same subscription & order
-    $existingLog = SubscriptionPauseResumeLog::where('subscription_id', $subscription->id)
-        ->where('order_id', $subscription->order_id)
-        ->where('action', 'pause-update') // optional filter
-        ->latest()
-        ->first();
-
-    if ($existingLog) {
-        // Update existing log
-        $existingLog->update([
-            'pause_start_date' => $pauseStart->toDateString(),
-            'pause_end_date'   => $pauseEnd->toDateString(),
-            'resume_date'      => $resumeDate?->toDateString(),
-            'new_end_date'     => $newEndDate?->toDateString(),
-            'paused_days'      => $pausedDays,
-        ]);
-    } else {
-        // Insert new log
-        SubscriptionPauseResumeLog::create([
-            'subscription_id'  => $subscription->id,
-            'order_id'         => $subscription->order_id,
-            'action'           => 'pause-update',
-            'pause_start_date' => $pauseStart->toDateString(),
-            'pause_end_date'   => $pauseEnd->toDateString(),
-            'resume_date'      => $resumeDate?->toDateString(),
-            'new_end_date'     => $newEndDate?->toDateString(),
-            'paused_days'      => $pausedDays,
-        ]);
-    }
-
-    return redirect()->back()->with('success', 'Pause dates and log updated successfully.');
-}
 
     public function markAsViewed()
     {
