@@ -26,36 +26,36 @@ use Illuminate\Support\Str;
 class FlowerOrderController extends Controller
 {
     
-public function showOrders(Request $request)
-{
-    if ($request->ajax()) {
-        $query = Subscription::with([
-            'order.rider',
-            'order.address.localityDetails',
-            'flowerPayments',
-            'users',
-            'flowerProducts',
-            'pauseResumeLog',
-        ])->orderBy('id', 'desc');
+// public function showOrders(Request $request)
+// {
+//     if ($request->ajax()) {
+//         $query = Subscription::with([
+//             'order.rider',
+//             'order.address.localityDetails',
+//             'flowerPayments',
+//             'users',
+//             'flowerProducts',
+//             'pauseResumeLog',
+//         ])->orderBy('id', 'desc');
 
-        // Add filters if any
-        if ($request->query('filter') === 'active') {
-            $query->where('status', 'active');
-        }
+//         // Add filters if any
+//         if ($request->query('filter') === 'active') {
+//             $query->where('status', 'active');
+//         }
 
-        return DataTables::of($query)->make(true);
-    }
+//         return DataTables::of($query)->make(true);
+//     }
 
-    // When not an AJAX call (first page load)
-    $activeSubscriptions = Subscription::where('status', 'active')->count();
-    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
-    $riders = \App\Models\RiderDetails::where('status', 'active')->get();
+//     // When not an AJAX call (first page load)
+//     $activeSubscriptions = Subscription::where('status', 'active')->count();
+//     $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+//     $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+//     $riders = \App\Models\RiderDetails::where('status', 'active')->get();
 
-    return view('admin.flower-order.manage-flower-orders', compact(
-        'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
-    ));
-}  
+//     return view('admin.flower-order.manage-flower-orders', compact(
+//         'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
+//     ));
+// }
 
     // public function showOrders(Request $request)
     // {
@@ -188,6 +188,42 @@ public function showOrders(Request $request)
     //             'riders', 'orders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
     //         ));
     // }
+
+    public function showOrders(Request $request)
+{
+    $query = Subscription::with([
+        'order.address.localityDetails',
+        'flowerPayments',
+        'users',
+        'flowerProducts',
+        'pauseResumeLog',
+        'order.rider' // add rider relation
+    ])->orderBy('id', 'desc');
+
+    // Apply all filters (same as before)...
+    if ($request->query('filter') === 'rider') {
+        $query->whereHas('order', function ($query) {
+            $query->whereNull('rider_id')->orWhere('rider_id', '');
+        });
+    }
+    // Add rest of your filters here...
+
+    // ✅ AJAX for DataTable
+    if ($request->ajax()) {
+        return datatables()->eloquent($query)->toJson();
+    }
+
+    // Only for initial page load
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
+    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+    $ordersRequestedToday = Subscription::whereDate('created_at', Carbon::today())->count();
+    $riders = RiderDetails::where('status', 'active')->get();
+
+    return view('admin.flower-order.manage-flower-orders', compact(
+        'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
+    ));
+}
+
 
 public function updateDates(Request $request, $id)
 {
