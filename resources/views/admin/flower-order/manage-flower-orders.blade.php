@@ -486,6 +486,39 @@
                             </div>
                         </div>
 
+                        <div class="modal fade" id="editPauseModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="edit-pause-form" method="POST" action="">
+                                    @csrf
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-warning text-dark">
+                                            <h5 class="modal-title">Edit Pause Dates</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="subscription_id" id="pause-sub-id">
+                                            <div class="mb-3">
+                                                <label for="pause-start">Pause Start Date</label>
+                                                <input type="date" name="pause_start_date" id="pause-start"
+                                                    class="form-control" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="pause-end">Pause End Date</label>
+                                                <input type="date" name="pause_end_date" id="pause-end"
+                                                    class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Update</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+
                     </div>
 
                 </div>
@@ -646,12 +679,35 @@
                     },
 
                     {
-                        data: 'created_at',
+                        data: null,
                         name: 'created_at',
-                        render: function(d) {
-                            return d ? moment(d).format('DD-MM-YYYY h:mm A') : 'N/A';
+                        render: function(r) {
+                            const createdAt = r.created_at ? moment(r.created_at).format(
+                                'DD-MM-YYYY h:mm A') : 'N/A';
+
+                            if (r.status === 'paused') {
+                                const start = moment(r.pause_start_date).format('DD-MM-YYYY');
+                                const end = moment(r.pause_end_date).format('DD-MM-YYYY');
+                                return `
+                                ${createdAt}
+                                <div style="margin-top: 8px; padding: 8px; background-color: #f8d7da; color: #721c24; border-radius: 5px;">
+                                    <strong><i class="fas fa-pause-circle me-2"></i></strong> ${start}<br>
+                                    <strong><i class="fas fa-play-circle me-2"></i></strong> ${end}
+                                    <button class="btn btn-sm btn-outline-secondary edit-pause-dates mt-2"
+                                        data-id="${r.id}"
+                                        data-start="${r.pause_start_date}"
+                                        data-end="${r.pause_end_date}"
+                                        data-bs-toggle="modal" data-bs-target="#editPauseModal">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            `;
+                            }
+
+                            return createdAt;
                         }
                     },
+
                     {
                         data: null,
                         name: 'start_date',
@@ -858,32 +914,77 @@
             });
 
 
-            // -- Edit Pause Dates --
+            // // -- Edit Pause Dates --
+            // $('#file-datatable').on('click', '.edit-pause-dates', function() {
+            //     const id = $(this).data('id');
+            //     const start = $(this).data('start');
+            //     const end = $(this).data('end');
+            //     $('#pause-sub-id').val(id);
+            //     $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
+            //     $('#pause-end').val(moment(end).format('YYYY-MM-DD'));
+            //     $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/updatePauseDates`);
+            //     new bootstrap.Modal($('#editPauseModal')[0]).show();
+            // });
+
+            // $('#edit-pause-form').submit(function(e) {
+            //     e.preventDefault();
+            //     $.ajax({
+            //         url: this.action,
+            //         type: 'POST',
+            //         data: $(this).serialize(),
+            //         success: () => {
+            //             Swal.fire('Updated', 'Pause dates updated.', 'success');
+            //             $('#editPauseModal').modal('hide');
+            //             table.ajax.reload(null, false);
+            //         },
+            //         error: () => Swal.fire('Error', 'Failed to update pause dates.', 'error')
+            //     });
+            // });
+
+
             $('#file-datatable').on('click', '.edit-pause-dates', function() {
                 const id = $(this).data('id');
                 const start = $(this).data('start');
                 const end = $(this).data('end');
+
                 $('#pause-sub-id').val(id);
                 $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
                 $('#pause-end').val(moment(end).format('YYYY-MM-DD'));
-                $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/updatePauseDates`);
-                new bootstrap.Modal($('#editPauseModal')[0]).show();
+                $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/update-pause-dates`);
             });
 
             $('#edit-pause-form').submit(function(e) {
                 e.preventDefault();
+                const form = $(this);
+
                 $.ajax({
-                    url: this.action,
-                    type: 'POST',
-                    data: $(this).serialize(),
-                    success: () => {
-                        Swal.fire('Updated', 'Pause dates updated.', 'success');
+                    url: form.attr('action'),
+                    method: 'POST',
+                    data: form.serialize(),
+                    success: function(res) {
+                        Swal.fire('Updated', res.message || 'Pause dates updated.', 'success');
                         $('#editPauseModal').modal('hide');
                         table.ajax.reload(null, false);
                     },
-                    error: () => Swal.fire('Error', 'Failed to update pause dates.', 'error')
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            let msg = '';
+                            for (const key in errors) {
+                                msg += `${errors[key][0]}<br>`;
+                            }
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Validation Error',
+                                html: msg
+                            });
+                        } else {
+                            Swal.fire('Error', 'Something went wrong', 'error');
+                        }
+                    }
                 });
             });
+
         });
     </script>
 @endsection
