@@ -318,120 +318,126 @@
                             {{ $errors->first('danger') }}
                         </div>
                     @endif
-                   <div class="table-responsive">
-   <div class="table-responsive">
-  <table id="file-datatable" class="table table-bordered w-100">
-    <thead>
-      <tr>
-        <th>Customer Details</th>
-        <th>Purchase Date</th>
-        <th>Duration</th>
-        <th>Price</th>
-        <th>Status</th>
-        <th>Assigned Rider</th>
-        <th>Referred By</th>
-        <th>Subscription</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{-- DataTables will load rows via AJAX --}}
-    </tbody>
-  </table>
-</div>
-
-<div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="edit-status-form" method="POST"
-                action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
-                @csrf
-                <div class="modal-content">
-                    <div class="modal-header bg-info text-white">
-                        <h5 class="modal-title">Update Subscription Status</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="subscription_id" id="status-sub-id">
-                        <div class="mb-3">
-                            <label for="status-select">Status</label>
-                            <select class="form-select" name="status" id="status-select" required>
-                                <option value="active">Active</option>
-                                <option value="paused">Paused</option>
-                                <option value="pending">Pending</option>
-                                <option value="expired">Expired</option>
-                            </select>
+                    <div class="table-responsive">
+                        <div class="table-responsive">
+                            <table id="file-datatable" class="table table-bordered w-100">
+                                <thead>
+                                    <tr>
+                                        <th>Customer Details</th>
+                                        <th>Purchase Date</th>
+                                        <th>Duration</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Assigned Rider</th>
+                                        <th>Referred By</th>
+                                        <th>Subscription</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{-- DataTables will load rows via AJAX --}}
+                                </tbody>
+                            </table>
                         </div>
+
+                        <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="edit-status-form" method="POST"
+                                    action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
+                                    @csrf
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-info text-white">
+                                            <h5 class="modal-title">Update Subscription Status</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="subscription_id" id="status-sub-id">
+                                            <div class="mb-3">
+                                                <label for="status-select">Status</label>
+                                                <select class="form-select" name="status" id="status-select" required>
+                                                    <option value="active">Active</option>
+                                                    <option value="paused">Paused</option>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="expired">Expired</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Update</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Global Edit Dates Modal -->
+                        <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="edit-dates-form" method="POST">
+                                    @csrf @method('PUT')
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title">Edit Subscription Dates</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="subscription_id" id="sub-id">
+                                            <div class="mb-3">
+                                                <label>Start Date</label>
+                                                <input type="date" name="start_date" id="sub-start"
+                                                    class="form-control" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label>End Date</label>
+                                                <input type="date" name="end_date" id="sub-end"
+                                                    class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Save</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Global Edit Rider Modal -->
+                        <div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <form id="edit-rider-form" method="POST">
+                                    @csrf @method('POST')
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-info text-white">
+                                            <h5 class="modal-title">Assign/Change Rider</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <input type="hidden" name="subscription_id" id="rider-sub-id">
+                                            <div class="mb-3">
+                                                <label>Rider</label>
+                                                <select name="rider_id" id="rider-select" class="form-control" required>
+                                                    <option value="">Choose Rider</option>
+                                                    @foreach ($riders as $rider)
+                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Save</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Update</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
-
-<!-- Global Edit Dates Modal -->
-<div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="edit-dates-form" method="POST">
-      @csrf @method('PUT')
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title">Edit Subscription Dates</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" name="subscription_id" id="sub-id">
-          <div class="mb-3">
-            <label>Start Date</label>
-            <input type="date" name="start_date" id="sub-start" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label>End Date</label>
-            <input type="date" name="end_date" id="sub-end" class="form-control" required>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Save</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-<!-- Global Edit Rider Modal -->
-<div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="edit-rider-form" method="POST">
-      @csrf @method('POST')
-      <div class="modal-content">
-        <div class="modal-header bg-info text-white">
-          <h5 class="modal-title">Assign/Change Rider</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        <div class="modal-body">
-          <input type="hidden" name="subscription_id" id="rider-sub-id">
-          <div class="mb-3">
-            <label>Rider</label>
-            <select name="rider_id" id="rider-select" class="form-control" required>
-              <option value="">Choose Rider</option>
-              @foreach($riders as $rider)
-                <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
-              @endforeach
-            </select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-success">Save</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-
-</div>
 
                 </div>
             </div>
@@ -440,215 +446,307 @@
     <!-- End Row -->
 @endsection
 @section('scripts')
-<!-- Dependencies -->
-<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <!-- Dependencies -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
 
-<script>
-$(function () {
-    const table = $('#file-datatable').DataTable({
-        processing: true,
-        serverSide: true,
-        ajax: {
-            url: "{{ route('admin.orders.index') }}",
-            data: { filter: '{{ request('filter', '') }}' }
-        },
-        columns: [
-            {
-                data: null,
-                name: 'users.name',
-                orderable: false,
-                searchable: false,
-                render: function (r) {
-                    return `
-                        <strong>Ord:</strong> ${r.order?.order_id || 'N/A'}<br>
-                        <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
-                        <strong>No:</strong> ${r.users?.mobile_number || 'N/A'}`;
-                }
-            },
-            {
-                data: 'created_at',
-                name: 'created_at',
-                render: function (d) {
-                    return d ? moment(d).format('DD-MM-YYYY h:mm A') : 'N/A';
-                }
-            },
-            {
-                data: null,
-                name: 'start_date',
-                render: function (r) {
-                    const start = moment(r.start_date).format('MMM D, YYYY');
-                    const end = r.new_date ? moment(r.new_date).format('MMM D, YYYY') : moment(r.end_date).format('MMM D, YYYY');
-                    return `${start}<br> — <br>${end}<br>
+    <script>
+        $(function() {
+            const table = $('#file-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('admin.orders.index') }}",
+                    data: {
+                        filter: '{{ request('filter', '') }}'
+                    }
+                },
+                columns: [{
+                        data: null,
+                        name: 'users.name',
+                        orderable: false,
+                        searchable: false,
+                        render: function(r) {
+                            const userId = r.users?.userid || '';
+                            const orderId = r.id;
+                            const address = r.order?.address || {};
+                            const locality = r.order?.address?.localityDetails?.locality_name || '';
+
+                            return `
+                                <strong>Ord:</strong> ${r.order?.order_id || 'N/A'}<br>
+                                <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
+                                <strong>No:</strong> ${r.users?.mobile_number || 'N/A'}<br>
+                                ${userId ? `<a href="/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` : ''}
+                                <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal${orderId}">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal${orderId}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+
+                                <!-- View Address Modal -->
+                                <div class="modal fade" id="addressModal${orderId}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-primary text-white">
+                                                <h5 class="modal-title"><i class="fas fa-home"></i> Address Details</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>Address:</strong> ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
+                                                <p><strong>Landmark:</strong> ${address.landmark || ''}</p>
+                                                <p><strong>Pin Code:</strong> ${address.pincode || ''}</p>
+                                                <p><strong>City:</strong> ${address.city || ''}</p>
+                                                <p><strong>State:</strong> ${address.state || ''}</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Address Modal -->
+                                <div class="modal fade" id="editAddressModal${orderId}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="POST" action="/admin/orders/${address.id}/updateAddress">
+                                                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                                <input type="hidden" name="_method" value="PUT">
+                                                <div class="modal-header bg-primary text-white">
+                                                    <h5 class="modal-title"><i class="fas fa-edit"></i> Edit Address</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Flat/Plot</label>
+                                                        <input type="text" name="apartment_flat_plot" class="form-control" value="${address.apartment_flat_plot || ''}" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Apartment Name</label>
+                                                        <input type="text" name="apartment_name" class="form-control" value="${address.apartment_name || ''}" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Locality</label>
+                                                        <input type="text" name="locality_name" class="form-control" value="${address.locality || ''}" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Landmark</label>
+                                                        <input type="text" name="landmark" class="form-control" value="${address.landmark || ''}" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Pin Code</label>
+                                                        <input type="text" name="pincode" class="form-control" value="${address.pincode || ''}" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">City</label>
+                                                        <input type="text" name="city" class="form-control" value="${address.city || ''}" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">State</label>
+                                                        <input type="text" name="state" class="form-control" value="${address.state || ''}" />
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Changes</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    },
+
+                    {
+                        data: 'created_at',
+                        name: 'created_at',
+                        render: function(d) {
+                            return d ? moment(d).format('DD-MM-YYYY h:mm A') : 'N/A';
+                        }
+                    },
+                    {
+                        data: null,
+                        name: 'start_date',
+                        render: function(r) {
+                            const start = moment(r.start_date).format('MMM D, YYYY');
+                            const end = r.new_date ? moment(r.new_date).format('MMM D, YYYY') :
+                                moment(r.end_date).format('MMM D, YYYY');
+                            return `${start}<br> — <br>${end}<br>
                         <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
                             <i class="fas fa-edit"></i>
                         </button>`;
-                }
-            },
-            {
-                data: 'order.total_price',
-                name: 'order.total_price',
-                render: function (p) {
-                    return `₹ ${parseFloat(p).toFixed(2)}`;
-                }
-            },
-            {
-                data: 'status',
-                name: 'status',
-                render: function (s, t, r) {
-                    const classes = {
-                        active: 'bg-success',
-                        paused: 'bg-warning',
-                        expired: 'bg-primary',
-                        dead: 'bg-danger',
-                        pending: 'bg-danger'
-                    };
-                    return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>
+                        }
+                    },
+                    {
+                        data: 'order.total_price',
+                        name: 'order.total_price',
+                        render: function(p) {
+                            return `₹ ${parseFloat(p).toFixed(2)}`;
+                        }
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        render: function(s, t, r) {
+                            const classes = {
+                                active: 'bg-success',
+                                paused: 'bg-warning',
+                                expired: 'bg-primary',
+                                dead: 'bg-danger',
+                                pending: 'bg-danger'
+                            };
+                            return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>
                         <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
                             data-bs-toggle="modal" data-bs-target="#editStatusModal"
                             data-id="${r.id}" data-status="${s}">
                             <i class="fas fa-edit"></i>
                         </button>`;
-                }
-            },
-            {
-                data: null,
-                name: 'order.rider_id',
-                render: function (r) {
-                    return `${r.order?.rider?.rider_name || 'Unassigned'}<br>
+                        }
+                    },
+                    {
+                        data: null,
+                        name: 'order.rider_id',
+                        render: function(r) {
+                            return `${r.order?.rider?.rider_name || 'Unassigned'}<br>
                         <button class="btn btn-sm btn-outline-info edit-rider"
                             data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order?.rider?.rider_id || ''}">
                             <i class="fas fa-edit"></i>
                         </button>`;
-                }
-            },
-            {
-                data: 'order.referral_id',
-                name: 'order.referral_id',
-                render: function (id) {
-                    return id || 'N/A';
-                }
-            },
-            {
-                data: null,
-                orderable: false,
-                render: function (r) {
-                    let btn = `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
-                    if (r.status === 'active')
-                        btn += ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
-                    if (r.status === 'paused')
-                        btn += ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
-                    return btn;
-                }
-            }
-        ],
-        order: [[1, 'desc']]
-    });
+                        }
+                    },
+                    {
+                        data: 'order.referral_id',
+                        name: 'order.referral_id',
+                        render: function(id) {
+                            return id || 'N/A';
+                        }
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        render: function(r) {
+                            let btn =
+                                `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
+                            if (r.status === 'active')
+                                btn +=
+                                ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
+                            if (r.status === 'paused')
+                                btn +=
+                                ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
+                            return btn;
+                        }
+                    }
+                ],
+                order: [
+                    [1, 'desc']
+                ]
+            });
 
-    // -- Edit Dates --
-    $('#file-datatable').on('click', '.edit-dates', function () {
-        const row = table.row($(this).closest('tr')).data();
-        $('#sub-id').val(row.id);
-        $('#sub-start').val(moment(row.start_date).format('YYYY-MM-DD'));
-        $('#sub-end').val(moment(row.new_date || row.end_date).format('YYYY-MM-DD'));
-        $('#edit-dates-form').attr('action', `/admin/subscriptions/${row.id}/updateDates`);
-        new bootstrap.Modal($('#editDatesModal')[0]).show();
-    });
+            // -- Edit Dates --
+            $('#file-datatable').on('click', '.edit-dates', function() {
+                const row = table.row($(this).closest('tr')).data();
+                $('#sub-id').val(row.id);
+                $('#sub-start').val(moment(row.start_date).format('YYYY-MM-DD'));
+                $('#sub-end').val(moment(row.new_date || row.end_date).format('YYYY-MM-DD'));
+                $('#edit-dates-form').attr('action', `/admin/subscriptions/${row.id}/updateDates`);
+                new bootstrap.Modal($('#editDatesModal')[0]).show();
+            });
 
-    $('#edit-dates-form').submit(function (e) {
-        e.preventDefault();
-        $.ajax({
-            url: this.action,
-            type: 'POST',
-            data: $(this).serialize(),
-            success: () => {
-                Swal.fire('Updated', 'Subscription dates updated.', 'success');
-                $('#editDatesModal').modal('hide');
-                table.ajax.reload(null, false);
-            },
-            error: () => Swal.fire('Error', 'Failed to update.', 'error')
+            $('#edit-dates-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: () => {
+                        Swal.fire('Updated', 'Subscription dates updated.', 'success');
+                        $('#editDatesModal').modal('hide');
+                        table.ajax.reload(null, false);
+                    },
+                    error: () => Swal.fire('Error', 'Failed to update.', 'error')
+                });
+            });
+
+            // -- Edit Rider --
+            $('#file-datatable').on('click', '.edit-rider', function() {
+                const row = table.row($(this).closest('tr')).data();
+                $('#rider-sub-id').val(row.id);
+                $('#rider-select').val(row.order.rider?.rider_id || '');
+                $('#edit-rider-form').attr('action', `/admin/orders/${row.order.id}/updateRider`);
+                new bootstrap.Modal($('#editRiderModal')[0]).show();
+            });
+
+            $('#edit-rider-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: () => {
+                        Swal.fire('Updated', 'Rider assigned.', 'success');
+                        $('#editRiderModal').modal('hide');
+                        table.ajax.reload(null, false);
+                    },
+                    error: () => Swal.fire('Error', 'Failed to update rider.', 'error')
+                });
+            });
+
+            // -- Edit Status --
+            $('#file-datatable').on('click', '.edit-status-btn', function() {
+                const id = $(this).data('id');
+                const status = $(this).data('status');
+                $('#status-sub-id').val(id);
+                $('#status-select').val(status);
+                $('#edit-status-form').attr('action', `/admin/subscriptions/${id}/update-status`);
+            });
+
+            $('#edit-status-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: () => {
+                        Swal.fire('Updated', 'Status updated.', 'success');
+                        $('#editStatusModal').modal('hide');
+                        table.ajax.reload(null, false);
+                    },
+                    error: () => Swal.fire('Error', 'Failed to update status.', 'error')
+                });
+            });
+
+            // -- Edit Pause Dates --
+            $('#file-datatable').on('click', '.edit-pause-dates', function() {
+                const id = $(this).data('id');
+                const start = $(this).data('start');
+                const end = $(this).data('end');
+                $('#pause-sub-id').val(id);
+                $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
+                $('#pause-end').val(moment(end).format('YYYY-MM-DD'));
+                $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/updatePauseDates`);
+                new bootstrap.Modal($('#editPauseModal')[0]).show();
+            });
+
+            $('#edit-pause-form').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: this.action,
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: () => {
+                        Swal.fire('Updated', 'Pause dates updated.', 'success');
+                        $('#editPauseModal').modal('hide');
+                        table.ajax.reload(null, false);
+                    },
+                    error: () => Swal.fire('Error', 'Failed to update pause dates.', 'error')
+                });
+            });
         });
-    });
-
-    // -- Edit Rider --
-    $('#file-datatable').on('click', '.edit-rider', function () {
-        const row = table.row($(this).closest('tr')).data();
-        $('#rider-sub-id').val(row.id);
-        $('#rider-select').val(row.order.rider?.rider_id || '');
-        $('#edit-rider-form').attr('action', `/admin/orders/${row.order.id}/updateRider`);
-        new bootstrap.Modal($('#editRiderModal')[0]).show();
-    });
-
-    $('#edit-rider-form').submit(function (e) {
-        e.preventDefault();
-        $.ajax({
-            url: this.action,
-            type: 'POST',
-            data: $(this).serialize(),
-            success: () => {
-                Swal.fire('Updated', 'Rider assigned.', 'success');
-                $('#editRiderModal').modal('hide');
-                table.ajax.reload(null, false);
-            },
-            error: () => Swal.fire('Error', 'Failed to update rider.', 'error')
-        });
-    });
-
-    // -- Edit Status --
-    $('#file-datatable').on('click', '.edit-status-btn', function () {
-        const id = $(this).data('id');
-        const status = $(this).data('status');
-        $('#status-sub-id').val(id);
-        $('#status-select').val(status);
-        $('#edit-status-form').attr('action', `/admin/subscriptions/${id}/update-status`);
-    });
-
-    $('#edit-status-form').submit(function (e) {
-        e.preventDefault();
-        $.ajax({
-            url: this.action,
-            type: 'POST',
-            data: $(this).serialize(),
-            success: () => {
-                Swal.fire('Updated', 'Status updated.', 'success');
-                $('#editStatusModal').modal('hide');
-                table.ajax.reload(null, false);
-            },
-            error: () => Swal.fire('Error', 'Failed to update status.', 'error')
-        });
-    });
-
-    // -- Edit Pause Dates --
-    $('#file-datatable').on('click', '.edit-pause-dates', function () {
-        const id = $(this).data('id');
-        const start = $(this).data('start');
-        const end = $(this).data('end');
-        $('#pause-sub-id').val(id);
-        $('#pause-start').val(moment(start).format('YYYY-MM-DD'));
-        $('#pause-end').val(moment(end).format('YYYY-MM-DD'));
-        $('#edit-pause-form').attr('action', `/admin/subscriptions/${id}/updatePauseDates`);
-        new bootstrap.Modal($('#editPauseModal')[0]).show();
-    });
-
-    $('#edit-pause-form').submit(function (e) {
-        e.preventDefault();
-        $.ajax({
-            url: this.action,
-            type: 'POST',
-            data: $(this).serialize(),
-            success: () => {
-                Swal.fire('Updated', 'Pause dates updated.', 'success');
-                $('#editPauseModal').modal('hide');
-                table.ajax.reload(null, false);
-            },
-            error: () => Swal.fire('Error', 'Failed to update pause dates.', 'error')
-        });
-    });
-});
-</script>
+    </script>
 @endsection
-
