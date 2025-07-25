@@ -62,14 +62,15 @@
                                 </div>
                             </div>
                             <div class="col-4 d-flex justify-content-center align-items-center">
-                                <div class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
+                                <div
+                                    class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
                                     <i class="fa fa-clock tx-16 text-white"></i>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-               
+
                 <!-- Active Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
@@ -88,7 +89,6 @@
                                         <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
                                     </div>
                                 </div>
-
                             </div>
                         </div>
                     </a>
@@ -515,7 +515,7 @@
                     </a>
                 </div>
 
-                  <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
@@ -567,14 +567,18 @@
         }, 5000);
     </script>
 
-     <script>
-                    function updateDateTime() {
-                        const now = new Date();
-                        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-                        document.getElementById('todayDate').textContent = now.toLocaleDateString(undefined, dateOptions);
-                        document.getElementById('liveTime').textContent = now.toLocaleTimeString();
-                    }
-                    updateDateTime();
-                    setInterval(updateDateTime, 1000);
-                </script>
+    <script>
+        function updateDateTime() {
+            const now = new Date();
+            const dateOptions = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            document.getElementById('todayDate').textContent = now.toLocaleDateString(undefined, dateOptions);
+            document.getElementById('liveTime').textContent = now.toLocaleTimeString();
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
 @endsection
