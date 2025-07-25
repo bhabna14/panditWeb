@@ -674,21 +674,37 @@
             $('#edit-dates-form').submit(function(e) {
                 e.preventDefault();
                 const form = $(this);
+
                 $.ajax({
                     url: form.attr('action'),
                     type: 'POST',
                     data: form.serialize(),
-                    success: function() {
-                        Swal.fire('Updated', 'Subscription dates updated.', 'success');
-                        bootstrap.Modal.getInstance($('#editDatesModal')[0]).hide();
-                        table.ajax.reload(null, false);
+                    success: function(res) {
+                        if (res.status === 'success') {
+                            Swal.fire('Success', res.message, 'success');
+                            bootstrap.Modal.getInstance($('#editDatesModal')[0]).hide();
+                            table.ajax.reload(null, false);
+                        }
                     },
-                    error: function() {
-                        Swal.fire('Error', 'Failed to update subscription dates.', 'error');
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            let message = '';
+                            for (const key in errors) {
+                                message += `${errors[key][0]}<br>`;
+                            }
+                            Swal.fire({
+                                title: 'Validation Error',
+                                html: message,
+                                icon: 'warning'
+                            });
+                        } else {
+                            Swal.fire('Error', xhr.responseJSON?.message ||
+                                'An unknown error occurred.', 'error');
+                        }
                     }
                 });
             });
-
 
             // -- Edit Rider --
             $('#file-datatable').on('click', '.edit-rider', function() {

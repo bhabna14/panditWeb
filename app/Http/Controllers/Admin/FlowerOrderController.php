@@ -315,25 +315,40 @@ public function showOrders(Request $request)
 }
 public function updateDates(Request $request, $id)
 {
-    $request->validate([
-        'start_date' => 'required|date',
-        'end_date'   => 'required|date|after_or_equal:start_date',
-    ]);
+    try {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+        ]);
 
-    $subscription = Subscription::findOrFail($id);
-    $subscription->start_date = Carbon::parse($request->start_date)->toDateString();
+        $subscription = Subscription::findOrFail($id);
+        $subscription->start_date = Carbon::parse($request->start_date)->toDateString();
 
-    $submittedEndDate = Carbon::parse($request->end_date)->toDateString();
-    $originalEndDate = Carbon::parse($subscription->end_date)->toDateString();
+        $submittedEndDate = Carbon::parse($request->end_date)->toDateString();
+        $originalEndDate = Carbon::parse($subscription->end_date)->toDateString();
 
-    if ($submittedEndDate !== $originalEndDate) {
-        $subscription->new_date = $submittedEndDate;
+        if ($submittedEndDate !== $originalEndDate) {
+            $subscription->new_date = $submittedEndDate;
+        }
+
+        $subscription->save();
+
+        return response()->json(['status' => 'success', 'message' => 'Subscription dates updated successfully.']);
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'status' => 'validation_error',
+            'errors' => $e->validator->errors()
+        ], 422);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Something went wrong: ' . $e->getMessage()
+        ], 500);
     }
-
-    $subscription->save();
-
-    return response()->json(['message' => 'Dates updated']); // ✅ Return JSON
 }
+
 
 public function updateStatus(Request $request, $id)
 {
