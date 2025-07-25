@@ -323,7 +323,7 @@
                     @endif
 
                     <form id="filter-form" class="row g-2 align-items-end">
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label class="form-label">Customer Name</label>
                             <select class="form-select" name="customer_name" id="customer_name">
                                 <option value="">All</option>
@@ -332,7 +332,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label class="form-label">Mobile Number</label>
                             <select class="form-select" name="mobile_number" id="mobile_number">
                                 <option value="">All</option>
@@ -341,7 +341,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label class="form-label">Apartment Name</label>
                             <select class="form-select" name="apartment_name" id="apartment_name">
                                 <option value="">All</option>
@@ -350,7 +350,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label class="form-label">Apartment Number</label>
                             <select class="form-select" name="apartment_flat_plot" id="apartment_flat_plot">
                                 <option value="">All</option>
