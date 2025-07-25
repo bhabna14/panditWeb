@@ -480,7 +480,7 @@
                                 <strong>Ord:</strong> ${r.order?.order_id || 'N/A'}<br>
                                 <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
                                 <strong>No:</strong> ${r.users?.mobile_number || 'N/A'}<br>
-                                ${userId ? `<a href="/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` : ''}
+                                ${userId ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` : ''}
                                 <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#addressModal${orderId}">
                                     <i class="fas fa-map-marker-alt"></i>
                                 </button>
