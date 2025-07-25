@@ -51,6 +51,27 @@
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom">Flower Subscription</h4>
             <div class="row">
+
+                <!-- Today Date & Running Time Card -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <div class="card sales-card">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="ps-4 pt-4 pe-3 pb-4">
+                                    <h6 class="mb-2 tx-12">Today's Date & Time</h6>
+                                    <h4 class="tx-20 font-weight-semibold mb-2" id="todayDate"></h4>
+                                    <h5 class="tx-16 font-weight-semibold mb-0" id="liveTime"></h5>
+                                </div>
+                            </div>
+                            <div class="col-4 d-flex justify-content-center align-items-center">
+                                <div class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
+                                    <i class="fa fa-clock tx-16 text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               
                 <!-- Active Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
@@ -547,4 +568,15 @@
             }
         }, 5000);
     </script>
+
+     <script>
+                    function updateDateTime() {
+                        const now = new Date();
+                        const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+                        document.getElementById('todayDate').textContent = now.toLocaleDateString(undefined, dateOptions);
+                        document.getElementById('liveTime').textContent = now.toLocaleTimeString();
+                    }
+                    updateDateTime();
+                    setInterval(updateDateTime, 1000);
+                </script>
 @endsection

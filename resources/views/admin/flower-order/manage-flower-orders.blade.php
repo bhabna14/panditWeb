@@ -252,7 +252,6 @@
                                 href="{{ route('admin.orders.index') }}" onclick="changeColor(this)">Subscription Orders</a>
                             <a class="nav-link mb-2 mt-2" href="{{ route('flower-request') }}"
                                 onclick="changeColor(this)">Request Orders</a>
-
                         </nav>
                     </div>
                 </div>
