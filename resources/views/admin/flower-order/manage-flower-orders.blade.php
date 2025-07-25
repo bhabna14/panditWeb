@@ -371,11 +371,11 @@
                             </div>
                         </div>
 
-                        <!-- Global Edit Dates Modal -->
                         <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog">
                                 <form id="edit-dates-form" method="POST">
-                                    @csrf @method('PUT')
+                                    @csrf
+                                    @method('PUT')
                                     <div class="modal-content">
                                         <div class="modal-header bg-primary text-white">
                                             <h5 class="modal-title">Edit Subscription Dates</h5>
@@ -662,7 +662,6 @@
             });
 
 
-            // -- Edit Dates --
             $('#file-datatable').on('click', '.edit-dates', function() {
                 const row = table.row($(this).closest('tr')).data();
                 $('#sub-id').val(row.id);
@@ -674,18 +673,22 @@
 
             $('#edit-dates-form').submit(function(e) {
                 e.preventDefault();
+                const form = $(this);
                 $.ajax({
-                    url: this.action,
+                    url: form.attr('action'),
                     type: 'POST',
-                    data: $(this).serialize(),
-                    success: () => {
+                    data: form.serialize(),
+                    success: function() {
                         Swal.fire('Updated', 'Subscription dates updated.', 'success');
-                        $('#editDatesModal').modal('hide');
+                        bootstrap.Modal.getInstance($('#editDatesModal')[0]).hide();
                         table.ajax.reload(null, false);
                     },
-                    error: () => Swal.fire('Error', 'Failed to update.', 'error')
+                    error: function() {
+                        Swal.fire('Error', 'Failed to update subscription dates.', 'error');
+                    }
                 });
             });
+
 
             // -- Edit Rider --
             $('#file-datatable').on('click', '.edit-rider', function() {

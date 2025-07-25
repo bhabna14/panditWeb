@@ -313,7 +313,6 @@ public function showOrders(Request $request)
         'riders', 'activeSubscriptions', 'pausedSubscriptions', 'ordersRequestedToday'
     ));
 }
-
 public function updateDates(Request $request, $id)
 {
     $request->validate([
@@ -333,7 +332,7 @@ public function updateDates(Request $request, $id)
 
     $subscription->save();
 
-        return redirect()->back()->with('success', 'Subscription dates updated successfully.');
+    return response()->json(['message' => 'Dates updated']); // ✅ Return JSON
 }
 
 public function updateStatus(Request $request, $id)
