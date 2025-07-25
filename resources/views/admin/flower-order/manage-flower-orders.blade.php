@@ -741,18 +741,38 @@
 
             $('#edit-status-form').submit(function(e) {
                 e.preventDefault();
+
                 $.ajax({
                     url: this.action,
                     type: 'POST',
                     data: $(this).serialize(),
-                    success: () => {
-                        Swal.fire('Updated', 'Status updated.', 'success');
-                        $('#editStatusModal').modal('hide');
-                        table.ajax.reload(null, false);
+                    success: function(res) {
+                        if (res.status === 'success') {
+                            Swal.fire('Success', res.message, 'success');
+                            $('#editStatusModal').modal('hide');
+                            table.ajax.reload(null, false);
+                        }
                     },
-                    error: () => Swal.fire('Error', 'Failed to update status.', 'error')
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            const errors = xhr.responseJSON.errors;
+                            let message = '';
+                            for (const key in errors) {
+                                message += `${errors[key][0]}<br>`;
+                            }
+                            Swal.fire({
+                                title: 'Validation Error',
+                                html: message,
+                                icon: 'warning'
+                            });
+                        } else {
+                            Swal.fire('Error', xhr.responseJSON?.message ||
+                                'Failed to update status.', 'error');
+                        }
+                    }
                 });
             });
+
 
             // -- Edit Pause Dates --
             $('#file-datatable').on('click', '.edit-pause-dates', function() {

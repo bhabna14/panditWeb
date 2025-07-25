@@ -349,19 +349,34 @@ public function updateDates(Request $request, $id)
     }
 }
 
-
 public function updateStatus(Request $request, $id)
 {
-    $request->validate([
-        'status' => 'required|in:active,paused,pending,expired'
-    ]);
+    try {
+        $request->validate([
+            'status' => 'required|in:active,paused,pending,expired'
+        ]);
 
-    $subscription = Subscription::findOrFail($id);
-    $subscription->status = $request->status;
-    $subscription->save();
+        $subscription = Subscription::findOrFail($id);
+        $subscription->status = $request->status;
+        $subscription->save();
 
-        return redirect()->back()->with('success', 'Subscription dates updated successfully.');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Subscription status updated successfully.'
+        ]);
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return response()->json([
+            'status' => 'validation_error',
+            'errors' => $e->validator->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'Something went wrong: ' . $e->getMessage()
+        ], 500);
+    }
 }
+
 public function updatePauseDates(Request $request, $id)
 {
     $request->validate([
