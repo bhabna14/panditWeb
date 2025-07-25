@@ -532,10 +532,15 @@
                 serverSide: true,
                 ajax: {
                     url: "{{ route('admin.orders.index') }}",
-                    data: {
-                        filter: '{{ request('filter', '') }}'
+                    data: function(d) {
+                        d.filter = '{{ request('filter', '') }}';
+                        d.customer_name = $('#customer_name').val();
+                        d.mobile_number = $('#mobile_number').val();
+                        d.apartment_name = $('#apartment_name').val();
+                        d.apartment_flat_plot = $('#apartment_flat_plot').val();
                     }
                 },
+
                 columns: [{
                         data: null,
                         name: 'users.name',
@@ -732,6 +737,9 @@
                 tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
             });
 
+            $('#search-btn').on('click', function() {
+                table.ajax.reload();
+            });
 
             $('#file-datatable').on('click', '.edit-dates', function() {
                 const row = table.row($(this).closest('tr')).data();

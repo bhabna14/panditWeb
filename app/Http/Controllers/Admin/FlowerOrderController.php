@@ -300,6 +300,31 @@ class FlowerOrderController extends Controller
                 ->whereDate('pause_end_date', $tomorrow);
         }
 
+        if ($request->filled('customer_name')) {
+            $query->whereHas('users', function ($q) use ($request) {
+                $q->where('name', $request->customer_name);
+            });
+        }
+
+        if ($request->filled('mobile_number')) {
+            $query->whereHas('users', function ($q) use ($request) {
+                $q->where('mobile_number', $request->mobile_number);
+            });
+        }
+
+        if ($request->filled('apartment_name')) {
+            $query->whereHas('order.address', function ($q) use ($request) {
+                $q->where('apartment_name', $request->apartment_name);
+            });
+        }
+
+        if ($request->filled('apartment_flat_plot')) {
+            $query->whereHas('order.address', function ($q) use ($request) {
+                $q->where('apartment_flat_plot', $request->apartment_flat_plot);
+            });
+        }
+
+
         if ($request->ajax()) {
             return datatables()->eloquent($query)->toJson();
         }
