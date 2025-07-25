@@ -748,9 +748,15 @@
                     data: $(this).serialize(),
                     success: function(res) {
                         if (res.status === 'success') {
-                            Swal.fire('Success', res.message, 'success');
-                            $('#editStatusModal').modal('hide');
-                            table.ajax.reload(null, false);
+                            Swal.fire({
+                                title: 'Success',
+                                text: res.message,
+                                icon: 'success',
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload(); // 🔄 Auto-refresh the page
+                            });
                         }
                     },
                     error: function(xhr) {
