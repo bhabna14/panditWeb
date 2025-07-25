@@ -441,8 +441,9 @@
 @endsection
 @section('scripts')
 <!-- Dependencies -->
-<script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-<script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
@@ -453,39 +454,52 @@ $(function () {
         processing: true,
         serverSide: true,
         ajax: {
-            url: "{{ route('admin.orders.index') }}",
+            url: "{{ route('admin.orders.show') }}",
             data: { filter: '{{ request('filter', '') }}' }
         },
         columns: [
             {
                 data: null,
+                name: 'users.name',
                 orderable: false,
-                render: (r) => `
-                    <strong>Ord:</strong> ${r.order.order_id}<br>
-                    <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
-                    <strong>No:</strong> ${r.users?.mobile_number || 'N/A'}`
+                searchable: false,
+                render: function (r) {
+                    return `
+                        <strong>Ord:</strong> ${r.order?.order_id || 'N/A'}<br>
+                        <strong>Name:</strong> ${r.users?.name || 'N/A'}<br>
+                        <strong>No:</strong> ${r.users?.mobile_number || 'N/A'}`;
+                }
             },
             {
                 data: 'created_at',
-                render: d => d ? moment(d).format('DD-MM-YYYY h:mm A') : 'N/A'
+                name: 'created_at',
+                render: function (d) {
+                    return d ? moment(d).format('DD-MM-YYYY h:mm A') : 'N/A';
+                }
             },
             {
                 data: null,
-                render: r => `
-                    ${moment(r.start_date).format('MMM D, YYYY')}<br> — <br>
-                    ${r.new_date ? moment(r.new_date).format('MMM D, YYYY') : moment(r.end_date).format('MMM D, YYYY')}
-                    <br>
-                    <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
-                        <i class="fas fa-edit"></i>
-                    </button>`
+                name: 'start_date',
+                render: function (r) {
+                    const start = moment(r.start_date).format('MMM D, YYYY');
+                    const end = r.new_date ? moment(r.new_date).format('MMM D, YYYY') : moment(r.end_date).format('MMM D, YYYY');
+                    return `${start}<br> — <br>${end}<br>
+                        <button class="btn btn-sm btn-outline-secondary edit-dates" data-id="${r.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>`;
+                }
             },
             {
                 data: 'order.total_price',
-                render: p => `₹ ${parseFloat(p).toFixed(2)}`
+                name: 'order.total_price',
+                render: function (p) {
+                    return `₹ ${parseFloat(p).toFixed(2)}`;
+                }
             },
             {
                 data: 'status',
-                render: s => {
+                name: 'status',
+                render: function (s, t, r) {
                     const classes = {
                         active: 'bg-success',
                         paused: 'bg-warning',
@@ -494,29 +508,35 @@ $(function () {
                         pending: 'bg-danger'
                     };
                     return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>
-                    <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
-                        data-bs-toggle="modal" data-bs-target="#editStatusModal"
-                        data-id="${r.id}" data-status="${s}">
-                        <i class="fas fa-edit"></i>
-                    </button>`;
+                        <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
+                            data-bs-toggle="modal" data-bs-target="#editStatusModal"
+                            data-id="${r.id}" data-status="${s}">
+                            <i class="fas fa-edit"></i>
+                        </button>`;
                 }
             },
             {
                 data: null,
-                render: r => `
-                    ${r.order.rider?.rider_name || 'Unassigned'}<br>
-                    <button class="btn btn-sm btn-outline-info edit-rider" data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order.rider?.rider_id || ''}">
-                        <i class="fas fa-edit"></i>
-                    </button>`
+                name: 'order.rider_id',
+                render: function (r) {
+                    return `${r.order?.rider?.rider_name || 'Unassigned'}<br>
+                        <button class="btn btn-sm btn-outline-info edit-rider"
+                            data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order?.rider?.rider_id || ''}">
+                            <i class="fas fa-edit"></i>
+                        </button>`;
+                }
             },
             {
-                data: null,
-                render: r => r.order.referral_id || 'N/A'
+                data: 'order.referral_id',
+                name: 'order.referral_id',
+                render: function (id) {
+                    return id || 'N/A';
+                }
             },
             {
                 data: null,
                 orderable: false,
-                render: r => {
+                render: function (r) {
                     let btn = `<a href="/admin/flower-orders/${r.id}" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>`;
                     if (r.status === 'active')
                         btn += ` <a href="/admin/subscription/pause-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-pause"></i></a>`;
