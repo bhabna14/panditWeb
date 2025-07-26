@@ -155,13 +155,13 @@
                                             <div class="d-flex flex-column">
                                                 <!-- Total Delivery with icon -->
                                                 <h4 class="tx-12 font-weight-semibold text-dark mb-2">
-                                                    <i class="fas fa-truck-loading me-2 text-dark"></i>
+                                                    {{-- <i class="fas fa-truck-loading me-2 text-dark"></i> --}}
                                                     Total Delivery: {{ $data['totalAssignedOrders'] }}
                                                 </h4>
 
                                                 <!-- Total Delivered with icon -->
                                                 <h4 class="tx-12 font-weight-semibold text-dark mb-0">
-                                                    <i class="fas fa-check-circle me-2 text-dark"></i>
+                                                    {{-- <i class="fas fa-check-circle me-2 text-dark"></i> --}}
                                                     Total Delivered: {{ $data['totalDeliveredToday'] }}
                                                 </h4>
                                             </div>
