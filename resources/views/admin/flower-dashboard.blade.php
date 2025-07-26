@@ -69,7 +69,7 @@
                     </div>
                 </div> --}}
 
-                <div class="card row">
+                <div class="card sales-card row">
                     <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                         <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                             <div class="card sales-card">
