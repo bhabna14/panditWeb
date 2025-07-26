@@ -169,6 +169,12 @@ class FlowerDashboardController extends Controller
             ->where('action', 'paused') // Optional: only count pause actions
             ->count();
 
+            $today = Carbon::today();
+            $threeDaysLater = Carbon::today()->addDays(3);
+
+            $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$today, $threeDaysLater])
+            ->count();
+
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',
                 'totalDeliveriesTodayCount',
@@ -189,7 +195,8 @@ class FlowerDashboardController extends Controller
                 'todayPausedRequest',
                 'pausedSubscriptions',
                 'nextDayPaused',
-                'nextDayResumed'
+                'nextDayResumed',
+                'upcomingCustomizeOrders'
             ));
 }
 
