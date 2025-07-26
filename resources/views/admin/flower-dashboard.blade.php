@@ -141,7 +141,7 @@
 
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <h4 class="card-title-custom mb-4">Individual Rider Details</h4>
+            <h4 class="card-title-custom mb-4" style="font-size: 14px">Individual Rider Details</h4>
             <div class="row">
                 @foreach ($ridersData as $data)
                     <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
@@ -185,7 +185,7 @@
     <!-- row closed -->
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <h4 class="card-title-custom"> Rider Details</h4>
+            <h4 class="card-title-custom" style="font-size: 14px"> Rider Details</h4>
 
             <div class="row">
                 <!-- Total Riders -->
@@ -279,7 +279,7 @@
 
   <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h4 class="card-title-custom">Todays Order Block</h4>
+            <h4 class="card-title-custom" style="font-size: 14px">Todays Order Block</h4>
             <div class="row">
                 <!-- New Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
@@ -353,7 +353,7 @@
     <div class="row card sales-card mt-2">
 
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h4 class="card-title-custom">Subscription Status</h4>
+            <h4 class="card-title-custom" style="font-size: 14px">Subscription Status</h4>
             <div class="row">
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
@@ -449,7 +449,7 @@
 
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h4 class="card-title-custom">Paused Subscription</h4>
+            <h4 class="card-title-custom" style="font-size: 14px">Paused Subscription</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
