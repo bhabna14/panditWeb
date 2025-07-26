@@ -50,7 +50,7 @@
             <h4 class="card-title-custom">Flower Subscription</h4>
             <div class="row">
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <div class="card sales-card">
                         <div class="row">
                             <div class="col-8">
@@ -67,7 +67,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> --}}
 
                 <!-- Active Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
