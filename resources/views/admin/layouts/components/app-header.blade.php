@@ -26,10 +26,10 @@
 						<div class="main-header-center">
 							<div class="d-flex align-items-center">
 								<div class="me-3">
-									<span class="fw-bold" id="current-date" style="font-size: 22px"></span>
+									<span class="fw-bold" id="current-date" style="font-size: 20px"></span>
 								</div>
 								<div>
-									<span class="fw-bold" id="current-time"></span>
+									<span class="fw-bold" id="current-time" style="font-size: 20px"></span>
 								</div>
 							</div>
 						</div>
