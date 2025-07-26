@@ -47,7 +47,7 @@
 
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h6 class="card-title-custom mb-4" style="font-size: 18px">Flower Subscription</h6>
+            <h6 class="card-title-custom mb-4" style="font-size: 14px">Flower Subscription</h6>
             <div class="row">
 
                 {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
