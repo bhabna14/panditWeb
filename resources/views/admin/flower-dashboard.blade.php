@@ -81,12 +81,12 @@
                                             {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
                                     </div>
                                 </div>
-                                <div>
+                                {{-- <div>
                                     <div
-                                        class="circle-icon from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
+                                        class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
