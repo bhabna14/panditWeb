@@ -156,13 +156,13 @@
                                                 <!-- Total Delivery with icon -->
                                                 <h4 class="tx-12 font-weight-semibold text-dark mb-2">
                                                     {{-- <i class="fas fa-truck-loading me-2 text-dark"></i> --}}
-                                                    Total Delivery: {{ $data['totalAssignedOrders'] }}
+                                                    Delivery Assigned: {{ $data['totalAssignedOrders'] }}
                                                 </h4>
 
                                                 <!-- Total Delivered with icon -->
                                                 <h4 class="tx-12 font-weight-semibold text-dark mb-0">
                                                     {{-- <i class="fas fa-check-circle me-2 text-dark"></i> --}}
-                                                    Total Delivered: {{ $data['totalDeliveredToday'] }}
+                                                    Delivered: {{ $data['totalDeliveredToday'] }}
                                                 </h4>
                                             </div>
                                         </div>
@@ -260,7 +260,7 @@
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Sub Total Delivery</h6>
+                                        <h6 class="mb-2 tx-12">Total Delivery</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveries }}</h4>
                                     </div>
                                 </div>
@@ -279,7 +279,7 @@
 
   <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h4 class="card-title-custom" style="font-size: 14px">Todays Order Block</h4>
+            <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
             <div class="row">
                 <!-- New Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
