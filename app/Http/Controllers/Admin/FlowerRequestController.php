@@ -17,44 +17,45 @@ use Carbon\Carbon;
 class FlowerRequestController extends Controller
 {
     //
-    public function showRequests(Request $request)
-    {
-        // Get the filter value from the query string, defaulting to 'today'
-        // $filter = $request->input('filter', 'today');
-    
-        $query = FlowerRequest::with([
-            'order' => function ($query) {
-                $query->with('flowerPayments', 'delivery');
-            },
-            'flowerProduct',
-            'user',
-            'address.localityDetails',
-            'flowerRequestItems'
-        ])->orderBy('id', 'desc');
-    
-        // Apply filter: Only show today's orders if 'today' filter is selected
-        // if ($filter == 'today') {
-        //     $query->whereDate('created_at', Carbon::today());
-        // }
-    
-        // Get the filtered orders
-        $pendingRequests = $query->get();
+  public function showRequests(Request $request)
+{
+    // Get the filter value from the query string, defaulting to 'today'
+    $filter = $request->input('filter', 'today');
 
-    
-        $activeSubscriptions = Subscription::where('status', 'active')->count();
-        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
-        $ordersRequestedToday = FlowerRequest::whereDate('date', Carbon::today())->count();
-        $riders = RiderDetails::where('status', 'active')->get();
-    
-        return view('admin.flower-request.manage-flower-request', compact(
-            'riders',
-            'pendingRequests',
-            'activeSubscriptions',
-            'pausedSubscriptions',
-            'ordersRequestedToday'
-        ));
+    $query = FlowerRequest::with([
+        'order' => function ($query) {
+            $query->with('flowerPayments', 'delivery');
+        },
+        'flowerProduct',
+        'user',
+        'address.localityDetails',
+        'flowerRequestItems'
+    ])->orderBy('id', 'desc');
+
+    // Apply filter based on requested type
+    if ($filter === 'today') {
+        $query->whereDate('date', Carbon::today());
     }
-    
+
+    if ($filter === 'upcoming') {
+        $query->whereBetween('date', [Carbon::today(), Carbon::today()->addDays(3)]);
+    }
+
+    $pendingRequests = $query->get();
+
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
+    $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+    $ordersRequestedToday = FlowerRequest::whereDate('date', Carbon::today())->count();
+    $riders = RiderDetails::where('status', 'active')->get();
+
+    return view('admin.flower-request.manage-flower-request', compact(
+        'riders',
+        'pendingRequests',
+        'activeSubscriptions',
+        'pausedSubscriptions',
+        'ordersRequestedToday'
+    ));
+}
     
 // public function saveOrder(Request $request, $id)
 // {
