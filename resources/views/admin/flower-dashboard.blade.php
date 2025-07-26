@@ -141,7 +141,7 @@
 
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <h4 class="card-title-custom mb-4" style="font-size: 14px">Individual Rider Details</h4>
+            <h4 class="card-title-custom mb-4" style="font-size: 14px">Todays Rider Details</h4>
             <div class="row">
                 @foreach ($ridersData as $data)
                     <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
