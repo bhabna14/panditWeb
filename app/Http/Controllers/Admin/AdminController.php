@@ -548,10 +548,10 @@ class AdminController extends Controller
         // Fetch rider details
         $rider = RiderDetails::where('rider_id', $riderId)->firstOrFail();
 
-        // Fetch all riders except the current rider
+        // Fetch all riders except the current one
         $allRiders = RiderDetails::where('rider_id', '!=', $riderId)->get();
 
-        // Fetch orders assigned to the rider where the subscription is active
+        // Fetch orders assigned to this rider where subscription is active
         $orders = Order::where('rider_id', $riderId)
             ->whereHas('subscription', function ($query) {
                 $query->where('status', 'active');
@@ -559,8 +559,15 @@ class AdminController extends Controller
             ->with(['flowerProduct', 'user', 'subscription'])
             ->get();
 
-        // Pass the rider details, orders, and all riders to the view
-        return view('admin.delivery-assign', compact('rider', 'orders', 'allRiders'));
+        // Fetch today's delivery history for this rider
+        $today = Carbon::today();
+
+        $deliveryHistory = DeliveryHistory::where('rider_id', $riderId)
+            ->whereDate('created_at', $today)
+            ->with('order.user')
+            ->get();
+
+        return view('admin.delivery-assign', compact('rider', 'orders', 'allRiders', 'deliveryHistory'));
     }
 
     public function transferOrders(Request $request)

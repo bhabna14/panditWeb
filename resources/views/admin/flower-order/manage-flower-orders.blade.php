@@ -1,6 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('styles')
+
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
     <!-- Data table css -->

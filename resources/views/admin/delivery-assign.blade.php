@@ -113,44 +113,46 @@
     <!-- Orders Table -->
     <div class="row mt-4">
         <div class="col-12">
-            <div class="card p-3 shadow-sm">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-list-ol"></i> Serial No</th>
-                            <th><i class="fas fa-hashtag"></i> Order ID</th>
-                            <th><i class="fas fa-user"></i> User</th>
-                            <th><i class="fas fa-check-circle"></i> Subscription Status</th>
-                            <th><i class="fas fa-calendar"></i> Assigned Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($orders as $index => $order)
+            @if ($deliveryHistory->isNotEmpty())
+                <div class="card mt-4 p-3 shadow-sm">
+                    <h5 class="mb-3"><i class="fas fa-calendar-day"></i> Today's Delivery History</h5>
+                    <table class="table table-striped">
+                        <thead>
                             <tr>
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $order->order_id }}</td>
-                                <td>{{ $order->user->name ?? 'N/A' }}</td>
-                                <td>
-                                    @if ($order->subscription->status ?? '' == 'active')
-                                        <span class="badge badge-active">Active</span>
-                                    @else
-                                        <span class="badge badge-inactive">Inactive</span>
-                                    @endif
-                                </td>
-                                <td>{{ $order->created_at->format('d-m-Y') }}</td>
+                                <th><i class="fas fa-list-ol"></i> #</th>
+                                <th><i class="fas fa-hashtag"></i> Order ID</th>
+                                <th><i class="fas fa-user"></i> User</th>
+                                <th><i class="fas fa-shipping-fast"></i> Delivery Status</th>
+                                <th><i class="fas fa-clock"></i> Time</th>
                             </tr>
-                        @endforeach
+                        </thead>
+                        <tbody>
+                            @foreach ($deliveryHistory as $index => $history)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $history->order->order_id ?? 'N/A' }}</td>
+                                    <td>{{ $history->order->user->name ?? 'N/A' }}</td>
+                                    <td>
+                                        <span
+                                            class="badge 
+                                @if ($history->delivery_status == 'delivered') badge-success
+                                @elseif($history->delivery_status == 'pending') badge-warning
+                                @else badge-secondary @endif">
+                                            {{ ucfirst($history->delivery_status) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $history->created_at->format('h:i A') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="text-muted mt-3 text-center">
+                    <i class="fas fa-info-circle"></i> No deliveries made today.
+                </div>
+            @endif
 
-                        @if ($orders->isEmpty())
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    <i class="fas fa-info-circle"></i> No orders assigned to this rider.
-                                </td>
-                            </tr>
-                        @endif
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 
