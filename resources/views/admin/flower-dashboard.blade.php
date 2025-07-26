@@ -1,8 +1,10 @@
-@extends('admin.layouts.app')
+@extends('admin.layouts.apps')
 
 @section('styles')
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
+<!-- Feather Icons -->
+<link href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css" rel="stylesheet">
 
     <!-- INTERNAL Data table css -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
@@ -549,4 +551,9 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+<script>
+    feather.replace();
+</script>
+
 @endsection
