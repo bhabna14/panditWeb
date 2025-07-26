@@ -24,10 +24,9 @@
             </ol>
         </div>
     </div>
-    <!-- /breadcrumb -->
 
     <!-- row -->
-    <div class="row" id="welcomeSections">
+    {{-- <div class="row" id="welcomeSections">
         <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
             <div class="card">
                 <div class="card-body">
@@ -44,8 +43,7 @@
                 </div>
             </div>
         </div>
-    </div>
-
+    </div> --}}
 
     <div class="row mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
