@@ -69,77 +69,77 @@
                     </div>
                 </div> --}}
 
-               
-                    <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                        <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                            <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <div class="ps-4 pt-4 pe-3 pb-4">
-                                            <h5 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h5>
-                                            <h4 class="tx-20 font-weight-semibold mb-2">
-                                                {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div
-                                            class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
-                                            <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
 
-                    <!-- New Subscription -->
-                    <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                        <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                            <div class="card sales-card " style="border: 1px solid rgb(186, 185, 185);">
-                                <div class="row">
-                                    <div class="col-8">
-                                        <div class="ps-4 pt-4 pe-3 pb-4">
-                                            <h6 class="mb-2 tx-12">Today Total Income</h6>
-                                            <h4 class="tx-20 font-weight-semibold mb-2">
-                                                ₹{{ number_format($totalIncomeToday, 2) }}</h4>
-                                        </div>
-                                    </div>
-                                    <div class="col-4">
-                                        <div
-                                            class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
-                                            <i class="fas fa-rupee-sign tx-16 text-white"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-
-                    <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
+                                        <h5 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h5>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
-                                            ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
+                                            {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                <div>
                                     <div
-                                        class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
-                                        <i class="fas fa-money-bill-wave tx-16 text-white"></i>
+                                        class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
+                                        <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </a>
+                </div>
+
+                <!-- New Subscription -->
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
+                        <div class="card sales-card " style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Today Total Income</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">
+                                            ₹{{ number_format($totalIncomeToday, 2) }}</h4>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div
+                                        class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
+                                        <i class="fas fa-rupee-sign tx-16 text-white"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                    <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="row">
+                            <div class="col-8">
+                                <div class="ps-4 pt-4 pe-3 pb-4">
+                                    <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
+                                    <h4 class="tx-20 font-weight-semibold mb-2">
+                                        ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div
+                                    class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
+                                    <i class="fas fa-money-bill-wave tx-16 text-white"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
 
             </div>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <h4 class="card-title-custom mb-4">Individual Rider Details</h4>
             <div class="row">
@@ -147,7 +147,7 @@
                     <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
                         <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank"
                             class="text-decoration-none">
-                            <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+                            <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);border: 1px solid rgb(186, 185, 185);">
                                 <div class="row">
                                     <div class="col-8">
                                         <div class="ps-4 pt-4 pe-3 pb-4">
@@ -183,7 +183,7 @@
     </div>
 
     <!-- row closed -->
-    <div class="row">
+    <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <h4 class="card-title-custom"> Rider Details</h4>
 
@@ -191,7 +191,7 @@
                 <!-- Total Riders -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-primary text-white">
+                        <div class="card sales-card bg-gradient-primary text-white" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -212,7 +212,7 @@
                 <!-- Total Delivery Today -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-info text-white">
+                        <div class="card sales-card bg-gradient-info text-white" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -234,7 +234,7 @@
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
                         target="_blank">
-                        <div class="card sales-card bg-gradient-success text-white">
+                        <div class="card sales-card bg-gradient-success text-white" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -256,7 +256,7 @@
                 <!-- Total Delivery -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-secondary text-white">
+                        <div class="card sales-card bg-gradient-secondary text-white" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -277,14 +277,14 @@
         </div>
     </div>
 
-    <div class="row mt-2">
+  <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom">Todays Order Block</h4>
             <div class="row">
                 <!-- New Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -306,7 +306,7 @@
                 <!-- Renewed Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -328,7 +328,7 @@
                 <!-- Customize Order -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -350,7 +350,7 @@
         </div>
     </div>
 
-    <div class="row mt-2">
+    <div class="row card sales-card mt-2">
 
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom">Subscription Status</h4>
@@ -358,7 +358,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -379,7 +379,7 @@
                 </div>
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -401,7 +401,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -424,7 +424,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -447,13 +447,13 @@
         </div>
     </div>
 
-    <div class="row mt-2">
+    <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom">Paused Subscription</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -473,7 +473,7 @@
                 </div>
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -494,7 +494,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'tommorow']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -515,7 +515,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
-                        <div class="card sales-card">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
