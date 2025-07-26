@@ -22,7 +22,7 @@
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('flowerDashboard') }}">
-						<i class="fas fa-home side-menu__icon"></i>
+						<i class="fas fa-home side-menu__icon" style="color: black"></i>
 						<span class="side-menu__label">Flower Dashboard</span>
 					</a>
 				</li>
