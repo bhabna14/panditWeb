@@ -45,7 +45,7 @@
         </div>
     </div> --}}
 
-    <div class="row mt-2">
+    <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom">Flower Subscription</h4>
             <div class="row">
@@ -69,7 +69,7 @@
                     </div>
                 </div> --}}
 
-                <div class="card sales-card row">
+               
                     <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                         <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                             <div class="card sales-card">
@@ -134,7 +134,6 @@
                             </div>
                         </div>
                     </div>
-                </div>
 
             </div>
         </div>
