@@ -22,72 +22,72 @@
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('flowerDashboard') }}">
-						<i class="side-menu__icon fe fe-home"></i>
+						<i class="fas fa-home side-menu__icon"></i>
 						<span class="side-menu__label">Flower Dashboard</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ url('admin/manage-users') }}">
-						<i class="side-menu__icon fe fe-users"></i>
+						<i class="fas fa-users side-menu__icon"></i>
 						<span class="side-menu__label">Manage Users</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.managelocality') }}">
-						<i class="side-menu__icon fe fe-map"></i>
+						<i class="fas fa-map-marked-alt side-menu__icon"></i>
 						<span class="side-menu__label">Manage Locality</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.orders.index') }}">
-						<i class="side-menu__icon fe fe-shopping-cart"></i>
+						<i class="fas fa-shopping-cart side-menu__icon"></i>
 						<span class="side-menu__label">Manage Flower Orders</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.managevendor') }}">
-						<i class="side-menu__icon fe fe-briefcase"></i>
+						<i class="fas fa-briefcase side-menu__icon"></i>
 						<span class="side-menu__label">Manage Vendors</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.manageRiderDetails') }}">
-						<i class="side-menu__icon fe fe-user"></i>
+						<i class="fas fa-motorcycle side-menu__icon"></i>
 						<span class="side-menu__label">Manage Rider</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.manageOrderAssign') }}">
-						<i class="side-menu__icon fe fe-layers"></i>
+						<i class="fas fa-building side-menu__icon"></i>
 						<span class="side-menu__label">Apartment Assign</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.manageflowerpickupdetails') }}">
-						<i class="side-menu__icon fe fe-truck"></i>
+						<i class="fas fa-truck-pickup side-menu__icon"></i>
 						<span class="side-menu__label">Manage Flower Pickup</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ url('admin/manage-delivery-history') }}">
-						<i class="side-menu__icon fe fe-file-text"></i>
+						<i class="fas fa-history side-menu__icon"></i>
 						<span class="side-menu__label">Delivery History</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-						<i class="side-menu__icon fe fe-plus-square"></i>
+						<i class="fas fa-plus-circle side-menu__icon"></i>
 						<span class="side-menu__label">Order Creation</span>
-						<i class="angle fe fe-chevron-right"></i>
+						<i class="angle fas fa-chevron-right"></i>
 					</a>
 					<ul class="slide-menu">
 						<li><a class="sub-side-menu__item" href="{{ url('admin/existing-user') }}">Subscription Order (Existing User)</a></li>
@@ -98,9 +98,9 @@
 
 				<li class="slide">
 					<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-						<i class="side-menu__icon fe fe-message-square"></i>
+						<i class="fas fa-bullhorn side-menu__icon"></i>
 						<span class="side-menu__label">Marketing</span>
-						<i class="angle fe fe-chevron-right"></i>
+						<i class="angle fas fa-chevron-right"></i>
 					</a>
 					<ul class="slide-menu">
 						<li><a class="sub-side-menu__item" href="{{ route('admin.followUpSubscriptions') }}">Follow Up</a></li>
@@ -110,9 +110,9 @@
 				@if(session('admin_role') === 'admin')
 					<li class="slide">
 						<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-							<i class="side-menu__icon fe fe-settings"></i>
+							<i class="fas fa-cogs side-menu__icon"></i>
 							<span class="side-menu__label">Product Admin</span>
-							<i class="angle fe fe-chevron-right"></i>
+							<i class="angle fas fa-chevron-right"></i>
 						</a>
 						<ul class="slide-menu">
 							<li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li>
