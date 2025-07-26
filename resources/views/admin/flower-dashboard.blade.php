@@ -70,7 +70,7 @@
                 </div> --}}
 
                 <!-- Active Subscription -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
@@ -93,7 +93,7 @@
                 </div>
 
                 <!-- New Subscription -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card">
                             <div class="row">
@@ -115,7 +115,7 @@
                     </a>
                 </div>
 
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                     <div class="card sales-card">
                         <div class="row">
                             <div class="col-8">
