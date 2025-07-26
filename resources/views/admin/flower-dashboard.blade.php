@@ -72,7 +72,7 @@
                
                     <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                         <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                            <div class="card sales-card" style="border: 1px solid rgb(57, 55, 55);">
+                            <div class="card sales-card" style="border: 1px solid rgb(123, 122, 122);">
                                 <div class="row">
                                     <div class="col-12">
                                         <div class="ps-4 pt-4 pe-3 pb-4">
