@@ -26,7 +26,7 @@
 						<div class="main-header-center">
 							<div class="d-flex align-items-center">
 								<div class="me-3">
-									<span class="fw-bold" id="current-date"></span>
+									<span class="fw-bold" id="current-date" style="font-size: 22px"></span>
 								</div>
 								<div>
 									<span class="fw-bold" id="current-time"></span>
