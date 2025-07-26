@@ -581,4 +581,26 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
     </script>
+
+    <script>
+        function updateDateTime() {
+            const dateElem = document.getElementById('current-date');
+            const timeElem = document.getElementById('current-time');
+            const now = new Date();
+
+            // Format date: e.g., Monday, 10 June 2024
+            const options = {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            };
+            dateElem.textContent = now.toLocaleDateString(undefined, options);
+
+            // Format time: e.g., 10:15:30 AM
+            timeElem.textContent = now.toLocaleTimeString();
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
 @endsection
