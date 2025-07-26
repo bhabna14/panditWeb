@@ -68,67 +68,68 @@
                         </div>
                     </div>
                 </div> --}}
-
-                <!-- Active Subscription -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h5 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h5>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">
-                                            {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
+                
+                <div class="card">
+                    <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                        <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
+                            <div class="card sales-card">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="ps-4 pt-4 pe-3 pb-4">
+                                            <h5 class="mb-2 tx-12">Today Active Subscription/Total Delivery</h5>
+                                            <h4 class="tx-20 font-weight-semibold mb-2">
+                                                {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
+                                    <div>
+                                        <div
+                                            class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
+                                            <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </a>
-                </div>
+                        </a>
+                    </div>
 
-                <!-- New Subscription -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
+                    <!-- New Subscription -->
+                    <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                        <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
+                            <div class="card sales-card">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <div class="ps-4 pt-4 pe-3 pb-4">
+                                            <h6 class="mb-2 tx-12">Today Total Income</h6>
+                                            <h4 class="tx-20 font-weight-semibold mb-2">
+                                                ₹{{ number_format($totalIncomeToday, 2) }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div
+                                            class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
+                                            <i class="fas fa-rupee-sign tx-16 text-white"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                         <div class="card sales-card">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Today Total Income</h6>
+                                        <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
-                                            ₹{{ number_format($totalIncomeToday, 2) }}</h4>
+                                            ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
                                     </div>
                                 </div>
                                 <div class="col-4">
                                     <div
-                                        class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
-                                        <i class="fas fa-rupee-sign tx-16 text-white"></i>
+                                        class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
+                                        <i class="fas fa-money-bill-wave tx-16 text-white"></i>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
-                    <div class="card sales-card">
-                        <div class="row">
-                            <div class="col-8">
-                                <div class="ps-4 pt-4 pe-3 pb-4">
-                                    <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
-                                    <h4 class="tx-20 font-weight-semibold mb-2">
-                                        ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div
-                                    class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
-                                    <i class="fas fa-money-bill-wave tx-16 text-white"></i>
                                 </div>
                             </div>
                         </div>
