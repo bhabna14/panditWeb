@@ -20,74 +20,76 @@
 			<ul class="side-menu">
 				<li class="side-item side-item-category">Main</li>
 
+				@php
+				$svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24"><path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13zm7 7v-5h4v5h-4zm2-15.586 6 6V15l.001 5H16v-5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v5H6v-9.586l6-6z"/></svg>';
+				@endphp
+
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('flowerDashboard') }}">
-						<svg xmlns="http://www.w3.org/2000/svg" class="side-menu__icon" width="24" height="24" viewBox="0 0 24 24">
-											<path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13zm7 7v-5h4v5h-4zm2-15.586 6 6V15l.001 5H16v-5c0-1.103-.897-2-2-2h-4c-1.103 0-2 .897-2 2v5H6v-9.586l6-6z"/>
-										</svg>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Flower Dashboard</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ url('admin/manage-users') }}">
-						<i class="fas fa-user-cog side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Manage Users</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.managelocality') }}">
-						<i class="fas fa-map-pin side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Manage Locality</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.orders.index') }}">
-						<i class="fas fa-box side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Manage Flower Orders</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.managevendor') }}">
-						<i class="fas fa-store side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Manage Vendors</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.manageRiderDetails') }}">
-						<i class="fas fa-biking side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Manage Rider</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.manageOrderAssign') }}">
-						<i class="fas fa-tasks side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Apartment Assign</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ route('admin.manageflowerpickupdetails') }}">
-						<i class="fas fa-shipping-fast side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Manage Flower Pickup</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" href="{{ url('admin/manage-delivery-history') }}">
-						<i class="fas fa-clock side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Delivery History</span>
 					</a>
 				</li>
 
 				<li class="slide">
 					<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-						<i class="fas fa-cart-plus side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Order Creation</span>
 						<i class="angle fas fa-chevron-right"></i>
 					</a>
@@ -100,7 +102,7 @@
 
 				<li class="slide">
 					<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-						<i class="fas fa-envelope-open-text side-menu__icon"></i>
+						{!! $svgIcon !!}
 						<span class="side-menu__label">Marketing</span>
 						<i class="angle fas fa-chevron-right"></i>
 					</a>
@@ -112,7 +114,7 @@
 				@if(session('admin_role') === 'admin')
 					<li class="slide">
 						<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-							<i class="fas fa-sliders-h side-menu__icon"></i>
+							{!! $svgIcon !!}
 							<span class="side-menu__label">Product Admin</span>
 							<i class="angle fas fa-chevron-right"></i>
 						</a>
