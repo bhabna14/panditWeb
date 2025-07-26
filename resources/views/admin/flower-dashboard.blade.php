@@ -12,63 +12,11 @@
 @endsection
 
 @section('content')
-    <!-- breadcrumb -->
-    {{-- <div class="breadcrumb-header justify-content-between" id="welcomeSection">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">FLOWER DASHBOARD</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Sales</li>
-            </ol>
-        </div>
-    </div> --}}
-
-    <!-- row -->
-    {{-- <div class="row" id="welcomeSections">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-xs-12">
-            <div class="card">
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-xl-9 col-lg-7 col-md-12 col-sm-12">
-                            <div class="text-justified align-items-center">
-                                <h3 class="text-dark font-weight-semibold mb-2 mt-0">
-                                    Hi, Welcome Back
-                                    <span class="text-primary">{{ Auth::guard('admins')->user()->name }}!</span>
-                                </h3>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
 
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
             <div class="row">
-
-                {{-- <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <div class="card sales-card">
-                        <div class="row">
-                            <div class="col-8">
-                                <div class="ps-4 pt-4 pe-3 pb-4">
-                                    <h4 class="tx-20 font-weight-semibold mb-2" id="todayDate"></h4>
-                                    <h5 class="tx-16 font-weight-semibold mb-0" id="liveTime"></h5>
-                                </div>
-                            </div>
-                            <div class="col-4 d-flex justify-content-center align-items-center">
-                                <div
-                                    class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
-                                    <i class="fa fa-clock tx-16 text-white"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> --}}
-
 
                 <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
