@@ -104,12 +104,12 @@
                                             ₹{{ number_format($totalIncomeToday, 2) }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
                                         <i class="fas fa-rupee-sign tx-16 text-white"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -125,12 +125,12 @@
                                         ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
                                 </div>
                             </div>
-                            <div class="col-4">
+                            {{-- <div class="col-4">
                                 <div
                                     class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
                                     <i class="fas fa-money-bill-wave tx-16 text-white"></i>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div>
@@ -199,11 +199,11 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalRiders }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div class="circle-icon bg-white text-primary text-center">
                                         <i class="fa fa-users fa-2x"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -220,11 +220,11 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveriesToday }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div class="circle-icon bg-white text-info text-center">
                                         <i class="fa fa-calendar-check fa-2x"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -243,11 +243,11 @@
                                         </h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div class="circle-icon bg-white text-success text-center">
                                         <i class="fa fa-calendar-alt fa-2x"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -264,11 +264,11 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $totalDeliveries }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div class="circle-icon bg-white text-secondary text-center">
                                         <i class="fa fa-box fa-2x"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -292,12 +292,12 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $newUserSubscription }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-gift tx-16 text-white"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -314,12 +314,12 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $renewSubscription }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-recycle tx-16 text-white"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -336,12 +336,12 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $ordersRequestedToday }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-green-400 to-teal-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-cogs tx-16 text-white"></i> <!-- Customize Order Icon -->
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -366,13 +366,13 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $todayEndSubscription }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
                                         <i
                                             class="fa fa-exclamation-triangle tx-16 text-white"></i><!-- Active Subscription Icon -->
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -388,12 +388,12 @@
                                             {{ $subscriptionEndFiveDays }}</h4>
                                     </div>
                                 </div>
-                                <div>
+                                {{-- <div>
                                     <div
                                         class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
                                         <i class="fas fa-calendar-check tx-16 text-white"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -409,14 +409,14 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}</h4>
                                     </div>
                                 </div>
-                                <div>
+                                {{-- <div>
                                     <div
                                         class="circle-icon bg-gradient-to-r from-red-600 to-orange-500 text-center align-self-center overflow-hidden">
                                         <img src="{{ asset('assets/img/s.png') }}" alt="Image">
 
                                         <!-- Expired Subscription Icon -->
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -432,12 +432,12 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $nonAssignedRidersCount }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-red-400 to-teal-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-users text-white"></i>
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -461,12 +461,12 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayPausedRequest }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -481,12 +481,12 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -502,12 +502,12 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayPaused }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-green-400 to-red-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -523,12 +523,12 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayResumed }}</h4>
                                     </div>
                                 </div>
-                                <div class="col-4">
+                                {{-- <div class="col-4">
                                     <div
                                         class="circle-icon bg-gradient-to-r from-green-400 to-red-500 text-center align-self-center overflow-hidden">
                                         <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
                                     </div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </a>
