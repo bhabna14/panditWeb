@@ -302,7 +302,7 @@
                     <a href="{{ route('flower-request', ['filter' => 'upcoming']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
-                                <div class="col-8">
+                                <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Customize Order (Next 3 Days)</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $upcomingCustomizeOrders }}</h4>
