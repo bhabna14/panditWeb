@@ -170,7 +170,7 @@
                                     <div class="col-4 d-flex justify-content-center align-items-center">
                                         <div class="circle-icon bg-white text-primary text-center"
                                             style="border-radius: 50%; width: 60px; height: 60px;">
-                                            <i class="fas fa-truck-loading fa-2x"></i>
+                                            {{-- <i class="fas fa-truck-loading fa-2x"></i> --}}
                                         </div>
                                     </div>
                                 </div>
