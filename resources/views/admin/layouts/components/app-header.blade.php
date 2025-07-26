@@ -24,7 +24,32 @@
 							</li>
 						</div>
 						<div class="main-header-center">
-							<img src="{{asset('assets/img/brand/yantra.png')}}" class="header-center-image" style="margin-left:40%;height:40px;width:40px" alt="center image">
+							<div class="d-flex align-items-center">
+								<div class="me-3">
+									<span class="fw-bold" id="current-date"></span>
+								</div>
+								<div>
+									<span class="fw-bold" id="current-time"></span>
+								</div>
+							</div>
+							@push('scripts')
+							<script>
+								function updateDateTime() {
+									const dateElem = document.getElementById('current-date');
+									const timeElem = document.getElementById('current-time');
+									const now = new Date();
+
+									// Format date: e.g., Monday, 10 June 2024
+									const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+									dateElem.textContent = now.toLocaleDateString(undefined, options);
+
+									// Format time: e.g., 10:15:30 AM
+									timeElem.textContent = now.toLocaleTimeString();
+								}
+								updateDateTime();
+								setInterval(updateDateTime, 1000);
+							</script>
+							@endpush
 						</div>
 						<div class="main-header-right">
 							<button class="navbar-toggler navresponsive-toggler d-md-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent-4" aria-controls="navbarSupportedContent-4" aria-expanded="false" aria-label="Toggle navigation">
