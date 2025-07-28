@@ -10,30 +10,31 @@
 <div class="container mt-5">
     <div class="row g-4">
 
-        @php
-            $cards = [
-                'apartment' => [
-                    'class' => 'bg-info text-white',
-                    'icon' => 'bi-building' // 🏢
-                ],
-                'individual' => [
-                    'class' => 'bg-success text-white',
-                    'icon' => 'bi-house-door' // 🏠
-                ],
-                'temple' => [
-                    'class' => 'bg-warning text-dark',
-                    'icon' => 'bi-bank' // 🛕 (closest match)
-                ],
-                'business' => [
-                    'class' => 'bg-danger text-white',
-                    'icon' => 'bi-briefcase' // 🧳
-                ],
-            ];
-        @endphp
+      @php
+    $cards = [
+        'apartment' => [
+            'style' => 'background-color: #4da6ff; color: white;', // Light blue
+            'icon' => 'bi-building'
+        ],
+        'individual' => [
+            'style' => 'background-color: #28a745; color: white;', // Custom green
+            'icon' => 'bi-house-door'
+        ],
+        'temple' => [
+            'style' => 'background-color: #f4c430; color: #333;', // Saffron-like yellow
+            'icon' => 'bi-bank'
+        ],
+        'business' => [
+            'style' => 'background-color: #d9534f; color: white;', // Custom red
+            'icon' => 'bi-briefcase'
+        ],
+    ];
+@endphp
+
 
         @foreach ($cards as $category => $data)
             <div class="col-md-6 col-xl-3">
-                <div class="card shadow-sm {{ $data['class'] }}">
+                <div class="card shadow-sm {{ $data['style'] }}">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 180px;">
                         <i class="bi {{ $data['icon'] }} display-4 mb-2"></i>
                         <h5 class="card-title text-capitalize">{{ $category }}</h5>
