@@ -131,6 +131,15 @@
                     </a>
                 </li>
 
+                   <li class="slide">
+                    <a class="side-menu__item" href="{{ route('admin.address.categories') }}">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+                    </svg>
+                        <span class="side-menu__label">Address Summary</span>
+                    </a>
+                </li>
+
                 <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -162,20 +171,6 @@
                     </a>
                     <ul class="slide-menu">
                         <li><a class="sub-side-menu__item" href="{{ route('admin.followUpSubscriptions') }}">Follow
-                                Up</a></li>
-                    </ul>
-                </li>
-
-                  <li class="slide">
-                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
-                    </svg>
-                        <span class="side-menu__label">Address Summary</span>
-                        <i class="angle fas fa-chevron-right"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.address.categories') }}">Follow
                                 Up</a></li>
                     </ul>
                 </li>
