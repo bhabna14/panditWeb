@@ -32,9 +32,9 @@
 @endphp
 
 
-        @foreach ($cards as $category => $data)
+          @foreach ($cards as $category => $data)
             <div class="col-md-6 col-xl-3">
-                <div class="card shadow-sm {{ $data['style'] }}">
+                <div class="card shadow-sm" style="{{ $data['style'] }}">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 180px;">
                         <i class="bi {{ $data['icon'] }} display-4 mb-2"></i>
                         <h5 class="card-title text-capitalize">{{ $category }}</h5>
