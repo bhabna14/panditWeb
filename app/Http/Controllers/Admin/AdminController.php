@@ -627,6 +627,7 @@ class AdminController extends Controller
         }
 
         return [
+            'user_id' => $user?->userid,
             'address_id' => $address->id,
             'name' => $user?->name ?? '—',
             'mobile_number' => $user?->mobile_number ?? '—',
@@ -639,24 +640,33 @@ class AdminController extends Controller
     return response()->json($result);
 }
 
-
 public function updateAddress(Request $request)
 {
     $request->validate([
         'address_id' => 'required|exists:user_addresses,id',
+        'user_id' => 'required|exists:users,userid',
+        'name' => 'required|string|max:255',
         'apartment_name' => 'required|string|max:255',
         'apartment_flat_plot' => 'required|string|max:255',
     ]);
 
-    $address = UserAddress::findOrFail($request->address_id);
+    // Update user name
+    $user = \App\Models\User::where('userid', $request->user_id)->first();
+    if ($user) {
+        $user->update([
+            'name' => $request->name,
+        ]);
+    }
+
+    // Update address
+    $address = \App\Models\UserAddress::findOrFail($request->address_id);
     $address->update([
         'apartment_name' => $request->apartment_name,
         'apartment_flat_plot' => $request->apartment_flat_plot,
     ]);
 
-    return response()->json(['message' => 'Address updated successfully.']);
+    return response()->json(['message' => 'Customer and address updated successfully.']);
 }
-
 
 
 

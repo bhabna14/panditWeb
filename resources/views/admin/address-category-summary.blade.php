@@ -53,36 +53,44 @@
     </div>
 
     <!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="editAddressForm">
-        @csrf
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Edit Address</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" name="address_id" id="editAddressId">
-                <div class="mb-3">
-                    <label for="editApartmentName" class="form-label">Apartment Name</label>
-                    <input type="text" class="form-control" id="editApartmentName" name="apartment_name" required>
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form id="editAddressForm">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Edit Address</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="address_id" id="editAddressId">
+                        <input type="hidden" name="user_id" id="editUserId">
+
+                        <div class="mb-3">
+                            <label for="editUserName" class="form-label">Customer Name</label>
+                            <input type="text" class="form-control" id="editUserName" name="name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editApartmentName" class="form-label">Apartment Name</label>
+                            <input type="text" class="form-control" id="editApartmentName" name="apartment_name"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editFlatPlot" class="form-label">Flat/Plot</label>
+                            <input type="text" class="form-control" id="editFlatPlot" name="apartment_flat_plot"
+                                required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">Update</button>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label for="editFlatPlot" class="form-label">Flat/Plot</label>
-                    <input type="text" class="form-control" id="editFlatPlot" name="apartment_flat_plot" required>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-success">Update</button>
-            </div>
+            </form>
         </div>
-    </form>
-  </div>
-</div>
-
+    </div>
 @endsection
-
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -94,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const tableBody = document.querySelector('#categoryUserTable tbody');
     const title = document.getElementById('categoryTitle');
 
-    // Card click event
+    // Handle card click: fetch users by place category
     cards.forEach(card => {
         card.addEventListener('click', function () {
             const category = this.dataset.category;
@@ -103,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .then(res => res.json())
                 .then(data => {
                     tableBody.innerHTML = '';
-                    title.innerText = category.charAt(0).toUpperCase() + category.slice(1) + ' Users';
+                    title.innerText = `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
 
                     if (data.length === 0) {
                         tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No users found.</td></tr>`;
@@ -120,6 +128,8 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <td>
                                         <button class="btn btn-sm btn-primary edit-btn"
                                             data-id="${user.address_id}"
+                                            data-userid="${user.user_id}"
+                                            data-username="${user.name}"
                                             data-name="${user.apartment_name}"
                                             data-flat="${user.apartment_flat_plot}">
                                             <i class="bi bi-pencil-square"></i>
@@ -137,11 +147,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Handle modal trigger
-    document.addEventListener('click', function(e) {
+    // Handle modal trigger: populate fields
+    document.addEventListener('click', function (e) {
         if (e.target.closest('.edit-btn')) {
             const btn = e.target.closest('.edit-btn');
             document.getElementById('editAddressId').value = btn.dataset.id;
+            document.getElementById('editUserId').value = btn.dataset.userid;
+            document.getElementById('editUserName').value = btn.dataset.username;
             document.getElementById('editApartmentName').value = btn.dataset.name;
             document.getElementById('editFlatPlot').value = btn.dataset.flat;
             modal.show();
@@ -173,5 +185,4 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
-
 @endsection
