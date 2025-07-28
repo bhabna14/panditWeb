@@ -89,8 +89,55 @@
 document.addEventListener('DOMContentLoaded', function () {
     const modal = new bootstrap.Modal(document.getElementById('editModal'));
     const editForm = document.getElementById('editAddressForm');
+    const cards = document.querySelectorAll('.card-click');
+    const tableSection = document.getElementById('categoryDataSection');
+    const tableBody = document.querySelector('#categoryUserTable tbody');
+    const title = document.getElementById('categoryTitle');
 
-    // Open modal and populate form
+    // Card click event
+    cards.forEach(card => {
+        card.addEventListener('click', function () {
+            const category = this.dataset.category;
+
+            fetch(`/admin/address-category-users?category=${category}`)
+                .then(res => res.json())
+                .then(data => {
+                    tableBody.innerHTML = '';
+                    title.innerText = category.charAt(0).toUpperCase() + category.slice(1) + ' Users';
+
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No users found.</td></tr>`;
+                    } else {
+                        data.forEach((user, index) => {
+                            const row = `
+                                <tr>
+                                    <td>${index + 1}</td>
+                                    <td>${user.name}</td>
+                                    <td>${user.mobile_number}</td>
+                                    <td>${user.apartment_name}</td>
+                                    <td>${user.apartment_flat_plot}</td>
+                                    <td>${user.rider_name}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-primary edit-btn"
+                                            data-id="${user.address_id}"
+                                            data-name="${user.apartment_name}"
+                                            data-flat="${user.apartment_flat_plot}">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                            tableBody.insertAdjacentHTML('beforeend', row);
+                        });
+                    }
+
+                    tableSection.style.display = 'block';
+                    tableSection.scrollIntoView({ behavior: 'smooth' });
+                });
+        });
+    });
+
+    // Handle modal trigger
     document.addEventListener('click', function(e) {
         if (e.target.closest('.edit-btn')) {
             const btn = e.target.closest('.edit-btn');
@@ -101,11 +148,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Handle form submit
-    editForm.addEventListener('submit', function(e) {
+    // Handle modal form submit
+    editForm.addEventListener('submit', function (e) {
         e.preventDefault();
-
         const formData = new FormData(editForm);
+
         fetch("{{ route('admin.address.update') }}", {
             method: 'POST',
             headers: {
@@ -127,60 +174,4 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.card-click');
-            const tableSection = document.getElementById('categoryDataSection');
-            const tableBody = document.querySelector('#categoryUserTable tbody');
-            const title = document.getElementById('categoryTitle');
-
-            cards.forEach(card => {
-                card.addEventListener('click', function() {
-                    const category = this.dataset.category;
-
-                    fetch(`/admin/address-category-users?category=${category}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            tableBody.innerHTML = '';
-                            title.innerText = category.charAt(0).toUpperCase() + category.slice(
-                                1) + ' Users';
-
-                            if (data.length === 0) {
-                                tableBody.innerHTML =
-                                    `<tr><td colspan="6" class="text-center">No users found.</td></tr>`;
-                            } else {
-                                data.forEach((user, index) => {
-                                    const row = `
-                                        <tr>
-                                            <td>${index + 1}</td>
-                                            <td>${user.name}</td>
-                                            <td>${user.mobile_number}</td>
-                                            <td>${user.apartment_name}</td>
-                                            <td>${user.apartment_flat_plot}</td>
-                                            <td>${user.rider_name}</td>
-                                            <td>
-                                                <button class="btn btn-sm btn-primary edit-btn" 
-                                                    data-id="${user.address_id}" 
-                                                    data-name="${user.apartment_name}" 
-                                                    data-flat="${user.apartment_flat_plot}">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        `;
-
-                                    tableBody.insertAdjacentHTML('beforeend', row);
-                                });
-                            }
-
-
-                            tableSection.style.display = 'block';
-                            tableSection.scrollIntoView({
-                                behavior: 'smooth'
-                            });
-                        });
-                });
-            });
-        });
-    </script>
 @endsection
