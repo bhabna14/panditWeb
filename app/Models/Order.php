@@ -26,6 +26,11 @@ class Order extends Model
         'suggestion',
         'created_at'
     ];
+    public function address()
+    {
+        return $this->belongsTo(UserAddress::class, 'address_id','id');
+    }
+
     public function delivery()
     {
         return $this->belongsTo(DeliveryHistory::class, 'order_id', 'order_id');
@@ -54,10 +59,7 @@ public function flowerProduct()
 {
     return $this->belongsTo(FlowerProduct::class, 'product_id', 'product_id');
 }
-public function address()
-{
-    return $this->belongsTo(UserAddress::class, 'address_id');
-}
+
 // app/Models/Order.php
 
 public function pauseResumeLogs()

@@ -71,11 +71,11 @@
                     </thead>
                     <tbody>
                         @foreach ($deliveries as $index => $delivery)
-                        
                             @php
                                 $order = $delivery->order ?? null;
                                 $user = $order?->user ?? null;
-                                $address = $user?->addressDetails ?? null;
+                                $address = $order?->address ?? null; // <-- fixed here
+
                                 $subscription = \App\Models\Subscription::where('order_id', $order?->order_id)->first();
                                 $days =
                                     $subscription && $subscription->start_date && $subscription->end_date
@@ -83,12 +83,12 @@
                                                 \Carbon\Carbon::parse($subscription->end_date),
                                             ) + 1
                                         : 0;
+
                                 $packagePricePerDay =
                                     $days > 0 && $order?->total_price > 0
                                         ? number_format($order->total_price / $days, 2)
                                         : '—';
                             @endphp
-
 
                             <tr>
                                 <td>{{ $index + 1 }}</td>

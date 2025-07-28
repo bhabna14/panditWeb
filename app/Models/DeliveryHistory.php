@@ -18,7 +18,8 @@ class DeliveryHistory extends Model
         'longitude',
         'latitude',
     ];
-    public function order()
+    
+public function order()
 {
     return $this->belongsTo(Order::class, 'order_id','order_id');
 }
@@ -27,6 +28,7 @@ public function rider()
 {
     return $this->belongsTo(RiderDetails::class,'rider_id', 'rider_id');
 }
+
 public function deliveryStartHistory()
 {
     return $this->hasOne(DeliveryStartHistory::class, 'rider_id', 'rider_id');
