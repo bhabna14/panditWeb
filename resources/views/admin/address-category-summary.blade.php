@@ -19,7 +19,6 @@
                     <div class="card-body d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 160px;">
                         <h5 class="card-title text-capitalize">{{ $category }}</h5>
                         <p class="display-4 fw-bold m-0">{{ $addressCounts[$category] ?? 0 }}</p>
-                        <p class="mt-2 mb-0">Total Addresses</p>
                     </div>
                 </div>
             </div>
