@@ -10,6 +10,7 @@ use App\Models\EduDetail;
 use App\Models\PanditVedic;
 use App\Models\VedicDetail;
 use App\Models\IdcardDetail;
+use App\Models\Apartment;
 use App\Models\PanditIdCard;
 use App\Models\Booking;
 use App\Models\Poojadetails;
@@ -601,8 +602,10 @@ class AdminController extends Controller
         foreach ($categories as $category) {
             $addressCounts[$category] = UserAddress::where('place_category', $category)->count();
         }
+            $apartments = Apartment::orderBy('apartment_name')->get();
 
-        return view('admin.address-category-summary', compact('addressCounts'));
+
+        return view('admin.address-category-summary', compact('addressCounts','apartments'));
     }
 
  public function getAddressUsersByCategory(Request $request)

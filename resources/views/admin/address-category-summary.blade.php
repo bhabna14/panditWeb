@@ -73,8 +73,13 @@
 
                         <div class="mb-3">
                             <label for="editApartmentName" class="form-label">Apartment Name</label>
-                            <input type="text" class="form-control" id="editApartmentName" name="apartment_name"
-                                required>
+                            <select class="form-select" id="editApartmentName" name="apartment_name" required>
+                                <option value="">Select Apartment</option>
+                                @foreach ($apartments as $apartment)
+                                    <option value="{{ $apartment->apartment_name }}">{{ $apartment->apartment_name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <div class="mb-3">
@@ -92,34 +97,36 @@
     </div>
 @endsection
 @section('scripts')
-   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const modal = new bootstrap.Modal(document.getElementById('editModal'));
-    const editForm = document.getElementById('editAddressForm');
-    const cards = document.querySelectorAll('.card-click');
-    const tableSection = document.getElementById('categoryDataSection');
-    const tableBody = document.querySelector('#categoryUserTable tbody');
-    const title = document.getElementById('categoryTitle');
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            const editForm = document.getElementById('editAddressForm');
+            const cards = document.querySelectorAll('.card-click');
+            const tableSection = document.getElementById('categoryDataSection');
+            const tableBody = document.querySelector('#categoryUserTable tbody');
+            const title = document.getElementById('categoryTitle');
 
-    let editingRow = null; // holds the row DOM element being edited
+            let editingRow = null; // holds the row DOM element being edited
 
-    // Handle card click: fetch users by place category
-    cards.forEach(card => {
-        card.addEventListener('click', function () {
-            const category = this.dataset.category;
+            // Handle card click: fetch users by place category
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const category = this.dataset.category;
 
-            fetch(`/admin/address-category-users?category=${category}`)
-                .then(res => res.json())
-                .then(data => {
-                    tableBody.innerHTML = '';
-                    title.innerText = `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
+                    fetch(`/admin/address-category-users?category=${category}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            tableBody.innerHTML = '';
+                            title.innerText =
+                                `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
 
-                    if (data.length === 0) {
-                        tableBody.innerHTML = `<tr><td colspan="7" class="text-center">No users found.</td></tr>`;
-                    } else {
-                        data.forEach((user, index) => {
-                            const row = `
+                            if (data.length === 0) {
+                                tableBody.innerHTML =
+                                    `<tr><td colspan="7" class="text-center">No users found.</td></tr>`;
+                            } else {
+                                data.forEach((user, index) => {
+                                    const row = `
                                 <tr data-row-id="${user.address_id}">
                                     <td>${index + 1}</td>
                                     <td class="col-name">${user.name}</td>
@@ -139,82 +146,83 @@ document.addEventListener('DOMContentLoaded', function () {
                                     </td>
                                 </tr>
                             `;
-                            tableBody.insertAdjacentHTML('beforeend', row);
+                                    tableBody.insertAdjacentHTML('beforeend', row);
+                                });
+                            }
+
+                            tableSection.style.display = 'block';
+                            tableSection.scrollIntoView({
+                                behavior: 'smooth'
+                            });
                         });
-                    }
-
-                    tableSection.style.display = 'block';
-                    tableSection.scrollIntoView({ behavior: 'smooth' });
                 });
-        });
-    });
-
-    // Handle modal trigger: populate fields
-    document.addEventListener('click', function (e) {
-        if (e.target.closest('.edit-btn')) {
-            const btn = e.target.closest('.edit-btn');
-            const row = btn.closest('tr');
-
-            editingRow = row; // store reference to row being edited
-
-            document.getElementById('editAddressId').value = btn.dataset.id;
-            document.getElementById('editUserId').value = btn.dataset.userid;
-            document.getElementById('editUserName').value = btn.dataset.username;
-            document.getElementById('editApartmentName').value = btn.dataset.name;
-            document.getElementById('editFlatPlot').value = btn.dataset.flat;
-
-            modal.show();
-        }
-    });
-
-    // Handle modal form submit
-    editForm.addEventListener('submit', function (e) {
-        e.preventDefault();
-        const formData = new FormData(editForm);
-
-        fetch("{{ route('admin.address.update') }}", {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': formData.get('_token'),
-                'Accept': 'application/json',
-            },
-            body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-            modal.hide();
-            Swal.fire({
-                title: 'Success!',
-                text: data.message,
-                icon: 'success',
-                confirmButtonText: 'OK'
             });
 
-            // Update table row content
-            if (editingRow) {
-                const updatedName = document.getElementById('editUserName').value;
-                const updatedApartment = document.getElementById('editApartmentName').value;
-                const updatedFlat = document.getElementById('editFlatPlot').value;
+            // Handle modal trigger: populate fields
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.edit-btn')) {
+                    const btn = e.target.closest('.edit-btn');
+                    const row = btn.closest('tr');
 
-                editingRow.querySelector('.col-name').innerText = updatedName;
-                editingRow.querySelector('.col-apartment').innerText = updatedApartment;
-                editingRow.querySelector('.col-flat').innerText = updatedFlat;
+                    editingRow = row; // store reference to row being edited
 
-                // Also update data attributes so modal shows updated data next time
-                const editBtn = editingRow.querySelector('.edit-btn');
-                editBtn.dataset.username = updatedName;
-                editBtn.dataset.name = updatedApartment;
-                editBtn.dataset.flat = updatedFlat;
-            }
+                    document.getElementById('editAddressId').value = btn.dataset.id;
+                    document.getElementById('editUserId').value = btn.dataset.userid;
+                    document.getElementById('editUserName').value = btn.dataset.username;
+                    document.getElementById('editApartmentName').value = btn.dataset.name;
+                    document.getElementById('editFlatPlot').value = btn.dataset.flat;
 
-            editingRow = null; // reset
-        })
-        .catch(error => {
-            console.error(error);
-            Swal.fire('Error', 'Something went wrong.', 'error');
+                    modal.show();
+                }
+            });
+
+            // Handle modal form submit
+            editForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(editForm);
+
+                fetch("{{ route('admin.address.update') }}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': formData.get('_token'),
+                            'Accept': 'application/json',
+                        },
+                        body: formData
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        modal.hide();
+                        Swal.fire({
+                            title: 'Success!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        });
+
+                        // Update table row content
+                        if (editingRow) {
+                            const updatedName = document.getElementById('editUserName').value;
+                            const updatedApartment = document.getElementById('editApartmentName').value;
+                            const updatedFlat = document.getElementById('editFlatPlot').value;
+
+                            editingRow.querySelector('.col-name').innerText = updatedName;
+                            editingRow.querySelector('.col-apartment').innerText = updatedApartment;
+                            editingRow.querySelector('.col-flat').innerText = updatedFlat;
+
+                            // Also update data attributes so modal shows updated data next time
+                            const editBtn = editingRow.querySelector('.edit-btn');
+                            editBtn.dataset.username = updatedName;
+                            editBtn.dataset.name = updatedApartment;
+                            editBtn.dataset.flat = updatedFlat;
+                        }
+
+                        editingRow = null; // reset
+                    })
+                    .catch(error => {
+                        console.error(error);
+                        Swal.fire('Error', 'Something went wrong.', 'error');
+                    });
+            });
         });
-    });
-});
-</script>
-
+    </script>
 @endsection
