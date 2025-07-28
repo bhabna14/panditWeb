@@ -43,6 +43,7 @@
                             <th>Apartment Name</th>
                             <th>Flat/Plot</th>
                             <th>Rider Name</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -50,9 +51,82 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editAddressForm">
+        @csrf
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Address</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="address_id" id="editAddressId">
+                <div class="mb-3">
+                    <label for="editApartmentName" class="form-label">Apartment Name</label>
+                    <input type="text" class="form-control" id="editApartmentName" name="apartment_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="editFlatPlot" class="form-label">Flat/Plot</label>
+                    <input type="text" class="form-control" id="editFlatPlot" name="apartment_flat_plot" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Update</button>
+            </div>
+        </div>
+    </form>
+  </div>
+</div>
+
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = new bootstrap.Modal(document.getElementById('editModal'));
+    const editForm = document.getElementById('editAddressForm');
+
+    // Open modal and populate form
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-btn')) {
+            const btn = e.target.closest('.edit-btn');
+            document.getElementById('editAddressId').value = btn.dataset.id;
+            document.getElementById('editApartmentName').value = btn.dataset.name;
+            document.getElementById('editFlatPlot').value = btn.dataset.flat;
+            modal.show();
+        }
+    });
+
+    // Handle form submit
+    editForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(editForm);
+        fetch("{{ route('admin.address.update') }}", {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': formData.get('_token'),
+                'Accept': 'application/json',
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            modal.hide();
+            Swal.fire('Success!', data.message, 'success');
+        })
+        .catch(error => {
+            console.error(error);
+            Swal.fire('Error', 'Something went wrong.', 'error');
+        });
+    });
+});
+</script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const cards = document.querySelectorAll('.card-click');
@@ -77,15 +151,24 @@
                             } else {
                                 data.forEach((user, index) => {
                                     const row = `
-                                    <tr>
-                                        <td>${index + 1}</td>
-                                        <td>${user.name}</td>
-                                        <td>${user.mobile_number}</td>
-                                        <td>${user.apartment_name}</td>
-                                        <td>${user.apartment_flat_plot}</td>
-                                        <td>${user.rider_name}</td>
-                                    </tr>
-                                `;
+                                        <tr>
+                                            <td>${index + 1}</td>
+                                            <td>${user.name}</td>
+                                            <td>${user.mobile_number}</td>
+                                            <td>${user.apartment_name}</td>
+                                            <td>${user.apartment_flat_plot}</td>
+                                            <td>${user.rider_name}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary edit-btn" 
+                                                    data-id="${user.address_id}" 
+                                                    data-name="${user.apartment_name}" 
+                                                    data-flat="${user.apartment_flat_plot}">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        `;
+
                                     tableBody.insertAdjacentHTML('beforeend', row);
                                 });
                             }
