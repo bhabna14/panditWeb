@@ -13,7 +13,7 @@
       @php
     $cards = [
         'apartment' => [
-            'style' => 'background-color: #4da6ff; color: white;', // Light blue
+            'style' => 'background-color: #9d9b9b; color: white;', // Light blue
             'icon' => 'bi-building'
         ],
         'individual' => [
