@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('admin.layouts.apps')
 
 @section('styles')
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
