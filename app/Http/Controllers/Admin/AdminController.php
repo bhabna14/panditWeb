@@ -605,22 +605,26 @@ class AdminController extends Controller
         return view('admin.address-category-summary', compact('addressCounts'));
     }
 
-   public function getAddressUsersByCategory(Request $request)
+  public function getAddressUsersByCategory(Request $request)
 {
     $category = $request->input('category');
 
-    $addresses = \App\Models\UserAddress::with(['user.orders.rider']) // include orders and rider
+    $addresses = \App\Models\UserAddress::with(['user.orders.rider']) // Eager load orders and rider
         ->where('place_category', $category)
         ->get();
 
     $result = $addresses->map(function ($address) {
         $user = $address->user;
 
-        // Find the first order for this user that has a rider
         $riderName = '—';
-        if ($user && $user->orders->isNotEmpty()) {
-            $rider = $user->orders->firstWhere('rider')?->rider;
-            $riderName = $rider?->rider_name ?? '—';
+
+        if ($user && $user->orders->count()) {
+            foreach ($user->orders as $order) {
+                if ($order->rider) {
+                    $riderName = $order->rider->rider_name ?? '—';
+                    break;
+                }
+            }
         }
 
         return [
@@ -634,6 +638,7 @@ class AdminController extends Controller
 
     return response()->json($result);
 }
+
 
 
 }
