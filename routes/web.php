@@ -414,6 +414,8 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('admin/order-assign/{riderId}', 'showRiderDetails')->name('admin.orderAssign');
         Route::post('/admin/transfer-order', 'transferOrders')->name('admin.transferOrder');
 
+        Route::get('/address-categories', 'showAddressByCategory')->name('admin.address.categories');
+
     });
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');

@@ -32,6 +32,8 @@ use App\Models\ProductRequest;
 use App\Models\ProductSucription;
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
+use App\Models\UserAddress;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -588,6 +590,19 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Failed to transfer orders: ' . $e->getMessage());
         }
+    }
+
+   public function showAddressByCategory()
+    {
+        $categories = ['apartment', 'individual', 'temple', 'business'];
+
+        $addressCounts = [];
+
+        foreach ($categories as $category) {
+            $addressCounts[$category] = UserAddress::where('place_category', $category)->count();
+        }
+
+        return view('admin.address-category-summary', compact('addressCounts'));
     }
 
 }
