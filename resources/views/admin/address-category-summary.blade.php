@@ -13,19 +13,15 @@
       @php
     $cards = [
         'apartment' => [
-            'style' => 'background-color: #9d9b9b; color: white;', // Light blue
             'icon' => 'bi-building'
         ],
         'individual' => [
-            'style' => 'background-color: #28a745; color: white;', // Custom green
             'icon' => 'bi-house-door'
         ],
         'temple' => [
-            'style' => 'background-color: #f4c430; color: #333;', // Saffron-like yellow
             'icon' => 'bi-bank'
         ],
         'business' => [
-            'style' => 'background-color: #d9534f; color: white;', // Custom red
             'icon' => 'bi-briefcase'
         ],
     ];
@@ -34,7 +30,7 @@
 
           @foreach ($cards as $category => $data)
             <div class="col-md-6 col-xl-3">
-                <div class="card shadow-sm" style="{{ $data['style'] }}">
+                <div class="card shadow-sm" style="background-color: #9d9b9b; color: rgb(6, 6, 6);">
                     <div class="card-body d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 180px;">
                         <i class="bi {{ $data['icon'] }} display-4 mb-2"></i>
                         <h5 class="card-title text-capitalize">{{ $category }}</h5>
