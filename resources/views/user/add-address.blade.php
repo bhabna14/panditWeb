@@ -70,8 +70,6 @@
                               Individual
                           </label>
                         </div>
-                   
-                    
                       </div>
                       <div class="col-lg-2">
                         <div class="form-check custom-radio-button">

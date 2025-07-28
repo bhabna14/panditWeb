@@ -1,4 +1,4 @@
-@extends('layouts.custom-app')
+@extends('layouts.custom-apps')
 
     @section('styles')
     <title> User Login</title>

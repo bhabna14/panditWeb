@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('admin.layouts.apps')
 
 @section('content')
     <div class="breadcrumb-header justify-content-between">

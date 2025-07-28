@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('admin.layouts.apps')
 
 @section('styles')
     <!-- Internal Select2 css -->
