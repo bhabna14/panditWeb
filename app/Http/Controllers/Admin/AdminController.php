@@ -605,4 +605,24 @@ class AdminController extends Controller
         return view('admin.address-category-summary', compact('addressCounts'));
     }
 
+    public function getAddressUsersByCategory(Request $request)
+{
+    $category = $request->input('category');
+
+    $addresses = \App\Models\UserAddress::with('user')
+        ->where('place_category', $category)
+        ->get();
+
+    $result = $addresses->map(function ($address) {
+        return [
+            'name' => $address->user?->name ?? '—',
+            'mobile_number' => $address->user?->mobile_number ?? '—',
+            'apartment_name' => $address->apartment_name ?? '—',
+            'apartment_flat_plot' => $address->apartment_flat_plot ?? '—',
+        ];
+    });
+
+    return response()->json($result);
+}
+
 }

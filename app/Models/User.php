@@ -21,6 +21,8 @@ class User extends Authenticatable
     protected $fillable = [
         'userid','name', 'mobile_number', 'otp','email', 'order_id', 'expiry', 'hash', 'client_id', 'client_secret', 'otp_length', 'channel', 'userphoto',
     ];
+
+    
     
     /**
      * The attributes that should be hidden for arrays.
@@ -40,6 +42,12 @@ class User extends Authenticatable
         'expiry' => 'datetime',
     ];
 
+    
+    public function addressDetails()
+{
+    return $this->hasOne(UserAddress::class, 'user_id', 'userid')->where('default', 1);
+}
+
     public function bankdetail()
     {
         return $this->hasOne(Bankdetail::class);
@@ -55,9 +63,5 @@ class User extends Authenticatable
         return $this->hasMany(UserDevice::class, 'user_id', 'userid');
     }
 
-    public function addressDetails()
-{
-    return $this->hasOne(UserAddress::class, 'user_id', 'userid')->where('default', 1);
-}
 
 }

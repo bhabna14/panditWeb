@@ -415,6 +415,8 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::post('/admin/transfer-order', 'transferOrders')->name('admin.transferOrder');
 
         Route::get('/address-categories', 'showAddressByCategory')->name('admin.address.categories');
+        Route::get('/address-category-users','getAddressUsersByCategory')->name('admin.address.category.users');
+
 
     });
     Route::controller(PujaController::class)->group(function() {

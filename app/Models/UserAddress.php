@@ -30,4 +30,10 @@ class UserAddress extends Model
     {
         return $this->belongsTo(Locality::class, 'locality', 'unique_code');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'userid');
+    }
+
 }
