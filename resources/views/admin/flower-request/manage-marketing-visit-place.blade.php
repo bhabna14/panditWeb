@@ -268,13 +268,21 @@
                 .then(res => res.json())
                 .then(response => {
                     if (response.success) {
+                        // ✅ Close the modal manually using Bootstrap instance
+                        const modalEl = document.getElementById('editVisitModal');
+                        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                        if (modalInstance) {
+                            modalInstance.hide();
+                        }
+
+                        // ✅ Show SweetAlert after closing
                         Swal.fire({
                             icon: 'success',
                             title: 'Updated!',
                             text: response.message,
                             confirmButtonColor: '#3085d6'
                         }).then(() => {
-                            location.reload(); // Reload only after user confirms
+                            location.reload();
                         });
                     }
                 });
