@@ -41,12 +41,10 @@ use App\Http\Controllers\Admin\AdminNotificationController;
 use App\Http\Controllers\Admin\CustomizeProductController;
 use App\Http\Controllers\Admin\FlowerDashboardController;
 use App\Http\Controllers\Admin\PodcastPlanningController;
-
+use App\Http\Controllers\Admin\MarketingVisitPlaceController;
 
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 use App\Http\Controllers\Admin\ProductRequestController;
-
-
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -382,8 +380,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/delete-rider-details/{id}',  'deleteRiderDetails')->name('admin.deleteRiderDetails');
         Route::get('/edit-rider-details/{id}', 'editRiderDetails')->name('admin.editRiderDetails');
         Route::put('/update-rider-details/{id}', 'updateRiderDetails')->name('admin.updateRiderDetails');
-
-        // flower order assign
         Route::get('/manage-order-assign', 'manageOrderAssign')->name('admin.manageOrderAssign');
         Route::get('/add-order-assign', 'addOrderAssign')->name('admin.addRiderDetails');
         Route::get('/get-apartments', 'getApartments')->name('admin.getApartments');
@@ -395,6 +391,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
     });
 
     Route::controller(AdminController::class)->group(function() {
+
         Route::get('/dashboard', 'admindashboard')->name('admin.dashboard');
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');
         Route::get('/pandit-profile', 'panditprofile')->name('panditprofile');
@@ -418,8 +415,12 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/address-category-users','getAddressUsersByCategory')->name('admin.address.category.users');
         Route::post('/address-update','updateAddress')->name('admin.address.update');
 
+    });
+    Route::controller(MarketingVisitPlaceController::class)->group(function() {
+        Route::get('/marketing-visit-place','getVisitPlace')->name('admin.getVisitPlace');
 
     });
+
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
         Route::get('/manage-special-puja', 'manageSpecialPuja')->name('manageSpecialPuja');

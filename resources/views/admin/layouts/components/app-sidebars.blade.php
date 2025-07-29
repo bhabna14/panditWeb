@@ -172,8 +172,11 @@
                     <ul class="slide-menu">
                         <li><a class="sub-side-menu__item" href="{{ route('admin.followUpSubscriptions') }}">Follow
                                 Up</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.getVisitPlace') }}">Visit Place</a></li>
                     </ul>
                 </li>
+
+               
 
                 @if (session('admin_role') === 'admin')
                     <li class="slide">
