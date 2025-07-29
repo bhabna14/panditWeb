@@ -790,10 +790,11 @@ Route::controller(PoojaHistoryController::class)->group(function() {
 });
 
 Route::controller(MarketingVisitPlaceController::class)->group(function() {
-    Route::get('/marketing-visit-place','getVisitPlace')->name('admin.getVisitPlace');
-    Route::post('/save-marketing-visit-place', 'storeVisitPlace')->name('marketing.visit.place.store');
-Route::get('/visit-place/edit/{id}', [MarketingVisitPlaceController::class, 'editVisitPlace'])->name('admin.editVisitPlace');
-Route::post('/visit-place/update/{id}', [MarketingVisitPlaceController::class, 'updateVisitPlace'])->name('admin.updateVisitPlace');
+        Route::get('/marketing-visit-place','getVisitPlace')->name('admin.getVisitPlace');
+        Route::post('/save-marketing-visit-place', 'storeVisitPlace')->name('marketing.visit.place.store');
+        Route::get('/manage-marketing-visit-place','manageVisitPlace')->name('admin.visitPlace');
+        Route::get('/visit-place/edit/{id}',  'editVisitPlace')->name('admin.editVisitPlace');
+Route::post('/visit-place/update/{id}', 'updateVisitPlace')->name('admin.updateVisitPlace');
 });
 
 
