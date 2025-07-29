@@ -161,7 +161,7 @@
                 <input type="text" id="contactName" name="contactName">
             </div>
 
-            <div class="form-group full-width" id="phoneNumbers">
+            <div class="form-group" id="phoneNumbers">
                 <label>Contact Person Number</label>
                 <div class="phone-field">
                     <i class="fas fa-phone"></i>
