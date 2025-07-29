@@ -44,7 +44,6 @@
                                     <th>No. of Apartments</th>
                                     <th>Delivery</th>
                                     <th>View Address</th>
-                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -57,7 +56,7 @@
                                         <td>{{ $visit->contact_person_name }}</td>
                                         <td>
                                             @foreach (explode(',', $visit->contact_person_number) as $num)
-                                                <span class="badge bg-primary">{{ $num }}</span><br>
+                                                <span class="badge">{{ $num }}</span><br>
                                             @endforeach
                                         </td>
                                         <td>{{ $visit->no_of_apartment ?? 'N/A' }}</td>
@@ -72,11 +71,7 @@
                                                 View Address
                                             </button>
                                         </td>
-                                        <td>
-                                            <a href="#" class="btn btn-sm btn-info">Edit</a>
-                                            <a href="#" class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Are you sure to delete?')">Delete</a>
-                                        </td>
+                                       
                                     </tr>
                                 @endforeach
                             </tbody>
