@@ -279,10 +279,13 @@ class FlowerOrderController extends Controller
                 ->groupBy('user_id');
 
             $query->joinSub($subQuery, 'latest_subscriptions', function ($join) {
-                $join->on('subscriptions.user_id', '=', 'latest_subscriptions.user_id')
-                    ->on('subscriptions.end_date', '=', 'latest_subscriptions.latest_end_date');
-            })->orderByDesc('subscriptions.end_date');
+                    $join->on('subscriptions.user_id', '=', 'latest_subscriptions.user_id')
+                        ->on('subscriptions.end_date', '=', 'latest_subscriptions.latest_end_date');
+                })
+                ->select('subscriptions.*') // ✅ Avoid duplicate columns
+                ->orderByDesc('subscriptions.end_date');
         }
+
 
         if ($filter === 'paused') {
             $query->where('status', 'paused');
