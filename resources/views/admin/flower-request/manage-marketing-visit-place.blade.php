@@ -56,7 +56,7 @@
                                         <td>{{ $visit->contact_person_name }}</td>
                                         <td>
                                             @foreach (explode(',', $visit->contact_person_number) as $num)
-                                                <span class="badge">{{ $num }}</span><br>
+                                                <p style="font-size: 17px">{{ $num }}</p><br>
                                             @endforeach
                                         </td>
                                         <td>{{ $visit->no_of_apartment ?? 'N/A' }}</td>
