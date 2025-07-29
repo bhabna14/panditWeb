@@ -201,7 +201,7 @@
             </div>
 
             <div class="form-group">
-                <label>Already Delivered?</label>
+                <label>Flower Already Delivered?</label>
                 <div class="checkbox-group">
                     <label><input type="checkbox" name="delivered" value="yes"> Yes</label>
                     <label><input type="checkbox" name="delivered" value="no"> No</label>

@@ -123,6 +123,7 @@
                             <label>Visitor Name</label>
                             <input type="text" name="visitor_name" id="edit_visitor_name" class="form-control">
                         </div>
+
                         <div class="col-md-6">
                             <label>Location Type</label>
                             <select name="location_type" id="edit_location_type" class="form-control">

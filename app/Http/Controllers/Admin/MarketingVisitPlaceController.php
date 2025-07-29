@@ -5,6 +5,8 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\MarketingVisitPlace;
+ use App\Models\Apartment;
+
 use Illuminate\Support\Carbon;
 
 class MarketingVisitPlaceController extends Controller
@@ -14,7 +16,8 @@ class MarketingVisitPlaceController extends Controller
         return view('admin.flower-request.flower-marketing-visit-place');
     }
 
- public function storeVisitPlace(Request $request)
+
+public function storeVisitPlace(Request $request)
 {
     $request->validate([
         'visitor_name' => 'required|string|max:255',
@@ -33,6 +36,7 @@ class MarketingVisitPlaceController extends Controller
 
     $contactNumbers = implode(',', array_filter($request->contactNumber));
 
+    // ✅ Save to MarketingVisitPlace table
     MarketingVisitPlace::create([
         'visitor_name'          => $request->visitor_name,
         'location_type'         => $request->locationType,
@@ -46,6 +50,16 @@ class MarketingVisitPlaceController extends Controller
         'locality_name'         => $request->locality,
         'landmark'              => $request->landmark,
     ]);
+
+    // ✅ Also save to Apartment model if apartment_name is provided
+    if ($request->apartmentName) {
+        Apartment::updateOrCreate(
+            [
+                'apartment_name' => $request->apartmentName,
+                'locality_id'    => $request->locality
+            ],
+        );
+    }
 
     return redirect()->back()->with('success', 'Marketing visit data saved successfully.');
 }
