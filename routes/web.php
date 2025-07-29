@@ -416,11 +416,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::post('/address-update','updateAddress')->name('admin.address.update');
 
     });
-    Route::controller(MarketingVisitPlaceController::class)->group(function() {
-        Route::get('/marketing-visit-place','getVisitPlace')->name('admin.getVisitPlace');
-
-    });
-
+    
     Route::controller(PujaController::class)->group(function() {
         Route::get('/manage-puja', 'managePuja')->name('managepuja');
         Route::get('/manage-special-puja', 'manageSpecialPuja')->name('manageSpecialPuja');
@@ -792,5 +788,10 @@ Route::controller(PoojaStatusController::class)->group(function() {
 Route::controller(PoojaHistoryController::class)->group(function() {
     Route::get('pandit/poojahistory', 'poojahistory')->name('poojahistory');
 });
+
+Route::controller(MarketingVisitPlaceController::class)->group(function() {
+        Route::get('/marketing-visit-place','getVisitPlace')->name('admin.getVisitPlace');
+    });
+
 
 	
