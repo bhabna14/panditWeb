@@ -791,6 +791,8 @@ Route::controller(PoojaHistoryController::class)->group(function() {
 
 Route::controller(MarketingVisitPlaceController::class)->group(function() {
         Route::get('/marketing-visit-place','getVisitPlace')->name('admin.getVisitPlace');
+        Route::post('/save-marketing-visit-place', 'storeVisitPlace')->name('marketing.visit.place.store');
+
     });
 
 

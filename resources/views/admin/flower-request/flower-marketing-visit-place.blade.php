@@ -148,8 +148,8 @@
         <h1>Flower Marketing Visit Form</h1>
     </header>
     <div class="container">
-        <form>
-            <div class="form-group">
+        <form action="{{ route('marketing.visit.place.store') }}" method="POST">
+            @csrf <div class="form-group">
                 <label for="locationType">Location Type</label>
                 <i class="fas fa-map-marker-alt"></i>
                 <select id="locationType" name="locationType">
@@ -228,6 +228,21 @@
             <button type="submit">Submit</button>
         </form>
     </div>
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#1E88E5',
+                });
+            });
+        </script>
+    @endif
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         function addPhoneField() {
             const phoneList = document.querySelector('#phoneNumbers .phone-list');
@@ -245,6 +260,21 @@
             }
         }
     </script>
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#1E88E5',
+                });
+            });
+        </script>
+    @endif
 
 </body>
 
