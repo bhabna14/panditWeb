@@ -93,7 +93,7 @@
         }
 
         .phone-field input {
-            width: 92%;
+            width: 86%;
             padding: 0.7rem 0.7rem 0.7rem 2.5rem;
             font-size: 1rem;
             border-radius: 6px;
