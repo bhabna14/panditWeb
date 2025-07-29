@@ -71,7 +71,22 @@
             grid-column: 1 / -1;
         }
 
-        button {
+        .phone-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .phone-actions button {
+            background-color: #1E88E5;
+            color: white;
+            border: none;
+            padding: 0.4rem 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button[type="submit"] {
             padding: 0.9rem;
             font-size: 1rem;
             background-color: #1E88E5;
@@ -82,7 +97,7 @@
             grid-column: 1 / -1;
         }
 
-        button:hover {
+        button[type="submit"]:hover {
             background-color: #1565C0;
         }
 
@@ -127,10 +142,16 @@
                 <input type="text" id="contactName" name="contactName">
             </div>
 
-            <div class="form-group">
-                <label for="contactNumber">Contact Person Number</label>
-                <i class="fas fa-phone"></i>
-                <input type="tel" id="contactNumber" name="contactNumber">
+            <div class="form-group full-width" id="phoneNumbers">
+                <label>Contact Person Number</label>
+                <div class="phone-field">
+                    <i class="fas fa-phone"></i>
+                    <input type="tel" name="contactNumber[]">
+                </div>
+                <div class="phone-actions">
+                    <button type="button" onclick="addPhoneField()">Add</button>
+                    <button type="button" onclick="removePhoneField()">Remove</button>
+                </div>
             </div>
 
             <div class="form-group">
@@ -174,5 +195,23 @@
             <button type="submit">Submit</button>
         </form>
     </div>
+
+    <script>
+        function addPhoneField() {
+            const container = document.getElementById('phoneNumbers');
+            const newField = document.createElement('div');
+            newField.classList.add('phone-field');
+            newField.innerHTML = '<i class="fas fa-phone"></i><input type="tel" name="contactNumber[]">';
+            container.insertBefore(newField, container.querySelector('.phone-actions'));
+        }
+
+        function removePhoneField() {
+            const container = document.getElementById('phoneNumbers');
+            const fields = container.querySelectorAll('.phone-field');
+            if (fields.length > 1) {
+                container.removeChild(fields[fields.length - 1]);
+            }
+        }
+    </script>
 </body>
 </html>
