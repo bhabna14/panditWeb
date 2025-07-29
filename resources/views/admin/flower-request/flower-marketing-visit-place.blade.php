@@ -161,6 +161,13 @@
             </div>
 
             <div class="form-group">
+                <label for="visitorName">Visitor Name</label>
+                <i class="fas fa-user-check"></i>
+                <input type="text" id="visitorName" name="visitor_name" required>
+            </div>
+
+
+            <div class="form-group">
                 <label for="datetime">Date and Time</label>
                 <i class="fas fa-calendar-alt"></i>
                 <input type="datetime-local" id="datetime" name="datetime">
