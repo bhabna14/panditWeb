@@ -503,6 +503,28 @@
             </div>
         </div>
     </div>
+
+     <div class="row card sales-card mt-2">
+        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+            <h4 class="card-title-custom" style="font-size: 14px">Marketing</h4>
+            <div class="row">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.visitPlace') }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Marketing Visit Place Today</h6>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $visitPlaceCountToday }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')

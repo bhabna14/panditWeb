@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\FlowerPickupDetails;
 use App\Models\RiderDetails;
 use App\Models\FlowerRequest;
+use App\Models\MarketingVisitPlace;
 use App\Models\SubscriptionPauseResumeLog;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
@@ -175,6 +176,8 @@ class FlowerDashboardController extends Controller
             $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$today, $threeDaysLater])
             ->count();
 
+            $visitPlaceCountToday = MarketingVisitPlace::whereDate('created_at', Carbon::today())->count();
+
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',
                 'totalDeliveriesTodayCount',
@@ -196,7 +199,8 @@ class FlowerDashboardController extends Controller
                 'pausedSubscriptions',
                 'nextDayPaused',
                 'nextDayResumed',
-                'upcomingCustomizeOrders'
+                'upcomingCustomizeOrders',
+                'visitPlaceCountToday'
             ));
 }
 
