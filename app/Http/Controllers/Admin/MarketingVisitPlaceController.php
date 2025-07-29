@@ -5,6 +5,7 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\MarketingVisitPlace;
+use Illuminate\Support\Carbon;
 
 class MarketingVisitPlaceController extends Controller
 {
@@ -49,11 +50,17 @@ class MarketingVisitPlaceController extends Controller
     return redirect()->back()->with('success', 'Marketing visit data saved successfully.');
 }
 
-    public function manageVisitPlace()
-    {
-        $visitPlaces = MarketingVisitPlace::all();
-        return view('admin.flower-request.manage-marketing-visit-place', compact('visitPlaces'));
+public function manageVisitPlace(Request $request)
+{
+    $filter = $request->query('filter');
 
+    if ($filter === 'todayVisitPlace') {
+        $visitPlaces = MarketingVisitPlace::whereDate('created_at', Carbon::today())->get();
+    } else {
+        $visitPlaces = MarketingVisitPlace::all();
     }
+
+    return view('admin.flower-request.manage-marketing-visit-place', compact('visitPlaces'));
+}
 
 }

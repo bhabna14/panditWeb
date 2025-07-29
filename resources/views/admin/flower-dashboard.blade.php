@@ -509,7 +509,7 @@
             <h4 class="card-title-custom" style="font-size: 14px">Marketing</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.visitPlace') }}" target="_blank">
+                    <a href="{{ route('admin.visitPlace' , ['filter' => 'todayVisitPlace']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
