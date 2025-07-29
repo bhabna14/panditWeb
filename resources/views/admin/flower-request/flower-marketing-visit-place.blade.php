@@ -71,10 +71,29 @@
             grid-column: 1 / -1;
         }
 
+        .phone-field {
+            position: relative;
+            margin-bottom: 0.8rem;
+        }
+
+        .phone-field i {
+            position: absolute;
+            top: 0.8rem;
+            left: 0.8rem;
+            color: #1E88E5;
+        }
+
+        .phone-field input {
+            width: 100%;
+            padding: 0.7rem 0.7rem 0.7rem 2.5rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
         .phone-actions {
             display: flex;
             gap: 0.5rem;
-            margin-top: 0.5rem;
         }
 
         .phone-actions button {
