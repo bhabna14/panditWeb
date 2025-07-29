@@ -49,4 +49,11 @@ class MarketingVisitPlaceController extends Controller
     return redirect()->back()->with('success', 'Marketing visit data saved successfully.');
 }
 
+    public function manageVisitPlace()
+    {
+        $visitPlaces = MarketingVisitPlace::all();
+        return view('admin.flower-request.manage-marketing-visit-place', compact('visitPlaces'));
+
+    }
+
 }
