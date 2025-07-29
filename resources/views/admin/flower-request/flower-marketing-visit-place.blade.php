@@ -203,8 +203,8 @@
             <div class="form-group">
                 <label>Flower Already Delivered?</label>
                 <div class="checkbox-group">
-                    <label><input type="checkbox" name="delivered" value="yes"> Yes</label>
-                    <label><input type="checkbox" name="delivered" value="no"> No</label>
+                    <label><input type="radio" name="delivered" value="yes"> Yes</label>
+                    <label><input type="radio" name="delivered" value="no"> No</label>
                 </div>
             </div>
 
