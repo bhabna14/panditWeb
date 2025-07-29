@@ -226,6 +226,7 @@
             document.getElementById('modalLandmark').textContent = button.getAttribute('data-landmark') || 'N/A';
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // Load data into modal
@@ -279,5 +280,4 @@
                 });
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
