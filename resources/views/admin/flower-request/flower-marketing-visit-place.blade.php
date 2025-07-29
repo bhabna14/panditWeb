@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +19,7 @@
             color: white;
             padding: 1.5rem;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         .container {
@@ -27,7 +28,7 @@
             padding: 2rem;
             background-color: #ffffff;
             border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
         }
 
         form {
@@ -54,7 +55,8 @@
             color: #1E88E5;
         }
 
-        input, select {
+        input,
+        select {
             padding: 0.7rem 0.7rem 0.7rem 2.5rem;
             font-size: 1rem;
             border-radius: 6px;
@@ -71,15 +73,22 @@
             grid-column: 1 / -1;
         }
 
+        .phone-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
         .phone-field {
             position: relative;
-            margin-bottom: 0.8rem;
         }
 
         .phone-field i {
             position: absolute;
-            top: 0.8rem;
+            top: 50%;
             left: 0.8rem;
+            transform: translateY(-50%);
             color: #1E88E5;
         }
 
@@ -90,6 +99,7 @@
             border-radius: 6px;
             border: 1px solid #ccc;
         }
+
 
         .phone-actions {
             display: flex;
@@ -132,6 +142,7 @@
         }
     </style>
 </head>
+
 <body>
     <header>
         <h1>Flower Marketing Visit Form</h1>
@@ -161,17 +172,20 @@
                 <input type="text" id="contactName" name="contactName">
             </div>
 
-            <div class="form-group" id="phoneNumbers">
+            <div class="form-group full-width" id="phoneNumbers">
                 <label>Contact Person Number</label>
-                <div class="phone-field">
-                    <i class="fas fa-phone"></i>
-                    <input type="tel" name="contactNumber[]">
+                <div class="phone-list">
+                    <div class="phone-field">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" name="contactNumber[]">
+                    </div>
                 </div>
                 <div class="phone-actions">
                     <button type="button" onclick="addPhoneField()">Add</button>
                     <button type="button" onclick="removePhoneField()">Remove</button>
                 </div>
             </div>
+
 
             <div class="form-group">
                 <label for="noOfApartments">Number of Apartments</label>
@@ -214,23 +228,24 @@
             <button type="submit">Submit</button>
         </form>
     </div>
-
     <script>
         function addPhoneField() {
-            const container = document.getElementById('phoneNumbers');
+            const phoneList = document.querySelector('#phoneNumbers .phone-list');
             const newField = document.createElement('div');
             newField.classList.add('phone-field');
             newField.innerHTML = '<i class="fas fa-phone"></i><input type="tel" name="contactNumber[]">';
-            container.insertBefore(newField, container.querySelector('.phone-actions'));
+            phoneList.appendChild(newField);
         }
 
         function removePhoneField() {
-            const container = document.getElementById('phoneNumbers');
-            const fields = container.querySelectorAll('.phone-field');
+            const phoneList = document.querySelector('#phoneNumbers .phone-list');
+            const fields = phoneList.querySelectorAll('.phone-field');
             if (fields.length > 1) {
-                container.removeChild(fields[fields.length - 1]);
+                phoneList.removeChild(fields[fields.length - 1]);
             }
         }
     </script>
+
 </body>
+
 </html>
