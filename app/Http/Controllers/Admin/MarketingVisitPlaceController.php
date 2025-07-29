@@ -63,4 +63,31 @@ public function manageVisitPlace(Request $request)
     return view('admin.flower-request.manage-marketing-visit-place', compact('visitPlaces'));
 }
 
+public function editVisitPlace($id)
+{
+    $visitPlace = MarketingVisitPlace::findOrFail($id);
+    return response()->json($visitPlace);
+}
+
+public function updateVisitPlace(Request $request, $id)
+{
+    $request->validate([
+        'visitor_name' => 'required|string|max:255',
+        'location_type' => 'required|string',
+        'date_time' => 'required|date',
+        'contact_person_name' => 'required|string',
+        'contact_person_number' => 'required|string', // comma-separated string
+        'no_of_apartment' => 'nullable|integer',
+        'already_delivery' => 'nullable|string',
+        'apartment_name' => 'nullable|string',
+        'apartment_number' => 'nullable|string',
+        'locality_name' => 'nullable|string',
+        'landmark' => 'nullable|string',
+    ]);
+
+    $visitPlace = MarketingVisitPlace::findOrFail($id);
+    $visitPlace->update($request->all());
+
+    return response()->json(['success' => true, 'message' => 'Visit place updated successfully.']);
+}
 }
