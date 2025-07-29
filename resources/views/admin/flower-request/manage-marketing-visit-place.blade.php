@@ -44,6 +44,7 @@
                                     <th>No. of Apartments</th>
                                     <th>Delivery</th>
                                     <th>View Address</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -71,7 +72,12 @@
                                                 View Address
                                             </button>
                                         </td>
-                                       
+                                        <td>
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-info" title="Edit"
+                                                onclick="loadVisitData({{ $visit->id }})">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -99,6 +105,85 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editVisitModal" tabindex="-1" aria-labelledby="editVisitModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <form id="editVisitForm">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Visit Place</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body row g-3">
+                        <input type="hidden" id="edit_id">
+
+                        <div class="col-md-6">
+                            <label>Visitor Name</label>
+                            <input type="text" name="visitor_name" id="edit_visitor_name" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Location Type</label>
+                            <select name="location_type" id="edit_location_type" class="form-control">
+                                <option value="apartment">Apartment</option>
+                                <option value="individual">Individual</option>
+                                <option value="temple">Temple</option>
+                                <option value="business">Business</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Date Time</label>
+                            <input type="datetime-local" name="date_time" id="edit_date_time" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Contact Person Name</label>
+                            <input type="text" name="contact_person_name" id="edit_contact_person_name"
+                                class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Contact Numbers (comma separated)</label>
+                            <input type="text" name="contact_person_number" id="edit_contact_person_number"
+                                class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Number of Apartments</label>
+                            <input type="number" name="no_of_apartment" id="edit_no_of_apartment" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Delivery Status</label>
+                            <select name="already_delivery" id="edit_already_delivery" class="form-control">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Apartment Name</label>
+                            <input type="text" name="apartment_name" id="edit_apartment_name" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Apartment Number</label>
+                            <input type="text" name="apartment_number" id="edit_apartment_number"
+                                class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Locality</label>
+                            <input type="text" name="locality_name" id="edit_locality_name" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Landmark</label>
+                            <input type="text" name="landmark" id="edit_landmark" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <!-- End Row -->
 @endsection
@@ -141,4 +226,58 @@
             document.getElementById('modalLandmark').textContent = button.getAttribute('data-landmark') || 'N/A';
         });
     </script>
+
+    <script>
+        // Load data into modal
+        function loadVisitData(id) {
+            fetch(`/visit-place/edit/${id}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('edit_id').value = data.id;
+                    document.getElementById('edit_visitor_name').value = data.visitor_name;
+                    document.getElementById('edit_location_type').value = data.location_type;
+                    document.getElementById('edit_date_time').value = data.date_time.replace(' ', 'T');
+                    document.getElementById('edit_contact_person_name').value = data.contact_person_name;
+                    document.getElementById('edit_contact_person_number').value = data.contact_person_number;
+                    document.getElementById('edit_no_of_apartment').value = data.no_of_apartment;
+                    document.getElementById('edit_already_delivery').value = data.already_delivery;
+                    document.getElementById('edit_apartment_name').value = data.apartment_name;
+                    document.getElementById('edit_apartment_number').value = data.apartment_number;
+                    document.getElementById('edit_locality_name').value = data.locality_name;
+                    document.getElementById('edit_landmark').value = data.landmark;
+
+                    new bootstrap.Modal(document.getElementById('editVisitModal')).show();
+                });
+        }
+
+        // Handle form submission
+        document.getElementById('editVisitForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('edit_id').value;
+            const formData = new FormData(this);
+
+            fetch(`/visit-place/update/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(response => {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated!',
+                            text: response.message,
+                            confirmButtonColor: '#3085d6'
+                        }).then(() => {
+                            location.reload(); // Reload only after user confirms
+                        });
+                    }
+                });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection
