@@ -87,9 +87,11 @@ class FlowerDashboardController extends Controller
 
         $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
 
-         $newUserSubscription = Subscription::whereDate('created_at', Carbon::today())
+        $newUserSubscription = Subscription::whereDate('created_at', Carbon::today())
         ->distinct('user_id')
-        ->where('status', 'pending')                   
+        ->where('status', 'pending')
+        ->groupBy('subscription_id', 'order_id', 'user_id')
+        ->distinct('user_id')
         ->count('user_id');
 
         $renewSubscription = Subscription::whereDate('created_at', Carbon::today()) // Check rows created today
