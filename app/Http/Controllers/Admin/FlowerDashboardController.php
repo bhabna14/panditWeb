@@ -96,7 +96,7 @@ class FlowerDashboardController extends Controller
     //         ->count('user_id');
 
         $newUserSubscription = Subscription::where('status', 'pending')
-            ->whereBetween('created_at',  Carbon::today())
+            ->whereDate('created_at',  Carbon::today())
             ->groupBy('user_id')
             ->selectRaw('MIN(order_id) as order_id, user_id')
             ->get()
