@@ -257,11 +257,12 @@ class FlowerOrderController extends Controller
             });
         }
 
-        if ($filter === 'new') {
-            $query->whereDate('created_at', Carbon::today())
-                ->select('user_id')
+       if ($filter === 'new') {
+            $newUserSubscriptionCount = DB::table('subscriptions')
+                ->whereDate('created_at', Carbon::today())
                 ->where('status', 'pending')
                 ->groupBy('subscription_id', 'order_id', 'user_id')
+                ->select('user_id')
                 ->distinct('user_id');
         }
 
