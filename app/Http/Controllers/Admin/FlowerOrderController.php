@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Models\SubscriptionPauseResumeLog;
- use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables; // ✅ Correct import
 
 use Illuminate\Support\Facades\Auth;
@@ -259,7 +259,9 @@ class FlowerOrderController extends Controller
 
         if ($filter === 'new') {
             $query->whereDate('created_at', Carbon::today())
+                ->select('user_id')
                 ->where('status', 'pending')
+                ->groupBy('subscription_id', 'order_id', 'user_id')
                 ->distinct('user_id');
         }
 
@@ -285,7 +287,6 @@ class FlowerOrderController extends Controller
                 ->select('subscriptions.*') // ✅ Avoid duplicate columns
                 ->orderByDesc('subscriptions.end_date');
         }
-
 
         if ($filter === 'paused') {
             $query->where('status', 'paused');
@@ -326,7 +327,6 @@ class FlowerOrderController extends Controller
                 $q->where('apartment_flat_plot', $request->apartment_flat_plot);
             });
         }
-
 
         if ($request->ajax()) {
             return datatables()->eloquent($query)->toJson();
