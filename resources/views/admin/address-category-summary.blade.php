@@ -100,6 +100,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
             const modal = new bootstrap.Modal(document.getElementById('editModal'));
             const editForm = document.getElementById('editAddressForm');
             const cards = document.querySelectorAll('.card-click');
