@@ -266,7 +266,7 @@ class FlowerOrderController extends Controller
                         ->groupBy('user_id')
                         ->havingRaw('COUNT(*) = 1');
                 })
-                ->distinct('user_id');
+            ->distinct('user_id');
         }
 
         if ($filter === 'active') {
@@ -282,16 +282,15 @@ class FlowerOrderController extends Controller
                         ->from('subscriptions')
                         ->whereIn('status', ['active', 'paused', 'resume']);
                 })
-                ->groupBy('user_id');
+            ->groupBy('user_id');
 
             $query->joinSub($subQuery, 'latest_subscriptions', function ($join) {
                     $join->on('subscriptions.user_id', '=', 'latest_subscriptions.user_id')
                         ->on('subscriptions.end_date', '=', 'latest_subscriptions.latest_end_date');
                 })
-                ->select('subscriptions.*') // ✅ Avoid duplicate columns
-                ->orderByDesc('subscriptions.end_date');
+            ->select('subscriptions.*')
+            ->orderByDesc('subscriptions.end_date');
         }
-
 
         if ($filter === 'paused') {
             $query->where('status', 'paused');
@@ -332,7 +331,6 @@ class FlowerOrderController extends Controller
                 $q->where('apartment_flat_plot', $request->apartment_flat_plot);
             });
         }
-
 
         if ($request->ajax()) {
             return datatables()->eloquent($query)->toJson();

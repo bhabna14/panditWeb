@@ -607,8 +607,7 @@ class AdminController extends Controller
 
         return view('admin.address-category-summary', compact('addressCounts','apartments'));
     }
-
- public function getAddressUsersByCategory(Request $request)
+public function getAddressUsersByCategory(Request $request)
 {
     $category = $request->input('category');
 
@@ -616,8 +615,11 @@ class AdminController extends Controller
         ->where('place_category', $category)
         ->get();
 
-    $result = $addresses->map(function ($address) {
+    $grouped = [];
+
+    foreach ($addresses as $address) {
         $user = $address->user;
+        $apartmentName = $address->apartment_name ?? '—';
         $riderName = '—';
 
         if ($user && $user->orders->count()) {
@@ -629,19 +631,22 @@ class AdminController extends Controller
             }
         }
 
-        return [
+        $entry = [
             'user_id' => $user?->userid,
             'address_id' => $address->id,
             'name' => $user?->name ?? '—',
             'mobile_number' => $user?->mobile_number ?? '—',
-            'apartment_name' => $address->apartment_name ?? '—',
+            'apartment_name' => $apartmentName,
             'apartment_flat_plot' => $address->apartment_flat_plot ?? '—',
             'rider_name' => $riderName,
         ];
-    });
 
-    return response()->json($result);
+        $grouped[$apartmentName][] = $entry;
+    }
+
+    return response()->json($grouped);
 }
+
 
 public function updateAddress(Request $request)
 {

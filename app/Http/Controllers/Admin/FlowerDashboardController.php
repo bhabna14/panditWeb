@@ -115,7 +115,7 @@ class FlowerDashboardController extends Controller
         ->count();
 
          $todayEndSubscription = Subscription::where(function ($query) {
-                $query->where(function ($subQuery) {
+            $query->where(function ($subQuery) {
                     $subQuery->whereNotNull('new_date') // Check if new_date is available
                             ->whereDate('new_date', Carbon::today()); // Count using new_date if available
                 })
