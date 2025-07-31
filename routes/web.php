@@ -42,6 +42,7 @@ use App\Http\Controllers\Admin\CustomizeProductController;
 use App\Http\Controllers\Admin\FlowerDashboardController;
 use App\Http\Controllers\Admin\PodcastPlanningController;
 use App\Http\Controllers\Admin\MarketingVisitPlaceController;
+use App\Http\Controllers\Admin\OfferDetailsController;
 
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 use App\Http\Controllers\Admin\ProductRequestController;
@@ -470,9 +471,16 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         // Route::get('/savelocation', 'savelocation')->name('savelocation');
         Route::delete('/dltbooking/{id}', 'deleteBooking')->name('admin.booking.delete');
     });
+
     Route::controller(PodcastCreateController::class)->group(function() {
         Route::get('/podcast-create', 'podcastCreate')->name('podcastCreate');
         Route::post('/save-podcast-create', 'savePodcastCreate')->name('savePodcastCreate');
+    });
+
+    
+    Route::controller(OfferDetailsController::class)->group(function() {
+        Route::get('/offer-details', 'offerDetails')->name('admin.offerDetails');
+        Route::post('/save-offer-details', 'saveOfferDetails')->name('admin.saveOfferDetails');
     });
 
     Route::controller(PodcastReportController::class)->group(function() {

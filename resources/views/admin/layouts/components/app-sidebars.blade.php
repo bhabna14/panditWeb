@@ -140,6 +140,15 @@
                     </a>
                 </li>
 
+                  <li class="slide">
+                    <a class="side-menu__item" href="{{ route('admin.offerDetails') }}">
+                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z"/>
+                    </svg>
+                        <span class="side-menu__label">Offer Details</span>
+                    </a>
+                </li>
+
                 <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"

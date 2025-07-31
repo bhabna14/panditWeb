@@ -1,0 +1,57 @@
+<?php
+
+namespace App\Http\Controllers\admin;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use App\Models\OfferDetails;
+use Illuminate\Support\Facades\Storage;
+
+class OfferDetailsController extends Controller
+{
+    
+    public function offerDetails()
+    {
+        return view('admin.offer.offer-details');
+    }
+
+ public function saveOfferDetails(Request $request)
+    {
+        try {
+            // Validate inputs
+            $request->validate([
+                'main_header' => 'required|string|max:255',
+                'sub_header'  => 'nullable|string|max:255',
+                'content'     => 'nullable|string',
+                'discount'    => 'nullable|numeric|min:0|max:100',
+                'menu'        => 'nullable|array',
+                'menu.*'      => 'nullable|string|max:255',
+                'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            ]);
+
+            // Process menu array to comma-separated string
+            $menu = $request->menu ? implode(',', array_filter($request->menu)) : null;
+
+            // Handle image upload
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $imagePath = $request->file('image')->store('offers', 'public');
+                $imagePath = Storage::url($imagePath); // Get public URL
+            }
+
+            // Save to database
+            OfferDetails::create([
+                'main_header' => $request->main_header,
+                'sub_header'  => $request->sub_header,
+                'content'     => $request->content,
+                'discount'    => $request->discount,
+                'menu'        => $menu,
+                'image'       => $imagePath,
+            ]);
+
+            return redirect()->back()->with('success', 'Offer saved successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to save offer: ' . $e->getMessage());
+        }
+    }
+}
