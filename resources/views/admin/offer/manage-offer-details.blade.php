@@ -76,11 +76,14 @@
                                             </button>
                                         </td>
                                         <td>
-                                            <button class="btn btn-sm btn-warning edit-offer-btn"
+                                            <button type="button" class="btn btn-sm btn-warning edit-offer-btn"
                                                 data-id="{{ $offer->id }}" data-main_header="{{ $offer->main_header }}"
                                                 data-sub_header="{{ $offer->sub_header }}"
                                                 data-discount="{{ $offer->discount }}" data-menu="{{ $offer->menu }}"
-                                                data-content="{{ $offer->content }}" data-bs-toggle="modal"
+                                                data-content="{{ $offer->content }}"
+                                                data-start_date="{{ $offer->start_date }}"
+                                                data-end_date="{{ $offer->end_date }}"
+                                                data-image="{{ asset($offer->image) }}" data-bs-toggle="modal"
                                                 data-bs-target="#editOfferModal">
                                                 <i class="fas fa-edit"></i>
                                             </button>
