@@ -27,6 +27,8 @@ class OfferDetailsController extends Controller
                 'menu'        => 'nullable|array',
                 'menu.*'      => 'nullable|string|max:255',
                 'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'start_date'  => 'required|date',
+                'end_date'    => 'required|date|after_or_equal:start_date',
             ]);
 
             // Process menu array to comma-separated string
@@ -45,6 +47,8 @@ class OfferDetailsController extends Controller
                 'sub_header'  => $request->sub_header,
                 'content'     => $request->content,
                 'discount'    => $request->discount,
+                'start_date'  => $request->start_date,
+                'end_date'    => $request->end_date,
                 'menu'        => $menu,
                 'image'       => $imagePath,
             ]);
