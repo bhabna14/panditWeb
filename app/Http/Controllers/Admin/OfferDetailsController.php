@@ -63,7 +63,7 @@ class OfferDetailsController extends Controller
     {
         $offers = OfferDetails::where('status','active')->get();
 
-        return view('admin.offer.manage', compact('offers'));
+        return view('admin.offer.manage-offer-details', compact('offers'));
     }
 
     public function updateOfferDetails(Request $request)
