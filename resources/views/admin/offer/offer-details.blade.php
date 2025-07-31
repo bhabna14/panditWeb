@@ -61,7 +61,7 @@
                     </div>
                 </div>
 
-                  <div class="col-md-8">
+                  <div class="col-md-4">
                     <label class="form-label">Menu Items</label>
                     <div id="menu-container">
                         <div class="input-group mb-2 menu-group">
