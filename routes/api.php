@@ -115,7 +115,7 @@ Route::controller(CareersController::class)->group(function() {
 
 
 Route::controller(OfferDetailsApiController::class)->group(function() {
-    Route::post('/offer-details', 'getOfferDetails');
+    Route::get('/offer-details', 'getOfferDetails');
 });
 
 Route::controller(PoojaSkillController::class)->group(function() {
