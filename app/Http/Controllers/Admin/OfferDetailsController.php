@@ -58,4 +58,49 @@ class OfferDetailsController extends Controller
             return redirect()->back()->with('error', 'Failed to save offer: ' . $e->getMessage());
         }
     }
+
+    public function manageOfferDetails()
+    {
+        $offers = OfferDetails::where('status','active')->get();
+
+        return view('admin.offer.manage', compact('offers'));
+    }
+
+    public function updateOfferDetails(Request $request)
+    {
+        try {
+            $request->validate([
+                'id' => 'required|exists:offer_details,id',
+                'main_header' => 'required|string|max:255',
+                'sub_header'  => 'nullable|string|max:255',
+                'discount'    => 'nullable|numeric|min:0|max:100',
+                'menu'        => 'nullable|string',
+                'content'     => 'nullable|string',
+            ]);
+
+            $offer = OfferDetails::findOrFail($request->id);
+            $offer->update([
+                'main_header' => $request->main_header,
+                'sub_header'  => $request->sub_header,
+                'discount'    => $request->discount,
+                'menu'        => $request->menu,
+                'content'     => $request->content,
+            ]);
+
+            return redirect()->back()->with('success', 'Offer updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Update failed: ' . $e->getMessage());
+        }
+    }
+
+    public function deleteOfferDetails($id)
+    {
+        try {
+            OfferDetails::findOrFail($id)->delete();
+            return redirect()->back()->with('success', 'Offer deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Delete failed: ' . $e->getMessage());
+        }
+    }
+
 }

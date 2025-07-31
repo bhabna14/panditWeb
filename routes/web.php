@@ -477,10 +477,12 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::post('/save-podcast-create', 'savePodcastCreate')->name('savePodcastCreate');
     });
 
-    
     Route::controller(OfferDetailsController::class)->group(function() {
         Route::get('/offer-details', 'offerDetails')->name('admin.offerDetails');
         Route::post('/save-offer-details', 'saveOfferDetails')->name('admin.saveOfferDetails');
+        Route::get('/manage-offer-details', 'manageOfferDetails')->name('admin.manageOfferDetails');
+        Route::post('/update-offer-details','updateOfferDetails')->name('admin.updateOfferDetails');
+        Route::delete('/delete-offer-details/{id}','deleteOfferDetails')->name('admin.deleteOfferDetails');
     });
 
     Route::controller(PodcastReportController::class)->group(function() {

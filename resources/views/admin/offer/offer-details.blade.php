@@ -71,7 +71,6 @@
                     </div>
                 </div>
 
-
                 <div class="col-md-12">
                     <div class="form-group">
                         <label for="content" class="form-label">Content</label>
