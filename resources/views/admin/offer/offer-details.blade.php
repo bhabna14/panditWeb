@@ -79,7 +79,7 @@
                     </div>
                 </div>
 
-                <div class="col-12 text-end">
+                <div class="col-12">
                     <button type="submit" class="btn btn-primary">Save Offer</button>
                 </div>
             </div>
