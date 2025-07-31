@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\PanditLoginController;
 use App\Http\Controllers\Api\CheckController;
 use App\Http\Controllers\Api\PoojaStatusController;
 use App\Http\Controllers\Api\FlowerBookingController;
+use App\Http\Controllers\Api\OfferDetailsApiController;
 
 use App\Http\Controllers\Admin\NotificationController;
 
@@ -110,6 +111,11 @@ Route::controller(ProfileController::class)->group(function() {
 
 Route::controller(CareersController::class)->group(function() {
     Route::post('/career/save', 'saveCareer');
+});
+
+
+Route::controller(OfferDetailsApiController::class)->group(function() {
+    Route::post('/offer-details', 'getOfferDetails');
 });
 
 Route::controller(PoojaSkillController::class)->group(function() {
