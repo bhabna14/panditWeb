@@ -69,22 +69,47 @@ class OfferDetailsController extends Controller
     public function updateOfferDetails(Request $request)
     {
         try {
+            // Validate request
             $request->validate([
                 'id' => 'required|exists:offer_details,id',
                 'main_header' => 'required|string|max:255',
                 'sub_header'  => 'nullable|string|max:255',
                 'discount'    => 'nullable|numeric|min:0|max:100',
-                'menu'        => 'nullable|string',
+                'menu'        => 'nullable|array',
+                'menu.*'      => 'nullable|string|max:255',
                 'content'     => 'nullable|string',
+                'start_date'  => 'nullable|date',
+                'end_date'    => 'nullable|date|after_or_equal:start_date',
+                'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
 
             $offer = OfferDetails::findOrFail($request->id);
+
+            // Handle menu items as comma-separated string
+            $menu = $request->menu ? implode(',', array_filter($request->menu)) : null;
+
+            // Handle image update
+            $imagePath = $offer->image; // existing image
+            if ($request->hasFile('image')) {
+                // Delete old image if needed (optional)
+                if ($imagePath && \Storage::disk('public')->exists(str_replace('/storage/', '', $imagePath))) {
+                    \Storage::disk('public')->delete(str_replace('/storage/', '', $imagePath));
+                }
+
+                $newImage = $request->file('image')->store('offers', 'public');
+                $imagePath = \Storage::url($newImage);
+            }
+
+            // Update offer
             $offer->update([
                 'main_header' => $request->main_header,
                 'sub_header'  => $request->sub_header,
                 'discount'    => $request->discount,
-                'menu'        => $request->menu,
+                'menu'        => $menu,
                 'content'     => $request->content,
+                'start_date'  => $request->start_date,
+                'end_date'    => $request->end_date,
+                'image'       => $imagePath,
             ]);
 
             return redirect()->back()->with('success', 'Offer updated successfully!');

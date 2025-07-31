@@ -137,7 +137,8 @@
                         <div class="modal fade" id="editOfferModal" tabindex="-1" aria-labelledby="editOfferModalLabel"
                             aria-hidden="true">
                             <div class="modal-dialog modal-lg">
-                                <form method="POST" id="editOfferForm" action="{{ route('admin.updateOfferDetails') }}">
+                                <form method="POST" id="editOfferForm" action="{{ route('admin.updateOfferDetails') }}"
+                                    enctype="multipart/form-data">
                                     @csrf
                                     <input type="hidden" name="id" id="edit_id">
                                     <div class="modal-content">
@@ -152,24 +153,53 @@
                                                 <input type="text" name="main_header" id="edit_main_header"
                                                     class="form-control" required>
                                             </div>
+
                                             <div class="col-md-6">
                                                 <label>Sub Header</label>
                                                 <input type="text" name="sub_header" id="edit_sub_header"
                                                     class="form-control">
                                             </div>
+
+                                            <div class="col-md-6">
+                                                <label>Start Date</label>
+                                                <input type="date" name="start_date" id="edit_start_date"
+                                                    class="form-control">
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label>End Date</label>
+                                                <input type="date" name="end_date" id="edit_end_date"
+                                                    class="form-control">
+                                            </div>
+
                                             <div class="col-md-4">
                                                 <label>Discount (%)</label>
                                                 <input type="number" name="discount" id="edit_discount"
                                                     class="form-control">
                                             </div>
+
                                             <div class="col-md-8">
-                                                <label>Menu</label>
-                                                <input type="text" name="menu" id="edit_menu" class="form-control"
-                                                    placeholder="Comma separated">
+                                                <label>Menu Items</label>
+                                                <div id="edit_menu_container"></div>
+                                                <button type="button" class="btn btn-sm btn-success mt-2"
+                                                    id="edit_add_menu">+ Add Menu</button>
                                             </div>
+
                                             <div class="col-md-12">
                                                 <label>Content</label>
                                                 <textarea name="content" id="edit_content" rows="3" class="form-control"></textarea>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label>Current Image</label><br>
+                                                <img id="edit_preview_image" src="" alt="Preview"
+                                                    class="img-fluid rounded border" style="max-height: 120px;">
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label>Change Image</label>
+                                                <input type="file" name="image" class="form-control"
+                                                    accept="image/*">
                                             </div>
                                         </div>
 
@@ -230,6 +260,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Populate edit modal
             document.querySelectorAll('.edit-offer-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     document.getElementById('edit_id').value = this.getAttribute('data-id');
@@ -239,10 +270,49 @@
                         'data-sub_header');
                     document.getElementById('edit_discount').value = this.getAttribute(
                         'data-discount');
-                    document.getElementById('edit_menu').value = this.getAttribute('data-menu');
                     document.getElementById('edit_content').value = this.getAttribute(
                         'data-content');
+                    document.getElementById('edit_start_date').value = this.getAttribute(
+                        'data-start_date');
+                    document.getElementById('edit_end_date').value = this.getAttribute(
+                        'data-end_date');
+
+                    const menuItems = (this.getAttribute('data-menu') || '').split(',');
+                    const menuContainer = document.getElementById('edit_menu_container');
+                    menuContainer.innerHTML = '';
+
+                    menuItems.forEach((item, index) => {
+                        const group = document.createElement('div');
+                        group.classList.add('input-group', 'mb-2');
+                        group.innerHTML = `
+                        <input type="text" name="menu[]" class="form-control" value="${item.trim()}">
+                        <button type="button" class="btn btn-danger remove-menu">−</button>
+                    `;
+                        menuContainer.appendChild(group);
+                    });
+
+                    document.getElementById('edit_preview_image').src = this.getAttribute(
+                        'data-image');
                 });
+            });
+
+            // Add new menu field in edit modal
+            document.getElementById('edit_add_menu').addEventListener('click', function() {
+                const menuContainer = document.getElementById('edit_menu_container');
+                const group = document.createElement('div');
+                group.classList.add('input-group', 'mb-2');
+                group.innerHTML = `
+                <input type="text" name="menu[]" class="form-control">
+                <button type="button" class="btn btn-danger remove-menu">−</button>
+            `;
+                menuContainer.appendChild(group);
+            });
+
+            // Remove menu field
+            document.getElementById('edit_menu_container').addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-menu')) {
+                    e.target.closest('.input-group').remove();
+                }
             });
         });
     </script>
