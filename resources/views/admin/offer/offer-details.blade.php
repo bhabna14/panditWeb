@@ -21,27 +21,40 @@
         <form action="{{ route('admin.saveOfferDetails') }}" method="POST" enctype="multipart/form-data">
             @csrf
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="main_header" class="form-label">Main Header</label>
                         <input type="text" class="form-control" id="main_header" name="main_header" required>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="sub_header" class="form-label">Sub Header</label>
                         <input type="text" class="form-control" id="sub_header" name="sub_header">
                     </div>
                 </div>
                 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="discount" class="form-label">Discount (%)</label>
                         <input type="number" class="form-control" id="discount" name="discount" min="0" max="100">
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="start_date" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="start_date" name="start_date">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="end_date" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="end_date" name="end_date">
+                    </div>
+                </div>
               
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="form-group">
                         <label for="image" class="form-label">Image</label>
                         <input type="file" class="form-control" id="image" name="image" accept="image/*">
