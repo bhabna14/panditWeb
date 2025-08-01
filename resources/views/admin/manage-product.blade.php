@@ -188,7 +188,7 @@
                                                             </div>
                                                             <div class="modal-body p-4">
                                                                 <ul class="mb-0">
-                                                                    @foreach (explode(',', $product->benefits) as $benefit)
+                                                                    @foreach (explode('#', $product->benefits) as $benefit)
                                                                         @if (trim($benefit) !== '')
                                                                             <li>{{ trim($benefit) }}</li>
                                                                         @endif

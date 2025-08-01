@@ -59,7 +59,7 @@ class ProductController extends Controller
         $benefitString = null;
         if (!empty($validated['benefit'])) {
             $cleanedBenefits = array_filter(array_map('trim', $validated['benefit']));
-            $benefitString = implode(',', $cleanedBenefits);
+            $benefitString = implode('#', $cleanedBenefits);
         }
 
         // Create the product record
@@ -125,7 +125,7 @@ class ProductController extends Controller
     $benefitString = null;
     if ($request->filled('benefits')) {
         $benefitArray = array_filter(array_map('trim', $request->benefits));
-        $benefitString = implode(',', $benefitArray);
+        $benefitString = implode('#', $benefitArray);
     }
 
     // Update core fields
