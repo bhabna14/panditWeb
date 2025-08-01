@@ -86,6 +86,7 @@
                                     <th>Category</th>
                                     <th>Status</th>
                                     <th>Package Item</th>
+                                    <th>Benefit</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
