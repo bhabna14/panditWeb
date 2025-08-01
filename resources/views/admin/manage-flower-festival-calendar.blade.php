@@ -84,10 +84,9 @@
                                         <td>{{ $festival->related_flower }}</td>
                                         <td>{{ $festival->description }}</td>
                                         <td>
-                                            <a href="{{ route('admin.editFestivalCalendar', $festival->id) }}"
-                                                class="btn btn-sm btn-primary" title="Edit">
+                                           
                                                 <i class="fas fa-edit"></i>
-                                            </a>
+                                         
                                             <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $festival->id }}"
                                                 title="Delete">
                                                 <i class="fas fa-trash-alt"></i>
