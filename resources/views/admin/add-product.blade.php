@@ -44,7 +44,7 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.products.store') }}" method="post" enctype="multipart/form-data">
+    <form action="{{ route('c') }}" method="post" enctype="multipart/form-data">
         @csrf
         <div class="row">
             <!-- Product Name -->
@@ -149,7 +149,7 @@
                 <input type="file" name="product_image" class="form-control" id="product_image"
                     placeholder="Enter stock quantity" required>
             </div>
-            
+
             <div class="col-md-6 mb-3">
                 <label for="benefit" class="form-label">Benefits</label>
                 <div id="benefitFields">
