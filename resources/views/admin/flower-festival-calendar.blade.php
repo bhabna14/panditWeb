@@ -37,7 +37,13 @@
 
                     <div class="col-md-6">
                         <label for="festival_image" class="form-label">Festival Image</label>
-                        <input type="file" class="form-control" id="festival_image" name="festival_image" accept="image/*">
+                        <input type="file" class="form-control" id="festival_image" name="festival_image"
+                            accept="image/*">
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="package_price" class="form-label">Package Price</label>
+                        <input type="number" class="form-control" name="package_price" placeholder="Package Price">
                     </div>
 
                     <!-- Dynamic Flower + Price Section -->
@@ -53,9 +59,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-5">
-                                    <input type="number" class="form-control" name="package_price[]" placeholder="Package Price">
-                                </div>
+
                                 <div class="col-md-2">
                                     <button type="button" class="btn btn-success add-flower-price w-100">+</button>
                                 </div>
@@ -77,7 +81,6 @@
             </form>
         </div>
     </div>
-
 @endsection
 
 @section('scripts')
@@ -104,10 +107,10 @@
 
     <!-- Dynamic Flower + Price Input JavaScript -->
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             const container = document.getElementById('flower-price-container');
 
-            container.addEventListener('click', function (e) {
+            container.addEventListener('click', function(e) {
                 if (e.target.classList.contains('add-flower-price')) {
                     const group = document.createElement('div');
                     group.classList.add('row', 'g-2', 'align-items-center', 'flower-price-group', 'mb-2');
@@ -120,9 +123,7 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-5">
-                            <input type="number" class="form-control" name="package_price[]" placeholder="Package Price">
-                        </div>
+                       
                         <div class="col-md-2">
                             <button type="button" class="btn btn-danger remove-flower-price w-100">−</button>
                         </div>
