@@ -86,9 +86,11 @@
                                                 data-date="{{ $festival->festival_date }}"
                                                 data-price="{{ $festival->package_price }}"
                                                 data-flowers="{{ $festival->related_flower }}"
-                                                data-description="{{ $festival->description }}">
+                                                data-description="{{ $festival->description }}"
+                                                data-image="{{ asset($festival->festival_image) }}">
                                                 <i class="fas fa-edit"></i>
                                             </button>
+
 
                                             <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $festival->id }}">
                                                 <i class="fas fa-trash-alt"></i>
@@ -100,10 +102,10 @@
                             </tbody>
                         </table>
 
-                        <!-- Edit Modal -->
+                        <!-- Edit Festival Modal -->
                         <div class="modal fade" id="editModal" tabindex="-1">
                             <div class="modal-dialog modal-lg">
-                                <form id="editFestivalForm">
+                                <form id="editFestivalForm" enctype="multipart/form-data">
                                     @csrf
                                     <input type="hidden" name="id" id="edit_id">
                                     <div class="modal-content">
@@ -122,16 +124,29 @@
                                                 <input type="date" class="form-control" id="edit_date"
                                                     name="festival_date" required>
                                             </div>
+
                                             <div class="col-md-6">
                                                 <label>Package Price</label>
                                                 <input type="number" class="form-control" id="edit_price"
                                                     name="package_price">
                                             </div>
+
+                                            <div class="col-md-6">
+                                                <label>Festival Image</label>
+                                                <input type="file" class="form-control" name="festival_image">
+                                                <img id="currentImage" src="" class="img-thumbnail mt-2"
+                                                    width="100" alt="Current Image">
+                                            </div>
+
                                             <div class="col-md-12">
                                                 <label>Related Flowers</label>
-                                                <input type="text" class="form-control" id="edit_flowers"
-                                                    name="related_flower">
+                                                <div id="edit-flower-container">
+                                                    <!-- dynamically added flower inputs will go here -->
+                                                </div>
+                                                <button type="button" class="btn btn-sm btn-success mt-2"
+                                                    id="addFlowerBtn">+ Add Flower</button>
                                             </div>
+
                                             <div class="col-md-12">
                                                 <label>Description</label>
                                                 <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
@@ -146,6 +161,7 @@
                                 </form>
                             </div>
                         </div>
+
 
                     </div>
                 </div>
@@ -217,6 +233,30 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                const flowerContainer = document.getElementById('edit-flower-container');
+                const addFlowerBtn = document.getElementById('addFlowerBtn');
+
+                // Function to add a flower input
+                function addFlowerInput(value = '') {
+                    const div = document.createElement('div');
+                    div.classList.add('input-group', 'mb-2');
+                    div.innerHTML = `
+                <input type="text" name="related_flower[]" class="form-control" value="${value}">
+                <button type="button" class="btn btn-danger remove-flower">−</button>
+            `;
+                    flowerContainer.appendChild(div);
+                }
+
+                // Add initial empty input
+                addFlowerBtn.addEventListener('click', () => addFlowerInput());
+
+                // Remove flower input
+                flowerContainer.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('remove-flower')) {
+                        e.target.closest('.input-group').remove();
+                    }
+                });
+
                 // Open modal and populate data
                 document.querySelectorAll('.edit-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
@@ -225,14 +265,23 @@
                         document.getElementById('edit_name').value = this.dataset.name;
                         document.getElementById('edit_date').value = this.dataset.date;
                         document.getElementById('edit_price').value = this.dataset.price;
-                        document.getElementById('edit_flowers').value = this.dataset.flowers;
                         document.getElementById('edit_description').value = this.dataset.description;
+
+                        const imageSrc = this.dataset.image;
+                        const imageElement = document.getElementById('currentImage');
+                        imageElement.src = imageSrc;
+                        imageElement.style.display = imageSrc ? 'block' : 'none';
+
+                        // Populate flower fields
+                        flowerContainer.innerHTML = ''; // clear previous
+                        const flowers = this.dataset.flowers.split(',');
+                        flowers.forEach(f => addFlowerInput(f.trim()));
 
                         new bootstrap.Modal(document.getElementById('editModal')).show();
                     });
                 });
 
-                // Submit update via AJAX
+                // Submit via AJAX
                 document.getElementById('editFestivalForm').addEventListener('submit', function(e) {
                     e.preventDefault();
                     const id = document.getElementById('edit_id').value;

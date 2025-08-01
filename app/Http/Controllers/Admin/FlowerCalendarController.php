@@ -96,7 +96,6 @@ public function deleteFestivalCalendar($id)
         return redirect()->route('admin.manageFestivalCalendar')->with('error', 'Error deleting festival: ' . $e->getMessage());
     }
 }
-
 public function updateFestivalCalendar(Request $request, $id)
 {
     try {
@@ -106,24 +105,40 @@ public function updateFestivalCalendar(Request $request, $id)
             'festival_name' => 'required|string|max:255',
             'festival_date' => 'required|date',
             'package_price' => 'nullable|numeric',
-            'related_flower' => 'nullable|string',
+            'related_flower' => 'nullable|array',
+            'related_flower.*' => 'nullable|string|max:255',
             'description' => 'nullable|string',
+            'festival_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
+        $imagePath = $festival->festival_image;
+
+        if ($request->hasFile('festival_image')) {
+            $image = $request->file('festival_image');
+            $imageName = \Str::uuid() . '.' . $image->getClientOriginalExtension();
+            $storedPath = $image->storeAs('festival_images', $imageName, 'public');
+            $imagePath = \Storage::url($storedPath);
+        }
+
+        // Convert related flowers to comma-separated string
+        $flowers = $request->related_flower ?? [];
+        $relatedFlowerString = implode(',', array_filter($flowers));
+
         $festival->update([
-            'festival_name' => $request->festival_name,
-            'festival_date' => $request->festival_date,
-            'package_price' => $request->package_price,
-            'related_flower' => $request->related_flower,
-            'description' => $request->description,
+            'festival_name'   => $request->festival_name,
+            'festival_date'   => $request->festival_date,
+            'festival_image'  => $imagePath,
+            'package_price'   => $request->package_price,
+            'related_flower'  => $relatedFlowerString,
+            'description'     => $request->description,
         ]);
 
         return response()->json(['success' => true, 'message' => 'Festival updated successfully.']);
-
     } catch (\Exception $e) {
         return response()->json(['success' => false, 'message' => $e->getMessage()]);
     }
 }
+
 
 
 }
