@@ -98,31 +98,5 @@ public function deleteFestivalCalendar($id)
     }
 }
 
-public function updateFestivalCalendar(Request $request, $id)
-{
-    $festival = FlowerCalendor::findOrFail($id);
-
-    $data = $request->only([
-        'festival_name',
-        'festival_date',
-        'package_price',
-        'description',
-    ]);
-
-    // Handle flower list
-    $data['related_flower'] = $request->input('related_flower');
-
-    // Handle image update
-    if ($request->hasFile('festival_image')) {
-        $file = $request->file('festival_image');
-        $path = $file->store('festival_images', 'public');
-        $data['festival_image'] = 'storage/' . $path;
-    }
-
-    $festival->update($data);
-
-    return response()->json(['success' => true]);
-}
-
 
 }
