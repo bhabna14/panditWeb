@@ -116,6 +116,26 @@
             </div>
 
             <div class="col-md-12 mb-3">
+                <label class="form-label">Benefits</label>
+                <div id="benefitsWrapper">
+                    @if(!empty($product->benefits))
+                        @foreach($product->benefits as $index => $benefit)
+                            <div class="input-group mb-2 benefit-row">
+                                <input type="text" name="benefits[]" class="form-control" value="{{ $benefit }}" placeholder="Enter benefit" required>
+                                <button type="button" class="btn btn-danger removeBenefit">Remove</button>
+                            </div>
+                        @endforeach
+                    @else
+                        <div class="input-group mb-2 benefit-row">
+                            <input type="text" name="benefits[]" class="form-control" placeholder="Enter benefit" required>
+                            <button type="button" class="btn btn-danger removeBenefit">Remove</button>
+                        </div>
+                    @endif
+                </div>
+                <button type="button" class="btn btn-secondary" id="addBenefit">Add Benefit</button>
+            </div>
+
+            <div class="col-md-12 mb-3">
                 <label for="description" class="form-label">Description</label>
                 <textarea name="description" class="form-control" id="description" rows="4" required>{{ $product->description }}</textarea>
             </div>
@@ -237,4 +257,29 @@
 });
 
 </script>
+ <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const benefitsWrapper = document.getElementById('benefitsWrapper');
+                    const addBenefitBtn = document.getElementById('addBenefit');
+
+                    addBenefitBtn.addEventListener('click', function () {
+                        const div = document.createElement('div');
+                        div.className = 'input-group mb-2 benefit-row';
+                        div.innerHTML = `
+                            <input type="text" name="benefits[]" class="form-control" placeholder="Enter benefit" required>
+                            <button type="button" class="btn btn-danger removeBenefit">Remove</button>
+                        `;
+                        benefitsWrapper.appendChild(div);
+                    });
+
+                    benefitsWrapper.addEventListener('click', function (e) {
+                        if (e.target.classList.contains('removeBenefit')) {
+                            const rows = benefitsWrapper.querySelectorAll('.benefit-row');
+                            if (rows.length > 1) {
+                                e.target.closest('.benefit-row').remove();
+                            }
+                        }
+                    });
+                });
+            </script>
 @endsection

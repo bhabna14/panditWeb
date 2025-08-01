@@ -102,58 +102,70 @@ class ProductController extends Controller
         return view('admin.edit-product', compact('product', 'Poojaitemlist', 'selectedItems'));
     }
     
-    public function updateProduct(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'mrp' => 'required|numeric',
-            'price' => 'required|numeric',
-            'category' => 'required|string',
-            'stock' => 'nullable|numeric',
-            'duration' => 'nullable|numeric',
-            'product_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'description' => 'required|string',
-            'item_id' => 'nullable|array',
-            'variant_id' => 'nullable|array',
-        ]);
-    
-        $product = FlowerProduct::findOrFail($id);
-    
-        $product->update($request->except('product_image'));
-    
-        if ($request->hasFile('product_image')) {
-            // Delete the old image if it exists
-            if ($product->product_image) {
-                Storage::delete('public/' . $product->product_image);
-            }
-    
-            // New image storage logic
-            $imagePath = 'product_images/' . $request->file('product_image')->hashName();
-            $request->file('product_image')->move(public_path('product_images'), $imagePath);
-            $imageUrl = asset($imagePath);
-    
-            // Update the product's image URL
-            $product->product_image = $imageUrl;
-            $product->save();
-        }
-    
-        // Update package items
-        PackageItem::where('product_id', $product->product_id)->delete();
-        if ($request->item_id && $request->variant_id) {
-            foreach ($request->item_id as $index => $itemId) {
-                if (!empty($itemId) && !empty($request->variant_id[$index])) {
-                    PackageItem::create([
-                        'product_id' => $product->product_id,
-                        'item_id' => $itemId,
-                        'variant_id' => $request->variant_id[$index],
-                    ]);
-                }
-            }
-        }
-    
-        return redirect()->route('admin.edit-product', $product->id)->with('success', 'Product updated successfully.');
+   public function updateProduct(Request $request, $id)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'mrp' => 'required|numeric',
+        'price' => 'required|numeric',
+        'category' => 'required|string',
+        'stock' => 'nullable|numeric',
+        'duration' => 'nullable|numeric',
+        'product_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        'description' => 'required|string',
+        'item_id' => 'nullable|array',
+        'variant_id' => 'nullable|array',
+        'benefit' => 'nullable|array',
+        'benefit.*' => 'nullable|string|max:255',
+    ]);
+
+    $product = FlowerProduct::findOrFail($id);
+
+    // Join benefits into comma-separated string
+    $benefitString = null;
+    if ($request->filled('benefit')) {
+        $benefitArray = array_filter(array_map('trim', $request->benefit));
+        $benefitString = implode(',', $benefitArray);
     }
-    
+
+    // Update other fields (except image and benefits)
+    $product->update($request->except('product_image', 'benefit'));
+
+    // Manually update the benefit string
+    $product->benefits = $benefitString;
+    $product->save();
+
+    // Handle product image upload
+    if ($request->hasFile('product_image')) {
+        if ($product->product_image && file_exists(public_path('product_images/' . basename($product->product_image)))) {
+            unlink(public_path('product_images/' . basename($product->product_image)));
+        }
+
+        $imagePath = 'product_images/' . $request->file('product_image')->hashName();
+        $request->file('product_image')->move(public_path('product_images'), $imagePath);
+        $imageUrl = asset($imagePath);
+        $product->product_image = $imageUrl;
+        $product->save();
+    }
+
+    // Update package items
+    PackageItem::where('product_id', $product->product_id)->delete();
+    if ($request->item_id && $request->variant_id) {
+        foreach ($request->item_id as $index => $itemId) {
+            if (!empty($itemId)) {
+                PackageItem::create([
+                    'product_id' => $product->product_id,
+                    'item_id' => $itemId,
+                    'variant_id' => $request->variant_id[$index] ?? null,
+                ]);
+            }
+        }
+    }
+
+    return redirect()->route('admin.edit-product', $product->id)
+        ->with('success', 'Product updated successfully.');
+}
+
     
     public function deleteProduct($id)
     {
