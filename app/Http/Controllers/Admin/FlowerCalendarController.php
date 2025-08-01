@@ -8,6 +8,7 @@ use App\Models\FlowerCalendor;
 use App\Models\FlowerProduct;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 
 class FlowerCalendarController extends Controller
@@ -23,32 +24,32 @@ class FlowerCalendarController extends Controller
 
   public function saveFestivalCalendar(Request $request)
 {
-    dd($request->all());
-    $request->validate([
-        'festival_name' => 'required|string|max:255',
-        'festival_date' => 'required|date',
-        'festival_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        'package_price' => 'nullable|numeric',
-        'related_flower' => 'nullable|array',
-        'related_flower.*' => 'nullable|string|max:255',
-        'description' => 'nullable|string',
-    ]);
-
     try {
+        // Validation
+        $request->validate([
+            'festival_name' => 'required|string|max:255',
+            'festival_date' => 'required|date',
+            'festival_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'package_price' => 'nullable|numeric',
+            'related_flower' => 'nullable|array',
+            'related_flower.*' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+        ]);
+
         $imagePath = null;
 
-        // Handle image upload
+        // Image upload
         if ($request->hasFile('festival_image')) {
             $image = $request->file('festival_image');
             $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
             $storedPath = $image->storeAs('festival_images', $imageName, 'public');
-            $imagePath = Storage::url($storedPath); // e.g., /storage/festival_images/xyz.jpg
+            $imagePath = Storage::url($storedPath); // e.g. /storage/festival_images/xyz.jpg
         }
 
-        // Convert related flowers array to comma-separated string
+        // Handle related flowers
         $relatedFlowers = null;
         if (!empty($request->related_flower)) {
-            $filtered = array_filter($request->related_flower); // remove blanks
+            $filtered = array_filter($request->related_flower); // remove empty
             $relatedFlowers = implode(',', $filtered);
         }
 
@@ -64,8 +65,14 @@ class FlowerCalendarController extends Controller
 
         return redirect()->back()->with('success', 'Festival calendar saved successfully.');
 
+    } catch (ValidationException $e) {
+        return redirect()->back()
+            ->withErrors($e->validator)
+            ->withInput()
+            ->with('validation_errors', true);
     } catch (\Throwable $e) {
         return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
     }
 }
+
 }
