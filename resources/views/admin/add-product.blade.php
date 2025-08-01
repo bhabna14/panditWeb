@@ -143,6 +143,19 @@
                 <label for="product_image" class="form-label">Product Image</label>
                 <input type="file" name="product_image" class="form-control" id="product_image" placeholder="Enter stock quantity" required>
             </div>
+              <div class="col-md-6 mb-3">
+                <label for="benefit" class="form-label">Benefits</label>
+                <div id="benefitFields">
+                    <div class="input-group mb-2 benefit-row">
+                        <input type="text" name="benefit[]" class="form-control" placeholder="Enter benefit" required>
+                        <button type="button" class="btn btn-success add-benefit" title="Add Benefit"><i class="fa fa-plus"></i> Add</button>
+                        <button type="button" class="btn btn-danger remove-benefit" title="Remove Benefit" style="display:none;"><i class="fa fa-minus"></i> Remove</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Benefit Multi-Select Field -->
+          
 
               <!-- Description -->
               <div class="col-md-12 mb-3">
@@ -276,5 +289,27 @@
 });
 
 </script>
+
+ <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const benefitFields = document.getElementById('benefitFields');
+
+                    benefitFields.addEventListener('click', function (e) {
+                        if (e.target.classList.contains('add-benefit')) {
+                            const row = e.target.closest('.benefit-row');
+                            const newRow = row.cloneNode(true);
+                            newRow.querySelector('input').value = '';
+                            newRow.querySelector('.remove-benefit').style.display = 'inline-block';
+                            benefitFields.appendChild(newRow);
+                        }
+                        if (e.target.classList.contains('remove-benefit')) {
+                            const row = e.target.closest('.benefit-row');
+                            if (benefitFields.querySelectorAll('.benefit-row').length > 1) {
+                                row.remove();
+                            }
+                        }
+                    });
+                });
+            </script>
 
 @endsection
