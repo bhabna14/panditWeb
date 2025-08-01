@@ -235,6 +235,8 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const flowerContainer = document.getElementById('edit-flower-container');
                 const addFlowerBtn = document.getElementById('addFlowerBtn');
+                const editModalElement = document.getElementById('editModal');
+                const editModal = new bootstrap.Modal(editModalElement);
 
                 // Function to add a flower input
                 function addFlowerInput(value = '') {
@@ -247,7 +249,7 @@
                     flowerContainer.appendChild(div);
                 }
 
-                // Add initial empty input
+                // Add new flower input
                 addFlowerBtn.addEventListener('click', () => addFlowerInput());
 
                 // Remove flower input
@@ -260,8 +262,7 @@
                 // Open modal and populate data
                 document.querySelectorAll('.edit-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
-                        const id = this.dataset.id;
-                        document.getElementById('edit_id').value = id;
+                        document.getElementById('edit_id').value = this.dataset.id;
                         document.getElementById('edit_name').value = this.dataset.name;
                         document.getElementById('edit_date').value = this.dataset.date;
                         document.getElementById('edit_price').value = this.dataset.price;
@@ -272,16 +273,16 @@
                         imageElement.src = imageSrc;
                         imageElement.style.display = imageSrc ? 'block' : 'none';
 
-                        // Populate flower fields
-                        flowerContainer.innerHTML = ''; // clear previous
+                        // Clear previous flower inputs
+                        flowerContainer.innerHTML = '';
                         const flowers = this.dataset.flowers.split(',');
                         flowers.forEach(f => addFlowerInput(f.trim()));
 
-                        new bootstrap.Modal(document.getElementById('editModal')).show();
+                        editModal.show();
                     });
                 });
 
-                // Submit via AJAX
+                // Submit update via AJAX
                 document.getElementById('editFestivalForm').addEventListener('submit', function(e) {
                     e.preventDefault();
                     const id = document.getElementById('edit_id').value;
@@ -296,16 +297,23 @@
                         })
                         .then(res => res.json())
                         .then(response => {
-                            if (response.success) {
-                                Swal.fire('Updated!', response.message, 'success').then(() => {
-                                    location.reload();
-                                });
-                            } else {
-                                Swal.fire('Error!', response.message, 'error');
-                            }
+                            editModal.hide(); // ✅ close modal immediately
+
+                            setTimeout(() => {
+                                if (response.success) {
+                                    Swal.fire('Updated!', response.message, 'success').then(() => {
+                                        location.reload();
+                                    });
+                                } else {
+                                    Swal.fire('Error!', response.message, 'error');
+                                }
+                            }, 300); // slight delay to allow modal close animation
                         })
                         .catch(() => {
-                            Swal.fire('Error!', 'Something went wrong.', 'error');
+                            editModal.hide();
+                            setTimeout(() => {
+                                Swal.fire('Error!', 'Something went wrong.', 'error');
+                            }, 300);
                         });
                 });
             });
