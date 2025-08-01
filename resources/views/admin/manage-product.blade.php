@@ -165,7 +165,7 @@
                                         </td>
 
                                         <td>
-                                            @if (!empty($product->benefit))
+                                            @if (!empty($product->benefits))
                                                 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
                                                     data-bs-target="#benefitModal{{ $product->product_id }}">
                                                     Benefit
