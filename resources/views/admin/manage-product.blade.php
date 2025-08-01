@@ -72,7 +72,7 @@
         <div class="col-lg-12">
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
-                 
+
                     <div class="table-responsive  export-table">
                         <table id="file-datatable" class="table table-bordered ">
                             <thead>
@@ -172,20 +172,30 @@
                                                 </button>
 
                                                 <!-- Benefit Modal -->
-                                                <div class="modal fade" id="benefitModal{{ $product->product_id }}" tabindex="-1"
-                                                    aria-labelledby="benefitModalLabel{{ $product->product_id }}" aria-hidden="true">
+                                                <div class="modal fade" id="benefitModal{{ $product->product_id }}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="benefitModalLabel{{ $product->product_id }}"
+                                                    aria-hidden="true">
                                                     <div class="modal-dialog">
                                                         <div class="modal-content shadow-lg border-0">
                                                             <div class="modal-header bg-success text-white">
-                                                                <h5 class="modal-title" id="benefitModalLabel{{ $product->product_id }}">
+                                                                <h5 class="modal-title"
+                                                                    id="benefitModalLabel{{ $product->product_id }}">
                                                                     Product Benefit
                                                                 </h5>
                                                                 <button type="button" class="btn-close btn-close-white"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body p-4">
-                                                                {!! nl2br(e($product->benefits)) !!}
+                                                                <ul class="mb-0">
+                                                                    @foreach (explode(',', $product->benefits) as $benefit)
+                                                                        @if (trim($benefit) !== '')
+                                                                            <li>{{ trim($benefit) }}</li>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </ul>
                                                             </div>
+
                                                             <div class="modal-footer bg-light">
                                                                 <button type="button" class="btn btn-secondary"
                                                                     data-bs-dismiss="modal">Close</button>
