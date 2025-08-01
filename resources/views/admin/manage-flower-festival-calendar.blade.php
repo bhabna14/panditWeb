@@ -81,17 +81,7 @@
                                         <td>{{ $festival->related_flower }}</td>
                                         <td>{{ $festival->description }}</td>
                                         <td>
-                                            <button class="btn btn-sm btn-primary edit-btn" data-id="{{ $festival->id }}"
-                                                data-name="{{ $festival->festival_name }}"
-                                                data-date="{{ $festival->festival_date }}"
-                                                data-price="{{ $festival->package_price }}"
-                                                data-flowers="{{ $festival->related_flower }}"
-                                                data-description="{{ $festival->description }}"
-                                                data-image="{{ asset($festival->festival_image) }}">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
-
-
+                                           
                                             <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $festival->id }}">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
@@ -101,67 +91,6 @@
 
                             </tbody>
                         </table>
-
-                        <!-- Edit Festival Modal -->
-                        <div class="modal fade" id="editModal" tabindex="-1">
-                            <div class="modal-dialog modal-lg">
-                                <form id="editFestivalForm" enctype="multipart/form-data">
-                                    @csrf
-                                    <input type="hidden" name="id" id="edit_id">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit Festival</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body row g-3">
-                                            <div class="col-md-6">
-                                                <label>Festival Name</label>
-                                                <input type="text" class="form-control" id="edit_name"
-                                                    name="festival_name" required>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <label>Festival Date</label>
-                                                <input type="date" class="form-control" id="edit_date"
-                                                    name="festival_date" required>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label>Package Price</label>
-                                                <input type="number" class="form-control" id="edit_price"
-                                                    name="package_price">
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label>Festival Image</label>
-                                                <input type="file" class="form-control" name="festival_image">
-                                                <img id="currentImage" src="" class="img-thumbnail mt-2"
-                                                    width="100" alt="Current Image">
-                                            </div>
-
-                                            <div class="col-md-12">
-                                                <label>Related Flowers</label>
-                                                <div id="edit-flower-container">
-                                                    <!-- dynamically added flower inputs will go here -->
-                                                </div>
-                                                <button type="button" class="btn btn-sm btn-success mt-2"
-                                                    id="addFlowerBtn">+ Add Flower</button>
-                                            </div>
-
-                                            <div class="col-md-12">
-                                                <label>Description</label>
-                                                <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Update</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
 
                     </div>
                 </div>
@@ -230,105 +159,5 @@
                 });
             });
         </script>
-        <script>
-            $(document).ready(function() {
-                // Handle Edit button click
-                $('.edit-btn').on('click', function() {
-                    let button = $(this);
-                    let id = button.data('id');
-                    let name = button.data('name');
-                    let date = button.data('date');
-                    let price = button.data('price');
-                    let flowers = button.data('flowers');
-                    let description = button.data('description');
-                    let image = button.data('image');
-
-                    $('#edit_id').val(id);
-                    $('#edit_name').val(name);
-                    $('#edit_date').val(date);
-                    $('#edit_price').val(price);
-                    $('#edit_description').val(description);
-
-                    if (image) {
-                        $('#currentImage').attr('src', image).show();
-                    } else {
-                        $('#currentImage').hide();
-                    }
-
-                    // Clear and populate related flowers
-                    $('#edit-flower-container').empty();
-                    if (flowers) {
-                        let flowerList = flowers.split(',');
-                        flowerList.forEach((flower, index) => {
-                            addFlowerInput(flower.trim());
-                        });
-                    } else {
-                        addFlowerInput('');
-                    }
-
-                    // Show modal
-                    $('#editModal').modal('show');
-                });
-
-                // Function to add flower input
-                function addFlowerInput(value = '') {
-                    let input = `
-                <div class="input-group mb-2 flower-input">
-                    <input type="text" name="related_flower[]" class="form-control" value="${value}">
-                    <button type="button" class="btn btn-danger remove-flower-btn">X</button>
-                </div>
-            `;
-                    $('#edit-flower-container').append(input);
-                }
-
-                // Add new flower field
-                $('#addFlowerBtn').on('click', function() {
-                    addFlowerInput('');
-                });
-
-                // Remove flower field
-                $(document).on('click', '.remove-flower-btn', function() {
-                    $(this).closest('.flower-input').remove();
-                });
-
-                // Submit update form via AJAX
-                $('#editFestivalForm').on('submit', function(e) {
-                    e.preventDefault();
-
-                    let formData = new FormData(this);
-                    let id = $('#edit_id').val();
-
-                    // Join flower inputs into one string
-                    let flowers = [];
-                    $('input[name="related_flower[]"]').each(function() {
-                        if ($(this).val().trim() !== '') {
-                            flowers.push($(this).val().trim());
-                        }
-                    });
-                    formData.set('related_flower', flowers.join(','));
-
-                    $.ajaxSetup({
-                        headers: {
-                            'X-CSRF-TOKEN': $('input[name="_token"]').val()
-                        }
-                    });
-
-                    $.ajax({
-                        url: `/festival/update/${id}`, // adjust route as per your setup
-                        type: 'POST',
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        success: function(res) {
-                            alert('Festival updated successfully!');
-                            location.reload();
-                        },
-                        error: function(xhr) {
-                            alert('Update failed. Check console for details.');
-                            console.error(xhr.responseText);
-                        }
-                    });
-                });
-            });
-        </script>
+       
     @endsection
