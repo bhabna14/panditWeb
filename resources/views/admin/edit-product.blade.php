@@ -45,34 +45,40 @@
     @endif
     <form action="{{ route('admin.update-product', $product->id) }}" method="post" enctype="multipart/form-data">
         @csrf
-        
+
         <div class="row">
-            
+
             <div class="col-md-6 mb-3">
                 <label for="name" class="form-label">Product Name</label>
-                <input type="text" name="name" class="form-control" id="name" value="{{ $product->name }}" required>
+                <input type="text" name="name" class="form-control" id="name" value="{{ $product->name }}"
+                    required>
             </div>
 
             <div class="col-md-3 mb-3">
                 <label for="mrp" class="form-label">MRP (Rs.)</label>
-                <input type="number" name="mrp" class="form-control" id="mrp" value="{{ $product->mrp }}" required>
+                <input type="number" name="mrp" class="form-control" id="mrp" value="{{ $product->mrp }}"
+                    required>
             </div>
 
             <div class="col-md-3 mb-3">
                 <label for="price" class="form-label">Price (Rs.)</label>
-                <input type="number" name="price" class="form-control" id="price" value="{{ $product->price }}" required>
+                <input type="number" name="price" class="form-control" id="price" value="{{ $product->price }}"
+                    required>
             </div>
 
             <div class="col-md-6 mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select name="category" id="category" class="form-control select2" required>
                     <option value="Puja Item" {{ $product->category == 'Puja Item' ? 'selected' : '' }}>Puja Item</option>
-                    <option value="Subscription" {{ $product->category == 'Subscription' ? 'selected' : '' }}>Subscription</option>
+                    <option value="Subscription" {{ $product->category == 'Subscription' ? 'selected' : '' }}>Subscription
+                    </option>
                     <option value="Flower" {{ $product->category == 'Flower' ? 'selected' : '' }}>Flower</option>
-                    <option value="Immediateproduct" {{ $product->category == 'Immediateproduct' ? 'selected' : '' }}>Customize Flower</option>
-                    <option value="Customizeproduct"  {{ $product->category == 'Customizeproduct' ? 'selected' : '' }}>Customize Product</option>
-                    <option value="Package"  {{ $product->category == 'Package' ? 'selected' : '' }}>Package</option>
-                    <option value="Books"  {{ $product->category == 'Books' ? 'selected' : '' }}>Books</option>
+                    <option value="Immediateproduct" {{ $product->category == 'Immediateproduct' ? 'selected' : '' }}>
+                        Customize Flower</option>
+                    <option value="Customizeproduct" {{ $product->category == 'Customizeproduct' ? 'selected' : '' }}>
+                        Customize Product</option>
+                    <option value="Package" {{ $product->category == 'Package' ? 'selected' : '' }}>Package</option>
+                    <option value="Books" {{ $product->category == 'Books' ? 'selected' : '' }}>Books</option>
                 </select>
             </div>
 
@@ -84,7 +90,8 @@
                                 <select class="form-control select2 item-select" name="item_id[]">
                                     <option value="">Select Puja List</option>
                                     @foreach ($Poojaitemlist as $pujalist)
-                                        <option value="{{ $pujalist->id }}" {{ $pujalist->id == $selected->item_id ? 'selected' : '' }}>
+                                        <option value="{{ $pujalist->id }}"
+                                            {{ $pujalist->id == $selected->item_id ? 'selected' : '' }}>
                                             {{ $pujalist->item_name }}
                                         </option>
                                     @endforeach
@@ -94,7 +101,8 @@
                                 <select class="form-control select2 variant-select" name="variant_id[]">
                                     <option value="">Select Variant</option>
                                     @foreach ($Poojaitemlist->find($selected->item_id)->variants as $variant)
-                                        <option value="{{ $variant->id }}" {{ $variant->id == $selected->variant_id ? 'selected' : '' }}>
+                                        <option value="{{ $variant->id }}"
+                                            {{ $variant->id == $selected->variant_id ? 'selected' : '' }}>
                                             {{ $variant->title }}
                                         </option>
                                     @endforeach
@@ -110,30 +118,29 @@
             <div class="col-md-6 mb-3">
                 <label for="product_image" class="form-label">Product Image</label>
                 <input type="file" name="product_image" class="form-control" id="product_image">
-                @if($product->product_image)
-                    <img src="{{ $product->product_image}}" alt="Product Image" width="100" class="mt-2">
+                @if ($product->product_image)
+                    <img src="{{ $product->product_image }}" alt="Product Image" width="100" class="mt-2">
                 @endif
             </div>
 
             <div class="col-md-12 mb-3">
                 <label class="form-label">Benefits</label>
                 <div id="benefitsWrapper">
-                    @if(!empty($product->benefits))
-                        @foreach($product->benefits as $index => $benefit)
-                            <div class="input-group mb-2 benefit-row">
-                                <input type="text" name="benefits[]" class="form-control" value="{{ $benefit }}" placeholder="Enter benefit" required>
-                                <button type="button" class="btn btn-danger removeBenefit">Remove</button>
-                            </div>
-                        @endforeach
-                    @else
+                    @php
+                        $benefits = !empty($product->benefits) ? explode(',', $product->benefits) : [''];
+                    @endphp
+
+                    @foreach ($benefits as $index => $benefit)
                         <div class="input-group mb-2 benefit-row">
-                            <input type="text" name="benefits[]" class="form-control" placeholder="Enter benefit" required>
+                            <input type="text" name="benefits[]" class="form-control" value="{{ trim($benefit) }}"
+                                placeholder="Enter benefit" required>
                             <button type="button" class="btn btn-danger removeBenefit">Remove</button>
                         </div>
-                    @endif
+                    @endforeach
                 </div>
                 <button type="button" class="btn btn-secondary" id="addBenefit">Add Benefit</button>
             </div>
+
 
             <div class="col-md-12 mb-3">
                 <label for="description" class="form-label">Description</label>
@@ -164,29 +171,29 @@
     </script>
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-    const categorySelect = document.getElementById('category');
-    const packageFields = document.getElementById('packageFields');
-    const packageItems = document.getElementById('packageItems');
-    const addMoreButton = document.getElementById('addMore');
-    const removeLastButton = document.getElementById('removeLast');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('category');
+            const packageFields = document.getElementById('packageFields');
+            const packageItems = document.getElementById('packageItems');
+            const addMoreButton = document.getElementById('addMore');
+            const removeLastButton = document.getElementById('removeLast');
 
-    // Show or hide package fields based on category selection
-    categorySelect.addEventListener('change', function () {
-        if (this.value === 'Package') {
-            packageFields.style.display = 'block';
-        } else {
-            packageFields.style.display = 'none';
-        }
-    });
+            // Show or hide package fields based on category selection
+            categorySelect.addEventListener('change', function() {
+                if (this.value === 'Package') {
+                    packageFields.style.display = 'block';
+                } else {
+                    packageFields.style.display = 'none';
+                }
+            });
 
-    // Add more package items
-    addMoreButton.addEventListener('click', function () {
-        const newItemRow = document.createElement('div');
-        newItemRow.classList.add('row', 'mb-3');
+            // Add more package items
+            addMoreButton.addEventListener('click', function() {
+                const newItemRow = document.createElement('div');
+                newItemRow.classList.add('row', 'mb-3');
 
-        newItemRow.innerHTML = `
+                newItemRow.innerHTML = `
             <div class="col-md-6">
                 <select class="form-control select2 item-select" name="item_id[]" required>
                     <option value="">Select Puja List</option>
@@ -204,82 +211,82 @@
             </div>
         `;
 
-        packageItems.appendChild(newItemRow);
+                packageItems.appendChild(newItemRow);
 
-        // Reinitialize event listeners for dynamically added items
-        initializeItemChangeListener(newItemRow.querySelector('.item-select'));
-    });
+                // Reinitialize event listeners for dynamically added items
+                initializeItemChangeListener(newItemRow.querySelector('.item-select'));
+            });
 
-    // Remove the last added item
-    removeLastButton.addEventListener('click', function () {
-        const rows = packageItems.querySelectorAll('.row');
-        if (rows.length > 1) {
-            rows[rows.length - 1].remove();
-        }
-    });
-
-    // Function to initialize item change listener
-    function initializeItemChangeListener(itemSelect) {
-        itemSelect.addEventListener('change', function () {
-            const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-            const variants = selectedOption.getAttribute('data-variants');
-            const variantSelect = itemSelect.closest('.row').querySelector('.variant-select');
-
-            // Clear previous options
-            variantSelect.innerHTML = '<option value="">Select Variant</option>';
-
-            if (variants) {
-                try {
-                    let parsedVariants = variants;
-
-                    // Decode HTML entities and parse JSON
-                    if (typeof parsedVariants === 'string') {
-                        parsedVariants = parsedVariants.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
-                        parsedVariants = JSON.parse(parsedVariants);
-                    }
-
-                    // Populate the variant dropdown
-                    parsedVariants.forEach(function (variant) {
-                        const option = document.createElement('option');
-                        option.value = variant.id;
-                        option.textContent = `${variant.title} - ${variant.price}`;
-                        variantSelect.appendChild(option);
-                    });
-                } catch (e) {
-                    console.error('Error parsing variant data:', e);
+            // Remove the last added item
+            removeLastButton.addEventListener('click', function() {
+                const rows = packageItems.querySelectorAll('.row');
+                if (rows.length > 1) {
+                    rows[rows.length - 1].remove();
                 }
+            });
+
+            // Function to initialize item change listener
+            function initializeItemChangeListener(itemSelect) {
+                itemSelect.addEventListener('change', function() {
+                    const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+                    const variants = selectedOption.getAttribute('data-variants');
+                    const variantSelect = itemSelect.closest('.row').querySelector('.variant-select');
+
+                    // Clear previous options
+                    variantSelect.innerHTML = '<option value="">Select Variant</option>';
+
+                    if (variants) {
+                        try {
+                            let parsedVariants = variants;
+
+                            // Decode HTML entities and parse JSON
+                            if (typeof parsedVariants === 'string') {
+                                parsedVariants = parsedVariants.replace(/&quot;/g, '"').replace(/&amp;/g,
+                                    '&');
+                                parsedVariants = JSON.parse(parsedVariants);
+                            }
+
+                            // Populate the variant dropdown
+                            parsedVariants.forEach(function(variant) {
+                                const option = document.createElement('option');
+                                option.value = variant.id;
+                                option.textContent = `${variant.title} - ${variant.price}`;
+                                variantSelect.appendChild(option);
+                            });
+                        } catch (e) {
+                            console.error('Error parsing variant data:', e);
+                        }
+                    }
+                });
             }
+
+            // Initialize listeners for the default row
+            document.querySelectorAll('.item-select').forEach(initializeItemChangeListener);
         });
-    }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const benefitsWrapper = document.getElementById('benefitsWrapper');
+            const addBenefitBtn = document.getElementById('addBenefit');
 
-    // Initialize listeners for the default row
-    document.querySelectorAll('.item-select').forEach(initializeItemChangeListener);
-});
-
-</script>
- <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    const benefitsWrapper = document.getElementById('benefitsWrapper');
-                    const addBenefitBtn = document.getElementById('addBenefit');
-
-                    addBenefitBtn.addEventListener('click', function () {
-                        const div = document.createElement('div');
-                        div.className = 'input-group mb-2 benefit-row';
-                        div.innerHTML = `
+            addBenefitBtn.addEventListener('click', function() {
+                const div = document.createElement('div');
+                div.className = 'input-group mb-2 benefit-row';
+                div.innerHTML = `
                             <input type="text" name="benefits[]" class="form-control" placeholder="Enter benefit" required>
                             <button type="button" class="btn btn-danger removeBenefit">Remove</button>
                         `;
-                        benefitsWrapper.appendChild(div);
-                    });
+                benefitsWrapper.appendChild(div);
+            });
 
-                    benefitsWrapper.addEventListener('click', function (e) {
-                        if (e.target.classList.contains('removeBenefit')) {
-                            const rows = benefitsWrapper.querySelectorAll('.benefit-row');
-                            if (rows.length > 1) {
-                                e.target.closest('.benefit-row').remove();
-                            }
-                        }
-                    });
-                });
-            </script>
+            benefitsWrapper.addEventListener('click', function(e) {
+                if (e.target.classList.contains('removeBenefit')) {
+                    const rows = benefitsWrapper.querySelectorAll('.benefit-row');
+                    if (rows.length > 1) {
+                        e.target.closest('.benefit-row').remove();
+                    }
+                }
+            });
+        });
+    </script>
 @endsection

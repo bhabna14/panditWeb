@@ -115,21 +115,21 @@ class ProductController extends Controller
         'description' => 'required|string',
         'item_id' => 'nullable|array',
         'variant_id' => 'nullable|array',
-        'benefit' => 'nullable|array',
-        'benefit.*' => 'nullable|string|max:255',
+        'benefits' => 'nullable|array',
+        'benefits.*' => 'nullable|string|max:255',
     ]);
 
     $product = FlowerProduct::findOrFail($id);
 
     // Join benefits into comma-separated string
     $benefitString = null;
-    if ($request->filled('benefit')) {
-        $benefitArray = array_filter(array_map('trim', $request->benefit));
+    if ($request->filled('benefits')) {
+        $benefitArray = array_filter(array_map('trim', $request->benefits));
         $benefitString = implode(',', $benefitArray);
     }
 
-    // Update other fields (except image and benefits)
-    $product->update($request->except('product_image', 'benefit'));
+    // Update core fields
+    $product->update($request->except('product_image', 'benefits'));
 
     // Manually update the benefit string
     $product->benefits = $benefitString;
@@ -143,8 +143,7 @@ class ProductController extends Controller
 
         $imagePath = 'product_images/' . $request->file('product_image')->hashName();
         $request->file('product_image')->move(public_path('product_images'), $imagePath);
-        $imageUrl = asset($imagePath);
-        $product->product_image = $imageUrl;
+        $product->product_image = asset($imagePath);
         $product->save();
     }
 
