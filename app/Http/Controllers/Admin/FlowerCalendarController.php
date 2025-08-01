@@ -74,5 +74,28 @@ class FlowerCalendarController extends Controller
         return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
     }
 }
+public function manageFestivalCalendar()
+{
+    $festivals = FlowerCalendor::where('status','active')->get();
+    return view('admin.manage-festival-calendar', compact('festivals'));
+}
+
+public function deleteFestivalCalendar($id)
+{
+    try {
+        $festival = FlowerCalendor::findOrFail($id);
+
+        if ($festival->festival_image && Storage::disk('public')->exists(str_replace('/storage/', '', $festival->festival_image))) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', $festival->festival_image));
+        }
+
+        $festival->delete();
+
+        return redirect()->route('admin.manageFestivalCalendar')->with('success', 'Festival deleted successfully.');
+    } catch (\Exception $e) {
+        return redirect()->route('admin.manageFestivalCalendar')->with('error', 'Error deleting festival: ' . $e->getMessage());
+    }
+}
+
 
 }
