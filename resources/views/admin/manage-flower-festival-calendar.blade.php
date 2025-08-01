@@ -230,114 +230,105 @@
                 });
             });
         </script>
-
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const flowerContainer = document.getElementById('edit-flower-container');
-                const addFlowerBtn = document.getElementById('addFlowerBtn');
-                const editModalElement = document.getElementById('editModal');
-                const editModal = new bootstrap.Modal(editModalElement);
+            $(document).ready(function() {
+                // Handle Edit button click
+                $('.edit-btn').on('click', function() {
+                    let button = $(this);
+                    let id = button.data('id');
+                    let name = button.data('name');
+                    let date = button.data('date');
+                    let price = button.data('price');
+                    let flowers = button.data('flowers');
+                    let description = button.data('description');
+                    let image = button.data('image');
 
-                // Function to add a flower input
+                    $('#edit_id').val(id);
+                    $('#edit_name').val(name);
+                    $('#edit_date').val(date);
+                    $('#edit_price').val(price);
+                    $('#edit_description').val(description);
+
+                    if (image) {
+                        $('#currentImage').attr('src', image).show();
+                    } else {
+                        $('#currentImage').hide();
+                    }
+
+                    // Clear and populate related flowers
+                    $('#edit-flower-container').empty();
+                    if (flowers) {
+                        let flowerList = flowers.split(',');
+                        flowerList.forEach((flower, index) => {
+                            addFlowerInput(flower.trim());
+                        });
+                    } else {
+                        addFlowerInput('');
+                    }
+
+                    // Show modal
+                    $('#editModal').modal('show');
+                });
+
+                // Function to add flower input
                 function addFlowerInput(value = '') {
-                    const div = document.createElement('div');
-                    div.classList.add('input-group', 'mb-2');
-                    div.innerHTML = `
-                <input type="text" name="related_flower[]" class="form-control" value="${value}">
-                <button type="button" class="btn btn-danger remove-flower">−</button>
+                    let input = `
+                <div class="input-group mb-2 flower-input">
+                    <input type="text" name="related_flower[]" class="form-control" value="${value}">
+                    <button type="button" class="btn btn-danger remove-flower-btn">X</button>
+                </div>
             `;
-                    flowerContainer.appendChild(div);
+                    $('#edit-flower-container').append(input);
                 }
 
-                // Add new flower input
-                addFlowerBtn.addEventListener('click', () => addFlowerInput());
-
-                // Remove flower input
-                flowerContainer.addEventListener('click', function(e) {
-                    if (e.target.classList.contains('remove-flower')) {
-                        e.target.closest('.input-group').remove();
-                    }
+                // Add new flower field
+                $('#addFlowerBtn').on('click', function() {
+                    addFlowerInput('');
                 });
 
-                // Open modal and populate data
-                document.querySelectorAll('.edit-btn').forEach(btn => {
-                    btn.addEventListener('click', function() {
-                        document.getElementById('edit_id').value = this.dataset.id;
-                        document.getElementById('edit_name').value = this.dataset.name;
-                        document.getElementById('edit_date').value = this.dataset.date;
-                        document.getElementById('edit_price').value = this.dataset.price;
-                        document.getElementById('edit_description').value = this.dataset.description;
+                // Remove flower field
+                $(document).on('click', '.remove-flower-btn', function() {
+                    $(this).closest('.flower-input').remove();
+                });
 
-                        const imageSrc = this.dataset.image;
-                        const imageElement = document.getElementById('currentImage');
-                        imageElement.src = imageSrc;
-                        imageElement.style.display = imageSrc ? 'block' : 'none';
+                // Submit update form via AJAX
+                $('#editFestivalForm').on('submit', function(e) {
+                    e.preventDefault();
 
-                        // Clear previous flower inputs
-                        flowerContainer.innerHTML = '';
-                        const flowers = this.dataset.flowers.split(',');
-                        flowers.forEach(f => addFlowerInput(f.trim()));
+                    let formData = new FormData(this);
+                    let id = $('#edit_id').val();
 
-                        editModal.show();
+                    // Join flower inputs into one string
+                    let flowers = [];
+                    $('input[name="related_flower[]"]').each(function() {
+                        if ($(this).val().trim() !== '') {
+                            flowers.push($(this).val().trim());
+                        }
+                    });
+                    formData.set('related_flower', flowers.join(','));
+
+                    $.ajaxSetup({
+                        headers: {
+                            'X-CSRF-TOKEN': $('input[name="_token"]').val()
+                        }
+                    });
+
+                    $.ajax({
+                        url: `/festival/update/${id}`, // adjust route as per your setup
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function(res) {
+                            alert('Festival updated successfully!');
+                            location.reload();
+                        },
+                        error: function(xhr) {
+                            alert('Update failed. Check console for details.');
+                            console.error(xhr.responseText);
+                        }
                     });
                 });
-
-                // Submit update via AJAX
-                document.getElementById('editFestivalForm').addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    const id = document.getElementById('edit_id').value;
-                    const formData = new FormData(this);
-
-                    fetch(`/admin/update-festival-calendar/${id}`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: formData
-                        })
-                        .then(async res => {
-                            let data;
-                            try {
-                                data = await res.json(); // Parse response
-                            } catch (jsonError) {
-                                throw new Error("Invalid JSON response from server");
-                            }
-
-                            editModal.hide();
-
-                            setTimeout(() => {
-                                if (res.ok && data.success) {
-                                    Swal.fire('Updated!', data.message, 'success').then(() => {
-                                        location.reload();
-                                    });
-                                } else if (res.status === 422 && data.errors) {
-                                    // Laravel validation errors
-                                    const errorList = Object.values(data.errors)
-                                        .map(msgArr => `• ${msgArr[0]}`).join('\n');
-
-                                    Swal.fire({
-                                        icon: 'error',
-                                        title: 'Validation Error',
-                                        text: errorList,
-                                        customClass: {
-                                            popup: 'text-start'
-                                        }
-                                    });
-                                } else {
-                                    Swal.fire('Error!', data.message ||
-                                        'Unexpected error occurred.', 'error');
-                                }
-                            }, 300);
-                        })
-                        .catch((error) => {
-                            editModal.hide();
-                            setTimeout(() => {
-                                Swal.fire('Error!', error.message || 'Something went wrong.',
-                                    'error');
-                            }, 300);
-                        });
-                });
-
             });
         </script>
     @endsection

@@ -491,8 +491,10 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/get-festival-calendar', 'getFestivalCalendar')->name('admin.getFestivalCalendar');
         Route::post('/save-festival-calendar', 'saveFestivalCalendar')->name('admin.saveFestivalCalendar');
         Route::get('/manage-festival-calendar', 'manageFestivalCalendar')->name('admin.manageFestivalCalendar');
-        Route::post('/update-festival-calendar','updateFestivalCalendar')->name('admin.updateFestivalCalendar');
+        // Route::post('/update-festival-calendar','updateFestivalCalendar')->name('admin.updateFestivalCalendar');
         Route::delete('/delete-festival-calendar/{id}','deleteFestivalCalendar')->name('admin.deleteFestivalCalendar');
+        Route::post('/festival/update/{id}', 'updateFestivalCalendar')->name('festival.update');
+
     });
 
     Route::controller(PodcastReportController::class)->group(function() {

@@ -97,57 +97,32 @@ public function deleteFestivalCalendar($id)
         return redirect()->route('admin.manageFestivalCalendar')->with('error', 'Error deleting festival: ' . $e->getMessage());
     }
 }
+
 public function updateFestivalCalendar(Request $request, $id)
 {
-    try {
-        $festival = FlowerCalendor::findOrFail($id);
+    $festival = FlowerCalendor::findOrFail($id);
 
-        $request->validate([
-            'festival_name' => 'required|string|max:255',
-            'festival_date' => 'required|date',
-            'package_price' => 'nullable|numeric',
-            'related_flower' => 'nullable|array',
-            'related_flower.*' => 'nullable|string|max:255',
-            'description' => 'nullable|string',
-            'festival_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-        ]);
+    $data = $request->only([
+        'festival_name',
+        'festival_date',
+        'package_price',
+        'description',
+    ]);
 
-        // Image processing
-        $imagePath = $festival->festival_image;
-        if ($request->hasFile('festival_image')) {
-            $image = $request->file('festival_image');
-            $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
-            $storedPath = $image->storeAs('festival_images', $imageName, 'public');
-            $imagePath = Storage::url($storedPath);
-        }
+    // Handle flower list
+    $data['related_flower'] = $request->input('related_flower');
 
-        // Convert related flowers
-        $flowers = $request->related_flower ?? [];
-        $relatedFlowerString = implode(',', array_filter($flowers));
-
-        // Update data
-        $festival->update([
-            'festival_name'   => $request->festival_name,
-            'festival_date'   => $request->festival_date,
-            'festival_image'  => $imagePath,
-            'package_price'   => $request->package_price,
-            'related_flower'  => $relatedFlowerString,
-            'description'     => $request->description,
-        ]);
-
-        return response()->json(['success' => true, 'message' => 'Festival updated successfully.']);
-
-    } catch (ValidationException $e) {
-        return response()->json([
-            'success' => false,
-            'errors' => $e->errors()
-        ], 422);
-    } catch (\Exception $e) {
-        Log::error('Update error: ' . $e->getMessage());
-        return response()->json([
-            'success' => false,
-            'message' => 'Server error: ' . $e->getMessage()
-        ], 500);
+    // Handle image update
+    if ($request->hasFile('festival_image')) {
+        $file = $request->file('festival_image');
+        $path = $file->store('festival_images', 'public');
+        $data['festival_image'] = 'storage/' . $path;
     }
+
+    $festival->update($data);
+
+    return response()->json(['success' => true]);
 }
+
+
 }
