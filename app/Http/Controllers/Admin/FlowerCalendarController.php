@@ -9,7 +9,8 @@ use App\Models\FlowerProduct;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 
 class FlowerCalendarController extends Controller
 {
@@ -111,8 +112,8 @@ public function updateFestivalCalendar(Request $request, $id)
             'festival_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
+        // Image processing
         $imagePath = $festival->festival_image;
-
         if ($request->hasFile('festival_image')) {
             $image = $request->file('festival_image');
             $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
@@ -120,10 +121,11 @@ public function updateFestivalCalendar(Request $request, $id)
             $imagePath = Storage::url($storedPath);
         }
 
-        // Convert related flowers to comma-separated string
+        // Convert related flowers
         $flowers = $request->related_flower ?? [];
         $relatedFlowerString = implode(',', array_filter($flowers));
 
+        // Update data
         $festival->update([
             'festival_name'   => $request->festival_name,
             'festival_date'   => $request->festival_date,
@@ -141,6 +143,7 @@ public function updateFestivalCalendar(Request $request, $id)
             'errors' => $e->errors()
         ], 422);
     } catch (\Exception $e) {
+        Log::error('Update error: ' . $e->getMessage());
         return response()->json([
             'success' => false,
             'message' => 'Server error: ' . $e->getMessage()
