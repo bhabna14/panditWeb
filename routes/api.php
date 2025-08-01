@@ -107,12 +107,13 @@ Route::controller(ProfileController::class)->group(function() {
 
 });
 
-
-
 Route::controller(CareersController::class)->group(function() {
     Route::post('/career/save', 'saveCareer');
 });
 
+Route::controller(FlowerCalendarApiController::class)->group(function() {
+    Route::get('/festivals', 'getFestivalCalendar');
+});
 
 Route::controller(OfferDetailsApiController::class)->group(function() {
     Route::get('/offer-details', 'getOfferDetails');
