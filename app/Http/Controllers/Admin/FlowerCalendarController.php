@@ -115,9 +115,9 @@ public function updateFestivalCalendar(Request $request, $id)
 
         if ($request->hasFile('festival_image')) {
             $image = $request->file('festival_image');
-            $imageName = \Str::uuid() . '.' . $image->getClientOriginalExtension();
+            $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
             $storedPath = $image->storeAs('festival_images', $imageName, 'public');
-            $imagePath = \Storage::url($storedPath);
+            $imagePath = Storage::url($storedPath);
         }
 
         // Convert related flowers to comma-separated string
@@ -134,11 +134,17 @@ public function updateFestivalCalendar(Request $request, $id)
         ]);
 
         return response()->json(['success' => true, 'message' => 'Festival updated successfully.']);
+
+    } catch (ValidationException $e) {
+        return response()->json([
+            'success' => false,
+            'errors' => $e->errors()
+        ], 422);
     } catch (\Exception $e) {
-        return response()->json(['success' => false, 'message' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Server error: ' . $e->getMessage()
+        ], 500);
     }
 }
-
-
-
 }

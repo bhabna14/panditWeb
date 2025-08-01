@@ -295,19 +295,38 @@
                             },
                             body: formData
                         })
-                        .then(res => res.json())
-                        .then(response => {
-                            editModal.hide(); // ✅ close modal immediately
-
-                            setTimeout(() => {
-                                if (response.success) {
-                                    Swal.fire('Updated!', response.message, 'success').then(() => {
+                        .then(async res => {
+                            const data = await res.json();
+                            if (res.ok && data.success) {
+                                editModal.hide();
+                                setTimeout(() => {
+                                    Swal.fire('Updated!', data.message, 'success').then(() => {
                                         location.reload();
                                     });
-                                } else {
-                                    Swal.fire('Error!', response.message, 'error');
-                                }
-                            }, 300); // slight delay to allow modal close animation
+                                }, 300);
+                            } else {
+                                editModal.hide();
+
+                                setTimeout(() => {
+                                    if (data.errors) {
+                                        // Validation errors: show all in a list
+                                        const errorList = Object.values(data.errors).map(
+                                            msgArr => `• ${msgArr[0]}`).join('\n');
+                                        Swal.fire({
+                                            icon: 'error',
+                                            title: 'Validation Error',
+                                            text: errorList,
+                                            customClass: {
+                                                popup: 'text-start'
+                                            }
+                                        });
+                                    } else {
+                                        // Generic server error
+                                        Swal.fire('Error!', data.message ||
+                                            'Something went wrong.', 'error');
+                                    }
+                                }, 300);
+                            }
                         })
                         .catch(() => {
                             editModal.hide();
@@ -316,6 +335,7 @@
                             }, 300);
                         });
                 });
+
             });
         </script>
     @endsection
