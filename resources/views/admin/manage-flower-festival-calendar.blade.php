@@ -57,17 +57,14 @@
                                                     width="50" height="50" data-bs-toggle="modal"
                                                     data-bs-target="#imageModal{{ $festival->id }}"
                                                     style="cursor:pointer;">
-
-                                                <!-- Modal -->
-                                                <div class="modal fade" id="imageModal{{ $festival->id }}" tabindex="-1"
-                                                    aria-labelledby="imageModalLabel{{ $festival->id }}"
-                                                    aria-hidden="true">
+                                                <!-- Image Modal -->
+                                                <div class="modal fade" id="imageModal{{ $festival->id }}" tabindex="-1">
                                                     <div class="modal-dialog modal-dialog-centered">
                                                         <div class="modal-content">
                                                             <div class="modal-header">
                                                                 <h5 class="modal-title">Festival Image</h5>
                                                                 <button type="button" class="btn-close"
-                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    data-bs-dismiss="modal"></button>
                                                             </div>
                                                             <div class="modal-body text-center">
                                                                 <img src="{{ asset($festival->festival_image) }}"
@@ -84,19 +81,71 @@
                                         <td>{{ $festival->related_flower }}</td>
                                         <td>{{ $festival->description }}</td>
                                         <td>
-                                           
+                                            <button class="btn btn-sm btn-primary edit-btn" data-id="{{ $festival->id }}"
+                                                data-name="{{ $festival->festival_name }}"
+                                                data-date="{{ $festival->festival_date }}"
+                                                data-price="{{ $festival->package_price }}"
+                                                data-flowers="{{ $festival->related_flower }}"
+                                                data-description="{{ $festival->description }}">
                                                 <i class="fas fa-edit"></i>
-                                         
-                                            <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $festival->id }}"
-                                                title="Delete">
+                                            </button>
+
+                                            <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $festival->id }}">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 @endforeach
+
                             </tbody>
                         </table>
 
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editModal" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <form id="editFestivalForm">
+                                    @csrf
+                                    <input type="hidden" name="id" id="edit_id">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">Edit Festival</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body row g-3">
+                                            <div class="col-md-6">
+                                                <label>Festival Name</label>
+                                                <input type="text" class="form-control" id="edit_name"
+                                                    name="festival_name" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>Festival Date</label>
+                                                <input type="date" class="form-control" id="edit_date"
+                                                    name="festival_date" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>Package Price</label>
+                                                <input type="number" class="form-control" id="edit_price"
+                                                    name="package_price">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label>Related Flowers</label>
+                                                <input type="text" class="form-control" id="edit_flowers"
+                                                    name="related_flower">
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label>Description</label>
+                                                <textarea class="form-control" id="edit_description" name="description" rows="3"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-success">Update</button>
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Cancel</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -162,6 +211,53 @@
                             }
                         });
                     });
+                });
+            });
+        </script>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Open modal and populate data
+                document.querySelectorAll('.edit-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.dataset.id;
+                        document.getElementById('edit_id').value = id;
+                        document.getElementById('edit_name').value = this.dataset.name;
+                        document.getElementById('edit_date').value = this.dataset.date;
+                        document.getElementById('edit_price').value = this.dataset.price;
+                        document.getElementById('edit_flowers').value = this.dataset.flowers;
+                        document.getElementById('edit_description').value = this.dataset.description;
+
+                        new bootstrap.Modal(document.getElementById('editModal')).show();
+                    });
+                });
+
+                // Submit update via AJAX
+                document.getElementById('editFestivalForm').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const id = document.getElementById('edit_id').value;
+                    const formData = new FormData(this);
+
+                    fetch(`/admin/update-festival-calendar/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: formData
+                        })
+                        .then(res => res.json())
+                        .then(response => {
+                            if (response.success) {
+                                Swal.fire('Updated!', response.message, 'success').then(() => {
+                                    location.reload();
+                                });
+                            } else {
+                                Swal.fire('Error!', response.message, 'error');
+                            }
+                        })
+                        .catch(() => {
+                            Swal.fire('Error!', 'Something went wrong.', 'error');
+                        });
                 });
             });
         </script>
