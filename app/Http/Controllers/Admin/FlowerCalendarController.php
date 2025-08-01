@@ -23,6 +23,7 @@ class FlowerCalendarController extends Controller
 
   public function saveFestivalCalendar(Request $request)
 {
+    dd($request->all());
     $request->validate([
         'festival_name' => 'required|string|max:255',
         'festival_date' => 'required|date',
