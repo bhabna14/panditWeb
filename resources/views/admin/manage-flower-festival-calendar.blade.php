@@ -296,42 +296,44 @@
                             body: formData
                         })
                         .then(async res => {
-                            const data = await res.json();
-                            if (res.ok && data.success) {
-                                editModal.hide();
-                                setTimeout(() => {
+                            let data;
+                            try {
+                                data = await res.json(); // Parse response
+                            } catch (jsonError) {
+                                throw new Error("Invalid JSON response from server");
+                            }
+
+                            editModal.hide();
+
+                            setTimeout(() => {
+                                if (res.ok && data.success) {
                                     Swal.fire('Updated!', data.message, 'success').then(() => {
                                         location.reload();
                                     });
-                                }, 300);
-                            } else {
-                                editModal.hide();
+                                } else if (res.status === 422 && data.errors) {
+                                    // Laravel validation errors
+                                    const errorList = Object.values(data.errors)
+                                        .map(msgArr => `• ${msgArr[0]}`).join('\n');
 
-                                setTimeout(() => {
-                                    if (data.errors) {
-                                        // Validation errors: show all in a list
-                                        const errorList = Object.values(data.errors).map(
-                                            msgArr => `• ${msgArr[0]}`).join('\n');
-                                        Swal.fire({
-                                            icon: 'error',
-                                            title: 'Validation Error',
-                                            text: errorList,
-                                            customClass: {
-                                                popup: 'text-start'
-                                            }
-                                        });
-                                    } else {
-                                        // Generic server error
-                                        Swal.fire('Error!', data.message ||
-                                            'Something went wrong.', 'error');
-                                    }
-                                }, 300);
-                            }
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Validation Error',
+                                        text: errorList,
+                                        customClass: {
+                                            popup: 'text-start'
+                                        }
+                                    });
+                                } else {
+                                    Swal.fire('Error!', data.message ||
+                                        'Unexpected error occurred.', 'error');
+                                }
+                            }, 300);
                         })
-                        .catch(() => {
+                        .catch((error) => {
                             editModal.hide();
                             setTimeout(() => {
-                                Swal.fire('Error!', 'Something went wrong.', 'error');
+                                Swal.fire('Error!', error.message || 'Something went wrong.',
+                                    'error');
                             }, 300);
                         });
                 });
