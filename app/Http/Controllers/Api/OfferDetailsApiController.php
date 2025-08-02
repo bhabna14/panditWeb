@@ -25,24 +25,37 @@ class OfferDetailsApiController extends Controller
                 'image',
                 'start_date',
                 'end_date',
-                'product_id' // fetch product_id to map package names
+                'product_id'
             ]);
 
-        // Format each offer
         $offerDetails->transform(function ($offer) {
-            // Convert image to full URL
             $offer->image = $offer->image ? url($offer->image) : null;
 
-            // Extract and resolve package names
-            $packageNames = [];
+            // Resolve product ID and name pair
+            $packages = [];
             if (!empty($offer->product_id)) {
-                $productIds = explode(',', $offer->product_id);
-                $packageNames = FlowerProduct::whereIn('product_id', $productIds)->pluck('name')->toArray();
+                $productIds = array_filter(explode(',', $offer->product_id));
+                $packages = FlowerProduct::whereIn('product_id', $productIds)
+                    ->get(['product_id', 'name'])
+                    ->map(function ($product) {
+                        return [
+                            'product_id' => $product->product_id,
+                            'name' => $product->name,
+                        ];
+                    })->values()->toArray();
             }
 
-            $offer->package_names = $packageNames;
-
-            return $offer;
+            return [
+                'main_header'   => $offer->main_header,
+                'sub_header'    => $offer->sub_header,
+                'content'       => $offer->content,
+                'discount'      => $offer->discount,
+                'menu'          => $offer->menu,
+                'image'         => $offer->image,
+                'start_date'    => $offer->start_date,
+                'end_date'      => $offer->end_date,
+                'packages'      => $packages,
+            ];
         });
 
         return response()->json([
