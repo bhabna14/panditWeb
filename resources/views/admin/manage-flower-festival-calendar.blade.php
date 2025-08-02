@@ -86,10 +86,8 @@
                                                 View Packages
                                             </button>
                                         </td>
-
                                         <td>{{ $festival->description }}</td>
                                         <td>
-
                                             <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $festival->id }}">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
