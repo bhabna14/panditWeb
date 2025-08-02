@@ -41,6 +41,7 @@
                                     <th>Festival Image</th>
                                     <th>Package Price</th>
                                     <th>Related Flowers</th>
+                                    <th>Package Name</th>
                                     <th>Description</th>
                                     <th>Actions</th>
                                 </tr>
@@ -79,9 +80,16 @@
                                         </td>
                                         <td>{{ $festival->package_price }}</td>
                                         <td>{{ $festival->related_flower }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-primary view-package-btn"
+                                                data-bs-toggle="modal" data-bs-target="#packageModal{{ $offer->id }}">
+                                                View Packages
+                                            </button>
+                                        </td>
+
                                         <td>{{ $festival->description }}</td>
                                         <td>
-                                           
+
                                             <button class="btn btn-sm btn-danger delete-btn" data-id="{{ $festival->id }}">
                                                 <i class="fas fa-trash-alt"></i>
                                             </button>
@@ -91,6 +99,38 @@
 
                             </tbody>
                         </table>
+
+                        @foreach ($offers as $offer)
+                            <!-- Package List Modal -->
+                            <div class="modal fade" id="packageModal{{ $offer->id }}" tabindex="-1"
+                                aria-labelledby="packageModalLabel{{ $offer->id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content shadow-lg border-0">
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title" id="packageModalLabel{{ $offer->id }}">Package Names
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white"
+                                                data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            @if (!empty($offer->package_names))
+                                                <ul class="mb-0">
+                                                    @foreach (explode(',', $offer->package_names) as $packageName)
+                                                        <li>{{ trim($packageName) }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            @else
+                                                <p>No packages linked to this offer.</p>
+                                            @endif
+                                        </div>
+                                        <div class="modal-footer bg-light">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
 
                     </div>
                 </div>
@@ -159,5 +199,4 @@
                 });
             });
         </script>
-       
     @endsection

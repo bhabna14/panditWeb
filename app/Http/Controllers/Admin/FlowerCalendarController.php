@@ -84,7 +84,16 @@ class FlowerCalendarController extends Controller
 public function manageFestivalCalendar()
 {
     $festivals = FlowerCalendor::where('status','active')->get();
-    return view('admin.manage-flower-festival-calendar', compact('festivals'));
+
+       foreach ($festivals as $festival) {
+        $productIds = explode(',', $festival->product_id ?? '');
+        $productNames = FlowerProduct::whereIn('product_id', $productIds)->pluck('name')->toArray();
+        $offer->package_names = implode(', ', $productNames); // Attach for use in view
+        }
+
+        $packages = FlowerProduct::where('category', 'package')->where('status', 'active')->get();
+
+    return view('admin.manage-flower-festival-calendar', compact('festivals', 'packages'));
 }
 
 public function deleteFestivalCalendar($id)
