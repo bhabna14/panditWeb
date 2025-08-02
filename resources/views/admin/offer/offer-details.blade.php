@@ -91,24 +91,47 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- JavaScript to handle Add/Remove for menu items -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const menuContainer = document.getElementById('menu-container');
+            // Template for adding new package dropdown
+            const packageOptions = `@foreach ($packages as $package)
+            <option value="{{ $package->product_id }}">{{ $package->name }}</option>
+            @endforeach`;
 
-            menuContainer.addEventListener('click', function(e) {
-                if (e.target.classList.contains('add-menu')) {
+            // MENU ITEM logic
+            const menuItemsContainer = document.getElementById('menu-items-container');
+            menuItemsContainer.addEventListener('click', function(e) {
+                if (e.target.closest('.add-menu-item')) {
                     const group = document.createElement('div');
-                    group.classList.add('input-group', 'mb-2', 'menu-group');
+                    group.className = 'input-group mb-2 menu-item-group';
                     group.innerHTML = `
-                    <input type="text" name="menu[]" class="form-control" placeholder="Menu item">
-                    <button type="button" class="btn btn-danger remove-menu">−</button>
+                    <input type="text" name="menu_items[]" class="form-control" placeholder="Enter menu item" required>
+                    <button type="button" class="btn btn-danger remove-menu-item"><i class="fa fa-minus"></i></button>
                 `;
-                    menuContainer.appendChild(group);
+                    menuItemsContainer.appendChild(group);
                 }
+                if (e.target.closest('.remove-menu-item')) {
+                    e.target.closest('.menu-item-group').remove();
+                }
+            });
 
-                if (e.target.classList.contains('remove-menu')) {
-                    e.target.closest('.menu-group').remove();
+            // PACKAGE logic
+            const packageContainer = document.getElementById('package-container');
+            packageContainer.addEventListener('click', function(e) {
+                if (e.target.closest('.add-package')) {
+                    const group = document.createElement('div');
+                    group.className = 'input-group mb-2 package-group';
+                    group.innerHTML = `
+                    <select name="packages[]" class="form-select" required>
+                        <option value="">Select Package</option>
+                        ${packageOptions}
+                    </select>
+                    <button type="button" class="btn btn-danger remove-package"><i class="fa fa-minus"></i></button>
+                `;
+                    packageContainer.appendChild(group);
+                }
+                if (e.target.closest('.remove-package')) {
+                    e.target.closest('.package-group').remove();
                 }
             });
         });

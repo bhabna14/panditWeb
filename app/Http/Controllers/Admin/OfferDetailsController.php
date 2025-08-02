@@ -5,6 +5,8 @@ namespace App\Http\Controllers\admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\OfferDetails;
+use App\Models\FlowerProduct;
+
 use Illuminate\Support\Facades\Storage;
 
 class OfferDetailsController extends Controller
@@ -12,7 +14,9 @@ class OfferDetailsController extends Controller
     
     public function offerDetails()
     {
-        return view('admin.offer.offer-details');
+        $packages = FlowerProduct::where('status', 'active')->where('category','package')->get();
+
+        return view('admin.offer.offer-details' , compact('packages'));
     }
 
  public function saveOfferDetails(Request $request)

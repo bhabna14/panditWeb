@@ -12,7 +12,7 @@ class OfferDetails extends Model
     protected $table = 'offer_details';
 
     protected $fillable = [
-       
+
         'main_header',
         'sub_header',
         'content',
@@ -20,6 +20,8 @@ class OfferDetails extends Model
         'end_date',
         'discount',
         'menu',
+        'package_id',
         'image'
+
     ];
 }
