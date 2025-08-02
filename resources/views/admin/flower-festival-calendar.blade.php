@@ -46,11 +46,11 @@
                         <input type="number" class="form-control" name="package_price" placeholder="Package Price">
                     </div>
 
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <label class="form-label">Related Flowers</label>
                         <div id="flower-price-container">
                             <div class="row g-2 align-items-center flower-price-group mb-2">
-                                <div class="col-md-5">
+                                <div class="col-md-4">
                                     <select class="form-control" name="related_flower[]">
                                         <option value="">Select Flower</option>
                                         @foreach ($flowerNames as $flower)
@@ -61,6 +61,22 @@
                                 <div class="col-md-2">
                                     <button type="button" class="btn btn-success add-flower-price w-100">+</button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Packages</label>
+                        <div id="package-container">
+                            <div class="input-group mb-2 package-group">
+                                <select name="product_id[]" class="form-select">
+                                    <option value="">Select Package</option>
+                                    @foreach ($packages as $package)
+                                        <option value="{{ $package->product_id }}">{{ $package->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="button" class="btn btn-success add-package" title="Add"><i
+                                        class="fa fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
@@ -78,10 +94,10 @@
         </div>
     </div>
 @endsection
-
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    {{-- ✅ SweetAlert for success/error/validation --}}
     <script>
         @if (session('success'))
             Swal.fire({
@@ -110,49 +126,33 @@
                 title: 'Validation Error',
                 text: errorMessages,
                 confirmButtonColor: '#d33',
-                customClass: {
-                    popup: 'text-start'
-                }
+                customClass: { popup: 'text-start' }
             });
         @endif
     </script>
 
-
-    <!-- Dynamic Flower + Price Input JavaScript -->
+    {{-- ✅ Dynamic Flower Fields --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const container = document.getElementById('flower-price-container');
+        document.addEventListener('DOMContentLoaded', function () {
+            const flowerContainer = document.getElementById('flower-price-container');
 
-            container.addEventListener('click', function(e) {
+            flowerContainer.addEventListener('click', function (e) {
                 if (e.target.classList.contains('add-flower-price')) {
-                    const group = document.createElement('div');
-                    group.classList.add('row', 'g-2', 'align-items-center', 'flower-price-group', 'mb-2');
-                    group.innerHTML = `
-                        <div class="col-md-5">
-                            <select class="form-control" name="related_flower[]">
-                                <option value="">Select Flower</option>
-                                @foreach ($flowerNames as $flower)
-                                    <option value="{{ $flower->name }}">{{ $flower->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                       
-                        <div class="col-md-2">
-                            <button type="button" class="btn btn-danger remove-flower-price w-100">−</button>
-                        </div>
-                    `;
-                    container.appendChild(group);
-                    updateButtons();
+                    const group = e.target.closest('.flower-price-group');
+                    const newGroup = group.cloneNode(true);
+                    newGroup.querySelector('select').value = '';
+                    flowerContainer.appendChild(newGroup);
+                    updateFlowerButtons();
                 }
 
                 if (e.target.classList.contains('remove-flower-price')) {
                     e.target.closest('.flower-price-group').remove();
-                    updateButtons();
+                    updateFlowerButtons();
                 }
             });
 
-            function updateButtons() {
-                const groups = container.querySelectorAll('.flower-price-group');
+            function updateFlowerButtons() {
+                const groups = flowerContainer.querySelectorAll('.flower-price-group');
                 groups.forEach((group, index) => {
                     const button = group.querySelector('button');
                     if (index === 0) {
@@ -164,6 +164,38 @@
                     }
                 });
             }
+
+            updateFlowerButtons(); // Run once on load
+        });
+    </script>
+
+    {{-- ✅ Dynamic Package Fields --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const packageOptions = `@foreach ($packages as $package)
+                <option value="{{ $package->product_id }}">{{ $package->name }}</option>
+            @endforeach`;
+
+            const packageContainer = document.getElementById('package-container');
+
+            packageContainer.addEventListener('click', function (e) {
+                if (e.target.closest('.add-package')) {
+                    const group = document.createElement('div');
+                    group.className = 'input-group mb-2 package-group';
+                    group.innerHTML = `
+                        <select name="product_id[]" class="form-select" required>
+                            <option value="">Select Package</option>
+                            ${packageOptions}
+                        </select>
+                        <button type="button" class="btn btn-danger remove-package"><i class="fa fa-minus"></i></button>
+                    `;
+                    packageContainer.appendChild(group);
+                }
+
+                if (e.target.closest('.remove-package')) {
+                    e.target.closest('.package-group').remove();
+                }
+            });
         });
     </script>
 @endsection

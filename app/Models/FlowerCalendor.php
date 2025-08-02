@@ -17,6 +17,7 @@ class FlowerCalendor extends Model
         'festival_image',
         'related_flower',
         'package_price',
+        'product_id',
         'description',
     ];
 }

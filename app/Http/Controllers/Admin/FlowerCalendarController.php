@@ -16,17 +16,18 @@ class FlowerCalendarController extends Controller
 {
     public function getFestivalCalendar()
     {
+        $packages = FlowerProduct::where('status', 'active')->where('category','package')->get();
 
         $flowerNames = FlowerProduct::where('category', 'Flower')->where('status','active')->get();
 
-        return view('admin.flower-festival-calendar',compact('flowerNames'));
+        return view('admin.flower-festival-calendar',compact('flowerNames', 'packages'));
 
     }
 
-  public function saveFestivalCalendar(Request $request)
+ public function saveFestivalCalendar(Request $request)
 {
     try {
-        // Validation
+        // Validate input
         $request->validate([
             'festival_name' => 'required|string|max:255',
             'festival_date' => 'required|date',
@@ -34,25 +35,29 @@ class FlowerCalendarController extends Controller
             'package_price' => 'nullable|numeric',
             'related_flower' => 'nullable|array',
             'related_flower.*' => 'nullable|string|max:255',
+            'product_id' => 'nullable|array',
+            'product_id.*' => 'nullable|string|exists:flower_products,product_id',
             'description' => 'nullable|string',
         ]);
 
+        // Handle image
         $imagePath = null;
-
-        // Image upload
         if ($request->hasFile('festival_image')) {
             $image = $request->file('festival_image');
             $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
             $storedPath = $image->storeAs('festival_images', $imageName, 'public');
-            $imagePath = Storage::url($storedPath); // e.g. /storage/festival_images/xyz.jpg
+            $imagePath = Storage::url($storedPath);
         }
 
-        // Handle related flowers
-        $relatedFlowers = null;
-        if (!empty($request->related_flower)) {
-            $filtered = array_filter($request->related_flower); // remove empty
-            $relatedFlowers = implode(',', $filtered);
-        }
+        // Related flowers
+        $relatedFlowers = $request->filled('related_flower')
+            ? implode(',', array_filter($request->related_flower))
+            : null;
+
+        // Packages
+        $productIds = $request->filled('product_id')
+            ? implode(',', array_filter($request->product_id))
+            : null;
 
         // Save to DB
         FlowerCalendor::create([
@@ -61,11 +66,11 @@ class FlowerCalendarController extends Controller
             'festival_image'  => $imagePath,
             'related_flower'  => $relatedFlowers,
             'package_price'   => $request->package_price,
+            'product_id'      => $productIds,
             'description'     => $request->description,
         ]);
 
         return redirect()->back()->with('success', 'Festival calendar saved successfully.');
-
     } catch (ValidationException $e) {
         return redirect()->back()
             ->withErrors($e->validator)
@@ -75,6 +80,7 @@ class FlowerCalendarController extends Controller
         return redirect()->back()->with('error', 'An error occurred: ' . $e->getMessage());
     }
 }
+
 public function manageFestivalCalendar()
 {
     $festivals = FlowerCalendor::where('status','active')->get();
