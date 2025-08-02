@@ -50,7 +50,7 @@
                         <label class="form-label">Related Flowers</label>
                         <div id="flower-price-container">
                             <div class="row g-2 align-items-center flower-price-group mb-2">
-                                <div class="col-md-4">
+                                <div class="col-md-5">
                                     <select class="form-control" name="related_flower[]">
                                         <option value="">Select Flower</option>
                                         @foreach ($flowerNames as $flower)
