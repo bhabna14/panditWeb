@@ -88,6 +88,7 @@
                                                 data-id="{{ $offer->id }}" data-main_header="{{ $offer->main_header }}"
                                                 data-sub_header="{{ $offer->sub_header }}"
                                                 data-discount="{{ $offer->discount }}" data-menu="{{ $offer->menu }}"
+                                                data-product_id="{{ $offer->product_id }}"
                                                 data-content="{{ $offer->content }}"
                                                 data-start_date="{{ $offer->start_date }}"
                                                 data-end_date="{{ $offer->end_date }}"
@@ -95,6 +96,7 @@
                                                 data-bs-target="#editOfferModal">
                                                 <i class="fas fa-edit"></i>
                                             </button>
+
 
                                             <form action="{{ route('admin.deleteOfferDetails', $offer->id) }}"
                                                 method="POST" class="delete-offer-form" style="display:inline-block;">
@@ -226,6 +228,13 @@
                                                     id="edit_add_menu">+ Add Menu</button>
                                             </div>
 
+                                            <div class="col-md-8">
+                                                <label>Package(s)</label>
+                                                <div id="edit_package_container"></div>
+                                                <button type="button" class="btn btn-sm btn-success mt-2"
+                                                    id="edit_add_package">+ Add Package</button>
+                                            </div>
+
                                             <div class="col-md-12">
                                                 <label>Content</label>
                                                 <textarea name="content" id="edit_content" rows="3" class="form-control"></textarea>
@@ -300,9 +309,45 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Populate edit modal
+            const allPackages = @json($packages); // Inject all package data from controller
+
+            // Helper to create a package dropdown
+            function createPackageSelect(selectedId = '') {
+                const select = document.createElement('select');
+                select.name = 'product_id[]';
+                select.className = 'form-select mb-2';
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = 'Select Package';
+                select.appendChild(defaultOption);
+
+                allPackages.forEach(pkg => {
+                    const option = document.createElement('option');
+                    option.value = pkg.product_id;
+                    option.textContent = pkg.name;
+                    if (pkg.product_id === selectedId) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'input-group mb-2 package-group';
+                wrapper.appendChild(select);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-danger remove-package';
+                removeBtn.innerHTML = '−';
+                wrapper.appendChild(removeBtn);
+
+                return wrapper;
+            }
+
+            // Load data into modal on edit click
             document.querySelectorAll('.edit-offer-btn').forEach(button => {
                 button.addEventListener('click', function() {
+                    // Fill basic fields
                     document.getElementById('edit_id').value = this.getAttribute('data-id');
                     document.getElementById('edit_main_header').value = this.getAttribute(
                         'data-main_header');
@@ -316,14 +361,16 @@
                         'data-start_date');
                     document.getElementById('edit_end_date').value = this.getAttribute(
                         'data-end_date');
+                    document.getElementById('edit_preview_image').src = this.getAttribute(
+                        'data-image');
 
+                    // Handle menu items
                     const menuItems = (this.getAttribute('data-menu') || '').split(',');
                     const menuContainer = document.getElementById('edit_menu_container');
                     menuContainer.innerHTML = '';
-
-                    menuItems.forEach((item, index) => {
+                    menuItems.forEach(item => {
                         const group = document.createElement('div');
-                        group.classList.add('input-group', 'mb-2');
+                        group.className = 'input-group mb-2';
                         group.innerHTML = `
                         <input type="text" name="menu[]" class="form-control" value="${item.trim()}">
                         <button type="button" class="btn btn-danger remove-menu">−</button>
@@ -331,16 +378,22 @@
                         menuContainer.appendChild(group);
                     });
 
-                    document.getElementById('edit_preview_image').src = this.getAttribute(
-                        'data-image');
+                    // Handle product_ids (packages)
+                    const packageContainer = document.getElementById('edit_package_container');
+                    const rawPackages = this.getAttribute('data-product_id') || '';
+                    const packageIds = rawPackages.split(',').map(p => p.trim()).filter(p => p);
+                    packageContainer.innerHTML = '';
+                    packageIds.forEach(pkgId => {
+                        packageContainer.appendChild(createPackageSelect(pkgId));
+                    });
                 });
             });
 
-            // Add new menu field in edit modal
+            // Add new menu item
             document.getElementById('edit_add_menu').addEventListener('click', function() {
                 const menuContainer = document.getElementById('edit_menu_container');
                 const group = document.createElement('div');
-                group.classList.add('input-group', 'mb-2');
+                group.className = 'input-group mb-2';
                 group.innerHTML = `
                 <input type="text" name="menu[]" class="form-control">
                 <button type="button" class="btn btn-danger remove-menu">−</button>
@@ -348,14 +401,28 @@
                 menuContainer.appendChild(group);
             });
 
-            // Remove menu field
+            // Remove menu item
             document.getElementById('edit_menu_container').addEventListener('click', function(e) {
                 if (e.target.classList.contains('remove-menu')) {
                     e.target.closest('.input-group').remove();
                 }
             });
+
+            // Add new package dropdown
+            document.getElementById('edit_add_package').addEventListener('click', function() {
+                const packageContainer = document.getElementById('edit_package_container');
+                packageContainer.appendChild(createPackageSelect());
+            });
+
+            // Remove package
+            document.getElementById('edit_package_container').addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-package')) {
+                    e.target.closest('.package-group').remove();
+                }
+            });
         });
     </script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

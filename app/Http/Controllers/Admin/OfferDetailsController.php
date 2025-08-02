@@ -80,15 +80,18 @@ class OfferDetailsController extends Controller
         $productIds = explode(',', $offer->product_id ?? '');
         $productNames = FlowerProduct::whereIn('product_id', $productIds)->pluck('name')->toArray();
         $offer->package_names = implode(', ', $productNames); // Attach for use in view
-    }
+        }
 
-        return view('admin.offer.manage-offer-details', compact('offers'));
-    }
+        $packages = FlowerProduct::where('category', 'package')->where('status', 'active')->get();
 
+
+        return view('admin.offer.manage-offer-details', compact('offers', 'packages'));
+    }
+    
     public function updateOfferDetails(Request $request)
     {
         try {
-            // Validate request
+            // Validate the request fields based on modal input names
             $request->validate([
                 'id' => 'required|exists:offer_details,id',
                 'main_header' => 'required|string|max:255',
@@ -104,29 +107,32 @@ class OfferDetailsController extends Controller
                 'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ]);
 
+            // Fetch the offer
             $offer = OfferDetails::findOrFail($request->id);
 
-            // Convert menu items and product IDs to comma-separated strings
-            $menu = $request->filled('menu') 
-                ? implode(',', array_filter(array_map('trim', $request->menu))) 
+            // Convert menu[] and product_id[] arrays to comma-separated strings
+            $menu = $request->has('menu')
+                ? implode(',', array_filter(array_map('trim', $request->menu)))
                 : null;
 
-            $productIds = $request->filled('product_id') 
-                ? implode(',', array_filter($request->product_id)) 
+            $productIds = $request->has('product_id')
+                ? implode(',', array_filter($request->product_id))
                 : null;
 
-            // Handle image update
+            // Handle image upload if a new file is provided
             $imagePath = $offer->image;
             if ($request->hasFile('image')) {
+                // Delete existing image if present
                 if ($imagePath && \Storage::disk('public')->exists(str_replace('/storage/', '', $imagePath))) {
                     \Storage::disk('public')->delete(str_replace('/storage/', '', $imagePath));
                 }
 
-                $newImage = $request->file('image')->store('offers', 'public');
-                $imagePath = \Storage::url($newImage);
+                // Store new image
+                $storedImage = $request->file('image')->store('offers', 'public');
+                $imagePath = \Storage::url($storedImage);
             }
 
-            // Update offer
+            // Update all fields
             $offer->update([
                 'main_header' => $request->main_header,
                 'sub_header'  => $request->sub_header,
