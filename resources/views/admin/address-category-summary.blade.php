@@ -2,6 +2,17 @@
 
 @section('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        .apartment-card {
+            border: 1px solid #ccc;
+            transition: 0.3s;
+        }
+
+        .apartment-card:hover {
+            background-color: #f8f9fa;
+            transform: scale(1.02);
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -100,7 +111,6 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-
             const modal = new bootstrap.Modal(document.getElementById('editModal'));
             const editForm = document.getElementById('editAddressForm');
             const cards = document.querySelectorAll('.card-click');
@@ -122,42 +132,99 @@
                             title.innerText =
                                 `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
 
-                            if (data.length === 0) {
+                            if (Object.keys(data).length === 0) {
                                 tableBody.innerHTML =
                                     `<tr><td colspan="7" class="text-center">No users found.</td></tr>`;
-                            } else {
-                                data.forEach((user, index) => {
-                                    const row = `
-                                <tr data-row-id="${user.address_id}">
-                                    <td>${index + 1}</td>
-                                    <td class="col-name">${user.name}</td>
-                                    <td class="col-mobile">${user.mobile_number}</td>
-                                    <td class="col-apartment">${user.apartment_name}</td>
-                                    <td class="col-flat">${user.apartment_flat_plot}</td>
-                                    <td class="col-rider">${user.rider_name}</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-primary edit-btn"
-                                            data-id="${user.address_id}"
-                                            data-userid="${user.user_id}"
-                                            data-username="${user.name}"
-                                            data-name="${user.apartment_name}"
-                                            data-flat="${user.apartment_flat_plot}">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            `;
-                                    tableBody.insertAdjacentHTML('beforeend', row);
-                                });
+                                return;
                             }
 
-                            tableSection.style.display = 'block';
-                            tableSection.scrollIntoView({
-                                behavior: 'smooth'
+                            // Create cards for each apartment
+                            const cardContainer = document.createElement('div');
+                            cardContainer.className = 'row g-3 mb-4';
+
+                            for (const [apartment, users] of Object.entries(data)) {
+                                const apartmentCard = `
+                        <div class="col-md-4">
+                            <div class="card shadow-sm apartment-card" data-apartment="${apartment}">
+                                <div class="card-body text-center" style="cursor: pointer;">
+                                    <h5 class="card-title">${apartment}</h5>
+                                    <p class="card-text display-6">${users.length}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                                cardContainer.insertAdjacentHTML('beforeend', apartmentCard);
+                            }
+
+                            tableSection.innerHTML = ''; // Clear previous section
+                            tableSection.appendChild(title);
+                            tableSection.appendChild(cardContainer);
+
+                            // Handle click on each apartment card
+                            document.querySelectorAll('.apartment-card').forEach(card => {
+                                card.addEventListener('click', function() {
+                                    const apartmentName = this.dataset
+                                        .apartment;
+                                    const users = data[apartmentName];
+
+                                    // Render table for selected apartment
+                                    const tableHtml = `
+                            <div class="table-responsive mt-4">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Name</th>
+                                            <th>Mobile Number</th>
+                                            <th>Apartment Name</th>
+                                            <th>Flat/Plot</th>
+                                            <th>Rider Name</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${users.map((user, index) => `
+                                                    <tr>
+                                                        <td>${index + 1}</td>
+                                                        <td>${user.name}</td>
+                                                        <td>${user.mobile_number}</td>
+                                                        <td>${user.apartment_name}</td>
+                                                        <td>${user.apartment_flat_plot}</td>
+                                                        <td>${user.rider_name}</td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-primary edit-btn"
+                                                                data-id="${user.address_id}"
+                                                                data-userid="${user.user_id}"
+                                                                data-username="${user.name}"
+                                                                data-name="${user.apartment_name}"
+                                                                data-flat="${user.apartment_flat_plot}">
+                                                                <i class="bi bi-pencil-square"></i>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
+
+                                    // Append table below cards
+                                    const tableWrapper = document.createElement(
+                                        'div');
+                                    tableWrapper.innerHTML = tableHtml;
+                                    tableSection.appendChild(tableWrapper);
+
+                                    tableSection.scrollIntoView({
+                                        behavior: 'smooth'
+                                    });
+                                });
                             });
+
+                            tableSection.style.display = 'block';
                         });
                 });
             });
+
 
             // Handle modal trigger: populate fields
             document.addEventListener('click', function(e) {

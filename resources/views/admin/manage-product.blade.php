@@ -53,7 +53,6 @@
     </div>
     <!-- /breadcrumb -->
 
-
     @if (session('success'))
         <div id = 'Message' class="alert alert-success">
             {{ session('success') }}
@@ -65,7 +64,6 @@
             {{ session('danger') }}
         </div>
     @endif
-
 
     <!-- Row -->
     <div class="row row-sm">
@@ -211,13 +209,10 @@
                                         </td>
 
                                         <td>
-                                            <a href="{{ url('admin/edit-product/' . $product->id) }}"
-                                                class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
-                                            <a href="{{ url('admin/delete-product/' . $product->id) }}"
-                                                class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Are you sure you want to delete this product?');"><i
-                                                    class="fa fa-trash"></i></a>
+                                            <a href="{{ url('admin/edit-product/' . $product->id) }}"  class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
+                                            <a href="{{ url('admin/delete-product/' . $product->id) }}"  class="btn btn-sm btn-danger"  onclick="return confirm('Are you sure you want to delete this product?');"><i class="fa fa-trash"></i></a>
                                         </td>
+
                                     </tr>
                                 @endforeach
                             </tbody>
