@@ -19,7 +19,7 @@ class OfferDetailsController extends Controller
         return view('admin.offer.offer-details' , compact('packages'));
     }
 
- public function saveOfferDetails(Request $request)
+    public function saveOfferDetails(Request $request)
     {
         try {
             // Validate inputs
@@ -28,21 +28,29 @@ class OfferDetailsController extends Controller
                 'sub_header'  => 'nullable|string|max:255',
                 'content'     => 'nullable|string',
                 'discount'    => 'nullable|numeric|min:0|max:100',
-                'menu'        => 'nullable|array',
-                'menu.*'      => 'nullable|string|max:255',
+                'menu_items'  => 'nullable|array',
+                'menu_items.*'=> 'nullable|string|max:255',
+                'product_id'  => 'nullable|array',
+                'product_id.*'=> 'nullable|string|exists:flower_products,product_id',
                 'image'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                 'start_date'  => 'required|date',
                 'end_date'    => 'required|date|after_or_equal:start_date',
             ]);
 
-            // Process menu array to comma-separated string
-            $menu = $request->menu ? implode(',', array_filter($request->menu)) : null;
+            // Process arrays to comma-separated strings
+            $menu = $request->filled('menu_items') 
+                ? implode(',', array_filter(array_map('trim', $request->menu_items))) 
+                : null;
+
+            $packages = $request->filled('product_id') 
+                ? implode(',', array_filter($request->product_id)) 
+                : null;
 
             // Handle image upload
             $imagePath = null;
             if ($request->hasFile('image')) {
-                $imagePath = $request->file('image')->store('offers', 'public');
-                $imagePath = Storage::url($imagePath); // Get public URL
+                $uploaded = $request->file('image')->store('offers', 'public');
+                $imagePath = Storage::url($uploaded); // public path like /storage/offers/xxx.jpg
             }
 
             // Save to database
@@ -54,6 +62,7 @@ class OfferDetailsController extends Controller
                 'start_date'  => $request->start_date,
                 'end_date'    => $request->end_date,
                 'menu'        => $menu,
+                'product_id'  => $packages,
                 'image'       => $imagePath,
             ]);
 
@@ -66,6 +75,12 @@ class OfferDetailsController extends Controller
     public function manageOfferDetails()
     {
         $offers = OfferDetails::where('status','active')->get();
+
+        foreach ($offers as $offer) {
+        $productIds = explode(',', $offer->product_id ?? '');
+        $productNames = FlowerProduct::whereIn('product_id', $productIds)->pluck('name')->toArray();
+        $offer->package_names = implode(', ', $productNames); // Attach for use in view
+    }
 
         return view('admin.offer.manage-offer-details', compact('offers'));
     }
@@ -81,6 +96,8 @@ class OfferDetailsController extends Controller
                 'discount'    => 'nullable|numeric|min:0|max:100',
                 'menu'        => 'nullable|array',
                 'menu.*'      => 'nullable|string|max:255',
+                'product_id'  => 'nullable|array',
+                'product_id.*'=> 'nullable|string|exists:flower_products,product_id',
                 'content'     => 'nullable|string',
                 'start_date'  => 'nullable|date',
                 'end_date'    => 'nullable|date|after_or_equal:start_date',
@@ -89,13 +106,18 @@ class OfferDetailsController extends Controller
 
             $offer = OfferDetails::findOrFail($request->id);
 
-            // Handle menu items as comma-separated string
-            $menu = $request->menu ? implode(',', array_filter($request->menu)) : null;
+            // Convert menu items and product IDs to comma-separated strings
+            $menu = $request->filled('menu') 
+                ? implode(',', array_filter(array_map('trim', $request->menu))) 
+                : null;
+
+            $productIds = $request->filled('product_id') 
+                ? implode(',', array_filter($request->product_id)) 
+                : null;
 
             // Handle image update
-            $imagePath = $offer->image; // existing image
+            $imagePath = $offer->image;
             if ($request->hasFile('image')) {
-                // Delete old image if needed (optional)
                 if ($imagePath && \Storage::disk('public')->exists(str_replace('/storage/', '', $imagePath))) {
                     \Storage::disk('public')->delete(str_replace('/storage/', '', $imagePath));
                 }
@@ -110,6 +132,7 @@ class OfferDetailsController extends Controller
                 'sub_header'  => $request->sub_header,
                 'discount'    => $request->discount,
                 'menu'        => $menu,
+                'product_id'  => $productIds,
                 'content'     => $request->content,
                 'start_date'  => $request->start_date,
                 'end_date'    => $request->end_date,

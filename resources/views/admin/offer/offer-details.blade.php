@@ -78,14 +78,13 @@
                         <label class="form-label">Packages</label>
                         <div id="package-container">
                             <div class="input-group mb-2 package-group">
-                                <select name="packages[]" class="form-select" required>
+                                <select name="product_id[]" class="form-select" >
                                     <option value="">Select Package</option>
                                     @foreach ($packages as $package)
                                         <option value="{{ $package->product_id }}">{{ $package->name }}</option>
                                     @endforeach
                                 </select>
-                                <button type="button" class="btn btn-success add-package" title="Add"><i
-                                        class="fa fa-plus"></i></button>
+                                <button type="button" class="btn btn-success add-package" title="Add"><i class="fa fa-plus"></i></button>
                             </div>
                         </div>
                     </div>

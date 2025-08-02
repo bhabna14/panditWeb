@@ -20,8 +20,7 @@ class OfferDetails extends Model
         'end_date',
         'discount',
         'menu',
-        'package_id',
+        'product_id',
         'image'
-
     ];
 }
