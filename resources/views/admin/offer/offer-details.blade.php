@@ -62,12 +62,30 @@
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-6">
                         <label class="form-label">Menu Items</label>
-                        <div id="menu-container">
-                            <div class="input-group mb-2 menu-group">
-                                <input type="text" name="menu[]" class="form-control" placeholder="Menu item">
-                                <button type="button" class="btn btn-success add-menu">+</button>
+                        <div id="menu-items-container">
+                            <div class="input-group mb-2 menu-item-group">
+                                <input type="text" name="menu_items[]" class="form-control" placeholder="Enter menu item"
+                                    required>
+                                <button type="button" class="btn btn-success add-menu-item" title="Add"><i
+                                        class="fa fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Packages</label>
+                        <div id="package-container">
+                            <div class="input-group mb-2 package-group">
+                                <select name="packages[]" class="form-select" required>
+                                    <option value="">Select Package</option>
+                                    @foreach ($packages as $package)
+                                        <option value="{{ $package->product_id }}">{{ $package->name }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="button" class="btn btn-success add-package" title="Add"><i
+                                        class="fa fa-plus"></i></button>
                             </div>
                         </div>
                     </div>
