@@ -110,180 +110,57 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = new bootstrap.Modal(document.getElementById('editModal'));
-            const editForm = document.getElementById('editAddressForm');
-            const cards = document.querySelectorAll('.card-click');
-            const tableSection = document.getElementById('categoryDataSection');
-            const tableBody = document.querySelector('#categoryUserTable tbody');
-            const title = document.getElementById('categoryTitle');
-            let editingRow = null;
+    document.addEventListener('DOMContentLoaded', function () {
+        const cards = document.querySelectorAll('.card-click');
+        const tableSection = document.getElementById('categoryDataSection');
+        const title = document.getElementById('categoryTitle');
 
-            cards.forEach(card => {
-                card.addEventListener('click', function() {
-                    const category = this.dataset.category;
+        cards.forEach(card => {
+            card.addEventListener('click', function () {
+                const category = this.dataset.category;
 
-                    fetch(`/admin/address-category-users?category=${category}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            tableSection.innerHTML = '';
-                            title.innerText =
-                                `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
-                            title.classList.add('mb-4');
-                            tableSection.appendChild(title);
+                fetch(`/admin/address-category-users?category=${category}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        tableSection.innerHTML = '';
+                        title.innerText = `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
+                        title.classList.add('mb-4');
+                        tableSection.appendChild(title);
 
-                            if (Object.keys(data).length === 0) {
-                                tableSection.innerHTML +=
-                                    `<tr><td colspan="7" class="text-center">No users found.</td></tr>`;
-                                return;
-                            }
+                        if (Object.keys(data).length === 0) {
+                            tableSection.innerHTML += `<div class="text-center">No users found.</div>`;
+                            return;
+                        }
 
-                            const tableFormat = `
-                        <div class="table-responsive">
-                            <table class="table table-hover table-bordered" id="apartmentListTable">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Apartment Name</th>
-                                        <th>User Count</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${Object.entries(data).map(([apartment, users], index) => `
-                                            <tr class="apartment-row" data-apartment="${apartment}">
+                        const tableFormat = `
+                            <div class="table-responsive">
+                                <table class="table table-hover table-bordered" id="apartmentListTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Apartment Name</th>
+                                            <th>User Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${Object.entries(data).map(([apartment, users], index) => `
+                                            <tr class="apartment-row" style="cursor:pointer;" onclick="window.location.href='/admin/apartment-users/${encodeURIComponent(apartment)}'">
                                                 <td>${index + 1}</td>
                                                 <td>${apartment}</td>
                                                 <td>${users.length}</td>
                                             </tr>
                                         `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    `;
+                                    </tbody>
+                                </table>
+                            </div>
+                        `;
 
-                            tableSection.insertAdjacentHTML('beforeend', tableFormat);
-                            tableSection.style.display = 'block';
-
-                            document.querySelectorAll('.apartment-row').forEach(row => {
-                                row.addEventListener('click', function() {
-                                    const apartmentName = this.dataset
-                                    .apartment;
-                                    const users = data[apartmentName];
-
-                                    const tableHtml = `
-                                <div class="table-responsive mt-4">
-                                    <table class="table table-bordered">
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th class="col-name">Name</th>
-                                                <th class="col-mobile">Mobile Number</th>
-                                                <th class="col-apartment">Apartment Name</th>
-                                                <th class="col-flat">Flat/Plot</th>
-                                                <th class="col-rider">Rider Name</th>
-                                                <th>Action</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            ${users.map((user, index) => `
-                                                    <tr data-row-id="${user.address_id}">
-                                                        <td>${index + 1}</td>
-                                                        <td class="col-name">${user.name}</td>
-                                                        <td>${user.mobile_number}</td>
-                                                        <td class="col-apartment">${user.apartment_name}</td>
-                                                        <td class="col-flat">${user.apartment_flat_plot}</td>
-                                                        <td>${user.rider_name}</td>
-                                                        <td>
-                                                            <button class="btn btn-sm btn-primary edit-btn"
-                                                                data-id="${user.address_id}"
-                                                                data-userid="${user.user_id}"
-                                                                data-username="${user.name}"
-                                                                data-name="${user.apartment_name}"
-                                                                data-flat="${user.apartment_flat_plot}">
-                                                                <i class="bi bi-pencil-square"></i>
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                `).join('')}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            `;
-
-                                    const tableWrapper = document.createElement(
-                                        'div');
-                                    tableWrapper.innerHTML = tableHtml;
-                                    tableSection.appendChild(tableWrapper);
-
-                                    tableWrapper.scrollIntoView({
-                                        behavior: 'smooth'
-                                    });
-                                });
-                            });
-                        });
-                });
-            });
-
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.edit-btn')) {
-                    const btn = e.target.closest('.edit-btn');
-                    const row = btn.closest('tr');
-                    editingRow = row;
-
-                    document.getElementById('editAddressId').value = btn.dataset.id;
-                    document.getElementById('editUserId').value = btn.dataset.userid;
-                    document.getElementById('editUserName').value = btn.dataset.username;
-                    document.getElementById('editApartmentName').value = btn.dataset.name;
-                    document.getElementById('editFlatPlot').value = btn.dataset.flat;
-
-                    modal.show();
-                }
-            });
-
-            editForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(editForm);
-
-                fetch("{{ route('admin.address.update') }}", {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': formData.get('_token'),
-                            'Accept': 'application/json',
-                        },
-                        body: formData
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        modal.hide();
-                        Swal.fire({
-                            title: 'Success!',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        });
-
-                        if (editingRow) {
-                            const updatedName = document.getElementById('editUserName').value;
-                            const updatedApartment = document.getElementById('editApartmentName').value;
-                            const updatedFlat = document.getElementById('editFlatPlot').value;
-
-                            editingRow.querySelector('.col-name').innerText = updatedName;
-                            editingRow.querySelector('.col-apartment').innerText = updatedApartment;
-                            editingRow.querySelector('.col-flat').innerText = updatedFlat;
-
-                            const editBtn = editingRow.querySelector('.edit-btn');
-                            editBtn.dataset.username = updatedName;
-                            editBtn.dataset.name = updatedApartment;
-                            editBtn.dataset.flat = updatedFlat;
-                        }
-
-                        editingRow = null;
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        Swal.fire('Error', 'Something went wrong.', 'error');
+                        tableSection.insertAdjacentHTML('beforeend', tableFormat);
+                        tableSection.style.display = 'block';
                     });
             });
         });
-    </script>
+    });
+</script>
+
 @endsection

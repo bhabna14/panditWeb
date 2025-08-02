@@ -682,6 +682,41 @@ public function getAddressUsersByCategory(Request $request)
 
     return response()->json($grouped);
 }
+public function viewApartmentUsers($apartment)
+{
+    $users = \App\Models\UserAddress::with(['user.orders.rider'])
+        ->where('apartment_name', $apartment)
+        ->get();
+
+    $userData = $users->map(function ($address) {
+        $user = $address->user;
+        $riderName = '—';
+
+        if ($user && $user->orders->count()) {
+            foreach ($user->orders as $order) {
+                if ($order->rider) {
+                    $riderName = $order->rider->rider_name ?? '—';
+                    break;
+                }
+            }
+        }
+
+        return [
+            'address_id' => $address->id,
+            'user_id' => $user?->userid,
+            'name' => $user?->name ?? '—',
+            'mobile_number' => $user?->mobile_number ?? '—',
+            'apartment_name' => $address->apartment_name ?? '—',
+            'apartment_flat_plot' => $address->apartment_flat_plot ?? '—',
+            'rider_name' => $riderName,
+        ];
+    });
+
+    return view('admin.address-wise-user', [
+        'apartment' => $apartment,
+        'users' => $userData,
+    ]);
+}
 
 public function updateAddress(Request $request)
 {

@@ -417,6 +417,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/address-categories', 'showAddressByCategory')->name('admin.address.categories');
         Route::get('/address-category-users','getAddressUsersByCategory')->name('admin.address.category.users');
         Route::post('/address-update','updateAddress')->name('admin.address.update');
+        Route::get('/apartment-users/{apartment}', 'viewApartmentUsers')->name('admin.apartment.users');
 
     });
     
