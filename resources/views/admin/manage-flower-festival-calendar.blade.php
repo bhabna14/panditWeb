@@ -82,7 +82,7 @@
                                         <td>{{ $festival->related_flower }}</td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-primary view-package-btn"
-                                                data-bs-toggle="modal" data-bs-target="#packageModal{{ $offer->id }}">
+                                                data-bs-toggle="modal" data-bs-target="#packageModal{{ $festival->id }}">
                                                 View Packages
                                             </button>
                                         </td>
@@ -100,22 +100,22 @@
                             </tbody>
                         </table>
 
-                        @foreach ($offers as $offer)
+                        @foreach ($festivals as $festival)
                             <!-- Package List Modal -->
-                            <div class="modal fade" id="packageModal{{ $offer->id }}" tabindex="-1"
-                                aria-labelledby="packageModalLabel{{ $offer->id }}" aria-hidden="true">
+                            <div class="modal fade" id="packageModal{{ $festival->id }}" tabindex="-1"
+                                aria-labelledby="packageModalLabel{{ $festival->id }}" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content shadow-lg border-0">
                                         <div class="modal-header bg-primary text-white">
-                                            <h5 class="modal-title" id="packageModalLabel{{ $offer->id }}">Package Names
+                                            <h5 class="modal-title" id="packageModalLabel{{ $festival->id }}">Package Names
                                             </h5>
                                             <button type="button" class="btn-close btn-close-white"
                                                 data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            @if (!empty($offer->package_names))
+                                            @if (!empty($festival->package_names))
                                                 <ul class="mb-0">
-                                                    @foreach (explode(',', $offer->package_names) as $packageName)
+                                                    @foreach (explode(',', $festival->package_names) as $packageName)
                                                         <li>{{ trim($packageName) }}</li>
                                                     @endforeach
                                                 </ul>

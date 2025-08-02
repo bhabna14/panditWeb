@@ -88,7 +88,7 @@ public function manageFestivalCalendar()
        foreach ($festivals as $festival) {
         $productIds = explode(',', $festival->product_id ?? '');
         $productNames = FlowerProduct::whereIn('product_id', $productIds)->pluck('name')->toArray();
-        $offer->package_names = implode(', ', $productNames); // Attach for use in view
+        $festival->package_names = implode(', ', $productNames); // Attach for use in view
         }
 
         $packages = FlowerProduct::where('category', 'package')->where('status', 'active')->get();
