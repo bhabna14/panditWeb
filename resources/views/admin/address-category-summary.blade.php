@@ -117,10 +117,8 @@
             const tableSection = document.getElementById('categoryDataSection');
             const tableBody = document.querySelector('#categoryUserTable tbody');
             const title = document.getElementById('categoryTitle');
+            let editingRow = null;
 
-            let editingRow = null; // holds the row DOM element being edited
-
-            // Handle card click: fetch users by place category
             cards.forEach(card => {
                 card.addEventListener('click', function() {
                     const category = this.dataset.category;
@@ -128,68 +126,72 @@
                     fetch(`/admin/address-category-users?category=${category}`)
                         .then(res => res.json())
                         .then(data => {
-                            tableBody.innerHTML = '';
+                            tableSection.innerHTML = '';
                             title.innerText =
                                 `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
+                            title.classList.add('mb-4');
+                            tableSection.appendChild(title);
 
                             if (Object.keys(data).length === 0) {
-                                tableBody.innerHTML =
+                                tableSection.innerHTML +=
                                     `<tr><td colspan="7" class="text-center">No users found.</td></tr>`;
                                 return;
                             }
 
-                            // Create cards for each apartment
-                            const cardContainer = document.createElement('div');
-                            cardContainer.className = 'row g-3 mb-4';
-
-                            for (const [apartment, users] of Object.entries(data)) {
-                                const apartmentCard = `
-                        <div class="col-md-4">
-                            <div class="card shadow-sm apartment-card" data-apartment="${apartment}">
-                                <div class="card-body text-center" style="cursor: pointer;">
-                                    <h5 class="card-title">${apartment}</h5>
-                                    <p class="card-text display-6">${users.length}</p>
-                                </div>
-                            </div>
+                            const tableFormat = `
+                        <div class="table-responsive">
+                            <table class="table table-hover table-bordered" id="apartmentListTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Apartment Name</th>
+                                        <th>User Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${Object.entries(data).map(([apartment, users], index) => `
+                                            <tr class="apartment-row" data-apartment="${apartment}">
+                                                <td>${index + 1}</td>
+                                                <td>${apartment}</td>
+                                                <td>${users.length}</td>
+                                            </tr>
+                                        `).join('')}
+                                </tbody>
+                            </table>
                         </div>
                     `;
-                                cardContainer.insertAdjacentHTML('beforeend', apartmentCard);
-                            }
 
-                            tableSection.innerHTML = ''; // Clear previous section
-                            tableSection.appendChild(title);
-                            tableSection.appendChild(cardContainer);
+                            tableSection.insertAdjacentHTML('beforeend', tableFormat);
+                            tableSection.style.display = 'block';
 
-                            // Handle click on each apartment card
-                            document.querySelectorAll('.apartment-card').forEach(card => {
-                                card.addEventListener('click', function() {
+                            document.querySelectorAll('.apartment-row').forEach(row => {
+                                row.addEventListener('click', function() {
                                     const apartmentName = this.dataset
-                                        .apartment;
+                                    .apartment;
                                     const users = data[apartmentName];
 
-                                    // Render table for selected apartment
                                     const tableHtml = `
-                            <div class="table-responsive mt-4">
-                                <table class="table table-bordered">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>Name</th>
-                                            <th>Mobile Number</th>
-                                            <th>Apartment Name</th>
-                                            <th>Flat/Plot</th>
-                                            <th>Rider Name</th>
-                                            <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${users.map((user, index) => `
-                                                    <tr>
+                                <div class="table-responsive mt-4">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th class="col-name">Name</th>
+                                                <th class="col-mobile">Mobile Number</th>
+                                                <th class="col-apartment">Apartment Name</th>
+                                                <th class="col-flat">Flat/Plot</th>
+                                                <th class="col-rider">Rider Name</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${users.map((user, index) => `
+                                                    <tr data-row-id="${user.address_id}">
                                                         <td>${index + 1}</td>
-                                                        <td>${user.name}</td>
+                                                        <td class="col-name">${user.name}</td>
                                                         <td>${user.mobile_number}</td>
-                                                        <td>${user.apartment_name}</td>
-                                                        <td>${user.apartment_flat_plot}</td>
+                                                        <td class="col-apartment">${user.apartment_name}</td>
+                                                        <td class="col-flat">${user.apartment_flat_plot}</td>
                                                         <td>${user.rider_name}</td>
                                                         <td>
                                                             <button class="btn btn-sm btn-primary edit-btn"
@@ -203,36 +205,30 @@
                                                         </td>
                                                     </tr>
                                                 `).join('')}
-                                    </tbody>
-                                </table>
-                            </div>
-                        `;
+                                        </tbody>
+                                    </table>
+                                </div>
+                            `;
 
-                                    // Append table below cards
                                     const tableWrapper = document.createElement(
                                         'div');
                                     tableWrapper.innerHTML = tableHtml;
                                     tableSection.appendChild(tableWrapper);
 
-                                    tableSection.scrollIntoView({
+                                    tableWrapper.scrollIntoView({
                                         behavior: 'smooth'
                                     });
                                 });
                             });
-
-                            tableSection.style.display = 'block';
                         });
                 });
             });
 
-
-            // Handle modal trigger: populate fields
             document.addEventListener('click', function(e) {
                 if (e.target.closest('.edit-btn')) {
                     const btn = e.target.closest('.edit-btn');
                     const row = btn.closest('tr');
-
-                    editingRow = row; // store reference to row being edited
+                    editingRow = row;
 
                     document.getElementById('editAddressId').value = btn.dataset.id;
                     document.getElementById('editUserId').value = btn.dataset.userid;
@@ -244,7 +240,6 @@
                 }
             });
 
-            // Handle modal form submit
             editForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 const formData = new FormData(editForm);
@@ -267,7 +262,6 @@
                             confirmButtonText: 'OK'
                         });
 
-                        // Update table row content
                         if (editingRow) {
                             const updatedName = document.getElementById('editUserName').value;
                             const updatedApartment = document.getElementById('editApartmentName').value;
@@ -277,14 +271,13 @@
                             editingRow.querySelector('.col-apartment').innerText = updatedApartment;
                             editingRow.querySelector('.col-flat').innerText = updatedFlat;
 
-                            // Also update data attributes so modal shows updated data next time
                             const editBtn = editingRow.querySelector('.edit-btn');
                             editBtn.dataset.username = updatedName;
                             editBtn.dataset.name = updatedApartment;
                             editBtn.dataset.flat = updatedFlat;
                         }
 
-                        editingRow = null; // reset
+                        editingRow = null;
                     })
                     .catch(error => {
                         console.error(error);
