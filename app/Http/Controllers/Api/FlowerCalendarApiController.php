@@ -17,12 +17,6 @@ use Illuminate\Http\JsonResponse;
 class FlowerCalendarApiController extends Controller
 {
 
-  use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\URL;
-use App\Models\FlowerCalendor;
-use App\Models\FlowerProduct;
-
 public function getFestivalCalendar(): JsonResponse
 {
     try {
