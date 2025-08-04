@@ -690,6 +690,7 @@ public function getAddressUsersByCategory(Request $request)
 
     return response()->json($grouped);
 }
+
 public function viewApartmentUsers($apartment)
 {
     $users = \App\Models\UserAddress::with(['user.orders.rider'])
