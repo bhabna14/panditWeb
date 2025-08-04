@@ -606,7 +606,7 @@ class AdminController extends Controller
                 ->distinct('apartment_name')
                 ->count('apartment_name');
         } else {
-            $addressCounts[$category] = UserAddress::where('place_category', $category)->count();
+            $addressCounts[$category] = UserAddress::where('place_category', $category)->distinct('apartment_name')->count();
         }
     }
 
