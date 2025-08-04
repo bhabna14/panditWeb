@@ -605,6 +605,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::post('/updatepromonation/{id}', 'updatepromonation')->name('updatepromonation');
         Route::delete('/deletepromonation/{id}', 'deletepromonation')->name('deletepromonation');
     });
+
     Route::get('/send-notification', [AdminNotificationController::class, 'create'])->name('admin.notification.create');
     Route::post('/send-notification', [AdminNotificationController::class, 'send'])->name('admin.notification.send');
     Route::delete('/notifications/{id}', [AdminNotificationController::class, 'delete'])->name('admin.notifications.delete');
@@ -626,7 +627,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/existing-user', 'existingUser')->name('existingUser');
         Route::post('/save-demo-order-details', 'handleUserData')->name('saveDemoOrderDetails');
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
-       
     });
 
     Route::controller(UserCustomizeOrderController::class)->group(function() {
@@ -749,7 +749,6 @@ Route::controller(AreaController::class)->group(function() {
     Route::put('/pandit/update-poojaarea/{id}','updatePoojaArea')->name('update.poojaarea');
 });
 
-
 // pandit bank details
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(BankController::class)->group(function() {
@@ -765,7 +764,6 @@ Route::group(['prefix' => 'pandit'], function () {
     Route::controller(AddressController::class)->group(function() {
         Route::get('/address', 'address')->name('address');
         Route::post('/saveaddress', 'saveaddress');
-       
     });
 });
 
@@ -815,7 +813,7 @@ Route::controller(MarketingVisitPlaceController::class)->group(function() {
         Route::post('/save-marketing-visit-place', 'storeVisitPlace')->name('marketing.visit.place.store');
         Route::get('/manage-marketing-visit-place','manageVisitPlace')->name('admin.visitPlace');
         Route::get('/visit-place/edit/{id}',  'editVisitPlace')->name('admin.editVisitPlace');
-Route::post('/visit-place/update/{id}', 'updateVisitPlace')->name('admin.updateVisitPlace');
+        Route::post('/visit-place/update/{id}', 'updateVisitPlace')->name('admin.updateVisitPlace');
 });
 
 

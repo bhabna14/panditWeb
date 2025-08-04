@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use App\Models\UserDevice;
 
 
 class OtpController extends Controller
@@ -183,42 +184,54 @@ class OtpController extends Controller
         }
     }
 
-    public function verifyOtp(Request $request)
-    {
-        $request->validate([
-            'phoneNumber' => 'required|string',
-            'otp' => 'required|string'
-        ]);
+public function verifyOtp(Request $request)
+{
+    $request->validate([
+        'phoneNumber' => 'required|string',
+        'otp' => 'required|string',
+        'device_id' => 'required|string',
+        'platform' => 'required|string',
+        'device_model' => 'required|string',
+    ]);
 
-        // Find user by phone number
-        $user = User::where('mobile_number', $request->phoneNumber)->first();
+    // Find user by phone number
+    $user = User::where('mobile_number', $request->phoneNumber)->first();
 
-        if (!$user) {
-            return response()->json([
-                'message' => 'Mobile number not found. Please request OTP first.'
-            ], 404);
-        }
-
-        // Check OTP match
-        if ($user->otp !== $request->otp) {
-            return response()->json([
-                'message' => 'Invalid OTP.'
-            ], 401);
-        }
-
-        // OTP is valid — clear it
-        $user->otp = null;
-        $user->save();
-
-        // Generate Sanctum token
-        $token = $user->createToken('API Token')->plainTextToken;
-
+    if (!$user) {
         return response()->json([
-            'message' => 'User authenticated successfully.',
-            'token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user
-        ], 200);
+            'message' => 'Mobile number not found. Please request OTP first.'
+        ], 404);
     }
+
+    // Check OTP match
+    if ($user->otp !== $request->otp) {
+        return response()->json([
+            'message' => 'Invalid OTP.'
+        ], 401);
+    }
+
+    // OTP is valid — clear it
+    $user->otp = null;
+    $user->save();
+
+    // Store device info
+    UserDevice::updateOrCreate(
+        ['device_id' => $request->device_id, 'user_id' => $user->userid], // match by device + user
+        [
+            'platform' => $request->platform,
+            'device_model' => $request->device_model,
+        ]
+    );
+
+    // Generate Sanctum token
+    $token = $user->createToken('API Token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'User authenticated successfully.',
+        'token' => $token,
+        'token_type' => 'Bearer',
+        'user' => $user
+    ], 200);
+}
 
 }

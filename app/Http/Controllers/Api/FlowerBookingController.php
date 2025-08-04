@@ -178,15 +178,14 @@ public function storerequest(Request $request)
         }
 
         $deviceTokens = UserDevice::where('user_id', $user->userid)
-    ->whereNotNull('device_id')
-    ->pluck('device_id')
-    ->filter()
-    ->toArray();
+            ->whereNotNull('device_id')
+            ->pluck('device_id')
+            ->filter()
+            ->toArray();
 
-if (empty($deviceTokens)) {
-    \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
-}
-
+        if (empty($deviceTokens)) {
+            \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+        }
 
         if (!empty($deviceTokens)) {
             $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
@@ -220,12 +219,12 @@ if (empty($deviceTokens)) {
         ];
 
         \Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
-try {
-    Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
-    \Log::info('Email sent successfully to all recipients.');
-} catch (\Exception $e) {
-    \Log::error('Failed to send email.', ['error' => $e->getMessage()]);
-}
+    try {
+        Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+        \Log::info('Email sent successfully to all recipients.');
+    } catch (\Exception $e) {
+        \Log::error('Failed to send email.', ['error' => $e->getMessage()]);
+    }
         \Log::info('Email sent successfully to all recipients.');
 
         // Twilio WhatsApp Notification Logic
