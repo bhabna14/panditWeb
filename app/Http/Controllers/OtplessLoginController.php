@@ -18,63 +18,103 @@ class OtplessLoginController extends Controller
         return view('otp-login');
     }
 
-    public function sendOtp(Request $request)
-    {
-        // Validate the phone number
-        $validator = Validator::make($request->all(), [
-            'phone' => 'required|digits:10', // Assuming phone numbers should be 10 digits
-        ]);
-    
-        if ($validator->fails()) {
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
-    
-        $phoneNumber = $request->input('phone');
-        $countryCode = $request->input('country_code');
-        $fullPhoneNumber = $countryCode . $phoneNumber;
-    
-        $client = new Client();
-    
-        $url = rtrim($this->apiUrl, '/') . '/auth/otp/v1/send';
-    
-        try {
-            $response = $client->post($url, [
-                'headers' => [
-                    'Content-Type'  => 'application/json',
-                    'clientId'      => $this->clientId,
-                    'clientSecret'  => $this->clientSecret,
-                ],
-                'json' => [
-                    'phoneNumber' => $fullPhoneNumber,
-                ],
-            ]);
-    
-            $body = json_decode($response->getBody(), true);
-    
-            if (isset($body['orderId'])) {
-                $orderId = $body['orderId'];
-    
-                // Store $orderId in session or pass it along to OTP verification form
-                session(['otp_order_id' => $orderId]);
-                session(['otp_phone' => $fullPhoneNumber]);
-    
-                return redirect()->back()->with('otp_sent', true)->with('message', 'OTP sent successfully');
-            } else {
-                return redirect()->back()->with('error', 'Failed to send OTP. Please try again.');
-            }
-        } catch (RequestException $e) {
-            $response = $e->getResponse();
-            $responseBody = json_decode($response->getBody()->getContents(), true);
-            $errorMessage = $responseBody['message'] ?? 'Failed to send OTP due to an error.';
-    
-            return redirect()->back()->with('error', $errorMessage);
-        }
-    }
-    
-   
+ public function sendOtp(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'phone' => 'required|digits:10', // Assuming 10-digit phone number
+    ]);
 
+    if ($validator->fails()) {
+        return redirect()->back()->withErrors($validator)->withInput();
+    }
+
+    $phone = $request->input('phone');
+    $otp = rand(100000, 999999);
+    $shortToken = Str::random(6); // Used in button
+
+    // Step 2: Find or create user
+    $user = User::where('mobile_number', $phone)->first();
+    if ($user) {
+        $user->otp = $otp;
+        $user->save();
+        $status = 'existing';
+    } else {
+        $user = User::create([
+            'mobile_number' => $phone,
+            'otp' => $otp,
+            'userid' => 'USER' . rand(10000, 99999),
+        ]);
+        $status = 'new';
+    }
+
+    // Step 3: Prepare MSG91 WhatsApp payload
+    $payload = [
+        "integrated_number" => env('MSG91_WA_NUMBER'),
+        "content_type" => "template",
+        "payload" => [
+            "messaging_product" => "whatsapp",
+            "to" => $phone,
+            "type" => "template",
+            "template" => [
+                "name" => env('MSG91_WA_TEMPLATE'),
+                "language" => [
+                    "code" => "en",
+                    "policy" => "deterministic"
+                ],
+                "namespace" => env('MSG91_WA_NAMESPACE'),
+                "components" => [
+                    [
+                        "type" => "body",
+                        "parameters" => [
+                            [
+                                "type" => "text",
+                                "text" => (string) $otp
+                            ]
+                        ]
+                    ],
+                    [
+                        "type" => "button",
+                        "sub_type" => "url",
+                        "index" => 0,
+                        "parameters" => [
+                            [
+                                "type" => "text",
+                                "text" => $shortToken
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    ];
+
+    // Step 4: Send request to MSG91
+    try {
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'authkey' => env('MSG91_AUTHKEY'),
+        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
+
+        $result = $response->json();
+
+        if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+            return redirect()->back()->with('error', 'Unauthorized: Check MSG91 credentials or template settings.');
+        }
+
+        // Step 5: Store OTP session data (if needed for verify step)
+        session([
+            'otp_phone' => $phone,
+        ]);
+
+        return redirect()->back()->with('otp_sent', true)->with('message', 'OTP sent successfully via WhatsApp.');
+
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Failed to send OTP: ' . $e->getMessage());
+    }
+}
 public function verifyOtp(Request $request)
 {
+    // Step 1: Validate input
     $validator = Validator::make($request->all(), [
         'otp' => 'required|digits:6',
         'device_id' => 'required|string',
@@ -86,6 +126,7 @@ public function verifyOtp(Request $request)
         return redirect()->back()->withErrors($validator)->withInput();
     }
 
+    // Step 2: Get phone from session
     $phoneNumber = session('otp_phone');
     $otp = $request->input('otp');
 
@@ -93,21 +134,23 @@ public function verifyOtp(Request $request)
         return redirect()->back()->with('error', 'Session expired. Please request a new OTP.');
     }
 
+    // Step 3: Fetch user by mobile number
     $user = User::where('mobile_number', $phoneNumber)->first();
 
     if (!$user) {
-        return redirect()->back()->with('error', 'Mobile number not found. Please request OTP first.');
+        return redirect()->back()->with('error', 'Mobile number not found. Please request OTP again.');
     }
 
+    // Step 4: Check OTP
     if ($user->otp !== $otp) {
         return redirect()->back()->with('error', 'Invalid OTP. Please try again.');
     }
 
-    // OTP matched — clear it
+    // Step 5: OTP matched — clear OTP
     $user->otp = null;
     $user->save();
 
-    // Save device info
+    // Step 6: Save device info
     UserDevice::updateOrCreate(
         ['device_id' => $request->device_id, 'user_id' => $user->userid],
         [
@@ -116,14 +159,17 @@ public function verifyOtp(Request $request)
         ]
     );
 
-    // Authenticate the user using a custom guard or default
+    // Step 7: Login the user using custom guard
     Auth::guard('users')->login($user);
 
-    $referer = session()->pull('login_referer', route('userindex'));
+    // Optional: Create Sanctum token if you need it later (e.g., for frontend JavaScript usage)
+    // $token = $user->createToken('Web Token')->plainTextToken;
+    // session(['auth_token' => $token]);
 
+    // Step 8: Redirect to referer or default
+    $referer = session()->pull('login_referer', route('userindex'));
     return redirect(urldecode($referer))->with('success', 'User authenticated successfully.');
 }
-
 }
 
 
