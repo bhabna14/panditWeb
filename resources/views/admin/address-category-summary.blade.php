@@ -40,6 +40,7 @@
                     </div>
                 </div>
             @endforeach
+
         </div>
 
         <div class="mt-5" id="categoryDataSection" style="display: none;">
@@ -57,7 +58,9 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody>
+
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -110,29 +113,31 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const cards = document.querySelectorAll('.card-click');
-        const tableSection = document.getElementById('categoryDataSection');
-        const title = document.getElementById('categoryTitle');
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card-click');
+            const tableSection = document.getElementById('categoryDataSection');
+            const title = document.getElementById('categoryTitle');
 
-        cards.forEach(card => {
-            card.addEventListener('click', function () {
-                const category = this.dataset.category;
+            cards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const category = this.dataset.category;
 
-                fetch(`/admin/address-category-users?category=${category}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        tableSection.innerHTML = '';
-                        title.innerText = `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
-                        title.classList.add('mb-4');
-                        tableSection.appendChild(title);
+                    fetch(`/admin/address-category-users?category=${category}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            tableSection.innerHTML = '';
+                            title.innerText =
+                                `${category.charAt(0).toUpperCase() + category.slice(1)} Users`;
+                            title.classList.add('mb-4');
+                            tableSection.appendChild(title);
 
-                        if (Object.keys(data).length === 0) {
-                            tableSection.innerHTML += `<div class="text-center">No users found.</div>`;
-                            return;
-                        }
+                            if (Object.keys(data).length === 0) {
+                                tableSection.innerHTML +=
+                                    `<div class="text-center">No users found.</div>`;
+                                return;
+                            }
 
-                        const tableFormat = `
+                            const tableFormat = `
                             <div class="table-responsive">
                                 <table class="table table-hover table-bordered" id="apartmentListTable">
                                     <thead class="table-light">
@@ -144,23 +149,22 @@
                                     </thead>
                                     <tbody>
                                         ${Object.entries(data).map(([apartment, users], index) => `
-                                            <tr class="apartment-row" style="cursor:pointer;" onclick="window.location.href='/admin/apartment-users/${encodeURIComponent(apartment)}'">
-                                                <td>${index + 1}</td>
-                                                <td>${apartment}</td>
-                                                <td>${users.length}</td>
-                                            </tr>
-                                        `).join('')}
+                                                <tr class="apartment-row" style="cursor:pointer;" onclick="window.location.href='/admin/apartment-users/${encodeURIComponent(apartment)}'">
+                                                    <td>${index + 1}</td>
+                                                    <td>${apartment}</td>
+                                                    <td>${users.length}</td>
+                                                </tr>
+                                            `).join('')}
                                     </tbody>
                                 </table>
                             </div>
                         `;
 
-                        tableSection.insertAdjacentHTML('beforeend', tableFormat);
-                        tableSection.style.display = 'block';
-                    });
+                            tableSection.insertAdjacentHTML('beforeend', tableFormat);
+                            tableSection.style.display = 'block';
+                        });
+                });
             });
         });
-    });
-</script>
-
+    </script>
 @endsection

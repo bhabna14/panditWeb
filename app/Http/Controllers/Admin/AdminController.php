@@ -594,19 +594,27 @@ class AdminController extends Controller
     }
 
    public function showAddressByCategory()
-    {
-        $categories = ['apartment', 'individual', 'temple', 'business'];
+{
+    $categories = ['apartment', 'individual', 'temple', 'business'];
 
-        $addressCounts = [];
+    $addressCounts = [];
 
-        foreach ($categories as $category) {
+    foreach ($categories as $category) {
+        if ($category === 'apartment') {
+            // Count distinct apartment names
+            $addressCounts[$category] = UserAddress::where('place_category', 'apartment')
+                ->distinct('apartment_name')
+                ->count('apartment_name');
+        } else {
             $addressCounts[$category] = UserAddress::where('place_category', $category)->count();
         }
-            $apartments = Apartment::orderBy('apartment_name')->get();
-
-
-        return view('admin.address-category-summary', compact('addressCounts','apartments'));
     }
+
+    // Still load the full list of apartments for the view
+    $apartments = Apartment::orderBy('apartment_name')->get();
+
+    return view('admin.address-category-summary', compact('addressCounts', 'apartments'));
+}
 
 //  public function getAddressUsersByCategory(Request $request)
 // {
