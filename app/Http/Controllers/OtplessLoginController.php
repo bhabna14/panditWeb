@@ -13,7 +13,7 @@ use GuzzleHttp\Exception\RequestException;
 
 class OtplessLoginController extends Controller
 {
-    //
+
     public function otplogin(){
         return view('otp-login');
     }
@@ -112,6 +112,7 @@ class OtplessLoginController extends Controller
         return redirect()->back()->with('error', 'Failed to send OTP: ' . $e->getMessage());
     }
 }
+
 public function verifyOtp(Request $request)
 {
     // Step 1: Validate input
@@ -171,5 +172,3 @@ public function verifyOtp(Request $request)
     return redirect(urldecode($referer))->with('success', 'User authenticated successfully.');
 }
 }
-
-
