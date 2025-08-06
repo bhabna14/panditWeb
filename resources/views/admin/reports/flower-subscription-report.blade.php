@@ -54,7 +54,7 @@
     </div>
 
     <!-- Total Price Card -->
-    <div class="col-md-3">
+    <div class="col-md-3" style="margin-top: 20px">
         <div class="card border-primary shadow-sm">
             <div class="card-body text-center">
                 <h6 class="card-title text-primary mb-1">Total Price</h6>
