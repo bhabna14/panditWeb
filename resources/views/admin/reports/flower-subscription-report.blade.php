@@ -77,40 +77,42 @@
 
     <!-- DataTable Initialization Script -->
     <script>
-        $(document).ready(function() {
-            var table = $('#file-datatable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('subscription.report') }}",
-                    data: function(d) {
-                        d.from_date = $('#from_date').val();
-                        d.to_date = $('#to_date').val();
-                    }
-                },
-                columns: [{
-                        data: null,
-                        name: 'customer_details',
-                        render: function(data, type, row) {
-                            let user = row.user || {};
-                            let order = row.order || {};
-                            let address = row.address || {};
-                            let locality = row.locality || '';
-                            let userId = user.userid ?? null;
-                            let orderId = order.order_id ?? null;
+    $(document).ready(function () {
+        var table = $('#file-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('subscription.report') }}",
+                data: function (d) {
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
+                }
+            },
+            columns: [
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        let user = row.user || {};
+                        let order = row.order || {};
+                        let address = row.address || {};
+                        let locality = row.locality || '';
+                        let userId = user.userid ?? null;
+                        let orderId = order.order_id ?? null;
 
-                            let tooltip = `
+                        let tooltip = `
                             <strong>Ord:</strong> ${orderId || 'N/A'}<br>
                             <strong>Name:</strong> ${user.name || 'N/A'}<br>
                             <strong>No:</strong> ${user.mobile_number || 'N/A'}
                         `;
 
-                            let modalId = `addressModal${orderId}`;
-                            let viewBtn = userId ?
-                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` :
-                                '';
+                        let modalId = `addressModal${orderId}`;
+                        let viewBtn = userId
+                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>`
+                            : '';
 
-                            let addressHtml = `
+                        let addressHtml = `
                             <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -133,7 +135,7 @@
                             </div>
                         `;
 
-                            return `
+                        return `
                             <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
                                 <strong>Ord:</strong> ${orderId}<br>
                                 <strong>Name:</strong> ${user.name}<br>
@@ -143,42 +145,38 @@
                             </div>
                             ${addressHtml}
                         `;
-                        }
-                    },
-                    {
-                        data: 'purchase_date',
-                        name: 'purchase_date',
-                        render: function(data) {
-                            return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data
-                                .end).format('DD MMM YYYY');
-                        }
-                    },
-                    {
-                        data: 'duration',
-                        name: 'duration',
-                        render: function(data) {
-                            return data + ' days';
-                        }
-                    },
-                    {
-                        data: 'price',
-                        name: 'price'
-                    },
-                    {
-                        data: 'status',
-                        name: 'status'
                     }
-                ]
-            });
-
-            $('#searchBtn').click(function() {
-                table.ajax.reload();
-            });
-
-            // Enable tooltips after draw
-            $('#file-datatable').on('draw.dt', function() {
-                $('[data-bs-toggle="tooltip"]').tooltip();
-            });
+                },
+                {
+                    data: 'purchase_date',
+                    render: function (data) {
+                        return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data.end).format('DD MMM YYYY');
+                    }
+                },
+                {
+                    data: 'duration',
+                    render: function (data) {
+                        return data + ' days';
+                    }
+                },
+                {
+                    data: 'price'
+                },
+                {
+                    data: 'status'
+                }
+            ]
         });
-    </script>
+
+        $('#searchBtn').click(function () {
+            table.ajax.reload();
+        });
+
+        // Re-enable tooltips after draw
+        $('#file-datatable').on('draw.dt', function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    });
+</script>
+
 @endsection
