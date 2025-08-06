@@ -52,6 +52,6 @@ class FlowerReportsController extends Controller
                 ->make(true);
         }
 
-        return view('report.subscription-report');
+        return view('admin.reports.flower-subscription-report');
     }
 }
