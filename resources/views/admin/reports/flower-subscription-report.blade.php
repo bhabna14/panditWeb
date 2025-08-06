@@ -77,42 +77,38 @@
 
     <!-- DataTable Initialization Script -->
     <script>
-    $(document).ready(function () {
-        var table = $('#file-datatable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('subscription.report') }}",
-                data: function (d) {
-                    d.from_date = $('#from_date').val();
-                    d.to_date = $('#to_date').val();
-                }
-            },
-            columns: [
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row) {
-                        let user = row.user || {};
-                        let order = row.order || {};
-                        let address = row.address || {};
-                        let locality = row.locality || '';
-                        let userId = user.userid ?? null;
-                        let orderId = order.order_id ?? null;
+        $(document).ready(function() {
+            var table = $('#file-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('subscription.report') }}",
+                    data: function(d) {
+                        d.from_date = $('#from_date').val();
+                        d.to_date = $('#to_date').val();
+                    }
+                },
+                columns: [{
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            const user = row.user || {};
+                            const address = user.address_details || {};
+                            const userId = user.userid ?? null;
 
-                        let tooltip = `
-                            <strong>Ord:</strong> ${orderId || 'N/A'}<br>
+                            const tooltip = `
                             <strong>Name:</strong> ${user.name || 'N/A'}<br>
                             <strong>No:</strong> ${user.mobile_number || 'N/A'}
                         `;
 
-                        let modalId = `addressModal${orderId}`;
-                        let viewBtn = userId
-                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>`
-                            : '';
+                            const modalId = `addressModal${userId}`;
 
-                        let addressHtml = `
+                            const viewBtn = userId ?
+                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` :
+                                '';
+
+                            const addressHtml = `
                             <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -121,7 +117,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <p><strong>Address:</strong> ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
+                                            <p><strong>Address:</strong> ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${address.locality || ''}</p>
                                             <p><strong>Landmark:</strong> ${address.landmark || ''}</p>
                                             <p><strong>Pin Code:</strong> ${address.pincode || ''}</p>
                                             <p><strong>City:</strong> ${address.city || ''}</p>
@@ -135,48 +131,46 @@
                             </div>
                         `;
 
-                        return `
+                            return `
                             <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
-                                <strong>Ord:</strong> ${orderId}<br>
-                                <strong>Name:</strong> ${user.name}<br>
-                                <strong>No:</strong> ${user.mobile_number}<br>
+                                <strong>Name:</strong> ${user.name || 'N/A'}<br>
+                                <strong>No:</strong> ${user.mobile_number || 'N/A'}<br>
                                 ${viewBtn}
                                 <br><button class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#${modalId}">View Address</button>
                             </div>
                             ${addressHtml}
                         `;
+                        }
+                    },
+                    {
+                        data: 'purchase_date',
+                        render: function(data) {
+                            return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data
+                                .end).format('DD MMM YYYY');
+                        }
+                    },
+                    {
+                        data: 'duration',
+                        render: function(data) {
+                            return data + ' days';
+                        }
+                    },
+                    {
+                        data: 'price'
+                    },
+                    {
+                        data: 'status'
                     }
-                },
-                {
-                    data: 'purchase_date',
-                    render: function (data) {
-                        return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data.end).format('DD MMM YYYY');
-                    }
-                },
-                {
-                    data: 'duration',
-                    render: function (data) {
-                        return data + ' days';
-                    }
-                },
-                {
-                    data: 'price'
-                },
-                {
-                    data: 'status'
-                }
-            ]
-        });
+                ]
+            });
 
-        $('#searchBtn').click(function () {
-            table.ajax.reload();
-        });
+            $('#searchBtn').click(function() {
+                table.ajax.reload();
+            });
 
-        // Re-enable tooltips after draw
-        $('#file-datatable').on('draw.dt', function () {
-            $('[data-bs-toggle="tooltip"]').tooltip();
+            $('#file-datatable').on('draw.dt', function() {
+                $('[data-bs-toggle="tooltip"]').tooltip();
+            });
         });
-    });
-</script>
-
+    </script>
 @endsection

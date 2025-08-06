@@ -19,7 +19,7 @@ use Carbon\Carbon;
 
 class FlowerReportsController extends Controller
 {
- public function subscriptionReport(Request $request)
+public function subscriptionReport(Request $request)
 {
     if ($request->ajax()) {
         $startOfMonth = Carbon::now()->startOfMonth();
