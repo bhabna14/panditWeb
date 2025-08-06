@@ -11,7 +11,7 @@
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome & Select2 CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -20,51 +20,48 @@
 
 {{-- SECTION: Content --}}
 @section('content')
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-header justify-content-between">
+        <div class="left-content">
+            <span class="main-content-title mg-b-0 mg-b-lg-1">Subscription Report</span>
+        </div>
+        <div class="justify-content-center mt-2">
+            <ol class="breadcrumb d-flex justify-content-between align-items-center">
+                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Report</a></li>
+            </ol>
+        </div>
+    </div>
 
-<!-- Breadcrumb -->
-<div class="breadcrumb-header justify-content-between">
-    <div class="left-content">
-        <span class="main-content-title mg-b-0 mg-b-lg-1">Subscription Report</span>
+    <!-- Filter Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <label for="from_date" class="form-label">From Date</label>
+            <input type="date" id="from_date" name="from_date" class="form-control">
+        </div>
+        <div class="col-md-3">
+            <label for="to_date" class="form-label">To Date</label>
+            <input type="date" id="to_date" name="to_date" class="form-control">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
+        </div>
     </div>
-    <div class="justify-content-center mt-2">
-        <ol class="breadcrumb d-flex justify-content-between align-items-center">
-            <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Report</a></li>
-        </ol>
-    </div>
-</div>
 
-<!-- Filter Row -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <label for="from_date" class="form-label">From Date</label>
-        <input type="date" id="from_date" name="from_date" class="form-control">
+    <!-- DataTable -->
+    <div class="table-responsive">
+        <table id="file-datatable" class="table table-bordered w-100">
+            <thead>
+                <tr>
+                    <th>Customer Details</th>
+                    <th>Purchase Date</th>
+                    <th>Duration</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </div>
-    <div class="col-md-3">
-        <label for="to_date" class="form-label">To Date</label>
-        <input type="date" id="to_date" name="to_date" class="form-control">
-    </div>
-    <div class="col-md-3 d-flex align-items-end">
-        <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
-    </div>
-</div>
-
-<!-- DataTable -->
-<div class="table-responsive">
-    <table id="file-datatable" class="table table-bordered w-100">
-        <thead>
-            <tr>
-                <th>Customer Details</th>
-                <th>Purchase Date</th>
-                <th>Duration</th>
-                <th>Price</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{-- Data loaded by DataTables AJAX --}}
-        </tbody>
-    </table>
-</div>
 @endsection
 
 {{-- SECTION: Scripts --}}
@@ -80,41 +77,108 @@
 
     <!-- DataTable Initialization Script -->
     <script>
-    $(document).ready(function () {
-        var table = $('#file-datatable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('subscription.report') }}",
-                data: function (d) {
-                    d.from_date = $('#from_date').val();
-                    d.to_date = $('#to_date').val();
-                }
-            },
-            columns: [
-                { data: 'customer_details', name: 'customer_details' },
-                { data: 'purchase_date', name: 'purchase_date' },
-                { data: 'duration', name: 'duration' },
-                { data: 'price', name: 'price' },
-                { data: 'status', name: 'status' },
-            ]
-        });
+        $(document).ready(function() {
+            var table = $('#file-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('subscription.report') }}",
+                    data: function(d) {
+                        d.from_date = $('#from_date').val();
+                        d.to_date = $('#to_date').val();
+                    }
+                },
+                columns: [{
+                        data: null,
+                        name: 'customer_details',
+                        render: function(data, type, row) {
+                            let user = row.user || {};
+                            let order = row.order || {};
+                            let address = row.address || {};
+                            let locality = row.locality || '';
+                            let userId = user.userid ?? null;
+                            let orderId = order.order_id ?? null;
 
-        $('#searchBtn').click(function () {
-            table.ajax.reload();
-        });
+                            let tooltip = `
+                            <strong>Ord:</strong> ${orderId || 'N/A'}<br>
+                            <strong>Name:</strong> ${user.name || 'N/A'}<br>
+                            <strong>No:</strong> ${user.mobile_number || 'N/A'}
+                        `;
 
-        // Enable tooltips after data load
-        $('#file-datatable').on('draw.dt', function () {
-            $('[data-bs-toggle="tooltip"]').tooltip();
-        });
-    });
-</script>
-<script>
-    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-        new bootstrap.Tooltip(tooltipTriggerEl)
-    });
-</script>
+                            let modalId = `addressModal${orderId}`;
+                            let viewBtn = userId ?
+                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` :
+                                '';
 
+                            let addressHtml = `
+                            <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title"><i class="fas fa-home"></i> Address Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p><strong>Address:</strong> ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${locality}</p>
+                                            <p><strong>Landmark:</strong> ${address.landmark || ''}</p>
+                                            <p><strong>Pin Code:</strong> ${address.pincode || ''}</p>
+                                            <p><strong>City:</strong> ${address.city || ''}</p>
+                                            <p><strong>State:</strong> ${address.state || ''}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                            return `
+                            <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
+                                <strong>Ord:</strong> ${orderId}<br>
+                                <strong>Name:</strong> ${user.name}<br>
+                                <strong>No:</strong> ${user.mobile_number}<br>
+                                ${viewBtn}
+                                <br><button class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#${modalId}">View Address</button>
+                            </div>
+                            ${addressHtml}
+                        `;
+                        }
+                    },
+                    {
+                        data: 'purchase_date',
+                        name: 'purchase_date',
+                        render: function(data) {
+                            return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data
+                                .end).format('DD MMM YYYY');
+                        }
+                    },
+                    {
+                        data: 'duration',
+                        name: 'duration',
+                        render: function(data) {
+                            return data + ' days';
+                        }
+                    },
+                    {
+                        data: 'price',
+                        name: 'price'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
+                    }
+                ]
+            });
+
+            $('#searchBtn').click(function() {
+                table.ajax.reload();
+            });
+
+            // Enable tooltips after draw
+            $('#file-datatable').on('draw.dt', function() {
+                $('[data-bs-toggle="tooltip"]').tooltip();
+            });
+        });
+    </script>
 @endsection
