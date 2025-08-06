@@ -28,6 +28,7 @@ public function subscriptionReport(Request $request)
             'users.addressDetails',
             'flowerProducts',
         ])
+        ->where('status', '!=', 'expired') // ✅ exclude expired
         ->orderBy('id', 'desc');
 
         // Use filter if provided
