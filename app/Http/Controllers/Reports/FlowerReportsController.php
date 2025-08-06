@@ -19,6 +19,7 @@ use Carbon\Carbon;
 
 class FlowerReportsController extends Controller
 {
+
 public function subscriptionReport(Request $request)
 {
     if ($request->ajax()) {
@@ -28,25 +29,52 @@ public function subscriptionReport(Request $request)
             'users.addressDetails',
             'flowerProducts',
         ])
-        ->where('status', '!=', 'expired') // ✅ exclude expired
+        ->where('status', '!=', 'expired')
         ->orderBy('id', 'desc');
 
-        // Use filter if provided
         if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('start_date', [$request->from_date, $request->to_date]);
         } else {
-            // Default to current month
             $startOfMonth = Carbon::now()->startOfMonth();
             $endOfMonth = Carbon::now()->endOfMonth();
             $query->whereBetween('start_date', [$startOfMonth, $endOfMonth]);
         }
 
-        // Calculate total price for this query
-        $totalPrice = $query->get()->sum(function ($subscription) {
+        // Total
+        $subscriptions = $query->get();
+
+        $totalPrice = $subscriptions->sum(function ($subscription) {
             return $subscription->order->total_price ?? 0;
         });
 
-        // Prepare DataTable
+        // New User Subscription Total Price (1 subscription only)
+        $newUserPrice = Subscription::whereDate('created_at', Carbon::today())
+            ->where('status', 'pending')
+            ->whereIn('user_id', function ($subQuery) {
+                $subQuery->select('user_id')
+                    ->from('subscriptions')
+                    ->groupBy('user_id')
+                    ->havingRaw('COUNT(*) = 1');
+            })
+            ->get()
+            ->sum(function ($sub) {
+                return $sub->order->total_price ?? 0;
+            });
+
+        // Renew Customer Total Price (order id occurs more than once)
+        $renewPrice = Subscription::whereDate('created_at', Carbon::today())
+            ->whereIn('order_id', function ($query) {
+                $query->select('order_id')
+                    ->from('subscriptions')
+                    ->groupBy('order_id')
+                    ->havingRaw('COUNT(order_id) > 1');
+            })
+            ->get()
+            ->sum(function ($sub) {
+                return $sub->order->total_price ?? 0;
+            });
+
+        // DataTable response
         $dataTable = DataTables::of($query)
             ->addColumn('user', function ($row) {
                 $user = $row->users;
@@ -76,6 +104,8 @@ public function subscriptionReport(Request $request)
 
         $json = $dataTable->getData(true);
         $json['total_price'] = $totalPrice;
+        $json['new_user_price'] = $newUserPrice;
+        $json['renew_user_price'] = $renewPrice;
 
         return response()->json($json);
     }
@@ -84,4 +114,21 @@ public function subscriptionReport(Request $request)
 }
 
 
+public function showRequests(Request $request)
+{
+
+    $query = FlowerRequest::with([
+        'order' => function ($query) {
+            $query->with('flowerPayments', 'delivery');
+        },
+        'flowerProduct',
+        'user',
+        'address.localityDetails',
+        'flowerRequestItems'
+    ])->orderBy('id', 'desc');
+
+   return view('admin.reports.flower-customize-report', compact(
+        'query',  
+            ));
+        }
 }
