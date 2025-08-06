@@ -222,7 +222,7 @@
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('report.subscription') }}">Subscription Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower Reports</a></li>
                     </ul>
                 </li>
