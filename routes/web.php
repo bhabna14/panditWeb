@@ -66,6 +66,8 @@ use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
 use App\Http\Controllers\Pandit\PoojaHistoryController;
 
+use App\Http\Controllers\Reports\FlowerReportsController;
+
 use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
 use Twilio\Rest\Client;
@@ -285,9 +287,9 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
     Route::get('/flower-orders', [FlowerOrderController::class, 'showOrders'])->name('admin.orders.index');
 // ✅ Route must match the request you're making
-Route::put('/subscriptions/{id}/updateDates', [FlowerOrderController::class, 'updateDates'])->name('admin.subscriptions.updateDates');
-Route::post('/subscriptions/{id}/update-status', [FlowerOrderController::class, 'updateStatus'])
-    ->name('admin.subscriptions.updateStatus');
+    Route::put('/subscriptions/{id}/updateDates', [FlowerOrderController::class, 'updateDates'])->name('admin.subscriptions.updateDates');
+    Route::post('/subscriptions/{id}/update-status', [FlowerOrderController::class, 'updateStatus'])
+        ->name('admin.subscriptions.updateStatus');
     Route::post('/subscriptions/{id}/update-pause-dates', [FlowerOrderController::class, 'updatePauseDates'])->name('admin.subscriptions.updatePauseDates');
 
 
@@ -816,5 +818,7 @@ Route::controller(MarketingVisitPlaceController::class)->group(function() {
         Route::post('/visit-place/update/{id}', 'updateVisitPlace')->name('admin.updateVisitPlace');
 });
 
-
-	
+Route::controller(FlowerReportsController::class)->group(function() {
+        Route::get('/report-subscription','reportSubscription')->name('report.subscription');
+        Route::get('/report-customize','reportCustomize')->name('report.customize');
+});

@@ -705,81 +705,81 @@ class FlowerOrderController extends Controller
             return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
         }
     }
-public function showRiderDetails($id)
-{
-    // Fetch rider details
-    $rider = RiderDetails::findOrFail($id);
 
-    // Fetch delivery history for the rider
-    $deliveryHistory = DeliveryHistory::with([
-        'order.user',
-        'order.flowerProduct',
-        'order.flowerPayments',
-        'order.address.localityDetails',
-        'rider'
-    ])
-    ->where('rider_id', $rider->rider_id)
-    ->orderBy('created_at', 'desc')
-    ->get();
+    public function showRiderDetails($id)
+    {
+        // Fetch rider details
+        $rider = RiderDetails::findOrFail($id);
 
-    // Add pickup history
-    $pickupHistory = FlowerPickupDetails::with([
-        'vendor',
-        'rider',
-        'flowerPickupItems',
-    ])
-    ->where('rider_id', $rider->rider_id)
-    ->orderBy('created_at', 'desc')
-    ->get();
+        // Fetch delivery history for the rider
+        $deliveryHistory = DeliveryHistory::with([
+            'order.user',
+            'order.flowerProduct',
+            'order.flowerPayments',
+            'order.address.localityDetails',
+            'rider'
+        ])
+        ->where('rider_id', $rider->rider_id)
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-    // Calculate total pickup price
-    $total_price = FlowerPickupDetails::where('rider_id', $rider->rider_id)->sum('total_price');
+        // Add pickup history
+        $pickupHistory = FlowerPickupDetails::with([
+            'vendor',
+            'rider',
+            'flowerPickupItems',
+        ])
+        ->where('rider_id', $rider->rider_id)
+        ->orderBy('created_at', 'desc')
+        ->get();
 
-    // Calculate total paid pickup
-    $total_paid = FlowerPickupDetails::where('rider_id', $rider->rider_id)
-        ->where('payment_status', 'Paid')
-        ->sum('total_price');
+        // Calculate total pickup price
+        $total_price = FlowerPickupDetails::where('rider_id', $rider->rider_id)->sum('total_price');
 
-    // Calculate total unpaid pickup
-    $total_unpaid = FlowerPickupDetails::where('rider_id', $rider->rider_id)
-        ->where('payment_status', 'pending')
-        ->sum('total_price');
+        // Calculate total paid pickup
+        $total_paid = FlowerPickupDetails::where('rider_id', $rider->rider_id)
+            ->where('payment_status', 'Paid')
+            ->sum('total_price');
 
-    // Calculate total orders
-    $totalOrders = $deliveryHistory->count();
+        // Calculate total unpaid pickup
+        $total_unpaid = FlowerPickupDetails::where('rider_id', $rider->rider_id)
+            ->where('payment_status', 'pending')
+            ->sum('total_price');
 
-    // Calculate ongoing orders
-    $ongoingOrders = $deliveryHistory->where('delivery_status', 'ongoing')->count();
+        // Calculate total orders
+        $totalOrders = $deliveryHistory->count();
 
-    // Calculate monthly orders
-    $monthlyOrders = $deliveryHistory->whereBetween('created_at', [
-        now()->startOfMonth(),
-        now()->endOfMonth()
-    ])->count();
+        // Calculate ongoing orders
+        $ongoingOrders = $deliveryHistory->where('delivery_status', 'ongoing')->count();
 
-    // Calculate total spend (fixed to avoid null error)
-    $totalSpend = $deliveryHistory->sum(function ($history) {
-        if ($history->order && $history->order->flowerPayments) {
-            return $history->order->flowerPayments->sum('paid_amount');
-        }
-        return 0;
-    });
+        // Calculate monthly orders
+        $monthlyOrders = $deliveryHistory->whereBetween('created_at', [
+            now()->startOfMonth(),
+            now()->endOfMonth()
+        ])->count();
 
-    // Return to the Blade view
-    return view('admin.rider-all-details', compact(
-        'total_price',
-        'total_paid',
-        'total_unpaid',
-        'rider',
-        'pickupHistory',
-        'deliveryHistory',
-        'totalOrders',
-        'ongoingOrders',
-        'monthlyOrders',
-        'totalSpend'
-    ));
-}
+        // Calculate total spend (fixed to avoid null error)
+        $totalSpend = $deliveryHistory->sum(function ($history) {
+            if ($history->order && $history->order->flowerPayments) {
+                return $history->order->flowerPayments->sum('paid_amount');
+            }
+            return 0;
+        });
 
+        // Return to the Blade view
+        return view('admin.rider-all-details', compact(
+            'total_price',
+            'total_paid',
+            'total_unpaid',
+            'rider',
+            'pickupHistory',
+            'deliveryHistory',
+            'totalOrders',
+            'ongoingOrders',
+            'monthlyOrders',
+            'totalSpend'
+        ));
+    }
 
     public function updateAddress(Request $request, $id)
     {
