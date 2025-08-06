@@ -153,7 +153,9 @@
                                 <strong>No:</strong> ${user.mobile_number || 'N/A'}<br>
                                 ${viewBtn}
                                 <br>
-                                <button class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#${modalId}">View Address</button>
+                                <button class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#${modalId}">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </button>
                             </div>
                             ${addressHtml}
                         `;
