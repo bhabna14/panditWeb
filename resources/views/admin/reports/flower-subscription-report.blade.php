@@ -33,28 +33,36 @@
     </div>
 
     <!-- Filter Row -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <label for="from_date" class="form-label">From Date</label>
-            <input type="date" id="from_date" name="from_date" class="form-control">
-        </div>
-        <div class="col-md-3">
-            <label for="to_date" class="form-label">To Date</label>
-            <input type="date" id="to_date" name="to_date" class="form-control">
-        </div>
-        <div class="col-md-3 d-flex align-items-end">
-            <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-primary">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Total Price</h5>
-                    <p class="card-text fs-4 fw-bold" id="totalPrice">₹0</p>
-                </div>
+    <div class="row g-3 align-items-end mb-4">
+    <!-- From Date -->
+    <div class="col-md-3">
+        <label for="from_date" class="form-label fw-semibold">From Date</label>
+        <input type="date" id="from_date" name="from_date" class="form-control">
+    </div>
+
+    <!-- To Date -->
+    <div class="col-md-3">
+        <label for="to_date" class="form-label fw-semibold">To Date</label>
+        <input type="date" id="to_date" name="to_date" class="form-control">
+    </div>
+
+    <!-- Search Button -->
+    <div class="col-md-3">
+        <button type="button" id="searchBtn" class="btn btn-primary w-100">
+            <i class="fas fa-search me-1"></i> Search
+        </button>
+    </div>
+
+    <!-- Total Price Card -->
+    <div class="col-md-3">
+        <div class="card border-primary shadow-sm">
+            <div class="card-body text-center">
+                <h6 class="card-title text-primary mb-1">Total Price</h6>
+                <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
             </div>
         </div>
     </div>
-
+</div>
 
     <!-- DataTable -->
     <div class="table-responsive">
