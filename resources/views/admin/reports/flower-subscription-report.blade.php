@@ -80,32 +80,41 @@
 
     <!-- DataTable Initialization Script -->
     <script>
-        $(document).ready(function () {
-            // Initialize the DataTable
-            var table = $('#file-datatable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('subscription.report') }}", // Route that returns JSON data
-                    data: function (d) {
-                        // Add filter inputs to request
-                        d.from_date = $('#from_date').val();
-                        d.to_date = $('#to_date').val();
-                    }
-                },
-                columns: [
-                    { data: 'customer_details', name: 'customer_details' },
-                    { data: 'purchase_date', name: 'start_date' },
-                    { data: 'duration', name: 'duration' },
-                    { data: 'price', name: 'price' },
-                    { data: 'status', name: 'status' },
-                ]
-            });
-
-            // Search button reloads DataTable with new filters
-            $('#searchBtn').click(function () {
-                table.ajax.reload();
-            });
+    $(document).ready(function () {
+        var table = $('#file-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('subscription.report') }}",
+                data: function (d) {
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
+                }
+            },
+            columns: [
+                { data: 'customer_details', name: 'customer_details' },
+                { data: 'purchase_date', name: 'purchase_date' },
+                { data: 'duration', name: 'duration' },
+                { data: 'price', name: 'price' },
+                { data: 'status', name: 'status' },
+            ]
         });
-    </script>
+
+        $('#searchBtn').click(function () {
+            table.ajax.reload();
+        });
+
+        // Enable tooltips after data load
+        $('#file-datatable').on('draw.dt', function () {
+            $('[data-bs-toggle="tooltip"]').tooltip();
+        });
+    });
+</script>
+<script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+        new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+</script>
+
 @endsection
