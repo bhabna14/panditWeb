@@ -28,7 +28,7 @@ public function subscriptionReport(Request $request)
         $query = Subscription::with([
             'order.address.localityDetails',
             'flowerPayments',
-            'users',
+            'users.addressDetails',
             'flowerProducts',
         ])
         ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
@@ -40,16 +40,21 @@ public function subscriptionReport(Request $request)
 
         return DataTables::of($query)
             ->addColumn('user', function ($row) {
-                return $row->users;
-            })
-            ->addColumn('order', function ($row) {
-                return $row->order;
-            })
-            ->addColumn('address', function ($row) {
-                return $row->order->address ?? null;
-            })
-            ->addColumn('locality', function ($row) {
-                return $row->order->address->localityDetails->locality ?? '';
+                $user = $row->users;
+                return [
+                    'userid' => $user->userid ?? null,
+                    'name' => $user->name ?? 'N/A',
+                    'mobile_number' => $user->mobile_number ?? 'N/A',
+                    'address_details' => $user->addressDetails ? [
+                        'apartment_flat_plot' => $user->addressDetails->apartment_flat_plot ?? '',
+                        'apartment_name' => $user->addressDetails->apartment_name ?? '',
+                        'locality' => $user->addressDetails->locality ?? '',
+                        'landmark' => $user->addressDetails->landmark ?? '',
+                        'pincode' => $user->addressDetails->pincode ?? '',
+                        'city' => $user->addressDetails->city ?? '',
+                        'state' => $user->addressDetails->state ?? '',
+                    ] : null
+                ];
             })
             ->addColumn('purchase_date', function ($row) {
                 return [
@@ -71,5 +76,6 @@ public function subscriptionReport(Request $request)
 
     return view('admin.reports.flower-subscription-report');
 }
+
 
 }
