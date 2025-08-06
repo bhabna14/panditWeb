@@ -46,6 +46,17 @@
             <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
         </div>
     </div>
+    <!-- Total Price Section -->
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Price</h5>
+                    <p class="card-text fs-4 fw-bold" id="totalPrice">₹0</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- DataTable -->
     <div class="table-responsive">
@@ -76,7 +87,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- DataTable Initialization Script -->
-   <script>
+  <script>
     $(document).ready(function () {
         var table = $('#file-datatable').DataTable({
             processing: true,
@@ -86,6 +97,11 @@
                 data: function (d) {
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
+                },
+                dataSrc: function (json) {
+                    // Update total price
+                    $('#totalPrice').text('₹' + (json.total_price ?? 0));
+                    return json.data;
                 }
             },
             columns: [
@@ -133,17 +149,12 @@
                         `;
 
                         return `
-                            <div class="order-details" 
-                                 data-bs-toggle="tooltip" 
-                                 data-bs-html="true" 
-                                 title="${tooltipContent}">
+                            <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltipContent}">
                                 <strong>Name:</strong> ${user.name || 'N/A'}<br>
                                 <strong>No:</strong> ${user.mobile_number || 'N/A'}<br>
                                 ${viewBtn}
                                 <br>
-                                <button class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#${modalId}">
-                                    View Address
-                                </button>
+                                <button class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#${modalId}">View Address</button>
                             </div>
                             ${addressHtml}
                         `;
@@ -162,7 +173,10 @@
                     }
                 },
                 {
-                    data: 'price'
+                    data: 'price',
+                    render: function (data) {
+                        return '₹' + parseFloat(data).toFixed(2);
+                    }
                 },
                 {
                     data: 'status'
@@ -174,12 +188,8 @@
             table.ajax.reload();
         });
 
-        // Re-enable tooltips after DataTable draw
         $('#file-datatable').on('draw.dt', function () {
-            // Manually dispose existing tooltips to avoid duplicates
             $('[data-bs-toggle="tooltip"]').tooltip('dispose');
-
-            // Re-initialize all tooltips
             $('[data-bs-toggle="tooltip"]').tooltip({
                 html: true,
                 boundary: 'window',

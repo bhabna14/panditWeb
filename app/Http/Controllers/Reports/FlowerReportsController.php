@@ -38,7 +38,13 @@ public function subscriptionReport(Request $request)
             $query->whereBetween('start_date', [$request->from_date, $request->to_date]);
         }
 
-        return DataTables::of($query)
+        // Clone query for total price
+        $totalPrice = $query->get()->sum(function ($subscription) {
+            return $subscription->order->total_price ?? 0;
+        });
+
+        // Prepare DataTable
+        $dataTable = DataTables::of($query)
             ->addColumn('user', function ($row) {
                 $user = $row->users;
                 return [
@@ -56,22 +62,20 @@ public function subscriptionReport(Request $request)
                     ] : null
                 ];
             })
-            ->addColumn('purchase_date', function ($row) {
-                return [
-                    'start' => $row->start_date,
-                    'end' => $row->end_date
-                ];
-            })
-            ->addColumn('duration', function ($row) {
-                return Carbon::parse($row->start_date)->diffInDays($row->end_date);
-            })
-            ->addColumn('price', function ($row) {
-                return $row->order->total_price ?? 'N/A';
-            })
-            ->addColumn('status', function ($row) {
-                return ucfirst($row->status);
-            })
+            ->addColumn('purchase_date', fn($row) => [
+                'start' => $row->start_date,
+                'end' => $row->end_date
+            ])
+            ->addColumn('duration', fn($row) => Carbon::parse($row->start_date)->diffInDays($row->end_date))
+            ->addColumn('price', fn($row) => $row->order->total_price ?? 0)
+            ->addColumn('status', fn($row) => ucfirst($row->status))
             ->make(true);
+
+        // Convert to array and inject total price
+        $json = $dataTable->getData(true);
+        $json['total_price'] = $totalPrice;
+
+        return response()->json($json);
     }
 
     return view('admin.reports.flower-subscription-report');
