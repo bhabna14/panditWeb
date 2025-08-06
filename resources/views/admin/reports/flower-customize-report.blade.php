@@ -66,32 +66,57 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- DataTable Script -->
-    <script>
-        $(document).ready(function () {
-            var table = $('#file-datatable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('report.customize') }}", // Adjust to your route
-                    data: function (d) {
-                        d.from_date = $('#from_date').val();
-                        d.to_date = $('#to_date').val();
-                    }
+   <script>
+    $(document).ready(function () {
+        var table = $('#file-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('report.customize') }}",
+                data: function (d) {
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
+                }
+            },
+            columns: [
+                { data: 'request_id', name: 'request_id' }, // real column
+                {
+                    data: 'purchase_date',
+                    name: 'purchase_date',
+                    orderable: false, // virtual column
+                    searchable: false
                 },
-                columns: [
-                    { data: 'request_id', name: 'request_id' },
-                    { data: 'purchase_date', name: 'purchase_date' },
-                    { data: 'delivery_date', name: 'delivery_date' },
-                    { data: 'flower_items', name: 'flower_items' },
-                    { data: 'status', name: 'status', className: 'text-capitalize' },
-                    { data: 'price', name: 'price' }
-                ]
-            });
-
-            // Search button action
-            $('#searchBtn').click(function () {
-                table.ajax.reload();
-            });
+                {
+                    data: 'delivery_date',
+                    name: 'delivery_date',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'flower_items',
+                    name: 'flower_items',
+                    orderable: false,
+                    searchable: false
+                },
+                {
+                    data: 'status',
+                    name: 'status',
+                    className: 'text-capitalize',
+                    orderable: false
+                },
+                {
+                    data: 'price',
+                    name: 'price',
+                    orderable: false,
+                    searchable: false
+                }
+            ]
         });
-    </script>
+
+        $('#searchBtn').click(function () {
+            table.ajax.reload();
+        });
+    });
+</script>
+
 @endsection
