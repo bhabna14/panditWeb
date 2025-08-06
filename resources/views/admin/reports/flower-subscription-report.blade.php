@@ -88,43 +88,44 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- DataTable Initialization Script -->
-    <script>
-        $(document).ready(function() {
-            var table = $('#file-datatable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('subscription.report') }}",
-                    data: function(d) {
-                        d.from_date = $('#from_date').val();
-                        d.to_date = $('#to_date').val();
-                    },
-                    dataSrc: function(json) {
-                        $('#totalPrice').text('₹' + parseFloat(json.total_price).toFixed(2));
-                        return json.data;
-                    }
+  <script>
+    $(document).ready(function () {
+        var table = $('#file-datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "{{ route('subscription.report') }}",
+                data: function (d) {
+                    d.from_date = $('#from_date').val();
+                    d.to_date = $('#to_date').val();
                 },
-                columns: [{
-                        data: null,
-                        orderable: false,
-                        searchable: false,
-                        render: function(data, type, row) {
-                            const user = row.user || {};
-                            const address = user.address_details || {};
-                            const userId = user.userid ?? null;
+                dataSrc: function (json) {
+                    $('#totalPrice').text('₹' + parseFloat(json.total_price).toFixed(2));
+                    return json.data;
+                }
+            },
+            columns: [
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    render: function (data, type, row) {
+                        const user = row.user || {};
+                        const address = user.address_details || {};
+                        const userId = user.userid ?? null;
 
-                            const tooltipContent = `
-                            <strong>Apartment:</strong> ${address.apartment_name || 'N/A'}<br>
-                            <strong>No:</strong> ${address.apartment_flat_plot || 'N/A'}
+                        const tooltipContent = `
+                            <strong>Name:</strong> ${user.name || 'N/A'}<br>
+                            <strong>Phone:</strong> ${user.mobile_number || 'N/A'}
                         `.trim();
 
-                            const modalId = `addressModal${userId}`;
+                        const modalId = `addressModal${userId}`;
 
-                            const viewBtn = userId ?
-                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` :
-                                '';
+                        const viewBtn = userId
+                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>`
+                            : '';
 
-                            const addressHtml = `
+                        const addressHtml = `
                             <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -147,57 +148,58 @@
                             </div>
                         `;
 
-                            return `
+                        return `
                             <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltipContent}">
-                                <strong>Name:</strong> ${user.name || 'N/A'}<br>
-                                <strong>No:</strong> ${user.mobile_number || 'N/A'}<br>
-                                ${viewBtn}
-                                <br>
-                                <button class="btn btn-sm btn-warning mt-1" data-bs-toggle="modal" data-bs-target="#${modalId}">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                </button>
+                                <div><strong>Name:</strong> ${user.name || 'N/A'}</div>
+                                <div><strong>No:</strong> ${user.mobile_number || 'N/A'}</div>
+                                <div class="mt-1 d-flex gap-2">
+                                    ${viewBtn}
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#${modalId}">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                </div>
                             </div>
                             ${addressHtml}
                         `;
-                        }
-                    },
-                    {
-                        data: 'purchase_date',
-                        render: function(data) {
-                            return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data
-                                .end).format('DD MMM YYYY');
-                        }
-                    },
-                    {
-                        data: 'duration',
-                        render: function(data) {
-                            return data + ' days';
-                        }
-                    },
-                    {
-                        data: 'price',
-                        render: function(data) {
-                            return '₹' + parseFloat(data).toFixed(2);
-                        }
-                    },
-                    {
-                        data: 'status'
                     }
-                ]
-            });
+                },
+                {
+                    data: 'purchase_date',
+                    render: function (data) {
+                        return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data.end).format('DD MMM YYYY');
+                    }
+                },
+                {
+                    data: 'duration',
+                    render: function (data) {
+                        return data + ' days';
+                    }
+                },
+                {
+                    data: 'price',
+                    render: function (data) {
+                        return '₹' + parseFloat(data).toFixed(2);
+                    }
+                },
+                {
+                    data: 'status',
+                    className: 'text-capitalize'
+                }
+            ]
+        });
 
-            $('#searchBtn').click(function() {
-                table.ajax.reload();
-            });
+        $('#searchBtn').click(function () {
+            table.ajax.reload();
+        });
 
-            $('#file-datatable').on('draw.dt', function() {
-                $('[data-bs-toggle="tooltip"]').tooltip('dispose');
-                $('[data-bs-toggle="tooltip"]').tooltip({
-                    html: true,
-                    boundary: 'window',
-                    trigger: 'hover'
-                });
+        $('#file-datatable').on('draw.dt', function () {
+            $('[data-bs-toggle="tooltip"]').tooltip('dispose');
+            $('[data-bs-toggle="tooltip"]').tooltip({
+                html: true,
+                boundary: 'window',
+                trigger: 'hover'
             });
         });
-    </script>
+    });
+</script>
 @endsection
