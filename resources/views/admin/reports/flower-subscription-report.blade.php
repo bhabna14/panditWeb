@@ -114,8 +114,8 @@
                             const userId = user.userid ?? null;
 
                             const tooltipContent = `
-                            <strong>Name:</strong> ${user.name || 'N/A'}<br>
-                            <strong>No:</strong> ${user.mobile_number || 'N/A'}
+                            <strong>Apartment:</strong> ${address.apartment_name || 'N/A'}<br>
+                            <strong>No:</strong> ${address.apartment_flat_plot || 'N/A'}
                         `.trim();
 
                             const modalId = `addressModal${userId}`;
