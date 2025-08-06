@@ -42,7 +42,7 @@
             <label for="to_date" class="form-label">To Date</label>
             <input type="date" id="to_date" name="to_date" class="form-control">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-3 d-flex align-items-end">
             <button type="button" id="searchBtn" class="btn btn-primary">Search</button>
         </div>
         <div class="col-md-3">
