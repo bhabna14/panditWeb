@@ -28,8 +28,8 @@ public function subscriptionReport(Request $request)
             'flowerPayments',
             'users.addressDetails',
             'flowerProducts',
-        ])->where('status', '!=', 'expired')
-          ->orderBy('id', 'desc');
+        ])
+        ->orderBy('id', 'desc');
 
         $from = $request->filled('from_date') ? Carbon::parse($request->from_date)->startOfDay() : Carbon::now()->startOfMonth();
         $to   = $request->filled('to_date') ? Carbon::parse($request->to_date)->endOfDay() : Carbon::now()->endOfMonth();
@@ -49,6 +49,7 @@ public function subscriptionReport(Request $request)
                     ->groupBy('user_id')
                     ->havingRaw('COUNT(*) = 1');
             })
+            ->where('status', '!=', 'expired')
             ->get()
             ->sum(fn($sub) => $sub->order->total_price ?? 0);
 
