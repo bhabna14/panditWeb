@@ -60,7 +60,7 @@
             <div class="card border-success shadow-sm">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-success mb-1">Renew Customer Total Price</h6>
-                    <h4 class="fw-bold mb-0" id="renewCustomerTotalPrice">₹0</h4>
+                    <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
                 </div>
             </div>
         </div>
@@ -72,14 +72,14 @@
                 </div>
             </div>
         </div>
-         <div class="col-md-4">
+         {{-- <div class="col-md-4">
             <div class="card border-primary shadow-sm w-100">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-primary mb-1">Total Price</h6>
                     <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
   
     <!-- DataTable -->

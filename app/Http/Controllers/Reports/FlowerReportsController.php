@@ -43,7 +43,6 @@ public function subscriptionReport(Request $request)
 
         // Filtered New User Subscriptions (within date range)
         $newUserPrice = Subscription::whereBetween('created_at', [$from, $to])
-            ->where('status', 'pending')
             ->whereIn('user_id', function ($subQuery) {
                 $subQuery->select('user_id')
                     ->from('subscriptions')
