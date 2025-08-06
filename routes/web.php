@@ -66,7 +66,7 @@ use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
 use App\Http\Controllers\Pandit\PoojaHistoryController;
 
-use App\Http\Controllers\Reports\FlowerReportsController;
+use App\Http\Controllers\reports\FlowerReportsController;
 
 use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
