@@ -16,39 +16,33 @@ use App\Models\PauseResumeLog;
 use App\Models\Rider;
 use Carbon\Carbon;
 
-
 class FlowerReportsController extends Controller
 {
 
 public function subscriptionReport(Request $request)
 {
     if ($request->ajax()) {
+        // Main Query
         $query = Subscription::with([
             'order.address.localityDetails',
             'flowerPayments',
             'users.addressDetails',
             'flowerProducts',
-        ])
-        ->where('status', '!=', 'expired')
-        ->orderBy('id', 'desc');
+        ])->where('status', '!=', 'expired')
+          ->orderBy('id', 'desc');
 
-        if ($request->filled('from_date') && $request->filled('to_date')) {
-            $query->whereBetween('start_date', [$request->from_date, $request->to_date]);
-        } else {
-            $startOfMonth = Carbon::now()->startOfMonth();
-            $endOfMonth = Carbon::now()->endOfMonth();
-            $query->whereBetween('start_date', [$startOfMonth, $endOfMonth]);
-        }
+        $from = $request->filled('from_date') ? Carbon::parse($request->from_date)->startOfDay() : Carbon::now()->startOfMonth();
+        $to   = $request->filled('to_date') ? Carbon::parse($request->to_date)->endOfDay() : Carbon::now()->endOfMonth();
 
-        // Total
+        $query->whereBetween('start_date', [$from, $to]);
+
         $subscriptions = $query->get();
 
-        $totalPrice = $subscriptions->sum(function ($subscription) {
-            return $subscription->order->total_price ?? 0;
-        });
+        // Total Price
+        $totalPrice = $subscriptions->sum(fn($sub) => $sub->order->total_price ?? 0);
 
-        // New User Subscription Total Price (1 subscription only)
-        $newUserPrice = Subscription::whereDate('created_at', Carbon::today())
+        // Filtered New User Subscriptions (within date range)
+        $newUserPrice = Subscription::whereBetween('created_at', [$from, $to])
             ->where('status', 'pending')
             ->whereIn('user_id', function ($subQuery) {
                 $subQuery->select('user_id')
@@ -57,12 +51,10 @@ public function subscriptionReport(Request $request)
                     ->havingRaw('COUNT(*) = 1');
             })
             ->get()
-            ->sum(function ($sub) {
-                return $sub->order->total_price ?? 0;
-            });
+            ->sum(fn($sub) => $sub->order->total_price ?? 0);
 
-        // Renew Customer Total Price (order id occurs more than once)
-        $renewPrice = Subscription::whereDate('created_at', Carbon::today())
+        // Filtered Renewed Users (within date range)
+        $renewPrice = Subscription::whereBetween('created_at', [$from, $to])
             ->whereIn('order_id', function ($query) {
                 $query->select('order_id')
                     ->from('subscriptions')
@@ -70,9 +62,7 @@ public function subscriptionReport(Request $request)
                     ->havingRaw('COUNT(order_id) > 1');
             })
             ->get()
-            ->sum(function ($sub) {
-                return $sub->order->total_price ?? 0;
-            });
+            ->sum(fn($sub) => $sub->order->total_price ?? 0);
 
         // DataTable response
         $dataTable = DataTables::of($query)
