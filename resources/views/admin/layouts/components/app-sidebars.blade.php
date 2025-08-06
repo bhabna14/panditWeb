@@ -210,6 +210,22 @@
                         </ul>
                     </li>
                 @endif
+
+                 <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M7 18c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H7zM6 6h12v2H6z" />
+                        </svg>
+                        <span class="side-menu__label">FINANCE REPORT</span>
+                        <i class="angle fas fa-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{ route('report.subscription') }}">Subscription Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower Reports</a></li>
+                    </ul>
+                </li>
             </ul>
 
             <div class="slide-right" id="slide-right">
@@ -219,21 +235,7 @@
                 </svg>
             </div>
 
-            <li class="slide">
-                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M7 18c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H7zM6 6h12v2H6z" />
-                        </svg>
-                        <span class="side-menu__label">FINANCE</span>
-                        <i class="angle fas fa-chevron-right"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('report.subscription') }}">Subscription Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower Reports</a></li>
-                    </ul>
-                </li>
+           
         </div>
     </aside>
 </div>
