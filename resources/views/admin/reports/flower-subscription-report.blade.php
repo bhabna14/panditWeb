@@ -34,35 +34,35 @@
 
     <!-- Filter Row -->
     <div class="row g-3 align-items-end mb-4">
-    <!-- From Date -->
-    <div class="col-md-3">
-        <label for="from_date" class="form-label fw-semibold">From Date</label>
-        <input type="date" id="from_date" name="from_date" class="form-control">
-    </div>
+        <!-- From Date -->
+        <div class="col-md-3">
+            <label for="from_date" class="form-label fw-semibold">From Date</label>
+            <input type="date" id="from_date" name="from_date" class="form-control">
+        </div>
 
-    <!-- To Date -->
-    <div class="col-md-3">
-        <label for="to_date" class="form-label fw-semibold">To Date</label>
-        <input type="date" id="to_date" name="to_date" class="form-control">
-    </div>
+        <!-- To Date -->
+        <div class="col-md-3">
+            <label for="to_date" class="form-label fw-semibold">To Date</label>
+            <input type="date" id="to_date" name="to_date" class="form-control">
+        </div>
 
-    <!-- Search Button -->
-    <div class="col-md-3">
-        <button type="button" id="searchBtn" class="btn btn-primary w-100">
-            <i class="fas fa-search me-1"></i> Search
-        </button>
-    </div>
+        <!-- Search Button -->
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="button" id="searchBtn" class="btn btn-primary w-100">
+                <i class="fas fa-search me-1"></i> Search
+            </button>
+        </div>
 
-    <!-- Total Price Card -->
-    <div class="col-md-3" style="margin-top: 20px">
-        <div class="card border-primary shadow-sm">
-            <div class="card-body text-center">
-                <h6 class="card-title text-primary mb-1">Total Price</h6>
-                <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
+        <!-- Total Price Card -->
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="card border-primary shadow-sm w-100">
+                <div class="card-body text-center py-2">
+                    <h6 class="card-title text-primary mb-1">Total Price</h6>
+                    <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- DataTable -->
     <div class="table-responsive">
@@ -93,44 +93,43 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- DataTable Initialization Script -->
-  <script>
-    $(document).ready(function () {
-        var table = $('#file-datatable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('subscription.report') }}",
-                data: function (d) {
-                    d.from_date = $('#from_date').val();
-                    d.to_date = $('#to_date').val();
+    <script>
+        $(document).ready(function() {
+            var table = $('#file-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('subscription.report') }}",
+                    data: function(d) {
+                        d.from_date = $('#from_date').val();
+                        d.to_date = $('#to_date').val();
+                    },
+                    dataSrc: function(json) {
+                        $('#totalPrice').text('₹' + parseFloat(json.total_price).toFixed(2));
+                        return json.data;
+                    }
                 },
-                dataSrc: function (json) {
-                    $('#totalPrice').text('₹' + parseFloat(json.total_price).toFixed(2));
-                    return json.data;
-                }
-            },
-            columns: [
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row) {
-                        const user = row.user || {};
-                        const address = user.address_details || {};
-                        const userId = user.userid ?? null;
+                columns: [{
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            const user = row.user || {};
+                            const address = user.address_details || {};
+                            const userId = user.userid ?? null;
 
-                        const tooltipContent = `
+                            const tooltipContent = `
                             <strong>Name:</strong> ${user.name || 'N/A'}<br>
                             <strong>Phone:</strong> ${user.mobile_number || 'N/A'}
                         `.trim();
 
-                        const modalId = `addressModal${userId}`;
+                            const modalId = `addressModal${userId}`;
 
-                        const viewBtn = userId
-                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>`
-                            : '';
+                            const viewBtn = userId ?
+                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` :
+                                '';
 
-                        const addressHtml = `
+                            const addressHtml = `
                             <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -153,7 +152,7 @@
                             </div>
                         `;
 
-                        return `
+                            return `
                             <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltipContent}">
                                 <div><strong>Name:</strong> ${user.name || 'N/A'}</div>
                                 <div><strong>No:</strong> ${user.mobile_number || 'N/A'}</div>
@@ -166,45 +165,46 @@
                             </div>
                             ${addressHtml}
                         `;
+                        }
+                    },
+                    {
+                        data: 'purchase_date',
+                        render: function(data) {
+                            return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data
+                                .end).format('DD MMM YYYY');
+                        }
+                    },
+                    {
+                        data: 'duration',
+                        render: function(data) {
+                            return data + ' days';
+                        }
+                    },
+                    {
+                        data: 'price',
+                        render: function(data) {
+                            return '₹' + parseFloat(data).toFixed(2);
+                        }
+                    },
+                    {
+                        data: 'status',
+                        className: 'text-capitalize'
                     }
-                },
-                {
-                    data: 'purchase_date',
-                    render: function (data) {
-                        return moment(data.start).format('DD MMM YYYY') + ' - ' + moment(data.end).format('DD MMM YYYY');
-                    }
-                },
-                {
-                    data: 'duration',
-                    render: function (data) {
-                        return data + ' days';
-                    }
-                },
-                {
-                    data: 'price',
-                    render: function (data) {
-                        return '₹' + parseFloat(data).toFixed(2);
-                    }
-                },
-                {
-                    data: 'status',
-                    className: 'text-capitalize'
-                }
-            ]
-        });
+                ]
+            });
 
-        $('#searchBtn').click(function () {
-            table.ajax.reload();
-        });
+            $('#searchBtn').click(function() {
+                table.ajax.reload();
+            });
 
-        $('#file-datatable').on('draw.dt', function () {
-            $('[data-bs-toggle="tooltip"]').tooltip('dispose');
-            $('[data-bs-toggle="tooltip"]').tooltip({
-                html: true,
-                boundary: 'window',
-                trigger: 'hover'
+            $('#file-datatable').on('draw.dt', function() {
+                $('[data-bs-toggle="tooltip"]').tooltip('dispose');
+                $('[data-bs-toggle="tooltip"]').tooltip({
+                    html: true,
+                    boundary: 'window',
+                    trigger: 'hover'
+                });
             });
         });
-    });
-</script>
+    </script>
 @endsection
