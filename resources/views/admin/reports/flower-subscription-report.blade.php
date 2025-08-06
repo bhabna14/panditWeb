@@ -99,8 +99,7 @@
                     d.to_date = $('#to_date').val();
                 },
                 dataSrc: function (json) {
-                    // Update total price
-                    $('#totalPrice').text('₹' + (json.total_price ?? 0));
+                    $('#totalPrice').text('₹' + parseFloat(json.total_price).toFixed(2));
                     return json.data;
                 }
             },
@@ -198,5 +197,6 @@
         });
     });
 </script>
+
 
 @endsection

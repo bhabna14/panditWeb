@@ -22,23 +22,25 @@ class FlowerReportsController extends Controller
 public function subscriptionReport(Request $request)
 {
     if ($request->ajax()) {
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-
         $query = Subscription::with([
             'order.address.localityDetails',
             'flowerPayments',
             'users.addressDetails',
             'flowerProducts',
         ])
-        ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
         ->orderBy('id', 'desc');
 
-        if ($request->from_date && $request->to_date) {
+        // Use filter if provided
+        if ($request->filled('from_date') && $request->filled('to_date')) {
             $query->whereBetween('start_date', [$request->from_date, $request->to_date]);
+        } else {
+            // Default to current month
+            $startOfMonth = Carbon::now()->startOfMonth();
+            $endOfMonth = Carbon::now()->endOfMonth();
+            $query->whereBetween('start_date', [$startOfMonth, $endOfMonth]);
         }
 
-        // Clone query for total price
+        // Calculate total price for this query
         $totalPrice = $query->get()->sum(function ($subscription) {
             return $subscription->order->total_price ?? 0;
         });
@@ -71,7 +73,6 @@ public function subscriptionReport(Request $request)
             ->addColumn('status', fn($row) => ucfirst($row->status))
             ->make(true);
 
-        // Convert to array and inject total price
         $json = $dataTable->getData(true);
         $json['total_price'] = $totalPrice;
 
