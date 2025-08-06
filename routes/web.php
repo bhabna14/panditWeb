@@ -819,6 +819,6 @@ Route::controller(MarketingVisitPlaceController::class)->group(function() {
 });
 
 Route::controller(FlowerReportsController::class)->group(function() {
-        Route::get('/report-subscription','subscriptionReport')->name('report.subscription');
+        Route::get('/report-subscription','subscriptionReport')->name('subscription.report');
         Route::get('/report-customize','reportCustomize')->name('report.customize');
 });
