@@ -104,6 +104,7 @@ public function subscriptionReport(Request $request)
 
     return view('admin.reports.flower-subscription-report');
 }
+
 public function reportCustomize(Request $request)
 {
     if ($request->ajax()) {
@@ -214,7 +215,5 @@ public function getFlowerPickupReport(Request $request)
         'today_price' => $reportData->where('pickup_date', now()->toDateString())->sum('total_price')
     ]);
 }
-
-
 
 }
