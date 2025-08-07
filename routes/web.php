@@ -695,46 +695,46 @@ Route::group(['prefix' => 'pandit'], function () {
 });
 
 // pandit profile crud operation
-Route::group(['prefix' => 'pandit'], function () {
+    Route::group(['prefix' => 'pandit'], function () {
     Route::controller(ProfileController::class)->group(function() {
-        Route::get('/profile', 'panditprofiles')->name('pandit.profile');
-        Route::post('/save-profile', 'saveprofile');
-        Route::get('/manageprofile', 'manageprofile')->name('manageprofile');
-        Route::put('/updateProfile/{id}','updateProfile')->name('updateProfile');
+    Route::get('/profile', 'panditprofiles')->name('pandit.profile');
+    Route::post('/save-profile', 'saveprofile');
+    Route::get('/manageprofile', 'manageprofile')->name('manageprofile');
+    Route::put('/updateProfile/{id}','updateProfile')->name('updateProfile');
     });
 });
 
 // pandit career crud operation
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(CareerController::class)->group(function() {
-        Route::get('/career', 'profilecareer')->name('profilecareer');
-        Route::get('/managecareer', 'managecareer')->name('managecareer');
-        Route::post('/save-career', 'savecareer');
-        Route::get('/deletIdproof/{id}', 'deletIdproof')->name('deletIdproof');
-        Route::get('/deletEducation/{id}', 'deletEducation')->name('deletEducation');
-        Route::get('/deletVedic/{id}', 'deletVedic')->name('deletVedic');
-        Route::put('/updateCareer/{pandit_id}', 'updateCareer')->name('updateCareer');
+    Route::get('/career', 'profilecareer')->name('profilecareer');
+    Route::get('/managecareer', 'managecareer')->name('managecareer');
+    Route::post('/save-career', 'savecareer');
+    Route::get('/deletIdproof/{id}', 'deletIdproof')->name('deletIdproof');
+    Route::get('/deletEducation/{id}', 'deletEducation')->name('deletEducation');
+    Route::get('/deletVedic/{id}', 'deletVedic')->name('deletVedic');
+    Route::put('/updateCareer/{pandit_id}', 'updateCareer')->name('updateCareer');
     });
 
     });
 // pandit skill crud operation
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(SkillController::class)->group(function() {
-        Route::post('/save-skillpooja', 'saveSkillPooja');
-        Route::put('/update-skillpooja', 'updateSkillPooja')->name('updateSkillPooja');
-        Route::get('/poojaskill', 'poojaskill')->name('poojaskill');
-        Route::get('/managepoojaskill', 'managepoojaskill')->name('managepoojaskill');
+    Route::post('/save-skillpooja', 'saveSkillPooja');
+    Route::put('/update-skillpooja', 'updateSkillPooja')->name('updateSkillPooja');
+    Route::get('/poojaskill', 'poojaskill')->name('poojaskill');
+    Route::get('/managepoojaskill', 'managepoojaskill')->name('managepoojaskill');
     });
 });
 // pandit pooja details crud operation
 
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaDetailsController::class)->group(function() {
-        Route::get('/poojadetails', 'poojadetails')->name('poojadetails');
-        Route::post('/save-poojadetails', 'savePoojadetails');
-        Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
-        Route::put('/update-poojadetails', 'updatePoojadetails')->name('updatePoojadetails');
-        Route::get('/pandit/poojadetails',  'poojadetails')->name('pandit.poojadetails');
+    Route::get('/poojadetails', 'poojadetails')->name('poojadetails');
+    Route::post('/save-poojadetails', 'savePoojadetails');
+    Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
+    Route::put('/update-poojadetails', 'updatePoojadetails')->name('updatePoojadetails');
+    Route::get('/pandit/poojadetails',  'poojadetails')->name('pandit.poojadetails');
     });
 });
 
@@ -751,25 +751,22 @@ Route::controller(AreaController::class)->group(function() {
 });
 
 // pandit bank details
-Route::group(['prefix' => 'pandit'], function () {
+    Route::group(['prefix' => 'pandit'], function () {
     Route::controller(BankController::class)->group(function() {
-        Route::get('/bankdetails', 'bankdetails')->name('bankdetails');
-        Route::post('/savebankdetails', 'savebankdetails');
-        // Route::get('/managepoojadetails', 'managepoojadetails')->name('managepoojadetails');
-       
+    Route::get('/bankdetails', 'bankdetails')->name('bankdetails');
+    Route::post('/savebankdetails', 'savebankdetails');
     });
 });
 
-// pandit Address details
-Route::group(['prefix' => 'pandit'], function () {
-    Route::controller(AddressController::class)->group(function() {
+        Route::group(['prefix' => 'pandit'], function () {
+        Route::controller(AddressController::class)->group(function() {
         Route::get('/address', 'address')->name('address');
         Route::post('/saveaddress', 'saveaddress');
     });
 });
 
 // Route::group(['prefix' => 'pandit'], function () {
-//     Route::controller(PoojaListController::class)->group(function() {
+//         Route::controller(PoojaListController::class)->group(function() {
 //         Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
 //         Route::get('/poojaitem', 'singlepoojaitem');
 //         Route::post('/save-poojaitemlist', 'savePoojaItemList');
@@ -778,29 +775,27 @@ Route::group(['prefix' => 'pandit'], function () {
 //         Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
 //         Route::put('/updatepoojalist', 'updatePoojalist');
 //         Route::get('/get-variants/{listName}', 'getVariants');
-//             Route::put('/pooja/{id}', 'updatePoojaItem');
+//         Route::put('/pooja/{id}', 'updatePoojaItem');
 //     });
 // });
 
 Route::group(['prefix' => 'pandit'], function () {
     Route::controller(PoojaListController::class)->group(function() {
-        Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
-        Route::get('/poojaitem', 'singlepoojaitem');
-        Route::post('/save-poojaitemlist', 'savePoojaItemList');
-        Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
-        Route::delete('/delete-poojaitem/{id}', 'deletePoojaItem')->name('deletePoojaItem');
-        Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
-        Route::put('/updatepoojalist', 'updatePoojalist');
-        Route::get('/get-variants/{listName}', 'getVariants');
-        Route::get('/get-variants-title/{itemId}',  'getVariantTitle');
-        Route::get('/edit-poojaitem/{id}', 'editPoojaItem')->name('editPoojaItem');
-        Route::put('/update-poojaitem/{id}', 'updatePoojaItem')->name('updatePoojaItem');
-
+    Route::get('/poojaitemlist', 'poojaitemlist')->name('poojaitemlist');
+    Route::get('/poojaitem', 'singlepoojaitem');
+    Route::post('/save-poojaitemlist', 'savePoojaItemList');
+    Route::get('/managepoojaitem', 'managepoojaitem')->name('managepoojaitem');
+    Route::delete('/delete-poojaitem/{id}', 'deletePoojaItem')->name('deletePoojaItem');
+    Route::get('/get-poojadetails/{pooja_id}', 'getPoojaDetails');
+    Route::put('/updatepoojalist', 'updatePoojalist');
+    Route::get('/get-variants/{listName}', 'getVariants');
+    Route::get('/get-variants-title/{itemId}',  'getVariantTitle');
+    Route::get('/edit-poojaitem/{id}', 'editPoojaItem')->name('editPoojaItem');
+    Route::put('/update-poojaitem/{id}', 'updatePoojaItem')->name('updatePoojaItem');
     });
 });
 
 Route::controller(PoojaStatusController::class)->group(function() {
-
     Route::post('/pooja/start','start')->name('pooja.start');
     Route::post('/pooja/end', 'end')->name('pooja.end');
 });
@@ -810,16 +805,16 @@ Route::controller(PoojaHistoryController::class)->group(function() {
 });
 
 Route::controller(MarketingVisitPlaceController::class)->group(function() {
-        Route::get('/marketing-visit-place','getVisitPlace')->name('admin.getVisitPlace');
-        Route::post('/save-marketing-visit-place', 'storeVisitPlace')->name('marketing.visit.place.store');
-        Route::get('/manage-marketing-visit-place','manageVisitPlace')->name('admin.visitPlace');
-        Route::get('/visit-place/edit/{id}',  'editVisitPlace')->name('admin.editVisitPlace');
-        Route::post('/visit-place/update/{id}', 'updateVisitPlace')->name('admin.updateVisitPlace');
+    Route::get('/marketing-visit-place','getVisitPlace')->name('admin.getVisitPlace');
+    Route::post('/save-marketing-visit-place', 'storeVisitPlace')->name('marketing.visit.place.store');
+    Route::get('/manage-marketing-visit-place','manageVisitPlace')->name('admin.visitPlace');
+    Route::get('/visit-place/edit/{id}',  'editVisitPlace')->name('admin.editVisitPlace');
+    Route::post('/visit-place/update/{id}', 'updateVisitPlace')->name('admin.updateVisitPlace');
 });
 
 Route::controller(FlowerReportsController::class)->group(function() {
         Route::get('/report-subscription','subscriptionReport')->name('subscription.report');
         Route::get('/report-customize','reportCustomize')->name('report.customize');
         Route::get('/report-flower-pick-up','flowerPickUp')->name('report.flower.pickup');
-        Route::post('/get-flower-pickup-report', 'getFlowerPickupReport')->name('report.flower.pickup.ajax');
+        Route::post('/get-flower-pickup-report', 'flowerPickUp')->name('report.flower.pickup.ajax');
 });
