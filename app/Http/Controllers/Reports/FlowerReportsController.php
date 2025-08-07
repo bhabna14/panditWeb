@@ -189,14 +189,16 @@ public function reportCustomize(Request $request)
     return view('admin.reports.flower-customize-report');
 }
 
+
 public function flowerPickUp(Request $request)
 {
     if ($request->ajax()) {
         $fromDate = $request->from_date;
         $toDate = $request->to_date;
     } else {
-        $toDate = Carbon::now()->toDateString();
-        $fromDate = Carbon::now()->subMonth()->toDateString();
+        // 🔄 CHANGE: From first day of current month to today
+        $fromDate = Carbon::now()->startOfMonth()->toDateString(); // 1st of the month
+        $toDate = Carbon::now()->toDateString(); // Today
     }
 
     $query = FlowerPickupDetails::with([
@@ -224,4 +226,5 @@ public function flowerPickUp(Request $request)
         'toDate' => $toDate,
     ]);
 }
+
 }
