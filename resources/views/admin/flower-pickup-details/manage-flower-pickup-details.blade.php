@@ -214,8 +214,9 @@
                                                             <label for="paid_by" class="form-label">Paid By</label>
                                                             <select class="form-control" name="paid_by" id="paid_by" required>
                                                                 <option value="">Select Name</option>
-                                                                <option value="Pankaj">Pankaj</option>
+                                                                <option value="Pankaj">Pankaj Sial</option>
                                                                 <option value="Subrata">Subrata</option>
+                                                                <option value="Basudha">Basudha</option>
                                                             </select>
                                                         </div>
                                                     </div>
