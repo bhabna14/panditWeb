@@ -200,8 +200,6 @@
                                             </form>
                                         </td>
 
-
-
                                         <td>
                                             @if ($request->order && $request->order->total_price)
                                                 @if ($request->order->rider_id)
@@ -248,7 +246,6 @@
                                     </tr>
                                 @endforeach
                             </tbody>
-
                         </table>
 
                         @foreach ($pendingRequests as $order)

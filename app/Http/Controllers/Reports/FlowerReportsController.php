@@ -128,13 +128,19 @@ public function reportCustomize(Request $request)
                 return $row->created_at ? $row->created_at->format('d M Y') : 'N/A';
             })
             ->addColumn('delivery_date', function ($row) {
-                return optional($row->order->delivery)->delivery_date ? Carbon::parse($row->order->delivery->delivery_date)->format('d M Y') : 'N/A';
+                // Check if order exists and then delivery exists
+                if ($row->order && $row->order->delivery && $row->order->delivery->delivery_date) {
+                    return Carbon::parse($row->order->delivery->delivery_date)->format('d M Y');
+                }
+                return 'N/A';
             })
             ->addColumn('flower_items', function ($row) {
-                return $row->flowerRequestItems->pluck('item_name')->implode(', ') ?? 'N/A';
+                return $row->flowerRequestItems->pluck('item_name')->implode(', ') ?: 'N/A';
             })
             ->addColumn('price', function ($row) {
-                return $row->order->total_price ? '₹' . number_format($row->order->total_price, 2) : '₹0';
+                return ($row->order && $row->order->total_price)
+                    ? '₹' . number_format($row->order->total_price, 2)
+                    : '₹0';
             })
             ->addColumn('status', function ($row) {
                 return ucfirst($row->status ?? 'N/A');
@@ -144,6 +150,7 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
+
 
 
 }
