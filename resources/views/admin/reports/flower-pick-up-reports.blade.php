@@ -43,21 +43,40 @@
     </div>
 
     <!-- Filter Form -->
-     <div class="row g-3 align-items-end mb-4">
-        <div class="col-md-4">
+    <div class="row g-3 align-items-end mb-4">
+        <div class="col-md-3">
             <label for="from_date" class="form-label fw-semibold">From Date</label>
             <input type="date" id="from_date" class="form-control" value="{{ $fromDate }}">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label for="to_date" class="form-label fw-semibold">To Date</label>
             <input type="date" id="to_date" class="form-control" value="{{ $toDate }}">
         </div>
-        <div class="col-md-4 d-flex align-items-end">
+        <div class="col-md-3">
+            <label for="vendor_id" class="form-label fw-semibold">Vendor Name</label>
+            <select id="vendor_id" class="form-select select2">
+                <option value="">All Vendors</option>
+                @foreach ($vendors as $vendor)
+                    <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="payment_mode" class="form-label fw-semibold">Mode of Payment</label>
+            <select id="payment_mode" class="form-select">
+                <option value="">All</option>
+                <option value="cash">Cash</option>
+                <option value="online">Online</option>
+                <option value="upi">UPI</option>
+            </select>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
             <button id="searchBtn" class="btn btn-primary w-100">
                 <i class="fas fa-search me-1"></i> Search
             </button>
         </div>
     </div>
+
 
     <!-- Data Table -->
     <div class="table-responsive export-table">
@@ -102,59 +121,67 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-     <script>
-        $(document).ready(function () {
-            let table = $('#file-datatable').DataTable({
-                responsive: true,
-                destroy: true,
-                searching: true,
-                paging: true,
-                info: true,
-            });
+   <script>
+    $(document).ready(function () {
+        let table = $('#file-datatable').DataTable({
+            responsive: true,
+            destroy: true,
+            searching: true,
+            paging: true,
+            info: true,
+        });
 
-            $('#searchBtn').on('click', function () {
-                const fromDate = $('#from_date').val();
-                const toDate = $('#to_date').val();
+        $('#searchBtn').on('click', function () {
+            const fromDate = $('#from_date').val();
+            const toDate = $('#to_date').val();
+            const vendorId = $('#vendor_id').val();
+            const paymentMode = $('#payment_mode').val();
 
-                if (!fromDate || !toDate) {
-                    Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
-                    return;
+            if (!fromDate || !toDate) {
+                Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
+                return;
+            }
+
+            $.ajax({
+                url: '{{ route('report.flower.pickup') }}',
+                type: 'POST',
+                data: {
+                    from_date: fromDate,
+                    to_date: toDate,
+                    vendor_id: vendorId,
+                    payment_mode: paymentMode,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    table.clear().draw();
+
+                    response.data.forEach(item => {
+                        const flowerDetails = item.flower_pickup_items.map(i =>
+                            `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
+                        ).join('<br>');
+
+                        table.row.add([
+                            item.pickup_date,
+                            item.vendor?.vendor_name || '-',
+                            item.rider?.rider_name || '-',
+                            flowerDetails,
+                            item.status,
+                            '₹' + item.total_price
+                        ]).draw(false);
+                    });
+
+                    $('#totalPrice').text('₹' + response.total_price);
+                    $('#todayPrice').text('₹' + response.today_price);
+                },
+                error: function () {
+                    Swal.fire('Error', 'Unable to fetch data.', 'error');
                 }
-
-                $.ajax({
-                    url: '{{ route('report.flower.pickup') }}',
-                    type: 'POST',
-                    data: {
-                        from_date: fromDate,
-                        to_date: toDate,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        table.clear().draw();
-
-                        response.data.forEach(item => {
-                            const flowerDetails = item.flower_pickup_items.map(i =>
-                                `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
-                            ).join('<br>');
-
-                            table.row.add([
-                                item.pickup_date,
-                                item.vendor?.vendor_name || '-',
-                                item.rider?.rider_name || '-',
-                                flowerDetails,
-                                item.status,
-                                '₹' + item.total_price
-                            ]).draw(false);
-                        });
-
-                        $('#totalPrice').text('₹' + response.total_price);
-                        $('#todayPrice').text('₹' + response.today_price);
-                    },
-                    error: function () {
-                        Swal.fire('Error', 'Unable to fetch data.', 'error');
-                    }
-                });
             });
         });
-    </script>
+
+        // Optional: auto-trigger search on load if needed
+        // $('#searchBtn').trigger('click');
+    });
+</script>
+
 @endsection

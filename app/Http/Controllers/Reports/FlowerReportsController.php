@@ -11,6 +11,7 @@ use App\Models\FlowerProduct;
 use App\Models\FlowerPickupDetails;
 use Yajra\DataTables\DataTables;
 use App\Models\User;
+use App\Models\FlowerVendor;
 use App\Models\Order;
 use App\Models\Address;
 use App\Models\LocalityDetails;
@@ -192,14 +193,17 @@ public function reportCustomize(Request $request)
 
 public function flowerPickUp(Request $request)
 {
+    // Set default date range if not AJAX
     if ($request->ajax()) {
         $fromDate = $request->from_date;
         $toDate = $request->to_date;
     } else {
-        // 🔄 CHANGE: From first day of current month to today
-        $fromDate = Carbon::now()->startOfMonth()->toDateString(); // 1st of the month
-        $toDate = Carbon::now()->toDateString(); // Today
+        $fromDate = Carbon::now()->startOfMonth()->toDateString();
+        $toDate = Carbon::now()->toDateString();
     }
+
+    // Fetch vendor list for dropdown
+    $vendors = FlowerVendor::select('vendor_id', 'vendor_name')->get();
 
     $query = FlowerPickupDetails::with([
         'flowerPickupItems.flower',
@@ -208,8 +212,19 @@ public function flowerPickUp(Request $request)
         'rider'
     ])->whereBetween('pickup_date', [$fromDate, $toDate]);
 
+    // Filter by vendor
+    if ($request->vendor_id) {
+        $query->where('vendor_id', $request->vendor_id);
+    }
+
+    // Filter by payment method
+    if ($request->payment_mode) {
+        $query->where('payment_method', $request->payment_mode);
+    }
+
     $reportData = $query->get();
 
+    // For AJAX: return JSON
     if ($request->ajax()) {
         return response()->json([
             'data' => $reportData,
@@ -218,13 +233,14 @@ public function flowerPickUp(Request $request)
         ]);
     }
 
+    // For page load: return view
     return view('admin.reports.flower-pick-up-reports', [
         'reportData' => $reportData,
         'total_price' => $reportData->sum('total_price'),
         'today_price' => $reportData->where('pickup_date', now()->toDateString())->sum('total_price'),
         'fromDate' => $fromDate,
         'toDate' => $toDate,
+        'vendors' => $vendors,
     ]);
 }
-
 }
