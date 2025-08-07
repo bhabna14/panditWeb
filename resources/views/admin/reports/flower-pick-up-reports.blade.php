@@ -65,9 +65,8 @@
             <label for="payment_mode" class="form-label fw-semibold">Mode of Payment</label>
             <select id="payment_mode" class="form-select">
                 <option value="">All</option>
-                <option value="cash">Cash</option>
-                <option value="online">Online</option>
-                <option value="upi">UPI</option>
+                <option value="Cash">Cash</option>
+                <option value="Upi">UPI</option>
             </select>
         </div>
         <div class="col-md-3 d-flex align-items-end">
