@@ -84,8 +84,8 @@
                     <th>Pickup Date</th>
                     <th>Vendor Name</th>
                     <th>Rider Name</th>
-                    <th>Flower Details</th>
                     <th>Paid By</th>
+                    <th>Flower Details</th>
                     <th>Status</th>
                     <th>Total Price</th>
                 </tr>
@@ -121,67 +121,66 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-   <script>
-    $(document).ready(function () {
-        let table = $('#file-datatable').DataTable({
-            responsive: true,
-            destroy: true,
-            searching: true,
-            paging: true,
-            info: true,
-        });
-
-        $('#searchBtn').on('click', function () {
-            const fromDate = $('#from_date').val();
-            const toDate = $('#to_date').val();
-            const vendorId = $('#vendor_id').val();
-            const paymentMode = $('#payment_mode').val();
-
-            if (!fromDate || !toDate) {
-                Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
-                return;
-            }
-
-            $.ajax({
-                url: '{{ route('report.flower.pickup') }}',
-                type: 'POST',
-                data: {
-                    from_date: fromDate,
-                    to_date: toDate,
-                    vendor_id: vendorId,
-                    payment_mode: paymentMode,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (response) {
-                    table.clear().draw();
-
-                    response.data.forEach(item => {
-                        const flowerDetails = item.flower_pickup_items.map(i =>
-                            `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
-                        ).join('<br>');
-
-                        table.row.add([
-                            item.pickup_date,
-                            item.vendor?.vendor_name || '-',
-                            item.rider?.rider_name || '-',
-                            flowerDetails,
-                            item.status,
-                            '₹' + item.total_price
-                        ]).draw(false);
-                    });
-
-                    $('#totalPrice').text('₹' + response.total_price);
-                    $('#todayPrice').text('₹' + response.today_price);
-                },
-                error: function () {
-                    Swal.fire('Error', 'Unable to fetch data.', 'error');
-                }
+    <script>
+        $(document).ready(function() {
+            let table = $('#file-datatable').DataTable({
+                responsive: true,
+                destroy: true,
+                searching: true,
+                paging: true,
+                info: true,
             });
+
+            $('#searchBtn').on('click', function() {
+                const fromDate = $('#from_date').val();
+                const toDate = $('#to_date').val();
+                const vendorId = $('#vendor_id').val();
+                const paymentMode = $('#payment_mode').val();
+
+                if (!fromDate || !toDate) {
+                    Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
+                    return;
+                }
+
+                $.ajax({
+                    url: '{{ route('report.flower.pickup') }}',
+                    type: 'POST',
+                    data: {
+                        from_date: fromDate,
+                        to_date: toDate,
+                        vendor_id: vendorId,
+                        payment_mode: paymentMode,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        table.clear().draw();
+
+                        response.data.forEach(item => {
+                            const flowerDetails = item.flower_pickup_items.map(i =>
+                                `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
+                            ).join('<br>');
+
+                            table.row.add([
+                                item.pickup_date,
+                                item.vendor?.vendor_name || '-',
+                                item.rider?.rider_name || '-',
+                                flowerDetails,
+                                item.status,
+                                '₹' + item.total_price
+                            ]).draw(false);
+                        });
+
+                        $('#totalPrice').text('₹' + response.total_price);
+                        $('#todayPrice').text('₹' + response.today_price);
+                    },
+                    error: function() {
+                        Swal.fire('Error', 'Unable to fetch data.', 'error');
+                    }
+                });
+            });
+
+            // Optional: auto-trigger search on load if needed
+            // $('#searchBtn').trigger('click');
         });
-
-        // Optional: auto-trigger search on load if needed
-        // $('#searchBtn').trigger('click');
-    });
-</script>
-
+    </script>
 @endsection
