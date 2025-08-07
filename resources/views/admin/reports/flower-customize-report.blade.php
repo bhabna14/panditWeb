@@ -19,7 +19,7 @@
             </ol>
         </div>
     </div>
- <div class="row mb-4">
+    <div class="row mb-4">
         <div class="col-md-6">
             <div class="card border-success shadow-sm">
                 <div class="card-body text-center py-2">
@@ -37,7 +37,7 @@
             </div>
         </div>
     </div>
-  
+
     <!-- Filter -->
     <div class="row g-3 align-items-end mb-4">
         <div class="col-md-4">
@@ -86,46 +86,45 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- DataTable Script -->
-<script>
-    $(document).ready(function () {
-        const table = $('#file-datatable').DataTable({
-            processing: true,
-            serverSide: true,
-            ajax: {
-                url: "{{ route('report.customize') }}",
-                data: function (d) {
-                    d.from_date = $('#from_date').val();
-                    d.to_date = $('#to_date').val();
+    <script>
+        $(document).ready(function() {
+            const table = $('#file-datatable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('report.customize') }}",
+                    data: function(d) {
+                        d.from_date = $('#from_date').val();
+                        d.to_date = $('#to_date').val();
+                    },
+                    dataSrc: function(json) {
+                        // Update totals
+                        $('#totalPrice').text('₹' + (json.total_price_sum ?? 0).toLocaleString());
+                        $('#todayPrice').text('₹' + (json.today_price_sum ?? 0).toLocaleString());
+
+                        return json.data;
+                    }
                 },
-                dataSrc: function (json) {
-                    // Update totals
-                    $('#totalPrice').text('₹' + (json.total_price_sum ?? 0).toLocaleString());
-                    $('#todayPrice').text('₹' + (json.today_price_sum ?? 0).toLocaleString());
+                columns: [{
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            const user = row.user || {};
+                            const address = user.address_details || {};
+                            const userId = user.userid ?? null;
 
-                    return json.data;
-                }
-            },
-            columns: [
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row) {
-                        const user = row.user || {};
-                        const address = user.address_details || {};
-                        const userId = user.userid ?? null;
-
-                        const tooltipContent = `
+                            const tooltipContent = `
                             <strong>Name:</strong> ${user.name || 'N/A'}<br>
                             <strong>Phone:</strong> ${user.mobile_number || 'N/A'}
                         `.trim();
 
-                        const modalId = `addressModal${userId}`;
-                        const viewBtn = userId
-                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>`
-                            : '';
+                            const modalId = `addressModal${userId}`;
+                            const viewBtn = userId ?
+                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>` :
+                                '';
 
-                        const addressHtml = `
+                            const addressHtml = `
                             <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
@@ -148,7 +147,7 @@
                             </div>
                         `;
 
-                        return `
+                            return `
                             <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltipContent}">
                                 <div><strong>Name:</strong> ${user.name || 'N/A'}</div>
                                 <div><strong>No:</strong> ${user.mobile_number || 'N/A'}</div>
@@ -161,18 +160,28 @@
                             </div>
                             ${addressHtml}
                         `;
-                    }
-                },
-                { data: 'purchase_date', name: 'purchase_date', orderable: false, searchable: false },
-                { data: 'delivery_date', name: 'delivery_date', orderable: false, searchable: false },
-                {
-                    data: 'flower_items',
-                    name: 'flower_items',
-                    orderable: false,
-                    searchable: false,
-                    render: function (data, type, row) {
-                        const modalId = `modal_${row.request_id}`;
-                        return `
+                        }
+                    },
+                    {
+                        data: 'purchase_date',
+                        name: 'purchase_date',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'delivery_date',
+                        name: 'delivery_date',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'flower_items',
+                        name: 'flower_items',
+                        orderable: false,
+                        searchable: false,
+                        render: function(data, type, row) {
+                            const modalId = `modal_${row.request_id}`;
+                            return `
                             <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#${modalId}">
                                 View Items
                             </button>
@@ -193,20 +202,27 @@
                                 </div>
                             </div>
                         `;
+                        }
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        className: 'text-capitalize',
+                        orderable: false
+                    },
+                    {
+                        data: 'price',
+                        name: 'price',
+                        orderable: false,
+                        searchable: false
                     }
-                },
-                { data: 'status', name: 'status', className: 'text-capitalize', orderable: false },
-                { data: 'price', name: 'price', orderable: false, searchable: false }
-            ]
+                ]
+            });
+
+            // Reload on date filter
+            $('#searchBtn').click(function() {
+                table.ajax.reload();
+            });
         });
-
-        // Reload on date filter
-        $('#searchBtn').click(function () {
-            table.ajax.reload();
-        });
-    });
-</script>
-
-
-
+    </script>
 @endsection

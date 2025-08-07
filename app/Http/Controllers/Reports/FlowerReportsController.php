@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use App\Models\FlowerRequest;
 use App\Models\FlowerPayment;
 use App\Models\FlowerProduct;
+use App\Models\FlowerPickupDetails;
 use Yajra\DataTables\DataTables;
 use App\Models\User;
 use App\Models\Order;
@@ -186,6 +187,34 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
+
+// FlowerPickupController.php
+public function getFlowerPickupReport(Request $request)
+{
+    $query = FlowerPickupDetails::with([
+        'flowerPickupItems.flower', 
+        'flowerPickupItems.unit', 
+        'vendor', 
+        'rider'
+    ])->whereBetween('pickup_date', [$request->from_date, $request->to_date]);
+
+    if ($request->vendor_id) {
+        $query->where('vendor_id', $request->vendor_id);
+    }
+
+    if ($request->rider_id) {
+        $query->where('rider_id', $request->rider_id);
+    }
+
+    $reportData = $query->get();
+
+    return response()->json([
+        'data' => $reportData,
+        'total_price' => $reportData->sum('total_price'),
+        'today_price' => $reportData->where('pickup_date', now()->toDateString())->sum('total_price')
+    ]);
+}
+
 
 
 }
