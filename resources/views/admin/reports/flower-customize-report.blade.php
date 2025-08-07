@@ -40,15 +40,15 @@
   
     <!-- Filter -->
     <div class="row g-3 align-items-end mb-4">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label for="from_date" class="form-label fw-semibold">From Date</label>
             <input type="date" id="from_date" class="form-control">
         </div>
-        <div class="col-md-3">
+        <div class="col-md-4">
             <label for="to_date" class="form-label fw-semibold">To Date</label>
             <input type="date" id="to_date" class="form-control">
         </div>
-        <div class="col-md-3 d-flex align-items-end">
+        <div class="col-md-4 d-flex align-items-end">
             <button id="searchBtn" class="btn btn-primary w-100">
                 <i class="fas fa-search me-1"></i> Search
             </button>
