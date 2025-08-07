@@ -98,7 +98,31 @@
                     data: 'flower_items',
                     name: 'flower_items',
                     orderable: false,
-                    searchable: false
+                    searchable: false,
+                    render: function (data, type, row) {
+                        const modalId = `modal_${row.request_id}`;
+                        return `
+                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#${modalId}">
+                                View Items
+                            </button>
+                            <div class="modal fade" id="${modalId}" tabindex="-1" aria-labelledby="${modalId}Label" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title" id="${modalId}Label">Flower Items</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            ${data ? data.split(',').map(item => `<div>- ${item.trim()}</div>`).join('') : '<em>No items found.</em>'}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }
                 },
                 {
                     data: 'status',
@@ -121,5 +145,6 @@
         });
     });
 </script>
+
 
 @endsection
