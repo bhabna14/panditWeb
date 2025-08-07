@@ -88,7 +88,7 @@ $totalRevenue = $orders->sum(function ($order) {
 });
 
 // Return the view with the filtered data
-return view('admin.reports.revenue-report', compact('orders', 'totalRevenue'));
+return view('admin.reports.flower-pick-up-reports', compact('orders', 'totalRevenue'));
 
     }
     
