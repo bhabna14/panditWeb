@@ -23,13 +23,12 @@
         </div>
     </div>
 
-    <!-- Summary Cards -->
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="card border-success shadow-sm">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-success mb-1">Total Price</h6>
-                    <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
+                    <h4 class="fw-bold mb-0" id="totalPrice">₹{{ $total_price }}</h4>
                 </div>
             </div>
         </div>
@@ -37,21 +36,21 @@
             <div class="card border-info shadow-sm">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-info mb-1">Today's Price</h6>
-                    <h4 class="fw-bold mb-0" id="todayPrice">₹0</h4>
+                    <h4 class="fw-bold mb-0" id="todayPrice">₹{{ $today_price }}</h4>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filter Form -->
-    <div class="row g-3 align-items-end mb-4">
+     <div class="row g-3 align-items-end mb-4">
         <div class="col-md-4">
             <label for="from_date" class="form-label fw-semibold">From Date</label>
-            <input type="date" id="from_date" class="form-control">
+            <input type="date" id="from_date" class="form-control" value="{{ $fromDate }}">
         </div>
         <div class="col-md-4">
             <label for="to_date" class="form-label fw-semibold">To Date</label>
-            <input type="date" id="to_date" class="form-control">
+            <input type="date" id="to_date" class="form-control" value="{{ $toDate }}">
         </div>
         <div class="col-md-4 d-flex align-items-end">
             <button id="searchBtn" class="btn btn-primary w-100">
@@ -74,7 +73,20 @@
                 </tr>
             </thead>
             <tbody id="reportTableBody">
-                
+                @foreach ($reportData as $item)
+                    <tr>
+                        <td>{{ $item->pickup_date }}</td>
+                        <td>{{ $item->vendor->vendor_name ?? '-' }}</td>
+                        <td>{{ $item->rider->rider_name ?? '-' }}</td>
+                        <td>
+                            @foreach ($item->flowerPickupItems as $f)
+                                {{ $f->flower->name }} ({{ $f->quantity }} {{ $f->unit->unit_name }})<br>
+                            @endforeach
+                        </td>
+                        <td>{{ $item->status }}</td>
+                        <td>₹{{ $item->total_price }}</td>
+                    </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
@@ -90,60 +102,59 @@
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <script>
-    $(document).ready(function () {
-        let table = $('#file-datatable').DataTable({
-            responsive: true,
-            destroy: true,
-            searching: true,
-            paging: true,
-            info: true,
-        });
+     <script>
+        $(document).ready(function () {
+            let table = $('#file-datatable').DataTable({
+                responsive: true,
+                destroy: true,
+                searching: true,
+                paging: true,
+                info: true,
+            });
 
-        $('#searchBtn').on('click', function () {
-            const fromDate = $('#from_date').val();
-            const toDate = $('#to_date').val();
+            $('#searchBtn').on('click', function () {
+                const fromDate = $('#from_date').val();
+                const toDate = $('#to_date').val();
 
-            if (!fromDate || !toDate) {
-                Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
-                return;
-            }
-
-            $.ajax({
-                url: '{{ route("report.flower.pickup") }}', // use same route as the view
-                type: 'POST',
-                data: {
-                    from_date: fromDate,
-                    to_date: toDate,
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function (response) {
-                    table.clear().draw();
-
-                    response.data.forEach(item => {
-                        const flowerDetails = item.flower_pickup_items.map(i =>
-                            `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
-                        ).join('<br>');
-
-                        table.row.add([
-                            item.pickup_date,
-                            item.vendor?.vendor_name || '-',
-                            item.rider?.rider_name || '-',
-                            flowerDetails,
-                            item.status,
-                            '₹' + item.total_price
-                        ]).draw(false);
-                    });
-
-                    $('#totalPrice').text('₹' + response.total_price);
-                    $('#todayPrice').text('₹' + response.today_price);
-                },
-                error: function () {
-                    Swal.fire('Error', 'Unable to fetch data.', 'error');
+                if (!fromDate || !toDate) {
+                    Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
+                    return;
                 }
+
+                $.ajax({
+                    url: '{{ route('report.flower.pickup') }}',
+                    type: 'POST',
+                    data: {
+                        from_date: fromDate,
+                        to_date: toDate,
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function (response) {
+                        table.clear().draw();
+
+                        response.data.forEach(item => {
+                            const flowerDetails = item.flower_pickup_items.map(i =>
+                                `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
+                            ).join('<br>');
+
+                            table.row.add([
+                                item.pickup_date,
+                                item.vendor?.vendor_name || '-',
+                                item.rider?.rider_name || '-',
+                                flowerDetails,
+                                item.status,
+                                '₹' + item.total_price
+                            ]).draw(false);
+                        });
+
+                        $('#totalPrice').text('₹' + response.total_price);
+                        $('#todayPrice').text('₹' + response.today_price);
+                    },
+                    error: function () {
+                        Swal.fire('Error', 'Unable to fetch data.', 'error');
+                    }
+                });
             });
         });
-    });
-</script>
-
+    </script>
 @endsection

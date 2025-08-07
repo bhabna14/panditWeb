@@ -189,15 +189,12 @@ public function reportCustomize(Request $request)
     return view('admin.reports.flower-customize-report');
 }
 
-
 public function flowerPickUp(Request $request)
 {
-    // Check if request is AJAX (for filtering)
     if ($request->ajax()) {
         $fromDate = $request->from_date;
         $toDate = $request->to_date;
     } else {
-        // Default: last 1 month
         $toDate = Carbon::now()->toDateString();
         $fromDate = Carbon::now()->subMonth()->toDateString();
     }
@@ -209,17 +206,8 @@ public function flowerPickUp(Request $request)
         'rider'
     ])->whereBetween('pickup_date', [$fromDate, $toDate]);
 
-    if ($request->vendor_id) {
-        $query->where('vendor_id', $request->vendor_id);
-    }
-
-    if ($request->rider_id) {
-        $query->where('rider_id', $request->rider_id);
-    }
-
     $reportData = $query->get();
 
-    // Return JSON for AJAX
     if ($request->ajax()) {
         return response()->json([
             'data' => $reportData,
@@ -228,7 +216,6 @@ public function flowerPickUp(Request $request)
         ]);
     }
 
-    // Default page load (Blade view)
     return view('admin.reports.flower-pick-up-reports', [
         'reportData' => $reportData,
         'total_price' => $reportData->sum('total_price'),
@@ -237,5 +224,4 @@ public function flowerPickUp(Request $request)
         'toDate' => $toDate,
     ]);
 }
-
 }
