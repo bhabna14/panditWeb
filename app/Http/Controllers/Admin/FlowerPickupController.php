@@ -342,13 +342,15 @@ public function updatePayment(Request $request, $pickup_id)
 
     $pickupDetail->payment_method = $request->input('payment_method');
     $pickupDetail->payment_id = $request->input('payment_id');
+    $pickupDetail->paid_by = $request->input('paid_by', 'N/A');
     $pickupDetail->save();
 
     // Log the payment update
     Log::info('Payment updated', [
         'pickup_id' => $pickup_id,
         'payment_method' => $request->input('payment_method'),
-        'payment_id' => $request->input('payment_id')
+        'payment_id' => $request->input('payment_id'),
+        'paid_by' => $request->input('paid_by', 'N/A')
     ]);
 
     return redirect()->back()->with('success', 'Payment details updated successfully');
