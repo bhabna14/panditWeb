@@ -115,12 +115,11 @@
             ]
         });
 
-        // Reload on filter search
+        // Reload table on search
         $('#searchBtn').click(function () {
             table.ajax.reload();
         });
     });
 </script>
-
 
 @endsection

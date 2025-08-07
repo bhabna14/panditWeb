@@ -104,6 +104,7 @@ public function subscriptionReport(Request $request)
     return view('admin.reports.flower-subscription-report');
 }
 
+
 public function reportCustomize(Request $request)
 {
     if ($request->ajax()) {
@@ -125,22 +126,29 @@ public function reportCustomize(Request $request)
 
         return DataTables::of($query)
             ->addColumn('purchase_date', function ($row) {
-                return $row->created_at ? $row->created_at->format('d M Y') : 'N/A';
+                return optional($row->created_at)->format('d M Y') ?? 'N/A';
             })
             ->addColumn('delivery_date', function ($row) {
-                // Check if order exists and then delivery exists
-                if ($row->order && $row->order->delivery && $row->order->delivery->delivery_date) {
-                    return Carbon::parse($row->order->delivery->delivery_date)->format('d M Y');
-                }
-                return 'N/A';
+                return $row->date
+                    ? Carbon::parse($row->date)->format('d M Y') . ($row->time ? ' ' . $row->time : '')
+                    : 'N/A';
             })
             ->addColumn('flower_items', function ($row) {
-                return $row->flowerRequestItems->pluck('item_name')->implode(', ') ?: 'N/A';
+                if ($row->flowerRequestItems->isEmpty()) return 'N/A';
+
+                return $row->flowerRequestItems->map(function ($item) {
+                    return $item->flower_name . ' (' . $item->flower_quantity . ' ' . $item->flower_unit . ')';
+                })->implode(', ');
             })
             ->addColumn('price', function ($row) {
-                return ($row->order && $row->order->total_price)
-                    ? '₹' . number_format($row->order->total_price, 2)
-                    : '₹0';
+                if ($row->order) {
+                    if ($row->order->total_price) {
+                        return '₹' . number_format($row->order->total_price, 2);
+                    } elseif ($row->order->requested_flower_price) {
+                        return '₹' . number_format($row->order->requested_flower_price, 2);
+                    }
+                }
+                return '₹0';
             })
             ->addColumn('status', function ($row) {
                 return ucfirst($row->status ?? 'N/A');
@@ -150,7 +158,5 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
-
-
 
 }
