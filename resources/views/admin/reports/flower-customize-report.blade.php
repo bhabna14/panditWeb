@@ -50,7 +50,9 @@
                     <th>Price</th>
                 </tr>
             </thead>
-            <tbody></tbody>
+            <tbody>
+                
+            </tbody>
         </table>
     </div>
 @endsection
@@ -66,7 +68,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- DataTable Script -->
-   <script>
+<script>
     $(document).ready(function () {
         var table = $('#file-datatable').DataTable({
             processing: true,

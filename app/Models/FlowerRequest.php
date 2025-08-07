@@ -27,6 +27,7 @@ class FlowerRequest extends Model
     {
         return $this->hasOne(Order::class, 'request_id', 'request_id');
     }
+
     public function address()
     {
         return $this->belongsTo(UserAddress::class, 'address_id','id');
@@ -34,14 +35,14 @@ class FlowerRequest extends Model
 
     public function user()
     {
-         return $this->belongsTo(User::class, 'user_id', 'userid');
+        return $this->belongsTo(User::class, 'user_id', 'userid');
     }
+
     public function flowerProduct()
     {
         return $this->belongsTo(FlowerProduct::class, 'product_id', 'product_id');
     }
 
-    // FlowerRequest.php
     public function flowerRequestItems()
     {
         return $this->hasMany(FlowerRequestItem::class, 'flower_request_id', 'request_id');

@@ -160,7 +160,7 @@
                                                 <p>Payment Pending</p>
                                             @elseif($request->status == 'paid')
                                                 <p>Payment Completed</p>
-                                            @endif3
+                                            @endif
                                         </td>
                                         <td>
                                             @if ($request->order && $request->order->total_price)
