@@ -76,7 +76,6 @@
         </div>
     </div>
 
-
     <!-- Data Table -->
     <div class="table-responsive export-table">
         <table id="file-datatable" class="table table-bordered">
@@ -86,6 +85,7 @@
                     <th>Vendor Name</th>
                     <th>Rider Name</th>
                     <th>Flower Details</th>
+                    <th>Paid By</th>
                     <th>Status</th>
                     <th>Total Price</th>
                 </tr>
@@ -96,6 +96,7 @@
                         <td>{{ $item->pickup_date }}</td>
                         <td>{{ $item->vendor->vendor_name ?? '-' }}</td>
                         <td>{{ $item->rider->rider_name ?? '-' }}</td>
+                        <td>{{ $item->paid_by }}</td>
                         <td>
                             @foreach ($item->flowerPickupItems as $f)
                                 {{ $f->flower->name }} ({{ $f->quantity }} {{ $f->unit->unit_name }})<br>

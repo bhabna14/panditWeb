@@ -210,6 +210,14 @@
                                                             <input type="text" class="form-control" id="payment_id"
                                                                 name="payment_id" placeholder="Enter Payment ID">
                                                         </div>
+                                                        <div class="mb-3">
+                                                            <label for="paid_by" class="form-label">Paid By</label>
+                                                            <select class="form-control" name="paid_by" id="paid_by" required>
+                                                                <option value="">Select Name</option>
+                                                                <option value="Pankaj">Pankaj</option>
+                                                                <option value="Subrata">Subrata</option>
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                     <div class="modal-footer">
                                                         <button type="button" class="btn btn-secondary"
@@ -218,7 +226,6 @@
                                                             Payment</button>
                                                     </div>
                                                 </form>
-
 
                                             </div>
                                         </div>
