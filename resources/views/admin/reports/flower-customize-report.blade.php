@@ -19,7 +19,25 @@
             </ol>
         </div>
     </div>
-
+ <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-success shadow-sm">
+                <div class="card-body text-center py-2">
+                    <h6 class="card-title text-success mb-1">Total Customize Total Price</h6>
+                    <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-info shadow-sm">
+                <div class="card-body text-center py-2">
+                    <h6 class="card-title text-info mb-1">Today Customize Price</h6>
+                    <h4 class="fw-bold mb-0" id="todayPrice">₹0</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+  
     <!-- Filter -->
     <div class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
@@ -78,6 +96,13 @@
                 data: function (d) {
                     d.from_date = $('#from_date').val();
                     d.to_date = $('#to_date').val();
+                },
+                dataSrc: function (json) {
+                    // Update totals
+                    $('#totalPrice').text('₹' + (json.total_price_sum ?? 0).toLocaleString());
+                    $('#todayPrice').text('₹' + (json.today_price_sum ?? 0).toLocaleString());
+
+                    return json.data;
                 }
             },
             columns: [
@@ -96,7 +121,6 @@
                         `.trim();
 
                         const modalId = `addressModal${userId}`;
-
                         const viewBtn = userId
                             ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>`
                             : '';
@@ -176,6 +200,7 @@
             ]
         });
 
+        // Reload on date filter
         $('#searchBtn').click(function () {
             table.ajax.reload();
         });

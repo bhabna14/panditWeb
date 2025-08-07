@@ -103,25 +103,48 @@ public function subscriptionReport(Request $request)
 
     return view('admin.reports.flower-subscription-report');
 }
-
 public function reportCustomize(Request $request)
 {
     if ($request->ajax()) {
         $query = FlowerRequest::with([
-            'order', // total_price, requested_flower_price
+            'order',
             'user.addressDetails',
             'address.localityDetails',
             'flowerRequestItems'
         ])->orderBy('id', 'desc');
 
-        if ($request->filled('from_date') && $request->filled('to_date')) {
-            $query->whereBetween('created_at', [
-                Carbon::parse($request->from_date)->startOfDay(),
-                Carbon::parse($request->to_date)->endOfDay()
-            ]);
-        }
+        // Default: current month
+        $from = $request->from_date ? Carbon::parse($request->from_date)->startOfDay() : Carbon::now()->startOfMonth();
+        $to = $request->to_date ? Carbon::parse($request->to_date)->endOfDay() : Carbon::now()->endOfMonth();
 
-        return DataTables::of($query)
+        $query->whereBetween('created_at', [$from, $to]);
+
+        // Calculate total and today's price
+        $allData = $query->get();
+        $totalPrice = $allData->sum(function ($item) {
+            if ($item->order && $item->order->total_price) {
+                return $item->order->total_price;
+            } elseif ($item->order && $item->order->requested_flower_price) {
+                return $item->order->requested_flower_price;
+            }
+            return 0;
+        });
+
+        $today = Carbon::today();
+        $todayPrice = $allData->whereBetween('created_at', [$today->startOfDay(), $today->endOfDay()])->sum(function ($item) {
+            if ($item->order && $item->order->total_price) {
+                return $item->order->total_price;
+            } elseif ($item->order && $item->order->requested_flower_price) {
+                return $item->order->requested_flower_price;
+            }
+            return 0;
+        });
+
+        return DataTables::of($allData)
+            ->with([
+                'total_price_sum' => $totalPrice,
+                'today_price_sum' => $todayPrice
+            ])
             ->addColumn('user', function ($row) {
                 return [
                     'userid' => $row->user->userid ?? null,
