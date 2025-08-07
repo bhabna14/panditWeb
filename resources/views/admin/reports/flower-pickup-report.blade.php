@@ -17,7 +17,7 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                
+
                 <li class="breadcrumb-item active" aria-current="page">Flower Pickup Report</li>
             </ol>
         </div>
@@ -26,7 +26,7 @@
     <!-- Form for Date Range -->
     <div class="card custom-card">
         <div class="card-body">
-            <form action="{{ route('admin.generateFlowerPickupReport') }}" method="POST">
+            <form id="reportForm">
                 @csrf
                 <div class="row">
                     <div class="col-md-3">
@@ -41,7 +41,7 @@
                         <label for="vendor_id">Vendor</label>
                         <select name="vendor_id" id="vendor_id" class="form-control">
                             <option value="">All Vendors</option>
-                            @foreach($vendors as $vendor)
+                            @foreach ($vendors as $vendor)
                                 <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
                             @endforeach
                         </select>
@@ -50,7 +50,7 @@
                         <label for="rider_id">Rider</label>
                         <select name="rider_id" id="rider_id" class="form-control">
                             <option value="">All Riders</option>
-                            @foreach($riders as $rider)
+                            @foreach ($riders as $rider)
                                 <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
                             @endforeach
                         </select>
@@ -60,68 +60,67 @@
                     </div>
                 </div>
             </form>
-            
         </div>
     </div>
-
     <!-- Report Table -->
-    @if(isset($reportData))
-        <div class="card custom-card mt-4">
+    @if (count($reportData))
+        <div class="card custom-card">
             <div class="card-body">
                 <h5>Flower Pickup Report</h5>
-                <div class="table-responsive  export-table">
-                <table id="file-datatable" class="table table-bordered ">
-                    <thead>
-                        <tr>
-                            <th>Pickup Date</th>
-                            <th>Vendor Name</th>
-                            <th>Rider Name</th>
-                            <th>Flower Details</th>
-                            <th>Status</th>
-                            <th>Total Price</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php $grandTotal = 0; @endphp
-                        @foreach($reportData as $pickup)
-                            @php $grandTotal += $pickup->total_price; @endphp
+                <div class="table-responsive export-table">
+                    <table class="table table-bordered">
+                        <thead>
                             <tr>
-                                <td>{{ $pickup->pickup_date }}</td>
-                                <td>{{ $pickup->vendor->vendor_name }}</td>
-                                <td>{{ $pickup->rider->rider_name }}</td>
-                                <td>
-                                    @foreach($pickup->flowerPickupItems as $item)
-                                        <div>{{ $item->flower->name }} - {{ $item->quantity }} {{ $item->unit->name }} ({{$item->price}})</div>
-                                    @endforeach
-                                </td>
-                                <td>
-                                    @if ($pickup->payment_status === 'Paid')
-                                        <span class="badge bg-success">Paid</span>
-                                    @else
-                                        <span class="badge bg-danger">Unpaid</span>
-                                    @endif
-                                </td>
-                                <td>&#8377;{{ $pickup->total_price }}</td> <!-- For INR -->
-
+                                <th>Pickup Date</th>
+                                <th>Vendor Name</th>
+                                <th>Rider Name</th>
+                                <th>Flower Details</th>
+                                <th>Status</th>
+                                <th>Total Price</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="5">Grand Total</th>
-                            <th>&#8377;{{ number_format($grandTotal, 2) }}</th>
-                        </tr>
-                    </tfoot>
-                </table>
+                        </thead>
+                        <tbody>
+                            @php $grandTotal = 0; @endphp
+                            @foreach ($reportData as $pickup)
+                                @php $grandTotal += $pickup->total_price; @endphp
+                                <tr>
+                                    <td>{{ $pickup->pickup_date }}</td>
+                                    <td>{{ $pickup->vendor->vendor_name }}</td>
+                                    <td>{{ $pickup->rider->rider_name }}</td>
+                                    <td>
+                                        @foreach ($pickup->flowerPickupItems as $item)
+                                            <div>{{ $item->flower->name }} - {{ $item->quantity }}
+                                                {{ $item->unit->name }} (&#8377;{{ $item->price }})</div>
+                                        @endforeach
+                                    </td>
+                                    <td>
+                                        @if ($pickup->payment_status === 'Paid')
+                                            <span class="badge bg-success">Paid</span>
+                                        @else
+                                            <span class="badge bg-danger">Unpaid</span>
+                                        @endif
+                                    </td>
+                                    <td>&#8377;{{ $pickup->total_price }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="5">Grand Total</th>
+                                <th>&#8377;{{ number_format($grandTotal, 2) }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
             </div>
         </div>
+    @else
+        <div class="alert alert-warning">No data found for the selected criteria.</div>
     @endif
 @endsection
 
 
 @section('scripts')
-   
     <!-- Internal Data tables -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
@@ -148,5 +147,34 @@
         setTimeout(function() {
             document.getElementById('Messages').style.display = 'none';
         }, 3000);
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#reportForm').on('submit', function(e) {
+                e.preventDefault();
+                let formData = $(this).serialize();
+
+                $.ajax({
+                    url: "{{ route('admin.generateFlowerPickupReport') }}",
+                    type: "POST",
+                    data: formData,
+                    beforeSend: function() {
+                        $('#reportResult').html('<div class="text-center">Loading...</div>');
+                    },
+                    success: function(response) {
+                        $('#reportResult').html(response.html);
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            alert('Validation error: ' + Object.values(xhr.responseJSON.errors)
+                                .join('\n'));
+                        } else {
+                            alert('Something went wrong. Please try again.');
+                        }
+                    }
+                });
+            });
+        });
     </script>
 @endsection

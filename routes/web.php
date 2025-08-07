@@ -341,7 +341,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
     Route::get('/manage-customize-request','showCustomizeRequest')->name('product-customize-request');
     Route::get('/manage-product-subscription','showProductSubscription')->name('admin.productSubscriptionOrder');
     Route::post('/save-customize-price/{id}','saveCustomizePrice')->name('admin.saveCustomizePrice');
-
   });
   
     Route::get('/flower-pickup-report', [ReportController::class, 'flowerPickupReport'])->name('admin.flowerPickupReport');
