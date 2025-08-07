@@ -25,43 +25,45 @@
 
     <!-- Form for Date Range -->
     <div class="card custom-card">
-        <div class="card-body">
-            <form id="reportForm">
-                @csrf
-                <div class="row">
-                    <div class="col-md-3">
-                        <label for="from_date">From Date</label>
-                        <input type="date" name="from_date" id="from_date" class="form-control" required>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="to_date">To Date</label>
-                        <input type="date" name="to_date" id="to_date" class="form-control" required>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="vendor_id">Vendor</label>
-                        <select name="vendor_id" id="vendor_id" class="form-control">
-                            <option value="">All Vendors</option>
-                            @foreach ($vendors as $vendor)
-                                <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label for="rider_id">Rider</label>
-                        <select name="rider_id" id="rider_id" class="form-control">
-                            <option value="">All Riders</option>
-                            @foreach ($riders as $rider)
-                                <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-12 mt-3">
-                        <button type="submit" class="btn btn-primary">Generate Report</button>
-                    </div>
+    <div class="card-body">
+        <form id="reportForm">
+            @csrf
+            <div class="row">
+                <div class="col-md-3">
+                    <label for="from_date">From Date</label>
+                    <input type="date" name="from_date" id="from_date" class="form-control" required>
                 </div>
-            </form>
-        </div>
+                <div class="col-md-3">
+                    <label for="to_date">To Date</label>
+                    <input type="date" name="to_date" id="to_date" class="form-control" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="vendor_id">Vendor</label>
+                    <select name="vendor_id" id="vendor_id" class="form-control">
+                        <option value="">All Vendors</option>
+                        @foreach ($vendors as $vendor)
+                            <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label for="rider_id">Rider</label>
+                    <select name="rider_id" id="rider_id" class="form-control">
+                        <option value="">All Riders</option>
+                        @foreach ($riders as $rider)
+                            <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-12 mt-3">
+                    <button type="submit" class="btn btn-primary">Generate Report</button>
+                </div>
+            </div>
+        </form>
     </div>
+</div>
+<div id="reportResult" class="mt-4"></div>
+
     <!-- Report Table -->
     @if (!empty($reportData) && $reportData->count())
         <div class="card custom-card">
@@ -149,32 +151,31 @@
         }, 3000);
     </script>
 
-    <script>
-        $(document).ready(function() {
-            $('#reportForm').on('submit', function(e) {
-                e.preventDefault();
-                let formData = $(this).serialize();
+   <script>
+    $(document).ready(function () {
+        $('#reportForm').on('submit', function (e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
 
-                $.ajax({
-                    url: "{{ route('admin.generateFlowerPickupReport') }}",
-                    type: "POST",
-                    data: formData,
-                    beforeSend: function() {
-                        $('#reportResult').html('<div class="text-center">Loading...</div>');
-                    },
-                    success: function(response) {
-                        $('#reportResult').html(response.html);
-                    },
-                    error: function(xhr) {
-                        if (xhr.status === 422) {
-                            alert('Validation error: ' + Object.values(xhr.responseJSON.errors)
-                                .join('\n'));
-                        } else {
-                            alert('Something went wrong. Please try again.');
-                        }
+            $.ajax({
+                url: "{{ route('admin.generateFlowerPickupReport') }}",
+                type: "POST",
+                data: formData,
+                beforeSend: function () {
+                    $('#reportResult').html('<div class="text-center">Loading...</div>');
+                },
+                success: function (response) {
+                    $('#reportResult').html(response.html);
+                },
+                error: function (xhr) {
+                    if (xhr.status === 422) {
+                        alert('Validation error:\n' + Object.values(xhr.responseJSON.errors).join('\n'));
+                    } else {
+                        alert('Something went wrong. Please try again.');
                     }
-                });
+                }
             });
         });
-    </script>
+    });
+</script>
 @endsection
