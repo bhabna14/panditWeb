@@ -63,7 +63,7 @@
         </div>
     </div>
     <!-- Report Table -->
-    @if (count($reportData))
+    @if (!empty($reportData) && $reportData->count())
         <div class="card custom-card">
             <div class="card-body">
                 <h5>Flower Pickup Report</h5>
