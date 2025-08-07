@@ -224,7 +224,7 @@
                     <ul class="slide-menu">
                         <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup.ajax') }}">Pick-up Flower Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower Reports</a></li>
                     </ul>
                 </li>
             </ul>

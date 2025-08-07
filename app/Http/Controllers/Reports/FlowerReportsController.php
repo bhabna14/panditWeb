@@ -189,6 +189,12 @@ public function reportCustomize(Request $request)
     return view('admin.reports.flower-customize-report');
 }
 
+    public function flowerPickUp()
+    {
+        return view('admin.reports.flower-pick-up-reports');
+    }
+
+
 // FlowerPickupController.php
 public function getFlowerPickupReport(Request $request)
 {
