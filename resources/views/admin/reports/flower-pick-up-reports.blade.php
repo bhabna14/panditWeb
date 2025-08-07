@@ -91,59 +91,59 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function () {
-            let table = $('#file-datatable').DataTable({
-                responsive: true,
-                destroy: true,
-                searching: true,
-                paging: true,
-                info: true,
-            });
+    $(document).ready(function () {
+        let table = $('#file-datatable').DataTable({
+            responsive: true,
+            destroy: true,
+            searching: true,
+            paging: true,
+            info: true,
+        });
 
-            $('#searchBtn').on('click', function () {
-                const fromDate = $('#from_date').val();
-                const toDate = $('#to_date').val();
+        $('#searchBtn').on('click', function () {
+            const fromDate = $('#from_date').val();
+            const toDate = $('#to_date').val();
 
-                if (!fromDate || !toDate) {
-                    Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
-                    return;
+            if (!fromDate || !toDate) {
+                Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
+                return;
+            }
+
+            $.ajax({
+                url: '{{ route("report.flower.pickup") }}', // use same route as the view
+                type: 'POST',
+                data: {
+                    from_date: fromDate,
+                    to_date: toDate,
+                    _token: $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function (response) {
+                    table.clear().draw();
+
+                    response.data.forEach(item => {
+                        const flowerDetails = item.flower_pickup_items.map(i =>
+                            `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
+                        ).join('<br>');
+
+                        table.row.add([
+                            item.pickup_date,
+                            item.vendor?.vendor_name || '-',
+                            item.rider?.rider_name || '-',
+                            flowerDetails,
+                            item.status,
+                            '₹' + item.total_price
+                        ]).draw(false);
+                    });
+
+                    $('#totalPrice').text('₹' + response.total_price);
+                    $('#todayPrice').text('₹' + response.today_price);
+                },
+                error: function () {
+                    Swal.fire('Error', 'Unable to fetch data.', 'error');
                 }
-
-                $.ajax({
-                    url: '{{ route("report.flower.pickup.ajax") }}',
-                    type: 'POST',
-                    data: {
-                        from_date: fromDate,
-                        to_date: toDate,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function (response) {
-                        // Clear and redraw DataTable
-                        table.clear().draw();
-
-                        response.data.forEach(item => {
-                            const flowerDetails = item.flower_pickup_items.map(i =>
-                                `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
-                            ).join('<br>');
-
-                            table.row.add([
-                                item.pickup_date,
-                                item.vendor?.vendor_name || '-',
-                                item.rider?.rider_name || '-',
-                                flowerDetails,
-                                item.status,
-                                '₹' + item.total_price
-                            ]).draw(false);
-                        });
-
-                        $('#totalPrice').text('₹' + response.total_price);
-                        $('#todayPrice').text('₹' + response.today_price);
-                    },
-                    error: function () {
-                        Swal.fire('Error', 'Unable to fetch data.', 'error');
-                    }
-                });
             });
         });
-    </script>
+    });
+</script>
+
 @endsection

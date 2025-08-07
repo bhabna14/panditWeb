@@ -815,6 +815,5 @@ Route::controller(MarketingVisitPlaceController::class)->group(function() {
 Route::controller(FlowerReportsController::class)->group(function() {
         Route::get('/report-subscription','subscriptionReport')->name('subscription.report');
         Route::get('/report-customize','reportCustomize')->name('report.customize');
-        Route::get('/report-flower-pick-up','flowerPickUp')->name('report.flower.pickup');
-        Route::post('/get-flower-pickup-report', 'getFlowerPickupReport')->name('report.flower.pickup.ajax');
+        Route::match(['get', 'post'], '/report-flower-pick-up', 'flowerPickUp')->name('report.flower.pickup');
 });
