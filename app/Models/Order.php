@@ -26,6 +26,12 @@ class Order extends Model
         'suggestion',
         'created_at'
     ];
+
+     public function flowerRequest()
+    {
+        return $this->belongsTo(FlowerRequest::class, 'request_id', 'request_id');
+    }
+
     public function address()
     {
         return $this->belongsTo(UserAddress::class, 'address_id','id');
@@ -39,10 +45,7 @@ class Order extends Model
     {
         return $this->belongsTo(RiderDetails::class, 'rider_id', 'rider_id');
     }
-    public function flowerRequest()
-    {
-        return $this->belongsTo(FlowerRequest::class, 'request_id', 'request_id');
-    }
+   
     public function subscription()
 {
     return $this->hasOne(Subscription::class, 'order_id', 'order_id');

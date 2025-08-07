@@ -51,7 +51,7 @@
                 </tr>
             </thead>
             <tbody>
-                
+
             </tbody>
         </table>
     </div>
@@ -70,7 +70,7 @@
     <!-- DataTable Script -->
 <script>
     $(document).ready(function () {
-        var table = $('#file-datatable').DataTable({
+        const table = $('#file-datatable').DataTable({
             processing: true,
             serverSide: true,
             ajax: {
@@ -81,11 +81,11 @@
                 }
             },
             columns: [
-                { data: 'request_id', name: 'request_id' }, // real column
+                { data: 'request_id', name: 'request_id' },
                 {
                     data: 'purchase_date',
                     name: 'purchase_date',
-                    orderable: false, // virtual column
+                    orderable: false,
                     searchable: false
                 },
                 {
@@ -115,10 +115,12 @@
             ]
         });
 
+        // Reload on filter search
         $('#searchBtn').click(function () {
             table.ajax.reload();
         });
     });
 </script>
+
 
 @endsection
