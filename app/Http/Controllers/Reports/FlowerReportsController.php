@@ -104,15 +104,12 @@ public function subscriptionReport(Request $request)
     return view('admin.reports.flower-subscription-report');
 }
 
-
 public function reportCustomize(Request $request)
 {
     if ($request->ajax()) {
         $query = FlowerRequest::with([
-            'order.flowerPayments',
-            'order.delivery',
-            'flowerProduct',
-            'user',
+            'order', // total_price, requested_flower_price
+            'user.addressDetails',
             'address.localityDetails',
             'flowerRequestItems'
         ])->orderBy('id', 'desc');
@@ -125,6 +122,14 @@ public function reportCustomize(Request $request)
         }
 
         return DataTables::of($query)
+            ->addColumn('user', function ($row) {
+                return [
+                    'userid' => $row->user->userid ?? null,
+                    'name' => $row->user->name ?? 'N/A',
+                    'mobile_number' => $row->user->mobile_number ?? 'N/A',
+                    'address_details' => $row->user->addressDetails ?? null
+                ];
+            })
             ->addColumn('purchase_date', function ($row) {
                 return optional($row->created_at)->format('d M Y') ?? 'N/A';
             })
@@ -158,5 +163,6 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
+
 
 }

@@ -42,7 +42,7 @@
         <table id="file-datatable" class="table table-bordered">
             <thead>
                 <tr>
-                    <th>Request ID</th>
+                    <th>Customer Details</th>
                     <th>Purchase Date</th>
                     <th>Delivery Date</th>
                     <th>Flower Items</th>
@@ -81,19 +81,66 @@
                 }
             },
             columns: [
-                { data: 'request_id', name: 'request_id' },
                 {
-                    data: 'purchase_date',
-                    name: 'purchase_date',
+                    data: null,
                     orderable: false,
-                    searchable: false
+                    searchable: false,
+                    render: function (data, type, row) {
+                        const user = row.user || {};
+                        const address = user.address_details || {};
+                        const userId = user.userid ?? null;
+
+                        const tooltipContent = `
+                            <strong>Name:</strong> ${user.name || 'N/A'}<br>
+                            <strong>Phone:</strong> ${user.mobile_number || 'N/A'}
+                        `.trim();
+
+                        const modalId = `addressModal${userId}`;
+
+                        const viewBtn = userId
+                            ? `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm"><i class="fas fa-eye"></i></a>`
+                            : '';
+
+                        const addressHtml = `
+                            <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-primary text-white">
+                                            <h5 class="modal-title"><i class="fas fa-home"></i> Address Details</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p><strong>Address:</strong> ${address.apartment_flat_plot || ''}, ${address.apartment_name || ''}, ${address.locality || ''}</p>
+                                            <p><strong>Landmark:</strong> ${address.landmark || ''}</p>
+                                            <p><strong>Pin Code:</strong> ${address.pincode || ''}</p>
+                                            <p><strong>City:</strong> ${address.city || ''}</p>
+                                            <p><strong>State:</strong> ${address.state || ''}</p>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+
+                        return `
+                            <div class="order-details" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltipContent}">
+                                <div><strong>Name:</strong> ${user.name || 'N/A'}</div>
+                                <div><strong>No:</strong> ${user.mobile_number || 'N/A'}</div>
+                                <div class="mt-1 d-flex gap-2">
+                                    ${viewBtn}
+                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#${modalId}">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            ${addressHtml}
+                        `;
+                    }
                 },
-                {
-                    data: 'delivery_date',
-                    name: 'delivery_date',
-                    orderable: false,
-                    searchable: false
-                },
+                { data: 'purchase_date', name: 'purchase_date', orderable: false, searchable: false },
+                { data: 'delivery_date', name: 'delivery_date', orderable: false, searchable: false },
                 {
                     data: 'flower_items',
                     name: 'flower_items',
@@ -124,27 +171,17 @@
                         `;
                     }
                 },
-                {
-                    data: 'status',
-                    name: 'status',
-                    className: 'text-capitalize',
-                    orderable: false
-                },
-                {
-                    data: 'price',
-                    name: 'price',
-                    orderable: false,
-                    searchable: false
-                }
+                { data: 'status', name: 'status', className: 'text-capitalize', orderable: false },
+                { data: 'price', name: 'price', orderable: false, searchable: false }
             ]
         });
 
-        // Reload table on search
         $('#searchBtn').click(function () {
             table.ajax.reload();
         });
     });
 </script>
+
 
 
 @endsection
