@@ -211,7 +211,7 @@
                     </li>
                 @endif
 
-                 <li class="slide">
+                <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24">
@@ -224,6 +224,7 @@
                     <ul class="slide-menu">
                         <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower Reports</a></li>
                     </ul>
                 </li>
             </ul>
@@ -235,7 +236,6 @@
                 </svg>
             </div>
 
-           
         </div>
     </aside>
 </div>
