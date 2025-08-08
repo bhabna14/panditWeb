@@ -383,4 +383,5 @@
             const categorySelect = document.getElementById('category');
         });
     </script>
+    
 @endsection
