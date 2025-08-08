@@ -1,7 +1,6 @@
 @extends('admin.layouts.apps')
 
 @section('content')
-    <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">Flower Promotion</span>
@@ -18,11 +17,13 @@
         </div>
     </div>
 
+    <!-- Form Card -->
     <div class="card">
         <div class="card-body">
             <form action="{{ route('admin.saveFlowerPromotion') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
+                    <!-- Header -->
                     <div class="col-md-6">
                         <label for="header" class="form-label">Header</label>
                         <input type="text" class="form-control @error('header') is-invalid @enderror" id="header"
@@ -32,6 +33,7 @@
                         @enderror
                     </div>
 
+                    <!-- Body -->
                     <div class="col-md-12">
                         <label for="body" class="form-label">Body</label>
                         <textarea class="form-control @error('body') is-invalid @enderror" id="body" name="body" rows="4"
@@ -41,6 +43,7 @@
                         @enderror
                     </div>
 
+                    <!-- Start Date -->
                     <div class="col-md-6">
                         <label for="start_date" class="form-label">Start Date</label>
                         <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date"
@@ -50,6 +53,7 @@
                         @enderror
                     </div>
 
+                    <!-- End Date -->
                     <div class="col-md-6">
                         <label for="end_date" class="form-label">End Date</label>
                         <input type="date" class="form-control @error('end_date') is-invalid @enderror" id="end_date"
@@ -59,6 +63,7 @@
                         @enderror
                     </div>
 
+                    <!-- Photo -->
                     <div class="col-md-6">
                         <label for="photo" class="form-label">Photo</label>
                         <input type="file" class="form-control @error('photo') is-invalid @enderror" id="photo"
@@ -68,6 +73,7 @@
                         @enderror
                     </div>
 
+                    <!-- Submit Button -->
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
@@ -76,10 +82,10 @@
         </div>
     </div>
 @endsection
+
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    {{-- ✅ SweetAlert for success/error/validation --}}
     <script>
         @if (session('success'))
             Swal.fire({
@@ -97,7 +103,7 @@
             });
         @endif
 
-        @if (session('validation_errors'))
+        @if ($errors->any())
             let errorMessages = '';
             @foreach ($errors->all() as $error)
                 errorMessages += '• {{ $error }}\n';
