@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PromotionDetails;
+use Illuminate\Support\Facades\Storage; // ⬅️ add this at the top
 
 class PromotionController extends Controller
 {
