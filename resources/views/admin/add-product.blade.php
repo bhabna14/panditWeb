@@ -48,33 +48,33 @@
         @csrf
         <div class="row">
             <!-- Product Name -->
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="name" class="form-label">Product Name</label>
                 <input type="text" name="name" class="form-control" id="name" placeholder="Enter product name"
                     required>
             </div>
 
             <!-- Odia Product Name -->
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="odia_name" class="form-label">Product Name (Odia)</label>
                 <input type="text" name="odia_name" class="form-control" id="odia_name"
                     placeholder="Enter product name in Odia">
             </div>
 
             <!-- Price -->
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="price" class="form-label">MRP (Rs.)</label>
                 <input type="number" name="mrp" class="form-control" id="mrp" placeholder="Enter product mrp"
                     required>
             </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="price" class="form-label">Sale Price (Rs.)</label>
                 <input type="number" name="price" class="form-control" id="price"
                     placeholder="Enter product sale price" required>
             </div>
 
             <!-- Category -->
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select name="category" id="category" class="form-control select2" required>
                     <option value="" disabled selected>Select Category</option>
@@ -89,7 +89,7 @@
             </div>
 
             <!-- Mala Provided Field (for Flower category) -->
-            <div class="col-md-3 mb-3" id="malaProvidedField" style="display: none;">
+            <div class="col-md-4 mb-3" id="malaProvidedField" style="display: none;">
                 <label class="form-label">Is Mala Provided with this Flower?</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="mala_provided" id="malaYes" value="1">
@@ -101,7 +101,7 @@
                 </div>
             </div>
             <!-- Flower Availability Field (for Flower category) -->
-            <div class="col-md-3 mb-3" id="flowerAvailabilityField" style="display: none;">
+            <div class="col-md-4 mb-3" id="flowerAvailabilityField" style="display: none;">
                 <label class="form-label">Is this Flower Available?</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="flower_available" id="flowerActive" value="1">
@@ -115,7 +115,7 @@
             </div>
 
 
-            <div class="col-md-6 mb-3" id="poojafields" style="display: none;">
+            <div class="col-md-4 mb-3" id="poojafields" style="display: none;">
                 <div class="form-group">
                     <label for="pooja_name" class="form-label">Pooja Name</label>
 
@@ -158,7 +158,7 @@
             </div>
 
 
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="duration" class="form-label">Subscription Duration (Months)</label>
                 <select name="duration" id="duration" class="form-control select2">
                     <option value="" disabled selected>Select Package</option>
@@ -169,7 +169,7 @@
             </div>
 
             <!-- Stock -->
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="stock" class="form-label">Stock</label>
                 <input type="number" name="stock" class="form-control" id="stock"
                     placeholder="Enter stock quantity">
@@ -177,13 +177,13 @@
 
             <!-- Subscription Duration -->
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="product_image" class="form-label">Product Image</label>
                 <input type="file" name="product_image" class="form-control" id="product_image"
                     placeholder="Enter stock quantity" required>
             </div>
 
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="benefit" class="form-label">Benefits</label>
                 <div id="benefitFields">
                     <div class="input-group mb-2 benefit-row">
@@ -383,5 +383,5 @@
             const categorySelect = document.getElementById('category');
         });
     </script>
-    
+
 @endsection
