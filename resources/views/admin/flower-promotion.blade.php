@@ -33,6 +33,16 @@
                         @enderror
                     </div>
 
+                      <!-- Photo -->
+                    <div class="col-md-6">
+                        <label for="photo" class="form-label">Photo</label>
+                        <input type="file" class="form-control @error('photo') is-invalid @enderror" id="photo"
+                            name="photo" accept="image/*" required>
+                        @error('photo')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <!-- Body -->
                     <div class="col-md-12">
                         <label for="body" class="form-label">Body</label>
@@ -63,16 +73,7 @@
                         @enderror
                     </div>
 
-                    <!-- Photo -->
-                    <div class="col-md-6">
-                        <label for="photo" class="form-label">Photo</label>
-                        <input type="file" class="form-control @error('photo') is-invalid @enderror" id="photo"
-                            name="photo" accept="image/*" required>
-                        @error('photo')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-
+                  
                     <!-- Submit Button -->
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">Save</button>
