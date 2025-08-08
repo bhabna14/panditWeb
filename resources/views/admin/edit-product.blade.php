@@ -54,6 +54,12 @@
                     required>
             </div>
 
+            <div class="col-md-6 mb-3">
+                <label for="odia_name" class="form-label">Product Name (Odia)</label>
+                <input type="text" name="odia_name" class="form-control" id="odia_name"
+                    value="{{ $product->odia_name ?? '' }}" required>
+            </div>
+
             <div class="col-md-3 mb-3">
                 <label for="mrp" class="form-label">MRP (Rs.)</label>
                 <input type="number" name="mrp" class="form-control" id="mrp" value="{{ $product->mrp }}"
@@ -80,6 +86,36 @@
                     <option value="Package" {{ $product->category == 'Package' ? 'selected' : '' }}>Package</option>
                     <option value="Books" {{ $product->category == 'Books' ? 'selected' : '' }}>Books</option>
                 </select>
+            </div>
+
+            <!-- Mala Provided Field (for Flower category) -->
+            <div class="col-md-4 mb-3" id="malaProvidedField" style="display: none;">
+                <label class="form-label">Is Mala Provided with this Flower?</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="mala_provided" id="malaYes" value="yes"
+                        {{ old('mala_provided', $product->mala_provided ?? '') == 'yes' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="malaYes">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="mala_provided" id="malaNo" value="no"
+                        {{ old('mala_provided', $product->mala_provided ?? '') == 'no' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="malaNo">No</label>
+                </div>
+            </div>
+            <!-- Flower Availability Field (for Flower category) -->
+            <div class="col-md-4 mb-3" id="flowerAvailabilityField" style="display: none;">
+                <label class="form-label">Is this Flower Available?</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flower_available" id="flowerActive" value="yes"
+                        {{ old('flower_available', $product->flower_available ?? '') == 'yes' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="flowerActive">Active</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flower_available" id="flowerInactive"
+                        value="no"
+                        {{ old('flower_available', $product->flower_available ?? '') == 'no' ? 'checked' : '' }}>
+                    <label class="form-check-label" for="flowerInactive">Inactive</label>
+                </div>
             </div>
 
             <div id="packageFields" class="col-md-12 mb-3">
@@ -287,6 +323,30 @@
                     }
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('category');
+            const malaField = document.getElementById('malaProvidedField');
+            const flowerField = document.getElementById('flowerAvailabilityField');
+
+            function toggleFlowerFields() {
+                if (categorySelect.value === 'Flower') {
+                    malaField.style.display = 'block';
+                    flowerField.style.display = 'block';
+                } else {
+                    malaField.style.display = 'none';
+                    flowerField.style.display = 'none';
+                }
+            }
+
+            // Initial check on page load
+            toggleFlowerFields();
+
+            // Listen for changes
+            categorySelect.addEventListener('change', toggleFlowerFields);
         });
     </script>
 @endsection
