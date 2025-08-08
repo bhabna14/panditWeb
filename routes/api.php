@@ -21,6 +21,8 @@ use App\Http\Controllers\Api\PoojaStatusController;
 use App\Http\Controllers\Api\FlowerBookingController;
 use App\Http\Controllers\Api\OfferDetailsApiController;
 use App\Http\Controllers\Api\FlowerCalendarApiController;
+use App\Http\Controllers\Api\FCMNotificationController;
+
 
 use App\Http\Controllers\Admin\NotificationController;
 
@@ -264,6 +266,9 @@ Route::middleware('auth:sanctum')->post('/product-subscription', [ProductApiCont
 Route::middleware('auth:sanctum')->post('/product-requests', [ProductApiController::class, 'productRequest']);
 Route::middleware('auth:sanctum')->post('/make-request-payment/{id}', [ProductApiController::class, 'makeRequestPayment']);
 Route::middleware('auth:sanctum')->get('/product-orders-list', [ProductApiController::class, 'ProductOrdersList']);
+
+Route::get('/fcm-bulk-notifications', [FCMNotificationController::class, 'getAllNotifications']);
+
 
 
 
