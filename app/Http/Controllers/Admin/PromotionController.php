@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Storage; // ⬅️ add this at the top
 
 class PromotionController extends Controller
 {
-   use Illuminate\Support\Facades\Storage; // ⬅️ add this at the top
 
 public function saveFlowerPromotion(Request $request)
 {
