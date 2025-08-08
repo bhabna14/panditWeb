@@ -21,6 +21,37 @@
                 @csrf
 
                 <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="paid_by" class="form-label">Paid By</label>
+                        <input type="text" class="form-control" id="paid_by" name="paid_by" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="amount" class="form-label">Amount</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="mode_of_payment" class="form-label">Mode of Payment</label>
+                        <select class="form-select" id="mode_of_payment" name="mode_of_payment" required>
+                            <option value="">Select Mode</option>
+                            <option value="cash">Cash</option>
+                            <option value="upi">UPI</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="type" class="form-label">Type</label>
+                        <select class="form-select" id="type" name="type" required>
+                            <option value="">Select Type</option>
+                            <option value="rent">Rent</option>
+                            <option value="fuel">Fuel</option>
+                            <option value="package">Package</option>
+                            <option value="bus_fare">Bus Fare</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Enter description"></textarea>
+                    </div>
 
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">Save Offer</button>
