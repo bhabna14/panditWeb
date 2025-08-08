@@ -142,158 +142,157 @@ class FlowerBookingController extends Controller
         }
     }
     
-public function storerequest(Request $request)
-{
-    try {
-        // Start a transaction
-        DB::beginTransaction();
-
-        // Get the authenticated user
-        $user = Auth::guard('sanctum')->user();
-
-        // Generate the request_id for the new flower request
-        $requestId = 'REQ-' . strtoupper(Str::random(12));
-
-        // Create the flower request and store the generated request_id
-        $flowerRequest = FlowerRequest::create([
-            'request_id' => $requestId,
-            'product_id' => $request->product_id,
-            'user_id' => $user->userid,
-            'address_id' => $request->address_id,
-            'description' => $request->description,
-            'suggestion' => $request->suggestion,
-            'date' => $request->date,
-            'time' => $request->time,
-            'status' => 'pending',
-        ]);
-
-        // Process flower items and create corresponding entries
-        foreach ($request->flower_name as $index => $flowerName) {
-            FlowerRequestItem::create([
-                'flower_request_id' => $requestId,
-                'flower_name' => $flowerName,
-                'flower_unit' => $request->flower_unit[$index],
-                'flower_quantity' => $request->flower_quantity[$index],
-            ]);
-        }
-
-        $deviceTokens = UserDevice::where('user_id', $user->userid)
-            ->whereNotNull('device_id')
-            ->pluck('device_id')
-            ->filter()
-            ->toArray();
-
-        if (empty($deviceTokens)) {
-            \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
-        }
-
-        if (!empty($deviceTokens)) {
-            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-            $notificationService->sendBulkNotifications(
-                $deviceTokens,
-                'Order Created',
-                'Your order has been placed. Price will be notified in few minutes.',
-                ['order_id' => $flowerRequest->id]
-            );
-            \Log::info('Notifications sent successfully to all devices.', [
-                'user_id' => $user->userid,
-                'device_tokens' => $deviceTokens,
-            ]);
-        } else {
-            \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
-        }
-
-        // Email Notification
-        $flowerRequest = $flowerRequest->load([
-            'address.localityDetails',
-            'user',
-            'flowerRequestItems',
-        ]);
-
-        $emails = [
-            'soumyaranjan.puhan@33crores.com',
-            'pankaj.sial@33crores.com',
-            'basudha@33crores.com',
-            'priya@33crores.com',
-            'starleen@33crores.com',
-        ];
-
-        \Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
-    try {
-        Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
-        \Log::info('Email sent successfully to all recipients.');
-    } catch (\Exception $e) {
-        \Log::error('Failed to send email.', ['error' => $e->getMessage()]);
-    }
-        \Log::info('Email sent successfully to all recipients.');
-
-        // Twilio WhatsApp Notification Logic
-        $adminNumber = '+919776888887';
-        $twilioSid = env('TWILIO_ACCOUNT_SID');
-        $twilioToken = env('TWILIO_AUTH_TOKEN');
-        $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
-
-        $messageBody = "*New Flower Request Received*\n\n" .
-            "*Request ID:* {$flowerRequest->request_id}\n" .
-            "*User:* {$flowerRequest->user->mobile_number}\n" .
-            "*Address:* {$flowerRequest->address->apartment_flat_plot}, " .
-            "{$flowerRequest->address->localityDetails->locality_name}, " .
-            "{$flowerRequest->address->city}, {$flowerRequest->address->state}, " .
-            "{$flowerRequest->address->pincode}\n" .
-            "*Landmark:* {$flowerRequest->address->landmark}\n" .
-            "*Description:* {$flowerRequest->description}\n" .
-            "*Suggestion:* {$flowerRequest->suggestion}\n" .
-            "*Date:* {$flowerRequest->date}\n" .
-            "*Time:* {$flowerRequest->time}\n\n" .
-            "*Flower Items:*\n";
-
-        foreach ($flowerRequest->flowerRequestItems as $item) {
-            $messageBody .= "- {$item->flower_name}: {$item->flower_quantity} {$item->flower_unit}\n";
-        }
-
+    public function storerequest(Request $request)
+    {
         try {
-            $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
-            $twilioClient->messages->create(
-                "whatsapp:{$adminNumber}",
-                [
-                    'from' => $twilioWhatsAppNumber,
-                    'body' => $messageBody,
-                ]
-            );
-            \Log::info('WhatsApp notification sent successfully.');
+            // Start a transaction
+            DB::beginTransaction();
+
+            // Get the authenticated user
+            $user = Auth::guard('sanctum')->user();
+
+            // Generate the request_id for the new flower request
+            $requestId = 'REQ-' . strtoupper(Str::random(12));
+
+            // Create the flower request and store the generated request_id
+            $flowerRequest = FlowerRequest::create([
+                'request_id' => $requestId,
+                'product_id' => $request->product_id,
+                'user_id' => $user->userid,
+                'address_id' => $request->address_id,
+                'description' => $request->description,
+                'suggestion' => $request->suggestion,
+                'date' => $request->date,
+                'time' => $request->time,
+                'status' => 'pending',
+            ]);
+
+            // Process flower items and create corresponding entries
+            foreach ($request->flower_name as $index => $flowerName) {
+                FlowerRequestItem::create([
+                    'flower_request_id' => $requestId,
+                    'flower_name' => $flowerName,
+                    'flower_unit' => $request->flower_unit[$index],
+                    'flower_quantity' => $request->flower_quantity[$index],
+                ]);
+            }
+
+            $deviceTokens = UserDevice::where('user_id', $user->userid)
+                ->whereNotNull('device_id')
+                ->pluck('device_id')
+                ->filter()
+                ->toArray();
+
+            if (empty($deviceTokens)) {
+                \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+            }
+
+            if (!empty($deviceTokens)) {
+                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                $notificationService->sendBulkNotifications(
+                    $deviceTokens,
+                    'Order Created',
+                    'Your order has been placed. Price will be notified in few minutes.',
+                    ['order_id' => $flowerRequest->id]
+                );
+                \Log::info('Notifications sent successfully to all devices.', [
+                    'user_id' => $user->userid,
+                    'device_tokens' => $deviceTokens,
+                ]);
+            } else {
+                \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+            }
+
+            // Email Notification
+            $flowerRequest = $flowerRequest->load([
+                'address.localityDetails',
+                'user',
+                'flowerRequestItems',
+            ]);
+
+            $emails = [
+                'soumyaranjan.puhan@33crores.com',
+                'pankaj.sial@33crores.com',
+                'basudha@33crores.com',
+                'priya@33crores.com',
+                'starleen@33crores.com',
+            ];
+
+            \Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
+        try {
+            Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+            \Log::info('Email sent successfully to all recipients.');
         } catch (\Exception $e) {
-            \Log::error('Failed to send WhatsApp notification.', ['error' => $e->getMessage()]);
+            \Log::error('Failed to send email.', ['error' => $e->getMessage()]);
         }
-        
+            \Log::info('Email sent successfully to all recipients.');
 
-        \Log::info('WhatsApp notification sent successfully.', ['admin_number' => $adminNumber]);
+            // Twilio WhatsApp Notification Logic
+            $adminNumber = '+919776888887';
+            $twilioSid = env('TWILIO_ACCOUNT_SID');
+            $twilioToken = env('TWILIO_AUTH_TOKEN');
+            $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
 
-        // Commit the transaction
-        DB::commit();
+            $messageBody = "*New Flower Request Received*\n\n" .
+                "*Request ID:* {$flowerRequest->request_id}\n" .
+                "*User:* {$flowerRequest->user->mobile_number}\n" .
+                "*Address:* {$flowerRequest->address->apartment_flat_plot}, " .
+                "{$flowerRequest->address->localityDetails->locality_name}, " .
+                "{$flowerRequest->address->city}, {$flowerRequest->address->state}, " .
+                "{$flowerRequest->address->pincode}\n" .
+                "*Landmark:* {$flowerRequest->address->landmark}\n" .
+                "*Description:* {$flowerRequest->description}\n" .
+                "*Suggestion:* {$flowerRequest->suggestion}\n" .
+                "*Date:* {$flowerRequest->date}\n" .
+                "*Time:* {$flowerRequest->time}\n\n" .
+                "*Flower Items:*\n";
 
-        // Return a successful response with flower request details
-        return response()->json([
-            'status' => 200,
-            'message' => 'Flower request created successfully',
-            'data' => $flowerRequest,
-        ], 200);
+            foreach ($flowerRequest->flowerRequestItems as $item) {
+                $messageBody .= "- {$item->flower_name}: {$item->flower_quantity} {$item->flower_unit}\n";
+            }
 
-    } catch (\Exception $e) {
-        // Rollback the transaction on failure
-        DB::rollBack();
+            try {
+                $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
+                $twilioClient->messages->create(
+                    "whatsapp:{$adminNumber}",
+                    [
+                        'from' => $twilioWhatsAppNumber,
+                        'body' => $messageBody,
+                    ]
+                );
+                \Log::info('WhatsApp notification sent successfully.');
+            } catch (\Exception $e) {
+                \Log::error('Failed to send WhatsApp notification.', ['error' => $e->getMessage()]);
+            }
+            
 
-        // Log the error for debugging
-        \Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
+            \Log::info('WhatsApp notification sent successfully.', ['admin_number' => $adminNumber]);
 
-        // Return an error response
-        return response()->json([
-            'status' => 500,
-            'message' => 'Failed to create flower request',
-            'error' => $e->getMessage(),
-        ], 500);
+            // Commit the transaction
+            DB::commit();
+
+            // Return a successful response with flower request details
+            return response()->json([
+                'status' => 200,
+                'message' => 'Flower request created successfully',
+                'data' => $flowerRequest,
+            ], 200);
+
+        } catch (\Exception $e) {
+            // Rollback the transaction on failure
+            DB::rollBack();
+
+            // Log the error for debugging
+            \Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
+
+            // Return an error response
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to create flower request',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-}
-
 
     public function ordersList()
     {
@@ -381,98 +380,98 @@ public function storerequest(Request $request)
     }
 
     public function pause(Request $request, $order_id)
-{
-    try {
-        // Find the active subscription by order_id
-        $subscription = Subscription::where('order_id', $order_id)
-        ->whereIn('status', ['active', 'paused'])
-        ->firstOrFail();
+    {
+        try {
+            // Find the active subscription by order_id
+            $subscription = Subscription::where('order_id', $order_id)
+            ->whereIn('status', ['active', 'paused'])
+            ->firstOrFail();
 
-        // Parse the input dates
-        $pauseStartDate = Carbon::parse($request->pause_start_date);
-        $pauseEndDate = Carbon::parse($request->pause_end_date);
-        $pausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1; // Include both dates
+            // Parse the input dates
+            $pauseStartDate = Carbon::parse($request->pause_start_date);
+            $pauseEndDate = Carbon::parse($request->pause_end_date);
+            $pausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1; // Include both dates
 
-        // Check if there is already a pause log for the same start and end dates
-        $existingPauseLog = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-            ->where('pause_start_date', $pauseStartDate)
-            ->where('pause_end_date', $pauseEndDate)
-            ->first();
+            // Check if there is already a pause log for the same start and end dates
+            $existingPauseLog = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                ->where('pause_start_date', $pauseStartDate)
+                ->where('pause_end_date', $pauseEndDate)
+                ->first();
 
-        // Calculate the current and new end dates
-        $currentEndDate = $existingPauseLog
-            ? Carbon::parse($existingPauseLog->new_end_date)
-            : Carbon::parse($subscription->end_date);
-        $newEndDate = $currentEndDate->addDays($pausedDays);
+            // Calculate the current and new end dates
+            $currentEndDate = $existingPauseLog
+                ? Carbon::parse($existingPauseLog->new_end_date)
+                : Carbon::parse($subscription->end_date);
+            $newEndDate = $currentEndDate->addDays($pausedDays);
 
-        if ($existingPauseLog) {
-            // If a pause log exists, update it
-            $existingPauseLog->update([
-                'pause_start_date' => $pauseStartDate,
-                'pause_end_date' => $pauseEndDate,
-                'paused_days' => $pausedDays,
-                'new_end_date' => $newEndDate,
-            ]);
+            if ($existingPauseLog) {
+                // If a pause log exists, update it
+                $existingPauseLog->update([
+                    'pause_start_date' => $pauseStartDate,
+                    'pause_end_date' => $pauseEndDate,
+                    'paused_days' => $pausedDays,
+                    'new_end_date' => $newEndDate,
+                ]);
 
-            $subscription->update([
-                'pause_start_date' => $pauseStartDate,
-                'pause_end_date' => $pauseEndDate,
-                'new_date' => $newEndDate,
-            ]);
-        } else {
-            // Create a new pause log and update subscription details
-            SubscriptionPauseResumeLog::create([
-                'subscription_id' => $subscription->subscription_id,
+                $subscription->update([
+                    'pause_start_date' => $pauseStartDate,
+                    'pause_end_date' => $pauseEndDate,
+                    'new_date' => $newEndDate,
+                ]);
+            } else {
+                // Create a new pause log and update subscription details
+                SubscriptionPauseResumeLog::create([
+                    'subscription_id' => $subscription->subscription_id,
+                    'order_id' => $order_id,
+                    'action' => 'paused',
+                    'pause_start_date' => $pauseStartDate,
+                    'pause_end_date' => $pauseEndDate,
+                    'paused_days' => $pausedDays,
+                    'new_end_date' => $newEndDate,
+                ]);
+
+                $subscription->update([
+                    'pause_start_date' => $pauseStartDate,
+                    'pause_end_date' => $pauseEndDate,
+                    'new_date' => $newEndDate,
+                ]);
+            }
+
+            // Return success response
+            return response()->json([
+                'success' => 200,
+                'message' => 'Subscription pause details updated successfully.',
+                'data' => [
+                    'subscription_id' => $subscription->subscription_id,
+                    'order_id' => $order_id,
+                    'pause_start_date' => $pauseStartDate->toDateString(),
+                    'pause_end_date' => $pauseEndDate->toDateString(),
+                    'paused_days' => $pausedDays,
+                    'new_end_date' => $newEndDate->toDateString(),
+                ]
+            ], 200);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            // Handle case where subscription is not found
+            return response()->json([
+                'success' => 404,
+                'message' => 'Subscription not found or inactive.',
+                'error' => $e->getMessage()
+            ], 404);
+        } catch (\Exception $e) {
+            // Log and handle general errors
+            Log::error('Error pausing subscription', [
                 'order_id' => $order_id,
-                'action' => 'paused',
-                'pause_start_date' => $pauseStartDate,
-                'pause_end_date' => $pauseEndDate,
-                'paused_days' => $pausedDays,
-                'new_end_date' => $newEndDate,
+                'error_message' => $e->getMessage(),
             ]);
 
-            $subscription->update([
-                'pause_start_date' => $pauseStartDate,
-                'pause_end_date' => $pauseEndDate,
-                'new_date' => $newEndDate,
-            ]);
+            return response()->json([
+                'success' => 500,
+                'message' => 'An error occurred while updating the pause details.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Return success response
-        return response()->json([
-            'success' => 200,
-            'message' => 'Subscription pause details updated successfully.',
-            'data' => [
-                'subscription_id' => $subscription->subscription_id,
-                'order_id' => $order_id,
-                'pause_start_date' => $pauseStartDate->toDateString(),
-                'pause_end_date' => $pauseEndDate->toDateString(),
-                'paused_days' => $pausedDays,
-                'new_end_date' => $newEndDate->toDateString(),
-            ]
-        ], 200);
-
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        // Handle case where subscription is not found
-        return response()->json([
-            'success' => 404,
-            'message' => 'Subscription not found or inactive.',
-            'error' => $e->getMessage()
-        ], 404);
-    } catch (\Exception $e) {
-        // Log and handle general errors
-        Log::error('Error pausing subscription', [
-            'order_id' => $order_id,
-            'error_message' => $e->getMessage(),
-        ]);
-
-        return response()->json([
-            'success' => 500,
-            'message' => 'An error occurred while updating the pause details.',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
     public function markPaymentApi(Request $request, $id)
     {
@@ -557,98 +556,131 @@ public function storerequest(Request $request)
         }
     }
     
-public function resume(Request $request, $order_id)
-{
-    try {
-        // Find the subscription by order_id
-        $subscription = Subscription::where('order_id', $order_id)->where('status','paused')->firstOrFail();
+    public function resume(Request $request, $order_id)
+    {
+        try {
+            // Find the subscription by order_id
+            $subscription = Subscription::where('order_id', $order_id)->where('status','paused')->firstOrFail();
 
-        // Validate that the subscription is currently paused
-        if ($subscription->status !== 'paused') {
+            // Validate that the subscription is currently paused
+            if ($subscription->status !== 'paused') {
+                return response()->json([
+                    'success' => 400,
+                    'message' => 'Subscription is not in a paused state.'
+                ], 400);
+            }
+
+            // Log the resume attempt
+            Log::info('Resuming subscription', [
+                'order_id' => $order_id,
+                'user_id' => $subscription->user_id,
+                'pause_start_date' => $subscription->pause_start_date,
+                'pause_end_date' => $subscription->pause_end_date,
+            ]);
+
+            // Parse the dates
+            $resumeDate = Carbon::parse($request->resume_date);
+            $pauseStartDate = Carbon::parse($subscription->pause_start_date);
+            $pauseEndDate = Carbon::parse($subscription->pause_end_date);
+            $currentEndDate = $subscription->new_date ? Carbon::parse($subscription->new_date) : Carbon::parse($subscription->end_date);
+
+            // Ensure the resume date is within the pause period
+            if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt($pauseEndDate)) {
+                return response()->json([
+                    'success' => 400,
+                    'message' => 'Resume date must be within the pause period.'
+                ], 400);
+            }
+
+            // Calculate the days actually paused until the resume date
+            $actualPausedDays = $resumeDate->diffInDays($pauseStartDate); // Include start date
+
+            // Calculate total planned paused days
+            $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1;
+
+            // Calculate the remaining paused days to adjust if resuming early
+            $remainingPausedDays = $totalPausedDays - $actualPausedDays;
+
+            // Adjust the new end date by subtracting the remaining paused days if necessary
+            if ($remainingPausedDays > 0) {
+                $newEndDate = $currentEndDate->subDays($actualPausedDays);
+            } else {
+                $newEndDate = $currentEndDate;
+            }
+
+            // Update the subscription status and clear pause dates
+            $subscription->new_date = $newEndDate;
+            $subscription->save();
+
+            // Log the resume action 
+            SubscriptionPauseResumeLog::create([
+                'subscription_id' => $subscription->subscription_id,
+                'order_id' => $order_id,
+                'action' => 'resumed',
+                'resume_date' => $resumeDate,
+                'pause_start_date' => $pauseStartDate,
+                'pause_end_date' => $pauseEndDate,
+                'new_end_date' => $newEndDate,
+                'paused_days' => $actualPausedDays,
+            ]);
+
+            // Log the successful resume
+            Log::info('Subscription resumed successfully', [
+                'order_id' => $order_id,
+                'new_end_date' => $newEndDate,
+            ]);
+
             return response()->json([
-                'success' => 400,
-                'message' => 'Subscription is not in a paused state.'
-            ], 400);
-        }
+                'success' => 200,
+                'message' => 'Subscription resumed successfully.',
+                'subscription' => $subscription
+            ], 200);
+        } catch (\Exception $e) {
+            // Log any errors that occur during the process
+            Log::error('Error resuming subscription', [
+                'order_id' => $order_id,
+                'error_message' => $e->getMessage(),
+            ]);
 
-        // Log the resume attempt
-        Log::info('Resuming subscription', [
-            'order_id' => $order_id,
-            'user_id' => $subscription->user_id,
-            'pause_start_date' => $subscription->pause_start_date,
-            'pause_end_date' => $subscription->pause_end_date,
-        ]);
-
-        // Parse the dates
-        $resumeDate = Carbon::parse($request->resume_date);
-        $pauseStartDate = Carbon::parse($subscription->pause_start_date);
-        $pauseEndDate = Carbon::parse($subscription->pause_end_date);
-        $currentEndDate = $subscription->new_date ? Carbon::parse($subscription->new_date) : Carbon::parse($subscription->end_date);
-
-        // Ensure the resume date is within the pause period
-        if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt($pauseEndDate)) {
             return response()->json([
-                'success' => 400,
-                'message' => 'Resume date must be within the pause period.'
-            ], 400);
+                'success' => 500,
+                'message' => 'An error occurred while resuming the subscription.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Calculate the days actually paused until the resume date
-        $actualPausedDays = $resumeDate->diffInDays($pauseStartDate); // Include start date
-
-        // Calculate total planned paused days
-        $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1;
-
-        // Calculate the remaining paused days to adjust if resuming early
-        $remainingPausedDays = $totalPausedDays - $actualPausedDays;
-
-        // Adjust the new end date by subtracting the remaining paused days if necessary
-        if ($remainingPausedDays > 0) {
-            $newEndDate = $currentEndDate->subDays($actualPausedDays);
-        } else {
-            $newEndDate = $currentEndDate;
-        }
-
-        // Update the subscription status and clear pause dates
-        $subscription->new_date = $newEndDate;
-        $subscription->save();
-
-        // Log the resume action 
-        SubscriptionPauseResumeLog::create([
-            'subscription_id' => $subscription->subscription_id,
-            'order_id' => $order_id,
-            'action' => 'resumed',
-            'resume_date' => $resumeDate,
-            'pause_start_date' => $pauseStartDate,
-            'pause_end_date' => $pauseEndDate,
-            'new_end_date' => $newEndDate,
-            'paused_days' => $actualPausedDays,
-        ]);
-
-        // Log the successful resume
-        Log::info('Subscription resumed successfully', [
-            'order_id' => $order_id,
-            'new_end_date' => $newEndDate,
-        ]);
-
-        return response()->json([
-            'success' => 200,
-            'message' => 'Subscription resumed successfully.',
-            'subscription' => $subscription
-        ], 200);
-    } catch (\Exception $e) {
-        // Log any errors that occur during the process
-        Log::error('Error resuming subscription', [
-            'order_id' => $order_id,
-            'error_message' => $e->getMessage(),
-        ]);
-
-        return response()->json([
-            'success' => 500,
-            'message' => 'An error occurred while resuming the subscription.',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
 
+    public function getApplication()
+    {
+        try {
+        
+            $photoBaseUrl = rtrim(config('app.photo_url'), '/') . '/';
+
+            // Get applications
+            $applications = PratihariApplication::where('status', 'active')->get();
+
+            // Append full photo URL
+            $applications->transform(function ($app) use ($photoBaseUrl) {
+                $app->photo_url = $app->photo
+                    ? (str_starts_with($app->photo, 'http') ? $app->photo : $photoBaseUrl . ltrim($app->photo, '/'))
+                    : null;
+                return $app;
+            });
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Applications fetched successfully.',
+                'data' => $applications
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Error fetching applications: ' . $e->getMessage());
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to fetch applications.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

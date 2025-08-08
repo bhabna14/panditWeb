@@ -44,6 +44,7 @@ use App\Http\Controllers\Admin\PodcastPlanningController;
 use App\Http\Controllers\Admin\MarketingVisitPlaceController;
 use App\Http\Controllers\Admin\OfferDetailsController;
 use App\Http\Controllers\Admin\FlowerCalendarController;
+use App\Http\Controllers\Admin\PromotionController;
 
 
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
@@ -817,3 +818,12 @@ Route::controller(FlowerReportsController::class)->group(function() {
         Route::get('/report-customize','reportCustomize')->name('report.customize');
         Route::match(['get', 'post'], '/report-flower-pick-up', 'flowerPickUp')->name('report.flower.pickup');
 });
+
+Route::post('/admin/save-flower-promotion', [PromotionController::class, 'saveFlowerPromotion'])->name('admin.saveFlowerPromotion');
+Route::get('/admin/manage-flower-promotion', [PromotionController::class, 'manageFlowerPromotion'])->name('admin.manageFlowerPromotion');
+   
+
+// Example promotions list page (for redirect)
+Route::get('/admin/promotion-list', function () {
+    return view('admin.flower-promotion'); // your blade file
+})->name('admin.promotionList');
