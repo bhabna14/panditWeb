@@ -821,9 +821,11 @@ Route::controller(FlowerReportsController::class)->group(function() {
 
 Route::post('/admin/save-flower-promotion', [PromotionController::class, 'saveFlowerPromotion'])->name('admin.saveFlowerPromotion');
 Route::get('/admin/manage-flower-promotion', [PromotionController::class, 'manageFlowerPromotion'])->name('admin.manageFlowerPromotion');
-   
+Route::put('/admin/promotions/{id}', [PromotionController::class, 'updateFlowerPromotion'])->name('admin.updateFlowerPromotion');
+Route::delete('/admin/promotions/{id}', [PromotionController::class, 'deleteFlowerPromotion'])->name('admin.deleteFlowerPromotion');
 
 // Example promotions list page (for redirect)
 Route::get('/admin/promotion-details', function () {
     return view('admin.flower-promotion'); // your blade file
 })->name('admin.promotionList');
+
