@@ -824,6 +824,6 @@ Route::get('/admin/manage-flower-promotion', [PromotionController::class, 'manag
    
 
 // Example promotions list page (for redirect)
-Route::get('/admin/promotion-list', function () {
+Route::get('/admin/promotion-details', function () {
     return view('admin.flower-promotion'); // your blade file
 })->name('admin.promotionList');
