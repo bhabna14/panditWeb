@@ -48,10 +48,17 @@
         @csrf
         <div class="row">
             <!-- Product Name -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-3 mb-3">
                 <label for="name" class="form-label">Product Name</label>
                 <input type="text" name="name" class="form-control" id="name" placeholder="Enter product name"
                     required>
+            </div>
+
+            <!-- Odia Product Name -->
+            <div class="col-md-3 mb-3">
+                <label for="odia_name" class="form-label">Product Name (Odia)</label>
+                <input type="text" name="odia_name" class="form-control" id="odia_name"
+                    placeholder="Enter product name in Odia">
             </div>
 
             <!-- Price -->
@@ -67,7 +74,7 @@
             </div>
 
             <!-- Category -->
-            <div class="col-md-6 mb-3">
+            <div class="col-md-3 mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select name="category" id="category" class="form-control select2" required>
                     <option value="" disabled selected>Select Category</option>
@@ -79,6 +86,32 @@
                     <option value="Package">Package</option>
                     <option value="Books">Books</option>
                 </select>
+            </div>
+
+            <!-- Mala Provided Field (for Flower category) -->
+            <div class="col-md-3 mb-3" id="malaProvidedField" style="display: none;">
+                <label class="form-label">Is Mala Provided with this Flower?</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="mala_provided" id="malaYes" value="1">
+                    <label class="form-check-label" for="malaYes">Yes</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="mala_provided" id="malaNo" value="0">
+                    <label class="form-check-label" for="malaNo">No</label>
+                </div>
+            </div>
+            <!-- Flower Availability Field (for Flower category) -->
+            <div class="col-md-3 mb-3" id="flowerAvailabilityField" style="display: none;">
+                <label class="form-label">Is this Flower Available?</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flower_available" id="flowerActive" value="1">
+                    <label class="form-check-label" for="flowerActive">Active</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="flower_available" id="flowerInactive"
+                        value="0">
+                    <label class="form-check-label" for="flowerInactive">Inactive</label>
+                </div>
             </div>
 
 
@@ -320,6 +353,34 @@
                     }
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('category');
+            const malaProvidedField = document.getElementById('malaProvidedField');
+            const flowerAvailabilityField = document.getElementById('flowerAvailabilityField');
+
+            categorySelect.addEventListener('change', function() {
+                if (this.value === 'Flower') {
+                    malaProvidedField.style.display = 'block';
+                    flowerAvailabilityField.style.display = 'block';
+
+                } else {
+                    malaProvidedField.style.display = 'none';
+                    // Optionally clear selection
+                    malaProvidedField.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+                    flowerAvailabilityField.querySelectorAll('input[type=radio]').forEach(r => r.checked =
+                        false);
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('category');
         });
     </script>
 @endsection
