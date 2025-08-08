@@ -21,10 +21,15 @@
                 @csrf
 
                 <div class="row g-3">
-                    <div class="col-md-6">
-                        <label for="paid_by" class="form-label">Paid By</label>
-                        <input type="text" class="form-control" id="paid_by" name="paid_by" required>
-                    </div>
+                <div class="col-md-6">
+                    <label for="paid_by" class="form-label">Paid By</label>
+                    <select class="form-select" id="paid_by" name="paid_by" required>
+                        <option value="">Select Person</option>
+                        <option value="pankaj">Pankaj</option>
+                        <option value="subrat">Subrat</option>
+                        <option value="basudha">Basudha</option>
+                    </select>
+                </div>
                     <div class="col-md-6">
                         <label for="amount" class="form-label">Amount</label>
                         <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
