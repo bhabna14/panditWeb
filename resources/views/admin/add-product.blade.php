@@ -92,11 +92,11 @@
             <div class="col-md-4 mb-3" id="malaProvidedField" style="display: none;">
                 <label class="form-label">Is Mala Provided with this Flower?</label>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="mala_provided" id="malaYes" value="1">
+                    <input class="form-check-input" type="radio" name="mala_provided" id="malaYes" value="yes">
                     <label class="form-check-label" for="malaYes">Yes</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="mala_provided" id="malaNo" value="0">
+                    <input class="form-check-input" type="radio" name="mala_provided" id="malaNo" value="no">
                     <label class="form-check-label" for="malaNo">No</label>
                 </div>
             </div>
@@ -104,12 +104,12 @@
             <div class="col-md-4 mb-3" id="flowerAvailabilityField" style="display: none;">
                 <label class="form-label">Is this Flower Available?</label>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="flower_available" id="flowerActive" value="1">
+                    <input class="form-check-input" type="radio" name="flower_available" id="flowerActive" value="yes">
                     <label class="form-check-label" for="flowerActive">Active</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="flower_available" id="flowerInactive"
-                        value="0">
+                        value="no">
                     <label class="form-check-label" for="flowerInactive">Inactive</label>
                 </div>
             </div>
