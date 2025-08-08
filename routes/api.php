@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\FlowerBookingController;
 use App\Http\Controllers\Api\OfferDetailsApiController;
 use App\Http\Controllers\Api\FlowerCalendarApiController;
 use App\Http\Controllers\Api\FCMNotificationController;
+use App\Http\Controllers\Api\PromotionControllerApi;
 
 
 use App\Http\Controllers\Admin\NotificationController;
@@ -272,7 +273,4 @@ Route::middleware('auth:sanctum')->get('/product-orders-list', [ProductApiContro
 
 Route::get('/fcm-bulk-notifications', [FCMNotificationController::class, 'getAllNotifications']);
 
-
-
-
-
+Route::get('/manage-promotion', [PromotionControllerApi::class, 'managePromotion']);
