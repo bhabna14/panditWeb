@@ -829,3 +829,7 @@ Route::get('/admin/promotion-details', function () {
     return view('admin.flower-promotion'); // your blade file
 })->name('admin.promotionList');
 
+Route::get('/admin/office-trasaction', function () {
+    return view('admin.office-transaction-details'); // your blade file
+})->name('admin.officeTransactionDetails');
+

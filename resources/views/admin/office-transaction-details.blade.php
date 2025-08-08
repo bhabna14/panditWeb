@@ -17,7 +17,7 @@
 
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('admin.saveOfferDetails') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('saveOfficeTransaction') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="row g-3">
