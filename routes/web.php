@@ -833,3 +833,4 @@ Route::get('/admin/office-trasaction', function () {
     return view('admin.office-transaction-details'); // your blade file
 })->name('admin.officeTransactionDetails');
 
+Route::post('/save-office-transaction', [PromotionController::class, 'saveOfficeTransaction'])->name('saveOfficeTransaction');
