@@ -86,4 +86,26 @@ public function getCurrentOrders(Request $request)
     }
 }
 
+    public function getFlowerProducts()
+    {
+        try {
+            // Fetch only category 'flower' and required fields
+            $products = FlowerProduct::where('category', 'Flower')
+                ->select('name', 'odia_name', 'mala_provided', 'flower_available', 'description')
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => $products
+            ], 200);
+
+        } catch (Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Something went wrong!',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

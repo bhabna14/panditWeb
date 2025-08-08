@@ -78,6 +78,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/current-orders', [ProductController::class, 'getCurrentOrders']);
 
 Route::get('/products', [ProductController::class, 'getActiveProducts']);
+
+Route::get('/flower-products', [ProductController::class, 'getFlowerProducts']);
+
 Route::controller(PanditLoginController::class)->group(function() {
     Route::post('/pandit-send-otp',  'sendOtp');
     Route::post('/pandit-verify-otp', 'verifyOtp');
