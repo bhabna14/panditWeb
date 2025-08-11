@@ -574,8 +574,8 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/dltpodcast/{podcast}', 'destroy')->name('destroy');
         Route::get('/manage-podcast-category', 'managepodcastcategory')->name('managepodcastcategory');
         Route::post('/savecategory', 'saveCategory')->name('savecategory');
-
     });
+
     Route::put('updatecategory', [PodcastController::class, 'updateCategory'])->name('updatecategory');
 
     // Delete a category
@@ -596,7 +596,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/editlocality/{id}', 'editLocality')->name('editlocality');
         Route::put('/updatelocality/{id}', 'updateLocality')->name('updatelocality');
         Route::delete('/deletelocality/{id}', 'deleteLocality')->name('deletelocality');
-
     });
 
     Route::controller(PromonationController::class)->group(function() {
@@ -612,7 +611,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
     Route::post('/send-notification', [AdminNotificationController::class, 'send'])->name('admin.notification.send');
     Route::delete('/notifications/{id}', [AdminNotificationController::class, 'delete'])->name('admin.notifications.delete');
     Route::post('/notifications/resend/{id}', [AdminNotificationController::class, 'resend'])->name('admin.notifications.resend');
-
     Route::get('/send-whatsapp-notification', [AdminNotificationController::class, 'whatsappcreate'])->name('admin.whatsapp-notification.create');
     Route::post('/send-whatsapp-notification', [AdminNotificationController::class, 'sendWhatsappNotification'])->name('admin.whatsapp-notification.send');
 
@@ -641,7 +639,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/new-user-order', 'newUserOrder')->name('newUserOrder');
         Route::post('/save-new-user-order', 'saveNewUserOrder')->name('saveNewUserOrder');
     });
-    
 });
 
 // user routes
@@ -814,9 +811,9 @@ Route::controller(MarketingVisitPlaceController::class)->group(function() {
 });
 
 Route::controller(FlowerReportsController::class)->group(function() {
-        Route::get('/report-subscription','subscriptionReport')->name('subscription.report');
-        Route::get('/report-customize','reportCustomize')->name('report.customize');
-        Route::match(['get', 'post'], '/report-flower-pick-up', 'flowerPickUp')->name('report.flower.pickup');
+    Route::get('/report-subscription','subscriptionReport')->name('subscription.report');
+    Route::get('/report-customize','reportCustomize')->name('report.customize');
+    Route::match(['get', 'post'], '/report-flower-pick-up', 'flowerPickUp')->name('report.flower.pickup');
 });
 
 Route::post('/admin/save-flower-promotion', [PromotionController::class, 'saveFlowerPromotion'])->name('admin.saveFlowerPromotion');
