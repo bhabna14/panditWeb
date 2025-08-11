@@ -8,7 +8,7 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.manageOfficePayments') }}"
+                <li class="breadcrumb-item tx-15"><a href="{{ route('manageOfficePayments') }}"
                         class="btn btn-warning text-dark">Manage Payment Mode</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
             </ol>
