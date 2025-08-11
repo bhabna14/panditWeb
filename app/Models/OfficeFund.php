@@ -9,6 +9,8 @@ class OfficeFund extends Model
 {
     use HasFactory;
 
+    protected $table = 'office_fund_received';
+
     protected $fillable = [
         'date',
         'categories',
