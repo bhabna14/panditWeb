@@ -36,7 +36,7 @@
                         <div class="col-md-6">
                             <div class="card border-success shadow-sm">
                                 <div class="card-body text-center py-2">
-                                    <h6 class="card-title text-success mb-1">Date Range Total</h6>
+                                    <h6 class="card-title text-success mb-1">Total Payment</h6>
                                     <h4 class="fw-bold mb-0" id="totalPaymentByDateRange">
                                         ₹{{ number_format($rangeTotal ?? 0, 2) }}
                                     </h4>
@@ -46,7 +46,7 @@
                         <div class="col-md-6">
                             <div class="card border-info shadow-sm">
                                 <div class="card-body text-center py-2">
-                                    <h6 class="card-title text-info mb-1">Today Total</h6>
+                                    <h6 class="card-title text-info mb-1">Today Payment</h6>
                                     <h4 class="fw-bold mb-0" id="todayPayment">
                                         ₹{{ number_format($todayTotal ?? 0, 2) }}
                                     </h4>

@@ -191,18 +191,99 @@ class OfficeTransactionController extends Controller
         return redirect()->back()->with('success', 'Office transaction saved successfully.');
     }
 
-     public function manageOfficeFund()
+      public function manageOfficeFund()
     {
-        // Fetch all office transactions
-        $transactions = OfficeFund::where('status', 'active')
+        // Initial list (active + latest first)
+        $transactions = OfficeFund::when(
+                OfficeFund::query()->getModel()->isFillable('status'),
+                fn($q) => $q->where('status', 'active'),
+                fn($q) => $q
+            )
             ->orderBy('date', 'desc')
             ->get();
 
-        // Return view with transactions
-        return view('admin.manage-office-fund', compact('transactions'));
+        // Today total (independent of filter)
+        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
+        $todayTotal = OfficeFund::when(
+                OfficeFund::query()->getModel()->isFillable('status'),
+                fn($q) => $q->where('status', 'active'),
+                fn($q) => $q
+            )
+            ->whereDate('date', $today)
+            ->sum('amount');
+
+        // Default (first load): show ALL‑TIME total in the "Total Payment" card
+        $rangeTotal = OfficeFund::when(
+                OfficeFund::query()->getModel()->isFillable('status'),
+                fn($q) => $q->where('status', 'active'),
+                fn($q) => $q
+            )
+            ->sum('amount');
+
+        return view('admin.manage-office-fund', compact('transactions', 'todayTotal', 'rangeTotal'));
     }
 
-      public function updateOfficeFund(Request $request, $id)
+
+     public function filterOfficeFund(Request $request)
+    {
+        $request->validate([
+            'from_date' => ['nullable', 'date'],
+            'to_date'   => ['nullable', 'date', 'after_or_equal:from_date'],
+        ]);
+
+        $from = $request->query('from_date');
+        $to   = $request->query('to_date');
+
+        // Base query
+        $base = OfficeFund::when(
+            OfficeFund::query()->getModel()->isFillable('status'),
+            fn($q) => $q->where('status', 'active'),
+            fn($q) => $q
+        );
+
+        // Filtered list (if from/to provided)
+        $query = (clone $base);
+        if ($from && $to) {
+            $query->whereBetween('date', [$from, $to]);
+        } elseif ($from) {
+            $query->whereDate('date', '>=', $from);
+        } elseif ($to) {
+            $query->whereDate('date', '<=', $to);
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->get();
+
+        // Range total (if no dates, it's effectively "all-time active")
+        $rangeTotal = (clone $query)->sum('amount');
+
+        // Today total
+        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
+        $todayTotal = (clone $base)->whereDate('date', $today)->sum('amount');
+
+        // Prepare compact rows for the table
+        $rows = $transactions->map(function ($t, $idx) {
+            return [
+                'sl'              => $idx + 1,
+                'date'            => Carbon::parse($t->date)->format('Y-m-d'),
+                'categories'      => $t->categories,
+                'amount'          => number_format((float)$t->amount, 2),
+                'mode_of_payment' => ucfirst($t->mode_of_payment),
+                'paid_by'         => ucfirst($t->paid_by),
+                'received_by'     => isset($t->received_by) ? ucfirst($t->received_by) : '',
+                'description'     => $t->description,
+                'id'              => $t->id,
+            ];
+        });
+
+        return response()->json([
+            'success'      => true,
+            'range_total'  => (float) $rangeTotal,
+            'today_total'  => (float) $todayTotal,
+            'transactions' => $rows,
+        ]);
+    }
+
+    public function updateOfficeFund(Request $request, $id)
     {
         $transaction = OfficeFund::findOrFail($id);
 

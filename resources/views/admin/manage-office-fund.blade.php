@@ -31,7 +31,53 @@
                     @if (session('success'))
                         <div class="alert alert-success">{{ session('success') }}</div>
                     @endif
+ <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card border-success shadow-sm">
+                                <div class="card-body text-center py-2">
+                                    <h6 class="card-title text-success mb-1">Total Payment</h6>
+                                    <h4 class="fw-bold mb-0" id="totalPaymentByDateRange">
+                                        ₹{{ number_format($rangeTotal ?? 0, 2) }}
+                                    </h4>
+                                    <div class="small text-muted mt-1" id="rangeLabel">
+                                        All-time total
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-info shadow-sm">
+                                <div class="card-body text-center py-2">
+                                    <h6 class="card-title text-info mb-1">Today Payment</h6>
+                                    <h4 class="fw-bold mb-0" id="todayPayment">
+                                        ₹{{ number_format($todayTotal ?? 0, 2) }}
+                                    </h4>
+                                    <div class="small text-muted mt-1">
+                                        {{ \Carbon\Carbon::today(config('app.timezone','Asia/Kolkata'))->format('Y-m-d') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
+                    {{-- Filters --}}
+                    <div class="row g-3 align-items-end mb-4">
+                        <div class="col-md-4">
+                            <label for="from_date" class="form-label fw-semibold">From Date</label>
+                            <input type="date" id="from_date" name="from_date" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="to_date" class="form-label fw-semibold">To Date</label>
+                            <input type="date" id="to_date" name="to_date" class="form-control">
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" id="searchBtn" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-1"></i> Search
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Table --}}
                     <div class="table-responsive export-table">
                         <table id="file-datatable" class="table table-bordered text-nowrap key-buttons border-bottom">
                             <thead>
@@ -47,42 +93,29 @@
                                     <th class="border-bottom-0">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach ($transactions as $transaction)
+                            <tbody id="transactionsBody">
+                                @foreach ($transactions as $t)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
-                                        <td>{{ $transaction->categories }}</td>
-                                        <td>{{ number_format($transaction->amount, 2) }}</td>
-                                        <td>{{ ucfirst($transaction->mode_of_payment) }}</td>
-                                        <td>{{ ucfirst($transaction->paid_by) }}</td>
-                                        <td>{{ ucfirst($transaction->received_by) }}</td>
-                                        <td>{{ $transaction->description }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($t->date)->format('Y-m-d') }}</td>
+                                        <td>{{ $t->categories }}</td>
+                                        <td>{{ number_format($t->amount, 2) }}</td>
+                                        <td>{{ ucfirst($t->mode_of_payment) }}</td>
+                                        <td>{{ ucfirst($t->paid_by) }}</td>
+                                        <td>{{ isset($t->received_by) ? ucfirst($t->received_by) : '' }}</td>
+                                        <td>{{ $t->description }}</td>
                                         <td class="d-flex gap-2">
-                                            <button type="button" class="btn btn-sm btn-primary btn-edit"
-                                                data-bs-toggle="modal" data-bs-target="#editModal"
-                                                data-id="{{ $transaction->id }}"
-                                                data-date="{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}"
-                                                data-categories="{{ $transaction->categories }}"
-                                                data-amount="{{ $transaction->amount }}"
-                                                data-mode_of_payment="{{ $transaction->mode_of_payment }}"
-                                                data-paid_by="{{ $transaction->paid_by }}"
-                                                data-received_by="{{ $transaction->received_by }}"
-                                                data-description="{{ $transaction->description }}">
-                                                Edit
-                                            </button>
-
-                                            <button type="button" class="btn btn-sm btn-danger btn-delete"
-                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                                data-id="{{ $transaction->id }}">
-                                                Delete
-                                            </button>
+                                            {{-- Optional: wire your Edit/Delete modals or links here --}}
+                                            <button type="button" class="btn btn-sm btn-primary" disabled>Edit</button>
+                                            <button type="button" class="btn btn-sm btn-danger" disabled>Delete</button>
                                         </td>
                                     </tr>
                                 @endforeach
-
                             </tbody>
                         </table>
+                        @if($transactions->isEmpty())
+                            <div class="text-center text-muted py-3">No records</div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -258,4 +291,81 @@
             });
         });
     </script>
+
+    <script>
+(function(){
+    const fromEl = document.getElementById('from_date');
+    const toEl   = document.getElementById('to_date');
+    const btn    = document.getElementById('searchBtn');
+    const body   = document.getElementById('transactionsBody');
+    const todayCard = document.getElementById('todayPayment');
+    const rangeCard = document.getElementById('totalPaymentByDateRange');
+    const rangeLabel = document.getElementById('rangeLabel');
+
+    const fmtINR = n => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 2 }).format(Number(n || 0));
+
+    const buildRowHTML = (row) => {
+        // Customize action buttons if you have edit/delete
+        const actionHtml = `
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-primary" disabled>Edit</button>
+                <button type="button" class="btn btn-sm btn-danger" disabled>Delete</button>
+            </div>`;
+
+        return `
+            <tr>
+                <td>${row.sl}</td>
+                <td>${row.date}</td>
+                <td>${row.categories}</td>
+                <td>${row.amount}</td>
+                <td>${row.mode_of_payment}</td>
+                <td>${row.paid_by}</td>
+                <td>${row.received_by || ''}</td>
+                <td>${row.description || ''}</td>
+                <td>${actionHtml}</td>
+            </tr>`;
+    };
+
+    async function doSearch(){
+        const params = new URLSearchParams();
+        if (fromEl.value) params.append('from_date', fromEl.value);
+        if (toEl.value)   params.append('to_date', toEl.value);
+
+        const url = `{{ route('officeFund.filter') }}?${params.toString()}`;
+        btn.disabled = true; btn.textContent = 'Searching...';
+
+        try {
+            const res = await fetch(url, { headers: { 'Accept':'application/json' } });
+            const data = await res.json();
+
+            if (!data.success) throw new Error('Failed');
+
+            // Update cards
+            rangeCard.textContent = fmtINR(data.range_total);
+            todayCard.textContent = fmtINR(data.today_total);
+
+            // Update label under range card
+            if (fromEl.value || toEl.value) {
+                const fromTxt = fromEl.value ? fromEl.value : 'Start';
+                const toTxt   = toEl.value   ? toEl.value   : 'Today';
+                rangeLabel.textContent = `Range: ${fromTxt} → ${toTxt}`;
+            } else {
+                rangeLabel.textContent = 'All-time total';
+            }
+
+            // Update table
+            const rowsHTML = (data.transactions || []).map(buildRowHTML).join('');
+            body.innerHTML = rowsHTML || `<tr><td colspan="9" class="text-center text-muted">No records</td></tr>`;
+
+        } catch (e) {
+            console.error(e);
+            body.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Error loading data</td></tr>`;
+        } finally {
+            btn.disabled = false; btn.textContent = 'Search';
+        }
+    }
+
+    btn.addEventListener('click', doSearch);
+})();
+</script>
 @endsection
