@@ -162,7 +162,7 @@
                    <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.officeTransactionDetails') }}">
                     <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z"/>
+                        <path d="M2 7c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7zm2 0v2h16V7H4zm16 4H4v6h16v-6z"/>
                     </svg>
                         <span class="side-menu__label">Make Payment</span>
                     </a>
@@ -177,9 +177,6 @@
                         <span class="side-menu__label">Fund Received</span>
                     </a>
                 </li>
-
-
-
 
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.getFestivalCalendar') }}">

@@ -38,24 +38,23 @@ class OfficeTransactionController extends Controller
         return redirect()->back()->with('success', 'Office transaction saved successfully.');
     }
 
-   public function manageOfficeTransaction()
-{
-    $transactions = OfficeTransaction::where('status', 'active')
-        ->orderBy('date', 'desc')
-        ->get();
+    public function manageOfficeTransaction()
+    {
+        $transactions = OfficeTransaction::where('status', 'active')
+            ->orderBy('date', 'desc')
+            ->get();
 
-    // All-time total payment
-    $rangeTotal = OfficeTransaction::where('status', 'active')->sum('amount');
+        // All-time total payment
+        $rangeTotal = OfficeTransaction::where('status', 'active')->sum('amount');
 
-    // Today's total
-    $today = \Carbon\Carbon::today(config('app.timezone', 'Asia/Kolkata'));
-    $todayTotal = OfficeTransaction::where('status', 'active')
-        ->whereDate('date', $today->toDateString())
-        ->sum('amount');
+        // Today's total
+        $today = \Carbon\Carbon::today(config('app.timezone', 'Asia/Kolkata'));
+        $todayTotal = OfficeTransaction::where('status', 'active')
+            ->whereDate('date', $today->toDateString())
+            ->sum('amount');
 
-    return view('admin.manage-office-transaction', compact('transactions', 'todayTotal', 'rangeTotal'));
-}
-
+        return view('admin.manage-office-transaction', compact('transactions', 'todayTotal', 'rangeTotal'));
+    }
 
      public function filterOfficeTransactions(Request $request)
     {
