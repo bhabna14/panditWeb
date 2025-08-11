@@ -300,45 +300,67 @@ class FlowerBookingController extends Controller
             // Get the authenticated user's ID
             $userId = Auth::guard('sanctum')->user()->userid;
 
+
             $subscriptionsOrder = Subscription::where('user_id', $userId)
-                ->with([
-                    'order',
-                    // Make sure product_image comes directly from flower_products
-                    // Keep 'id' so the relation hydrates correctly.
-                    'flowerProducts:id,product_id,name,odia_name,product_image,price,mrp,category,mala_provided,flower_available,stock,duration,benefits,status',
-                    'pauseResumeLog',
-                    'flowerPayments',
-                    'users',
-                    'order.address',
-                ])
-                ->orderBy('created_at', 'desc')
-                ->get();
+            ->with([
+                'order', // Associated orders
+                'flowerProducts', // Product info related to subscriptions
+                'pauseResumeLog',
+                'flowerPayments',
+                'users',
+                'order.address', // Include associated address through the order
 
+            ])
+            ->orderBy('created_at', 'desc') // Order by latest subscription
+            ->get();
+
+        // Add image URL to flower products if they exist
+        $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
+            if ($order->flowerProducts) {
+                $order->flowerProducts->product_image_url = $order->flowerProducts->product_image;
+            }
+            return $order;
+        });
+
+
+            // Fetch related orders for the authenticated user (orders with request_id)
             $requestedOrders = FlowerRequest::where('user_id', $userId)
-                ->with([
-                    'order' => function ($query) {
-                        $query->with('flowerPayments');
-                    },
-                    // Same here: select product_image directly from flower_products
-                    'flowerProduct:id,product_id,name,odia_name,product_image,price,mrp,category,mala_provided,flower_available,stock,duration,benefits,status',
-                    'user',
-                    'address.localityDetails',
-                    'flowerRequestItems',
-                ])
-                ->orderBy('id', 'desc')
-                ->get()
-                ->map(function ($request) {
-                    if ($request->order) {
-                        if ($request->order->flowerPayments->isEmpty()) {
-                            $request->order->flower_payments = (object)[];
-                        } else {
-                            $request->order->flower_payments = $request->order->flowerPayments;
-                        }
-                        unset($request->order->flowerPayments);
+            ->with([
+                'order' => function ($query) {
+                    $query->with('flowerPayments');
+                },
+                'flowerProduct',
+                'user',
+                'address.localityDetails',
+                'flowerRequestItems' 
+            ])
+            ->orderBy('id', 'desc')
+            ->get()
+            // ->orderBy('id', 'desc')
+            ->map(function ($request) {
+                // Check if 'order' relationship exists and has 'flower_payments'
+                if ($request->order) {
+                    // If 'flower_payments' is empty, set it to an empty object
+                    if ($request->order->flowerPayments->isEmpty()) {
+                        $request->order->flower_payments = (object)[];
+                    } else {
+                        // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
+                        $request->order->flower_payments = $request->order->flowerPayments;
                     }
-                    return $request;
-                });
-
+                    // Remove the 'flowerPayments' property to avoid duplication
+                    unset($request->order->flowerPayments);
+                }
+        
+                // Map product image URL
+                if ($request->flowerProduct) {
+                    // Generate full URL for the product image
+                    $request->flowerProduct->product_image_url =  $request->flowerProduct->product_image;
+                }
+        
+                return $request;
+            });
+        
+            // Combine both into a single response
             return response()->json([
                 'success' => 200,
                 'data' => [
@@ -347,6 +369,7 @@ class FlowerBookingController extends Controller
                 ],
             ], 200);
         } catch (\Exception $e) {
+            // Log the error for debugging
             \Log::error('Failed to fetch orders list: ' . $e->getMessage());
 
             return response()->json([
