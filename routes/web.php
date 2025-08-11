@@ -838,7 +838,10 @@ Route::controller(OfficeTransactionController::class)->group(function() {
    Route::put('/office-transactions/{id}', 'update')->name('officeTransactions.update');
    Route::delete('/office-transactions/{id}', 'destroy')->name('officeTransactions.destroy');
    Route::get('/office-fund/total-by-category', 'fundTotalsByCategory')->name('officeFund.totalByCategory');
-   
+Route::get('/office-transactions/filter',  'filterOfficeTransactions')->name('officeTransactions.filter');
+    
+
+
    Route::post('/save-office-fund',  'saveOfficeFund')->name('saveOfficeFund');
    Route::get('/manage-office-fund',  'manageOfficeFund')->name('manageOfficeFund');
    Route::put('/office-fund/{id}', 'updateOfficeFund')->name('officeFund.update');

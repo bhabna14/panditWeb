@@ -35,15 +35,76 @@ class OfficeTransactionController extends Controller
         return redirect()->back()->with('success', 'Office transaction saved successfully.');
     }
 
-    public function manageOfficeTransaction()
+     public function manageOfficeTransaction()
     {
-        // Fetch all office transactions
+        // Initial table data (active + latest first)
         $transactions = OfficeTransaction::where('status', 'active')
             ->orderBy('date', 'desc')
             ->get();
 
-        // Return view with transactions
-        return view('admin.manage-office-transaction', compact('transactions'));
+        // Today total (status = active)
+        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'));
+        $todayTotal = OfficeTransaction::where('status', 'active')
+            ->whereDate('date', $today->toDateString())
+            ->sum('amount');
+
+        // Optional: initial range total (set 0; will update via AJAX)
+        $rangeTotal = 0;
+
+        return view('admin.manage-office-transaction', compact('transactions', 'todayTotal', 'rangeTotal'));
+    }
+
+     public function filterOfficeTransactions(Request $request)
+    {
+        $request->validate([
+            'from_date' => ['nullable', 'date'],
+            'to_date'   => ['nullable', 'date', 'after_or_equal:from_date'],
+        ]);
+
+        $from = $request->query('from_date');
+        $to   = $request->query('to_date');
+
+        $query = OfficeTransaction::where('status', 'active');
+
+        if ($from && $to) {
+            $query->whereBetween('date', [$from, $to]);
+        } elseif ($from) {
+            $query->whereDate('date', '>=', $from);
+        } elseif ($to) {
+            $query->whereDate('date', '<=', $to);
+        }
+
+        $transactions = $query->orderBy('date', 'desc')->get();
+
+        // Range total
+        $rangeTotal = (clone $query)->sum('amount');
+
+        // Today total (independent of filter)
+        $today = Carbon::today(config('app.timezone', 'Asia/Kolkata'))->toDateString();
+        $todayTotal = OfficeTransaction::where('status', 'active')
+            ->whereDate('date', $today)
+            ->sum('amount');
+
+        // Shape a compact payload for the table
+        $rows = $transactions->map(function ($t, $i) {
+            return [
+                'sl'             => $i + 1,
+                'date'           => Carbon::parse($t->date)->format('Y-m-d'),
+                'categories'     => $t->categories,
+                'amount'         => number_format((float)$t->amount, 2),
+                'mode_of_payment'=> ucfirst($t->mode_of_payment),
+                'paid_by'        => ucfirst($t->paid_by),
+                'description'    => $t->description,
+                'id'             => $t->id,
+            ];
+        });
+
+        return response()->json([
+            'success'      => true,
+            'today_total'  => (float) $todayTotal,
+            'range_total'  => (float) $rangeTotal,
+            'transactions' => $rows,
+        ]);
     }
 
     public function update(Request $request, $id)
