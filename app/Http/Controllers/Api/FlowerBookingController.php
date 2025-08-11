@@ -303,7 +303,9 @@ class FlowerBookingController extends Controller
             $subscriptionsOrder = Subscription::where('user_id', $userId)
                 ->with([
                     'order',
-                    'flowerProducts',
+                    // Make sure product_image comes directly from flower_products
+                    // Keep 'id' so the relation hydrates correctly.
+                    'flowerProducts:id,product_id,name,odia_name,product_image,price,mrp,category,mala_provided,flower_available,stock,duration,benefits,status',
                     'pauseResumeLog',
                     'flowerPayments',
                     'users',
@@ -317,10 +319,11 @@ class FlowerBookingController extends Controller
                     'order' => function ($query) {
                         $query->with('flowerPayments');
                     },
-                    'flowerProduct',
+                    // Same here: select product_image directly from flower_products
+                    'flowerProduct:id,product_id,name,odia_name,product_image,price,mrp,category,mala_provided,flower_available,stock,duration,benefits,status',
                     'user',
                     'address.localityDetails',
-                    'flowerRequestItems'
+                    'flowerRequestItems',
                 ])
                 ->orderBy('id', 'desc')
                 ->get()
