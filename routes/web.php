@@ -830,9 +830,19 @@ Route::get('/admin/office-trasaction', function () {
     return view('admin.office-transaction-details'); // your blade file
 })->name('admin.officeTransactionDetails');
 
+
+Route::get('/admin/office-fund', function () {
+    return view('admin.office-fund-received'); // your blade file
+})->name('admin.officeFundReceived');
+
 Route::controller(OfficeTransactionController::class)->group(function() {
    Route::post('/save-office-transaction',  'saveOfficeTransaction')->name('saveOfficeTransaction');
    Route::get('/manage-office-transaction',  'manageOfficeTransaction')->name('manageOfficePayments');
    Route::put('/office-transactions/{id}', 'update')->name('officeTransactions.update');
    Route::delete('/office-transactions/{id}', 'destroy')->name('officeTransactions.destroy');
+
+   Route::post('/save-office-fund',  'saveOfficeFund')->name('saveOfficeFund');
+   Route::get('/manage-office-fund',  'manageOfficeFund')->name('manageOfficeFund');
+   Route::put('/office-fund/{id}', 'updateOfficeFund')->name('officeFund.update');
+   Route::delete('/office-fund/{id}', 'destroyOfficeFund')->name('officeFund.destroy');
 });

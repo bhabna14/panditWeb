@@ -4,22 +4,21 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">PAYMENT MADE</span>
+            <span class="main-content-title mg-b-0 mg-b-lg-1">FUND RECEIVED</span>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('manageOfficePayments') }}"
-                        class="btn btn-warning text-dark">Manage Payment Mode</a></li>
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
+                <li class="breadcrumb-item tx-15"><a href="{{ route('manageOfficeFund') }}"
+                        class="btn btn-warning text-dark">Manage Fund Received</a></li>
+                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);"> Dashboard</a></li>
             </ol>
         </div>
     </div>
 
     <div class="card">
         <div class="card-body">
-            <form action="{{ route('saveOfficeTransaction') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('saveOfficeFund') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-
                 <div class="row g-3">
 
                     <div class="col-md-4">
@@ -28,7 +27,7 @@
                     </div>
 
                     <div class="col-md-4">
-                        <label for="categories" class="form-label">Paid For</label>
+                        <label for="categories" class="form-label">Category</label>
                         <select class="form-select" id="categories" name="categories">
                             <option value="">Select Type</option>
                             <option value="rent">Rent</option>
@@ -63,6 +62,11 @@
                             <option value="subrat">Subrat</option>
                             <option value="basudha">Basudha</option>
                         </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="received_by" class="form-label">Received By Name</label>
+                        <input type="text" class="form-control" id="received_by" name="received_by" placeholder="Enter name" required>
                     </div>
 
                     <div class="col-md-12">

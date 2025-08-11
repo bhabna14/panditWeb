@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\OfficeTransaction;
+use App\Models\OfficeFund;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class OfficeTransactionController extends Controller
 {
 
-  public function saveOfficeTransaction(Request $request)
+    public function saveOfficeTransaction(Request $request)
     {
         // Validate request data
         $validatedData = $request->validate([
@@ -75,4 +76,5 @@ class OfficeTransactionController extends Controller
             ->with('success', 'Office transaction deleted successfully.');
     }
 
+   
 }

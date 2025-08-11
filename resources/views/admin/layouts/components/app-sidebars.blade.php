@@ -161,13 +161,24 @@
 
                    <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.officeTransactionDetails') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
-                            <path d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z" />
-                        </svg>
-                        <span class="side-menu__label">Office Transaction</span>
+                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z"/>
+                    </svg>
+                        <span class="side-menu__label">Make Payment</span>
                     </a>
                 </li>
+
+
+                   <li class="slide">
+                    <a class="side-menu__item" href="{{ route('admin.officeFundReceived') }}">
+                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm1-13h-2v2H8v2h3v2h-2v2h2v2h2v-2h2v-2h-3v-2h2v-2h-2V8z"/>
+                    </svg>
+                        <span class="side-menu__label">Fund Received</span>
+                    </a>
+                </li>
+
+
 
 
                 <li class="slide">
