@@ -40,4 +40,39 @@ class OfficeTransactionController extends Controller
         return view('admin.manage-office-transaction', compact('transactions'));
     }
 
+    public function update(Request $request, $id)
+    {
+        $transaction = OfficeTransaction::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'date'            => 'required|date',
+            'categories'      => 'required|string|max:255',
+            'amount'          => 'required|numeric|min:0',
+            'mode_of_payment' => 'required|string|in:cash,upi',
+            'paid_by'         => 'required|string|in:pankaj,subrat,basudha',
+            'description'     => 'nullable|string|max:500',
+        ]);
+
+        $transaction->update($validatedData);
+
+        return redirect()->route('officeTransactions.manage')
+            ->with('success', 'Office transaction updated successfully.');
+    }
+
+    public function destroy($id)
+    {
+        $transaction = OfficeTransaction::findOrFail($id);
+
+        // Soft delete style (fits your "status = active" listing)
+        if ($transaction->isFillable('status')) {
+            $transaction->update(['status' => 'deleted']);
+        } else {
+            // Fallback hard delete if you don’t have a status column
+            $transaction->delete();
+        }
+
+        return redirect()->route('officeTransactions.manage')
+            ->with('success', 'Office transaction deleted successfully.');
+    }
+
 }

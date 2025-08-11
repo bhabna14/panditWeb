@@ -833,4 +833,6 @@ Route::get('/admin/office-trasaction', function () {
 Route::controller(OfficeTransactionController::class)->group(function() {
    Route::post('/save-office-transaction',  'saveOfficeTransaction')->name('saveOfficeTransaction');
    Route::get('/manage-office-transaction',  'manageOfficeTransaction')->name('manageOfficePayments');
+   Route::put('/office-transactions/{id}', 'update')->name('officeTransactions.update');
+   Route::delete('/office-transactions/{id}', 'destroy')->name('officeTransactions.destroy');
 });

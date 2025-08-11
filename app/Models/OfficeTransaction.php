@@ -18,6 +18,8 @@ class OfficeTransaction extends Model
         'mode_of_payment',
         'categories',
         'description',
+        'status', 
+
     ];
 
 }
