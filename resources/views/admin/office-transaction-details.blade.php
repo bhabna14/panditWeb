@@ -4,12 +4,12 @@
     <!-- breadcrumb -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">OFFICE PAYMENTS</span>
+            <span class="main-content-title mg-b-0 mg-b-lg-1">PAYMENT MADE</span>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                {{-- <li class="breadcrumb-item tx-15"><a href="{{ route('admin.manageOfficePayments') }}"
-                        class="btn btn-warning text-dark">Manage Office Payments</a></li> --}}
+                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.manageOfficePayments') }}"
+                        class="btn btn-warning text-dark">Manage Payment Mode</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
             </ol>
         </div>
