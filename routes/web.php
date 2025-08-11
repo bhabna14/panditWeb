@@ -45,7 +45,7 @@ use App\Http\Controllers\Admin\MarketingVisitPlaceController;
 use App\Http\Controllers\Admin\OfferDetailsController;
 use App\Http\Controllers\Admin\FlowerCalendarController;
 use App\Http\Controllers\Admin\PromotionController;
-
+use App\Http\Controllers\Admin\OfficeTransactionController;
 
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 use App\Http\Controllers\Admin\ProductRequestController;
@@ -830,4 +830,6 @@ Route::get('/admin/office-trasaction', function () {
     return view('admin.office-transaction-details'); // your blade file
 })->name('admin.officeTransactionDetails');
 
-Route::post('/save-office-transaction', [PromotionController::class, 'saveOfficeTransaction'])->name('saveOfficeTransaction');
+Route::controller(OfficeTransactionController::class)->group(function() {
+   Route::post('/save-office-transaction',  'saveOfficeTransaction')->name('saveOfficeTransaction');
+});
