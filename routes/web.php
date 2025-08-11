@@ -846,4 +846,5 @@ Route::get('/office-transactions/filter',  'filterOfficeTransactions')->name('of
    Route::get('/manage-office-fund',  'manageOfficeFund')->name('manageOfficeFund');
    Route::put('/office-fund/{id}', 'updateOfficeFund')->name('officeFund.update');
    Route::delete('/office-fund/{id}', 'destroyOfficeFund')->name('officeFund.destroy');
+   Route::get('/office-fund/filter', 'filterOfficeFund')->name('officeFund.filter');
 });
