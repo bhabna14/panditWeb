@@ -81,6 +81,32 @@ class OfficeTransactionController extends Controller
             ->with('success', 'Office transaction deleted successfully.');
     }
 
+    public function fundTotalsByCategory(Request $request)
+    {
+        $request->validate([
+            'category' => 'required|string|in:rent,rider_salary,vendor_payment,fuel,package,bus_fare,miscellaneous',
+        ]);
+
+        $category = $request->query('category');
+
+        $total = OfficeFund::where('categories', $category)->sum('amount');
+
+        // Recent 5 receipts for that category (customize columns as you like)
+        $items = OfficeFund::select('date', 'amount', 'mode_of_payment', 'paid_by', 'received_by', 'description')
+            ->where('categories', $category)
+            ->orderBy('date', 'desc')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'success'        => true,
+            'category'       => $category,
+            'total_received' => (float) $total,
+            'count'          => $items->count(),
+            'items'          => $items,
+        ]);
+    }
+
      public function saveOfficeFund(Request $request)
     {
         // Validate request data
