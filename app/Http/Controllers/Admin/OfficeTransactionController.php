@@ -29,4 +29,15 @@ class OfficeTransactionController extends Controller
         return redirect()->back()->with('success', 'Office transaction saved successfully.');
     }
 
+    public function manageOfficeTransaction()
+    {
+        // Fetch all office transactions
+        $transactions = OfficeTransaction::where('status', 'active')
+            ->orderBy('date', 'desc')
+            ->get();
+
+        // Return view with transactions
+        return view('admin.manage-office-transaction', compact('transactions'));
+    }
+
 }
