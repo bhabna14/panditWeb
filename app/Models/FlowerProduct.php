@@ -21,7 +21,5 @@ class FlowerProduct extends Model
     {
         return $this->hasMany(PackageItem::class, 'product_id', 'product_id');
     }
-
-
     
 }

@@ -294,74 +294,64 @@ class FlowerBookingController extends Controller
         }
     }
 
- public function ordersList()
-{
-    try {
-        // Get the authenticated user's ID
-        $userId = Auth::guard('sanctum')->user()->userid;
+    public function ordersList()
+    {
+        try {
+            // Get the authenticated user's ID
+            $userId = Auth::guard('sanctum')->user()->userid;
 
-        $subscriptionsOrder = Subscription::where('user_id', $userId)
-            ->with([
-                'order',
-                'flowerProducts',
-                'pauseResumeLog',
-                'flowerPayments',
-                'users',
-                'order.address',
-            ])
-            ->orderBy('created_at', 'desc')
-            ->get();
+            $subscriptionsOrder = Subscription::where('user_id', $userId)
+                ->with([
+                    'order',
+                    'flowerProducts',
+                    'pauseResumeLog',
+                    'flowerPayments',
+                    'users',
+                    'order.address',
+                ])
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        // Remove product_image_url logic
-        // $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
-        //     return $order;
-        // });
-
-        $requestedOrders = FlowerRequest::where('user_id', $userId)
-            ->with([
-                'order' => function ($query) {
-                    $query->with('flowerPayments');
-                },
-                'flowerProduct',
-                'user',
-                'address.localityDetails',
-                'flowerRequestItems'
-            ])
-            ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($request) {
-                if ($request->order) {
-                    if ($request->order->flowerPayments->isEmpty()) {
-                        $request->order->flower_payments = (object)[];
-                    } else {
-                        $request->order->flower_payments = $request->order->flowerPayments;
+            $requestedOrders = FlowerRequest::where('user_id', $userId)
+                ->with([
+                    'order' => function ($query) {
+                        $query->with('flowerPayments');
+                    },
+                    'flowerProduct',
+                    'user',
+                    'address.localityDetails',
+                    'flowerRequestItems'
+                ])
+                ->orderBy('id', 'desc')
+                ->get()
+                ->map(function ($request) {
+                    if ($request->order) {
+                        if ($request->order->flowerPayments->isEmpty()) {
+                            $request->order->flower_payments = (object)[];
+                        } else {
+                            $request->order->flower_payments = $request->order->flowerPayments;
+                        }
+                        unset($request->order->flowerPayments);
                     }
-                    unset($request->order->flowerPayments);
-                }
+                    return $request;
+                });
 
-                // Remove product_image_url logic
-                // $request->flowerProduct->product_image_url = $request->flowerProduct->product_image;
+            return response()->json([
+                'success' => 200,
+                'data' => [
+                    'subscriptions_order' => $subscriptionsOrder,
+                    'requested_orders' => $requestedOrders,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Failed to fetch orders list: ' . $e->getMessage());
 
-                return $request;
-            });
-
-        return response()->json([
-            'success' => 200,
-            'data' => [
-                'subscriptions_order' => $subscriptionsOrder,
-                'requested_orders' => $requestedOrders,
-            ],
-        ], 200);
-    } catch (\Exception $e) {
-        \Log::error('Failed to fetch orders list: ' . $e->getMessage());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to retrieve orders list.',
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve orders list.',
+            ], 500);
+        }
     }
-}
-
 
     public function pause(Request $request, $order_id)
     {
