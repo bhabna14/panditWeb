@@ -32,9 +32,12 @@
                         <select class="form-select" id="categories" name="categories">
                             <option value="">Select Type</option>
                             <option value="rent">Rent</option>
+                            <option value="rider_salary">Rider Salary</option>
+                            <option value="vendor_payment">Vendor Payment</option>
                             <option value="fuel">Fuel</option>
                             <option value="package">Package</option>
                             <option value="bus_fare">Bus Fare</option>
+                            <option value="miscellaneous">Miscellaneous</option>
                         </select>
                     </div>
                    
