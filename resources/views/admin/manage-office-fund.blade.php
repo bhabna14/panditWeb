@@ -18,7 +18,7 @@
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item tx-15"><a href="{{ route('admin.officeFundReceived') }}"
-                        class="btn btn-info text-white">Add Payment Mode</a></li>
+                        class="btn btn-info text-white">Add Received Fund</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Payment</a></li>
             </ol>
         </div>
