@@ -22,12 +22,12 @@
 
                 <div class="row g-3">
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="date" class="form-label">Date</label>
                         <input type="date" class="form-control" id="date" name="date" required>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="categories" class="form-label">Categories</label>
                         <select class="form-select" id="categories" name="categories">
                             <option value="">Select Type</option>
@@ -37,14 +37,13 @@
                             <option value="bus_fare">Bus Fare</option>
                         </select>
                     </div>
-
                    
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="amount" class="form-label">Amount</label>
                         <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label for="mode_of_payment" class="form-label">Mode of Payment</label>
                         <select class="form-select" id="mode_of_payment" name="mode_of_payment" required>
                             <option value="">Select Mode</option>
@@ -53,7 +52,7 @@
                         </select>
                     </div>
 
-                     <div class="col-md-6">
+                     <div class="col-md-4">
                         <label for="paid_by" class="form-label">Paid By</label>
                         <select class="form-select" id="paid_by" name="paid_by" required>
                             <option value="">Select Person</option>
