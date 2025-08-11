@@ -55,7 +55,7 @@ class OfficeTransactionController extends Controller
 
         $transaction->update($validatedData);
 
-        return redirect()->route('officeTransactions.manage')
+        return redirect()->route('manageOfficePayments')
             ->with('success', 'Office transaction updated successfully.');
     }
 
@@ -71,7 +71,7 @@ class OfficeTransactionController extends Controller
             $transaction->delete();
         }
 
-        return redirect()->route('officeTransactions.manage')
+        return redirect()->route('manageOfficePayments')
             ->with('success', 'Office transaction deleted successfully.');
     }
 
