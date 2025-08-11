@@ -40,7 +40,7 @@
                             <option value="miscellaneous">Miscellaneous</option>
                         </select>
                     </div>
-                   
+
                     <div class="col-md-4">
                         <label for="amount" class="form-label">Amount</label>
                         <input type="number" class="form-control" id="amount" name="amount" step="0.01" required>
@@ -55,7 +55,7 @@
                         </select>
                     </div>
 
-                     <div class="col-md-4">
+                    <div class="col-md-4">
                         <label for="paid_by" class="form-label">Paid By</label>
                         <select class="form-select" id="paid_by" name="paid_by" required>
                             <option value="">Select Person</option>
