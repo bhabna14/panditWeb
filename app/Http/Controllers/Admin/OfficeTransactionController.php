@@ -11,6 +11,11 @@ use Illuminate\Validation\Rule;
 class OfficeTransactionController extends Controller
 {
 
+    public function getOfficeTransaction()
+    {
+        return view('admin.office-transaction-details'); // your blade file
+    }
+
     public function saveOfficeTransaction(Request $request)
     {
         // Validate request data
