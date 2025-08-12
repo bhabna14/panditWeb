@@ -46,15 +46,7 @@ class FlowerReferalController extends Controller
             ], 422);
         }
 
-        // Optional: allow claims only for very new accounts (e.g., 7 days)
-        
-        if ($referred->created_at && $referred->created_at->diffInDays(now()) > 7) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Referral code can only be claimed within 7 days of signup.',
-            ], 422);
-        }
-
+     
         // Idempotent: if this user already claimed, return the existing record
         $existing = FLowerReferal::where('referred_user_id', $referred->id)->first();
         if ($existing) {
@@ -73,8 +65,6 @@ class FlowerReferalController extends Controller
                     'referred_user_id'     => $referred->userid,
                     'subscription_user_id' => null, // will fill if we find/apply a subscription
                 ]);
-
-              
 
                 return [
                     'ref'          => $ref,
