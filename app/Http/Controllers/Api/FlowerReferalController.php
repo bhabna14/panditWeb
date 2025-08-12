@@ -54,8 +54,6 @@ class FlowerReferalController extends Controller
                 return FLowerReferal::create([
                     'user_id'             => $referred->userid, // use numeric PK
                     'referrer_user_id'     => $referrer->userid,   // use numeric PK
-                    'referred_user_id'     => $referred->userid,   // use numeric PK
-                    'subscription_user_id' => null,
                 ]);
             });
 
