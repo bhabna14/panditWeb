@@ -12,13 +12,14 @@ use Carbon\Carbon;
 
 class FlowerReferalController extends Controller
 {
-  
+
     public function claim(Request $request)
     {
         $data = $request->validate([
             'referral_code' => 'required|string|max:32',
         ]);
 
+        
         $referred = Auth::user(); // current logged-in user
         if (!$referred) {
             return response()->json([
@@ -39,49 +40,41 @@ class FlowerReferalController extends Controller
         }
 
         // Block self-referral
-        if ((int)$referrer->id === (int)$referred->id) {
+        if ((int)$referrer->userid === (int)$referred->userid) {
             return response()->json([
                 'success' => false,
                 'message' => 'You cannot use your own referral code.',
             ], 422);
         }
 
-     
         // Idempotent: if this user already claimed, return the existing record
-        $existing = FLowerReferal::where('referred_user_id', $referred->id)->first();
+        $existing = FLowerReferal::where('referred_user_id', $referred->userid)->first();
         if ($existing) {
             return response()->json([
                 'success' => true,
                 'message' => 'Referral already claimed.',
                 'data'    => $existing,
-            ]);
+            ], 200);
         }
 
         try {
-            $result = DB::transaction(function () use ($referrer, $referred) {
-                // Create the referral record
-                $ref = FLowerReferal::create([
-                    'referrer_user_id'     => $referrer->userid,
-                    'referred_user_id'     => $referred->userid,
-                    'subscription_user_id' => null, // will fill if we find/apply a subscription
+            $ref = DB::transaction(function () use ($referrer, $referred) {
+                return FLowerReferal::create([
+                    'user_id'             => $referred->userid, // use numeric PK
+                    'referrer_user_id'     => $referrer->userid,   // use numeric PK
+                    'referred_user_id'     => $referred->userid,   // use numeric PK
+                    'subscription_user_id' => null,
                 ]);
-
-                return [
-                    'ref'          => $ref,
-                    'applied'      => $applied,
-                    'nextRenewal'  => $nextRenewal ? Carbon::parse($nextRenewal)->toDateTimeString() : null,
-                ];
             });
 
             return response()->json([
                 'success' => true,
-                'message' => $result['applied']
-                    ? 'Referral applied: 1 free month granted to your referrer.'
-                    : 'Referral recorded. Free month will be applied when your referrer has an active subscription.',
+                'message' => 'Referral claimed successfully',
                 'data' => [
-                    'referral'          => $result['ref'],
-                    'reward_applied'    => $result['applied'],
-                    'referrer_next_renewal_at' => $result['nextRenewal'],
+                    'referrer'    => $referrer->only(['id', 'name', 'email', 'mobile_number']),
+                    'referred'    => $referred->only(['id', 'name', 'email', 'mobile_number']),
+                    'referral_id' => $ref->id,
+                    'referral'    => $ref,
                 ],
             ], 200);
         } catch (\Throwable $e) {
@@ -92,4 +85,5 @@ class FlowerReferalController extends Controller
             ], 500);
         }
     }
+
 }
