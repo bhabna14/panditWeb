@@ -81,6 +81,8 @@ class FlowerReferalController extends Controller
 public function stats(Request $request)
 {
     $referrer = Auth::user();
+
+    dd($referrer->userid);
     if (!$referrer) {
         return response()->json([
             'success' => false,
@@ -91,9 +93,6 @@ public function stats(Request $request)
     $includeUsers = $request->boolean('include_users', false);
     $limit        = (int) $request->query('limit', 50);
 
-    // Your app has two kinds of IDs floating around:
-    // 1) numeric users.id (e.g. 42)
-    // 2) string users.userid (e.g. "USER65632")
     $refKeyNum = (string) $referrer->id;
     $refKeyStr = (string) ($referrer->userid ?? '');
 
