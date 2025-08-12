@@ -78,99 +78,68 @@ class FlowerReferalController extends Controller
         }
     }
 
-public function stats(Request $request)
-{
-    $referrer = Auth::user();
+public function stats()
+    {
+       $userid =  Auth::user()->userid; // Assuming userid is the primary key
 
-    dd($referrer->userid);
-    if (!$referrer) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Unauthorized',
-        ], 401);
-    }
+        // 1) Times THIS user used someone else’s code (+ who referred them)
+        $usedRows = FlowerReferral::with(['referrer:id,name,mobile_number'])
+            ->where('user_id', $userid)
+            ->get();
 
-    $includeUsers = $request->boolean('include_users', false);
-    $limit        = (int) $request->query('limit', 50);
+        $usedReferral = [
+            'count' => $usedRows->count(),
+            'rows'  => $usedRows->map(function ($r) {
+                return [
+                    'referrer_id'             => $r->referrer_user_id,
+                    'referrer_name'           => optional($r->referrer)->name,
+                    'referrer_mobile_number'  => optional($r->referrer)->mobile_number,
+                    'status'                  => $r->status,
+                ];
+            })->values(),
+        ];
 
-    $refKeyNum = (string) $referrer->id;
-    $refKeyStr = (string) ($referrer->userid ?? '');
+        // 2) Users who used MY referral code (name + mobile)
+        // NOTE: change 'users.id' to 'users.userid' if that's your PK.
+        $myReferredUsers = FlowerReferral::select(
+                'users.id as user_id',
+                'users.name',
+                'users.mobile_number'
+            )
+            ->join('users', 'flower_referrals.user_id', '=', 'users.id')
+            ->where('flower_referrals.referrer_user_id', $userid)
+            ->get();
 
-    // Find referrals where THIS user is the referrer (match both formats)
-    $referrals = FLowerReferal::where(function ($q) use ($refKeyNum, $refKeyStr) {
-            $q->where('referrer_user_id', $refKeyNum);
-            if ($refKeyStr !== '') {
-                $q->orWhere('referrer_user_id', $refKeyStr);
-            }
-        })
-        ->get();
+        $myReferrals = [
+            'count' => $myReferredUsers->count(),
+            'users' => $myReferredUsers->values(),
+        ];
 
-    // Unique raw referred IDs from the referral table (could be numeric or "USERxxxxx")
-    $rawReferredIds = $referrals->pluck('user_id')->unique()->values();
-
-    // Split into numeric vs string "USERxxxxx"
-    $numericLike = $rawReferredIds->filter(fn ($v) => ctype_digit((string) $v))
-                                  ->map(fn ($v) => (int) $v)
-                                  ->values();
-
-    $stringLike  = $rawReferredIds->filter(fn ($v) => !ctype_digit((string) $v))
-                                  ->values();
-
-    // Map string "USERxxxxx" -> numeric users.id
-    $numericFromStrings = $stringLike->isNotEmpty()
-        ? User::whereIn('userid', $stringLike)->pluck('id')
-        : collect();
-
-    // Final set of numeric user IDs for referred users
-    $referredNumericIds = $numericLike->merge($numericFromStrings)->unique()->values();
-
-    // Count used users
-    $usedCount = $referredNumericIds->count();
-
-    // Completed users = have an active subscription (tweak logic as you need)
-    $completedUserIds = $referredNumericIds->isNotEmpty()
-        ? Subscription::whereIn('user_id', $referredNumericIds)
+        // 3) Of those referred users, who completed a subscription? (+ their data)
+        // Define what "completed" means. Here we treat status 'completed' OR is_active = 1 as completed.
+        $completedReferredUsers = Subscription::select(
+                'users.id as user_id',
+                'users.name',
+                'users.mobile_number'
+            )
+            ->join('users', 'subscriptions.user_id', '=', 'users.id')
+            ->join('flower_referrals', 'flower_referrals.user_id', '=', 'subscriptions.user_id')
+            ->where('flower_referrals.referrer_user_id', $userid)
             ->where(function ($q) {
-                $q->orWhere(function ($q2) {
-                $q2->whereNotNull('end_date')
-                ->whereDate('end_date', '>=', now()->toDateString());
-                });
+                $q->where('subscriptions.status', 'active');
             })
             ->distinct()
-            ->pluck('user_id')
-        : collect();
+            ->get();
 
-    $completedCount = $completedUserIds->count();
+        $completed = [
+            'count' => $completedReferredUsers->count(),
+            'users' => $completedReferredUsers->values(),
+        ];
 
-    $response = [
-        'success' => true,
-        'data' => [
-            'used_users'      => $usedCount,
-            'completed_users' => $completedCount,
-        ],
-    ];
-
-    if ($includeUsers) {
-        $usedUsers = $referredNumericIds->isNotEmpty()
-            ? User::whereIn('id', $referredNumericIds)
-                ->select('id', 'userid', 'name', 'email', 'mobile_number')
-                ->limit($limit)
-                ->get()
-            : collect();
-
-        $completedUsers = $completedUserIds->isNotEmpty()
-            ? User::whereIn('id', $completedUserIds)
-                ->select('id', 'userid', 'name', 'email', 'mobile_number')
-                ->limit($limit)
-                ->get()
-            : collect();
-
-        $response['data']['used_users_list']      = $usedUsers;
-        $response['data']['completed_users_list'] = $completedUsers;
+        return response()->json([
+            'used_referral'             => $usedReferral,
+            'my_referrals'              => $myReferrals,
+            'completed_referred_users'  => $completed,
+        ]);
     }
-
-    return response()->json($response, 200);
-}
-
-
 }

@@ -53,6 +53,11 @@ class User extends Authenticatable
         return $this->hasOne(Bankdetail::class);
     }
 
+     public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referrer_user_id'); // 'id' by default
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'user_id');
