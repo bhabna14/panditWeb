@@ -131,58 +131,68 @@
                     </a>
                 </li>
 
-                   <li class="slide">
+                <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.address.categories') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
-                    </svg>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" />
+                        </svg>
                         <span class="side-menu__label">Address Summary</span>
                     </a>
                 </li>
 
-                  <li class="slide">
+                <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.offerDetails') }}">
-                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z"/>
-                    </svg>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z" />
+                        </svg>
                         <span class="side-menu__label">Offer Details</span>
                     </a>
                 </li>
 
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.promotionList') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
-                            <path d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z" />
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z" />
                         </svg>
                         <span class="side-menu__label">Flower Promotion</span>
                     </a>
                 </li>
 
-                   <li class="slide">
+                <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.officeTransactionDetails') }}">
-                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M2 7c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7zm2 0v2h16V7H4zm16 4H4v6h16v-6z"/>
-                    </svg>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M2 7c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7zm2 0v2h16V7H4zm16 4H4v6h16v-6z" />
+                        </svg>
                         <span class="side-menu__label">Make Payment</span>
                     </a>
                 </li>
 
-
-                   <li class="slide">
+                <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.officeFundReceived') }}">
-                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm1-13h-2v2H8v2h3v2h-2v2h2v2h2v-2h2v-2h-3v-2h2v-2h-2V8z"/>
-                    </svg>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm1-13h-2v2H8v2h3v2h-2v2h2v2h2v-2h2v-2h-3v-2h2v-2h-2V8z" />
+                        </svg>
                         <span class="side-menu__label">Fund Received</span>
                     </a>
                 </li>
 
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.getFestivalCalendar') }}">
-                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1z"/>
-                    </svg>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1z" />
+                        </svg>
                         <span class="side-menu__label">Festival Calendar</span>
                     </a>
                 </li>
@@ -219,7 +229,8 @@
                     <ul class="slide-menu">
                         <li><a class="sub-side-menu__item" href="{{ route('admin.followUpSubscriptions') }}">Follow
                                 Up</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.getVisitPlace') }}">Visit Place</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.getVisitPlace') }}">Visit Place</a>
+                        </li>
                     </ul>
                 </li>
 
@@ -251,9 +262,12 @@
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription
+                                Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower
+                                Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower
+                                Reports</a></li>
                     </ul>
                 </li>
             </ul>

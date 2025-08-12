@@ -170,7 +170,7 @@ class OfficeTransactionController extends Controller
         ]);
     }
 
-     public function saveOfficeFund(Request $request)
+    public function saveOfficeFund(Request $request)
     {
         // Validate request data
         $validatedData = $request->validate([
@@ -190,7 +190,7 @@ class OfficeTransactionController extends Controller
         return redirect()->back()->with('success', 'Office transaction saved successfully.');
     }
 
-      public function manageOfficeFund()
+    public function manageOfficeFund()
     {
         // Initial list (active + latest first)
         $transactions = OfficeFund::when(
@@ -222,8 +222,7 @@ class OfficeTransactionController extends Controller
         return view('admin.manage-office-fund', compact('transactions', 'todayTotal', 'rangeTotal'));
     }
 
-
-     public function filterOfficeFund(Request $request)
+    public function filterOfficeFund(Request $request)
     {
         $request->validate([
             'from_date' => ['nullable', 'date'],

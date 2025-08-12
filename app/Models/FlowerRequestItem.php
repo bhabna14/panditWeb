@@ -9,23 +9,23 @@ class FlowerRequestItem extends Model
 {
     use HasFactory;
 
-    // Specify the table name if it doesn't follow the naming convention
     protected $table = 'flower_request_items';
 
-    // Define the fillable properties
     protected $fillable = [
         'flower_request_id',
+        'type',
+        'garland_name',
+        'flower_count',
+        'garland_quantity',
+        'garland_size',
         'flower_name',
         'flower_unit',
         'flower_quantity',
+        'size'
     ];
 
-    /**
-     * Relationship with FlowerRequest
-     * Each item belongs to one FlowerRequest
-     */
     public function flowerRequest()
     {
-        return $this->belongsTo(FlowerRequest::class);
+        return $this->belongsTo(FlowerRequest::class, 'flower_request_id', 'id');
     }
 }
