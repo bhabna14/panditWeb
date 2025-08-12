@@ -40,7 +40,7 @@ class FlowerReferalController extends Controller
         }
 
         // Idempotent: if this user already claimed, return the existing record
-        $existing = FLowerReferal::where('referred_user_id', $referred->userid)->first();
+        $existing = FLowerReferal::where('referrer_user_id', $referred->userid)->first();
         if ($existing) {
             return response()->json([
                 'success' => true,
