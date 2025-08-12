@@ -39,14 +39,6 @@ class FlowerReferalController extends Controller
             ], 422);
         }
 
-        // Block self-referral
-        if ((int)$referrer->userid === (int)$referred->userid) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You cannot use your own referral code.',
-            ], 422);
-        }
-
         // Idempotent: if this user already claimed, return the existing record
         $existing = FLowerReferal::where('referred_user_id', $referred->userid)->first();
         if ($existing) {
