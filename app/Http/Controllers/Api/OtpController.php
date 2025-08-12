@@ -82,120 +82,115 @@ class OtpController extends Controller
         ], 200);
     }
 
-    use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
-use App\Models\User;
-
-public function sendOtp(Request $request)
-{
-    $request->validate([
-        'phone' => 'required|string',
-    ]);
-
-    $otp = random_int(100000, 999999);
-    $phone = $request->phone;
-    $shortToken = Str::random(6); // max 15 characters
-
-    // Check if user already exists
-    $pandit = User::where('mobile_number', $phone)->first();
-
-    if ($pandit) {
-        // ✅ Existing: update OTP
-        $pandit->otp = $otp;
-
-        // (Optional) backfill referral_code if missing
-        // if (empty($pandit->referral_code)) {
-        //     $pandit->referral_code = $this->generateReferralCode();
-        // }
-
-        $pandit->save();
-        $status = 'existing';
-    } else {
-        // ✅ New: create with new user id AND a unique referral_code
-        $pandit = User::create([
-            'mobile_number'  => $phone,
-            'otp'            => $otp,
-            'userid'         => 'USER' . random_int(10000, 99999),
-            'referral_code'  => $this->generateReferralCode(), // ← new line
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
         ]);
-        $status = 'new';
-    }
 
-    // ✅ MSG91 WhatsApp template payload (unchanged)
-    $payload = [
-        "integrated_number" => env('MSG91_WA_NUMBER'),
-        "content_type" => "template",
-        "payload" => [
-            "messaging_product" => "whatsapp",
-            "to" => $phone,
-            "type" => "template",
-            "template" => [
-                "name" => env('MSG91_WA_TEMPLATE'),
-                "language" => [
-                    "code" => "en",
-                    "policy" => "deterministic"
-                ],
-                "namespace" => env('MSG91_WA_NAMESPACE'),
-                "components" => [
-                    [
-                        "type" => "body",
-                        "parameters" => [
-                            [
-                                "type" => "text",
-                                "text" => (string) $otp
-                            ]
-                        ]
+        $otp = random_int(100000, 999999);
+        $phone = $request->phone;
+        $shortToken = Str::random(6); // max 15 characters
+
+        // Check if user already exists
+        $pandit = User::where('mobile_number', $phone)->first();
+
+        if ($pandit) {
+            // ✅ Existing: update OTP
+            $pandit->otp = $otp;
+
+            // (Optional) backfill referral_code if missing
+            // if (empty($pandit->referral_code)) {
+            //     $pandit->referral_code = $this->generateReferralCode();
+            // }
+
+            $pandit->save();
+            $status = 'existing';
+        } else {
+            // ✅ New: create with new user id AND a unique referral_code
+            $pandit = User::create([
+                'mobile_number'  => $phone,
+                'otp'            => $otp,
+                'userid'         => 'USER' . random_int(10000, 99999),
+                'referral_code'  => $this->generateReferralCode(), // ← new line
+            ]);
+            $status = 'new';
+        }
+
+        // ✅ MSG91 WhatsApp template payload (unchanged)
+        $payload = [
+            "integrated_number" => env('MSG91_WA_NUMBER'),
+            "content_type" => "template",
+            "payload" => [
+                "messaging_product" => "whatsapp",
+                "to" => $phone,
+                "type" => "template",
+                "template" => [
+                    "name" => env('MSG91_WA_TEMPLATE'),
+                    "language" => [
+                        "code" => "en",
+                        "policy" => "deterministic"
                     ],
-                    [
-                        "type" => "button",
-                        "sub_type" => "url",
-                        "index" => 0,
-                        "parameters" => [
-                            [
-                                "type" => "text",
-                                "text" => $shortToken
+                    "namespace" => env('MSG91_WA_NAMESPACE'),
+                    "components" => [
+                        [
+                            "type" => "body",
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => (string) $otp
+                                ]
+                            ]
+                        ],
+                        [
+                            "type" => "button",
+                            "sub_type" => "url",
+                            "index" => 0,
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => $shortToken
+                                ]
                             ]
                         ]
                     ]
                 ]
             ]
-        ]
-    ];
+        ];
 
-    try {
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'authkey' => env('MSG91_AUTHKEY'),
-        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'authkey' => env('MSG91_AUTHKEY'),
+            ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
 
-        $result = $response->json();
+            $result = $response->json();
 
-        if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+            if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
+                    'error'   => $result
+                ], 401);
+            }
+
+            return response()->json([
+                'success'      => true,
+                'message'      => 'OTP sent successfully',
+                'user_status'  => $status,
+                'token'        => $shortToken,
+                // (Optional) expose referral_code for brand-new users:
+                // 'referral_code' => $status === 'new' ? $pandit->referral_code : null,
+                'api_response' => $result
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
-                'error'   => $result
-            ], 401);
+                'message' => 'Failed to send OTP',
+                'error'   => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success'      => true,
-            'message'      => 'OTP sent successfully',
-            'user_status'  => $status,
-            'token'        => $shortToken,
-            // (Optional) expose referral_code for brand-new users:
-            // 'referral_code' => $status === 'new' ? $pandit->referral_code : null,
-            'api_response' => $result
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to send OTP',
-            'error'   => $e->getMessage()
-        ], 500);
     }
-}
 
     public function verifyOtp(Request $request)
     {
@@ -247,18 +242,18 @@ public function sendOtp(Request $request)
         ], 200);
     }
 
-private function generateReferralCode(int $length = 7): string
-{
-    $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    do {
-        $code = '';
-        for ($i = 0; $i < $length; $i++) {
-            $code .= $alphabet[random_int(0, strlen($alphabet) - 1)];
-        }
-        $exists = User::where('referral_code', $code)->exists();
-    } while ($exists);
+    private function generateReferralCode(int $length = 7): string
+    {
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        do {
+            $code = '';
+            for ($i = 0; $i < $length; $i++) {
+                $code .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+            }
+            $exists = User::where('referral_code', $code)->exists();
+        } while ($exists);
 
-    return $code;
-}
+        return $code;
+    }
 
 }
