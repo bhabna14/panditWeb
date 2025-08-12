@@ -95,7 +95,7 @@ class FlowerReferalController extends Controller
         $referralsQuery = FLowerReferal::where('referrer_user_id', $referrer->id);
 
         // Total referred/used (distinct users, in case of duplicates)
-        $referredUserIds = (clone $referralsQuery)->pluck('user_id')->unique()->values();
+        $referredUserIds = (clone $referralsQuery)->pluck('referrer_user_id')->unique()->values();
         $usedCount       = $referredUserIds->count();
 
         // Completed = those referred users who have an "active" subscription
