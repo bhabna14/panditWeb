@@ -78,12 +78,6 @@ class FlowerReferalController extends Controller
         }
     }
 
-  use App\Models\FLowerReferal;
-use App\Models\Subscription;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-
 public function stats(Request $request)
 {
     $referrer = Auth::user();
