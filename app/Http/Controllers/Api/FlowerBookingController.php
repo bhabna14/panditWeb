@@ -144,251 +144,252 @@ class FlowerBookingController extends Controller
     }
 
     public function storerequest(Request $request)
-{
-    try {
-        // -----------------------------
-        // 1) Normalize incoming payload
-        // -----------------------------
+    {
+        try {
+            // -----------------------------
+            // 1) Normalize incoming payload
+            // -----------------------------
 
-        // Accept items whether:
-        // - sent as proper array (raw JSON: items: [...])
-        // - sent as JSON string in form-data: items = "[{...}]"
-        // - sent using old arrays: flower_name[], flower_unit[], flower_quantity[]
-        $rawItems = $request->input('items');
+            // Accept items whether:
+            // - sent as proper array (raw JSON: items: [...])
+            // - sent as JSON string in form-data: items = "[{...}]"
+            // - sent using old arrays: flower_name[], flower_unit[], flower_quantity[]
+            $rawItems = $request->input('items');
 
-        // If items is a JSON string (common with form-data), try decoding
-        if (is_string($rawItems)) {
-            $decoded = json_decode($rawItems, true);
-            if (json_last_error() === JSON_ERROR_NONE) {
-                $rawItems = $decoded;
-            }
-        }
-
-        $normalizedItems = [];
-
-        if (is_array($rawItems)) {
-            // New format already (items[])
-            $normalizedItems = $rawItems;
-        } else {
-            // Try OLD format -> convert to new
-            $flowerNames     = $request->input('flower_name', []);
-            $flowerUnits     = $request->input('flower_unit', []);
-            $flowerQuantites = $request->input('flower_quantity', []);
-
-            // Only build if we actually have arrays with some elements
-            if (is_array($flowerNames) && count($flowerNames) > 0) {
-                foreach ($flowerNames as $i => $name) {
-                    if ($name === null || $name === '') continue;
-
-                    $normalizedItems[] = [
-                        'type'             => 'flower',
-                        'flower_name'      => $name,
-                        'flower_unit'      => $flowerUnits[$i]     ?? null,
-                        'flower_quantity'  => $flowerQuantites[$i] ?? null,
-                    ];
+            // If items is a JSON string (common with form-data), try decoding
+            if (is_string($rawItems)) {
+                $decoded = json_decode($rawItems, true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $rawItems = $decoded;
                 }
             }
-        }
 
-        // Merge back so validator sees a proper array
-        $request->merge(['items' => $normalizedItems]);
+            $normalizedItems = [];
 
-        // --------------------------------
-        // 2) Validate AFTER normalization
-        // --------------------------------
-        $validator = Validator::make($request->all(), [
-            // If your product_id can be a code like "FLOW1977637", do not force integer
-            'product_id'   => ['required'], // change to ['required','integer'] if it must be numeric
-            'address_id'   => ['required', 'integer'],
-            'description'  => ['nullable', 'string'],
-            'suggestion'   => ['nullable', 'string'],
-            'date'         => ['required', 'date'],
-            'time'         => ['required', 'string'],
+            if (is_array($rawItems)) {
+                // New format already (items[])
+                $normalizedItems = $rawItems;
+            } else {
+                // Try OLD format -> convert to new
+                $flowerNames     = $request->input('flower_name', []);
+                $flowerUnits     = $request->input('flower_unit', []);
+                $flowerQuantites = $request->input('flower_quantity', []);
 
-            'items'        => ['required', 'array', 'min:1'],
-            'items.*.type' => ['required', 'in:flower,garland'],
+                // Only build if we actually have arrays with some elements
+                if (is_array($flowerNames) && count($flowerNames) > 0) {
+                    foreach ($flowerNames as $i => $name) {
+                        if ($name === null || $name === '') continue;
 
-            // Flower fields
-            'items.*.flower_name'     => ['required_if:items.*.type,flower', 'string'],
-            'items.*.flower_unit'     => ['required_if:items.*.type,flower', 'string'],
-            'items.*.flower_quantity' => ['required_if:items.*.type,flower', 'numeric', 'min:1'],
+                        $normalizedItems[] = [
+                            'type'             => 'flower',
+                            'flower_name'      => $name,
+                            'flower_unit'      => $flowerUnits[$i]     ?? null,
+                            'flower_quantity'  => $flowerQuantites[$i] ?? null,
+                        ];
+                    }
+                }
+            }
 
-            // Garland fields
-            'items.*.garland_name'     => ['required_if:items.*.type,garland', 'string'],
-            'items.*.garland_quantity' => ['required_if:items.*.type,garland', 'numeric', 'min:1'],
-            'items.*.flower_count'     => ['required_if:items.*.type,garland', 'integer', 'min:1'],
-            'items.*.garland_size'     => ['required_if:items.*.type,garland', 'string'],
-        ], [
-            'items.required' => 'Please add at least one item (flower or garland).',
-        ]);
+            // Merge back so validator sees a proper array
+            $request->merge(['items' => $normalizedItems]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status'  => 422,
-                'message' => 'Validation failed',
-                'errors'  => $validator->errors(),
-            ], 422);
-        }
+            // --------------------------------
+            // 2) Validate AFTER normalization
+            // --------------------------------
+            $validator = Validator::make($request->all(), [
+                // If your product_id can be a code like "FLOW1977637", do not force integer
+                'product_id'   => ['required'], // change to ['required','integer'] if it must be numeric
+                'address_id'   => ['required', 'integer'],
+                'description'  => ['nullable', 'string'],
+                'suggestion'   => ['nullable', 'string'],
+                'date'         => ['required', 'date'],
+                'time'         => ['required', 'string'],
 
-        // ------------------------------------------------
-        // 3) Create request + items inside a transaction
-        // ------------------------------------------------
-        DB::beginTransaction();
+                'items'        => ['required', 'array', 'min:1'],
+                'items.*.type' => ['required', 'in:flower,garland'],
 
-        $user = Auth::guard('sanctum')->user();
+                // Flower fields
+                'items.*.flower_name'     => ['required_if:items.*.type,flower', 'string'],
+                'items.*.flower_unit'     => ['required_if:items.*.type,flower', 'string'],
+                'items.*.flower_quantity' => ['required_if:items.*.type,flower', 'numeric', 'min:1'],
 
-        $publicRequestId = 'REQ-' . strtoupper(Str::random(12));
+                // Garland fields
+                'items.*.garland_name'     => ['required_if:items.*.type,garland', 'string'],
+                'items.*.garland_quantity' => ['required_if:items.*.type,garland', 'numeric', 'min:1'],
+                'items.*.flower_count'     => ['required_if:items.*.type,garland', 'integer', 'min:1'],
+                'items.*.garland_size'     => ['required_if:items.*.type,garland', 'string'],
+            ], [
+                'items.required' => 'Please add at least one item (flower or garland).',
+            ]);
 
-        $flowerRequest = FlowerRequest::create([
-            'request_id'  => $publicRequestId,
-            'product_id'  => $request->product_id,
-            'user_id'     => $user->userid,
-            'address_id'  => $request->address_id,
-            'description' => $request->description,
-            'suggestion'  => $request->suggestion,
-            'date'        => $request->date,
-            'time'        => $request->time,
-            'status'      => 'pending',
-        ]);
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => 422,
+                    'message' => 'Validation failed',
+                    'errors'  => $validator->errors(),
+                ], 422);
+            }
 
-        foreach ($request->input('items', []) as $item) {
-            $type = $item['type'];
+            // ------------------------------------------------
+            // 3) Create request + items inside a transaction
+            // ------------------------------------------------
+            DB::beginTransaction();
 
-            $payload = [
-                'flower_request_id' => $flowerRequest->id,
-                'type'              => $type,
+            $user = Auth::guard('sanctum')->user();
+
+            $publicRequestId = 'REQ-' . strtoupper(Str::random(12));
+
+            $flowerRequest = FlowerRequest::create([
+                'request_id'  => $publicRequestId,
+                'product_id'  => $request->product_id,
+                'user_id'     => $user->userid,
+                'address_id'  => $request->address_id,
+                'description' => $request->description,
+                'suggestion'  => $request->suggestion,
+                'date'        => $request->date,
+                'time'        => $request->time,
+                'status'      => 'pending',
+            ]);
+
+            foreach ($request->input('items', []) as $item) {
+                $type = $item['type'];
+
+                $payload = [
+                    'flower_request_id' => $flowerRequest->id,
+                    'type'              => $type,
+                ];
+
+                if ($type === 'flower') {
+                    $payload['flower_name']     = $item['flower_name'];
+                    $payload['flower_unit']     = $item['flower_unit'];
+                    // cast to number if it came as string
+                    $payload['flower_quantity'] = is_numeric($item['flower_quantity']) ? (float)$item['flower_quantity'] : $item['flower_quantity'];
+                } else {
+                    $payload['garland_name']     = $item['garland_name'];
+                    $payload['garland_quantity'] = is_numeric($item['garland_quantity']) ? (int)$item['garland_quantity'] : $item['garland_quantity'];
+                    $payload['flower_count']     = is_numeric($item['flower_count']) ? (int)$item['flower_count'] : $item['flower_count'];
+                    $payload['garland_size']     = $item['garland_size'];
+                    // If your DB column is named 'size' instead of 'garland_size', also set:
+                    // $payload['size'] = $item['garland_size'];
+                }
+
+                FlowerRequestItem::create($payload);
+            }
+
+            // -----------------------------------
+            // 4) Notifications (same as before)
+            // -----------------------------------
+            $deviceTokens = UserDevice::where('user_id', $user->userid)
+                ->whereNotNull('device_id')
+                ->pluck('device_id')
+                ->filter()
+                ->toArray();
+
+            if (empty($deviceTokens)) {
+                \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+            } else {
+                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                $notificationService->sendBulkNotifications(
+                    $deviceTokens,
+                    'Order Created',
+                    'Your order has been placed. Price will be notified in few minutes.',
+                    ['order_id' => $flowerRequest->id]
+                );
+                \Log::info('Notifications sent successfully to all devices.', [
+                    'user_id' => $user->userid,
+                    'device_tokens' => $deviceTokens,
+                ]);
+            }
+
+            // -----------------------------------
+            // 5) Email
+            // -----------------------------------
+            $flowerRequest = $flowerRequest->load([
+                'address.localityDetails',
+                'user',
+                'flowerRequestItems',
+            ]);
+
+            $emails = [
+                'soumyaranjan.puhan@33crores.com',
+                'pankaj.sial@33crores.com',
+                'basudha@33crores.com',
+                'priya@33crores.com',
+                'starleen@33crores.com',
             ];
 
-            if ($type === 'flower') {
-                $payload['flower_name']     = $item['flower_name'];
-                $payload['flower_unit']     = $item['flower_unit'];
-                // cast to number if it came as string
-                $payload['flower_quantity'] = is_numeric($item['flower_quantity']) ? (float)$item['flower_quantity'] : $item['flower_quantity'];
-            } else {
-                $payload['garland_name']     = $item['garland_name'];
-                $payload['garland_quantity'] = is_numeric($item['garland_quantity']) ? (int)$item['garland_quantity'] : $item['garland_quantity'];
-                $payload['flower_count']     = is_numeric($item['flower_count']) ? (int)$item['flower_count'] : $item['flower_count'];
-                $payload['garland_size']     = $item['garland_size'];
-                // If your DB column is named 'size' instead of 'garland_size', also set:
-                // $payload['size'] = $item['garland_size'];
+            \Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
+            try {
+                Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
+                \Log::info('Email sent successfully to all recipients.');
+            } catch (\Exception $e) {
+                \Log::error('Failed to send email.', ['error' => $e->getMessage()]);
             }
 
-            FlowerRequestItem::create($payload);
-        }
+            // -----------------------------------
+            // 6) WhatsApp (Twilio)
+            // -----------------------------------
+            $adminNumber = '+919776888887';
+            $twilioSid = env('TWILIO_ACCOUNT_SID');
+            $twilioToken = env('TWILIO_AUTH_TOKEN');
+            $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
 
-        // -----------------------------------
-        // 4) Notifications (same as before)
-        // -----------------------------------
-        $deviceTokens = UserDevice::where('user_id', $user->userid)
-            ->whereNotNull('device_id')
-            ->pluck('device_id')
-            ->filter()
-            ->toArray();
+            $messageBody = "*New Flower Request Received*\n\n" .
+                "*Request ID:* {$flowerRequest->request_id}\n" .
+                "*User:* {$flowerRequest->user->mobile_number}\n" .
+                "*Address:* {$flowerRequest->address->apartment_flat_plot}, " .
+                "{$flowerRequest->address->localityDetails->locality_name}, " .
+                "{$flowerRequest->address->city}, {$flowerRequest->address->state}, " .
+                "{$flowerRequest->address->pincode}\n" .
+                "*Landmark:* {$flowerRequest->address->landmark}\n" .
+                "*Description:* {$flowerRequest->description}\n" .
+                "*Suggestion:* {$flowerRequest->suggestion}\n" .
+                "*Date:* {$flowerRequest->date}\n" .
+                "*Time:* {$flowerRequest->time}\n\n" .
+                "*Items:*\n";
 
-        if (empty($deviceTokens)) {
-            \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
-        } else {
-            $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-            $notificationService->sendBulkNotifications(
-                $deviceTokens,
-                'Order Created',
-                'Your order has been placed. Price will be notified in few minutes.',
-                ['order_id' => $flowerRequest->id]
-            );
-            \Log::info('Notifications sent successfully to all devices.', [
-                'user_id' => $user->userid,
-                'device_tokens' => $deviceTokens,
-            ]);
-        }
-
-        // -----------------------------------
-        // 5) Email
-        // -----------------------------------
-        $flowerRequest = $flowerRequest->load([
-            'address.localityDetails',
-            'user',
-            'flowerRequestItems',
-        ]);
-
-        $emails = [
-            'soumyaranjan.puhan@33crores.com',
-            'pankaj.sial@33crores.com',
-            'basudha@33crores.com',
-            'priya@33crores.com',
-            'starleen@33crores.com',
-        ];
-
-        \Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
-        try {
-            Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
-            \Log::info('Email sent successfully to all recipients.');
-        } catch (\Exception $e) {
-            \Log::error('Failed to send email.', ['error' => $e->getMessage()]);
-        }
-
-        // -----------------------------------
-        // 6) WhatsApp (Twilio)
-        // -----------------------------------
-        $adminNumber = '+919776888887';
-        $twilioSid = env('TWILIO_ACCOUNT_SID');
-        $twilioToken = env('TWILIO_AUTH_TOKEN');
-        $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
-
-        $messageBody = "*New Flower Request Received*\n\n" .
-            "*Request ID:* {$flowerRequest->request_id}\n" .
-            "*User:* {$flowerRequest->user->mobile_number}\n" .
-            "*Address:* {$flowerRequest->address->apartment_flat_plot}, " .
-            "{$flowerRequest->address->localityDetails->locality_name}, " .
-            "{$flowerRequest->address->city}, {$flowerRequest->address->state}, " .
-            "{$flowerRequest->address->pincode}\n" .
-            "*Landmark:* {$flowerRequest->address->landmark}\n" .
-            "*Description:* {$flowerRequest->description}\n" .
-            "*Suggestion:* {$flowerRequest->suggestion}\n" .
-            "*Date:* {$flowerRequest->date}\n" .
-            "*Time:* {$flowerRequest->time}\n\n" .
-            "*Items:*\n";
-
-        foreach ($flowerRequest->flowerRequestItems as $it) {
-            if ($it->type === 'flower') {
-                $messageBody .= "- (Flower) {$it->flower_name}: {$it->flower_quantity} {$it->flower_unit}\n";
-            } else {
-                $messageBody .= "- (Garland) {$it->garland_name}: {$it->garland_quantity} pcs, {$it->flower_count} flowers, size {$it->garland_size}\n";
+            foreach ($flowerRequest->flowerRequestItems as $it) {
+                if ($it->type === 'flower') {
+                    $messageBody .= "- (Flower) {$it->flower_name}: {$it->flower_quantity} {$it->flower_unit}\n";
+                } else {
+                    $messageBody .= "- (Garland) {$it->garland_name}: {$it->garland_quantity} pcs, {$it->flower_count} flowers, size {$it->garland_size}\n";
+                }
             }
-        }
 
-        try {
-            $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
-            $twilioClient->messages->create(
-                "whatsapp:{$adminNumber}",
-                [
-                    'from' => $twilioWhatsAppNumber,
-                    'body' => $messageBody,
-                ]
-            );
-            \Log::info('WhatsApp notification sent successfully.');
+            try {
+                $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
+                $twilioClient->messages->create(
+                    "whatsapp:{$adminNumber}",
+                    [
+                        'from' => $twilioWhatsAppNumber,
+                        'body' => $messageBody,
+                    ]
+                );
+                \Log::info('WhatsApp notification sent successfully.');
+            } catch (\Exception $e) {
+                \Log::error('Failed to send WhatsApp notification.', ['error' => $e->getMessage()]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Flower request created successfully',
+                'data'    => $flowerRequest,
+            ], 200);
+
         } catch (\Exception $e) {
-            \Log::error('Failed to send WhatsApp notification.', ['error' => $e->getMessage()]);
+            DB::rollBack();
+            \Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Failed to create flower request',
+                'error'   => $e->getMessage(),
+            ], 500);
         }
-
-        DB::commit();
-
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Flower request created successfully',
-            'data'    => $flowerRequest,
-        ], 200);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        \Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
-
-        return response()->json([
-            'status'  => 500,
-            'message' => 'Failed to create flower request',
-            'error'   => $e->getMessage(),
-        ], 500);
     }
-}
+
     public function ordersList()
     {
         try {
@@ -404,7 +405,6 @@ class FlowerBookingController extends Controller
                 'flowerPayments',
                 'users',
                 'order.address', // Include associated address through the order
-
             ])
             ->orderBy('created_at', 'desc') // Order by latest subscription
             ->get();
@@ -416,7 +416,6 @@ class FlowerBookingController extends Controller
             }
             return $order;
         });
-
 
             // Fetch related orders for the authenticated user (orders with request_id)
             $requestedOrders = FlowerRequest::where('user_id', $userId)

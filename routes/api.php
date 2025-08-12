@@ -259,12 +259,8 @@ Route::middleware('auth:sanctum')->post('/subscription/resume/{order_id}', [Flow
 
 Route::middleware('auth:sanctum')->post('/make-payment/{id}', [FlowerBookingController::class, 'markPaymentApi']);
 
-
 Route::middleware('auth:sanctum')->post('/flower-requests', [FlowerBookingController::class, 'storerequest']);
 Route::middleware('auth:sanctum')->get('/orders-list', [FlowerBookingController::class, 'ordersList']);
-
-
-// product api
 
 Route::middleware('auth:sanctum')->post('/product-subscription', [ProductApiController::class, 'productSubscription']);
 Route::middleware('auth:sanctum')->post('/product-requests', [ProductApiController::class, 'productRequest']);
