@@ -83,7 +83,7 @@ public function stats()
        $userid =  Auth::user()->userid; // Assuming userid is the primary key
 
         // 1) Times THIS user used someone else’s code (+ who referred them)
-        $usedRows = FlowerReferral::with(['referrer:id,name,mobile_number'])
+        $usedRows = FLowerReferal::with(['referrer:id,name,mobile_number'])
             ->where('user_id', $userid)
             ->get();
 
@@ -98,10 +98,8 @@ public function stats()
                 ];
             })->values(),
         ];
-
-        // 2) Users who used MY referral code (name + mobile)
-        // NOTE: change 'users.id' to 'users.userid' if that's your PK.
-        $myReferredUsers = FlowerReferral::select(
+      
+        $myReferredUsers = FLowerReferal::select(
                 'users.id as user_id',
                 'users.name',
                 'users.mobile_number'
