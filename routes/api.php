@@ -273,4 +273,4 @@ Route::get('/fcm-bulk-notifications', [FCMNotificationController::class, 'getAll
 Route::get('/manage-promotion', [PromotionControllerApi::class, 'managePromotion']);
 
 Route::middleware('auth:sanctum')->post('/referrals/claim', [FlowerReferalController::class, 'claim']);
-
+Route::middleware('auth:sanctum')->get('/referrals/stats', [FlowerReferalController::class, 'stats']);
