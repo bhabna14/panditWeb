@@ -25,6 +25,7 @@ use App\Models\UserDevice;
 use Razorpay\Api\Api;
 use Twilio\Rest\Client;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class FlowerBookingController extends Controller
 {
