@@ -77,4 +77,50 @@ public function saveReferOffer(Request $request)
 
         return view('refer.manage-offer', compact('offers'));
     }
+
+     public function update(Request $request, ReferOffer $offer)
+    {
+        $validated = $request->validate([
+            'offer_name'    => 'required|string|max:255',
+            'description'   => 'required|string|max:2000',
+            'status'        => 'required|in:active,inactive',
+            'no_of_refer'   => 'required|array|min:1',
+            'no_of_refer.*' => 'nullable|integer|min:1',
+            'benefit'       => 'required|array|min:1',
+            'benefit.*'     => 'nullable|string|max:255',
+        ]);
+
+        $referArray = [];
+        $benefitArray = [];
+        $count = max(count($validated['no_of_refer']), count($validated['benefit']));
+        for ($i = 0; $i < $count; $i++) {
+            $r = $validated['no_of_refer'][$i] ?? null;
+            $b = isset($validated['benefit'][$i]) ? trim($validated['benefit'][$i]) : null;
+            if (empty($r) && ($b === null || $b === '')) continue;
+            if (empty($r) || $b === null || $b === '') {
+                return back()->withInput()->withErrors(['benefit' => 'Each Refer & Benefit row must have both values.']);
+            }
+            $referArray[] = (int)$r;
+            $benefitArray[] = $b;
+        }
+        if (empty($referArray)) {
+            return back()->withInput()->withErrors(['no_of_refer' => 'Please add at least one valid Refer & Benefit row.']);
+        }
+
+        $offer->update([
+            'offer_name'  => $validated['offer_name'],
+            'description' => $validated['description'],
+            'status'      => $validated['status'],
+            'no_of_refer' => $referArray,
+            'benefit'     => $benefitArray,
+        ]);
+
+        return redirect()->route('refer.manage')->with('success', 'Offer updated successfully.');
+    }
+
+    public function destroy(ReferOffer $offer)
+    {
+        $offer->delete();
+        return redirect()->route('refer.manage')->with('success', 'Offer deleted successfully.');
+    }
 }

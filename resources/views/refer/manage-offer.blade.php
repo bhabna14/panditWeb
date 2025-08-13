@@ -50,8 +50,7 @@
                                         <td class="fw-semibold">{{ $offer->offer_name }}</td>
 
                                         <td>
-                                            <button type="button"
-                                                class="btn btn-sm btn-outline-primary btn-view-pairs"
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-view-pairs"
                                                 data-offer="{{ e($offer->offer_name) }}"
                                                 data-refer='@json($offer->no_of_refer ?? [])'
                                                 data-benefit='@json($offer->benefit ?? [])'>
@@ -62,18 +61,31 @@
                                         <td>{{ $offer->description }}</td>
 
                                         <td>
-                                            @php
-                                                $isActive = strtolower((string) ($offer->status ?? '')) === 'active';
-                                            @endphp
+                                            @php $isActive = strtolower((string) ($offer->status ?? '')) === 'active'; @endphp
                                             @if ($isActive)
                                                 <span class="badge bg-success">Active</span>
                                             @else
-                                                <span class="badge bg-secondary">{{ ucfirst($offer->status ?? 'inactive') }}</span>
+                                                <span
+                                                    class="badge bg-secondary">{{ ucfirst($offer->status ?? 'inactive') }}</span>
                                             @endif
                                         </td>
 
-                                        <td>
-                                            {{-- Place edit/delete here if needed --}}
+                                        <td class="text-nowrap">
+                                            <button type="button" class="btn btn-sm btn-outline-warning btn-edit-offer"
+                                                title="Edit" data-id="{{ $offer->id }}"
+                                                data-offer="{{ e($offer->offer_name) }}"
+                                                data-description="{{ e($offer->description) }}"
+                                                data-status="{{ strtolower((string) ($offer->status ?? 'inactive')) }}"
+                                                data-refer='@json($offer->no_of_refer ?? [])'
+                                                data-benefit='@json($offer->benefit ?? [])'>
+                                                <i class="bi bi-pencil-square"></i> Edit
+                                            </button>
+
+                                            <button type="button" class="btn btn-sm btn-outline-danger btn-delete-offer"
+                                                title="Delete" data-id="{{ $offer->id }}"
+                                                data-name="{{ e($offer->offer_name) }}">
+                                                <i class="bi bi-trash"></i> Delete
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty
@@ -82,6 +94,7 @@
                                     </tr>
                                 @endforelse
                             </tbody>
+
                         </table>
 
                     </div>
@@ -127,6 +140,56 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="editOfferModal" tabindex="-1" aria-labelledby="editOfferModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <form id="edit-offer-form" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-content shadow">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editOfferModalLabel">Edit Offer</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Offer Name</label>
+                                <input type="text" class="form-control" name="offer_name" id="edit-offer_name"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" name="status" id="edit-status" required>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" name="description" id="edit-description" rows="3" required></textarea>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Refer & Benefit</label>
+                                <div id="edit-referBenefitFields">
+                                    {{-- rows injected via JS --}}
+                                </div>
+                                <button type="button" class="btn btn-sm btn-success mt-2" id="edit-add-row">+ Add
+                                    Row</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="edit-save-btn">Update</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -157,9 +220,13 @@
             if ($.fn.DataTable && !$.fn.dataTable.isDataTable('#file-datatable')) {
                 $('#file-datatable').DataTable({
                     pageLength: 10,
-                    order: [[0, 'asc']],
-                    columnDefs: [
-                        { orderable: false, targets: [2, 5] } // “Refer & Benefit” + “Actions” not sortable
+                    order: [
+                        [0, 'asc']
+                    ],
+                    columnDefs: [{
+                            orderable: false,
+                            targets: [2, 5]
+                        } // “Refer & Benefit” + “Actions” not sortable
                     ]
                 });
             }
@@ -169,13 +236,21 @@
 
             // Click handler: render pairs in modal
             $(document).on('click', '.btn-view-pairs', function() {
-                const offerName  = $(this).data('offer') || '';
-                let referArr     = $(this).data('refer') || [];
-                let benefitArr   = $(this).data('benefit') || [];
+                const offerName = $(this).data('offer') || '';
+                let referArr = $(this).data('refer') || [];
+                let benefitArr = $(this).data('benefit') || [];
 
                 // In case some jQuery versions return strings, try parsing
-                if (typeof referArr === 'string') { try { referArr = JSON.parse(referArr); } catch (e) {} }
-                if (typeof benefitArr === 'string') { try { benefitArr = JSON.parse(benefitArr); } catch (e) {} }
+                if (typeof referArr === 'string') {
+                    try {
+                        referArr = JSON.parse(referArr);
+                    } catch (e) {}
+                }
+                if (typeof benefitArr === 'string') {
+                    try {
+                        benefitArr = JSON.parse(benefitArr);
+                    } catch (e) {}
+                }
 
                 $('#pairs-offer-name').text(offerName);
 
@@ -183,7 +258,8 @@
                 const len = Math.min(referArr.length, benefitArr.length);
 
                 if (len === 0) {
-                    tbody.append('<tr><td colspan="3" class="text-center text-muted">No pairs found.</td></tr>');
+                    tbody.append(
+                        '<tr><td colspan="3" class="text-center text-muted">No pairs found.</td></tr>');
                 } else {
                     for (let i = 0; i < len; i++) {
                         const idx = i + 1;
@@ -201,6 +277,162 @@
 
                 if (pairsModal) pairsModal.show();
             });
+        });
+    </script>
+
+    <script>
+        $(function() {
+            // Routes as templates for JS
+            const updateRouteTmpl = @json(route('refer.offer.update', ['offer' => '__ID__']));
+            const deleteRouteTmpl = @json(route('refer.offer.destroy', ['offer' => '__ID__']));
+
+            const editModalEl = document.getElementById('editOfferModal');
+            const editModal = editModalEl ? new bootstrap.Modal(editModalEl) : null;
+
+            function buildRow(referVal = '', benefitVal = '') {
+                return $(`
+            <div class="row g-2 align-items-end mb-2 refer-benefit-row">
+                <div class="col-md-5">
+                    <label class="form-label small mb-0">No. of Refer</label>
+                    <input type="number" class="form-control" name="no_of_refer[]" min="1" value="${referVal}">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label small mb-0">Benefit</label>
+                    <input type="text" class="form-control" name="benefit[]" value="${benefitVal}">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm edit-remove-row">-</button>
+                </div>
+            </div>
+        `);
+            }
+
+            function refreshRemoveButtons() {
+                const rows = $('#edit-referBenefitFields .refer-benefit-row');
+                if (rows.length <= 1) {
+                    rows.find('.edit-remove-row').prop('disabled', true);
+                } else {
+                    rows.find('.edit-remove-row').prop('disabled', false);
+                }
+            }
+
+            // Open Edit Modal
+            $(document).on('click', '.btn-edit-offer', function() {
+                const id = $(this).data('id');
+                const name = $(this).data('offer') || '';
+                const desc = $(this).data('description') || '';
+                const status = $(this).data('status') || 'inactive';
+                let referArr = $(this).data('refer') || [];
+                let benefitArr = $(this).data('benefit') || [];
+
+                if (typeof referArr === 'string') {
+                    try {
+                        referArr = JSON.parse(referArr);
+                    } catch (e) {}
+                }
+                if (typeof benefitArr === 'string') {
+                    try {
+                        benefitArr = JSON.parse(benefitArr);
+                    } catch (e) {}
+                }
+
+                // Set form action
+                const action = updateRouteTmpl.replace('__ID__', id);
+                $('#edit-offer-form').attr('action', action);
+
+                // Fill basics
+                $('#edit-offer_name').val(name);
+                $('#edit-description').val(desc);
+                $('#edit-status').val(status);
+
+                // Build rows
+                const wrap = $('#edit-referBenefitFields').empty();
+                const len = Math.max(referArr.length, benefitArr.length) || 1;
+
+                for (let i = 0; i < len; i++) {
+                    const r = referArr[i] ?? '';
+                    const b = benefitArr[i] ?? '';
+                    wrap.append(buildRow(r, b));
+                }
+                refreshRemoveButtons();
+
+                if (editModal) editModal.show();
+            });
+
+            // Add row button
+            $('#edit-add-row').on('click', function() {
+                $('#edit-referBenefitFields').append(buildRow());
+                refreshRemoveButtons();
+            });
+
+            // Remove row
+            $(document).on('click', '.edit-remove-row', function() {
+                $(this).closest('.refer-benefit-row').remove();
+                if ($('#edit-referBenefitFields .refer-benefit-row').length === 0) {
+                    $('#edit-referBenefitFields').append(buildRow());
+                }
+                refreshRemoveButtons();
+            });
+
+            // Save (confirm with SweetAlert, then submit)
+            $('#edit-save-btn').on('click', function() {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Update offer?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, update',
+                        cancelButtonText: 'Cancel'
+                    }).then((res) => {
+                        if (res.isConfirmed) {
+                            $('#edit-offer-form')[0].submit();
+                        }
+                    });
+                } else {
+                    $('#edit-offer-form')[0].submit();
+                }
+            });
+
+            // Delete offer
+            $(document).on('click', '.btn-delete-offer', function() {
+                const id = $(this).data('id');
+                const name = $(this).data('name') || 'this offer';
+                const action = deleteRouteTmpl.replace('__ID__', id);
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Delete offer?',
+                        html: `You are about to delete <strong>${name}</strong>. This cannot be undone.`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, delete',
+                        cancelButtonText: 'Cancel'
+                    }).then((res) => {
+                        if (res.isConfirmed) {
+                            const form = $('#delete-offer-form');
+                            form.attr('action', action);
+                            form.trigger('submit');
+                        }
+                    });
+                } else {
+                    const form = $('#delete-offer-form');
+                    form.attr('action', action);
+                    form.trigger('submit');
+                }
+            });
+
+            // Toast on success
+            @if (session('success'))
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success',
+                        text: @json(session('success')),
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                }
+            @endif
         });
     </script>
 @endsection
