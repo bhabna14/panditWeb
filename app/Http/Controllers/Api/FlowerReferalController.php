@@ -142,8 +142,7 @@ public function stats(Request $request)
         ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
         ->where('fr.user_id', $userId)
         ->where(function ($q) {
-            $q->where('s.status', 'active')
-              ->orWhere('s.is_active', 1);
+            $q->where('s.status', 'active');
         })
         ->select('r.userid as id', 'r.name', 'r.mobile_number')
         ->distinct()
