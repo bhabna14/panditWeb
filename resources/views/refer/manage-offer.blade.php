@@ -56,18 +56,12 @@
 
                                         {{-- Compact summary in cell (first 2 pairs) --}}
                                         <td>
-                                            @if ($pairsCount > 0)
-                                                <div class="small text-muted">
-                                                    @for ($i = 0; $i < min($pairsCount, 2); $i++)
-                                                        <div>{{ $offer->no_of_refer[$i] }} → {{ $offer->benefit[$i] }}</div>
-                                                    @endfor
-                                                    @if ($pairsCount > 2)
-                                                        <div class="text-secondary">+ {{ $pairsCount - 2 }} more…</div>
-                                                    @endif
-                                                </div>
-                                            @else
-                                                <span class="text-muted">No pairs</span>
-                                            @endif
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-view-pairs"
+                                                data-offer="{{ e($offer->offer_name) }}"
+                                                data-refer='@json($offer->no_of_refer ?? [])'
+                                                data-benefit='@json($offer->benefit ?? [])'>
+                                                View Pairs
+                                            </button>
                                         </td>
 
                                         <td>{{ $offer->description }}</td>
@@ -82,12 +76,7 @@
                                         </td>
 
                                         <td>
-                                            <button type="button" class="btn btn-sm btn-outline-primary btn-view-pairs"
-                                                data-offer="{{ e($offer->offer_name) }}"
-                                                data-refer='@json($offer->no_of_refer ?? [])'
-                                                data-benefit='@json($offer->benefit ?? [])'>
-                                                View Pairs
-                                            </button>
+                                           
                                             {{-- Add Edit/Delete if needed --}}
                                             {{-- <a href="{{ route('refer.offer.edit', $offer->id) }}" class="btn btn-sm btn-outline-warning">Edit</a> --}}
                                             {{-- <button class="btn btn-sm btn-outline-danger">Delete</button> --}}
