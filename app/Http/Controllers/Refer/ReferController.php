@@ -14,7 +14,7 @@ class ReferController extends Controller
         return view('refer.offer-create');
     }
 
-  public function saveReferOffer(Request $request)
+public function saveReferOffer(Request $request)
 {
     $validated = $request->validate([
         'offer_name'    => 'required|string|max:255',
@@ -70,4 +70,11 @@ class ReferController extends Controller
         ->route('refer.offerCreate')
         ->with('success', 'Refer offer saved successfully!');
 }
+
+  public function manageReferOffer()
+    {
+        $offers = ReferOffer::where('status','active')->get();
+
+        return view('refer.manage-offer', compact('offers'));
+    }
 }
