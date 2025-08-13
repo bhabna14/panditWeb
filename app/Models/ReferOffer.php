@@ -18,4 +18,9 @@ class ReferOffer extends Model
         'benefit',
         'status',
     ];
+
+     protected $casts = [
+        'no_of_refer' => 'array',
+        'benefit'     => 'array',
+    ];
 }

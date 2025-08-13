@@ -14,63 +14,60 @@ class ReferController extends Controller
         return view('refer.offer-create');
     }
 
-    public function saveReferOffer(Request $request)
-    {
-        // Basic validation of top-level + array presence
-        $validated = $request->validate([
-            'offer_name'      => 'required|string|max:255',
-            'description'     => 'required|string|max:2000',
-            'no_of_refer'     => 'required|array|min:1',
-            'no_of_refer.*'   => 'nullable|integer|min:1',
-            'benefit'         => 'required|array|min:1',
-            'benefit.*'       => 'nullable|string|max:255',
-            // If you submit a status field in the form later, validate it here:
-            // 'status'       => 'nullable|in:active,inactive',
-        ]);
+  public function saveReferOffer(Request $request)
+{
+    $validated = $request->validate([
+        'offer_name'    => 'required|string|max:255',
+        'description'   => 'required|string|max:2000',
+        'no_of_refer'   => 'required|array|min:1',
+        'no_of_refer.*' => 'nullable|integer|min:1',
+        'benefit'       => 'required|array|min:1',
+        'benefit.*'     => 'nullable|string|max:255',
+        // 'status'      => 'nullable|in:active,inactive',
+    ]);
 
-        // Pair up rows; skip empty clones
-        $rows = [];
-        $count = max(count($validated['no_of_refer']), count($validated['benefit']));
+    $referArray   = [];
+    $benefitArray = [];
 
-        for ($i = 0; $i < $count; $i++) {
-            $refer   = $validated['no_of_refer'][$i] ?? null;
-            $benefit = isset($validated['benefit'][$i]) ? trim($validated['benefit'][$i]) : null;
+    $count = max(count($validated['no_of_refer']), count($validated['benefit']));
+    for ($i = 0; $i < $count; $i++) {
+        $refer   = $validated['no_of_refer'][$i] ?? null;
+        $benefit = isset($validated['benefit'][$i]) ? trim($validated['benefit'][$i]) : null;
 
-            // Skip if both fields empty (common when cloning rows in the UI)
-            if (empty($refer) && (empty($benefit) && $benefit !== '0')) {
-                continue;
-            }
-
-            // Server-side require both when one is provided
-            if (empty($refer) || $benefit === null || $benefit === '') {
-                return back()
-                    ->withInput()
-                    ->withErrors(['benefit' => 'Each Refer & Benefit row must have both values.']);
-            }
-
-            $rows[] = [
-                'offer_name'   => $validated['offer_name'],
-                'description'  => $validated['description'],
-                'no_of_refer'  => (int) $refer,
-                'benefit'      => $benefit,
-                'status'       => $request->input('status', 'active'),
-                'created_at'   => now(),
-                'updated_at'   => now(),
-            ];
+        // Skip cloned/empty rows
+        if (empty($refer) && ($benefit === null || $benefit === '')) {
+            continue;
         }
 
-        if (empty($rows)) {
+        // Require both values per row
+        if (empty($refer) || $benefit === null || $benefit === '') {
             return back()
                 ->withInput()
-                ->withErrors(['no_of_refer' => 'Please add at least one valid Refer & Benefit row.']);
+                ->withErrors(['benefit' => 'Each Refer & Benefit row must have both values.']);
         }
 
-        DB::transaction(function () use ($rows) {
-            ReferOffer::insert($rows); // insert many rows in one go
-        });
-
-        return redirect()
-            ->route('refer.offerCreate')
-            ->with('success', 'Refer offer saved successfully!');
+        $referArray[]   = (int) $refer;
+        $benefitArray[] = $benefit;
     }
+
+    if (empty($referArray)) {
+        return back()
+            ->withInput()
+            ->withErrors(['no_of_refer' => 'Please add at least one valid Refer & Benefit row.']);
+    }
+
+    DB::transaction(function () use ($request, $validated, $referArray, $benefitArray) {
+        ReferOffer::create([
+            'offer_name'  => $validated['offer_name'],
+            'description' => $validated['description'],
+            'no_of_refer' => $referArray,           // JSON array
+            'benefit'     => $benefitArray,         // JSON array
+            'status'      => $request->input('status', 'active'),
+        ]);
+    });
+
+    return redirect()
+        ->route('refer.offerCreate')
+        ->with('success', 'Refer offer saved successfully!');
+}
 }
