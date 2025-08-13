@@ -89,7 +89,6 @@ class FlowerReferalController extends Controller
 
         $userId = $authUser->userid; // your schema uses "userid" as PK
 
-        dd($userId);
 
         // Everyone who used MY referral code (i.e., I am the referrer)
         $usedRows = DB::table('flower_referrals as fr')
