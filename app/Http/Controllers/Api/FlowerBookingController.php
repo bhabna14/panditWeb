@@ -405,7 +405,7 @@ class FlowerBookingController extends Controller
                 ->with([
                     'order.flowerPayments',
                     'order.address.localityDetails',
-                    'flowerProducts',      // <-- this now exists
+                    'flowerProducts',   // make sure this relation exists on Subscription
                     'pauseResumeLog',
                     'users',
                 ])
@@ -430,27 +430,28 @@ class FlowerBookingController extends Controller
                     'flowerProduct',
                     'user',
                     'address.localityDetails',
-                    'flowerRequestItems' => function ($q) {
-                        $q->select(
-                            'id','flower_request_id','type',
-                            'garland_name','flower_count','garland_quantity','garland_size',
-                            'flower_name','flower_unit','flower_quantity','size',
-                            'created_at','updated_at'
-                        );
-                    },
+                    // NOTE: no custom select here — avoids selecting a non-existent 'size' column
+                    'flowerRequestItems',
                 ])
                 ->orderByDesc('id')
                 ->get()
                 ->map(function ($requestRow) {
+                    // normalize order -> flower_payments
                     if ($requestRow->order) {
                         $payments = $requestRow->order->flowerPayments ?? collect();
                         $requestRow->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
                         unset($requestRow->order->flowerPayments);
                     }
+
+                    // product image url
                     if ($requestRow->flowerProduct) {
                         $requestRow->flowerProduct->product_image_url = $requestRow->flowerProduct->product_image;
                     }
-                    $garlandItems = $requestRow->flowerRequestItems->where('type', 'garland')->values();
+
+                    // GARLAND DETAILS
+                    $garlandItems = $requestRow->flowerRequestItems
+                        ->where('type', 'garland')
+                        ->values();
 
                     $requestRow->garland_items = $garlandItems->map(function ($item) {
                         return [
@@ -494,6 +495,7 @@ class FlowerBookingController extends Controller
             ], 500);
         }
     }
+
 
     public function pause(Request $request, $order_id)
     {
