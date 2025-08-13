@@ -71,6 +71,9 @@ use App\Http\Controllers\Reports\FlowerReportsController;
 
 use App\Http\Controllers\Auth\LoginRegisterController;
 use App\Http\Controllers\Superadmin\SuperAdminController;
+
+use App\Http\Controllers\Refer\ReferController;
+
 use Twilio\Rest\Client;
 
 
