@@ -77,7 +77,6 @@ class FlowerReferalController extends Controller
         }
     }
 
-
 public function stats(Request $request)
 {
     $authUser = Auth::user();
@@ -88,23 +87,16 @@ public function stats(Request $request)
         ], 401);
     }
 
-    $userId = $authUser->userid; // PK is string like "USER65632"
+    $userId = $authUser->userid; // e.g. "USER65632"
+    $onlyActiveReferralRows = $request->boolean('only_active_referral_rows');
 
-    // ---------- 1) AS REFERRER: users who used MY code ----------
-    $usedRows = DB::table('flower_referrals as fr')
-        ->join('users as u', 'u.userid', '=', 'fr.user_id')
-        ->where('fr.referrer_user_id', $userId)
-        ->when($request->boolean('only_active_referral_rows'), fn($q) => $q->where('fr.status', 'active'))
-        ->select('u.userid as id', 'u.name', 'u.mobile_number')
-        ->distinct()
-        ->get();
-
-    $completedRows = DB::table('flower_referrals as fr')
+    // ---------- AS REFERRER ----------
+    // COMPLETED = referred users who have an active subscription
+    $completedList = DB::table('flower_referrals as fr')
         ->join('users as u', 'u.userid', '=', 'fr.user_id')
         ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
         ->where('fr.referrer_user_id', $userId)
-        ->when($request->boolean('only_active_referral_rows'), fn($q) => $q->where('fr.status', 'active'))
-        // consider either status='active' OR is_active=1 as active
+        ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
         ->where(function ($q) {
             $q->where('s.status', 'active')
               ->orWhere('s.is_active', 1);
@@ -113,8 +105,25 @@ public function stats(Request $request)
         ->distinct()
         ->get();
 
-    // ---------- 2) REFERRED BY: users who claim THEY referred ME ----------
-    // (This matches your sample rows where user_id = USER65632 and referrer_user_id are others)
+    // USED (PENDING) = referred users WITHOUT an active subscription
+    $usedPendingList = DB::table('flower_referrals as fr')
+        ->join('users as u', 'u.userid', '=', 'fr.user_id')
+        ->where('fr.referrer_user_id', $userId)
+        ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
+        ->whereNotExists(function ($q) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s')
+              ->whereColumn('s.user_id', 'fr.user_id')
+              ->where(function ($s) {
+                  $s->where('s.status', 'active')
+                    ->orWhere('s.is_active', 1);
+              });
+        })
+        ->select('u.userid as id', 'u.name', 'u.mobile_number')
+        ->distinct()
+        ->get();
+
+    // ---------- REFERRED BY (who claims to have referred ME) ----------
     $myReferrers = DB::table('flower_referrals as fr')
         ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
         ->where('fr.user_id', $userId)
@@ -128,7 +137,6 @@ public function stats(Request $request)
         ->orderBy('fr.created_at', 'desc')
         ->get();
 
-    // If you also want "completed" among the people who referred YOU (rare, but included for completeness):
     $myReferrersCompleted = DB::table('flower_referrals as fr')
         ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
         ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
@@ -144,11 +152,10 @@ public function stats(Request $request)
     return response()->json([
         'success' => true,
         'data' => [
-          
-            // Your table example: multiple referrers recorded for ME
+           
             'referred_by' => [
-                'referrers_count'        => $myReferrers->count(),
-                'referrers_list'         => $myReferrers,
+                'referrers_count'           => $myReferrers->count(),
+                'referrers_list'            => $myReferrers,
                 'referrers_completed_count' => $myReferrersCompleted->count(),
                 'referrers_completed_list'  => $myReferrersCompleted,
             ],
