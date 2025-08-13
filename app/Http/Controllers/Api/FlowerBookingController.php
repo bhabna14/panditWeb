@@ -409,50 +409,88 @@ class FlowerBookingController extends Controller
             ->orderBy('created_at', 'desc') // Order by latest subscription
             ->get();
 
-        // Add image URL to flower products if they exist
-        $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
-            if ($order->flowerProducts) {
-                $order->flowerProducts->product_image_url = $order->flowerProducts->product_image;
+            // Add image URL to flower products if they exist
+            $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
+                if ($order->flowerProducts) {
+                    $order->flowerProducts->product_image_url = $order->flowerProducts->product_image;
+                }
+                return $order;
+            });
+
+          $requestedOrders = FlowerRequest::where('user_id', $userId)
+    ->with([
+        // Load payments with the order
+        'order.flowerPayments',
+
+        'flowerProduct',
+        'user',
+        'address.localityDetails',
+
+        // Load request items; we’ll filter garlands in the map()
+        'flowerRequestItems' => function ($q) {
+            $q->select(
+                'id',
+                'flower_request_id',
+                'type',
+                'garland_name',
+                'flower_count',
+                'garland_quantity',
+                'garland_size',
+                'flower_name',
+                'flower_unit',
+                'flower_quantity',
+                'size',
+                'created_at',
+                'updated_at'
+            );
+        },
+    ])
+    ->orderBy('id', 'desc')
+    ->get()
+    ->map(function ($request) {
+        // ----- Order -> flower_payments shape (your original logic) -----
+        if ($request->order) {
+            if ($request->order->flowerPayments->isEmpty()) {
+                $request->order->flower_payments = (object)[];
+            } else {
+                $request->order->flower_payments = $request->order->flowerPayments;
             }
-            return $order;
+            unset($request->order->flowerPayments);
+        }
+
+        // ----- Product image URL (keep your behavior; adjust to Storage::url() if needed) -----
+        if ($request->flowerProduct) {
+            $request->flowerProduct->product_image_url = $request->flowerProduct->product_image;
+        }
+
+        // ----- GARLAND DETAILS -----
+        $garlandItems = $request->flowerRequestItems
+            ->where('type', 'garland')
+            ->values();
+
+        // Plain details list (only garland fields you care about)
+        $request->garland_items = $garlandItems->map(function ($item) {
+            return [
+                'id'               => $item->id,
+                'garland_name'     => $item->garland_name,
+                'garland_quantity' => (int) $item->garland_quantity,
+                'garland_size'     => $item->garland_size,
+                'flower_count'     => (int) $item->flower_count,
+                // include extras if useful:
+                'created_at'       => $item->created_at,
+                'updated_at'       => $item->updated_at,
+            ];
         });
 
-            // Fetch related orders for the authenticated user (orders with request_id)
-            $requestedOrders = FlowerRequest::where('user_id', $userId)
-            ->with([
-                'order' => function ($query) {
-                    $query->with('flowerPayments');
-                },
-                'flowerProduct',
-                'user',
-                'address.localityDetails',
-                'flowerRequestItems' 
-            ])
-            ->orderBy('id', 'desc')
-            ->get()
-            // ->orderBy('id', 'desc')
-            ->map(function ($request) {
-                // Check if 'order' relationship exists and has 'flower_payments'
-                if ($request->order) {
-                    // If 'flower_payments' is empty, set it to an empty object
-                    if ($request->order->flowerPayments->isEmpty()) {
-                        $request->order->flower_payments = (object)[];
-                    } else {
-                        // Otherwise, assign the 'flowerPayments' collection to 'flower_payments'
-                        $request->order->flower_payments = $request->order->flowerPayments;
-                    }
-                    // Remove the 'flowerPayments' property to avoid duplication
-                    unset($request->order->flowerPayments);
-                }
-        
-                // Map product image URL
-                if ($request->flowerProduct) {
-                    // Generate full URL for the product image
-                    $request->flowerProduct->product_image_url =  $request->flowerProduct->product_image;
-                }
-        
-                return $request;
-            });
+        // Quick totals/summaries for garlands
+        $request->garland_summary = [
+            'items'              => $garlandItems->count(),
+            'total_quantity'     => (int) $garlandItems->sum('garland_quantity'),
+            'total_flower_count' => (int) $garlandItems->sum('flower_count'),
+        ];
+
+        return $request;
+    });
         
             // Combine both into a single response
             return response()->json([

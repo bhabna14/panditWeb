@@ -77,108 +77,106 @@ class FlowerReferalController extends Controller
         }
     }
 
+    public function stats(Request $request)
+    {
+        $authUser = Auth::user();
+        if (!$authUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
 
-public function stats(Request $request)
-{
-    $authUser = Auth::user();
-    if (!$authUser) {
+        $userId = $authUser->userid; // e.g. "USER65632"
+        $onlyActiveReferralRows = $request->boolean('only_active_referral_rows');
+
+        // ---------- AS REFERRER ----------
+        // COMPLETED = referred users who have an active subscription
+        $completedList = DB::table('flower_referrals as fr')
+            ->join('users as u', 'u.userid', '=', 'fr.user_id')
+            ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
+            ->where('fr.referrer_user_id', $userId)
+            ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
+            ->where(function ($q) {
+                $q->where('s.status', 'active');
+            })
+            ->select('u.userid as id', 'u.name', 'u.mobile_number')
+            ->distinct()
+            ->get();
+
+        // USED (PENDING) = referred users WITHOUT an active subscription
+        $usedPendingList = DB::table('flower_referrals as fr')
+            ->join('users as u', 'u.userid', '=', 'fr.user_id')
+            ->where('fr.referrer_user_id', $userId)
+            ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                ->from('subscriptions as s')
+                ->whereColumn('s.user_id', 'fr.user_id')
+                ->where(function ($s) {
+                    $s->where('s.status', 'active');
+                });
+            })
+            ->select('u.userid as id', 'u.name', 'u.mobile_number')
+            ->distinct()
+            ->get();
+
+        // COMPLETED referrers = people who referred me AND have an active subscription
+        $myReferrersCompleted = DB::table('flower_referrals as fr')
+            ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
+            ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
+            ->where('fr.user_id', $userId)
+            ->where(function ($q) {
+                $q->where('s.status', 'active')
+                ->orWhere('s.is_active', 1);
+            })
+            ->select('r.userid as id', 'r.name', 'r.mobile_number', 'fr.created_at')
+            ->distinct()
+            ->get();
+
+        // PENDING referrers = people who referred me WITHOUT an active subscription
+        $myReferrersPending = DB::table('flower_referrals as fr')
+            ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
+            ->where('fr.user_id', $userId)
+            ->whereNotExists(function ($q) {
+                $q->select(DB::raw(1))
+                ->from('subscriptions as s')
+                ->whereColumn('s.user_id', 'fr.referrer_user_id')
+                ->where(function ($s) {
+                    $s->where('s.status', 'active')
+                        ->orWhere('s.is_active', 1);
+                });
+            })
+            ->select(
+                'r.userid as id',
+                'r.name',
+                'r.mobile_number',
+                'fr.status',
+                'fr.created_at'
+            )
+            ->orderBy('fr.created_at', 'desc')
+            ->distinct()
+            ->get();
+
+        // ---------- FINAL DE-DUP SAFETY NET (in case of odd data) ----------
+        $completedIds = $completedList->pluck('id')->all();
+        $usedPendingList = $usedPendingList->reject(fn ($row) => in_array($row->id, $completedIds))->values();
+
+        $myRefCompletedIds = $myReferrersCompleted->pluck('id')->all();
+        $myReferrersPending = $myReferrersPending->reject(fn ($row) => in_array($row->id, $myRefCompletedIds))->values();
+
         return response()->json([
-            'success' => false,
-            'message' => 'Unauthorized',
-        ], 401);
-    }
-
-    $userId = $authUser->userid; // e.g. "USER65632"
-    $onlyActiveReferralRows = $request->boolean('only_active_referral_rows');
-
-    // ---------- AS REFERRER ----------
-    // COMPLETED = referred users who have an active subscription
-    $completedList = DB::table('flower_referrals as fr')
-        ->join('users as u', 'u.userid', '=', 'fr.user_id')
-        ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
-        ->where('fr.referrer_user_id', $userId)
-        ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
-        ->where(function ($q) {
-            $q->where('s.status', 'active');
-        })
-        ->select('u.userid as id', 'u.name', 'u.mobile_number')
-        ->distinct()
-        ->get();
-
-    // USED (PENDING) = referred users WITHOUT an active subscription
-    $usedPendingList = DB::table('flower_referrals as fr')
-        ->join('users as u', 'u.userid', '=', 'fr.user_id')
-        ->where('fr.referrer_user_id', $userId)
-        ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
-        ->whereNotExists(function ($q) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s')
-              ->whereColumn('s.user_id', 'fr.user_id')
-              ->where(function ($s) {
-                  $s->where('s.status', 'active');
-              });
-        })
-        ->select('u.userid as id', 'u.name', 'u.mobile_number')
-        ->distinct()
-        ->get();
-
-    // COMPLETED referrers = people who referred me AND have an active subscription
-    $myReferrersCompleted = DB::table('flower_referrals as fr')
-        ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
-        ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
-        ->where('fr.user_id', $userId)
-        ->where(function ($q) {
-            $q->where('s.status', 'active')
-              ->orWhere('s.is_active', 1);
-        })
-        ->select('r.userid as id', 'r.name', 'r.mobile_number', 'fr.created_at')
-        ->distinct()
-        ->get();
-
-    // PENDING referrers = people who referred me WITHOUT an active subscription
-    $myReferrersPending = DB::table('flower_referrals as fr')
-        ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
-        ->where('fr.user_id', $userId)
-        ->whereNotExists(function ($q) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s')
-              ->whereColumn('s.user_id', 'fr.referrer_user_id')
-              ->where(function ($s) {
-                  $s->where('s.status', 'active')
-                    ->orWhere('s.is_active', 1);
-              });
-        })
-        ->select(
-            'r.userid as id',
-            'r.name',
-            'r.mobile_number',
-            'fr.status',
-            'fr.created_at'
-        )
-        ->orderBy('fr.created_at', 'desc')
-        ->distinct()
-        ->get();
-
-    // ---------- FINAL DE-DUP SAFETY NET (in case of odd data) ----------
-    $completedIds = $completedList->pluck('id')->all();
-    $usedPendingList = $usedPendingList->reject(fn ($row) => in_array($row->id, $completedIds))->values();
-
-    $myRefCompletedIds = $myReferrersCompleted->pluck('id')->all();
-    $myReferrersPending = $myReferrersPending->reject(fn ($row) => in_array($row->id, $myRefCompletedIds))->values();
-
-    return response()->json([
-        'success' => true,
-        'data' => [
-          
-            'referred_by' => [
-                'referrers_count'           => $myReferrersPending->count(), // excludes referrers_completed
-                'referrers_list'            => $myReferrersPending,
-                'referrers_completed_count' => $myReferrersCompleted->count(),
-                'referrers_completed_list'  => $myReferrersCompleted,
+            'success' => true,
+            'data' => [
+            
+                'referred_by' => [
+                    'referrers_count'           => $myReferrersPending->count(), // excludes referrers_completed
+                    'referrers_list'            => $myReferrersPending,
+                    'referrers_completed_count' => $myReferrersCompleted->count(),
+                    'referrers_completed_list'  => $myReferrersCompleted,
+                ],
             ],
-        ],
-    ], 200);
-}
-
+        ], 200);
+    }
 
 }

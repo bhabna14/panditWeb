@@ -495,7 +495,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::post('/save-festival-calendar', 'saveFestivalCalendar')->name('admin.saveFestivalCalendar');
         Route::get('/manage-festival-calendar', 'manageFestivalCalendar')->name('admin.manageFestivalCalendar');
         Route::delete('/delete-festival-calendar/{id}','deleteFestivalCalendar')->name('admin.deleteFestivalCalendar');
-
     });
 
     Route::controller(PodcastReportController::class)->group(function() {
@@ -643,10 +642,8 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
 
 // user routes
 // Route::prefix('user')->middleware(['user'])->group(function () {
-
 //     Route::controller(userController::class)->group(function() {
 //         Route::get('/dashboard', 'dashboard')->name('user.dashboard');
-        
 //     });
 // });
 
@@ -668,7 +665,7 @@ Route::controller(PanditOtpController::class)->group(function() {
 
 /// pandit routes
 // Route::group(['prefix' => 'pandit'], function () {
-//     Route::controller(PanditController::class)->group(function() {
+//         Route::controller(PanditController::class)->group(function() {
 //         Route::get('/panditlogin', 'panditlogin')->name('panditlogin');
 //         Route::get('/poojarequest', 'poojarequest')->name('poojarequest');
 //         Route::get('/booking/details/{id}', 'getDetails')->name('bookingdetails');
@@ -749,15 +746,15 @@ Route::controller(AreaController::class)->group(function() {
 });
 
 // pandit bank details
-    Route::group(['prefix' => 'pandit'], function () {
+Route::group(['prefix' => 'pandit'], function () {
     Route::controller(BankController::class)->group(function() {
-    Route::get('/bankdetails', 'bankdetails')->name('bankdetails');
-    Route::post('/savebankdetails', 'savebankdetails');
+        Route::get('/bankdetails', 'bankdetails')->name('bankdetails');
+        Route::post('/savebankdetails', 'savebankdetails');
     });
 });
 
-        Route::group(['prefix' => 'pandit'], function () {
-        Route::controller(AddressController::class)->group(function() {
+Route::group(['prefix' => 'pandit'], function () {
+    Route::controller(AddressController::class)->group(function() {
         Route::get('/address', 'address')->name('address');
         Route::post('/saveaddress', 'saveaddress');
     });
@@ -826,7 +823,6 @@ Route::get('/admin/promotion-details', function () {
     return view('admin.flower-promotion'); // your blade file
 })->name('admin.promotionList');
 
-
 Route::get('/admin/office-fund', function () {
     return view('admin.office-fund-received'); // your blade file
 })->name('admin.officeFundReceived');
@@ -838,10 +834,7 @@ Route::controller(OfficeTransactionController::class)->group(function() {
    Route::put('/office-transactions/{id}', 'update')->name('officeTransactions.update');
    Route::delete('/office-transactions/{id}', 'destroy')->name('officeTransactions.destroy');
    Route::get('/office-fund/total-by-category', 'fundTotalsByCategory')->name('officeFund.totalByCategory');
-Route::get('/office-transactions/filter',  'filterOfficeTransactions')->name('officeTransactions.filter');
-    
-
-
+   Route::get('/office-transactions/filter',  'filterOfficeTransactions')->name('officeTransactions.filter');
    Route::post('/save-office-fund',  'saveOfficeFund')->name('saveOfficeFund');
    Route::get('/manage-office-fund',  'manageOfficeFund')->name('manageOfficeFund');
    Route::put('/office-fund/{id}', 'updateOfficeFund')->name('officeFund.update');
