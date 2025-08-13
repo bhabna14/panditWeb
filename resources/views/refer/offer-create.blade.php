@@ -21,7 +21,7 @@
             <form action="{{ route('refer.saveReferOffer') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <label for="offer_name" class="form-label">Offer Name</label>
                         <input type="text" class="form-control" id="offer_name" name="offer_name" required>
                     </div>
@@ -29,11 +29,11 @@
                         <label class="form-label">Refer & Benefit</label>
                         <div id="referBenefitFields">
                             <div class="row mb-2 refer-benefit-row">
-                                <div class="col-md-4">
+                                <div class="col-md-5">
                                     <input type="number" class="form-control" name="no_of_refer[]"
                                         placeholder="No. of Refer" required>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-5">
                                     <input type="text" class="form-control" name="benefit[]" placeholder="Benefit"
                                         required>
                                 </div>
