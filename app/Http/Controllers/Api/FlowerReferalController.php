@@ -77,7 +77,7 @@ class FlowerReferalController extends Controller
         }
     }
 
-    
+
 public function stats(Request $request)
 {
     $authUser = Auth::user();
@@ -144,13 +144,7 @@ public function stats(Request $request)
     return response()->json([
         'success' => true,
         'data' => [
-            // Your original requirement: who used MY code + how many completed
-            'as_referrer' => [
-                'used_count'       => $usedRows->count(),
-                'used_list'        => $usedRows,
-                'completed_count'  => $completedRows->count(),
-                'completed_list'   => $completedRows,
-            ],
+          
             // Your table example: multiple referrers recorded for ME
             'referred_by' => [
                 'referrers_count'        => $myReferrers->count(),
