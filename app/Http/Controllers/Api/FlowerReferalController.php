@@ -77,6 +77,7 @@ class FlowerReferalController extends Controller
         }
     }
 
+    
 public function stats(Request $request)
 {
     $authUser = Auth::user();
@@ -124,9 +125,32 @@ public function stats(Request $request)
         ->get();
 
     // ---------- REFERRED BY (who claims to have referred ME) ----------
-    $myReferrers = DB::table('flower_referrals as fr')
+    // COMPLETED referrers = people who referred me AND have an active subscription
+    $myReferrersCompleted = DB::table('flower_referrals as fr')
+        ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
+        ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
+        ->where('fr.user_id', $userId)
+        ->where(function ($q) {
+            $q->where('s.status', 'active')
+              ->orWhere('s.is_active', 1);
+        })
+        ->select('r.userid as id', 'r.name', 'r.mobile_number')
+        ->distinct()
+        ->get();
+
+    // PENDING referrers = people who referred me WITHOUT an active subscription
+    $myReferrersPending = DB::table('flower_referrals as fr')
         ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
         ->where('fr.user_id', $userId)
+        ->whereNotExists(function ($q) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s')
+              ->whereColumn('s.user_id', 'fr.referrer_user_id')
+              ->where(function ($s) {
+                  $s->where('s.status', 'active')
+                    ->orWhere('s.is_active', 1);
+              });
+        })
         ->select(
             'r.userid as id',
             'r.name',
@@ -135,26 +159,28 @@ public function stats(Request $request)
             'fr.created_at'
         )
         ->orderBy('fr.created_at', 'desc')
-        ->get();
-
-    $myReferrersCompleted = DB::table('flower_referrals as fr')
-        ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
-        ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
-        ->where('fr.user_id', $userId)
-        ->where(function ($q) {
-            $q->where('s.status', 'active');
-        })
-        ->select('r.userid as id', 'r.name', 'r.mobile_number')
         ->distinct()
         ->get();
+
+    // ---------- FINAL DE-DUP SAFETY NET (in case of odd data) ----------
+    $completedIds = $completedList->pluck('id')->all();
+    $usedPendingList = $usedPendingList->reject(fn ($row) => in_array($row->id, $completedIds))->values();
+
+    $myRefCompletedIds = $myReferrersCompleted->pluck('id')->all();
+    $myReferrersPending = $myReferrersPending->reject(fn ($row) => in_array($row->id, $myRefCompletedIds))->values();
 
     return response()->json([
         'success' => true,
         'data' => [
-           
+            'as_referrer' => [
+                'used_count'        => $usedPendingList->count(),   // excludes completed
+                'used_list'         => $usedPendingList,
+                'completed_count'   => $completedList->count(),
+                'completed_list'    => $completedList,
+            ],
             'referred_by' => [
-                'referrers_count'           => $myReferrers->count(),
-                'referrers_list'            => $myReferrers,
+                'referrers_count'           => $myReferrersPending->count(), // excludes referrers_completed
+                'referrers_list'            => $myReferrersPending,
                 'referrers_completed_count' => $myReferrersCompleted->count(),
                 'referrers_completed_list'  => $myReferrersCompleted,
             ],
