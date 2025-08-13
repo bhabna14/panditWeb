@@ -21,7 +21,34 @@
             <form action="{{ route('refer.saveReferOffer') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row g-3">
-                   
+                    <div class="col-md-6">
+                        <label for="offer_name" class="form-label">Offer Name</label>
+                        <input type="text" class="form-control" id="offer_name" name="offer_name" required>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label">Refer & Benefit</label>
+                        <div id="referBenefitFields">
+                            <div class="row mb-2 refer-benefit-row">
+                                <div class="col-md-4">
+                                    <input type="number" class="form-control" name="no_of_refer[]"
+                                        placeholder="No. of Refer" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <input type="text" class="form-control" name="benefit[]" placeholder="Benefit"
+                                        required>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="button" class="btn btn-success add-row">+</button>
+                                    <button type="button" class="btn btn-danger remove-row"
+                                        style="display:none;">-</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                    </div>
 
                     <div class="col-12">
                         <button type="submit" class="btn btn-primary">Save Offer</button>
@@ -50,5 +77,20 @@
                 confirmButtonColor: '#d33'
             });
         @endif
+    </script>
+
+    <script>
+        $(document).ready(function() {
+            $('#referBenefitFields').on('click', '.add-row', function() {
+                var row = $(this).closest('.refer-benefit-row').clone();
+                row.find('input').val('');
+                row.find('.remove-row').show();
+                $('#referBenefitFields').append(row);
+            });
+
+            $('#referBenefitFields').on('click', '.remove-row', function() {
+                $(this).closest('.refer-benefit-row').remove();
+            });
+        });
     </script>
 @endsection

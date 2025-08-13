@@ -844,4 +844,6 @@ Route::controller(OfficeTransactionController::class)->group(function() {
 
 Route::controller(ReferController::class)->group(function() {
     Route::get('/offer-create','offerCreate')->name('refer.offerCreate');
+    Route::post('/save-refer-offer', 'saveReferOffer')->name('refer.saveReferOffer');
+    Route::get('/manage-refer-offer', 'manageReferOffer')->name('refer.manageReferOffer');
 });
