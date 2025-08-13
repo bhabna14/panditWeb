@@ -146,14 +146,7 @@ class FlowerBookingController extends Controller
     public function storerequest(Request $request)
     {
         try {
-            // -----------------------------
-            // 1) Normalize incoming payload
-            // -----------------------------
-
-            // Accept items whether:
-            // - sent as proper array (raw JSON: items: [...])
-            // - sent as JSON string in form-data: items = "[{...}]"
-            // - sent using old arrays: flower_name[], flower_unit[], flower_quantity[]
+         
             $rawItems = $request->input('items');
 
             // If items is a JSON string (common with form-data), try decoding
@@ -255,7 +248,7 @@ class FlowerBookingController extends Controller
                 $type = $item['type'];
 
                 $payload = [
-                    'flower_request_id' => $flowerRequest->id,
+                    'flower_request_id' => $flowerRequest->request_id,
                     'type'              => $type,
                 ];
 

@@ -473,7 +473,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
     Route::controller(OrderController::class)->group(function() {
         Route::get('/manage-orders', 'manageorders')->name('manageorders');
         Route::get('/booking/{id}','showbooking')->name('admin.booking.show');
-        // Route::get('/savelocation', 'savelocation')->name('savelocation');
         Route::delete('/dltbooking/{id}', 'deleteBooking')->name('admin.booking.delete');
     });
 
@@ -840,4 +839,9 @@ Route::controller(OfficeTransactionController::class)->group(function() {
    Route::put('/office-fund/{id}', 'updateOfficeFund')->name('officeFund.update');
    Route::delete('/office-fund/{id}', 'destroyOfficeFund')->name('officeFund.destroy');
    Route::get('/office-fund/filter', 'filterOfficeFund')->name('officeFund.filter');
+});
+
+
+Route::controller(ReferController::class)->group(function() {
+    Route::get('/offer-create','offerCreate')->name('refer.offerCreate');
 });
