@@ -10,7 +10,7 @@ class Subscription extends Model
     use HasFactory;
 
     protected $table = 'subscriptions'; // Ensure this matches your actual table name
-    // Add all fields you want to allow for mass assignment
+    
     protected $fillable = [
         'subscription_id',
         'order_id',
@@ -44,28 +44,27 @@ class Subscription extends Model
            ]);
        }
    }
-  
-public function pauseResumeLogs()
-{
-    return $this->hasMany(SubscriptionPauseResumeLog::class, 'subscription_id', 'subscription_id');
-}
 
-   
+    public function pauseResumeLogs()
+    {
+        return $this->hasMany(SubscriptionPauseResumeLog::class, 'subscription_id', 'subscription_id');
+    }
+
    public function relatedOrder()
    {
        return $this->belongsTo(Order::class, 'order_id', 'order_id');  // Adjust 'order_id' if necessary
    }
-   
+
    public function order()
    {
        return $this->belongsTo(Order::class, 'order_id', 'order_id');  // Adjust 'order_id' if necessary
    }
-   
+
    public function flowerProducts()
    {
        return $this->belongsTo(FlowerProduct::class, 'product_id', 'product_id');
    }
-   
+
    public function pauseResumeLog()
    {
        return $this->hasMany(SubscriptionPauseResumeLog::class, 'order_id', 'order_id');
@@ -80,6 +79,5 @@ public function pauseResumeLogs()
    {
        return $this->belongsTo(User::class, 'user_id', 'userid');
    }
-   
 
 }

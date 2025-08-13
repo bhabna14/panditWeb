@@ -20,7 +20,6 @@ class FlowerReferalController extends Controller
         $data = $request->validate([
             'referral_code' => 'required|string|max:32',
         ]);
-
         
         $referred = Auth::user(); // current logged-in user
         if (!$referred) {
@@ -78,66 +77,48 @@ class FlowerReferalController extends Controller
         }
     }
 
-public function stats()
+    public function stats(Request $request)
     {
-       $userid =  Auth::user()->userid; // Assuming userid is the primary key
+        $authUser = Auth::user();
+        if (!$authUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
 
-        // 1) Times THIS user used someone else’s code (+ who referred them)
-        $usedRows = FLowerReferal::with(['referrer:id,name,mobile_number'])
-            ->where('user_id', $userid)
-            ->get();
+        $userId = $authUser->userid; // your schema uses "userid" as PK
 
-        $usedReferral = [
-            'count' => $usedRows->count(),
-            'rows'  => $usedRows->map(function ($r) {
-                return [
-                    'referrer_id'             => $r->referrer_user_id,
-                    'referrer_name'           => optional($r->referrer)->name,
-                    'referrer_mobile_number'  => optional($r->referrer)->mobile_number,
-                    'status'                  => $r->status,
-                ];
-            })->values(),
-        ];
-      
-        $myReferredUsers = FLowerReferal::select(
-                'users.id as user_id',
-                'users.name',
-                'users.mobile_number'
-            )
-            ->join('users', 'flower_referrals.user_id', '=', 'users.id')
-            ->where('flower_referrals.referrer_user_id', $userid)
-            ->get();
-
-        $myReferrals = [
-            'count' => $myReferredUsers->count(),
-            'users' => $myReferredUsers->values(),
-        ];
-
-        // 3) Of those referred users, who completed a subscription? (+ their data)
-        // Define what "completed" means. Here we treat status 'completed' OR is_active = 1 as completed.
-        $completedReferredUsers = Subscription::select(
-                'users.id as user_id',
-                'users.name',
-                'users.mobile_number'
-            )
-            ->join('users', 'subscriptions.user_id', '=', 'users.id')
-            ->join('flower_referrals', 'flower_referrals.user_id', '=', 'subscriptions.user_id')
-            ->where('flower_referrals.referrer_user_id', $userid)
-            ->where(function ($q) {
-                $q->where('subscriptions.status', 'active');
-            })
+        // Everyone who used MY referral code (i.e., I am the referrer)
+        $usedRows = DB::table('flower_referrals as fr')
+            ->join('users as u', 'u.userid', '=', 'fr.user_id')
+            ->where('fr.referrer_user_id', $userId)
+            ->select('u.userid as id', 'u.name', 'u.mobile_number')
             ->distinct()
             ->get();
 
-        $completed = [
-            'count' => $completedReferredUsers->count(),
-            'users' => $completedReferredUsers->values(),
-        ];
+        // Of those, who have an active subscription
+        $completedRows = DB::table('flower_referrals as fr')
+            ->join('users as u', 'u.userid', '=', 'fr.user_id')
+            ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
+            ->where('fr.referrer_user_id', $userId)
+            // treat either status='active' OR is_active=1 as active
+            ->where(function ($q) {
+                $q->where('s.status', 'active');
+            })
+            ->select('u.userid as id', 'u.name', 'u.mobile_number')
+            ->distinct()
+            ->get();
 
         return response()->json([
-            'used_referral'             => $usedReferral,
-            'my_referrals'              => $myReferrals,
-            'completed_referred_users'  => $completed,
-        ]);
+            'success' => true,
+            'data' => [
+                'used_count'       => $usedRows->count(),
+                'used_list'        => $usedRows,
+                'completed_count'  => $completedRows->count(),
+                'completed_list'   => $completedRows,
+            ],
+        ], 200);
     }
+
 }

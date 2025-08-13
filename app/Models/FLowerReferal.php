@@ -13,4 +13,13 @@ class FLowerReferal extends Model
     
     protected $fillable = ['user_id','referrer_user_id','status'];
 
+    public function referredUser()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'userid');
+    }
+
+    public function referrerUser()
+    {
+        return $this->belongsTo(User::class, 'referrer_user_id', 'userid');
+    }
 }
