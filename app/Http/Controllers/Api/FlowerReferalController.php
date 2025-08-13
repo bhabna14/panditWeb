@@ -77,49 +77,90 @@ class FlowerReferalController extends Controller
         }
     }
 
-    public function stats(Request $request)
-    {
-        $authUser = Auth::user();
-        if (!$authUser) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
-
-        $userId = $authUser->userid; // your schema uses "userid" as PK
-
-
-        // Everyone who used MY referral code (i.e., I am the referrer)
-        $usedRows = DB::table('flower_referrals as fr')
-            ->join('users as u', 'u.userid', '=', 'fr.user_id')
-            ->where('fr.user_id', $userId)
-            ->select('u.userid as id', 'u.name', 'u.mobile_number')
-            ->distinct()
-            ->get();
-
-        // Of those, who have an active subscription
-        $completedRows = DB::table('flower_referrals as fr')
-            ->join('users as u', 'u.userid', '=', 'fr.user_id')
-            ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
-            ->where('fr.user_id', $userId)
-            // treat either status='active' OR is_active=1 as active
-            ->where(function ($q) {
-                $q->where('s.status', 'active');
-            })
-            ->select('u.userid as id', 'u.name', 'u.mobile_number')
-            ->distinct()
-            ->get();
-
+    
+public function stats(Request $request)
+{
+    $authUser = Auth::user();
+    if (!$authUser) {
         return response()->json([
-            'success' => true,
-            'data' => [
+            'success' => false,
+            'message' => 'Unauthorized',
+        ], 401);
+    }
+
+    $userId = $authUser->userid; // PK is string like "USER65632"
+
+    // ---------- 1) AS REFERRER: users who used MY code ----------
+    $usedRows = DB::table('flower_referrals as fr')
+        ->join('users as u', 'u.userid', '=', 'fr.user_id')
+        ->where('fr.referrer_user_id', $userId)
+        ->when($request->boolean('only_active_referral_rows'), fn($q) => $q->where('fr.status', 'active'))
+        ->select('u.userid as id', 'u.name', 'u.mobile_number')
+        ->distinct()
+        ->get();
+
+    $completedRows = DB::table('flower_referrals as fr')
+        ->join('users as u', 'u.userid', '=', 'fr.user_id')
+        ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
+        ->where('fr.referrer_user_id', $userId)
+        ->when($request->boolean('only_active_referral_rows'), fn($q) => $q->where('fr.status', 'active'))
+        // consider either status='active' OR is_active=1 as active
+        ->where(function ($q) {
+            $q->where('s.status', 'active')
+              ->orWhere('s.is_active', 1);
+        })
+        ->select('u.userid as id', 'u.name', 'u.mobile_number')
+        ->distinct()
+        ->get();
+
+    // ---------- 2) REFERRED BY: users who claim THEY referred ME ----------
+    // (This matches your sample rows where user_id = USER65632 and referrer_user_id are others)
+    $myReferrers = DB::table('flower_referrals as fr')
+        ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
+        ->where('fr.user_id', $userId)
+        ->select(
+            'r.userid as id',
+            'r.name',
+            'r.mobile_number',
+            'fr.status',
+            'fr.created_at'
+        )
+        ->orderBy('fr.created_at', 'desc')
+        ->get();
+
+    // If you also want "completed" among the people who referred YOU (rare, but included for completeness):
+    $myReferrersCompleted = DB::table('flower_referrals as fr')
+        ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
+        ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
+        ->where('fr.user_id', $userId)
+        ->where(function ($q) {
+            $q->where('s.status', 'active')
+              ->orWhere('s.is_active', 1);
+        })
+        ->select('r.userid as id', 'r.name', 'r.mobile_number')
+        ->distinct()
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'data' => [
+            // Your original requirement: who used MY code + how many completed
+            'as_referrer' => [
                 'used_count'       => $usedRows->count(),
                 'used_list'        => $usedRows,
                 'completed_count'  => $completedRows->count(),
                 'completed_list'   => $completedRows,
             ],
-        ], 200);
-    }
+            // Your table example: multiple referrers recorded for ME
+            'referred_by' => [
+                'referrers_count'        => $myReferrers->count(),
+                'referrers_list'         => $myReferrers,
+                'referrers_completed_count' => $myReferrersCompleted->count(),
+                'referrers_completed_list'  => $myReferrersCompleted,
+            ],
+        ],
+    ], 200);
+}
+
 
 }
