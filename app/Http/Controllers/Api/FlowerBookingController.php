@@ -390,54 +390,40 @@ class FlowerBookingController extends Controller
         }
     }
 
-     public function ordersList(Request $request)
+    public function ordersList(Request $request)
     {
         try {
             $authUser = Auth::guard('sanctum')->user();
             if (!$authUser) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized',
-                ], 401);
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
             }
 
             $userId = $authUser->userid;
 
-            // ===== SUBSCRIPTIONS for this user =====
+            // SUBSCRIPTIONS
             $subscriptionsOrder = Subscription::where('user_id', $userId)
                 ->with([
-                    // order and nested relations
                     'order.flowerPayments',
                     'order.address.localityDetails',
-
-                    // product referenced by subscription
-                    'flowerProduct',
-
-                    // optional logs on subscription (define model below)
+                    'flowerProducts',      // <-- this now exists
                     'pauseResumeLog',
-
-                    // keep your existing alias to user
                     'users',
                 ])
                 ->orderByDesc('created_at')
                 ->get()
                 ->map(function ($sub) {
-                    // map product image URL
                     if ($sub->flowerProduct) {
                         $sub->flowerProduct->product_image_url = $sub->flowerProduct->product_image;
                     }
-
-                    // normalize order -> flower_payments
                     if ($sub->order) {
                         $payments = $sub->order->flowerPayments ?? collect();
                         $sub->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
                         unset($sub->order->flowerPayments);
                     }
-
                     return $sub;
                 });
 
-            // ===== ONE-OFF FLOWER REQUESTS for this user =====
+            // ONE-OFF REQUESTS
             $requestedOrders = FlowerRequest::where('user_id', $userId)
                 ->with([
                     'order.flowerPayments',
@@ -446,41 +432,25 @@ class FlowerBookingController extends Controller
                     'address.localityDetails',
                     'flowerRequestItems' => function ($q) {
                         $q->select(
-                            'id',
-                            'flower_request_id',
-                            'type',
-                            'garland_name',
-                            'flower_count',
-                            'garland_quantity',
-                            'garland_size',
-                            'flower_name',
-                            'flower_unit',
-                            'flower_quantity',
-                            'size',
-                            'created_at',
-                            'updated_at'
+                            'id','flower_request_id','type',
+                            'garland_name','flower_count','garland_quantity','garland_size',
+                            'flower_name','flower_unit','flower_quantity','size',
+                            'created_at','updated_at'
                         );
                     },
                 ])
                 ->orderByDesc('id')
                 ->get()
                 ->map(function ($requestRow) {
-                    // normalize order -> flower_payments
                     if ($requestRow->order) {
                         $payments = $requestRow->order->flowerPayments ?? collect();
                         $requestRow->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
                         unset($requestRow->order->flowerPayments);
                     }
-
-                    // product image url
                     if ($requestRow->flowerProduct) {
                         $requestRow->flowerProduct->product_image_url = $requestRow->flowerProduct->product_image;
                     }
-
-                    // GARLAND DETAILS
-                    $garlandItems = $requestRow->flowerRequestItems
-                        ->where('type', 'garland')
-                        ->values();
+                    $garlandItems = $requestRow->flowerRequestItems->where('type', 'garland')->values();
 
                     $requestRow->garland_items = $garlandItems->map(function ($item) {
                         return [
@@ -510,6 +480,7 @@ class FlowerBookingController extends Controller
                     'requested_orders'    => $requestedOrders,
                 ],
             ], 200);
+
         } catch (\Throwable $e) {
             Log::error('Failed to fetch orders list', [
                 'message' => $e->getMessage(),
@@ -519,7 +490,7 @@ class FlowerBookingController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve orders list.',
-                'error'   => app()->environment('local') ? $e->getMessage() : null, // helpful in local env
+                'error'   => app()->environment('local') ? $e->getMessage() : null,
             ], 500);
         }
     }
