@@ -57,6 +57,32 @@
             </form>
         </div>
     </div>
+
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Saved!',
+                    text: @json(session('success')),
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation error',
+                    html: `{!! implode('<br>', $errors->all()) !!}`
+                });
+            });
+        </script>
+    @endif
 @endsection
 
 @section('scripts')
