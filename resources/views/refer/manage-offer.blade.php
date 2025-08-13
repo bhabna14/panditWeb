@@ -65,8 +65,7 @@
                                             @if ($isActive)
                                                 <span class="badge bg-success">Active</span>
                                             @else
-                                                <span
-                                                    class="badge bg-secondary">{{ ucfirst($offer->status ?? 'inactive') }}</span>
+                                                <span class="badge bg-secondary">{{ ucfirst($offer->status ?? 'inactive') }}</span>
                                             @endif
                                         </td>
 
@@ -94,7 +93,6 @@
                                     </tr>
                                 @endforelse
                             </tbody>
-
                         </table>
 
                     </div>
@@ -112,7 +110,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-
                     <div class="mb-3">
                         <span class="fw-semibold">Offer:</span>
                         <span id="pairs-offer-name" class="ms-1"></span>
@@ -132,7 +129,6 @@
                             </tbody>
                         </table>
                     </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
@@ -141,6 +137,7 @@
         </div>
     </div>
 
+    {{-- Edit Modal --}}
     <div class="modal fade" id="editOfferModal" tabindex="-1" aria-labelledby="editOfferModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <form id="edit-offer-form" method="POST">
@@ -156,8 +153,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Offer Name</label>
-                                <input type="text" class="form-control" name="offer_name" id="edit-offer_name"
-                                    required>
+                                <input type="text" class="form-control" name="offer_name" id="edit-offer_name" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
@@ -176,8 +172,7 @@
                                 <div id="edit-referBenefitFields">
                                     {{-- rows injected via JS --}}
                                 </div>
-                                <button type="button" class="btn btn-sm btn-success mt-2" id="edit-add-row">+ Add
-                                    Row</button>
+                                <button type="button" class="btn btn-sm btn-success mt-2" id="edit-add-row">+ Add Row</button>
                             </div>
                         </div>
                     </div>
@@ -190,6 +185,12 @@
             </form>
         </div>
     </div>
+
+    {{-- Hidden delete form --}}
+    <form id="delete-offer-form" method="POST" style="display:none;">
+        @csrf
+        @method('DELETE')
+    </form>
 @endsection
 
 @section('scripts')
@@ -206,7 +207,6 @@
     <script src="{{ asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
-    {{-- If your theme already auto-initializes tables via table-data.js, you can remove it to avoid double init --}}
     {{-- <script src="{{ asset('assets/js/table-data.js') }}"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -220,13 +220,9 @@
             if ($.fn.DataTable && !$.fn.dataTable.isDataTable('#file-datatable')) {
                 $('#file-datatable').DataTable({
                     pageLength: 10,
-                    order: [
-                        [0, 'asc']
-                    ],
-                    columnDefs: [{
-                            orderable: false,
-                            targets: [2, 5]
-                        } // “Refer & Benefit” + “Actions” not sortable
+                    order: [[0, 'asc']],
+                    columnDefs: [
+                        { orderable: false, targets: [2, 5] } // “Refer & Benefit” + “Actions” not sortable
                     ]
                 });
             }
@@ -240,17 +236,8 @@
                 let referArr = $(this).data('refer') || [];
                 let benefitArr = $(this).data('benefit') || [];
 
-                // In case some jQuery versions return strings, try parsing
-                if (typeof referArr === 'string') {
-                    try {
-                        referArr = JSON.parse(referArr);
-                    } catch (e) {}
-                }
-                if (typeof benefitArr === 'string') {
-                    try {
-                        benefitArr = JSON.parse(benefitArr);
-                    } catch (e) {}
-                }
+                if (typeof referArr === 'string') { try { referArr = JSON.parse(referArr); } catch (e) {} }
+                if (typeof benefitArr === 'string') { try { benefitArr = JSON.parse(benefitArr); } catch (e) {} }
 
                 $('#pairs-offer-name').text(offerName);
 
@@ -258,8 +245,7 @@
                 const len = Math.min(referArr.length, benefitArr.length);
 
                 if (len === 0) {
-                    tbody.append(
-                        '<tr><td colspan="3" class="text-center text-muted">No pairs found.</td></tr>');
+                    tbody.append('<tr><td colspan="3" class="text-center text-muted">No pairs found.</td></tr>');
                 } else {
                     for (let i = 0; i < len; i++) {
                         const idx = i + 1;
@@ -291,29 +277,25 @@
 
             function buildRow(referVal = '', benefitVal = '') {
                 return $(`
-            <div class="row g-2 align-items-end mb-2 refer-benefit-row">
-                <div class="col-md-5">
-                    <label class="form-label small mb-0">No. of Refer</label>
-                    <input type="number" class="form-control" name="no_of_refer[]" min="1" value="${referVal}">
-                </div>
-                <div class="col-md-5">
-                    <label class="form-label small mb-0">Benefit</label>
-                    <input type="text" class="form-control" name="benefit[]" value="${benefitVal}">
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger btn-sm edit-remove-row">-</button>
-                </div>
-            </div>
-        `);
+                    <div class="row g-2 align-items-end mb-2 refer-benefit-row">
+                        <div class="col-md-5">
+                            <label class="form-label small mb-0">No. of Refer</label>
+                            <input type="number" class="form-control" name="no_of_refer[]" min="1" value="${referVal}">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label small mb-0">Benefit</label>
+                            <input type="text" class="form-control" name="benefit[]" value="${benefitVal}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger btn-sm edit-remove-row">-</button>
+                        </div>
+                    </div>
+                `);
             }
 
             function refreshRemoveButtons() {
                 const rows = $('#edit-referBenefitFields .refer-benefit-row');
-                if (rows.length <= 1) {
-                    rows.find('.edit-remove-row').prop('disabled', true);
-                } else {
-                    rows.find('.edit-remove-row').prop('disabled', false);
-                }
+                rows.find('.edit-remove-row').prop('disabled', rows.length <= 1);
             }
 
             // Open Edit Modal
@@ -325,16 +307,8 @@
                 let referArr = $(this).data('refer') || [];
                 let benefitArr = $(this).data('benefit') || [];
 
-                if (typeof referArr === 'string') {
-                    try {
-                        referArr = JSON.parse(referArr);
-                    } catch (e) {}
-                }
-                if (typeof benefitArr === 'string') {
-                    try {
-                        benefitArr = JSON.parse(benefitArr);
-                    } catch (e) {}
-                }
+                if (typeof referArr === 'string') { try { referArr = JSON.parse(referArr); } catch (e) {} }
+                if (typeof benefitArr === 'string') { try { benefitArr = JSON.parse(benefitArr); } catch (e) {} }
 
                 // Set form action
                 const action = updateRouteTmpl.replace('__ID__', id);
@@ -374,26 +348,15 @@
                 refreshRemoveButtons();
             });
 
-            // Save (confirm with SweetAlert, then submit)
+            // UPDATE: submit immediately (no warning) and close modal
             $('#edit-save-btn').on('click', function() {
-                if (typeof Swal !== 'undefined') {
-                    Swal.fire({
-                        title: 'Update offer?',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonText: 'Yes, update',
-                        cancelButtonText: 'Cancel'
-                    }).then((res) => {
-                        if (res.isConfirmed) {
-                            $('#edit-offer-form')[0].submit();
-                        }
-                    });
-                } else {
-                    $('#edit-offer-form')[0].submit();
-                }
+                const $btn = $(this);
+                $btn.prop('disabled', true).text('Updating...');
+                if (editModal) editModal.hide(); // close the modal immediately
+                $('#edit-offer-form')[0].submit(); // regular form submit (redirects with flash)
             });
 
-            // Delete offer
+            // DELETE: confirm with SweetAlert
             $(document).on('click', '.btn-delete-offer', function() {
                 const id = $(this).data('id');
                 const name = $(this).data('name') || 'this offer';
@@ -421,7 +384,7 @@
                 }
             });
 
-            // Toast on success
+            // Toast on success (optional)
             @if (session('success'))
                 if (typeof Swal !== 'undefined') {
                     Swal.fire({
