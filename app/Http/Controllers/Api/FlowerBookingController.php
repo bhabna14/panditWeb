@@ -390,123 +390,136 @@ class FlowerBookingController extends Controller
         }
     }
 
-    public function ordersList()
+     public function ordersList(Request $request)
     {
         try {
-            // Get the authenticated user's ID
-            $userId = Auth::guard('sanctum')->user()->userid;
-
-
-            $subscriptionsOrder = Subscription::where('user_id', $userId)
-            ->with([
-                'order', // Associated orders
-                'flowerProducts', // Product info related to subscriptions
-                'pauseResumeLog',
-                'flowerPayments',
-                'users',
-                'order.address', // Include associated address through the order
-            ])
-            ->orderBy('created_at', 'desc') // Order by latest subscription
-            ->get();
-
-            // Add image URL to flower products if they exist
-            $subscriptionsOrder = $subscriptionsOrder->map(function ($order) {
-                if ($order->flowerProducts) {
-                    $order->flowerProducts->product_image_url = $order->flowerProducts->product_image;
-                }
-                return $order;
-            });
-
-          $requestedOrders = FlowerRequest::where('user_id', $userId)
-    ->with([
-        // Load payments with the order
-        'order.flowerPayments',
-
-        'flowerProduct',
-        'user',
-        'address.localityDetails',
-
-        // Load request items; we’ll filter garlands in the map()
-        'flowerRequestItems' => function ($q) {
-            $q->select(
-                'id',
-                'flower_request_id',
-                'type',
-                'garland_name',
-                'flower_count',
-                'garland_quantity',
-                'garland_size',
-                'flower_name',
-                'flower_unit',
-                'flower_quantity',
-                'size',
-                'created_at',
-                'updated_at'
-            );
-        },
-    ])
-    ->orderBy('id', 'desc')
-    ->get()
-    ->map(function ($request) {
-        // ----- Order -> flower_payments shape (your original logic) -----
-        if ($request->order) {
-            if ($request->order->flowerPayments->isEmpty()) {
-                $request->order->flower_payments = (object)[];
-            } else {
-                $request->order->flower_payments = $request->order->flowerPayments;
+            $authUser = Auth::guard('sanctum')->user();
+            if (!$authUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized',
+                ], 401);
             }
-            unset($request->order->flowerPayments);
-        }
 
-        // ----- Product image URL (keep your behavior; adjust to Storage::url() if needed) -----
-        if ($request->flowerProduct) {
-            $request->flowerProduct->product_image_url = $request->flowerProduct->product_image;
-        }
+            $userId = $authUser->userid;
 
-        // ----- GARLAND DETAILS -----
-        $garlandItems = $request->flowerRequestItems
-            ->where('type', 'garland')
-            ->values();
+            // ===== SUBSCRIPTIONS for this user =====
+            $subscriptionsOrder = Subscription::where('user_id', $userId)
+                ->with([
+                    // order and nested relations
+                    'order.flowerPayments',
+                    'order.address.localityDetails',
 
-        // Plain details list (only garland fields you care about)
-        $request->garland_items = $garlandItems->map(function ($item) {
-            return [
-                'id'               => $item->id,
-                'garland_name'     => $item->garland_name,
-                'garland_quantity' => (int) $item->garland_quantity,
-                'garland_size'     => $item->garland_size,
-                'flower_count'     => (int) $item->flower_count,
-                // include extras if useful:
-                'created_at'       => $item->created_at,
-                'updated_at'       => $item->updated_at,
-            ];
-        });
+                    // product referenced by subscription
+                    'flowerProduct',
 
-        // Quick totals/summaries for garlands
-        $request->garland_summary = [
-            'items'              => $garlandItems->count(),
-            'total_quantity'     => (int) $garlandItems->sum('garland_quantity'),
-            'total_flower_count' => (int) $garlandItems->sum('flower_count'),
-        ];
+                    // optional logs on subscription (define model below)
+                    'pauseResumeLog',
 
-        return $request;
-    });
-        
-            // Combine both into a single response
+                    // keep your existing alias to user
+                    'users',
+                ])
+                ->orderByDesc('created_at')
+                ->get()
+                ->map(function ($sub) {
+                    // map product image URL
+                    if ($sub->flowerProduct) {
+                        $sub->flowerProduct->product_image_url = $sub->flowerProduct->product_image;
+                    }
+
+                    // normalize order -> flower_payments
+                    if ($sub->order) {
+                        $payments = $sub->order->flowerPayments ?? collect();
+                        $sub->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
+                        unset($sub->order->flowerPayments);
+                    }
+
+                    return $sub;
+                });
+
+            // ===== ONE-OFF FLOWER REQUESTS for this user =====
+            $requestedOrders = FlowerRequest::where('user_id', $userId)
+                ->with([
+                    'order.flowerPayments',
+                    'flowerProduct',
+                    'user',
+                    'address.localityDetails',
+                    'flowerRequestItems' => function ($q) {
+                        $q->select(
+                            'id',
+                            'flower_request_id',
+                            'type',
+                            'garland_name',
+                            'flower_count',
+                            'garland_quantity',
+                            'garland_size',
+                            'flower_name',
+                            'flower_unit',
+                            'flower_quantity',
+                            'size',
+                            'created_at',
+                            'updated_at'
+                        );
+                    },
+                ])
+                ->orderByDesc('id')
+                ->get()
+                ->map(function ($requestRow) {
+                    // normalize order -> flower_payments
+                    if ($requestRow->order) {
+                        $payments = $requestRow->order->flowerPayments ?? collect();
+                        $requestRow->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
+                        unset($requestRow->order->flowerPayments);
+                    }
+
+                    // product image url
+                    if ($requestRow->flowerProduct) {
+                        $requestRow->flowerProduct->product_image_url = $requestRow->flowerProduct->product_image;
+                    }
+
+                    // GARLAND DETAILS
+                    $garlandItems = $requestRow->flowerRequestItems
+                        ->where('type', 'garland')
+                        ->values();
+
+                    $requestRow->garland_items = $garlandItems->map(function ($item) {
+                        return [
+                            'id'               => $item->id,
+                            'garland_name'     => $item->garland_name,
+                            'garland_quantity' => (int) $item->garland_quantity,
+                            'garland_size'     => $item->garland_size,
+                            'flower_count'     => (int) $item->flower_count,
+                            'created_at'       => $item->created_at,
+                            'updated_at'       => $item->updated_at,
+                        ];
+                    });
+
+                    $requestRow->garland_summary = [
+                        'items'              => $garlandItems->count(),
+                        'total_quantity'     => (int) $garlandItems->sum('garland_quantity'),
+                        'total_flower_count' => (int) $garlandItems->sum('flower_count'),
+                    ];
+
+                    return $requestRow;
+                });
+
             return response()->json([
-                'success' => 200,
+                'success' => true,
                 'data' => [
                     'subscriptions_order' => $subscriptionsOrder,
-                    'requested_orders' => $requestedOrders,
+                    'requested_orders'    => $requestedOrders,
                 ],
             ], 200);
-        } catch (\Exception $e) {
-            // Log the error for debugging
-            \Log::error('Failed to fetch orders list: ' . $e->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('Failed to fetch orders list', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
 
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve orders list.',
+                'error'   => app()->environment('local') ? $e->getMessage() : null, // helpful in local env
             ], 500);
         }
     }
