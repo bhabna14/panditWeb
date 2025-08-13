@@ -115,12 +115,12 @@ public function saveReferOffer(Request $request)
             'benefit'     => $benefitArray,
         ]);
 
-        return redirect()->route('refer.manage')->with('success', 'Offer updated successfully.');
+        return redirect()->route('refer.manageReferOffer')->with('success', 'Offer updated successfully.');
     }
 
     public function destroy(ReferOffer $offer)
     {
         $offer->delete();
-        return redirect()->route('refer.manage')->with('success', 'Offer deleted successfully.');
+        return redirect()->route('refer.manageReferOffer')->with('success', 'Offer deleted successfully.');
     }
 }
