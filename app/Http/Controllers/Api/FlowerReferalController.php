@@ -94,7 +94,7 @@ class FlowerReferalController extends Controller
         // Everyone who used MY referral code (i.e., I am the referrer)
         $usedRows = DB::table('flower_referrals as fr')
             ->join('users as u', 'u.userid', '=', 'fr.user_id')
-            ->where('fr.referrer_user_id', $userId)
+            ->where('fr.user_id', $userId)
             ->select('u.userid as id', 'u.name', 'u.mobile_number')
             ->distinct()
             ->get();
@@ -103,7 +103,7 @@ class FlowerReferalController extends Controller
         $completedRows = DB::table('flower_referrals as fr')
             ->join('users as u', 'u.userid', '=', 'fr.user_id')
             ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
-            ->where('fr.referrer_user_id', $userId)
+            ->where('fr.user_id', $userId)
             // treat either status='active' OR is_active=1 as active
             ->where(function ($q) {
                 $q->where('s.status', 'active');
