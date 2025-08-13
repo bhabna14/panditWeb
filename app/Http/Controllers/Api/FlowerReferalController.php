@@ -77,7 +77,7 @@ class FlowerReferalController extends Controller
         }
     }
 
-    
+
 public function stats(Request $request)
 {
     $authUser = Auth::user();
@@ -99,8 +99,7 @@ public function stats(Request $request)
         ->where('fr.referrer_user_id', $userId)
         ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
         ->where(function ($q) {
-            $q->where('s.status', 'active')
-              ->orWhere('s.is_active', 1);
+            $q->where('s.status', 'active');
         })
         ->select('u.userid as id', 'u.name', 'u.mobile_number')
         ->distinct()
@@ -116,15 +115,13 @@ public function stats(Request $request)
               ->from('subscriptions as s')
               ->whereColumn('s.user_id', 'fr.user_id')
               ->where(function ($s) {
-                  $s->where('s.status', 'active')
-                    ->orWhere('s.is_active', 1);
+                  $s->where('s.status', 'active');
               });
         })
         ->select('u.userid as id', 'u.name', 'u.mobile_number')
         ->distinct()
         ->get();
 
-    // ---------- REFERRED BY (who claims to have referred ME) ----------
     // COMPLETED referrers = people who referred me AND have an active subscription
     $myReferrersCompleted = DB::table('flower_referrals as fr')
         ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
@@ -134,7 +131,7 @@ public function stats(Request $request)
             $q->where('s.status', 'active')
               ->orWhere('s.is_active', 1);
         })
-        ->select('r.userid as id', 'r.name', 'r.mobile_number')
+        ->select('r.userid as id', 'r.name', 'r.mobile_number', 'fr.created_at')
         ->distinct()
         ->get();
 
@@ -172,12 +169,7 @@ public function stats(Request $request)
     return response()->json([
         'success' => true,
         'data' => [
-            'as_referrer' => [
-                'used_count'        => $usedPendingList->count(),   // excludes completed
-                'used_list'         => $usedPendingList,
-                'completed_count'   => $completedList->count(),
-                'completed_list'    => $completedList,
-            ],
+          
             'referred_by' => [
                 'referrers_count'           => $myReferrersPending->count(), // excludes referrers_completed
                 'referrers_list'            => $myReferrersPending,
