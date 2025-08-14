@@ -191,7 +191,7 @@ class FlowerReferalController extends Controller
                 ],
             ],
 
-             'data'    => [
+             'offer_details'    => [
                 'offers' => $offers,
             ],
         ], 200);
