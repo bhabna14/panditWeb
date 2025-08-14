@@ -11,7 +11,7 @@ class FLowerReferal extends Model
 
     protected $table = 'flower_referrals';
     
-    protected $fillable = ['user_id','referrer_user_id','status'];
+    protected $fillable = ['user_id','referrer_user_id','code_status','status'];
 
     public function referredUser()
     {

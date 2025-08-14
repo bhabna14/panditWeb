@@ -78,6 +78,8 @@ class FlowerReferalController extends Controller
                 'user_id'           => $referred->userid,     // the claimer
                 'referrer_user_id'  => $referrer->userid,     // who owns the code
                 'status'            => 'claimed',
+                'code_status'       => 'yes',
+
             ]);
 
             // Mark this user as having used a referral code
@@ -93,7 +95,7 @@ class FlowerReferalController extends Controller
             'success' => true,
             'message' => 'Referral claimed successfully',
             'data' => [
-                'referrer'    => $referrer->only(['id', 'name', 'email', 'mobile_number']),
+                'referrer'    => $referrer->only(['id', 'name', 'email', 'mobile_number', 'code_status']),
                 'referred'    => $referred->only(['id', 'name', 'email', 'mobile_number']) + ['code_status' => $referred->code_status],
                 'referral_id' => $ref->id,
                 'referral'    => $ref,
