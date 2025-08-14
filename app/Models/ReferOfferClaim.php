@@ -23,4 +23,6 @@ class ReferOfferClaim extends Model
         'selected_pairs' => 'array',
         'date_time'      => 'datetime',
     ];
+
+
 }

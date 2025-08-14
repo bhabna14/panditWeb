@@ -135,23 +135,20 @@ class ReferController extends Controller
         return view('refer.offer-claim', compact('users', 'offers'));
     }
 
-    public function saveOfferClaim(Request $request)
+   public function saveOfferClaim(Request $request)
     {
-        try {
-            // Validate inputs
-            $validated = $request->validate([
-                'user_id'        => 'required|exists:users,userid',
-                'offer_id'       => 'required|exists:flower__refer_offer,id',
-                // HTML datetime-local => "YYYY-MM-DDTHH:MM"
-                'claim_datetime' => 'required|date_format:Y-m-d\TH:i',
-                'selected_pairs' => 'nullable|array',
-                'selected_pairs.*' => 'string', // values like "idx|refer|benefit"
-            ]);
+        $validated = $request->validate([
+            'user_id'         => 'required|exists:users,userid',
+            'offer_id'        => 'required|exists:flower__refer_offer,id',
+            'claim_datetime'  => 'required|date_format:Y-m-d\TH:i', // HTML datetime-local
+            'selected_pairs'  => 'nullable|array',
+            'selected_pairs.*'=> 'string', // "idx|refer|benefit"
+        ]);
 
+        try {
             // Parse selected pairs into structured array
             $parsedSelections = collect($request->input('selected_pairs', []))
                 ->map(function ($v) {
-                    // "idx|refer|benefit"
                     [$i, $r, $b] = array_pad(explode('|', $v, 3), 3, null);
                     return [
                         'index'   => is_numeric($i) ? (int)$i : null,
@@ -163,30 +160,30 @@ class ReferController extends Controller
                 ->values()
                 ->all();
 
-            // (Optional) sanity check against offer’s arrays
+            // Optional sanity check against offer arrays
             $offer = ReferOffer::findOrFail($validated['offer_id']);
             $maxIndex = min(count($offer->no_of_refer ?? []), count($offer->benefit ?? [])) - 1;
             foreach ($parsedSelections as $sel) {
                 if ($sel['index'] === null || $sel['index'] < 0 || $sel['index'] > $maxIndex) {
+                    // Put a specific message into the error bag so SweetAlert shows it
                     return back()->withInput()->withErrors([
-                        'selected_pairs' => 'One or more selected benefit options are invalid.'
+                        'selected_pairs' => 'One or more selected benefit options are invalid.',
                     ]);
                 }
             }
 
-            // Parse datetime-local to app timezone
+            // Parse datetime-local to app timezone (store as "Y-m-d H:i:s")
             $dt = Carbon::createFromFormat('Y-m-d\TH:i', $validated['claim_datetime'], config('app.timezone'))
                         ->format('Y-m-d H:i:s');
 
-            // Optional: prevent duplicate claim per user+offer
+            // Upsert per (user_id, offer_id)
             $existing = ReferOfferClaim::where('user_id', $validated['user_id'])
                 ->where('offer_id', $validated['offer_id'])
                 ->first();
 
             if ($existing) {
-                // If you prefer to update the old record:
                 $existing->update([
-                    'selected_pairs' => $parsedSelections,   // with casts -> saves as JSON
+                    'selected_pairs' => $parsedSelections, // cast -> JSON
                     'date_time'      => $dt,
                     'status'         => 'claimed',
                 ]);
@@ -196,12 +193,11 @@ class ReferController extends Controller
                     ->with('success', 'Offer claim updated successfully!');
             }
 
-            // Create new claim
             DB::transaction(function () use ($validated, $parsedSelections, $dt) {
                 ReferOfferClaim::create([
                     'user_id'        => $validated['user_id'],
                     'offer_id'       => $validated['offer_id'],
-                    'selected_pairs' => $parsedSelections,   // with casts -> JSON
+                    'selected_pairs' => $parsedSelections, // cast -> JSON
                     'date_time'      => $dt,
                     'status'         => 'claimed',
                 ]);
@@ -217,8 +213,10 @@ class ReferController extends Controller
                 'trace'   => $e->getTraceAsString(),
             ]);
 
+            // Put a specific error message in session and also in the error bag
             return back()
                 ->withInput()
+                ->with('error', 'Unexpected server error while saving the claim.')
                 ->withErrors(['error' => 'Failed to save offer claim.']);
         }
     }
