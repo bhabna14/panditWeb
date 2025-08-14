@@ -52,7 +52,10 @@ public function manageReferOffer(Request $request)
     }
 
 
-}public function saveOfferClaim(Request $request)
+}
+
+
+public function saveOfferClaim(Request $request)
 {
     try {
         // Read raw inputs (no Validator)

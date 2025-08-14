@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\FLowerReferal; // your model name as given
 use App\Models\User;
 use App\Models\Subscription;
+use App\Models\ReferOffer;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class FlowerReferalController extends Controller
@@ -165,9 +167,21 @@ class FlowerReferalController extends Controller
         $myRefCompletedIds = $myReferrersCompleted->pluck('id')->all();
         $myReferrersPending = $myReferrersPending->reject(fn ($row) => in_array($row->id, $myRefCompletedIds))->values();
 
+         $status = $request->query('status', 'active');
+
+        $query = ReferOffer::query();
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $offers = $query
+            ->orderByDesc('created_at')
+            ->get(['id','offer_name','description','no_of_refer','benefit','status','created_at','updated_at']);
+
         return response()->json([
             'success' => true,
-            'data' => [
+            'refer_data' => [
             
                 'referred_by' => [
                     'referrers_count'           => $myReferrersPending->count(), // excludes referrers_completed
@@ -175,6 +189,10 @@ class FlowerReferalController extends Controller
                     'referrers_completed_count' => $myReferrersCompleted->count(),
                     'referrers_completed_list'  => $myReferrersCompleted,
                 ],
+            ],
+
+             'data'    => [
+                'offers' => $offers,
             ],
         ], 200);
     }
