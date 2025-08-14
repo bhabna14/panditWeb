@@ -844,7 +844,6 @@ Route::controller(OfficeTransactionController::class)->group(function() {
    Route::get('/office-fund/filter', 'filterOfficeFund')->name('officeFund.filter');
 });
 
-
 Route::controller(ReferController::class)->group(function() {
     Route::get('/offer-create','offerCreate')->name('refer.offerCreate');
     Route::post('/save-refer-offer', 'saveReferOffer')->name('refer.saveReferOffer');
