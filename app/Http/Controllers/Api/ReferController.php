@@ -8,6 +8,10 @@ use App\Models\ReferOffer;
 use App\Models\ReferOfferClaim;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+use App\Models\User;
+
 
 class ReferController extends Controller
 {
