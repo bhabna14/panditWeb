@@ -274,3 +274,7 @@ Route::get('/manage-promotion', [PromotionControllerApi::class, 'managePromotion
 
 Route::middleware('auth:sanctum')->post('/referrals/claim', [FlowerReferalController::class, 'claim']);
 Route::middleware('auth:sanctum')->get('/referrals/stats', [FlowerReferalController::class, 'stats']);
+
+
+Route::get('/refer/offers', [ReferController::class, 'manageReferOffer'])->name('api.refer.offers.manage');
+    

@@ -82,7 +82,7 @@
                         <select name="offer_id" id="offer_id" class="form-select select2" required>
                             <option value="" disabled selected>-- Select Offer --</option>
                             @foreach ($offers as $o)
-                                <option value="{{ $o->id }}" data-offer="{{ e($o->offer_name) }}"
+                                <option value="{{ $o->offer_id }}" data-offer="{{ e($o->offer_name) }}"
                                     data-refer='@json($o->no_of_refer ?? [])' data-benefit='@json($o->benefit ?? [])'>
                                     {{ $o->offer_name }} ({{ ucfirst($o->status ?? 'inactive') }})
                                 </option>
@@ -287,3 +287,5 @@
         });
     </script>
 @endsection
+
+
