@@ -135,7 +135,7 @@ class ReferController extends Controller
         return view('refer.offer-claim', compact('users', 'offers'));
     }
 
-   public function saveOfferClaim(Request $request)
+    public function saveOfferClaim(Request $request)
     {
         $validated = $request->validate([
             'user_id'         => 'required|exists:users,userid',

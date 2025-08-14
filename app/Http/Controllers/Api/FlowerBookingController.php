@@ -208,9 +208,9 @@ class FlowerBookingController extends Controller
 
                 // Garland fields
                 'items.*.garland_name'     => ['required_if:items.*.type,garland', 'string'],
-                'items.*.garland_quantity' => ['required_if:items.*.type,garland', 'numeric', 'min:1'],
-                'items.*.flower_count'     => ['required_if:items.*.type,garland', 'integer', 'min:1'],
-                'items.*.garland_size'     => ['required_if:items.*.type,garland', 'string'],
+                'items.*.garland_quantity' => ['nullable', 'numeric', 'min:1'],
+                'items.*.flower_count'     => ['nullable', 'integer', 'min:1'],
+                'items.*.garland_size'     => ['nullable', 'string'],
             ], [
                 'items.required' => 'Please add at least one item (flower or garland).',
             ]);
