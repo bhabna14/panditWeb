@@ -74,10 +74,6 @@
                         </div>
                     </div>
 
-                    <div class="col-12">
-                        <button type="submit" class="btn btn-primary">Save Claim</button>
-                        <a href="{{ route('refer.manage') }}" class="btn btn-light">Back</a>
-                    </div>
                 </div>
             </form>
         </div>
