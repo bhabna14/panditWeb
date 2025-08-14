@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Refer;
 
 use App\Http\Controllers\Controller;
 use App\Models\ReferOffer;
+use App\Models\ReferOfferClaim;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log; 
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -130,6 +133,94 @@ class ReferController extends Controller
         $offers = ReferOffer::where('status','active')->get();
 
         return view('refer.offer-claim', compact('users', 'offers'));
+    }
+
+    public function saveOfferClaim(Request $request)
+    {
+        try {
+            // Validate inputs
+            $validated = $request->validate([
+                'user_id'        => 'required|exists:users,userid',
+                'offer_id'       => 'required|exists:flower__refer_offer,id',
+                // HTML datetime-local => "YYYY-MM-DDTHH:MM"
+                'claim_datetime' => 'required|date_format:Y-m-d\TH:i',
+                'selected_pairs' => 'nullable|array',
+                'selected_pairs.*' => 'string', // values like "idx|refer|benefit"
+            ]);
+
+            // Parse selected pairs into structured array
+            $parsedSelections = collect($request->input('selected_pairs', []))
+                ->map(function ($v) {
+                    // "idx|refer|benefit"
+                    [$i, $r, $b] = array_pad(explode('|', $v, 3), 3, null);
+                    return [
+                        'index'   => is_numeric($i) ? (int)$i : null,
+                        'refer'   => $r,
+                        'benefit' => $b,
+                    ];
+                })
+                ->filter(fn ($row) => $row['refer'] !== null && $row['benefit'] !== null)
+                ->values()
+                ->all();
+
+            // (Optional) sanity check against offer’s arrays
+            $offer = ReferOffer::findOrFail($validated['offer_id']);
+            $maxIndex = min(count($offer->no_of_refer ?? []), count($offer->benefit ?? [])) - 1;
+            foreach ($parsedSelections as $sel) {
+                if ($sel['index'] === null || $sel['index'] < 0 || $sel['index'] > $maxIndex) {
+                    return back()->withInput()->withErrors([
+                        'selected_pairs' => 'One or more selected benefit options are invalid.'
+                    ]);
+                }
+            }
+
+            // Parse datetime-local to app timezone
+            $dt = Carbon::createFromFormat('Y-m-d\TH:i', $validated['claim_datetime'], config('app.timezone'))
+                        ->format('Y-m-d H:i:s');
+
+            // Optional: prevent duplicate claim per user+offer
+            $existing = ReferOfferClaim::where('user_id', $validated['user_id'])
+                ->where('offer_id', $validated['offer_id'])
+                ->first();
+
+            if ($existing) {
+                // If you prefer to update the old record:
+                $existing->update([
+                    'selected_pairs' => $parsedSelections,   // with casts -> saves as JSON
+                    'date_time'      => $dt,
+                    'status'         => 'claimed',
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->with('success', 'Offer claim updated successfully!');
+            }
+
+            // Create new claim
+            DB::transaction(function () use ($validated, $parsedSelections, $dt) {
+                ReferOfferClaim::create([
+                    'user_id'        => $validated['user_id'],
+                    'offer_id'       => $validated['offer_id'],
+                    'selected_pairs' => $parsedSelections,   // with casts -> JSON
+                    'date_time'      => $dt,
+                    'status'         => 'claimed',
+                ]);
+            });
+
+            return redirect()
+                ->back()
+                ->with('success', 'Offer claim saved successfully!');
+
+        } catch (\Throwable $e) {
+            Log::error('saveOfferClaim failed', [
+                'message' => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
+
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Failed to save offer claim.']);
+        }
     }
 
 }

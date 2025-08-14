@@ -18,4 +18,9 @@ class ReferOfferClaim extends Model
         'date_time',
         'status',
     ];
+
+     protected $casts = [
+        'selected_pairs' => 'array',
+        'date_time'      => 'datetime',
+    ];
 }

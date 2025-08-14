@@ -73,6 +73,11 @@
                     </div>
 
                     <div class="col-md-4">
+                        <label class="form-label">Claim Date & Time</label>
+                        <input type="datetime-local" name="claim_datetime" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-4">
                         <label class="form-label">Offer</label>
                         <select name="offer_id" id="offer_id" class="form-select select2" required>
                             <option value="" disabled selected>-- Select Offer --</option>
@@ -83,11 +88,6 @@
                                 </option>
                             @endforeach
                         </select>
-                    </div>
-
-                    <div class="col-md-4">
-                        <label class="form-label">Claim Date & Time</label>
-                        <input type="datetime-local" name="claim_datetime" class="form-control" required>
                     </div>
 
                     <div class="col-12">
