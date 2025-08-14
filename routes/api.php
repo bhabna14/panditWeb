@@ -277,4 +277,6 @@ Route::middleware('auth:sanctum')->get('/referrals/stats', [FlowerReferalControl
 
 
 Route::get('/refer/offers', [ReferController::class, 'manageReferOffer'])->name('api.refer.offers.manage');
+Route::post('/refer/offer-claims', [ReferController::class, 'saveOfferClaim'])->name('api.refer.offerClaims.store');
+   
     
