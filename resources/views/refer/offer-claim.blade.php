@@ -239,4 +239,42 @@
             });
         });
     </script>
+    {{-- SweetAlert flash + validation popups --}}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Success message
+    @if (session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: @json(session('success')),
+            timer: 2000,
+            showConfirmButton: false
+        });
+    @endif
+
+    // General server error (custom)
+    @if (session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: @json(session('error')),
+        });
+    @endif
+
+    // Validation errors (show all, clearly)
+    @if ($errors->any())
+        (function(){
+            const errs = @json($errors->all());
+            const html = errs.map(e => `<div>• ${e}</div>`).join('');
+            Swal.fire({
+                icon: 'error',
+                title: 'Please fix the following',
+                html: html
+            });
+        })();
+    @endif
+});
+</script>
+
 @endsection
