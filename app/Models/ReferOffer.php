@@ -12,6 +12,7 @@ class ReferOffer extends Model
     protected $table = "flower__refer_offer";
 
     protected $fillable = [
+        'offer_id',
         'offer_name',
         'description',
         'no_of_refer',

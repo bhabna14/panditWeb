@@ -849,7 +849,13 @@ Route::controller(ReferController::class)->group(function() {
     Route::get('/offer-create','offerCreate')->name('refer.offerCreate');
     Route::post('/save-refer-offer', 'saveReferOffer')->name('refer.saveReferOffer');
     Route::get('/manage-refer-offer', 'manageReferOffer')->name('refer.manageReferOffer');
-
     Route::put('/refer/offers/{offer}','update')->name('refer.offer.update');
     Route::delete('/refer/offers/{offer}',  'destroy')->name('refer.offer.destroy');
+
+    // offer claim
+    Route::get('/offer-claim', 'offerClaim')->name('refer.offerClaim');
+    Route::post('/save-offer-claim', 'saveOfferClaim')->name('refer.saveOfferClaim');
+    Route::get('/manage-offer-claim', 'manageOfferClaim')->name('refer.manageOfferClaim');
+    Route::put('/refer/claim/{claim}', 'updateOfferClaim')->name('refer.claim.update');
+    Route::delete('/refer/claim/{claim}', 'destroyOfferClaim')->name('refer.claim.destroy');
 });
