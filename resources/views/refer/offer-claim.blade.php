@@ -240,24 +240,50 @@
         });
     </script>
     {{-- SweetAlert flash + validation popups --}}
-   <script>
-document.addEventListener('DOMContentLoaded', function () {
-    @if (session('success'))
-        Swal.fire({ icon: 'success', title: 'Success', text: @json(session('success')), timer: 2000, showConfirmButton: false });
-    @endif
-
-    @if (session('error'))
-        Swal.fire({ icon: 'error', title: 'Error', text: @json(session('error')) });
-    @endif
-
-    @if ($errors->any())
-        (function(){
-            const errs = @json($errors->all());
-            const html = errs.map(e => `<div>• ${e}</div>`).join('');
-            Swal.fire({ icon: 'error', title: 'Please fix the following', html });
-        })();
-    @endif
-});
-</script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1) Validation errors (field -> messages)
+            @if ($errors->any())
+                (function() {
+                    const fieldErrors = @json($errors->toArray()); // { field: [msg, ...], ... }
+                    let html = '';
+                    Object.entries(fieldErrors).forEach(([field, msgs]) => {
+                        (msgs || []).forEach(msg => {
+                            html += `<div><strong>${field}</strong>: ${msg}</div>`;
+                        });
+                    });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Please fix the following',
+                        html
+                    });
+                })();
+            @elseif (session('error'))
+                // 2) Server/logic error from controller catch
+                (function() {
+                    const msg = @json(session('error'));
+                    const detail = @json(session('error_detail')); // only set in local
+                    let html = `<div>${msg}</div>`;
+                    if (detail) {
+                        html +=
+                            `<pre style="text-align:left; white-space:pre-wrap; margin-top:8px;">${detail}</pre>`;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        html
+                    });
+                })();
+            @elseif (session('success'))
+                // 3) Success
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: @json(session('success')),
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            @endif
+        });
+    </script>
 @endsection
