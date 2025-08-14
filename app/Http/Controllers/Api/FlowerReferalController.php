@@ -17,67 +17,97 @@ use Carbon\Carbon;
 class FlowerReferalController extends Controller
 {
 
-    public function claim(Request $request)
-    {
-        $data = $request->validate([
-            'referral_code' => 'required|string|max:32',
-        ]);
-        
-        $referred = Auth::user(); // current logged-in user
-        if (!$referred) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
+  public function claim(Request $request)
+{
+    $data = $request->validate([
+        'referral_code' => 'required|string|max:32',
+    ]);
 
-        $code = strtoupper(trim($data['referral_code']));
-
-        // Find referrer by code
-        $referrer = User::where('referral_code', $code)->first();
-        if (!$referrer) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid referral code.',
-            ], 422);
-        }
-
-        // Idempotent: if this user already claimed, return the existing record
-        $existing = FLowerReferal::where('referrer_user_id', $referred->userid)->first();
-        if ($existing) {
-            return response()->json([
-                'success' => true,
-                'message' => 'Referral already claimed.',
-                'data'    => $existing,
-            ], 200);
-        }
-
-        try {
-            $ref = DB::transaction(function () use ($referrer, $referred) {
-                return FLowerReferal::create([
-                    'user_id'             => $referred->userid, // use numeric PK
-                    'referrer_user_id'     => $referrer->userid,   // use numeric PK
-                ]);
-            });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Referral claimed successfully',
-                'data' => [
-                    'referrer'    => $referrer->only(['id', 'name', 'email', 'mobile_number']),
-                    'referred'    => $referred->only(['id', 'name', 'email', 'mobile_number']),
-                    'referral_id' => $ref->id,
-                    'referral'    => $ref,
-                ],
-            ], 200);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to claim referral.',
-                'error'   => $e->getMessage(),
-            ], 500);
-        }
+    $referred = Auth::user(); // current logged-in user
+    if (!$referred) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+        ], 401);
     }
+
+    $code = strtoupper(trim($data['referral_code']));
+
+    // Find referrer by code
+    $referrer = User::where('referral_code', $code)->first();
+    if (!$referrer) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid referral code.',
+        ], 422);
+    }
+
+    // Prevent claiming your own code
+    if ($referrer->userid === $referred->userid) {
+        return response()->json([
+            'success' => false,
+            'message' => 'You cannot claim your own referral code.',
+        ], 422);
+    }
+
+    // Idempotent check: has THIS user already claimed a referral?
+    // (Fix: check by fr.user_id == current user)
+    $existing = FLowerReferal::where('user_id', $referred->userid)->first();
+    if ($existing) {
+        // Ensure code_status is "yes" even if it wasn’t set previously
+        if (strtolower((string) $referred->code_status) !== 'yes') {
+            User::where('userid', $referred->userid)->update(['code_status' => 'yes']);
+            $referred->code_status = 'yes';
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Referral already claimed.',
+            'data' => [
+                'referral'    => $existing,
+                'referrer'    => $referrer->only(['id', 'name', 'email', 'mobile_number']),
+                'referred'    => $referred->only(['id', 'name', 'email', 'mobile_number']) + ['code_status' => $referred->code_status],
+            ],
+        ], 200);
+    }
+
+    try {
+        $ref = DB::transaction(function () use ($referrer, $referred) {
+            // Create referral row
+            $ref = FLowerReferal::create([
+                'user_id'           => $referred->userid,     // the claimer
+                'referrer_user_id'  => $referrer->userid,     // who owns the code
+                'status'            => 'claimed',
+            ]);
+
+            // Mark this user as having used a referral code
+            User::where('userid', $referred->userid)->update(['code_status' => 'yes']);
+
+            return $ref;
+        });
+
+        // Refresh in-memory value for response
+        $referred->code_status = 'yes';
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Referral claimed successfully',
+            'data' => [
+                'referrer'    => $referrer->only(['id', 'name', 'email', 'mobile_number']),
+                'referred'    => $referred->only(['id', 'name', 'email', 'mobile_number']) + ['code_status' => $referred->code_status],
+                'referral_id' => $ref->id,
+                'referral'    => $ref,
+            ],
+        ], 200);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to claim referral.',
+            'error'   => app()->environment('local') ? $e->getMessage() : null,
+        ], 500);
+    }
+}
+
 
     public function stats(Request $request)
     {
