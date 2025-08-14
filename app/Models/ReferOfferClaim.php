@@ -24,5 +24,4 @@ class ReferOfferClaim extends Model
         'date_time'      => 'datetime',
     ];
 
-
 }

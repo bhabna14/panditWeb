@@ -135,18 +135,19 @@ class ReferController extends Controller
         return view('refer.offer-claim', compact('users', 'offers'));
     }
 
-    public function saveOfferClaim(Request $request)
+     public function saveOfferClaim(Request $request)
     {
+        // Validate outside try/catch so field errors show properly
         $validated = $request->validate([
             'user_id'         => 'required|exists:users,userid',
             'offer_id'        => 'required|exists:flower__refer_offer,id',
-            'claim_datetime'  => 'required|date_format:Y-m-d\TH:i', // HTML datetime-local
+            'claim_datetime'  => 'required|date_format:Y-m-d\TH:i',
             'selected_pairs'  => 'nullable|array',
             'selected_pairs.*'=> 'string', // "idx|refer|benefit"
         ]);
 
         try {
-            // Parse selected pairs into structured array
+            // Parse selections (checkbox values)
             $parsedSelections = collect($request->input('selected_pairs', []))
                 ->map(function ($v) {
                     [$i, $r, $b] = array_pad(explode('|', $v, 3), 3, null);
@@ -160,23 +161,24 @@ class ReferController extends Controller
                 ->values()
                 ->all();
 
-            // Optional sanity check against offer arrays
-            $offer = ReferOffer::findOrFail($validated['offer_id']);
-            $maxIndex = min(count($offer->no_of_refer ?? []), count($offer->benefit ?? [])) - 1;
-            foreach ($parsedSelections as $sel) {
-                if ($sel['index'] === null || $sel['index'] < 0 || $sel['index'] > $maxIndex) {
-                    // Put a specific message into the error bag so SweetAlert shows it
-                    return back()->withInput()->withErrors([
-                        'selected_pairs' => 'One or more selected benefit options are invalid.',
-                    ]);
+            // Sanity check (only if there ARE selections)
+            if (!empty($parsedSelections)) {
+                $offer = ReferOffer::findOrFail($validated['offer_id']);
+                $maxIndex = min(count($offer->no_of_refer ?? []), count($offer->benefit ?? [])) - 1;
+                foreach ($parsedSelections as $sel) {
+                    if ($sel['index'] === null || $sel['index'] < 0 || $sel['index'] > $maxIndex) {
+                        return back()->withInput()->withErrors([
+                            'selected_pairs' => 'One or more selected benefit options are invalid.',
+                        ]);
+                    }
                 }
             }
 
-            // Parse datetime-local to app timezone (store as "Y-m-d H:i:s")
+            // Convert datetime-local to "Y-m-d H:i:s"
             $dt = Carbon::createFromFormat('Y-m-d\TH:i', $validated['claim_datetime'], config('app.timezone'))
-                        ->format('Y-m-d H:i:s');
+                        ->toDateTimeString();
 
-            // Upsert per (user_id, offer_id)
+            // Upsert (unique by user_id + offer_id)
             $existing = ReferOfferClaim::where('user_id', $validated['user_id'])
                 ->where('offer_id', $validated['offer_id'])
                 ->first();
@@ -188,9 +190,7 @@ class ReferController extends Controller
                     'status'         => 'claimed',
                 ]);
 
-                return redirect()
-                    ->back()
-                    ->with('success', 'Offer claim updated successfully!');
+                return redirect()->back()->with('success', 'Offer claim updated successfully!');
             }
 
             DB::transaction(function () use ($validated, $parsedSelections, $dt) {
@@ -203,9 +203,7 @@ class ReferController extends Controller
                 ]);
             });
 
-            return redirect()
-                ->back()
-                ->with('success', 'Offer claim saved successfully!');
+            return redirect()->back()->with('success', 'Offer claim saved successfully!');
 
         } catch (\Throwable $e) {
             Log::error('saveOfferClaim failed', [
@@ -213,10 +211,14 @@ class ReferController extends Controller
                 'trace'   => $e->getTraceAsString(),
             ]);
 
-            // Put a specific error message in session and also in the error bag
+            // In local/dev, show the real DB error in SweetAlert
+            $friendly = app()->environment('local')
+                ? 'Failed to save offer claim: '.$e->getMessage()
+                : 'Unexpected server error while saving the claim.';
+
             return back()
                 ->withInput()
-                ->with('error', 'Unexpected server error while saving the claim.')
+                ->with('error', $friendly)
                 ->withErrors(['error' => 'Failed to save offer claim.']);
         }
     }
