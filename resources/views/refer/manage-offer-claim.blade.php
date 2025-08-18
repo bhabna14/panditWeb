@@ -59,7 +59,6 @@
                             <thead class="table-light">
                                 <tr>
                                     <th style="width: 70px;">Sl No</th>
-                                    {{-- ✅ Added columns --}}
                                     <th>User</th>
                                     <th>Offer</th>
                                     <th>Selected Benefits</th>
@@ -137,7 +136,7 @@
                                             {{-- Approve --}}
                                             @if ($statusLower !== 'approved')
                                                 <button type="button" class="btn btn-sm btn-outline-success btn-status"
-                                                    data-action="{{ route('refer.claims.update', $c->id) }}"
+                                                    data-action="{{ route('refer.claim.update', $c->id) }}"
                                                     data-status="approved" title="Approve">
                                                     <i class="bi bi-check2-circle"></i>
                                                 </button>
@@ -146,7 +145,7 @@
                                             {{-- Reject --}}
                                             @if ($statusLower !== 'rejected')
                                                 <button type="button" class="btn btn-sm btn-outline-warning btn-status"
-                                                    data-action="{{ route('refer.claims.update', $c->id) }}"
+                                                    data-action="{{ route('refer.claim.update', $c->id) }}"
                                                     data-status="rejected" title="Reject">
                                                     <i class="bi bi-x-circle"></i>
                                                 </button>
@@ -154,7 +153,7 @@
 
                                             {{-- Delete --}}
                                             <button type="button" class="btn btn-sm btn-outline-danger btn-delete"
-                                                data-action="{{ route('refer.claims.destroy', $c->id) }}" title="Delete">
+                                                data-action="{{ route('refer.claim.destroy', $c->id) }}" title="Delete">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </td>
