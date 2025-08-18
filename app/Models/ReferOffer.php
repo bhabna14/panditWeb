@@ -11,6 +11,11 @@ class ReferOffer extends Model
 
     protected $table = "flower__refer_offer";
 
+    // ✅ tell Eloquent the real PK
+    protected $primaryKey = 'offer_id';
+    public $incrementing  = false;   // string PK, not auto-increment
+    protected $keyType    = 'string';
+
     protected $fillable = [
         'offer_id',
         'offer_name',
@@ -20,7 +25,7 @@ class ReferOffer extends Model
         'status',
     ];
 
-     protected $casts = [
+    protected $casts = [
         'no_of_refer' => 'array',
         'benefit'     => 'array',
     ];

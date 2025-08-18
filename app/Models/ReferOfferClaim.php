@@ -33,6 +33,6 @@ class ReferOfferClaim extends Model
     // Offer is standard id
     public function offer()
     {
-        return $this->belongsTo(ReferOffer::class, 'offer_id', 'id');
+        return $this->belongsTo(ReferOffer::class, 'offer_id', 'offer_id');
     }
 }
