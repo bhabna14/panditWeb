@@ -16,7 +16,8 @@ class ReferOfferClaim extends Model
         'user_id',
         'selected_pairs',
         'date_time',
-        'status',
+        'code',
+        'status'
     ];
 
     protected $casts = [

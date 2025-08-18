@@ -271,4 +271,83 @@ class ReferController extends Controller
         }
     }
 
+
+    public function startApprovalCode(ReferOfferClaim $claim)
+{
+    try {
+        if (strtolower((string)$claim->status) === 'approved') {
+            return response()->json([
+                'success' => false,
+                'message' => 'This claim is already approved.'
+            ], 400);
+        }
+
+        // Generate a 6-digit numeric code
+        $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        // Store on the claim (optionally you could store a generated_at timestamp too)
+        $claim->update(['code' => $code]);
+
+        // Return the code so the admin must re-enter it to confirm
+        return response()->json([
+            'success' => true,
+            'message' => 'Approval code generated. Please enter it to confirm.',
+            'code'    => $code,
+            'claim_id'=> $claim->id,
+        ], 200);
+
+    } catch (\Throwable $e) {
+        Log::error('startApprovalCode failed', ['id' => $claim->id, 'msg' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Server error while starting approval.',
+        ], 500);
+    }
+}
+
+public function verifyApprovalCode(Request $request, ReferOfferClaim $claim)
+{
+    $request->validate([
+        'code' => 'required|digits:6',
+    ]);
+
+    try {
+        // Must have a code generated
+        if (empty($claim->code)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No approval code generated for this claim. Please start again.',
+            ], 409);
+        }
+
+        // Compare
+        if ((string) $claim->code !== (string) $request->code) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid code.',
+            ], 422);
+        }
+
+        // Approve and clear the code
+        $claim->update([
+            'status' => 'approved',
+            'code'   => null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Claim approved successfully.',
+            'data'    => ['claim_id' => $claim->id, 'status' => $claim->status],
+        ], 200);
+
+    } catch (\Throwable $e) {
+        Log::error('verifyApprovalCode failed', ['id' => $claim->id, 'msg' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Server error while verifying the code.',
+        ], 500);
+    }
+}
+
+
 }

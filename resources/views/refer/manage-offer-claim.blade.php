@@ -133,14 +133,17 @@
                                                 <i class="bi bi-eye"></i>
                                             </button>
 
-                                            {{-- Approve --}}
+                                            {{-- Approve with code-confirm --}}
                                             @if ($statusLower !== 'approved')
-                                                <button type="button" class="btn btn-sm btn-outline-success btn-status"
-                                                    data-action="{{ route('refer.claim.update', $c->id) }}"
-                                                    data-status="approved" title="Approve">
+                                                <button type="button"
+                                                    class="btn btn-sm btn-outline-success btn-approve-code"
+                                                    title="Approve (Code)"
+                                                    data-start-url="{{ route('refer.claim.approve.start', $c->id) }}"
+                                                    data-verify-url="{{ route('refer.claim.approve.verify', $c->id) }}">
                                                     <i class="bi bi-check2-circle"></i>
                                                 </button>
                                             @endif
+
 
                                             {{-- Reject --}}
                                             @if ($statusLower !== 'rejected')
@@ -295,7 +298,7 @@
                 $('#v-user').text((data.user && data.user.name) ? data.user.name : '-');
                 $('#v-user-meta').html(
                     `ID: ${data.user_id}${data.user && data.user.mobile_number ? '<br>Ph: '+data.user.mobile_number : ''}`
-                    );
+                );
 
                 $('#v-offer').text((data.offer && data.offer.offer_name) ? data.offer.offer_name : '-');
                 $('#v-offer-meta').text('Offer ID: ' + (data.offer_id ?? '-'));
@@ -385,4 +388,86 @@
             @endif
         });
     </script>
+
+    <script>
+$(function () {
+    const csrf = $('meta[name="csrf-token"]').attr('content');
+
+    // Approve flow: generate code -> admin re-enters code -> verify -> approve
+    $(document).on('click', '.btn-approve-code', function () {
+        const $btn      = $(this);
+        const startUrl  = $btn.data('start-url');
+        const verifyUrl = $btn.data('verify-url');
+
+        $btn.prop('disabled', true);
+
+        // 1) Ask server to generate/store a code
+        $.ajax({
+            url: startUrl,
+            type: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf },
+            success: function (res) {
+                $btn.prop('disabled', false);
+
+                if (!res || res.success !== true || !res.code) {
+                    Swal.fire({ icon: 'error', title: 'Error', text: (res && res.message) || 'Failed to start approval.' });
+                    return;
+                }
+
+                const generatedCode = String(res.code);
+
+                // 2) Show code and ask admin to type it to confirm
+                Swal.fire({
+                    title: 'Confirm Approval',
+                    html:
+                        `<div class="mb-2">Enter the following 6-digit code to approve:</div>
+                         <div class="display-6 fw-bold mb-3">${generatedCode}</div>`,
+                    input: 'text',
+                    inputAttributes: { maxlength: 6, inputmode: 'numeric', autocapitalize:'off', autocorrect:'off' },
+                    inputValidator: (value) => {
+                        if (!/^\d{6}$/.test(value)) return 'Please enter the 6-digit code.';
+                        if (value !== generatedCode) return 'Code does not match. Please check and try again.';
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: 'Verify & Approve',
+                    cancelButtonText: 'Cancel',
+                    preConfirm: (value) => {
+                        // 3) Verify with server
+                        return $.ajax({
+                            url: verifyUrl,
+                            type: 'POST',
+                            headers: { 'X-CSRF-TOKEN': csrf },
+                            data: { code: value }
+                        }).then(function (r) {
+                            if (!r || r.success !== true) {
+                                throw new Error((r && r.message) || 'Verification failed.');
+                            }
+                            return r;
+                        }).catch(function (err) {
+                            Swal.showValidationMessage(err.message || 'Verification failed.');
+                        });
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Approved',
+                            text: 'Claim approved successfully.',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => window.location.reload());
+                    }
+                });
+            },
+            error: function (xhr) {
+                $btn.prop('disabled', false);
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || 'Failed to start approval.';
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+            }
+        });
+    });
+});
+</script>
+
 @endsection
