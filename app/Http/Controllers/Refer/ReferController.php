@@ -211,7 +211,7 @@ class ReferController extends Controller
     public function manageOfferClaim(Request $request)
     {
         // Optional filter: ?status=claimed|approved|rejected|all (default: claimed)
-        $status = $request->query('status', 'claimed');
+        $status = $request->query('status','!=', 'rejected');
 
         $query = ReferOfferClaim::with(['user:id,userid,name,mobile_number', 'offer:id,offer_name'])->orderByDesc('created_at');
             
