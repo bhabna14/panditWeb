@@ -140,7 +140,7 @@ class ReferController extends Controller
         // Validate first so field-level errors show properly
         $validated = $request->validate([
             'user_id'          => 'required|exists:users,userid',
-            'offer_id'         => 'required|exists:flower__refer_offer,id',
+            'offer_id'         => 'required|exists:flower__refer_offer,offer_id',
             'claim_datetime'   => 'required|date_format:Y-m-d\TH:i',
             'selected_pairs'   => 'nullable|array',
             'selected_pairs.*' => 'string',
@@ -211,10 +211,9 @@ class ReferController extends Controller
     public function manageOfferClaim(Request $request)
     {
         // Optional filter: ?status=claimed|approved|rejected|all (default: claimed)
-        $status = $request->query('status', 'claimed');
+        $status = $request->query('status','claimed');
 
         $query = ReferOfferClaim::with(['user:id,userid,name,mobile_number', 'offer:id,offer_name'])->orderByDesc('created_at');
-            
 
         if ($status !== 'all') {
             $query->where('status', $status);
@@ -250,7 +249,6 @@ class ReferController extends Controller
         }
     }
 
-    // DELETE: Remove a claim
     public function destroyClaim(ReferOfferClaim $claim)
     {
         try {
