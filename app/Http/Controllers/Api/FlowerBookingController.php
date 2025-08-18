@@ -442,27 +442,27 @@ class FlowerBookingController extends Controller
                     }
 
                     // GARLAND DETAILS
-                    $garlandItems = $requestRow->flowerRequestItems
-                        ->where('type', 'garland')
-                        ->values();
+                    // $garlandItems = $requestRow->flowerRequestItems
+                    //     ->where('type', 'garland')
+                    //     ->values();
 
-                    $requestRow->garland_items = $garlandItems->map(function ($item) {
-                        return [
-                            'id'               => $item->id,
-                            'garland_name'     => $item->garland_name,
-                            'garland_quantity' => (int) $item->garland_quantity,
-                            'garland_size'     => $item->garland_size,
-                            'flower_count'     => (int) $item->flower_count,
-                            'created_at'       => $item->created_at,
-                            'updated_at'       => $item->updated_at,
-                        ];
-                    });
+                    // $requestRow->garland_items = $garlandItems->map(function ($item) {
+                    //     return [
+                    //         'id'               => $item->id,
+                    //         'garland_name'     => $item->garland_name,
+                    //         'garland_quantity' => (int) $item->garland_quantity,
+                    //         'garland_size'     => $item->garland_size,
+                    //         'flower_count'     => (int) $item->flower_count,
+                    //         'created_at'       => $item->created_at,
+                    //         'updated_at'       => $item->updated_at,
+                    //     ];
+                    // });
 
-                    $requestRow->garland_summary = [
-                        'items'              => $garlandItems->count(),
-                        'total_quantity'     => (int) $garlandItems->sum('garland_quantity'),
-                        'total_flower_count' => (int) $garlandItems->sum('flower_count'),
-                    ];
+                    // $requestRow->garland_summary = [
+                    //     'items'              => $garlandItems->count(),
+                    //     'total_quantity'     => (int) $garlandItems->sum('garland_quantity'),
+                    //     'total_flower_count' => (int) $garlandItems->sum('flower_count'),
+                    // ];
 
                     return $requestRow;
                 });
