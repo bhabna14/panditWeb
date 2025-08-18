@@ -135,77 +135,140 @@ class ReferController extends Controller
         return view('refer.offer-claim', compact('users', 'offers'));
     }
 
-   public function saveOfferClaim(Request $request)
-{
-    // Validate first so field-level errors show properly
-    $validated = $request->validate([
-        'user_id'          => 'required|exists:users,userid',
-        'offer_id'         => 'required|exists:flower__refer_offer,id',
-        'claim_datetime'   => 'required|date_format:Y-m-d\TH:i',
-        'selected_pairs'   => 'nullable|array',
-        'selected_pairs.*' => 'string',
-    ]);
+    public function saveOfferClaim(Request $request)
+    {
+        // Validate first so field-level errors show properly
+        $validated = $request->validate([
+            'user_id'          => 'required|exists:users,userid',
+            'offer_id'         => 'required|exists:flower__refer_offer,id',
+            'claim_datetime'   => 'required|date_format:Y-m-d\TH:i',
+            'selected_pairs'   => 'nullable|array',
+            'selected_pairs.*' => 'string',
+        ]);
 
-    try {
-        // Parse & sanity-check (unchanged)
-        $parsedSelections = collect($request->input('selected_pairs', []))
-            ->map(function ($v) {
-                [$i, $r, $b] = array_pad(explode('|', $v, 3), 3, null);
-                return ['index' => is_numeric($i) ? (int)$i : null, 'refer' => $r, 'benefit' => $b];
-            })
-            ->filter(fn ($row) => $row['refer'] !== null && $row['benefit'] !== null)
-            ->values()
-            ->all();
+        try {
+            // Parse & sanity-check (unchanged)
+            $parsedSelections = collect($request->input('selected_pairs', []))
+                ->map(function ($v) {
+                    [$i, $r, $b] = array_pad(explode('|', $v, 3), 3, null);
+                    return ['index' => is_numeric($i) ? (int)$i : null, 'refer' => $r, 'benefit' => $b];
+                })
+                ->filter(fn ($row) => $row['refer'] !== null && $row['benefit'] !== null)
+                ->values()
+                ->all();
 
-        if (!empty($parsedSelections)) {
-            $offer = ReferOffer::findOrFail($validated['offer_id']);
-            $maxIndex = min(count($offer->no_of_refer ?? []), count($offer->benefit ?? [])) - 1;
-            foreach ($parsedSelections as $sel) {
-                if ($sel['index'] === null || $sel['index'] < 0 || $sel['index'] > $maxIndex) {
-                    return back()->withInput()->withErrors([
-                        'selected_pairs' => 'One or more selected benefit options are invalid.',
-                    ]);
+            if (!empty($parsedSelections)) {
+                $offer = ReferOffer::findOrFail($validated['offer_id']);
+                $maxIndex = min(count($offer->no_of_refer ?? []), count($offer->benefit ?? [])) - 1;
+                foreach ($parsedSelections as $sel) {
+                    if ($sel['index'] === null || $sel['index'] < 0 || $sel['index'] > $maxIndex) {
+                        return back()->withInput()->withErrors([
+                            'selected_pairs' => 'One or more selected benefit options are invalid.',
+                        ]);
+                    }
                 }
             }
+
+            $dt = Carbon::createFromFormat('Y-m-d\TH:i', $validated['claim_datetime'], config('app.timezone'))
+                        ->toDateTimeString();
+
+            $existing = ReferOfferClaim::where('user_id', $validated['user_id'])
+                ->where('offer_id', $validated['offer_id'])
+                ->first();
+
+            if ($existing) {
+                $existing->update([
+                    'selected_pairs' => $parsedSelections,
+                    'date_time'      => $dt,
+                    'status'         => 'claimed',
+                ]);
+                return redirect()->back()->with('success', 'Offer claim updated successfully!');
+            }
+
+            DB::transaction(function () use ($validated, $parsedSelections, $dt) {
+                ReferOfferClaim::create([
+                    'user_id'        => $validated['user_id'],
+                    'offer_id'       => $validated['offer_id'],
+                    'selected_pairs' => $parsedSelections,
+                    'date_time'      => $dt,
+                    'status'         => 'claimed',
+                ]);
+            });
+
+            return redirect()->back()->with('success', 'Offer claim saved successfully!');
+        } catch (\Throwable $e) {
+            Log::error('saveOfferClaim failed', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
+            // IMPORTANT: do NOT add a generic withErrors() here.
+            // Put a clear session error and a detailed error only in local.
+            return back()
+                ->withInput()
+                ->with('error', 'Failed to save offer claim.')
+                ->with('error_detail', app()->environment('local') ? $e->getMessage() : null);
         }
-
-        $dt = Carbon::createFromFormat('Y-m-d\TH:i', $validated['claim_datetime'], config('app.timezone'))
-                    ->toDateTimeString();
-
-        $existing = ReferOfferClaim::where('user_id', $validated['user_id'])
-            ->where('offer_id', $validated['offer_id'])
-            ->first();
-
-        if ($existing) {
-            $existing->update([
-                'selected_pairs' => $parsedSelections,
-                'date_time'      => $dt,
-                'status'         => 'claimed',
-            ]);
-            return redirect()->back()->with('success', 'Offer claim updated successfully!');
-        }
-
-        DB::transaction(function () use ($validated, $parsedSelections, $dt) {
-            ReferOfferClaim::create([
-                'user_id'        => $validated['user_id'],
-                'offer_id'       => $validated['offer_id'],
-                'selected_pairs' => $parsedSelections,
-                'date_time'      => $dt,
-                'status'         => 'claimed',
-            ]);
-        });
-
-        return redirect()->back()->with('success', 'Offer claim saved successfully!');
-    } catch (\Throwable $e) {
-        Log::error('saveOfferClaim failed', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-
-        // IMPORTANT: do NOT add a generic withErrors() here.
-        // Put a clear session error and a detailed error only in local.
-        return back()
-            ->withInput()
-            ->with('error', 'Failed to save offer claim.')
-            ->with('error_detail', app()->environment('local') ? $e->getMessage() : null);
     }
-}
+
+    public function manageOfferClaim(Request $request)
+    {
+        // Optional filter: ?status=claimed|approved|rejected|all (default: claimed)
+        $status = $request->query('status', 'claimed');
+
+        $query = ReferOfferClaim::with(['user:id,userid,name,mobile_number', 'offer:id,offer_name'])
+            ->orderByDesc('created_at');
+
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $claimedOffer = $query->get();
+
+        return view('refer.manage-offer', compact('claimedOffer', 'status'));
+    }
+public function updateClaimStatus(Request $request, ReferOfferClaim $claim)
+    {
+        $request->validate([
+            'status' => 'required|in:claimed,approved,rejected',
+        ]);
+
+        try {
+            $claim->update(['status' => $request->status]);
+
+            return redirect()
+                ->back()
+                ->with('success', 'Claim status updated to ' . ucfirst($request->status) . '.');
+
+        } catch (\Throwable $e) {
+            Log::error('updateClaimStatus failed', [
+                'id'      => $claim->id,
+                'message' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to update claim status.');
+        }
+    }
+
+    // DELETE: Remove a claim
+    public function destroyClaim(ReferOfferClaim $claim)
+    {
+        try {
+            $claim->delete();
+
+            return redirect()
+                ->back()
+                ->with('success', 'Claim deleted successfully.');
+
+        } catch (\Throwable $e) {
+            Log::error('destroyClaim failed', [
+                'id'      => $claim->id,
+                'message' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->back()
+                ->with('error', 'Failed to delete claim.');
+        }
+    }
 
 }

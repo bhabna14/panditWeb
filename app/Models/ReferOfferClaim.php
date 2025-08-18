@@ -19,9 +19,20 @@ class ReferOfferClaim extends Model
         'status',
     ];
 
-     protected $casts = [
+    protected $casts = [
         'selected_pairs' => 'array',
         'date_time'      => 'datetime',
     ];
 
+    // User is keyed by users.userid (string PK)
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'userid');
+    }
+
+    // Offer is standard id
+    public function offer()
+    {
+        return $this->belongsTo(ReferOffer::class, 'offer_id', 'id');
+    }
 }
