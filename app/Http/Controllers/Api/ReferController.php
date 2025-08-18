@@ -15,7 +15,7 @@ use App\Models\User;
 
 class ReferController extends Controller
 {
-  
+
 public function manageReferOffer(Request $request)
 {
     try {
@@ -53,7 +53,6 @@ public function manageReferOffer(Request $request)
 
 
 }
-
 
 public function saveOfferClaim(Request $request)
 {
@@ -131,6 +130,5 @@ public function saveOfferClaim(Request $request)
         ], 500);
     }
 }
-
 
 }

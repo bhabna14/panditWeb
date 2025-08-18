@@ -33,7 +33,6 @@
                     </a>
                 </li>
 
-
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('flowerDashboard') }}">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -197,7 +196,6 @@
                     </a>
                 </li>
 
-                
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('refer.offerCreate') }}">
                     <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
@@ -210,11 +208,22 @@
                 </li>
 
                 <li class="slide">
+                    <a class="side-menu__item" href="{{ route('refer.offerCreate') }}">
+                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13s-7-7.75-7-13a7 7 0 0 1 7-7zm0 9.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/>
+                        <circle cx="12" cy="9.5" r="1.5"/>
+                        <path d="M15 12h2v2h-2zM7 12h2v2H7z"/>
+                    </svg>
+                        <span class="side-menu__label">Refer Offer Claim</span>
+                    </a>
+                </li>                                                         
+
+                <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24">
                             <path
-                                d="M7 18c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H7zM6 6h12v2H6z" />
+                                d="M7 18c-1.1 0-2-.9-2-2v-6c0-1.1.   9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H7zM6 6h12v2H6z" />
                         </svg>
                         <span class="side-menu__label">Order Creation</span>
                         <i class="angle fas fa-chevron-right"></i>
