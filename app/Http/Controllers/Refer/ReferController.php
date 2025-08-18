@@ -197,6 +197,7 @@ class ReferController extends Controller
 
             return redirect()->back()->with('success', 'Offer claim saved successfully!');
         } catch (\Throwable $e) {
+
             Log::error('saveOfferClaim failed', ['message' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
 
             // IMPORTANT: do NOT add a generic withErrors() here.
