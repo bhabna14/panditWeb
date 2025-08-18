@@ -857,8 +857,6 @@ Route::controller(ReferController::class)->group(function() {
     Route::get('/manage-offer-claim', 'manageOfferClaim')->name('refer.manageOfferClaim');
     Route::put('/refer/claim/{claim}', 'updateClaimStatus')->name('refer.claim.update');
     Route::delete('/refer/claim/{claim}', 'destroyClaim')->name('refer.claim.destroy');
-    Route::post('/refer/claims/{claim}/approve/start',  'startApprovalCode')
-    ->name('refer.claim.approve.start');
-Route::post('/refer/claims/{claim}/approve/verify', 'verifyApprovalCode')
-    ->name('refer.claim.approve.verify');
+    Route::post('/refer/claims/{claim}/approve/start',  'startApprovalCode')->name('refer.claim.approve.start');
+    Route::post('/refer/claims/{claim}/approve/verify', 'verifyApprovalCode')->name('refer.claim.approve.verify');
 });
