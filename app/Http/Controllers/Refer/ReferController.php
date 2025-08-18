@@ -222,7 +222,7 @@ class ReferController extends Controller
 
         $claimedOffer = $query->get();
 
-        return view('refer.manage-offer', compact('claimedOffer', 'status'));
+        return view('refer.manage-offer-claim', compact('claimedOffer', 'status'));
     }
 public function updateClaimStatus(Request $request, ReferOfferClaim $claim)
     {
