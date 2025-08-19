@@ -60,11 +60,7 @@ class ReferController extends Controller
     {
         try {
             // 1) Auth user (robust user id resolution)
-            $authUser = Auth::guard('sanctum')->user();
-            $userId   = $authUser?->userid
-                    ?? $authUser?->id
-                    ?? $authUser?->getAttribute('userid')
-                    ?? $authUser?->getKey();
+            $userId = Auth::guard('sanctum')->user()->userid;
 
             if (!$userId) {
                 return response()->json([
