@@ -210,31 +210,77 @@ class ReferController extends Controller
         }
     }
 
+    // public function manageOfferClaim(Request $request)
+    // {
+    //     $status  = $request->query('status', 'claimed');
+    //     $allowed = ['claimed', 'approved', 'rejected'];
+    //     if (!in_array($status, $allowed, true)) {
+    //         $status = 'claimed';
+    //     }
+
+    //     $baseQuery = ReferOfferClaim::with([
+    //         'user:id,userid,name,mobile_number',
+    //         'offer:id,offer_name',
+    //     ])->orderByDesc('created_at');
+
+    //     $claimedOffer = (clone $baseQuery)
+    //         ->where('status', $status)
+    //         ->get();
+
+    //     // counts for badges
+    //     $counts = ReferOfferClaim::select('status', DB::raw('COUNT(*) as total'))
+    //         ->whereIn('status', $allowed)
+    //         ->groupBy('status')
+    //         ->pluck('total', 'status');
+
+    //     // keep your original view path
+    //     return view('refer.manage-offer-claim', compact('claimedOffer', 'status', 'counts'));
+    // }
+
     public function manageOfferClaim(Request $request)
     {
         $status  = $request->query('status', 'claimed');
+        $date    = $request->query('date', null); // e.g. "today"
         $allowed = ['claimed', 'approved', 'rejected'];
-        if (!in_array($status, $allowed, true)) {
-            $status = 'claimed';
+        if (!in_array($status, $allowed, true)) $status = 'claimed';
+
+        $tz       = config('app.timezone');
+        $todayStr = Carbon::today($tz)->toDateString();
+
+        $query = ReferOfferClaim::with(['user:id,userid,name,mobile_number', 'offer:id,offer_name'])
+            ->where('status', $status)
+            ->orderByDesc('created_at');
+
+        if ($date === 'today') {
+            // Filter by claim timestamp if present, else created_at
+            $query->whereDate(DB::raw('COALESCE(date_time, created_at)'), $todayStr);
         }
 
-        $baseQuery = ReferOfferClaim::with([
-            'user:id,userid,name,mobile_number',
-            'offer:id,offer_name',
-        ])->orderByDesc('created_at');
+        $claimedOffer = $query->get();
 
-        $claimedOffer = (clone $baseQuery)
-            ->where('status', $status)
-            ->get();
-
-        // counts for badges
         $counts = ReferOfferClaim::select('status', DB::raw('COUNT(*) as total'))
             ->whereIn('status', $allowed)
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        // keep your original view path
-        return view('refer.manage-offer-claim', compact('claimedOffer', 'status', 'counts'));
+        return view('refer.manage-offer-claim', compact('claimedOffer', 'status', 'counts', 'date'));
+    }
+
+    public function referralsIndex(Request $request)
+    {
+        $date = $request->query('date', 'all'); // 'today' or 'all'
+        $tz   = config('app.timezone');
+        $q = DB::table('flower_referrals as fr')
+            ->leftJoin('users as u', 'u.userid', '=', 'fr.user_id')
+            ->select('u.userid', 'u.name', 'u.mobile_number', 'fr.status', 'fr.created_at')
+            ->orderByDesc('fr.created_at');
+
+        if ($date === 'today') {
+            $q->whereDate('fr.created_at', Carbon::today($tz)->toDateString());
+        }
+
+        $rows = $q->paginate(50);
+        return view('admin.referrals.index', compact('rows', 'date'));
     }
 
     public function listOfferClaims(Request $request)
