@@ -212,19 +212,67 @@ class ReferController extends Controller
 
     public function manageOfferClaim(Request $request)
     {
-        // Optional filter: ?status=claimed|approved|rejected|all (default: claimed)
-        $status = $request->query('status','claimed');
 
-        $query = ReferOfferClaim::with(['user:id,userid,name,mobile_number', 'offer:id,offer_name'])->orderByDesc('created_at');
-
-        if ($status !== 'all') {
-            $query->where('status', $status);
+        $status = $request->query('status', 'claimed');
+        $allowed = ['claimed', 'approved', 'rejected'];
+        if (!\in_array($status, $allowed, true)) {
+        $status = 'claimed';
         }
 
-        $claimedOffer = $query->get();
 
-        return view('refer.manage-offer-claim', compact('claimedOffer', 'status'));
+        $baseQuery = ReferOfferClaim::with(['user:id,userid,name,mobile_number', 'offer:id,offer_name'])
+        ->orderByDesc('created_at');
+
+
+        $claimedOffer = (clone $baseQuery)
+        ->where('status', $status)
+        ->get();
+
+
+        // For badges in the tabs
+        $counts = ReferOfferClaim::select('status', DB::raw('COUNT(*) as total'))
+        ->whereIn('status', $allowed)
+        ->groupBy('status')
+        ->pluck('total', 'status');
+
+
+        return view('refer.manage-offer-claim', compact('claimedOffer', 'status', 'counts'));
     }
+
+    public function listOfferClaims(Request $request)
+        {
+        $status = $request->query('status', 'claimed');
+        $allowed = ['claimed', 'approved', 'rejected'];
+        if (!\in_array($status, $allowed, true)) {
+        return response()->json(['message' => 'Invalid status.'], 422);
+        }
+
+
+        $claimedOffer = ReferOfferClaim::with(['user:id,userid,name,mobile_number', 'offer:id,offer_name'])
+        ->where('status', $status)
+        ->orderByDesc('created_at')
+        ->get();
+
+
+        $html = view('refer.manage-offer-claim', compact('claimedOffer'))->render();
+
+
+        $counts = ReferOfferClaim::select('status', DB::raw('COUNT(*) as total'))
+        ->whereIn('status', $allowed)
+        ->groupBy('status')
+        ->pluck('total', 'status');
+
+
+        return response()->json([
+        'status' => $status,
+        'html' => $html,
+        'counts' => [
+        'claimed' => (int) ($counts['claimed'] ?? 0),
+        'approved' => (int) ($counts['approved'] ?? 0),
+        'rejected' => (int) ($counts['rejected'] ?? 0),
+        ],
+        ]);
+}
 
     public function updateClaimStatus(Request $request, ReferOfferClaim $claim)
     {
@@ -348,5 +396,7 @@ class ReferController extends Controller
             ], 500);
         }
     }
+
+    
 
 }
