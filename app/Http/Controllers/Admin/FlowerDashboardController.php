@@ -191,7 +191,7 @@ public function flowerDashboard()
 
             // Today Claimed = claims made today (by their claim timestamp if present, else created_at)
             $todayClaimed = ReferOfferClaim::where('status', 'claimed')
-                ->whereDate(DB::raw('COALESCE(date_time, created_at)'), $todayStr)
+                ->whereDate('date_time', $todayStr)
                 ->count();
 
             // Today Approved = claims approved today (status=approved and updated today)
@@ -200,10 +200,10 @@ public function flowerDashboard()
                 ->count();
 
             // Today Refer = referral rows created today
-            $todayRefer = ReferOffer::whereDate('created_at', $todayStr)->count();
+            $todayRefer = FLowerReferal::whereDate('created_at', $todayStr)->count();
 
             // Total Refer = all referral rows
-            $totalRefer = ReferOffer::count();
+            $totalRefer = FLowerReferal::count();
 
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',
