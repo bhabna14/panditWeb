@@ -56,34 +56,30 @@ class ReferController extends Controller
 
     }
 
-    public function saveOfferClaim(Request $request)
-    {
-        try {
-            // 1) Auth user (robust user id resolution)
-            $userId = Auth::guard('sanctum')->user()->userid;
+public function saveOfferClaim(Request $request)
+{
+    try {
+        // 1) Auth user — resolve robustly
+        $authUser = Auth::guard('sanctum')->user();
+        if (!$authUser) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized.'], 401);
+        }
+        $userId = (string) ($authUser->userid ?? $authUser->id ?? $authUser->getKey());
+        if ($userId === '') {
+            return response()->json(['success' => false, 'message' => 'Unauthorized: User not found.'], 401);
+        }
 
-            if (!$userId) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Unauthorized: User not found.',
-                ], 401);
-            }
+        // 2) offer_id (string ids allowed, e.g. "OFFER5598")
+        $offerId = trim((string) $request->input('offer_id', ''));
+        if ($offerId === '') {
+            return response()->json(['success' => false, 'message' => 'offer_id is required.'], 422);
+        }
 
-            // 2) Required: offer_id (allow string ids like "OFFER5598")
-            $offerId = $request->input('offer_id');
-            if (!$offerId || !is_string($offerId) || trim($offerId) === '') {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'offer_id is required.',
-                ], 422);
-            }
-            $offerId = trim($offerId);
-
-            // 3) Resolve a SINGLE pair (support multiple input styles)
+        // 3) Extract exactly one pair (refer/benefit) from any of the accepted shapes
+        [$refer, $benefit] = (function () use ($request) {
             $refer   = $request->input('refer');
             $benefit = $request->input('benefit');
 
-            // Helper to parse "x|y" string into [refer, benefit]
             $parsePipe = function (?string $s): array {
                 if ($s === null) return [null, null];
                 $parts = explode('|', $s, 2);
@@ -93,7 +89,6 @@ class ReferController extends Controller
             };
 
             if ((!$refer || !$benefit) && $request->filled('selected_pair')) {
-                // could be "3|₹100 off" or {"refer":"3","benefit":"₹100 off"}
                 $sp = $request->input('selected_pair');
                 if (is_string($sp)) {
                     [$r, $b] = $parsePipe($sp);
@@ -106,16 +101,13 @@ class ReferController extends Controller
             }
 
             if ((!$refer || !$benefit) && $request->has('selected_pairs')) {
-                
                 $sps = $request->input('selected_pairs');
-
                 if (is_string($sps)) {
                     [$r, $b] = $parsePipe($sps);
                     $refer   = $refer   ?: $r;
                     $benefit = $benefit ?: $b;
                 } elseif (is_array($sps)) {
                     if (isset($sps['refer']) || isset($sps['benefit'])) {
-                        // associative object
                         $refer   = $refer   ?: ($sps['refer']   ?? null);
                         $benefit = $benefit ?: ($sps['benefit'] ?? null);
                     } elseif (!empty($sps)) {
@@ -132,57 +124,59 @@ class ReferController extends Controller
                 }
             }
 
-            if (!$refer || !$benefit) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Please provide a single pair via (refer & benefit) or selected_pair / selected_pairs.',
-                ], 422);
-            }
+            return [$refer ? (string)$refer : null, $benefit ? (string)$benefit : null];
+        })();
 
-            // 4) Always use current date-time in app timezone
-            $dt = Carbon::now(config('app.timezone'))->toDateTimeString();
-
-            // 5) Save exactly ONE pair (no index)
-            $pairPayload = [[
-                'refer'   => (string) $refer,
-                'benefit' => (string) $benefit,
-            ]];
-
-            // 6) Upsert by (user_id, offer_id)
-            $claim = DB::transaction(function () use ($userId, $offerId, $pairPayload, $dt) {
-                /** @var \App\Models\ReferOfferClaim $row */
-                $row = ReferOfferClaim::updateOrCreate(
-                    ['user_id' => $userId, 'offer_id' => $offerId],
-                    [
-                        'selected_pairs' => $pairPayload, // JSON (array with a single {refer, benefit})
-                        'date_time'      => $dt,
-                        'status'         => 'claimed',
-                    ]
-                );
-                return $row->fresh(); // ensure casts are applied in the response
-            });
-
-            return response()->json([
-                'success' => true,
-                'message' => $claim->wasRecentlyCreated
-                    ? 'Offer claim created successfully.'
-                    : 'Offer claim updated successfully.',
-                'data'    => ['claim' => $claim],
-            ], 200);
-
-        } catch (\Throwable $e) {
-            Log::error('API saveOfferClaim failed', [
-                'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
-            ]);
-
+        if (!$refer || !$benefit) {
             return response()->json([
                 'success' => false,
-                'message' => app()->environment('local')
-                    ? 'Failed to save offer claim: ' . $e->getMessage()
-                    : 'Failed to save offer claim.',
-            ], 500);
+                'message' => 'Please provide a single pair via (refer & benefit) or selected_pair / selected_pairs.',
+            ], 422);
         }
+
+        // 4) Current datetime (Carbon) – best with your casts
+        $dt = Carbon::now(config('app.timezone'));
+
+        // 5) Single pair payload
+        $pairPayload = [[ 'refer' => (string)$refer, 'benefit' => (string)$benefit ]];
+
+        // 6) Upsert and FORCE the values; use saveOrFail to catch DB issues
+        $claim = DB::transaction(function () use ($userId, $offerId, $pairPayload, $dt) {
+            /** @var \App\Models\ReferOfferClaim $row */
+            $row = ReferOfferClaim::firstOrNew(['user_id' => $userId, 'offer_id' => $offerId]);
+
+            // force values (so user_id / offer_id cannot end up null)
+            $row->user_id        = $userId;
+            $row->offer_id       = $offerId;
+            $row->selected_pairs = $pairPayload;
+            $row->date_time      = $dt;
+            $row->status         = 'claimed';
+
+            $row->saveOrFail();   // <-- if DB rejects, we see the exception
+            return $row->fresh();
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => $claim->wasRecentlyCreated
+                ? 'Offer claim created successfully.'
+                : 'Offer claim updated successfully.',
+            'data' => ['claim' => $claim],
+        ], 200);
+
+    } catch (\Throwable $e) {
+        Log::error('API saveOfferClaim failed', [
+            'message' => $e->getMessage(),
+            'trace'   => $e->getTraceAsString(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => app()->environment('local')
+                ? 'Failed to save offer claim: ' . $e->getMessage()
+                : 'Failed to save offer claim.',
+        ], 500);
     }
+}
 
 }
