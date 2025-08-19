@@ -9,6 +9,7 @@ use App\Models\FlowerPickupDetails;
 use App\Models\RiderDetails;
 use App\Models\FlowerRequest;
 use App\Models\ReferOfferClaim;
+use App\Models\FLowerReferal;
 use App\Models\User;
 use App\Models\ReferOffer;
 use App\Models\MarketingVisitPlace;
