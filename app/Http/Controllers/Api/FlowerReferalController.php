@@ -248,6 +248,7 @@ public function stats(Request $request)
 
         $offerDetails = [
             'id'          => $offerRecord->id ?? $offerRecord->offer_id,
+            'offer_id'  => $offerRecord->offer_id,
             'offer_name'  => $offerRecord->offer_name,
             'description' => $offerRecord->description,
             'referData'   => $referData,
