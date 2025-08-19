@@ -19,7 +19,7 @@ use Carbon\Carbon;
 
 class FlowerDashboardController extends Controller
 {
-    public function flowerDashboard()
+public function flowerDashboard()
 {
     $activeSubscriptions = Subscription::where('status', 'active')->count();
 
@@ -86,14 +86,6 @@ class FlowerDashboardController extends Controller
             ->count();
 
         $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
-
-    //    $newUserSubscription = DB::table('subscriptions')
-    //         ->select('user_id')
-    //         ->whereDate('created_at', Carbon::today())
-    //         ->where('status', 'pending')
-    //         ->groupBy('subscription_id', 'order_id', 'user_id')
-    //         ->distinct('user_id')
-    //         ->count('user_id');
 
         $newUserSubscription = Subscription::where('status', 'pending')
             ->whereDate('created_at',  Carbon::today())
@@ -217,7 +209,7 @@ class FlowerDashboardController extends Controller
             ));
 }
 
-  public function showTodayDeliveries()
+public function showTodayDeliveries()
 {
     $today = Carbon::today();
 

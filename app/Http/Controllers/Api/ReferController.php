@@ -9,6 +9,9 @@ use App\Models\ReferOfferClaim;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use App\Models\User;
 
@@ -56,55 +59,114 @@ class ReferController extends Controller
     public function saveOfferClaim(Request $request)
     {
         try {
-            // Read raw inputs (no Validator)
-            $userId        = $request->input('user_id');
-            $offerId       = $request->input('offer_id');
-            $claimDatetime = $request->input('claim_datetime'); // expected "Y-m-d\TH:i"
-            $pairsRaw      = $request->input('selected_pairs', []); // ["idx|refer|benefit", ...]
+            // 1) Auth user (robust user id resolution)
+            $authUser = Auth::guard('sanctum')->user();
+            $userId   = $authUser?->userid
+                    ?? $authUser?->id
+                    ?? $authUser?->getAttribute('userid')
+                    ?? $authUser?->getKey();
 
-            // Parse datetime; fallback to now if parsing fails or missing
-            try {
-                $dt = $claimDatetime
-                    ? Carbon::createFromFormat('Y-m-d\TH:i', $claimDatetime, config('app.timezone'))->toDateTimeString()
-                    : Carbon::now(config('app.timezone'))->toDateTimeString();
-            } catch (\Throwable $e) {
-                $dt = Carbon::now(config('app.timezone'))->toDateTimeString();
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: User not found.',
+                ], 401);
             }
 
-            // Parse pairs -> structured array (skip obviously broken rows)
-            $parsedSelections = collect(is_array($pairsRaw) ? $pairsRaw : [])
-                ->map(function ($v) {
-                    [$i, $r, $b] = array_pad(explode('|', (string) $v, 3), 3, null);
-                    return [
-                        'index'   => is_numeric($i) ? (int) $i : null,
-                        'refer'   => $r,
-                        'benefit' => $b,
-                    ];
-                })
-                ->filter(fn ($row) => $row['refer'] !== null && $row['benefit'] !== null)
-                ->values();
+            // 2) Required: offer_id (allow string ids like "OFFER5598")
+            $offerId = $request->input('offer_id');
+            if (!$offerId || !is_string($offerId) || trim($offerId) === '') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'offer_id is required.',
+                ], 422);
+            }
+            $offerId = trim($offerId);
 
-            // Soft sanity check against offer arrays (NON-blocking; we just drop invalid indices)
-            $offer = ReferOffer::find($offerId);
-            if ($offer && is_array($offer->no_of_refer) && is_array($offer->benefit)) {
-                $maxIndex = min(count($offer->no_of_refer), count($offer->benefit)) - 1;
-                if ($maxIndex >= 0) {
-                    $parsedSelections = $parsedSelections->filter(function ($row) use ($maxIndex) {
-                        return $row['index'] !== null && $row['index'] >= 0 && $row['index'] <= $maxIndex;
-                    })->values();
+            // 3) Resolve a SINGLE pair (support multiple input styles)
+            $refer   = $request->input('refer');
+            $benefit = $request->input('benefit');
+
+            // Helper to parse "x|y" string into [refer, benefit]
+            $parsePipe = function (?string $s): array {
+                if ($s === null) return [null, null];
+                $parts = explode('|', $s, 2);
+                $r = isset($parts[0]) ? trim((string)$parts[0]) : null;
+                $b = isset($parts[1]) ? trim((string)$parts[1]) : null;
+                return [$r ?: null, $b ?: null];
+            };
+
+            if ((!$refer || !$benefit) && $request->filled('selected_pair')) {
+                // could be "3|₹100 off" or {"refer":"3","benefit":"₹100 off"}
+                $sp = $request->input('selected_pair');
+                if (is_string($sp)) {
+                    [$r, $b] = $parsePipe($sp);
+                    $refer   = $refer   ?: $r;
+                    $benefit = $benefit ?: $b;
+                } elseif (is_array($sp)) {
+                    $refer   = $refer   ?: ($sp['refer']   ?? null);
+                    $benefit = $benefit ?: ($sp['benefit'] ?? null);
                 }
             }
 
-            // Upsert by (user_id, offer_id)
-            $claim = DB::transaction(function () use ($userId, $offerId, $parsedSelections, $dt) {
-                return ReferOfferClaim::updateOrCreate(
+            if ((!$refer || !$benefit) && $request->has('selected_pairs')) {
+                // Backward compat: selected_pairs can be:
+                //  - ["3|₹100 off"]
+                //  - [{"refer":"3","benefit":"₹100 off"}]
+                //  - "3|₹100 off" (string)
+                $sps = $request->input('selected_pairs');
+
+                if (is_string($sps)) {
+                    [$r, $b] = $parsePipe($sps);
+                    $refer   = $refer   ?: $r;
+                    $benefit = $benefit ?: $b;
+                } elseif (is_array($sps)) {
+                    if (isset($sps['refer']) || isset($sps['benefit'])) {
+                        // associative object
+                        $refer   = $refer   ?: ($sps['refer']   ?? null);
+                        $benefit = $benefit ?: ($sps['benefit'] ?? null);
+                    } elseif (!empty($sps)) {
+                        $first = $sps[0];
+                        if (is_string($first)) {
+                            [$r, $b] = $parsePipe($first);
+                            $refer   = $refer   ?: $r;
+                            $benefit = $benefit ?: $b;
+                        } elseif (is_array($first)) {
+                            $refer   = $refer   ?: ($first['refer']   ?? null);
+                            $benefit = $benefit ?: ($first['benefit'] ?? null);
+                        }
+                    }
+                }
+            }
+
+            if (!$refer || !$benefit) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Please provide a single pair via (refer & benefit) or selected_pair / selected_pairs.',
+                ], 422);
+            }
+
+            // 4) Always use current date-time in app timezone
+            $dt = Carbon::now(config('app.timezone'))->toDateTimeString();
+
+            // 5) Save exactly ONE pair (no index)
+            $pairPayload = [[
+                'refer'   => (string) $refer,
+                'benefit' => (string) $benefit,
+            ]];
+
+            // 6) Upsert by (user_id, offer_id)
+            $claim = DB::transaction(function () use ($userId, $offerId, $pairPayload, $dt) {
+                /** @var \App\Models\ReferOfferClaim $row */
+                $row = ReferOfferClaim::updateOrCreate(
                     ['user_id' => $userId, 'offer_id' => $offerId],
                     [
-                        'selected_pairs' => $parsedSelections->all(), // cast -> JSON
+                        'selected_pairs' => $pairPayload, // JSON (array with a single {refer, benefit})
                         'date_time'      => $dt,
                         'status'         => 'claimed',
                     ]
                 );
+                return $row->fresh(); // ensure casts are applied in the response
             });
 
             return response()->json([

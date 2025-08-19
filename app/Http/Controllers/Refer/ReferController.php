@@ -209,7 +209,8 @@ class ReferController extends Controller
                 ->with('error_detail', app()->environment('local') ? $e->getMessage() : null);
         }
     }
- public function manageOfferClaim(Request $request)
+
+    public function manageOfferClaim(Request $request)
     {
         $status  = $request->query('status', 'claimed');
         $allowed = ['claimed', 'approved', 'rejected'];
@@ -270,6 +271,7 @@ class ReferController extends Controller
             ],
         ]);
     }
+
     public function updateClaimStatus(Request $request, ReferOfferClaim $claim)
     {
         $request->validate([
@@ -392,7 +394,5 @@ class ReferController extends Controller
             ], 500);
         }
     }
-
-    
 
 }
