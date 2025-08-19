@@ -183,6 +183,25 @@ public function flowerDashboard()
 
             $visitPlaceCountToday = MarketingVisitPlace::whereDate('created_at', Carbon::today())->count();
 
+            $tz       = config('app.timezone');
+            $todayStr = Carbon::today($tz)->toDateString();
+
+            // Today Claimed = claims made today (by their claim timestamp if present, else created_at)
+            $todayClaimed = ReferOfferClaim::where('status', 'claimed')
+                ->whereDate(DB::raw('COALESCE(date_time, created_at)'), $todayStr)
+                ->count();
+
+            // Today Approved = claims approved today (status=approved and updated today)
+            $todayApproved = ReferOfferClaim::where('status', 'approved')
+                ->whereDate('updated_at', $todayStr)
+                ->count();
+
+            // Today Refer = referral rows created today
+            $todayRefer = ReferOffer::whereDate('created_at', $todayStr)->count();
+
+            // Total Refer = all referral rows
+            $totalRefer = ReferOffer::count();
+
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',
                 'totalDeliveriesTodayCount',
@@ -205,7 +224,11 @@ public function flowerDashboard()
                 'nextDayPaused',
                 'nextDayResumed',
                 'upcomingCustomizeOrders',
-                'visitPlaceCountToday'
+                'visitPlaceCountToday',
+                'todayClaimed',
+                'todayApproved',
+                'todayRefer',
+                'totalRefer'
             ));
 }
 

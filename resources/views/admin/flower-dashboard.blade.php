@@ -3,8 +3,8 @@
 @section('styles')
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
-<!-- Feather Icons -->
-<link href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css" rel="stylesheet">
+    <!-- Feather Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css" rel="stylesheet">
 
     <!-- INTERNAL Data table css -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
@@ -14,7 +14,6 @@
 @endsection
 
 @section('content')
-
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
@@ -97,7 +96,8 @@
                     <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
                         <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank"
                             class="text-decoration-none">
-                            <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);border: 1px solid rgb(186, 185, 185);">
+                            <div class="sales-card"
+                                style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);border: 1px solid rgb(186, 185, 185);">
                                 <div class="row">
                                     <div class="col-8">
                                         <div class="ps-4 pt-4 pe-3 pb-4">
@@ -141,7 +141,8 @@
                 <!-- Total Riders -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-primary text-white" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card bg-gradient-primary text-white"
+                            style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -162,7 +163,8 @@
                 <!-- Total Delivery Today -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-info text-white" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card bg-gradient-info text-white"
+                            style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -182,9 +184,9 @@
 
                 <!-- Total Delivery in Month -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
-                        target="_blank">
-                        <div class="card sales-card bg-gradient-success text-white" style="border: 1px solid rgb(186, 185, 185);">
+                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}" target="_blank">
+                        <div class="card sales-card bg-gradient-success text-white"
+                            style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -206,7 +208,8 @@
                 <!-- Total Delivery -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-secondary text-white" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card bg-gradient-secondary text-white"
+                            style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -227,7 +230,7 @@
         </div>
     </div>
 
-  <div class="row card sales-card mt-2">
+    <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
             <div class="row">
@@ -504,12 +507,12 @@
         </div>
     </div>
 
-     <div class="row card sales-card mt-2">
+    <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Marketing</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.visitPlace' , ['filter' => 'todayVisitPlace']) }}" target="_blank">
+                    <a href="{{ route('admin.visitPlace', ['filter' => 'todayVisitPlace']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
@@ -530,28 +533,32 @@
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
             <div class="row">
+
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('' , ['filter' => '']) }}" target="_blank">
+                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
+                        target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Today Claimed</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ }}</h4>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayClaimed ?? 0 }}</h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </a>
                 </div>
+
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('' , ['filter' => '']) }}" target="_blank">
+                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
+                        target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Today Approved</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ }}</h4>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayApproved ?? 0 }}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -560,13 +567,13 @@
                 </div>
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('' , ['filter' => '']) }}" target="_blank">
+                    <a href="{{ route('admin.referrals.index', ['date' => 'today']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Today Refer</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ }}</h4>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayRefer ?? 0 }}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -575,13 +582,13 @@
                 </div>
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('' , ['filter' => '']) }}" target="_blank">
+                    <a href="{{ route('admin.referrals.index', ['date' => 'all']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Total Refer</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ }}</h4>
+                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $totalRefer ?? 0 }}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -593,6 +600,7 @@
         </div>
     </div>
 @endsection
+
 
 @section('scripts')
     <!-- INTERNAL Select2 js -->
@@ -656,8 +664,7 @@
         setInterval(updateDateTime, 1000);
     </script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
-<script>
-    feather.replace();
-</script>
-
+    <script>
+        feather.replace();
+    </script>
 @endsection
