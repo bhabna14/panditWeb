@@ -280,7 +280,7 @@ class ReferController extends Controller
         }
 
         $rows = $q->paginate(50);
-        return view('admin.referrals.index', compact('rows', 'date'));
+        return view('refer.manage-refer', compact('rows', 'date'));
     }
 
     public function listOfferClaims(Request $request)
