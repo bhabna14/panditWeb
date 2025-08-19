@@ -80,7 +80,7 @@
                             </thead>
                             <tbody id="claims-tbody">
                                 {{-- initial rows --}}
-                                @include('admin.refer.partials.offer-claim-rows', ['claimedOffer' => $claimedOffer])
+                                @include('refer.partials.offer-claim-rows', ['claimedOffer' => $claimedOffer])
                             </tbody>
                         </table>
 
