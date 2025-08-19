@@ -7,6 +7,7 @@ use App\Models\FLowerReferal;
 use App\Models\User;
 use App\Models\Subscription;
 use App\Models\ReferOffer;
+use App\Models\ReferOfferClaim;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
@@ -110,129 +111,185 @@ class FlowerReferalController extends Controller
         }
     }
 
-    public function stats(Request $request)
-    {
-        $authUser = Auth::user();
-        if (!$authUser) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
 
-        $userId = $authUser->userid; // e.g. "USER65632"
-        $onlyActiveReferralRows = $request->boolean('only_active_referral_rows');
+public function stats(Request $request)
+{
+    $authUser = Auth::user();
+    if (!$authUser) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Unauthorized',
+        ], 401);
+    }
 
-        // ---------- AS REFERRER ----------
-        // COMPLETED = referred users who have an active subscription
-        $completedList = DB::table('flower_referrals as fr')
-            ->join('users as u', 'u.userid', '=', 'fr.user_id')
-            ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
-            ->where('fr.referrer_user_id', $userId)
-            ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
-            ->where(function ($q) {
-                $q->where('s.status', 'active');
-            })
-            ->select('u.userid as id', 'u.name', 'u.mobile_number')
-            ->distinct()
-            ->get();
+    $userId = $authUser->userid; // e.g. "USER65632"
+    $onlyActiveReferralRows = $request->boolean('only_active_referral_rows');
 
-        // USED (PENDING) = referred users WITHOUT an active subscription
-        $usedPendingList = DB::table('flower_referrals as fr')
-            ->join('users as u', 'u.userid', '=', 'fr.user_id')
-            ->where('fr.referrer_user_id', $userId)
-            ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
-            ->whereNotExists(function ($q) {
-                $q->select(DB::raw(1))
-                ->from('subscriptions as s')
-                ->whereColumn('s.user_id', 'fr.user_id')
-                ->where(function ($s) {
-                    $s->where('s.status', 'active');
-                });
-            })
-            ->select('u.userid as id', 'u.name', 'u.mobile_number')
-            ->distinct()
-            ->get();
+    // ---------- AS REFERRER ----------
+    // COMPLETED = referred users who have an active subscription
+    $completedList = DB::table('flower_referrals as fr')
+        ->join('users as u', 'u.userid', '=', 'fr.user_id')
+        ->join('subscriptions as s', 's.user_id', '=', 'u.userid')
+        ->where('fr.referrer_user_id', $userId)
+        ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
+        ->where(function ($q) {
+            $q->where('s.status', 'active');
+        })
+        ->select('u.userid as id', 'u.name', 'u.mobile_number')
+        ->distinct()
+        ->get();
 
-        // COMPLETED referrers = people who referred me AND have an active subscription
-        $myReferrersCompleted = DB::table('flower_referrals as fr')
-            ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
-            ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
-            ->where('fr.user_id', $userId)
-            ->where(function ($q) {
-                $q->where('s.status', 'active')
-                ->orWhere('s.is_active', 1);
-            })
-            ->select('r.userid as id', 'r.name', 'r.mobile_number', 'fr.created_at')
-            ->distinct()
-            ->get();
+    // USED (PENDING) = referred users WITHOUT an active subscription
+    $usedPendingList = DB::table('flower_referrals as fr')
+        ->join('users as u', 'u.userid', '=', 'fr.user_id')
+        ->where('fr.referrer_user_id', $userId)
+        ->when($onlyActiveReferralRows, fn ($q) => $q->where('fr.status', 'active'))
+        ->whereNotExists(function ($q) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s')
+              ->whereColumn('s.user_id', 'fr.user_id')
+              ->where(function ($s) {
+                  $s->where('s.status', 'active');
+              });
+        })
+        ->select('u.userid as id', 'u.name', 'u.mobile_number')
+        ->distinct()
+        ->get();
 
-        // PENDING referrers = people who referred me WITHOUT an active subscription
-        $myReferrersPending = DB::table('flower_referrals as fr')
-            ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
-            ->where('fr.user_id', $userId)
-            ->whereNotExists(function ($q) {
-                $q->select(DB::raw(1))
-                ->from('subscriptions as s')
-                ->whereColumn('s.user_id', 'fr.referrer_user_id')
-                ->where(function ($s) {
-                    $s->where('s.status', 'active')
+    // COMPLETED referrers = people who referred me AND have an active subscription
+    $myReferrersCompleted = DB::table('flower_referrals as fr')
+        ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
+        ->join('subscriptions as s', 's.user_id', '=', 'r.userid')
+        ->where('fr.user_id', $userId)
+        ->where(function ($q) {
+            $q->where('s.status', 'active')
+              ->orWhere('s.is_active', 1);
+        })
+        ->select('r.userid as id', 'r.name', 'r.mobile_number', 'fr.created_at')
+        ->distinct()
+        ->get();
+
+    // PENDING referrers = people who referred me WITHOUT an active subscription
+    $myReferrersPending = DB::table('flower_referrals as fr')
+        ->join('users as r', 'r.userid', '=', 'fr.referrer_user_id')
+        ->where('fr.user_id', $userId)
+        ->whereNotExists(function ($q) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s')
+              ->whereColumn('s.user_id', 'fr.referrer_user_id')
+              ->where(function ($s) {
+                  $s->where('s.status', 'active')
                     ->orWhere('s.is_active', 1);
-                });
-            })
-            ->select('r.userid as id', 'r.name', 'r.mobile_number', 'fr.status', 'fr.created_at')
-            ->orderBy('fr.created_at', 'desc')
-            ->distinct()
-            ->get();
+              });
+        })
+        ->select('r.userid as id', 'r.name', 'r.mobile_number', 'fr.status', 'fr.created_at')
+        ->orderBy('fr.created_at', 'desc')
+        ->distinct()
+        ->get();
 
-        // ---------- FINAL DE-DUP SAFETY NET ----------
-        $completedIds     = $completedList->pluck('id')->all();
-        $usedPendingList  = $usedPendingList->reject(fn ($row) => in_array($row->id, $completedIds))->values();
+    // ---------- FINAL DE-DUP SAFETY NET ----------
+    $completedIds    = $completedList->pluck('id')->all();
+    $usedPendingList = $usedPendingList->reject(fn ($row) => in_array($row->id, $completedIds))->values();
 
-        $myRefCompletedIds  = $myReferrersCompleted->pluck('id')->all();
-        $myReferrersPending = $myReferrersPending->reject(fn ($row) => in_array($row->id, $myRefCompletedIds))->values();
+    $myRefCompletedIds  = $myReferrersCompleted->pluck('id')->all();
+    $myReferrersPending = $myReferrersPending->reject(fn ($row) => in_array($row->id, $myRefCompletedIds))->values();
 
-        // ---------- OFFER DETAILS (single object) ----------
-        // Optional filter: ?status=active|inactive|all  (default: active)
-        $status = $request->query('status', 'active');
+    // ---------- OFFER DETAILS (single object) ----------
+    // Optional filter: ?status=active|inactive|all  (default: active)
+    $statusFilter = $request->query('status', 'active');
 
-        $query = ReferOffer::query();
-        if ($status !== 'all') {
-            $query->where('status', $status);
+    $offerQuery = ReferOffer::query();
+    if ($statusFilter !== 'all') {
+        $offerQuery->where('status', $statusFilter);
+    }
+
+    // Latest offer; select both numeric id and string offer_id for flexibility
+    $offerRecord = $offerQuery->orderByDesc('created_at')
+        ->first([
+            'id', 'offer_id', 'offer_name', 'description',
+            'no_of_refer', 'benefit', 'status', 'created_at', 'updated_at'
+        ]);
+
+    $offerDetails = null;
+
+    if ($offerRecord) {
+        // Normalize arrays
+        $noArr  = is_array($offerRecord->no_of_refer) ? array_values($offerRecord->no_of_refer) : [];
+        $benArr = is_array($offerRecord->benefit)     ? array_values($offerRecord->benefit)     : [];
+        $n = min(count($noArr), count($benArr));
+
+        // Determine which offer_id to use for claims lookup (claims table uses string offer_id)
+        $offerKey = $offerRecord->offer_id ?? (string) $offerRecord->id;
+
+        // Load THIS USER's claims for THIS offer (latest first)
+        $claims = ReferOfferClaim::where('user_id', $userId)
+            ->where('offer_id', $offerKey)
+            ->orderByDesc('created_at')
+            ->get(['selected_pairs', 'status', 'created_at']);
+
+        // Build latest status per pair (keyed by "refer|benefit")
+        $latestStatusByPair = [];
+        foreach ($claims as $c) {
+            $pairs = is_array($c->selected_pairs)
+                ? $c->selected_pairs
+                : (json_decode($c->selected_pairs ?? '[]', true) ?: []);
+
+            foreach ($pairs as $p) {
+                $ref  = isset($p['refer'])   ? (string) $p['refer']   : null;
+                $bene = isset($p['benefit']) ? (string) $p['benefit'] : null;
+                if ($ref === null || $bene === null) continue;
+
+                $key = $ref . '|' . $bene;
+                // since claims are ordered desc by created_at, first status wins
+                if (!array_key_exists($key, $latestStatusByPair)) {
+                    $latestStatusByPair[$key] = (string) $c->status;
+                }
+            }
         }
 
-        // Get the latest offer. Select both id and offer_id to be safe across schemas.
-        $offerRecord = $query->orderByDesc('created_at')
-            ->first(['id', 'offer_id', 'offer_name', 'description', 'no_of_refer', 'benefit', 'status', 'created_at', 'updated_at']);
+        // Stitch referData in requested shape
+        $referData = [];
+        for ($i = 0; $i < $n; $i++) {
+            $refVal = (string) $noArr[$i];
+            $benVal = (string) $benArr[$i];
+            $key    = $refVal . '|' . $benVal;
 
-        // Shape payload as a single object with key "id" (fallback to offer_id if no numeric id)
-        $offerDetails = null;
-        if ($offerRecord) {
-            $offerDetails = [
-                'id'          => $offerRecord->id ?? $offerRecord->offer_id, // always expose as "id"
-                'offer_name'  => $offerRecord->offer_name,
-                'description' => $offerRecord->description,
-                'no_of_refer' => is_array($offerRecord->no_of_refer) ? array_values($offerRecord->no_of_refer) : [],
-                'benefit'     => is_array($offerRecord->benefit) ? array_values($offerRecord->benefit) : [],
-                'status'      => $offerRecord->status,
-                'created_at'  => $offerRecord->created_at, // will serialize to ISO8601
-                'updated_at'  => $offerRecord->updated_at,
+            // If user has a claim for this pair -> use that status; else "Active"
+            $statusForPair = $latestStatusByPair[$key] ?? 'Active';
+
+            $referData[] = [
+                'no_of_refer' => is_numeric($refVal) ? (int) $refVal : $refVal,
+                'benefit'     => $benVal,
+                'status'      => $statusForPair,
             ];
         }
 
-        return response()->json([
-            'success'     => true,
-            'refer_data'  => [
-                'referred_by' => [
-                    'referrers_count'           => $myReferrersPending->count(),
-                    'referrers_list'            => $myReferrersPending,
-                    'referrers_completed_count' => $myReferrersCompleted->count(),
-                    'referrers_completed_list'  => $myReferrersCompleted,
-                ],
-            ],
-            // ✅ Single object, not an array
-            'offer_details' => $offerDetails,
-        ], 200);
+        // Final payload
+        $offerDetails = [
+            'id'          => $offerRecord->id ?? $offerRecord->offer_id, // expose numeric id if present
+            'offer_name'  => $offerRecord->offer_name,
+            'description' => $offerRecord->description,
+            'referData'   => $referData, // <- exactly as requested
+            'status'      => $offerRecord->status,
+            'created_at'  => $offerRecord->created_at,
+            'updated_at'  => $offerRecord->updated_at,
+        ];
     }
+
+    return response()->json([
+        'success' => true,
+        'refer_data' => [
+            'referred_by' => [
+                'referrers_count'           => $myReferrersPending->count(),
+                'referrers_list'            => $myReferrersPending,
+                'referrers_completed_count' => $myReferrersCompleted->count(),
+                'referrers_completed_list'  => $myReferrersCompleted,
+            ],
+        ],
+        // ✅ Single object in your new format (with referData and per-pair status for this user)
+        'offer_details' => $offerDetails,
+    ], 200);
+}
+
 
 }
