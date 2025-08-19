@@ -106,10 +106,7 @@ class ReferController extends Controller
             }
 
             if ((!$refer || !$benefit) && $request->has('selected_pairs')) {
-                // Backward compat: selected_pairs can be:
-                //  - ["3|₹100 off"]
-                //  - [{"refer":"3","benefit":"₹100 off"}]
-                //  - "3|₹100 off" (string)
+                
                 $sps = $request->input('selected_pairs');
 
                 if (is_string($sps)) {
