@@ -1,20 +1,21 @@
 @php $rowIdx = 0; @endphp
 @forelse ($claimedOffer as $idx => $c)
     @php
-        // selected_pairs might be array / JSON string / null → normalize to array
+        // Normalize selected_pairs into array
         $pairs = [];
         if (is_array($c->selected_pairs)) {
             $pairs = $c->selected_pairs;
         } elseif (is_string($c->selected_pairs)) {
             $pairs = json_decode($c->selected_pairs, true) ?: [];
         }
-        $firstTwo   = array_slice($pairs, 0, 2);
-        $moreCount  = max(count($pairs) - 2, 0);
-        $user       = $c->user;
-        $offer      = $c->offer;
-        $statusLower= strtolower((string) $c->status);
+        $firstTwo    = array_slice($pairs, 0, 2);
+        $moreCount   = max(count($pairs) - 2, 0);
+        $user        = $c->user;
+        $offer       = $c->offer;
+        $statusLower = strtolower((string) $c->status);
         $rowIdx++;
     @endphp
+
     <tr>
         <td>{{ $idx + 1 }}</td>
 
@@ -64,33 +65,29 @@
         </td>
 
         <td class="text-nowrap">
-            <button type="button" class="btn btn-sm btn-outline-info btn-view"
-                title="View" data-claim='@json($c)'>
+            <button type="button" class="btn btn-sm btn-outline-info btn-view" title="View" data-claim='@json($c)'>
                 <i class="bi bi-eye"></i>
             </button>
 
-            {{-- Approve with code-confirm --}}
             @if ($statusLower !== 'approved')
                 <button type="button" class="btn btn-sm btn-outline-success btn-approve-code"
-                    title="Approve (Code)"
-                    data-start-url="{{ route('refer.claim.approve.start', $c->id) }}"
-                    data-verify-url="{{ route('refer.claim.approve.verify', $c->id) }}">
+                        title="Approve (Code)"
+                        data-start-url="{{ route('refer.claim.approve.start', $c->id) }}"
+                        data-verify-url="{{ route('refer.claim.approve.verify', $c->id) }}">
                     <i class="bi bi-check2-circle"></i>
                 </button>
             @endif
 
-            {{-- Reject --}}
             @if ($statusLower !== 'rejected')
                 <button type="button" class="btn btn-sm btn-outline-warning btn-status"
-                    data-action="{{ route('refer.claim.update', $c->id) }}"
-                    data-status="rejected" title="Reject">
+                        data-action="{{ route('refer.claim.update', $c->id) }}"
+                        data-status="rejected" title="Reject">
                     <i class="bi bi-x-circle"></i>
                 </button>
             @endif
 
-            {{-- Delete --}}
             <button type="button" class="btn btn-sm btn-outline-danger btn-delete"
-                data-action="{{ route('refer.claim.destroy', $c->id) }}" title="Delete">
+                    data-action="{{ route('refer.claim.destroy', $c->id) }}" title="Delete">
                 <i class="bi bi-trash"></i>
             </button>
         </td>
