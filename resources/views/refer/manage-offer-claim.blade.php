@@ -49,7 +49,8 @@
             </ol>
         </div>
     </div>
-
+   
+add 3 tab for approved rejected and claimed
     <div class="row row-sm">
         <div class="col-lg-12">
             <div class="card custom-card overflow-hidden">
@@ -436,9 +437,9 @@
                             },
                             inputValidator: (value) => {
                                 if (!/^\d{6}$/.test(value))
-                                return 'Please enter the 6-digit code.';
+                                    return 'Please enter the 6-digit code.';
                                 if (value !== generatedCode)
-                                return 'Code does not match. Please check and try again.';
+                                    return 'Code does not match. Please check and try again.';
                             },
                             showCancelButton: true,
                             confirmButtonText: 'Verify & Approve',
