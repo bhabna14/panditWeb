@@ -93,7 +93,7 @@
             <h4 class="card-title-custom mb-4" style="font-size: 14px">Todays Rider Details</h4>
             <div class="row">
                 @foreach ($ridersData as $data)
-                    <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12 mb-4">
+                    <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12 mb-4">
                         <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank"
                             class="text-decoration-none">
                             <div class="sales-card"
