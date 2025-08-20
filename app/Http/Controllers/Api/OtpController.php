@@ -195,7 +195,6 @@ class OtpController extends Controller
                 'message'        => 'OTP sent successfully',
                 'user_status'    => $status,
                 'token'          => $shortToken,
-                // expose referral_code for client use if you want
                 'referral_code'  => $pandit->referral_code,
                 'api_response'   => $result
             ]);
