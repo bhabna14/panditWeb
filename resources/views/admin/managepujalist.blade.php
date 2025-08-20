@@ -70,8 +70,8 @@
                   <option value="">Select Unit</option>
                   @foreach ($units as $unit)
                     {{-- If Option A (model): $unit->name; If Option B (static): $unit['name'] --}}
-                    <option value="{{ is_array($unit) ? $unit['name'] : $unit->name }}">
-                      {{ is_array($unit) ? $unit['name'] : $unit->name }}
+                    <option value="{{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}">
+                      {{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}
                     </option>
                   @endforeach
                 </select>
