@@ -81,6 +81,9 @@ Route::get('/current-orders', [ProductController::class, 'getCurrentOrders']);
 
 Route::get('/products', [ProductController::class, 'getActiveProducts']);
 
+Route::get('/package-items', [ProductController::class, 'packageItems']);
+
+
 Route::get('/flower-products', [ProductController::class, 'getFlowerProducts']);
 
 Route::controller(PanditLoginController::class)->group(function() {
