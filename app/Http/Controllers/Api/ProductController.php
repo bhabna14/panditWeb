@@ -11,18 +11,60 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
-    //
-    public function getActiveProducts()
+public function getActiveProducts()
 {
+    // Eager-load package items + their item & variant to avoid N+1 queries
     $products = FlowerProduct::where('status', 'active')
-    ->get();
+        ->with([
+            'packageItems:id,product_id,item_id,variant_id',
+            'packageItems.item:id,item_name,product_type,status',
+            'packageItems.variant:id,item_id,title,price',
+        ])
+        ->get();
+
+    // Transform response: attach package_items only for Package category
+    $data = $products->map(function ($p) {
+        $base = [
+            'product_id'         => $p->product_id,
+            'name'               => $p->name,
+            'odia_name'          => $p->odia_name,
+            'product_image'      => $p->product_image,
+            'price'              => $p->price,
+            'mrp'                => $p->mrp,
+            'description'        => $p->description,
+            'category'           => $p->category,
+            'mala_provided'      => $p->mala_provided,
+            'is_flower_available'=> $p->is_flower_available,
+            'stock'              => $p->stock,
+            'duration'           => $p->duration,
+            'benefits'           => $p->benefits,
+            'status'             => $p->status,
+        ];
+
+        if (Str::lower($p->category) === 'package') {
+            $base['package_items'] = $p->packageItems
+                ->map(function ($pi) {
+                    return [
+                        'item_id'        => $pi->item_id,
+                        'item_name'      => optional($pi->item)->item_name,
+                        'variant_id'     => $pi->variant_id,
+                        'variant_title'  => optional($pi->variant)->title,
+                        'variant_price'  => optional($pi->variant)->price,
+                    ];
+                })
+                ->values();
+        }
+
+        return $base;
+    });
 
     return response()->json([
-        'status' => 200,
+        'status'  => 200,
         'message' => 'Products retrieved successfully.',
-        'data' => $products
+        'data'    => $data,
     ], 200);
 }
+
 
 public function getCurrentOrders(Request $request)
 {          
