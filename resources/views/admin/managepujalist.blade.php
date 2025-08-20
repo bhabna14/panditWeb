@@ -104,9 +104,9 @@
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
                     <!-- <div>
-                                                            <h6 class="main-content-label mb-1">File export Datatables</h6>
-                                                            <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
-                                                        </div> -->
+                                                                    <h6 class="main-content-label mb-1">File export Datatables</h6>
+                                                                    <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
+                                                                </div> -->
                     <div class="table-responsive export-table">
                         <table id="file-datatable" class="table table-bordered">
                             <thead>
@@ -259,20 +259,42 @@
         });
     </script>
 
-   <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    $(document).on('click', '.edit-item', function () {
-      const $btn = $(this);
+    <script>
+        $(document).on('click', '.edit-item', function() {
+            const $btn = $(this);
 
-      $('#itemId').val($btn.data('id') || '');
-      $('#itemName').val($btn.data('name') || '');
-      $('#variantId').val($btn.data('variant-id') || '');
-      $('#editVariantTitle').val($btn.data('variant-title') || '').trigger('change');
-      $('#editPrice').val($btn.data('price') || '');
+            $('#itemId').val($btn.data('id') || '');
+            $('#itemName').val($btn.data('name') || '');
 
-      $('#modaldemo2').modal('show');
-    });
-  });
-</script>
+            const variantId = $btn.data('variant-id');
+            if (variantId === undefined || variantId === null || variantId === '') {
+                // Ensure empty variant_id doesn't break validation
+                $('#variantId').val(''); // controller will strip this to null
+            } else {
+                $('#variantId').val(variantId);
+            }
 
+            $('#editVariantTitle').val($btn.data('variant-title') || '').trigger('change');
+            $('#editPrice').val($btn.data('price') || '');
+
+            $('#modaldemo2').modal('show');
+        });
+    </script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            $(document).on('click', '.edit-item', function() {
+                const $btn = $(this);
+
+                $('#itemId').val($btn.data('id') || '');
+                $('#itemName').val($btn.data('name') || '');
+                $('#variantId').val($btn.data('variant-id') || '');
+                $('#editVariantTitle').val($btn.data('variant-title') || '').trigger('change');
+                $('#editPrice').val($btn.data('price') || '');
+
+                $('#modaldemo2').modal('show');
+            });
+        });
+    </script>
 @endsection

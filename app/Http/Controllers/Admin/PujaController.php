@@ -97,42 +97,106 @@ class PujaController extends Controller
                 return redirect()->back()->with('success', 'Data delete successfully.');
     
     }
-
 public function managePujaList()
-{
-    // load items + variants (kept from your last working version)
-    $items = Poojaitemlists::where('status', 'active')
-        ->with(['variants:id,item_id,title,price'])
-        ->orderBy('item_name')
-        ->get(['id', 'item_name', 'status']);
+    {
+        // Load active items with their variants
+        $items = Poojaitemlists::where('status', 'active')
+            ->with(['variants:id,item_id,title,price'])
+            ->orderBy('item_name')
+            ->get(['id', 'item_name', 'status']);
 
-    $poojaitems = $items->flatMap(function ($item) {
-        if ($item->variants->isEmpty()) {
-            return collect([(object)[
-                'product_id'    => $item->id,
-                'item_name'     => $item->item_name,
-                'variant_title' => '—',
-                'price'         => null,
-            ]]);
+        // Flatten to one row per (item, variant) for your table
+        $poojaitems = $items->flatMap(function ($item) {
+            if ($item->variants->isEmpty()) {
+                return collect([(object)[
+                    'product_id'    => $item->id,
+                    'item_name'     => $item->item_name,
+                    'variant_id'    => null,
+                    'variant_title' => '—',
+                    'price'         => null,
+                ]]);
+            }
+
+            return $item->variants->map(function ($v) use ($item) {
+                return (object)[
+                    'product_id'    => $item->id,
+                    'item_name'     => $item->item_name,
+                    'variant_id'    => $v->id,
+                    'variant_title' => $v->title,
+                    'price'         => $v->price,
+                ];
+            });
+        });
+
+        // Units for dropdowns
+        $units = Unit::where('status', 'active')
+            ->orderBy('unit_name')
+            ->get(['id', 'unit_name']);
+
+        return view('admin.managepujalist', compact('poojaitems', 'units'));
+    }
+
+    public function updateItem(Request $request)
+    {
+        // Normalize variant_id: treat empty string as null so validation won't fail
+        $input = $request->all();
+        if (!isset($input['variant_id']) || $input['variant_id'] === '') {
+            unset($input['variant_id']); // remove to skip variant_id validation branch
         }
 
-        return $item->variants->map(function ($v) use ($item) {
-            return (object)[
-                'product_id'    => $item->id,
-                'item_name'     => $item->item_name,
-                'variant_title' => $v->title,
-                'price'         => $v->price,
-            ];
-        });
-    });
+        // Validate base fields
+        $baseRules = [
+            'id'            => ['required', 'integer', 'exists:poojaitem_list,id'],
+            'item_name'     => ['required', 'string', 'max:255'],
+            'variant_title' => ['required', 'string', 'max:100'],
+            'price'         => ['required', 'numeric', 'min:0'],
+        ];
 
-  
-    $units = PoojaUnit::where('status', 'active')->orderBy('unit_name')->get(['id', 'unit_name']);
+        $validated = Validator::make($input, $baseRules)->validate();
 
-  
-    return view('admin/managepujalist', compact('poojaitems', 'units'));
-}
+        DB::beginTransaction();
+        try {
+            // Lock and update item
+            $item = Poojaitemlists::lockForUpdate()->findOrFail($validated['id']);
+            $item->item_name = $validated['item_name'];
+            // if you maintain slug: $item->slug = \Str::slug($validated['item_name']);
+            $item->save();
 
+            // If variant_id provided, update that variant (must belong to the item)
+            if (isset($input['variant_id'])) {
+                $variant = Variant::lockForUpdate()
+                    ->where('id', (int)$input['variant_id'])
+                    ->where('item_id', $item->id)
+                    ->first();
+
+                if (!$variant) {
+                    DB::rollBack();
+                    return back()->withErrors([
+                        'variant_id' => 'Selected variant does not belong to this item.',
+                    ])->withInput();
+                }
+
+                $variant->title = $validated['variant_title'];
+                $variant->price = $validated['price'];
+                $variant->save();
+            } else {
+                // No variant_id → create a new variant for this item
+                Variant::create([
+                    'item_id' => $item->id,
+                    'title'   => $validated['variant_title'],
+                    'price'   => $validated['price'],
+                ]);
+            }
+
+            DB::commit();
+            return back()->with('success', 'Pooja item updated successfully.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->withErrors([
+                'error' => 'Failed to update item: ' . $e->getMessage(),
+            ])->withInput();
+        }
+    }
 
 public function saveItem(Request $request)
 {
@@ -158,55 +222,6 @@ public function saveItem(Request $request)
     ]);
 
     return redirect()->back()->with('success', 'Pooja item and variant added successfully.');
-}
-
-public function updateItem(Request $request)
-{
-    $validated = $request->validate([
-        'id'            => ['required', 'integer', 'exists:poojaitem_list,id'],
-        'item_name'     => ['required', 'string', 'max:255'],
-        'variant_title' => ['required', 'string', 'max:100'],
-        'price'         => ['required', 'numeric', 'min:0'],
-        'variant_id'    => ['nullable', 'integer', 'exists:variants,id'],
-    ]);
-
-    try {
-        DB::beginTransaction();
-
-        // Update the item name (and slug if you use it)
-        $item = Poojaitemlists::lockForUpdate()->findOrFail($validated['id']);
-        $item->item_name = $validated['item_name'];
-        // If you maintain slug:
-        // $item->slug = \Str::slug($validated['item_name']);
-        $item->save();
-
-        // If variant_id given, update that variant (ensure it belongs to item)
-        if (!empty($validated['variant_id'])) {
-            $variant = Variant::lockForUpdate()->findOrFail($validated['variant_id']);
-            if ((int)$variant->item_id !== (int)$item->id) {
-                // safety: prevent cross-item edits
-                DB::rollBack();
-                return redirect()->back()->withErrors(['variant_id' => 'Selected variant does not belong to this item.']);
-            }
-
-            $variant->title = $validated['variant_title'];
-            $variant->price = $validated['price'];
-            $variant->save();
-        } else {
-            // If no variant_id passed (rare for edit), create one
-            Variant::create([
-                'item_id' => $item->id,
-                'title'   => $validated['variant_title'],
-                'price'   => $validated['price'],
-            ]);
-        }
-
-        DB::commit();
-        return redirect()->back()->with('success', 'Pooja item updated successfully.');
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        return redirect()->back()->withErrors(['error' => 'Failed to update item: '.$e->getMessage()]);
-    }
 }
 
     public function edititem(Poojaitemlists $item)
