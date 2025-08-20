@@ -8,6 +8,7 @@ use App\Models\Poojalist;
 use App\Models\Poojaitemlists;
 use App\Models\PoojaUnit;
 use Illuminate\Support\Str;
+
 use DB;
 
 class PujaController extends Controller
@@ -99,16 +100,13 @@ class PujaController extends Controller
 
 public function managePujaList()
 {
-    // Load active items with their variants
+    // load items + variants (kept from your last working version)
     $items = Poojaitemlists::where('status', 'active')
         ->with(['variants:id,item_id,title,price'])
         ->orderBy('item_name')
         ->get(['id', 'item_name', 'status']);
 
-    // Flatten: each variant becomes one row in the table
     $poojaitems = $items->flatMap(function ($item) {
-        // If you want to show items even when they have no variants,
-        // uncomment the fallback block below.
         if ($item->variants->isEmpty()) {
             return collect([(object)[
                 'product_id'    => $item->id,
@@ -120,7 +118,7 @@ public function managePujaList()
 
         return $item->variants->map(function ($v) use ($item) {
             return (object)[
-                'product_id'    => $item->id,         // used in your action links
+                'product_id'    => $item->id,
                 'item_name'     => $item->item_name,
                 'variant_title' => $v->title,
                 'price'         => $v->price,
@@ -128,21 +126,40 @@ public function managePujaList()
         });
     });
 
-    return view('admin/managepujalist', compact('poojaitems'));
+  
+    $units = PoojaUnit::where('status', 'active')->orderBy('unit_name')->get(['id', 'unit_name']);
+
+  
+    return view('admin/managepujalist', compact('poojaitems', 'units'));
 }
 
 
-    public function saveitem(Request $request){
-        $pujadata = new Poojaitemlists();
-        
-        $pujadata->item_name = $request->item_name;
-       
-        $pujadata->status  = 'active' ;
-        $pujadata->save();
-        
-        return redirect()->back()->with('success', 'Data saved successfully.');
-      
-    }
+public function saveItem(Request $request)
+{
+    $validated = $request->validate([
+        'item_name'      => ['required', 'string', 'max:255'],
+        'variant_title'  => ['required', 'string', 'max:100'], // value from unit dropdown
+        'price'          => ['required', 'numeric', 'min:0'],
+    ]);
+
+    // Create item
+    $item = Poojaitemlists::create([
+        'item_name'    => $validated['item_name'],
+        'slug'         => \Str::slug($validated['item_name']),
+        'product_type' => 'pooja',          // set whatever makes sense in your app
+        'status'       => 'active',
+    ]);
+
+    // Create its first variant
+    Variant::create([
+        'item_id' => $item->id,
+        'title'   => $validated['variant_title'], // comes from the units dropdown
+        'price'   => $validated['price'],
+    ]);
+
+    return redirect()->back()->with('success', 'Pooja item and variant added successfully.');
+}
+
     public function edititem(Poojaitemlists $item)
     {
         return view('admin/managepujalist', compact('item'));

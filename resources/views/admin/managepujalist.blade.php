@@ -42,35 +42,61 @@
     @endif
     <!-- Basic modal -->
     <div class="modal fade" id="modaldemo1">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content modal-content-demo">
-                <div class="modal-header">
-                    <h6 class="modal-title">Add Pooja List</h6><button aria-label="Close" class="btn-close"
-                        data-bs-dismiss="modal" type="button"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <form action="{{ url('admin/saveitem') }}" method="post">
-                    @csrf
+  <div class="modal-dialog" role="document">
+    <div class="modal-content modal-content-demo">
+      <div class="modal-header">
+        <h6 class="modal-title">Add Pooja List</h6>
+        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
 
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="event_name">Item Name</label>
-                                    <input type="text" class="form-control" id="puja_name" name="item_name"
-                                        placeholder="Enter Pooja Item Name">
-                                </div>
-                            </div>
+      <form action="{{ url('admin/saveitem') }}" method="post">
+        @csrf
+        <div class="modal-body">
+          <div class="row g-3">
 
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn ripple btn-primary" type="button">Save</button>
-                        <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
-                    </div>
-                </form>
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="puja_name">Item Name</label>
+                <input type="text" class="form-control" id="puja_name" name="item_name" placeholder="Enter Pooja Item Name" required>
+              </div>
             </div>
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="variant_title">Variant (Unit)</label>
+                <select class="form-select" id="variant_title" name="variant_title" required>
+                  <option value="">Select Unit</option>
+                  @foreach ($units as $unit)
+                    {{-- If Option A (model): $unit->name; If Option B (static): $unit['name'] --}}
+                    <option value="{{ is_array($unit) ? $unit['name'] : $unit->name }}">
+                      {{ is_array($unit) ? $unit['name'] : $unit->name }}
+                    </option>
+                  @endforeach
+                </select>
+              </div>
+            </div>
+
+            <div class="col-md-12">
+              <div class="form-group">
+                <label for="price">Price</label>
+                <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" placeholder="Enter Price" required>
+              </div>
+            </div>
+
+          </div>
         </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn ripple btn-primary">Save</button>
+          <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
+
     <!-- End Basic modal -->
 
     <!-- Row -->
