@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\FlowerProduct;
+use Illuminate\Support\Str;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 
