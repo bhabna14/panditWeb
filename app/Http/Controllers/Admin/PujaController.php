@@ -96,10 +96,10 @@ class PujaController extends Controller
                 return redirect()->back()->with('success', 'Data delete successfully.');
     
     }
-    
+
 public function managePujaList()
 {
-    $poojaitems = Poojaitemlists::where('status', 'active')
+    $poojaitemlists = Poojaitemlists::where('status', 'active')
         ->with(['variants:id,item_id,title,price'])
         ->orderBy('item_name')
         ->get(['id', 'item_name', 'status']);
