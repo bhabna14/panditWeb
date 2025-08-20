@@ -96,16 +96,16 @@ class PujaController extends Controller
                 return redirect()->back()->with('success', 'Data delete successfully.');
     
     }
-
-    public function managePujaList() {
-        $poojaitems = DB::table('poojaitem_list')
-            ->join('variants', 'poojaitem_list.id', '=', 'variants.product_id')
-            ->select('poojaitem_list.id as product_id', 'poojaitem_list.item_name', 'variants.title as variant_title', 'variants.price')
-            ->where('poojaitem_list.status', 'active')
-            ->get();
     
-        return view('admin/managepujalist', compact('poojaitems'));
-    }
+public function managePujaList()
+{
+    $poojaitems = Poojaitemlists::where('status', 'active')
+        ->with(['variants:id,item_id,title,price'])
+        ->orderBy('item_name')
+        ->get(['id', 'item_name', 'status']);
+
+    return view('admin/managepujalist', compact('poojaitemlists'));
+}
 
     public function saveitem(Request $request){
         $pujadata = new Poojaitemlists();

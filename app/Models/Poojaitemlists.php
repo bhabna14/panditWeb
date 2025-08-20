@@ -10,7 +10,7 @@ class Poojaitemlists extends Model
     use HasFactory;
     protected $table = "poojaitem_list";
     protected $fillable = [
-        
+        'id',
         'item_name',
         'slug',
         'product_type',
