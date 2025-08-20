@@ -564,7 +564,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
 
     Route::controller(PodcastPlanningController::class)->group(function() {
         Route::get('/podcast-planning', 'podcastPlanning')->name('PodcastSocialMedia');
-       
     });
 
     Route::controller(PodcastController::class)->group(function() {

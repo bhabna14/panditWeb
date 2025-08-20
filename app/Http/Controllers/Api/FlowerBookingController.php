@@ -490,6 +490,90 @@ class FlowerBookingController extends Controller
     }
 
 
+    public function markPaymentApi(Request $request, $id)
+    {
+        try {
+            // Initialize Razorpay API
+            $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
+            $paymentId = $request->payment_id;
+    
+            try {
+                // Fetch the payment details from Razorpay
+                $payment = $razorpayApi->payment->fetch($paymentId);
+                \Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
+    
+                // Check if the payment is captured
+                if ($payment->status !== 'captured') {
+                    // Attempt to capture the payment if it is authorized
+                    if ($payment->status === 'authorized') {
+                        $capture = $razorpayApi->payment->fetch($paymentId)->capture(['amount' => $payment->amount]);
+                        \Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
+                    } else {
+                        \Log::error('Payment not captured', ['payment_id' => $paymentId]);
+                        return response()->json(['message' => 'Payment was not successful, Your payment will be refunded within 7 days.'], 400);
+                    }
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
+                return response()->json(['message' => 'Failed to fetch payment status'], 500);
+            }
+    
+            // Find the order by flower request ID
+            $order = Order::where('request_id', $id)->firstOrFail();
+    
+            // Create a new flower payment entry
+            FlowerPayment::create([
+                'order_id' => $order->order_id,
+                'payment_id' => $paymentId, // Set payment ID from Razorpay
+                'user_id' => $order->user_id,
+                'payment_method' => 'Razorpay',
+                'paid_amount' => $order->total_price,
+                'payment_status' => 'paid',
+            ]);
+    
+            // Update the status of the FlowerRequest to "paid"
+            $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
+    
+            if ($flowerRequest->status === 'approved') {
+                $flowerRequest->status = 'paid';
+                $flowerRequest->save();
+            }
+    
+            // Send notification to the user
+            $deviceTokens = UserDevice::where('user_id', $order->user_id)->whereNotNull('device_id')->pluck('device_id')->toArray();
+    
+            if (!empty($deviceTokens)) {
+                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+                $notificationService->sendBulkNotifications(
+                    $deviceTokens,
+                    'Payment Successful',
+                    'Payment is successfully done. Your order will be delivered on time.',
+                    ['order_id' => $order->order_id]
+                );
+    
+                \Log::info('Notification sent successfully to all devices.', [
+                    'user_id' => $order->user_id,
+                    'device_tokens' => $deviceTokens,
+                ]);
+            } else {
+                \Log::warning('No device tokens found for user.', ['user_id' => $order->user_id]);
+            }
+    
+            return response()->json([
+                'status' => 200,
+                'message' => 'Payment marked as paid'
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Failed to mark payment as paid.', ['error' => $e->getMessage()]);
+    
+            return response()->json([
+                'status' => 500,
+                'message' => 'Failed to mark payment as paid'
+            ], 500);
+        }
+    }
+    
+
     public function pause(Request $request, $order_id)
     {
         try {
@@ -584,179 +668,127 @@ class FlowerBookingController extends Controller
         }
     }
 
-    public function markPaymentApi(Request $request, $id)
-    {
-        try {
-            // Initialize Razorpay API
-            $razorpayApi = new Api(config('services.razorpay.key'), config('services.razorpay.secret'));
-            $paymentId = $request->payment_id;
-    
-            try {
-                // Fetch the payment details from Razorpay
-                $payment = $razorpayApi->payment->fetch($paymentId);
-                \Log::info('Fetched payment details', ['payment_id' => $paymentId, 'payment_status' => $payment->status]);
-    
-                // Check if the payment is captured
-                if ($payment->status !== 'captured') {
-                    // Attempt to capture the payment if it is authorized
-                    if ($payment->status === 'authorized') {
-                        $capture = $razorpayApi->payment->fetch($paymentId)->capture(['amount' => $payment->amount]);
-                        \Log::info('Payment captured manually', ['payment_id' => $paymentId, 'captured_status' => $capture->status]);
-                    } else {
-                        \Log::error('Payment not captured', ['payment_id' => $paymentId]);
-                        return response()->json(['message' => 'Payment was not successful, Your payment will be refunded within 7 days.'], 400);
-                    }
-                }
-            } catch (\Exception $e) {
-                \Log::error('Failed to fetch payment status', ['error' => $e->getMessage()]);
-                return response()->json(['message' => 'Failed to fetch payment status'], 500);
-            }
-    
-            // Find the order by flower request ID
-            $order = Order::where('request_id', $id)->firstOrFail();
-    
-            // Create a new flower payment entry
-            FlowerPayment::create([
-                'order_id' => $order->order_id,
-                'payment_id' => $paymentId, // Set payment ID from Razorpay
-                'user_id' => $order->user_id,
-                'payment_method' => 'Razorpay',
-                'paid_amount' => $order->total_price,
-                'payment_status' => 'paid',
-            ]);
-    
-            // Update the status of the FlowerRequest to "paid"
-            $flowerRequest = FlowerRequest::where('request_id', $id)->firstOrFail();
-    
-            if ($flowerRequest->status === 'approved') {
-                $flowerRequest->status = 'paid';
-                $flowerRequest->save();
-            }
-    
-            // Send notification to the user
-            $deviceTokens = UserDevice::where('user_id', $order->user_id)->whereNotNull('device_id')->pluck('device_id')->toArray();
-    
-            if (!empty($deviceTokens)) {
-                $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-                $notificationService->sendBulkNotifications(
-                    $deviceTokens,
-                    'Payment Successful',
-                    'Payment is successfully done. Your order will be delivered on time.',
-                    ['order_id' => $order->order_id]
-                );
-    
-                \Log::info('Notification sent successfully to all devices.', [
-                    'user_id' => $order->user_id,
-                    'device_tokens' => $deviceTokens,
-                ]);
-            } else {
-                \Log::warning('No device tokens found for user.', ['user_id' => $order->user_id]);
-            }
-    
-            return response()->json([
-                'status' => 200,
-                'message' => 'Payment marked as paid'
-            ], 200);
-        } catch (\Exception $e) {
-            \Log::error('Failed to mark payment as paid.', ['error' => $e->getMessage()]);
-    
-            return response()->json([
-                'status' => 500,
-                'message' => 'Failed to mark payment as paid'
-            ], 500);
-        }
-    }
-    
     public function resume(Request $request, $order_id)
     {
+        // 1) Validate input
+        $request->validate([
+            'resume_date' => ['required','date'],
+        ]);
+
         try {
-            // Find the subscription by order_id
-            $subscription = Subscription::where('order_id', $order_id)->where('status','paused')->firstOrFail();
+            return DB::transaction(function () use ($request, $order_id) {
+                // 2) Lock the subscription row
+                $subscription = Subscription::where('order_id', $order_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            // Validate that the subscription is currently paused
-            if ($subscription->status !== 'paused') {
+                if ($subscription->status !== 'paused') {
+                    return response()->json([
+                        'success' => 409,
+                        'message' => 'Subscription is not in a paused state.',
+                    ], 409);
+                }
+
+                // Ensure pause dates exist
+                if (empty($subscription->pause_start_date) || empty($subscription->pause_end_date)) {
+                    return response()->json([
+                        'success' => 422,
+                        'message' => 'Pause window is not defined for this subscription.',
+                    ], 422);
+                }
+
+                // 3) Parse dates (treat as whole days)
+                $resumeDate      = Carbon::parse($request->resume_date)->startOfDay();
+                $pauseStartDate  = Carbon::parse($subscription->pause_start_date)->startOfDay();
+                $pauseEndDate    = Carbon::parse($subscription->pause_end_date)->startOfDay();
+                $currentEndDate  = Carbon::parse($subscription->new_date ?: $subscription->end_date)->startOfDay();
+
+                Log::info('Resuming subscription (incoming)', [
+                    'order_id'        => $order_id,
+                    'user_id'         => $subscription->user_id,
+                    'resume_date'     => $resumeDate->toDateString(),
+                    'pause_start'     => $pauseStartDate->toDateString(),
+                    'pause_end'       => $pauseEndDate->toDateString(),
+                    'current_end'     => $currentEndDate->toDateString(),
+                    'had_new_date'    => (bool) $subscription->new_date,
+                ]);
+
+                // 4) Sanity checks on resume date (must be within pause period, inclusive)
+                if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt($pauseEndDate)) {
+                    return response()->json([
+                        'success' => 422,
+                        'message' => 'Resume date must be within the pause period.',
+                    ], 422);
+                }
+
+                // 5) Compute planned vs actual paused days
+                // planned paused days (inclusive window)
+                $plannedPausedDays  = $pauseStartDate->diffInDays($pauseEndDate) + 1;
+                // actual paused days in effect before resume; if resume on start day => 0
+                $actualPausedDays   = $pauseStartDate->diffInDays($resumeDate);
+                $remainingPausedDays= max(0, $plannedPausedDays - $actualPausedDays);
+
+                // 6) Calculate the correct new end date
+                // Case A: you had already extended new_date at pause time by plannedPausedDays.
+                //         Now subtract UNUSED days (remainingPausedDays) to bring it back.
+                // Case B: you never extended; extend end date only by actualPausedDays.
+                if (!empty($subscription->new_date)) {
+                    // Already extended earlier by planned days → subtract the remainder
+                    $newEndDate = (clone $currentEndDate)->subDays($remainingPausedDays);
+                } else {
+                    // Not extended earlier → extend only by actually paused days
+                    $newEndDate = (clone $currentEndDate)->addDays($actualPausedDays);
+                }
+
+                // 7) Persist changes: activate + clear pause window + set new_date
+                $subscription->status            = 'active';
+                $subscription->new_date          = $newEndDate->toDateString();
+                $subscription->pause_start_date  = null;
+                $subscription->pause_end_date    = null;
+                // optional: $subscription->is_active = 1;
+                $subscription->save();
+
+                // 8) Log entry
+                SubscriptionPauseResumeLog::create([
+                    'subscription_id'  => $subscription->subscription_id,
+                    'order_id'         => $order_id,
+                    'action'           => 'resumed',
+                    'resume_date'      => $resumeDate->toDateString(),
+                    'pause_start_date' => $pauseStartDate->toDateString(),
+                    'pause_end_date'   => $pauseEndDate->toDateString(),
+                    'new_end_date'     => $newEndDate->toDateString(),
+                    'paused_days'      => $actualPausedDays,
+                    'meta'             => json_encode([
+                        'planned_paused_days'   => $plannedPausedDays,
+                        'remaining_paused_days' => $remainingPausedDays,
+                        'had_new_date_at_pause' => (bool) $subscription->new_date,
+                    ]),
+                ]);
+
+                Log::info('Subscription resumed successfully', [
+                    'order_id'    => $order_id,
+                    'new_end_date'=> $newEndDate->toDateString(),
+                ]);
+
+                // 9) Fresh instance for response
+                $subscription->refresh();
+
                 return response()->json([
-                    'success' => 400,
-                    'message' => 'Subscription is not in a paused state.'
-                ], 400);
-            }
-
-            // Log the resume attempt
-            Log::info('Resuming subscription', [
-                'order_id' => $order_id,
-                'user_id' => $subscription->user_id,
-                'pause_start_date' => $subscription->pause_start_date,
-                'pause_end_date' => $subscription->pause_end_date,
-            ]);
-
-            // Parse the dates
-            $resumeDate = Carbon::parse($request->resume_date);
-            $pauseStartDate = Carbon::parse($subscription->pause_start_date);
-            $pauseEndDate = Carbon::parse($subscription->pause_end_date);
-            $currentEndDate = $subscription->new_date ? Carbon::parse($subscription->new_date) : Carbon::parse($subscription->end_date);
-
-            // Ensure the resume date is within the pause period
-            if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt($pauseEndDate)) {
-                return response()->json([
-                    'success' => 400,
-                    'message' => 'Resume date must be within the pause period.'
-                ], 400);
-            }
-
-            // Calculate the days actually paused until the resume date
-            $actualPausedDays = $resumeDate->diffInDays($pauseStartDate); // Include start date
-
-            // Calculate total planned paused days
-            $totalPausedDays = $pauseEndDate->diffInDays($pauseStartDate) + 1;
-
-            // Calculate the remaining paused days to adjust if resuming early
-            $remainingPausedDays = $totalPausedDays - $actualPausedDays;
-
-            // Adjust the new end date by subtracting the remaining paused days if necessary
-            if ($remainingPausedDays > 0) {
-                $newEndDate = $currentEndDate->subDays($actualPausedDays);
-            } else {
-                $newEndDate = $currentEndDate;
-            }
-
-            // Update the subscription status and clear pause dates
-            $subscription->new_date = $newEndDate;
-            $subscription->save();
-
-            // Log the resume action 
-            SubscriptionPauseResumeLog::create([
-                'subscription_id' => $subscription->subscription_id,
-                'order_id' => $order_id,
-                'action' => 'resumed',
-                'resume_date' => $resumeDate,
-                'pause_start_date' => $pauseStartDate,
-                'pause_end_date' => $pauseEndDate,
-                'new_end_date' => $newEndDate,
-                'paused_days' => $actualPausedDays,
-            ]);
-
-            // Log the successful resume
-            Log::info('Subscription resumed successfully', [
-                'order_id' => $order_id,
-                'new_end_date' => $newEndDate,
-            ]);
-
-            return response()->json([
-                'success' => 200,
-                'message' => 'Subscription resumed successfully.',
-                'subscription' => $subscription
-            ], 200);
-        } catch (\Exception $e) {
-            // Log any errors that occur during the process
+                    'success'      => 200,
+                    'message'      => 'Subscription resumed successfully.',
+                    'subscription' => $subscription,
+                ], 200);
+            });
+        } catch (\Throwable $e) {
             Log::error('Error resuming subscription', [
                 'order_id' => $order_id,
-                'error_message' => $e->getMessage(),
+                'error'    => $e->getMessage(),
             ]);
 
             return response()->json([
                 'success' => 500,
                 'message' => 'An error occurred while resuming the subscription.',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
