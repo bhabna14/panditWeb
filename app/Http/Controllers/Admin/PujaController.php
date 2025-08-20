@@ -160,23 +160,60 @@ public function saveItem(Request $request)
     return redirect()->back()->with('success', 'Pooja item and variant added successfully.');
 }
 
+public function updateItem(Request $request)
+{
+    $validated = $request->validate([
+        'id'            => ['required', 'integer', 'exists:poojaitem_list,id'],
+        'item_name'     => ['required', 'string', 'max:255'],
+        'variant_title' => ['required', 'string', 'max:100'],
+        'price'         => ['required', 'numeric', 'min:0'],
+        'variant_id'    => ['nullable', 'integer', 'exists:variants,id'],
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        // Update the item name (and slug if you use it)
+        $item = Poojaitemlists::lockForUpdate()->findOrFail($validated['id']);
+        $item->item_name = $validated['item_name'];
+        // If you maintain slug:
+        // $item->slug = \Str::slug($validated['item_name']);
+        $item->save();
+
+        // If variant_id given, update that variant (ensure it belongs to item)
+        if (!empty($validated['variant_id'])) {
+            $variant = Variant::lockForUpdate()->findOrFail($validated['variant_id']);
+            if ((int)$variant->item_id !== (int)$item->id) {
+                // safety: prevent cross-item edits
+                DB::rollBack();
+                return redirect()->back()->withErrors(['variant_id' => 'Selected variant does not belong to this item.']);
+            }
+
+            $variant->title = $validated['variant_title'];
+            $variant->price = $validated['price'];
+            $variant->save();
+        } else {
+            // If no variant_id passed (rare for edit), create one
+            Variant::create([
+                'item_id' => $item->id,
+                'title'   => $validated['variant_title'],
+                'price'   => $validated['price'],
+            ]);
+        }
+
+        DB::commit();
+        return redirect()->back()->with('success', 'Pooja item updated successfully.');
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return redirect()->back()->withErrors(['error' => 'Failed to update item: '.$e->getMessage()]);
+    }
+}
+
     public function edititem(Poojaitemlists $item)
     {
         return view('admin/managepujalist', compact('item'));
     }
-    public function updateItem(Request $request)
-    {
-            $request->validate([
-                'id' => 'required|integer',
-                'item_name' => 'required|string|max:255',
-            ]);
-
-            $item = Poojaitemlists::find($request->id);
-            $item->item_name = $request->item_name;
-            $item->save();
-
-            return redirect()->back()->with('success', 'Item updated successfully');
-    }
+    
     public function dltitem(Request $request,$item)
     {
         $pujadata = Poojaitemlists::find($item);

@@ -42,60 +42,62 @@
     @endif
     <!-- Basic modal -->
     <div class="modal fade" id="modaldemo1">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content modal-content-demo">
-      <div class="modal-header">
-        <h6 class="modal-title">Add Pooja List</h6>
-        <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
+        <div class="modal-dialog" role="document">
+            <div class="modal-content modal-content-demo">
+                <div class="modal-header">
+                    <h6 class="modal-title">Add Pooja List</h6>
+                    <button aria-label="Close" class="btn-close" data-bs-dismiss="modal" type="button">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
 
-      <form action="{{ url('admin/saveitem') }}" method="post">
-        @csrf
-        <div class="modal-body">
-          <div class="row g-3">
+                <form action="{{ url('admin/saveitem') }}" method="post">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="row g-3">
 
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="puja_name">Item Name</label>
-                <input type="text" class="form-control" id="puja_name" name="item_name" placeholder="Enter Pooja Item Name" required>
-              </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="puja_name">Item Name</label>
+                                    <input type="text" class="form-control" id="puja_name" name="item_name"
+                                        placeholder="Enter Pooja Item Name" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="variant_title">Variant (Unit)</label>
+                                    <select class="form-select" id="variant_title" name="variant_title" required>
+                                        <option value="">Select Unit</option>
+                                        @foreach ($units as $unit)
+                                            {{-- If Option A (model): $unit->name; If Option B (static): $unit['name'] --}}
+                                            <option value="{{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}">
+                                                {{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="price">Price</label>
+                                    <input type="number" step="0.01" min="0" class="form-control" id="price"
+                                        name="price" placeholder="Enter Price" required>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="submit" class="btn ripple btn-primary">Save</button>
+                        <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
+                    </div>
+                </form>
             </div>
-
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="variant_title">Variant (Unit)</label>
-                <select class="form-select" id="variant_title" name="variant_title" required>
-                  <option value="">Select Unit</option>
-                  @foreach ($units as $unit)
-                    {{-- If Option A (model): $unit->name; If Option B (static): $unit['name'] --}}
-                    <option value="{{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}">
-                      {{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}
-                    </option>
-                  @endforeach
-                </select>
-              </div>
-            </div>
-
-            <div class="col-md-12">
-              <div class="form-group">
-                <label for="price">Price</label>
-                <input type="number" step="0.01" min="0" class="form-control" id="price" name="price" placeholder="Enter Price" required>
-              </div>
-            </div>
-
-          </div>
         </div>
-
-        <div class="modal-footer">
-          <button type="submit" class="btn ripple btn-primary">Save</button>
-          <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
-        </div>
-      </form>
     </div>
-  </div>
-</div>
 
     <!-- End Basic modal -->
 
@@ -105,9 +107,9 @@
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
                     <!-- <div>
-                                            <h6 class="main-content-label mb-1">File export Datatables</h6>
-                                            <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
-                                        </div> -->
+                                                    <h6 class="main-content-label mb-1">File export Datatables</h6>
+                                                    <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
+                                                </div> -->
                     <div class="table-responsive export-table">
                         <table id="file-datatable" class="table table-bordered">
                             <thead>
@@ -135,9 +137,13 @@
                                         <td>
                                             <a class="btn ripple btn-primary me-3 edit-item" href="javascript:void(0);"
                                                 data-id="{{ $poojaitem->product_id }}"
-                                                data-name="{{ $poojaitem->item_name }}">
+                                                data-name="{{ $poojaitem->item_name }}"
+                                                data-variant-id="{{ $poojaitem->variant_id ?? '' }}"
+                                                data-variant-title="{{ $poojaitem->variant_title }}"
+                                                data-price="{{ $poojaitem->price }}">
                                                 <i class="fa fa-edit"></i>
                                             </a>
+
                                             <a class="btn ripple btn-primary"
                                                 href="{{ url('admin/dltitem/' . $poojaitem->product_id) }}"
                                                 onClick="return confirm('Are you sure to delete ?');">
@@ -166,21 +172,48 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+
                 <form id="editItemForm" action="{{ url('admin/updateitem') }}" method="post">
                     @csrf
                     @method('PUT')
+
                     <input type="hidden" id="itemId" name="id">
+                    <input type="hidden" id="variantId" name="variant_id">
+
                     <div class="modal-body">
-                        <div class="row">
+                        <div class="row g-3">
                             <div class="col-md-12">
                                 <div class="form-group">
-                                    <label for="item_name">Item Name</label>
+                                    <label for="itemName">Item Name</label>
                                     <input type="text" class="form-control" id="itemName" name="item_name"
-                                        placeholder="Enter Pooja Item Name">
+                                        placeholder="Enter Pooja Item Name" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="editVariantTitle">Variant (Unit)</label>
+                                    <select class="form-select" id="editVariantTitle" name="variant_title" required>
+                                        <option value="">Select Unit</option>
+                                        @foreach ($units as $unit)
+                                            <option value="{{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}">
+                                                {{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="editPrice">Price</label>
+                                    <input type="number" step="0.01" min="0" class="form-control"
+                                        id="editPrice" name="price" placeholder="Enter Price" required>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="submit" class="btn ripple btn-primary">Save</button>
                         <button class="btn ripple btn-secondary" data-bs-dismiss="modal" type="button">Close</button>
@@ -189,6 +222,7 @@
             </div>
         </div>
     </div>
+
     <!-- End Basic modal -->
 @endsection
 
@@ -216,7 +250,6 @@
         }, 3000);
     </script>
 
-
     <script>
         $(document).ready(function() {
             $('.edit-item').on('click', function() {
@@ -227,6 +260,29 @@
                 $('#itemName').val(itemName);
 
                 $('#modaldemo2').modal('show');
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.edit-item').forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const id = this.dataset.id || '';
+                    const name = this.dataset.name || '';
+                    const variantId = this.dataset.variantId || '';
+                    const variantTitle = this.dataset.variantTitle || '';
+                    const price = this.dataset.price || '';
+
+                    document.getElementById('itemId').value = id;
+                    document.getElementById('itemName').value = name;
+                    document.getElementById('variantId').value = variantId;
+                    document.getElementById('editVariantTitle').value = variantTitle;
+                    document.getElementById('editPrice').value = price;
+
+                    const modal = new bootstrap.Modal(document.getElementById('modaldemo2'));
+                    modal.show();
+                });
             });
         });
     </script>
