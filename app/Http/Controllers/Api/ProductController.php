@@ -112,7 +112,7 @@ public function getCurrentOrders(Request $request)
 public function packageItems()
 {
     // Eager-load package items + their item & variant to avoid N+1 queries
-    $products = FlowerProduct::where('status', 'active')::where('category', 'Package')
+    $products = FlowerProduct::where('status', 'active')->where('category', 'Package')
         ->with([
             'packageItems:id,product_id,item_id,variant_id',
             'packageItems.item:id,item_name,product_type,status',
