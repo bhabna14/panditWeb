@@ -8,6 +8,8 @@ use App\Models\Poojalist;
 use App\Models\Poojaitemlists;
 use App\Models\PoojaUnit;
 use Illuminate\Support\Str;
+use App\Models\Variant;
+use Illuminate\Support\Facades\Validator;
 
 use DB;
 
