@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Models\UserDevice;
+use Illuminate\Support\Facades\DB;
+
 
 class OtpController extends Controller
 {
