@@ -199,33 +199,72 @@ public function managePujaList()
             ])->withInput();
         }
     }
-
 public function saveItem(Request $request)
 {
+    // Basic validation
     $validated = $request->validate([
-        'item_name'      => ['required', 'string', 'max:255'],
-        'variant_title'  => ['required', 'string', 'max:100'], // value from unit dropdown
-        'price'          => ['required', 'numeric', 'min:0'],
+        'item_name'     => ['required', 'string', 'max:255'],
+        'variant_title' => ['required', 'string', 'max:100'], // unit from dropdown
+        'price'         => ['required', 'numeric', 'min:0'],
     ]);
 
-    // Create item
-    $item = Poojaitemlists::create([
-        'item_name'    => $validated['item_name'],
-        'slug'         => \Str::slug($validated['item_name']),
-        'product_type' => 'pooja',          // set whatever makes sense in your app
-        'status'       => 'active',
-    ]);
+    // Normalize inputs
+    $name  = trim(preg_replace('/\s+/', ' ', $validated['item_name']));
+    $unit  = trim(preg_replace('/\s+/', ' ', $validated['variant_title']));
+    $price = $validated['price'];
 
-    // Create its first variant
-    Variant::create([
-        'item_id' => $item->id,
-        'title'   => $validated['variant_title'], // comes from the units dropdown
-        'price'   => $validated['price'],
-    ]);
+    try {
+        DB::beginTransaction();
 
-    return redirect()->back()->with('success', 'Pooja item and variant added successfully.');
+        // Find (case-insensitive) existing item by name
+        $item = Poojaitemlists::whereRaw('LOWER(item_name) = ?', [mb_strtolower($name)])->first();
+
+        if (!$item) {
+            // Create with unique slug
+            $slug = Str::slug($name);
+            $base = $slug;
+            $i = 1;
+            while (Poojaitemlists::where('slug', $slug)->exists()) {
+                $slug = $base . '-' . $i++;
+            }
+
+            $item = Poojaitemlists::create([
+                'item_name'    => $name,
+                'slug'         => $slug,
+                'product_type' => 'pooja',
+                'status'       => 'active',
+            ]);
+        }
+
+        // Check if this variant (unit) already exists for the item (case-insensitive)
+        $variant = Variant::where('item_id', $item->id)
+            ->whereRaw('LOWER(title) = ?', [mb_strtolower($unit)])
+            ->lockForUpdate()
+            ->first();
+
+        if ($variant) {
+            // Update price if changed
+            $variant->price = $price;
+            $variant->save();
+            $msg = 'Pooja item exists; variant price updated successfully.';
+        } else {
+            // Create new variant
+            Variant::create([
+                'item_id' => $item->id,
+                'title'   => $unit,
+                'price'   => $price,
+            ]);
+            $msg = 'Pooja item and variant added successfully.';
+        }
+
+        DB::commit();
+        return redirect()->back()->with('success', $msg);
+
+    } catch (\Throwable $e) {
+        DB::rollBack();
+        return redirect()->back()->with('danger', 'Failed to save item: ' . $e->getMessage());
+    }
 }
-
     public function edititem(Poojaitemlists $item)
     {
         return view('admin/managepujalist', compact('item'));

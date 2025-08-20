@@ -96,8 +96,6 @@
         </div>
     </div>
 
-    <!-- End Basic modal -->
-
     <!-- Row -->
     <div class="row row-sm">
         <div class="col-lg-12">
