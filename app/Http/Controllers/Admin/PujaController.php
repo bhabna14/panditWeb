@@ -99,13 +99,38 @@ class PujaController extends Controller
 
 public function managePujaList()
 {
-    $poojaitems  = Poojaitemlists::where('status', 'active')
+    // Load active items with their variants
+    $items = Poojaitemlists::where('status', 'active')
         ->with(['variants:id,item_id,title,price'])
         ->orderBy('item_name')
         ->get(['id', 'item_name', 'status']);
 
+    // Flatten: each variant becomes one row in the table
+    $poojaitems = $items->flatMap(function ($item) {
+        // If you want to show items even when they have no variants,
+        // uncomment the fallback block below.
+        if ($item->variants->isEmpty()) {
+            return collect([(object)[
+                'product_id'    => $item->id,
+                'item_name'     => $item->item_name,
+                'variant_title' => '—',
+                'price'         => null,
+            ]]);
+        }
+
+        return $item->variants->map(function ($v) use ($item) {
+            return (object)[
+                'product_id'    => $item->id,         // used in your action links
+                'item_name'     => $item->item_name,
+                'variant_title' => $v->title,
+                'price'         => $v->price,
+            ];
+        });
+    });
+
     return view('admin/managepujalist', compact('poojaitems'));
 }
+
 
     public function saveitem(Request $request){
         $pujadata = new Poojaitemlists();
