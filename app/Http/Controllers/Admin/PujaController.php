@@ -129,7 +129,7 @@ public function managePujaList()
         });
 
         // Units for dropdowns
-        $units = Unit::where('status', 'active')
+        $units = PoojaUnit::where('status', 'active')
             ->orderBy('unit_name')
             ->get(['id', 'unit_name']);
 
