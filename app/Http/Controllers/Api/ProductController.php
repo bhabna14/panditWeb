@@ -8,6 +8,7 @@ use App\Models\FlowerProduct;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
 
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
