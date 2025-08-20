@@ -28,7 +28,6 @@
     </div>
     <!-- /breadcrumb -->
 
-
     @if (session('success'))
         <div id = 'Message' class="alert alert-success">
             {{ session('success') }}

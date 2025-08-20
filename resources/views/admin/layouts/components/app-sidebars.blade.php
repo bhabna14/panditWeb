@@ -270,11 +270,8 @@
                             <i class="angle fas fa-chevron-right"></i>
                         </a>
                         <ul class="slide-menu">
-                            <li><a class="sub-side-menu__item"
-                                    href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li>
-                            <li><a class="sub-side-menu__item"
-                                    href="{{ route('managePujaList') }}">Manage Items</a></li>
-
+                            <li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li>
+                            <li><a class="sub-side-menu__item" href="{{ route('managePujaList') }}">Manage Items</a></li>
                         </ul>
                     </li>
                 @endif

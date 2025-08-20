@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Poojaitemlists extends Model
 {
     use HasFactory;
+
     protected $table = "poojaitem_list";
+
     protected $fillable = [
         'id',
         'item_name',
@@ -19,6 +21,6 @@ class Poojaitemlists extends Model
 
     public function variants()
     {
-        return $this->hasMany(Variant::class, 'item_id'); // Ensure 'product_id' matches the foreign key in the variants table
+        return $this->hasMany(Variant::class, 'item_id');
     }
 }
