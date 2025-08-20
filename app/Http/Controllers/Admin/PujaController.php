@@ -104,7 +104,7 @@ public function managePujaList()
         ->orderBy('item_name')
         ->get(['id', 'item_name', 'status']);
 
-    return view('admin/managepujalist', compact('poojaitemsd'));
+    return view('admin/managepujalist', compact('poojaitems'));
 }
 
     public function saveitem(Request $request){
