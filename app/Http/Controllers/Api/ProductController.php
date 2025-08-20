@@ -92,7 +92,7 @@ public function getCurrentOrders(Request $request)
         try {
             // Fetch only category 'flower' and required fields
             $products = FlowerProduct::where('category', 'Flower')->where('status', 'active')
-                ->select('name', 'odia_name', 'mala_provided', 'flower_available', 'description')
+                ->select('name', 'odia_name', 'mala_provided', 'is_flower_available', 'description')
                 ->get();
 
             return response()->json([
