@@ -99,12 +99,12 @@ class PujaController extends Controller
 
 public function managePujaList()
 {
-    $poojaitemlists = Poojaitemlists::where('status', 'active')
+    $poojaitems  = Poojaitemlists::where('status', 'active')
         ->with(['variants:id,item_id,title,price'])
         ->orderBy('item_name')
         ->get(['id', 'item_name', 'status']);
 
-    return view('admin/managepujalist', compact('poojaitemlists'));
+    return view('admin/managepujalist', compact('poojaitemsd'));
 }
 
     public function saveitem(Request $request){
