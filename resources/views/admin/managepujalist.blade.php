@@ -70,10 +70,7 @@
                                     <select class="form-select" id="variant_title" name="variant_title" required>
                                         <option value="">Select Unit</option>
                                         @foreach ($units as $unit)
-                                            {{-- If Option A (model): $unit->name; If Option B (static): $unit['name'] --}}
-                                            <option value="{{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}">
-                                                {{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}
-                                            </option>
+                                            <option value="{{ $unit->unit_name }}">{{ $unit->unit_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -107,9 +104,9 @@
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
                     <!-- <div>
-                                                    <h6 class="main-content-label mb-1">File export Datatables</h6>
-                                                    <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
-                                                </div> -->
+                                                            <h6 class="main-content-label mb-1">File export Datatables</h6>
+                                                            <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
+                                                        </div> -->
                     <div class="table-responsive export-table">
                         <table id="file-datatable" class="table table-bordered">
                             <thead>
@@ -196,9 +193,7 @@
                                     <select class="form-select" id="editVariantTitle" name="variant_title" required>
                                         <option value="">Select Unit</option>
                                         @foreach ($units as $unit)
-                                            <option value="{{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}">
-                                                {{ is_array($unit) ? $unit['unit_name'] : $unit->unit_name }}
-                                            </option>
+                                            <option value="{{ $unit->unit_name }}">{{ $unit->unit_name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -264,26 +259,20 @@
         });
     </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.edit-item').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    const id = this.dataset.id || '';
-                    const name = this.dataset.name || '';
-                    const variantId = this.dataset.variantId || '';
-                    const variantTitle = this.dataset.variantTitle || '';
-                    const price = this.dataset.price || '';
+   <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    $(document).on('click', '.edit-item', function () {
+      const $btn = $(this);
 
-                    document.getElementById('itemId').value = id;
-                    document.getElementById('itemName').value = name;
-                    document.getElementById('variantId').value = variantId;
-                    document.getElementById('editVariantTitle').value = variantTitle;
-                    document.getElementById('editPrice').value = price;
+      $('#itemId').val($btn.data('id') || '');
+      $('#itemName').val($btn.data('name') || '');
+      $('#variantId').val($btn.data('variant-id') || '');
+      $('#editVariantTitle').val($btn.data('variant-title') || '').trigger('change');
+      $('#editPrice').val($btn.data('price') || '');
 
-                    const modal = new bootstrap.Modal(document.getElementById('modaldemo2'));
-                    modal.show();
-                });
-            });
-        });
-    </script>
+      $('#modaldemo2').modal('show');
+    });
+  });
+</script>
+
 @endsection
