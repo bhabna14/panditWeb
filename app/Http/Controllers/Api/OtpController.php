@@ -12,8 +12,6 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Models\UserDevice;
-use Illuminate\Support\Facades\DB;
-
 
 class OtpController extends Controller
 {
@@ -90,50 +88,36 @@ class OtpController extends Controller
             'phone' => 'required|string',
         ]);
 
-        // normalize phone (keeps digits only)
-        $phone = preg_replace('/\D+/', '', $request->phone ?? '');
         $otp = random_int(100000, 999999);
-        $shortToken = Str::upper(Str::random(6)); // max 15 chars allowed, keep it short
+        $phone = $request->phone;
+        $shortToken = Str::random(6); // max 15 characters
 
-        // Create/update user + referral_code atomically
-        try {
-            DB::beginTransaction();
+        // Check if user already exists
+        $pandit = User::where('mobile_number', $phone)->first();
 
-            // lock the row if it exists to prevent two parallel requests creating codes at once
-            $pandit = User::where('mobile_number', $phone)->lockForUpdate()->first();
+        if ($pandit) {
+            // ✅ Existing: update OTP
+            $pandit->otp = $otp;
+
+            // (Optional) backfill referral_code if missing
+            // if (empty($pandit->referral_code)) {
+            //     $pandit->referral_code = $this->generateReferralCode();
+            // }
+
+            $pandit->save();
             $status = 'existing';
-
-            if ($pandit) {
-                // existing user: update OTP, and backfill referral_code if missing
-                $pandit->otp = $otp;
-
-                if (empty($pandit->referral_code)) {
-                    $pandit->referral_code = $this->generateReferralCode();
-                }
-
-                $pandit->save();
-            } else {
-                // new user: create with unique userid + referral_code
-                $pandit = User::create([
-                    'mobile_number' => $phone,
-                    'otp'           => $otp,
-                    'userid'        => $this->generateUserId(),
-                    'referral_code' => $this->generateReferralCode(),
-                ]);
-                $status = 'new';
-            }
-
-            DB::commit();
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to prepare OTP',
-                'error'   => $e->getMessage(),
-            ], 500);
+        } else {
+            // ✅ New: create with new user id AND a unique referral_code
+            $pandit = User::create([
+                'mobile_number'  => $phone,
+                'otp'            => $otp,
+                'userid'         => 'USER' . random_int(10000, 99999),
+                'referral_code'  => $this->generateReferralCode(), // ← new line
+            ]);
+            $status = 'new';
         }
 
-        // MSG91 WhatsApp template payload (unchanged)
+        // ✅ MSG91 WhatsApp template payload (unchanged)
         $payload = [
             "integrated_number" => env('MSG91_WA_NUMBER'),
             "content_type" => "template",
@@ -177,7 +161,7 @@ class OtpController extends Controller
         try {
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
-                'authkey'      => env('MSG91_AUTHKEY'),
+                'authkey' => env('MSG91_AUTHKEY'),
             ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
 
             $result = $response->json();
@@ -191,12 +175,13 @@ class OtpController extends Controller
             }
 
             return response()->json([
-                'success'        => true,
-                'message'        => 'OTP sent successfully',
-                'user_status'    => $status,
-                'token'          => $shortToken,
-                'referral_code'  => $pandit->referral_code,
-                'api_response'   => $result
+                'success'      => true,
+                'message'      => 'OTP sent successfully',
+                'user_status'  => $status,
+                'token'        => $shortToken,
+                // (Optional) expose referral_code for brand-new users:
+                // 'referral_code' => $status === 'new' ? $pandit->referral_code : null,
+                'api_response' => $result
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -269,16 +254,6 @@ class OtpController extends Controller
         } while ($exists);
 
         return $code;
-    }
-
-    private function generateUserId(): string
-    {
-        do {
-            $id = 'USER' . random_int(10000, 99999);
-            $exists = User::where('userid', $id)->exists();
-        } while ($exists);
-
-        return $id;
     }
 
 }

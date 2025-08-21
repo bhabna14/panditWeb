@@ -19,7 +19,7 @@ class FlowerVendorController extends Controller
         return view("admin/add-flower-vendors");
     }
 
-    public function saveVendorDetails(Request $request)
+public function saveVendorDetails(Request $request)
 {
     $request->validate([
         'vendor_name' => 'required|string|max:255',
