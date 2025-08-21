@@ -143,6 +143,37 @@ class FlowerVendorController extends Controller
         return view('admin.manage-flower-vendors', compact('vendor_details', 'flowers'));
     }
 
+    public function updateVendorFlowers(Request $request)
+    {
+        $request->validate([
+            'vendor_id'    => 'required|string',
+            'flower_ids'   => 'array',
+            'flower_ids.*' => 'integer',
+        ]);
+
+        $vendor = FlowerVendor::where('vendor_id', $request->vendor_id)->firstOrFail();
+
+        // Clean & validate incoming IDs to ensure they are valid "Flower" products
+        $incoming = collect($request->input('flower_ids', []))
+            ->filter(fn($id) => $id !== null && $id !== '')
+            ->map(fn($id) => (int) $id)
+            ->unique()
+            ->values();
+
+        $validFlowerIds = FlowerProduct::whereIn('product_id', $incoming)
+            ->where(function ($q) {
+                $q->where('category', 'Flower')->orWhere('category', 'flower');
+            })
+            ->pluck('product_id')
+            ->values()
+            ->all();
+
+        $vendor->flower_ids = $validFlowerIds; // will JSON-encode if cast present
+        $vendor->save();
+
+        return redirect()->back()->with('success', 'Flower list updated for vendor: ' . $vendor->vendor_name);
+    }
+
     public function vendorAllDetails($id){
 
         $pickupDetails = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
