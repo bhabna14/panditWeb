@@ -12,7 +12,6 @@ class FlowerVendor extends Model
     protected $table = 'flower__vendor_details';
 
     protected $fillable = [
-        'temple_id', 
         'vendor_id', 
         'vendor_name', 
         'phone_no', 
