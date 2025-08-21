@@ -3,12 +3,14 @@
 @section('content')
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">{{ isset($vendordetails) ? 'Edit Vendor Details' : 'Add Vendor Details' }}</span>
+            <span
+                class="main-content-title mg-b-0 mg-b-lg-1">{{ isset($vendordetails) ? 'Edit Vendor Details' : 'Add Vendor Details' }}</span>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item tx-15"><a href="{{ route('admin.managevendor') }}">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ isset($vendordetails) ? 'Edit Vendor' : 'Add Vendor' }}</li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    {{ isset($vendordetails) ? 'Edit Vendor' : 'Add Vendor' }}</li>
             </ol>
         </div>
     </div>
@@ -95,7 +97,8 @@
                                 <div class="form-group">
                                     <label for="vendor_category">Vendor Category <span style="color:red">*</span></label>
                                     <input type="text" class="form-control" id="vendor_category" name="vendor_category"
-                                        value="{{ old('vendor_category', $vendordetails->vendor_category ?? '') }}" required>
+                                        value="{{ old('vendor_category', $vendordetails->vendor_category ?? '') }}"
+                                        required>
                                     @error('vendor_category')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
@@ -132,35 +135,85 @@
                                 </div>
                             </div>
 
-                        
+
 
                         </div>
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="vendor_address">Vendor Address</label>
-                                <textarea name="vendor_address" class="form-control" id="vendor_address">{{$vendordetails->vendor_address}}</textarea>
+                                <textarea name="vendor_address" class="form-control" id="vendor_address">{{ $vendordetails->vendor_address }}</textarea>
                             </div>
                         </div>
-                    
+
 
                         <!-- Bank Details -->
                         <div class="row">
                             <div class="col-md-12 mt-4">
                                 <h4>Bank Details</h4>
-                               
+
                             </div>
                         </div>
+
+                        <!-- Flowers Provided (Category = Flower) -->
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <label class="form-label mb-0">Select Flowers</label>
+                                        <small class="text-muted d-block">Choose one or more flowers supplied by this
+                                            vendor.</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="text" id="flowerSearch" class="form-control"
+                                            placeholder="Search flowers..." style="min-width: 220px;">
+                                        <button type="button" class="btn btn-outline-primary"
+                                            id="selectAllFlowers">Select all</button>
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            id="clearAllFlowers">Clear</button>
+                                    </div>
+                                </div>
+
+                                @if (isset($flowers) && $flowers->count())
+                                    <div class="row" id="flowersGrid">
+                                        @foreach ($flowers as $flower)
+                                            <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-2 flower-item">
+                                                <div class="form-check p-2 border rounded">
+                                                    <input class="form-check-input flower-checkbox" type="checkbox"
+                                                        id="flower_{{ $flower->product_id }}" name="flower_ids[]"
+                                                        value="{{ $flower->product_id }}"
+                                                        {{ in_array($flower->product_id, $vendordetails->flower_ids ?? []) ? 'checked' : '' }}>
+                                                    <label class="form-check-label ms-1"
+                                                        for="flower_{{ $flower->product_id }}">
+                                                        {{ $flower->name }}
+                                                        @if (!empty($flower->odia_name))
+                                                            <small class="text-muted">({{ $flower->odia_name }})</small>
+                                                        @endif
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="alert alert-warning mb-0">
+                                        No flower products found for category <strong>Flower</strong>.
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+
 
                         <div id="bank-details-container">
                             @if (isset($vendordetails) && $vendordetails->vendorBanks->isNotEmpty())
                                 @foreach ($vendordetails->vendorBanks as $index => $bank)
-                                    <div class="bank-details" style="background-color: rgba(239, 227, 180, 0.5);padding: 20px;border-radius: 15px;margin: 5px">
+                                    <div class="bank-details"
+                                        style="background-color: rgba(239, 227, 180, 0.5);padding: 20px;border-radius: 15px;margin: 5px">
                                         <input type="hidden" name="bank_id[]" value="{{ $bank->id }}">
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="bank_name_{{ $index }}">Bank Name</label>
-                                                    <input type="text" class="form-control" id="bank_name_{{ $index }}" name="bank_name[]"
+                                                    <input type="text" class="form-control"
+                                                        id="bank_name_{{ $index }}" name="bank_name[]"
                                                         value="{{ old('bank_name.' . $index, $bank->bank_name ?? '') }}">
                                                     @error('bank_name.' . $index)
                                                         <small class="text-danger">{{ $message }}</small>
@@ -170,7 +223,8 @@
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="account_no_{{ $index }}">Account Number</label>
-                                                    <input type="number" class="form-control" id="account_no_{{ $index }}" name="account_no[]"
+                                                    <input type="number" class="form-control"
+                                                        id="account_no_{{ $index }}" name="account_no[]"
                                                         value="{{ old('account_no.' . $index, $bank->account_no ?? '') }}">
                                                     @error('account_no.' . $index)
                                                         <small class="text-danger">{{ $message }}</small>
@@ -180,7 +234,8 @@
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="ifsc_code_{{ $index }}">IFSC Code</label>
-                                                    <input type="text" class="form-control" id="ifsc_code_{{ $index }}" name="ifsc_code[]"
+                                                    <input type="text" class="form-control"
+                                                        id="ifsc_code_{{ $index }}" name="ifsc_code[]"
                                                         value="{{ old('ifsc_code.' . $index, $bank->ifsc_code ?? '') }}">
                                                     @error('ifsc_code.' . $index)
                                                         <small class="text-danger">{{ $message }}</small>
@@ -190,16 +245,18 @@
                                             <div class="col-md-4">
                                                 <div class="form-group">
                                                     <label for="upi_id_{{ $index }}">UPI Number/ID</label>
-                                                    <input type="text" class="form-control" id="upi_id_{{ $index }}" name="upi_id[]"
+                                                    <input type="text" class="form-control"
+                                                        id="upi_id_{{ $index }}" name="upi_id[]"
                                                         value="{{ old('upi_id.' . $index, $bank->upi_id ?? '') }}">
                                                     @error('upi_id.' . $index)
                                                         <small class="text-danger">{{ $message }}</small>
                                                     @enderror
                                                 </div>
                                             </div>
-                                           
+
                                         </div>
-                                        <button type="button" class="btn btn-danger remove-bank-section">Remove Bank Section</button>
+                                        <button type="button" class="btn btn-danger remove-bank-section">Remove Bank
+                                            Section</button>
                                     </div>
                                 @endforeach
                             @else
@@ -209,7 +266,8 @@
 
                         <!-- Submit Button -->
                         <div class="form-group text-center">
-                            <button type="button" id="add-bank-section" class="btn btn-success">Add Bank Section</button>
+                            <button type="button" id="add-bank-section" class="btn btn-success">Add Bank
+                                Section</button>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                     </form>
@@ -220,11 +278,11 @@
 @endsection
 
 @section('scripts')
-<script>
-   $(document).ready(function() {
-    $('#add-bank-section').on('click', function() {
-        const index = $('#bank-details-container .bank-details').length;
-        const bankSection = `
+    <script>
+        $(document).ready(function() {
+            $('#add-bank-section').on('click', function() {
+                const index = $('#bank-details-container .bank-details').length;
+                const bankSection = `
             <div class="bank-details" style="background-color: rgba(239, 227, 180, 0.5); padding: 20px; border-radius: 15px; margin: 5px">
                 <input type="hidden" name="bank_id[]" value="">
                 <div class="row">
@@ -255,17 +313,14 @@
                 </div>
                 <button type="button" class="btn btn-danger remove-bank-section">Remove Bank Section</button>
             </div>`;
-        $('#bank-details-container').append(bankSection);
-    });
+                $('#bank-details-container').append(bankSection);
+            });
 
-    // Remove bank section
-    $('#bank-details-container').on('click', '.remove-bank-section', function() {
-        $(this).closest('.bank-details').remove();
-    });
-});
-
-</script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+            // Remove bank section
+            $('#bank-details-container').on('click', '.remove-bank-section', function() {
+                $(this).closest('.bank-details').remove();
+            });
+        });
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 @endsection
-

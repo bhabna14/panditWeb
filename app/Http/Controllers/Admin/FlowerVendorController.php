@@ -157,62 +157,83 @@ public function saveVendorDetails(Request $request)
         }
     }
 
-    public function editVendorDetails($id)
-    {
-        $vendordetails = FlowerVendor::with('vendorBanks')->findOrFail($id);
-        return view('admin.edit-flower-vendor', compact('vendordetails'));
-    }
+   public function editVendorDetails($id)
+{
+    $vendordetails = FlowerVendor::with('vendorBanks')->findOrFail($id);
 
-    public function updateVendorDetails(Request $request, $id)
-    {
-        // Validate the request
-        $validatedData = $request->validate([
-            'vendor_name' => 'required|string|max:255',
-            'phone_no' => 'required|numeric',
-            'email_id' => 'nullable|email',
-            'vendor_category' => 'required|string|max:255',
-            'payment_type' => 'nullable|string|max:255',
-            'vendor_gst' => 'nullable|string|max:15',
-            'vendor_address' => 'nullable|string|max:255',
-            'bank_name.*' => 'nullable|string|max:255',
-            'account_no.*' => 'nullable|numeric',
-            'ifsc_code.*' => 'nullable|string|max:11',
-            'upi_id.*' => 'nullable|string|max:255',
-        ]);
-    
-        DB::beginTransaction();
-    
-        try {
-            // Update vendor details
-            $vendor = FlowerVendor::findOrFail($id);
-            $vendor->update($validatedData);
-    
-            // Handle bank details
-            $bankIds = $request->bank_id ?? [];
-            foreach ($bankIds as $index => $bankId) {
-                $bankData = [
-                    'bank_name' => $request->bank_name[$index] ?? null,
-                    'account_no' => $request->account_no[$index] ?? null,
-                    'ifsc_code' => $request->ifsc_code[$index] ?? null,
-                    'upi_id' => $request->upi_id[$index] ?? null,
-                ];
-    
-                if ($bankId) {
-                    // Update existing bank detail
-                    $vendor->vendorBanks()->where('id', $bankId)->update($bankData);
-                } else {
-                    // Create a new bank detail
-                    $vendor->vendorBanks()->create($bankData);
+    // Get all flower products for checkbox list
+    $flowers = FlowerProduct::where(function ($q) {
+            $q->where('category', 'Flower')->orWhere('category', 'flower');
+        })
+        ->orderBy('name')
+        ->get(['product_id', 'name', 'odia_name']);
+
+    return view('admin.edit-flower-vendor', compact('vendordetails', 'flowers'));
+}
+
+public function updateVendorDetails(Request $request, $id)
+{
+    $validated = $request->validate([
+        'vendor_name'     => 'required|string|max:255',
+        'phone_no'        => 'required|string|max:20',
+        'vendor_category' => 'required|string|max:255',
+        'email_id'        => 'nullable|email|max:255',
+        'payment_type'    => 'nullable|in:UPI,Bank,Cash',
+        'vendor_gst'      => 'nullable|string|max:20',
+        'vendor_address'  => 'nullable|string|max:500',
+        'flower_ids'      => 'nullable|array',
+        'flower_ids.*'    => 'nullable|integer',
+        'bank_id'         => 'nullable|array',
+        'bank_name'       => 'nullable|array',
+        'account_no'      => 'nullable|array',
+        'ifsc_code'       => 'nullable|array',
+        'upi_id'          => 'nullable|array',
+    ]);
+
+    $vendor = FlowerVendor::findOrFail($id);
+
+    // Update vendor
+    $vendor->update([
+        'vendor_name'     => $validated['vendor_name'],
+        'phone_no'        => $validated['phone_no'],
+        'email_id'        => $validated['email_id'] ?? null,
+        'vendor_category' => $validated['vendor_category'],
+        'payment_type'    => $validated['payment_type'] ?? null,
+        'vendor_gst'      => $validated['vendor_gst'] ?? null,
+        'vendor_address'  => $validated['vendor_address'] ?? null,
+        'flower_ids'      => $validated['flower_ids'] ?? [],
+    ]);
+
+    // Update Bank Details
+    if (!empty($validated['bank_name'])) {
+        foreach ($validated['bank_name'] as $index => $bankName) {
+            $bankId = $validated['bank_id'][$index] ?? null;
+
+            if ($bankId) {
+                // Update existing bank
+                $bank = FlowerVendorBank::find($bankId);
+                if ($bank) {
+                    $bank->update([
+                        'bank_name'  => $bankName,
+                        'account_no' => $validated['account_no'][$index] ?? null,
+                        'ifsc_code'  => $validated['ifsc_code'][$index] ?? null,
+                        'upi_id'     => $validated['upi_id'][$index] ?? null,
+                    ]);
                 }
+            } else {
+                // New bank
+                FlowerVendorBank::create([
+                    'vendor_id'  => $vendor->vendor_id,
+                    'bank_name'  => $bankName,
+                    'account_no' => $validated['account_no'][$index] ?? null,
+                    'ifsc_code'  => $validated['ifsc_code'][$index] ?? null,
+                    'upi_id'     => $validated['upi_id'][$index] ?? null,
+                ]);
             }
-    
-            DB::commit();
-    
-            return redirect()->route('admin.managevendor')->with('success', 'Vendor details updated successfully!');
-        } catch (\Exception $e) {
-            DB::rollBack();
-    
-            return redirect()->back()->with('error', 'An error occurred while saving vendor details. Please try again.');
         }
     }
+
+    return redirect()->back()->with('success', 'Vendor details updated successfully!');
+}
+
 }
