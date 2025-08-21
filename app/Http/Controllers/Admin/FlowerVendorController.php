@@ -181,7 +181,7 @@ public function updateVendorDetails(Request $request, $id)
         'vendor_gst'      => 'nullable|string|max:20',
         'vendor_address'  => 'nullable|string|max:500',
         'flower_ids'      => 'nullable|array',
-        'flower_ids.*'    => 'nullable|integer',
+        'flower_ids.*'    => 'nullable|string',
         'bank_id'         => 'nullable|array',
         'bank_name'       => 'nullable|array',
         'account_no'      => 'nullable|array',
