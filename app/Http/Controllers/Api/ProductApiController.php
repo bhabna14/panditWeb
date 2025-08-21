@@ -297,93 +297,34 @@ class ProductApiController extends Controller
             ], 500);
         }
     }
+ 
 
-  public function ProductOrdersList()
+    
+    public function ProductOrdersList()
 {
     try {
-        $authUser = Auth::guard('sanctum')->user();
-        if (!$authUser) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
+        
+        $userId = Auth::guard('sanctum')->user()->userid;
 
-        $userId = $authUser->userid;
-
-        // ===== Direct orders (no request_id) =====
         $subscriptionsOrder = ProductOrder::whereNull('request_id')
             ->where('user_id', $userId)
-            ->with([
-                'subscription',
-                'flowerPayments',
-                'user',
-                'address.localityDetails',
-                // Load product + packageItems + nested item & variant
-                'flowerProduct' => function ($q) {
-                    $q->with([
-                        'packageItems' => function ($pi) {
-                            $pi->with([
-                                'item:id,item_name',                 // Poojaitemlists
-                                'variant:id,item_id,title,price',   // Variant
-                            ]);
-                        },
-                    ]);
-                },
-            ])
+            ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($order) {
-                // Image URL for product
                 if ($order->flowerProduct && $order->flowerProduct->product_image) {
-                    $order->flowerProduct->product_image_url = url($order->flowerProduct->product_image);
+                    $order->flowerProduct->product_image_url = url( $order->flowerProduct->product_image);
                 }
-
-                // If product is a package → expose package_items (and hide raw relation)
-                if ($order->flowerProduct) {
-                    $category = strtolower($order->flowerProduct->category ?? '');
-
-                    if ($category === 'package') {
-                        $order->flowerProduct->package_items = $order->flowerProduct->packageItems
-                            ->map(function ($pi) {
-                                return [
-                                    'product_id'    => $pi->product_id,
-                                    'item_id'       => $pi->item_id,
-                                    'item_name'     => optional($pi->item)->item_name,
-                                    'variant_id'    => $pi->variant_id,
-                                    'variant_name'  => optional($pi->variant)->title,
-                                    'price'         => optional($pi->variant)->price,
-                                ];
-                            })
-                            ->values();
-                        // Hide the raw relation for a tidy payload
-                        $order->flowerProduct->setRelation('packageItems', collect());
-                    } else {
-                        // Not a package → blank relation and package_items
-                        $order->flowerProduct->setRelation('packageItems', collect());
-                        $order->flowerProduct->package_items = collect();
-                    }
-                }
-
                 return $order;
             });
 
-        // ===== Requested orders =====
+
         $requestedOrders = ProductRequest::where('user_id', $userId)
             ->with([
                 'order' => function ($query) {
                     $query->with('flowerPayments');
                 },
-                'flowerProduct' => function ($q) {
-                    $q->with([
-                        'packageItems' => function ($pi) {
-                            $pi->with([
-                                'item:id,item_name',
-                                'variant:id,item_id,title,price',
-                            ]);
-                        },
-                    ]);
-                },
+                'flowerProduct',
                 'user',
                 'address.localityDetails',
                 'flowerRequestItems',
@@ -391,35 +332,9 @@ class ProductApiController extends Controller
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($request) {
-                // Image URL for product
                 if ($request->flowerProduct && $request->flowerProduct->product_image) {
                     $request->flowerProduct->product_image_url = url($request->flowerProduct->product_image);
                 }
-
-                if ($request->flowerProduct) {
-                    $category = strtolower($request->flowerProduct->category ?? '');
-
-                    if ($category === 'package') {
-                        $request->flowerProduct->package_items = $request->flowerProduct->packageItems
-                            ->map(function ($pi) {
-                                return [
-                                    'product_id'    => $pi->product_id,
-                                    'item_id'       => $pi->item_id,
-                                    'item_name'     => optional($pi->item)->item_name,
-                                    'variant_id'    => $pi->variant_id,
-                                    'variant_name'  => optional($pi->variant)->title,
-                                    'price'         => optional($pi->variant)->price,
-                                ];
-                            })
-                            ->values();
-
-                        $request->flowerProduct->setRelation('packageItems', collect());
-                    } else {
-                        $request->flowerProduct->setRelation('packageItems', collect());
-                        $request->flowerProduct->package_items = collect();
-                    }
-                }
-
                 return $request;
             });
 
@@ -427,12 +342,11 @@ class ProductApiController extends Controller
             'success' => 200,
             'data' => [
                 'subscriptions_order' => $subscriptionsOrder,
-                'requested_orders'    => $requestedOrders,
+                'requested_orders' => $requestedOrders,
             ],
         ], 200);
-
-    } catch (\Throwable $e) {
-        \Log::error('Failed to fetch orders list: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+    } catch (\Exception $e) {
+        \Log::error('Failed to fetch orders list: ' . $e->getMessage());
 
         return response()->json([
             'success' => false,
