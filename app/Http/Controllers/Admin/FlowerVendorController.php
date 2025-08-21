@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\FlowerVendor;
 use App\Models\FlowerVendorBank;
 use App\Models\FlowerPickupDetails;
+use App\Models\FlowerProduct;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -15,9 +16,18 @@ use RealRashid\SweetAlert\Facades\Alert;
 
 class FlowerVendorController extends Controller
 {
-    public function addVendorDetails(){
-        return view("admin/add-flower-vendors");
-    }
+
+public function addVendorDetails()
+{
+    $flowers = FlowerProduct::where(function ($q) {
+            $q->where('category', 'Flower')->orWhere('category', 'flower');
+        })
+        // ->where('status', 'active') // uncomment if you only want active items
+        ->orderBy('name')
+        ->get(['product_id', 'name', 'odia_name']);
+
+    return view('admin/add-flower-vendors', compact('flowers'));
+}
 
 public function saveVendorDetails(Request $request)
 {
