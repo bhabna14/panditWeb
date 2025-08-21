@@ -189,32 +189,29 @@
     </div>
 @endsection
 @section('scripts')
-    <!-- Include SweetAlert JS -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     @if ($errors->any())
-        // Show first validation error
+        let errorList = `{!! implode('<br>', $errors->all()) !!}`;
         Swal.fire({
             icon: 'error',
             title: 'Validation Error',
-            text: '{{ $errors->first() }}',
+            html: errorList, // show all validation errors
             confirmButtonColor: '#d33'
         });
     @endif
 
     @if (session('error'))
-        // Show custom error (from try/catch rollback)
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: '{{ session('error') }}',
+            text: '{{ session('error') }}', // 👈 this will now show the actual DB or logic error
             confirmButtonColor: '#d33'
         });
     @endif
 
     @if (session('success'))
-        // Show success message
         Swal.fire({
             icon: 'success',
             title: 'Success',

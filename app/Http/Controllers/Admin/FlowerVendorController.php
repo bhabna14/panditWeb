@@ -116,18 +116,20 @@ public function saveVendorDetails(Request $request)
         return redirect()
             ->route('admin.addvendor')
             ->with('success', 'Vendor details saved successfully along with bank details.');
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        \Log::error('Error saving vendor details', [
-            'error' => $e->getMessage(),
-            'trace' => $e->getTraceAsString()
-        ]);
+    }catch (\Throwable $e) {
+    DB::rollBack();
 
-        return redirect()
-            ->back()
-            ->withInput()
-            ->with('error', 'An error occurred while saving vendor details. Please try again.');
-    }
+    \Log::error('Error saving vendor details', [
+        'error' => $e->getMessage(),
+        'trace' => $e->getTraceAsString()
+    ]);
+
+    return redirect()
+        ->back()
+        ->withInput()
+        ->with('error', $e->getMessage()); // 👈 show actual error
+}
+
 }
 
 
