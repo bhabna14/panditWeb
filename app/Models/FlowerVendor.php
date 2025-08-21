@@ -9,6 +9,10 @@ class FlowerVendor extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'vendor_id';   // If vendor_id is your PK
+    public $incrementing = false;          // Because it's string, not auto-increment
+    protected $keyType = 'string';
+
     protected $table = 'flower__vendor_details';
 
     protected $fillable = [
