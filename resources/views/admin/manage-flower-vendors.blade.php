@@ -17,7 +17,8 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addVendorDetails') }}" class="btn btn-info text-white">Add Vendor</a></li>
+                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.addVendorDetails') }}"
+                        class="btn btn-info text-white">Add Vendor</a></li>
                 <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Temple</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Vendor</li>
             </ol>
@@ -49,6 +50,7 @@
                                     <th class="border-bottom-0">Gst</th>
                                     <th class="border-bottom-0">Vendor Address</th>
                                     <th class="border-bottom-0">Bank Details</th>
+                                    <th class="border-bottom-0">Flower List</th>
                                     <th class="border-bottom-0">Action</th>
                                 </tr>
                             </thead>
@@ -56,7 +58,9 @@
                                 @foreach ($vendor_details as $index => $vendor)
                                     <tr>
                                         <td>{{ $index + 1 }}</td>
-                                        <td><a class="text-danger" href="{{ route('admin.vendorAllDetails', $vendor->vendor_id) }}">{{ $vendor->vendor_name }}</a></td>
+                                        <td><a class="text-danger"
+                                                href="{{ route('admin.vendorAllDetails', $vendor->vendor_id) }}">{{ $vendor->vendor_name }}</a>
+                                        </td>
                                         <td>{{ $vendor->phone_no }}</td>
                                         <td>{{ $vendor->email_id }}</td>
                                         <td>{{ $vendor->vendor_category }}</td>
@@ -64,17 +68,28 @@
                                         <td>{{ $vendor->vendor_gst }}</td>
                                         <td>{{ $vendor->vendor_address }}</td>
                                         <td>
-                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" 
-                                            data-bs-target="#vendorModal" 
-                                            data-vendor="{{ $vendor }}">
-                                            View Banks
-                                        </button>
+                                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#vendorModal" data-vendor="{{ $vendor }}">
+                                                View Banks
+                                            </button>
                                         </td>
                                         <td>
-                                            <form action="{{ route('admin.deletevendor', $vendor->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                            <button type="button" class="btn btn-info" data-bs-toggle="modal"
+                                                data-bs-target="#flowerModal"
+                                                data-flower-ids="{{ json_encode($vendor->flower_ids) }}"
+                                                data-flower-list="{{ $flowers->whereIn('product_id', $vendor->flower_ids ?? [])->pluck('name')->implode(', ') }}">
+                                                View Flowers
+                                            </button>
+                                        </td>
+
+                                        <td>
+                                            <form action="{{ route('admin.deletevendor', $vendor->id) }}" method="POST"
+                                                onsubmit="return confirm('Are you sure you want to delete this item?');">
                                                 @csrf
-                                                <button type="submit" class="btn btn-md btn-danger"><i class="fa fa-trash"></i></button>
-                                                <a href="{{ url('admin/edit-vendor-details', $vendor->id) }}" class="btn btn-md btn-primary"><i class="fa fa-edit"></i></a>
+                                                <button type="submit" class="btn btn-md btn-danger"><i
+                                                        class="fa fa-trash"></i></button>
+                                                <a href="{{ url('admin/edit-vendor-details', $vendor->id) }}"
+                                                    class="btn btn-md btn-primary"><i class="fa fa-edit"></i></a>
                                             </form>
                                         </td>
                                     </tr>
@@ -82,6 +97,25 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Flower List Modal -->
+    <div class="modal fade" id="flowerModal" tabindex="-1" aria-labelledby="flowerModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="flowerModalLabel">Vendor Flower List</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="flowerList" class="list-group">
+                        <!-- Flower items will be injected here by JS -->
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -96,8 +130,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    @if(!empty($vendor->vendorBanks) && $vendor->vendorBanks->count())
-                      
+                    @if (!empty($vendor->vendorBanks) && $vendor->vendorBanks->count())
                         <table class="table table-bordered" id="bank-details-table">
                             <thead>
                                 <tr>
@@ -109,13 +142,13 @@
                                 </tr>
                             </thead>
                             <tbody id="bank-details-body">
-                                @foreach($vendor->vendorBanks as $bank)
-                                <tr>
-                                <td>{{ $bank->bank_name }}</td>
-                                <td>{{ $bank->account_no }}</td>
-                                <td>{{ $bank->ifsc_code }}</td>
-                                <td>{{ $bank->upi_id }}</td>
-                            </tr>
+                                @foreach ($vendor->vendorBanks as $bank)
+                                    <tr>
+                                        <td>{{ $bank->bank_name }}</td>
+                                        <td>{{ $bank->account_no }}</td>
+                                        <td>{{ $bank->ifsc_code }}</td>
+                                        <td>{{ $bank->upi_id }}</td>
+                                    </tr>
                                 @endforeach
 
 
@@ -131,7 +164,6 @@
 @endsection
 
 @section('scripts')
-   
     <!-- Internal Data tables -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
@@ -158,5 +190,32 @@
         setTimeout(function() {
             document.getElementById('Messages').style.display = 'none';
         }, 3000);
+    </script>
+    <script>
+        const allFlowers = @json($flowers);
+
+        // When modal opens
+        var flowerModal = document.getElementById('flowerModal');
+        flowerModal.addEventListener('show.bs.modal', function(event) {
+            var button = event.relatedTarget;
+            var flowerIds = JSON.parse(button.getAttribute('data-flower-ids') || '[]');
+
+            var flowerListContainer = document.getElementById('flowerList');
+            flowerListContainer.innerHTML = '';
+
+            if (flowerIds.length > 0) {
+                flowerIds.forEach(id => {
+                    let flower = allFlowers.find(f => f.product_id == id);
+                    if (flower) {
+                        let li = document.createElement('li');
+                        li.className = 'list-group-item';
+                        li.textContent = flower.name + (flower.odia_name ? ` (${flower.odia_name})` : '');
+                        flowerListContainer.appendChild(li);
+                    }
+                });
+            } else {
+                flowerListContainer.innerHTML = '<li class="list-group-item text-muted">No flowers assigned.</li>';
+            }
+        });
     </script>
 @endsection
