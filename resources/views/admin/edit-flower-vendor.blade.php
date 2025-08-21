@@ -156,21 +156,7 @@
                         <!-- Flowers Provided (Category = Flower) -->
                         <div class="card mt-3">
                             <div class="card-body">
-                                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
-                                    <div>
-                                        <label class="form-label mb-0">Select Flowers</label>
-                                        <small class="text-muted d-block">Choose one or more flowers supplied by this
-                                            vendor.</small>
-                                    </div>
-                                    <div class="d-flex gap-2">
-                                        <input type="text" id="flowerSearch" class="form-control"
-                                            placeholder="Search flowers..." style="min-width: 220px;">
-                                        <button type="button" class="btn btn-outline-primary"
-                                            id="selectAllFlowers">Select all</button>
-                                        <button type="button" class="btn btn-outline-secondary"
-                                            id="clearAllFlowers">Clear</button>
-                                    </div>
-                                </div>
+                               
 
                                 @if (isset($flowers) && $flowers->count())
                                     <div class="row" id="flowersGrid">
