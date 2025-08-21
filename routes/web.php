@@ -359,6 +359,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::post('/save-vendor-details', 'saveVendorDetails')->name('admin.saveVendorDetails');
         Route::get('/manage-vendor-details', 'manageVendorDetails')->name('admin.managevendor');
         Route::get('/vendor-all-details/{id}', 'vendorAllDetails')->name('admin.vendorAllDetails');
+        Route::post('/admin/vendor/update-flowers', 'updateVendorFlowers')->name('admin.vendor.updateFlowers');
 
         Route::post('/delete-vendor-details/{imad}', 'deleteVendorDetails')->name('admin.deletevendor');
         Route::get('/edit-vendor-details/{id}', 'editVendorDetails')->name('admin.editVendorDetails');

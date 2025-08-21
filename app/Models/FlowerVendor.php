@@ -20,9 +20,14 @@ class FlowerVendor extends Model
         'vendor_category', 
         'payment_type', 
         'vendor_gst', 
-        'vendor_address', 
-       
+        'vendor_address',
+        'flower_ids',
     ];
+
+     protected $casts = [
+        'flower_ids' => 'array',
+    ];
+
 
     public function vendorBanks()
     {
