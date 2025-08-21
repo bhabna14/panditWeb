@@ -52,7 +52,6 @@ class FlowerVendorController extends Controller
 
         // flower ids (optional multi-select)
         'flower_ids'      => 'array',
-        'flower_ids.*'    => 'integer',
     ]);
 
     DB::beginTransaction();
