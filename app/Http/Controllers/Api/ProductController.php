@@ -109,91 +109,56 @@ public function getCurrentOrders(Request $request)
         }
     }
 
-    public function ProductOrdersList()
-    {
-        try {
-            $userId = Auth::guard('sanctum')->user()->userid;
 
-            // Direct orders (no request_id)
-            $subscriptionsOrder = ProductOrder::whereNull('request_id')
-                ->where('user_id', $userId)
-                ->with([
-                    'subscription',
-                    'flowerPayments',
-                    'user',
-                    'address.localityDetails',
-                    // ⬇️ load packageItems under flowerProduct
-                    'flowerProduct' => function ($q) {
-                        $q->with('packageItems');
-                    },
-                ])
-                ->orderBy('id', 'desc')
-                ->get()
-                ->map(function ($order) {
-                    if ($order->flowerProduct && $order->flowerProduct->product_image) {
-                        $order->flowerProduct->product_image_url = url($order->flowerProduct->product_image);
-                    }
+public function packageItems()
+{
+    // Eager-load package items + their item & variant to avoid N+1 queries
+    $products = FlowerProduct::where('status', 'active')->where('category', 'Package')
+        ->with([
+            'packageItems:id,product_id,item_id,variant_id',
+            'packageItems.item:id,item_name,product_type,status',
+            'packageItems.variant:id,item_id,title,price',
+        ])
+        ->get();
 
-                    // Only keep packageItems visible for package category
-                    if ($order->flowerProduct) {
-                        $category = strtolower($order->flowerProduct->category ?? '');
-                        if ($category !== 'package') {
-                            // hide relation for non-package products (keeps payload clean)
-                            $order->flowerProduct->setRelation('packageItems', collect());
-                        }
-                    }
+    // Transform response: attach package_items only for Package category
+    $data = $products->map(function ($p) {
+        $base = [
+            'product_id'         => $p->product_id,
+            'name'               => $p->name,
+            'odia_name'          => $p->odia_name,
+            'product_image'      => $p->product_image,
+            'price'              => $p->price,
+            'mrp'                => $p->mrp,
+            'description'        => $p->description,
+            'category'           => $p->category,
+            'stock'              => $p->stock,
+            'duration'           => $p->duration,
+            'benefits'           => $p->benefits,
+            'status'             => $p->status,
+        ];
 
-                    return $order;
-                });
-
-            // Requested orders
-            $requestedOrders = ProductRequest::where('user_id', $userId)
-                ->with([
-                    'order' => function ($query) {
-                        $query->with('flowerPayments');
-                    },
-                    // ⬇️ load packageItems under flowerProduct
-                    'flowerProduct' => function ($q) {
-                        $q->with('packageItems');
-                    },
-                    'user',
-                    'address.localityDetails',
-                    'flowerRequestItems',
-                ])
-                ->orderBy('id', 'desc')
-                ->get()
-                ->map(function ($request) {
-                    if ($request->flowerProduct && $request->flowerProduct->product_image) {
-                        $request->flowerProduct->product_image_url = url($request->flowerProduct->product_image);
-                    }
-
-                    // Only keep packageItems visible for package category
-                    if ($request->flowerProduct) {
-                        $category = strtolower($request->flowerProduct->category ?? '');
-                        if ($category !== 'package') {
-                            $request->flowerProduct->setRelation('packageItems', collect());
-                        }
-                    }
-
-                    return $request;
-                });
-
-            return response()->json([
-                'success' => 200,
-                'data' => [
-                    'subscriptions_order' => $subscriptionsOrder,
-                    'requested_orders'    => $requestedOrders,
-                ],
-            ], 200);
-
-        } catch (\Exception $e) {
-            \Log::error('Failed to fetch orders list: ' . $e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve orders list.',
-            ], 500);
+        if (Str::lower($p->category) === 'package') {
+            $base['package_items'] = $p->packageItems
+                ->map(function ($pi) {
+                    return [
+                        'item_id'        => $pi->item_id,
+                        'item_name'      => optional($pi->item)->item_name,
+                        'variant_id'     => $pi->variant_id,
+                        'variant_title'  => optional($pi->variant)->title,
+                        'variant_price'  => optional($pi->variant)->price,
+                    ];
+                })
+                ->values();
         }
-    }
 
+        return $base;
+    });
+
+    return response()->json([
+        'status'  => 200,
+        'message' => 'Products retrieved successfully.',
+        'data'    => $data,
+    ], 200);
+}
 }
