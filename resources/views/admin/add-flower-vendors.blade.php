@@ -189,7 +189,7 @@
     </div>
 @endsection
 @section('scripts')
-   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     @if ($errors->any())
@@ -206,7 +206,7 @@
         Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: '{{ session('error') }}', // 👈 this will now show the actual DB or logic error
+            text: '{{ session('error') }}', // show actual DB error
             confirmButtonColor: '#d33'
         });
     @endif
@@ -220,6 +220,7 @@
         });
     @endif
 </script>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
