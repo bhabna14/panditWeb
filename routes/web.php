@@ -362,7 +362,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
 
         Route::post('/delete-vendor-details/{imad}', 'deleteVendorDetails')->name('admin.deletevendor');
         Route::get('/edit-vendor-details/{id}', 'editVendorDetails')->name('admin.editVendorDetails');
-        Route::put('/update-vendor-details/{id}', 'updateVendorDetails')->name('admin.updateVendorDetails');
+        Route::put('/update-vendor-details/{vendor_id}',  'updateVendorDetails')->name('admin.updateVendorDetails');
     });
 
     Route::controller(FlowerPickupController::class)->group(function() {

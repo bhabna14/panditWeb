@@ -53,9 +53,10 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="POST" action="{{ route('admin.updateVendorDetails', $vendordetails->id) }}">
+                    <form method="POST" action="{{ route('admin.updateVendorDetails', $vendordetails->vendor_id) }}">
                         @csrf
                         @method('PUT')
+
 
                         <!-- Vendor Fields -->
                         <div class="row">
@@ -134,8 +135,6 @@
                                     @enderror
                                 </div>
                             </div>
-
-
 
                         </div>
                         <div class="col-md-12">
