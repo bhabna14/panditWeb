@@ -188,7 +188,6 @@
     </div>
 @endsection
 @section('scripts')
-@section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         @if(session('success'))
@@ -207,7 +206,6 @@
             })
         @endif
     </script>
-@endsection
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
