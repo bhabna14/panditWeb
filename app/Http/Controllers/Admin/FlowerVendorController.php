@@ -29,77 +29,64 @@ class FlowerVendorController extends Controller
 
         return view('admin/add-flower-vendors', compact('flowers'));
     }
-
-    
 public function saveVendorDetails(Request $request)
 {
-    DB::beginTransaction();
-
     try {
-        // Normalize flower ids (no strtoupper)
-        $incomingFlowerIds = collect($request->input('flower_ids', []))
-            ->filter()
-            ->map(fn($id) => trim($id))
-            ->unique()
-            ->values();
+        // Validate request
+        $validated = $request->validate([
+            'vendor_name'     => 'required|string|max:255',
+            'phone_no'        => 'required|string|max:20',
+            'vendor_category' => 'required|string|max:255',
+            'email_id'        => 'nullable|email|max:255',
+            'payment_type'    => 'nullable|in:UPI,Bank,Cash',
+            'vendor_gst'      => 'nullable|string|max:20',
+            'vendor_address'  => 'nullable|string|max:500',
+            'flower_ids'      => 'nullable|array',
+            'flower_ids.*'    => 'nullable|string',
 
-        // Only valid flower products (category must be Flower)
-        $validFlowerIds = FlowerProduct::whereIn('product_id', $incomingFlowerIds)
-            ->whereIn('category', ['Flower', 'flower'])
-            ->pluck('product_id')
-            ->values();
-
-        // Create vendor
-        $vendor = FlowerVendor::create([
-            'vendor_id'       => 'VENDOR-' . Str::upper(Str::random(10)),
-            'vendor_name'     => $request->vendor_name,
-            'phone_no'        => $request->phone_no,
-            'email_id'        => $request->email_id,
-            'vendor_category' => $request->vendor_category,
-            'payment_type'    => $request->payment_type,
-            'vendor_gst'      => $request->vendor_gst,
-            'vendor_address'  => $request->vendor_address,
-            'flower_ids'      => $validFlowerIds->all(), // must be JSON column
+            // Bank details
+            'bank_name'       => 'nullable|array',
+            'bank_name.*'     => 'nullable|string|max:255',
+            'account_no'      => 'nullable|array',
+            'account_no.*'    => 'nullable|string|max:32',
+            'ifsc_code'       => 'nullable|array',
+            'ifsc_code.*'     => 'nullable|string|max:15',
+            'upi_id'          => 'nullable|array',
+            'upi_id.*'        => 'nullable|string|max:64',
         ]);
 
-        // Save bank rows
-        $rows = max(
-            count($request->input('bank_name', [])),
-            count($request->input('account_no', [])),
-            count($request->input('ifsc_code', [])),
-            count($request->input('upi_id', []))
-        );
+        // Create vendor
+        $vendor = new FlowerVendor();
+        $vendor->vendor_id       = (string) \Str::uuid();   // unique ID
+        $vendor->vendor_name     = $validated['vendor_name'];
+        $vendor->phone_no        = $validated['phone_no'];
+        $vendor->email_id        = $validated['email_id'] ?? null;
+        $vendor->vendor_category = $validated['vendor_category'];
+        $vendor->payment_type    = $validated['payment_type'] ?? null;
+        $vendor->vendor_gst      = $validated['vendor_gst'] ?? null;
+        $vendor->vendor_address  = $validated['vendor_address'] ?? null;
+        $vendor->flower_ids      = $validated['flower_ids'] ?? [];
 
-        for ($i = 0; $i < $rows; $i++) {
-            $bankName  = trim($request->bank_name[$i]  ?? '');
-            $accountNo = trim($request->account_no[$i] ?? '');
-            $ifscCode  = strtoupper(trim($request->ifsc_code[$i] ?? ''));
-            $upiId     = trim($request->upi_id[$i] ?? '');
+        $vendor->save();
 
-            if ($bankName || $accountNo || $ifscCode || $upiId) {
-                FlowerVendorBank::create([
-                    'vendor_id'  => $vendor->vendor_id,
-                    'bank_name'  => $bankName ?: null,
-                    'account_no' => $accountNo ?: null,
-                    'ifsc_code'  => $ifscCode ?: null,
-                    'upi_id'     => $upiId ?: null,
-                ]);
+        // Save multiple bank details
+        if (!empty($validated['bank_name'])) {
+            foreach ($validated['bank_name'] as $index => $bankName) {
+                if (!empty($bankName) || !empty($validated['account_no'][$index]) || !empty($validated['upi_id'][$index])) {
+                    FlowerVendorBank::create([
+                        'vendor_id'  => $vendor->vendor_id,
+                        'bank_name'  => $bankName,
+                        'account_no' => $validated['account_no'][$index] ?? null,
+                        'ifsc_code'  => $validated['ifsc_code'][$index] ?? null,
+                        'upi_id'     => $validated['upi_id'][$index] ?? null,
+                    ]);
+                }
             }
         }
 
-        DB::commit();
-
-        return redirect()
-            ->route('admin.managevendor') // ✅ safer route
-            ->with('success', 'Vendor details saved successfully.');
-
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        // Debug actual error
-        return redirect()
-            ->back()
-            ->withInput()
-            ->with('error', "Error: {$e->getMessage()}");
+        return redirect()->back()->with('success', 'Vendor details saved successfully!');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Failed to save vendor. '.$e->getMessage());
     }
 }
 
