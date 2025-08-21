@@ -128,7 +128,6 @@
                             </div>
                         </div>
 
-
                         <div id="bank-details-container"
                             style="background-color: rgba(239, 227, 180, 0.5);padding: 20px;border-radius: 15px;margin: 5px">
                             <div class="bank-details">

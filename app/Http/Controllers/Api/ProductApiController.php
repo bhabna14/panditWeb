@@ -299,60 +299,58 @@ class ProductApiController extends Controller
     }
  
 
-    
     public function ProductOrdersList()
-{
-    try {
-        
-        $userId = Auth::guard('sanctum')->user()->userid;
+    {
+        try {
+            
+            $userId = Auth::guard('sanctum')->user()->userid;
 
-        $subscriptionsOrder = ProductOrder::whereNull('request_id')
-            ->where('user_id', $userId)
-            ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
-            ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($order) {
-                if ($order->flowerProduct && $order->flowerProduct->product_image) {
-                    $order->flowerProduct->product_image_url = url( $order->flowerProduct->product_image);
-                }
-                return $order;
-            });
+            $subscriptionsOrder = ProductOrder::whereNull('request_id')
+                ->where('user_id', $userId)
+                ->with(['subscription', 'flowerPayments', 'user', 'flowerProduct', 'address.localityDetails'])
+                ->orderBy('id', 'desc')
+                ->get()
+                ->map(function ($order) {
+                    if ($order->flowerProduct && $order->flowerProduct->product_image) {
+                        $order->flowerProduct->product_image_url = url( $order->flowerProduct->product_image);
+                    }
+                    return $order;
+                });
 
+            $requestedOrders = ProductRequest::where('user_id', $userId)
+                ->with([
+                    'order' => function ($query) {
+                        $query->with('flowerPayments');
+                    },
+                    'flowerProduct',
+                    'user',
+                    'address.localityDetails',
+                    'flowerRequestItems',
+                ])
+                ->orderBy('id', 'desc')
+                ->get()
+                ->map(function ($request) {
+                    if ($request->flowerProduct && $request->flowerProduct->product_image) {
+                        $request->flowerProduct->product_image_url = url($request->flowerProduct->product_image);
+                    }
+                    return $request;
+                });
 
-        $requestedOrders = ProductRequest::where('user_id', $userId)
-            ->with([
-                'order' => function ($query) {
-                    $query->with('flowerPayments');
-                },
-                'flowerProduct',
-                'user',
-                'address.localityDetails',
-                'flowerRequestItems',
-            ])
-            ->orderBy('id', 'desc')
-            ->get()
-            ->map(function ($request) {
-                if ($request->flowerProduct && $request->flowerProduct->product_image) {
-                    $request->flowerProduct->product_image_url = url($request->flowerProduct->product_image);
-                }
-                return $request;
-            });
+            return response()->json([
+                'success' => 200,
+                'data' => [
+                    'subscriptions_order' => $subscriptionsOrder,
+                    'requested_orders' => $requestedOrders,
+                ],
+            ], 200);
+        } catch (\Exception $e) {
+            \Log::error('Failed to fetch orders list: ' . $e->getMessage());
 
-        return response()->json([
-            'success' => 200,
-            'data' => [
-                'subscriptions_order' => $subscriptionsOrder,
-                'requested_orders' => $requestedOrders,
-            ],
-        ], 200);
-    } catch (\Exception $e) {
-        \Log::error('Failed to fetch orders list: ' . $e->getMessage());
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to retrieve orders list.',
-        ], 500);
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to retrieve orders list.',
+            ], 500);
+        }
     }
-}
-
+ 
 }
