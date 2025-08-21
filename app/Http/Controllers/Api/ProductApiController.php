@@ -301,9 +301,17 @@ class ProductApiController extends Controller
   public function ProductOrdersList()
 {
     try {
-        $userId = Auth::guard('sanctum')->user()->userid;
+        $authUser = Auth::guard('sanctum')->user();
+        if (!$authUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
 
-        // Direct orders (no request_id)
+        $userId = $authUser->userid;
+
+        // ===== Direct orders (no request_id) =====
         $subscriptionsOrder = ProductOrder::whereNull('request_id')
             ->where('user_id', $userId)
             ->with([
@@ -311,7 +319,7 @@ class ProductApiController extends Controller
                 'flowerPayments',
                 'user',
                 'address.localityDetails',
-                // Load flowerProduct + its packageItems + nested item & variant
+                // Load product + packageItems + nested item & variant
                 'flowerProduct' => function ($q) {
                     $q->with([
                         'packageItems' => function ($pi) {
@@ -326,12 +334,12 @@ class ProductApiController extends Controller
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($order) {
-                // Image URL
+                // Image URL for product
                 if ($order->flowerProduct && $order->flowerProduct->product_image) {
                     $order->flowerProduct->product_image_url = url($order->flowerProduct->product_image);
                 }
 
-                // Only expose package items (with names & price) if category is 'package'
+                // If product is a package → expose package_items (and hide raw relation)
                 if ($order->flowerProduct) {
                     $category = strtolower($order->flowerProduct->category ?? '');
 
@@ -348,11 +356,10 @@ class ProductApiController extends Controller
                                 ];
                             })
                             ->values();
-
-                        // (optional) hide the raw relation to keep payload clean
+                        // Hide the raw relation for a tidy payload
                         $order->flowerProduct->setRelation('packageItems', collect());
                     } else {
-                        // not a package → blank the relation AND package_items
+                        // Not a package → blank relation and package_items
                         $order->flowerProduct->setRelation('packageItems', collect());
                         $order->flowerProduct->package_items = collect();
                     }
@@ -361,13 +368,12 @@ class ProductApiController extends Controller
                 return $order;
             });
 
-        // Requested orders
+        // ===== Requested orders =====
         $requestedOrders = ProductRequest::where('user_id', $userId)
             ->with([
                 'order' => function ($query) {
                     $query->with('flowerPayments');
                 },
-                // Load flowerProduct + its packageItems + nested item & variant
                 'flowerProduct' => function ($q) {
                     $q->with([
                         'packageItems' => function ($pi) {
@@ -385,7 +391,7 @@ class ProductApiController extends Controller
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($request) {
-                // Image URL
+                // Image URL for product
                 if ($request->flowerProduct && $request->flowerProduct->product_image) {
                     $request->flowerProduct->product_image_url = url($request->flowerProduct->product_image);
                 }
@@ -425,8 +431,8 @@ class ProductApiController extends Controller
             ],
         ], 200);
 
-    } catch (\Exception $e) {
-        \Log::error('Failed to fetch orders list: ' . $e->getMessage());
+    } catch (\Throwable $e) {
+        \Log::error('Failed to fetch orders list: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
 
         return response()->json([
             'success' => false,
@@ -434,6 +440,5 @@ class ProductApiController extends Controller
         ], 500);
     }
 }
-
 
 }
