@@ -31,6 +31,8 @@ class FlowerVendorController extends Controller
     }
 public function saveVendorDetails(Request $request)
 {
+
+
     try {
         // Validate request
         $validated = $request->validate([
