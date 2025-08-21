@@ -30,19 +30,20 @@ class FlowerVendorController extends Controller
         return view('admin/add-flower-vendors', compact('flowers'));
     }
 
+    
 public function saveVendorDetails(Request $request)
 {
     DB::beginTransaction();
 
     try {
-        // Normalize flower ids
+        // Normalize flower ids (no strtoupper)
         $incomingFlowerIds = collect($request->input('flower_ids', []))
             ->filter()
-            ->map(fn($id) => strtoupper(trim($id)))
+            ->map(fn($id) => trim($id))
             ->unique()
             ->values();
 
-        // Only valid flower products
+        // Only valid flower products (category must be Flower)
         $validFlowerIds = FlowerProduct::whereIn('product_id', $incomingFlowerIds)
             ->whereIn('category', ['Flower', 'flower'])
             ->pluck('product_id')
@@ -58,7 +59,7 @@ public function saveVendorDetails(Request $request)
             'payment_type'    => $request->payment_type,
             'vendor_gst'      => $request->vendor_gst,
             'vendor_address'  => $request->vendor_address,
-            'flower_ids'      => $validFlowerIds->all(),
+            'flower_ids'      => $validFlowerIds->all(), // must be JSON column
         ]);
 
         // Save bank rows
@@ -72,8 +73,8 @@ public function saveVendorDetails(Request $request)
         for ($i = 0; $i < $rows; $i++) {
             $bankName  = trim($request->bank_name[$i]  ?? '');
             $accountNo = trim($request->account_no[$i] ?? '');
-            $ifscCode  = strtoupper(trim($request->ifsc_code[$i]  ?? ''));
-            $upiId     = trim($request->upi_id[$i]     ?? '');
+            $ifscCode  = strtoupper(trim($request->ifsc_code[$i] ?? ''));
+            $upiId     = trim($request->upi_id[$i] ?? '');
 
             if ($bankName || $accountNo || $ifscCode || $upiId) {
                 FlowerVendorBank::create([
@@ -89,18 +90,19 @@ public function saveVendorDetails(Request $request)
         DB::commit();
 
         return redirect()
-            ->route('admin.addvendor') // ⚠️ ensure this route exists
+            ->route('admin.managevendor') // ✅ safer route
             ->with('success', 'Vendor details saved successfully.');
 
     } catch (\Throwable $e) {
         DB::rollBack();
-
+        // Debug actual error
         return redirect()
             ->back()
             ->withInput()
-            ->with('error', "Error: {$e->getMessage()} in {$e->getFile()} line {$e->getLine()}");
+            ->with('error', "Error: {$e->getMessage()}");
     }
 }
+
 
     public function manageVendorDetails()
     {
