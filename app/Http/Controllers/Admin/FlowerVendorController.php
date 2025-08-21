@@ -156,12 +156,10 @@ public function saveVendorDetails(Request $request)
             return redirect()->back()->with('error', 'Vendor not found.');
         }
     }
-
-   public function editVendorDetails($id)
+public function editVendorDetails($vendor_id)
 {
-    $vendordetails = FlowerVendor::with('vendorBanks')->findOrFail($id);
+    $vendordetails = FlowerVendor::with('vendorBanks')->findOrFail($vendor_id);
 
-    // Get all flower products for checkbox list
     $flowers = FlowerProduct::where(function ($q) {
             $q->where('category', 'Flower')->orWhere('category', 'flower');
         })
@@ -170,6 +168,7 @@ public function saveVendorDetails(Request $request)
 
     return view('admin.edit-flower-vendor', compact('vendordetails', 'flowers'));
 }
+
 
 public function updateVendorDetails(Request $request, $id)
 {

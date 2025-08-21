@@ -83,15 +83,20 @@
                                         </td>
 
                                         <td>
-                                            <form action="{{ route('admin.deletevendor', $vendor->id) }}" method="POST"
+                                            <form action="{{ route('admin.deletevendor', $vendor->vendor_id) }}"
+                                                method="POST"
                                                 onsubmit="return confirm('Are you sure you want to delete this item?');">
                                                 @csrf
-                                                <button type="submit" class="btn btn-md btn-danger"><i
-                                                        class="fa fa-trash"></i></button>
-                                                <a href="{{ route('admin.editVendorDetails', $vendor->id) }}"
-                                                    class="btn btn-md btn-primary"><i class="fa fa-edit"></i></a>
+                                                <button type="submit" class="btn btn-md btn-danger">
+                                                    <i class="fa fa-trash"></i>
+                                                </button>
+                                                <a href="{{ route('admin.editVendorDetails', $vendor->vendor_id) }}"
+                                                    class="btn btn-md btn-primary">
+                                                    <i class="fa fa-edit"></i>
+                                                </a>
                                             </form>
                                         </td>
+
                                     </tr>
                                 @endforeach
                             </tbody>
