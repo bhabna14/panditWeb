@@ -28,8 +28,7 @@ class FlowerVendorController extends Controller
 
         return view('admin/add-flower-vendors', compact('flowers'));
     }
-
-  public function saveVendorDetails(Request $request)
+public function saveVendorDetails(Request $request)
 {
     $request->validate([
         'vendor_name'     => 'required|string|max:255',
@@ -50,20 +49,22 @@ class FlowerVendorController extends Controller
         'upi_id'          => 'array',
         'upi_id.*'        => 'nullable|string|max:255',
 
-        // flower ids (optional multi-select)
+        // flower ids (optional multi-select, stored as FLOWxxxx format)
         'flower_ids'      => 'array',
+        'flower_ids.*'    => 'string',
     ]);
 
     DB::beginTransaction();
 
     try {
-        // ✅ Sanitize & validate flower ids
+        // ✅ Collect flower ids (like FLOW3493765)
         $incomingFlowerIds = collect($request->input('flower_ids', []))
             ->filter(fn($id) => !empty($id))
-            ->map(fn($id) => (int) $id)
+            ->map(fn($id) => strtoupper(trim($id))) // normalize
             ->unique()
             ->values();
 
+        // ✅ Only keep ids that actually exist in FlowerProduct table
         $validFlowerIds = FlowerProduct::whereIn('product_id', $incomingFlowerIds)
             ->whereIn('category', ['Flower', 'flower'])
             ->pluck('product_id')
@@ -80,7 +81,7 @@ class FlowerVendorController extends Controller
         $vendor->payment_type    = $request->payment_type;
         $vendor->vendor_gst      = $request->vendor_gst;
         $vendor->vendor_address  = $request->vendor_address;
-        $vendor->flower_ids      = $validFlowerIds->all(); // JSON stored
+        $vendor->flower_ids      = $validFlowerIds->all(); // stored as array (JSON)
         $vendor->save();
 
         // ✅ Save bank details (parallel arrays)
@@ -97,7 +98,6 @@ class FlowerVendorController extends Controller
             $ifscCode  = trim($ifscCodes[$i]  ?? '');
             $upiId     = trim($upiIds[$i]     ?? '');
 
-            // Skip if all fields empty
             if ($bankName === '' && $accountNo === '' && $ifscCode === '' && $upiId === '') {
                 continue;
             }
@@ -129,6 +129,7 @@ class FlowerVendorController extends Controller
             ->with('error', 'An error occurred while saving vendor details. Please try again.');
     }
 }
+
 
     public function manageVendorDetails()
     {
