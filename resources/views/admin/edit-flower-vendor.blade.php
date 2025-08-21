@@ -157,7 +157,6 @@
                         <div class="card mt-3">
                             <div class="card-body">
                                
-
                                 @if (isset($flowers) && $flowers->count())
                                     <div class="row" id="flowersGrid">
                                         @foreach ($flowers as $flower)

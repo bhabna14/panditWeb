@@ -46,7 +46,7 @@ use App\Http\Controllers\Admin\OfferDetailsController;
 use App\Http\Controllers\Admin\FlowerCalendarController;
 use App\Http\Controllers\Admin\PromotionController;
 use App\Http\Controllers\Admin\OfficeTransactionController;
-
+use App\Http\Controllers\Admin\MonthWiseFlowerPriceController;
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 use App\Http\Controllers\Admin\ProductRequestController;
 
@@ -860,5 +860,9 @@ Route::controller(ReferController::class)->group(function() {
     Route::post('/refer/claims/{claim}/approve/verify', 'verifyApprovalCode')->name('refer.claim.approve.verify');
     Route::get('/refer/offer-claims/list', 'listOfferClaims')->name('refer.offerClaims.list');
     Route::get('/admin/referrals','referralsIndex')->name('admin.referrals.index');
-    
+});
+
+Route::controller(MonthWiseFlowerPriceController::class)->group(function() {
+    Route::get('/get-month-wise-price','create')->name('admin.flowerRegistration');
+    Route::post('/flower-registration', 'store')->name('admin.flowerRegistration.store');
 });
