@@ -863,6 +863,10 @@ Route::controller(ReferController::class)->group(function() {
 });
 
 Route::controller(MonthWiseFlowerPriceController::class)->group(function() {
-    Route::get('/get-month-wise-price','create')->name('admin.flowerRegistration');
-    Route::post('/flower-registration', 'store')->name('admin.flowerRegistration.store');
+   
+    Route::get('/month-wise-flower-price', 'create')
+    ->name('admin.monthWiseFlowerPrice');
+
+Route::post('/month-wise-flower-price', 'store')
+    ->name('admin.monthWiseFlowerPrice.store');
 });
