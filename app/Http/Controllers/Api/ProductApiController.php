@@ -311,24 +311,50 @@ class ProductApiController extends Controller
                 'flowerPayments',
                 'user',
                 'address.localityDetails',
-                // Load flowerProduct + its packageItems
+                // Load flowerProduct + its packageItems + nested item & variant
                 'flowerProduct' => function ($q) {
-                    $q->with('packageItems');
+                    $q->with([
+                        'packageItems' => function ($pi) {
+                            $pi->with([
+                                'item:id,item_name',                 // Poojaitemlists
+                                'variant:id,item_id,title,price',   // Variant
+                            ]);
+                        },
+                    ]);
                 },
             ])
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($order) {
+                // Image URL
                 if ($order->flowerProduct && $order->flowerProduct->product_image) {
                     $order->flowerProduct->product_image_url = url($order->flowerProduct->product_image);
                 }
 
-                // Only expose packageItems if the product is a package
+                // Only expose package items (with names & price) if category is 'package'
                 if ($order->flowerProduct) {
                     $category = strtolower($order->flowerProduct->category ?? '');
-                    if ($category !== 'package') {
-                        // hide relation for non-package products
+
+                    if ($category === 'package') {
+                        $order->flowerProduct->package_items = $order->flowerProduct->packageItems
+                            ->map(function ($pi) {
+                                return [
+                                    'product_id'    => $pi->product_id,
+                                    'item_id'       => $pi->item_id,
+                                    'item_name'     => optional($pi->item)->item_name,
+                                    'variant_id'    => $pi->variant_id,
+                                    'variant_name'  => optional($pi->variant)->title,
+                                    'price'         => optional($pi->variant)->price,
+                                ];
+                            })
+                            ->values();
+
+                        // (optional) hide the raw relation to keep payload clean
                         $order->flowerProduct->setRelation('packageItems', collect());
+                    } else {
+                        // not a package → blank the relation AND package_items
+                        $order->flowerProduct->setRelation('packageItems', collect());
+                        $order->flowerProduct->package_items = collect();
                     }
                 }
 
@@ -341,9 +367,16 @@ class ProductApiController extends Controller
                 'order' => function ($query) {
                     $query->with('flowerPayments');
                 },
-                // Load flowerProduct + its packageItems
+                // Load flowerProduct + its packageItems + nested item & variant
                 'flowerProduct' => function ($q) {
-                    $q->with('packageItems');
+                    $q->with([
+                        'packageItems' => function ($pi) {
+                            $pi->with([
+                                'item:id,item_name',
+                                'variant:id,item_id,title,price',
+                            ]);
+                        },
+                    ]);
                 },
                 'user',
                 'address.localityDetails',
@@ -352,15 +385,32 @@ class ProductApiController extends Controller
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($request) {
+                // Image URL
                 if ($request->flowerProduct && $request->flowerProduct->product_image) {
                     $request->flowerProduct->product_image_url = url($request->flowerProduct->product_image);
                 }
 
-                // Only expose packageItems if the product is a package
                 if ($request->flowerProduct) {
                     $category = strtolower($request->flowerProduct->category ?? '');
-                    if ($category !== 'package') {
+
+                    if ($category === 'package') {
+                        $request->flowerProduct->package_items = $request->flowerProduct->packageItems
+                            ->map(function ($pi) {
+                                return [
+                                    'product_id'    => $pi->product_id,
+                                    'item_id'       => $pi->item_id,
+                                    'item_name'     => optional($pi->item)->item_name,
+                                    'variant_id'    => $pi->variant_id,
+                                    'variant_name'  => optional($pi->variant)->title,
+                                    'price'         => optional($pi->variant)->price,
+                                ];
+                            })
+                            ->values();
+
                         $request->flowerProduct->setRelation('packageItems', collect());
+                    } else {
+                        $request->flowerProduct->setRelation('packageItems', collect());
+                        $request->flowerProduct->package_items = collect();
                     }
                 }
 
@@ -385,5 +435,5 @@ class ProductApiController extends Controller
     }
 }
 
- 
+
 }
