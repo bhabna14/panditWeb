@@ -19,13 +19,6 @@
             </ol>
         </div>
     </div>
-    <!-- /breadcrumb -->
-    @if (session('success'))
-        <div class="alert alert-success" id="Message">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <!-- Vendor Form -->
     <div class="row">
         <div class="col-12 col-sm-12">
@@ -197,7 +190,39 @@
 @endsection
 @section('scripts')
     <!-- Include SweetAlert JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    @if ($errors->any())
+        // Show first validation error
+        Swal.fire({
+            icon: 'error',
+            title: 'Validation Error',
+            text: '{{ $errors->first() }}',
+            confirmButtonColor: '#d33'
+        });
+    @endif
+
+    @if (session('error'))
+        // Show custom error (from try/catch rollback)
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '{{ session('error') }}',
+            confirmButtonColor: '#d33'
+        });
+    @endif
+
+    @if (session('success'))
+        // Show success message
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: '{{ session('success') }}',
+            confirmButtonColor: '#3085d6'
+        });
+    @endif
+</script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
