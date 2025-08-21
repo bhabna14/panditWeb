@@ -96,28 +96,28 @@ class OtpController extends Controller
         $pandit = User::where('mobile_number', $phone)->first();
 
         if ($pandit) {
-            // ✅ Existing: update OTP
+            // ✅ Existing user: update OTP
             $pandit->otp = $otp;
 
-            // (Optional) backfill referral_code if missing
-            // if (empty($pandit->referral_code)) {
-            //     $pandit->referral_code = $this->generateReferralCode();
-            // }
+            // If referral_code is missing, generate one
+            if (empty($pandit->referral_code)) {
+                $pandit->referral_code = $this->generateReferralCode();
+            }
 
             $pandit->save();
             $status = 'existing';
         } else {
-            // ✅ New: create with new user id AND a unique referral_code
+            // ✅ New user: create with referral_code
             $pandit = User::create([
                 'mobile_number'  => $phone,
                 'otp'            => $otp,
                 'userid'         => 'USER' . random_int(10000, 99999),
-                'referral_code'  => $this->generateReferralCode(), // ← new line
+                'referral_code'  => $this->generateReferralCode(),
             ]);
             $status = 'new';
         }
 
-        // ✅ MSG91 WhatsApp template payload (unchanged)
+        // ✅ MSG91 WhatsApp template payload
         $payload = [
             "integrated_number" => env('MSG91_WA_NUMBER'),
             "content_type" => "template",
@@ -179,8 +179,8 @@ class OtpController extends Controller
                 'message'      => 'OTP sent successfully',
                 'user_status'  => $status,
                 'token'        => $shortToken,
-                // (Optional) expose referral_code for brand-new users:
-                // 'referral_code' => $status === 'new' ? $pandit->referral_code : null,
+                // (Optional) expose referral_code when applicable
+                'referral_code'=> $pandit->referral_code,
                 'api_response' => $result
             ]);
         } catch (\Exception $e) {
