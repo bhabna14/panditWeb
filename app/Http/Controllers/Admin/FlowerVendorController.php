@@ -76,7 +76,6 @@ public function saveVendorDetails(Request $request)
         // 4) Create vendor
         $vendor = new FlowerVendor();
         $vendor->vendor_id       = 'VENDOR-' . Str::upper(Str::random(10));
-        $vendor->temple_id       = $request->temple_id ?? null;
         $vendor->vendor_name     = $validated['vendor_name'];
         $vendor->phone_no        = $validated['phone_no'];
         $vendor->email_id        = $validated['email_id'] ?? null;
