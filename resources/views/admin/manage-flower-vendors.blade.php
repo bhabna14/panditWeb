@@ -88,7 +88,7 @@
                                                 @csrf
                                                 <button type="submit" class="btn btn-md btn-danger"><i
                                                         class="fa fa-trash"></i></button>
-                                                <a href="{{ url('admin/edit-vendor-details', $vendor->id) }}"
+                                                <a href="{{ route('admin.editVendorDetails', $vendor->id) }}"
                                                     class="btn btn-md btn-primary"><i class="fa fa-edit"></i></a>
                                             </form>
                                         </td>
