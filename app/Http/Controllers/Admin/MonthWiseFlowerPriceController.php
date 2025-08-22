@@ -33,7 +33,7 @@ class MonthWiseFlowerPriceController extends Controller
      public function create()
     {
         $vendors = FlowerVendor::all();
-           $poojaUnits = PoojaUnit::all(['id','unit_name']); // load units
+        $poojaUnits = PoojaUnit::all(['id','unit_name']); // load units
         return view('admin.month-wise-flower-price', compact('vendors','poojaUnits'));
     }
 
@@ -41,7 +41,6 @@ class MonthWiseFlowerPriceController extends Controller
     {
         $vendor = FlowerVendor::findOrFail($request->vendor_id);
         $flowerIds = $vendor->flower_ids ?? [];
-        
         $flowers = FlowerProduct::whereIn('product_id', $flowerIds)->get();
         return response()->json($flowers);
     }
@@ -146,7 +145,9 @@ public function manageFlowerPrice()
     ->orderBy('id','desc')
     ->get();
 
-    return view('admin.manage-month-wise-flower-price', compact('transactions'));
+    $units = PoojaUnit::get();
+
+    return view('admin.manage-month-wise-flower-price', compact('transactions','units'));
 }
 
 public function updateFlowerPrice(Request $request, $id)
