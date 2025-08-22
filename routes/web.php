@@ -865,5 +865,5 @@ Route::controller(ReferController::class)->group(function() {
 Route::controller(MonthWiseFlowerPriceController::class)->group(function() {
     Route::get('/month-wise-flower-price', 'create')->name('admin.monthWiseFlowerPrice');
     Route::post('/month-wise-flower-price', 'store')->name('admin.monthWiseFlowerPrice.store');
-    Route::get('/vendor-flowers', 'vendorFlowers')->name('vendor.flowers');
+    Route::get('/vendor-flowers', 'vendorFlowers')->name('admin.vendor.flowers');
 });
