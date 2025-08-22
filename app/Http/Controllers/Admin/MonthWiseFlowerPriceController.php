@@ -15,28 +15,29 @@ use App\Models\MonthWiseFlowerPrice;
 
 class MonthWiseFlowerPriceController extends Controller
 {
-    public function create()
-    {
-        // Check once; avoid calling in closure
-        $hasStatus = Schema::hasColumn('flower__vendor_details', 'status');
+   public function create()
+{
+    // Check once; avoid calling in closure
+    $hasStatus = Schema::hasColumn('flower__vendor_details', 'status');
 
-        // Vendors (with flower_ids)
-        $vendors = FlowerVendor::select('vendor_id', 'vendor_name', 'flower_ids')
-            ->when($hasStatus, fn ($q) => $q->where('status', 'active'))
-            ->orderBy('vendor_name')
-            ->get();
+    // Vendors (with flower_ids)
+    $vendors = FlowerVendor::select('vendor_id', 'vendor_name', 'flower_ids')
+        ->when($hasStatus, fn ($q) => $q->where('status', 'active'))
+        ->orderBy('vendor_name')
+        ->get();
 
-        // Master flowers
-       $flowers = FlowerProduct::where(fn($q) => $q->where('category','Flower')->orWhere('category','flower'))
-    ->orderBy('name')
-    ->get(['product_id','name','odia_name','product_code']);
+    // Master flowers (NO product_code here)
+    $flowers = FlowerProduct::where(function ($q) {
+            $q->where('category', 'Flower')->orWhere('category', 'flower');
+        })
+        ->orderBy('name')
+        ->get(['product_id', 'name', 'odia_name']); // <-- removed 'product_code'
 
+    // Units
+    $units = PoojaUnit::orderBy('unit_name')->get(['id', 'unit_name']);
 
-        // Units
-        $units = PoojaUnit::orderBy('unit_name')->get(['id', 'unit_name']);
-
-        return view('admin.month-wise-flower-price', compact('vendors', 'flowers', 'units'));
-    }
+    return view('admin.month-wise-flower-price', compact('vendors', 'flowers', 'units'));
+}
 
     public function store(Request $request)
     {

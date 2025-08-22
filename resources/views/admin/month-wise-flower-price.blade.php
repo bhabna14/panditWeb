@@ -124,6 +124,7 @@
                     @foreach ($flowers as $f)
                         @php
                             $checked = in_array($f->product_id, old('flower_ids', []));
+                            // If product_code ever exists in future, this will use it; otherwise fallback.
                             $code = $f->product_code ?? 'FLOW' . $f->product_id;
                         @endphp
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 flower-item"
@@ -243,7 +244,7 @@
         function buildRowHTML(fid, idx, preset = {}) {
             const sd = preset.start_date || '';
             const ed = preset.end_date || '';
-            const q  = preset.quantity || '';
+            const q = preset.quantity || '';
             const uid = preset.unit_id || '';
             const pr = preset.price || '';
 
@@ -279,10 +280,10 @@
 
             const olds = {
                 start_date: (oldData.start_date[String(fid)] || []),
-                end_date:   (oldData.end_date[String(fid)]   || []),
-                quantity:   (oldData.quantity[String(fid)]   || []),
-                unit_id:    (oldData.unit_id[String(fid)]    || []),
-                price:      (oldData.price[String(fid)]      || []),
+                end_date: (oldData.end_date[String(fid)] || []),
+                quantity: (oldData.quantity[String(fid)] || []),
+                unit_id: (oldData.unit_id[String(fid)] || []),
+                price: (oldData.price[String(fid)] || []),
             };
             const maxRows = Math.max(
                 olds.start_date.length,
@@ -297,10 +298,10 @@
             for (let i = 0; i < maxRows; i++) {
                 rowsHTML += buildRowHTML(fid, i, {
                     start_date: olds.start_date[i],
-                    end_date:   olds.end_date[i],
-                    quantity:   olds.quantity[i],
-                    unit_id:    olds.unit_id[i],
-                    price:      olds.price[i],
+                    end_date: olds.end_date[i],
+                    quantity: olds.quantity[i],
+                    unit_id: olds.unit_id[i],
+                    price: olds.price[i],
                 });
             }
 
@@ -443,7 +444,8 @@
                 renderDetailsForSelected();
             });
             document.getElementById('clearAll').addEventListener('click', () => {
-                document.querySelectorAll('#flowersGrid .flower-checkbox').forEach(cb => cb.checked = false);
+                document.querySelectorAll('#flowersGrid .flower-checkbox').forEach(cb => cb.checked =
+                false);
                 renderDetailsForSelected();
             });
 
