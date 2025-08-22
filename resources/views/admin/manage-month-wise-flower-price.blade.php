@@ -95,6 +95,8 @@
         <div class="modal-dialog">
             <form method="POST" id="editForm">
                 @csrf
+                @method('PUT')
+
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Edit Flower Price</h5>
@@ -182,22 +184,22 @@
         });
 
         // ✅ Open Edit Modal
-        $(document).on('click', '.editBtn', function() {
-            let id = $(this).data('id');
+       $(document).ready(function () {
+    $('.editBtn').on('click', function () {
+        let id = $(this).data('id');
+        $('#edit_id').val(id);
+        $('#edit_start_date').val($(this).data('start'));
+        $('#edit_end_date').val($(this).data('end'));
+        $('#edit_quantity').val($(this).data('qty'));
+        $('#edit_unit_id').val($(this).data('unit'));
+        $('#edit_price').val($(this).data('price'));
 
-            $('#edit_id').val(id);
-            $('#edit_start_date').val($(this).data('start'));
-            $('#edit_end_date').val($(this).data('end'));
-            $('#edit_quantity').val($(this).data('qty'));
-            $('#edit_unit_id').val($(this).data('unit'));
-            $('#edit_price').val($(this).data('price'));
+        // set form action URL
+        $('#editForm').attr('action', '/admin/flower-price/update/' + id);
 
-            // ✅ point to correct POST route
-            $('#editForm').attr('action', '/admin/flower-price/update/' + id);
-
-            $('#editModal').modal('show');
-        });
-
+        $('#editModal').modal('show');
+    });
+});
 
         // ✅ Delete Confirmation
         $(document).on('click', '.deleteBtn', function() {
