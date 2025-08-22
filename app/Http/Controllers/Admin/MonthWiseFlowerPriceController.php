@@ -114,4 +114,44 @@ class MonthWiseFlowerPriceController extends Controller
             return back()->withInput()->with('error', 'Failed to save. '.$e->getMessage());
         }
     }
+
+      public function vendorFlowers(Request $request)
+    {
+        $request->validate([
+            'vendor_id' => 'required'
+        ]);
+
+        /** @var FlowerVendor|null $vendor */
+        $vendor = FlowerVendor::select('vendor_id','flower_ids')->find($request->vendor_id);
+        if (!$vendor) {
+            return response()->json(['success' => false, 'message' => 'Vendor not found'], 404);
+        }
+
+        // Resolve vendor.flower_ids (e.g., "FLOW3419542") -> numeric product_id
+        $ids = collect($vendor->flower_ids ?? [])
+            ->map(function ($val) {
+                // Keep only digits (handles "FLOW12345" and "12345")
+                $digits = preg_replace('/\D+/', '', (string)$val);
+                return $digits !== '' ? (int)$digits : null;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($ids)) {
+            return response()->json(['success' => true, 'vendor_id' => $vendor->vendor_id, 'flowers' => []]);
+        }
+
+        $flowers = FlowerProduct::whereIn('product_id', $ids)
+            ->orderBy('name')
+            ->get(['product_id','name','odia_name']);
+
+        return response()->json([
+            'success'   => true,
+            'vendor_id' => $vendor->vendor_id,
+            'flowers'   => $flowers,
+        ]);
+    }
+
 }
