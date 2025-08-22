@@ -145,7 +145,7 @@ class MonthWiseFlowerPriceController extends Controller
             'unit:id,unit_name'
         ])->orderBy('id','desc')->get();
 
-        return view('admin.manage_flower_price', compact('transactions'));
+        return view('admin.manage-month-wise-flower-price', compact('transactions'));
     }
 
 }
