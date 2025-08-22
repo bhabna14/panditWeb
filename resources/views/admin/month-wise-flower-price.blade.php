@@ -113,206 +113,185 @@
     </form>
 @endsection
 @section('scripts')
-    <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        // =============== Config / Data ===============
-        const vendorFlowersUrl = "{{ route('admin.vendor.flowers') }}"; // GET ?vendor_id=...
-        const units = @json($units);
+<script>
+    // =============== Config / Data ===============
+    const vendorFlowersUrl = @json(route('admin.vendor.flowers')); // absolute URL
+    const units = @json($units);
 
-        // Old input rehydration
-        const oldData = {
-            vendor_id: @json(old('vendor_id')),
-            start_date: @json(old('start_date', [])),
-            end_date: @json(old('end_date', [])),
-            quantity: @json(old('quantity', [])),
-            unit_id: @json(old('unit_id', [])),
-            price: @json(old('price', [])),
+    // Old input rehydration
+    const oldData = {
+        vendor_id: @json(old('vendor_id')),
+        start_date: @json(old('start_date', [])),
+        end_date:   @json(old('end_date', [])),
+        quantity:   @json(old('quantity', [])),
+        unit_id:    @json(old('unit_id', [])),
+        price:      @json(old('price', [])),
+    };
+
+    // =============== UI Builders ===============
+    function buildRowHTML(fid, idx, preset = {}) {
+        const sd = preset.start_date || '';
+        const ed = preset.end_date || '';
+        const q  = preset.quantity || '';
+        const uid = preset.unit_id || '';
+        const pr  = preset.price || '';
+
+        return `
+        <tr data-idx="${idx}">
+            <td><input type="date" class="form-control" name="start_date[${fid}][]" value="${sd}" required></td>
+            <td><input type="date" class="form-control" name="end_date[${fid}][]" value="${ed}" required></td>
+            <td><input type="number" step="0.01" min="0" class="form-control" name="quantity[${fid}][]" value="${q}" required></td>
+            <td>
+                <select class="form-control" name="unit_id[${fid}][]" required>
+                    <option value="">Select unit</option>
+                    ${units.map(u => `<option value="${u.id}" ${Number(uid)===Number(u.id) ? 'selected':''}>${u.unit_name}</option>`).join('')}
+                </select>
+            </td>
+            <td>
+                <div class="input-group">
+                    <span class="input-group-text">₹</span>
+                    <input type="number" step="0.01" min="0" class="form-control" name="price[${fid}][]" value="${pr}" required>
+                </div>
+            </td>
+            <td class="text-center">
+                <button type="button" class="btn btn-sm btn-outline-danger remove-row">Remove</button>
+            </td>
+        </tr>`;
+    }
+
+    function buildFlowerDetailCard(flower) {
+        const fid  = flower.product_id;
+        const name = flower.name || `Flower #${fid}`;
+
+        const olds = {
+            start_date: (oldData.start_date[String(fid)] || []),
+            end_date:   (oldData.end_date[String(fid)]   || []),
+            quantity:   (oldData.quantity[String(fid)]   || []),
+            unit_id:    (oldData.unit_id[String(fid)]    || []),
+            price:      (oldData.price[String(fid)]      || []),
         };
+        const maxRows = Math.max(
+            olds.start_date.length,
+            olds.end_date.length,
+            olds.quantity.length,
+            olds.unit_id.length,
+            olds.price.length,
+            1
+        );
 
-        // =============== UI Builders ===============
-        function buildRowHTML(fid, idx, preset = {}) {
-            const sd = preset.start_date || '';
-            const ed = preset.end_date || '';
-            const q = preset.quantity || '';
-            const uid = preset.unit_id || '';
-            const pr = preset.price || '';
-
-            return `
-    <tr data-idx="${idx}">
-        <td><input type="date" class="form-control" name="start_date[${fid}][]" value="${sd}" required></td>
-        <td><input type="date" class="form-control" name="end_date[${fid}][]" value="${ed}" required></td>
-        <td><input type="number" step="0.01" min="0" class="form-control" name="quantity[${fid}][]" value="${q}" required></td>
-        <td>
-            <select class="form-control" name="unit_id[${fid}][]" required>
-                <option value="">Select unit</option>
-                ${units.map(u => `<option value="${u.id}" ${Number(uid)===Number(u.id) ? 'selected':''}>${u.unit_name}</option>`).join('')}
-            </select>
-        </td>
-        <td>
-            <div class="input-group">
-                <span class="input-group-text">₹</span>
-                <input type="number" step="0.01" min="0" class="form-control" name="price[${fid}][]" value="${pr}" required>
-            </div>
-        </td>
-        <td class="text-center">
-            <button type="button" class="btn btn-sm btn-outline-danger remove-row">Remove</button>
-        </td>
-    </tr>`;
+        let rowsHTML = '';
+        for (let i = 0; i < maxRows; i++) {
+            rowsHTML += buildRowHTML(fid, i, {
+                start_date: olds.start_date[i],
+                end_date:   olds.end_date[i],
+                quantity:   olds.quantity[i],
+                unit_id:    olds.unit_id[i],
+                price:      olds.price[i],
+            });
         }
 
-        function buildFlowerDetailCard(flower) {
-            const fid = flower.product_id;
-            const name = flower.name || `Flower #${fid}`;
-
-            const olds = {
-                start_date: (oldData.start_date[String(fid)] || []),
-                end_date: (oldData.end_date[String(fid)] || []),
-                quantity: (oldData.quantity[String(fid)] || []),
-                unit_id: (oldData.unit_id[String(fid)] || []),
-                price: (oldData.price[String(fid)] || []),
-            };
-            const maxRows = Math.max(
-                olds.start_date.length,
-                olds.end_date.length,
-                olds.quantity.length,
-                olds.unit_id.length,
-                olds.price.length,
-                1
-            );
-
-            let rowsHTML = '';
-            for (let i = 0; i < maxRows; i++) {
-                rowsHTML += buildRowHTML(fid, i, {
-                    start_date: olds.start_date[i],
-                    end_date: olds.end_date[i],
-                    quantity: olds.quantity[i],
-                    unit_id: olds.unit_id[i],
-                    price: olds.price[i],
-                });
-            }
-
-            return `
-    <div class="card card-shadow mb-3 flower-detail" data-id="${fid}" data-name="${(name || '').toLowerCase()}">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <div class="h6 mb-0">${name}${flower.odia_name ? ` <small class="text-muted">(${flower.odia_name})</small>` : ''}</div>
-                <div>
-                    <button type="button" class="btn btn-sm btn-outline-success add-row" data-flower="${fid}">
-                        + Add Row
-                    </button>
+        return `
+        <div class="card card-shadow mb-3 flower-detail" data-id="${fid}" data-name="${(name || '').toLowerCase()}">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="h6 mb-0">${name}${flower.odia_name ? ` <small class="text-muted">(${flower.odia_name})</small>` : ''}</div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-outline-success add-row" data-flower="${fid}">
+                            + Add Row
+                        </button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered row-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Qty</th>
+                                <th>Unit</th>
+                                <th>Price</th>
+                                <th style="width: 100px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="rows" data-flower="${fid}">
+                            ${rowsHTML}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <div class="table-responsive">
-                <table class="table table-bordered row-table align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th>Start Date</th>
-                            <th>End Date</th>
-                            <th>Qty</th>
-                            <th>Unit</th>
-                            <th>Price</th>
-                            <th style="width: 100px;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody class="rows" data-flower="${fid}">
-                        ${rowsHTML}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>`;
+        </div>`;
+    }
+
+    function renderFlowers(flowers) {
+        const container = document.getElementById('flowerDetailsContainer');
+        container.innerHTML = '';
+
+        if (!Array.isArray(flowers) || flowers.length === 0) {
+            // No alert per your requirement — just empty space
+            return;
         }
 
-        function renderFlowers(flowers) {
-            const container = document.getElementById('flowerDetailsContainer');
-            container.innerHTML = '';
+        const sorted = [...flowers].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+        sorted.forEach(f => container.insertAdjacentHTML('beforeend', buildFlowerDetailCard(f)));
+    }
 
-            if (!Array.isArray(flowers) || flowers.length === 0) {
-                // No alert per your requirement — just empty space
-                return;
-            }
+    // =============== AJAX & Boot ===============
+    async function fetchVendorFlowers(vendorId) {
+        if (!vendorId) { renderFlowers([]); return; }
 
-            const sorted = [...flowers].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-            sorted.forEach(f => container.insertAdjacentHTML('beforeend', buildFlowerDetailCard(f)));
+        const url = vendorFlowersUrl + '?vendor_id=' + encodeURIComponent(vendorId);
+
+        try {
+            const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            if (!data.success) throw new Error(data.message || 'Failed to load');
+            renderFlowers(data.flowers);
+        } catch (err) {
+            console.error(err);
+            renderFlowers([]);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Could not load vendor flowers.' });
         }
+    }
 
-        // =============== AJAX & Boot ===============
-        async function fetchVendorFlowers(vendorId) {
-            if (!vendorId) {
-                renderFlowers([]);
-                return;
-            }
-            const url = new URL("{{ route('admin.vendor.flowers') }}", window.location.origin);
-            url.searchParams.set('vendor_id', vendorId);
+    document.addEventListener('DOMContentLoaded', () => {
+        $('.select2').select2({ width: '100%', allowClear: true });
 
-            try {
-                const res = await fetch(url.toString(), {
-                    headers: {
-                        'Accept': 'application/json'
-                    }
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                const data = await res.json();
-                if (!data.success) throw new Error(data.message || 'Failed to load');
-                renderFlowers(data.flowers);
-            } catch (err) {
-                console.error(err);
-                renderFlowers([]);
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Could not load vendor flowers.'
-                });
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            $('.select2').select2({
-                width: '100%',
-                allowClear: true
-            });
-
-            const vendorSel = document.getElementById('vendor_id');
-            vendorSel.addEventListener('change', (e) => {
-                fetchVendorFlowers(e.target.value);
-            });
-
-            // Rehydrate after validation error
-            if (oldData.vendor_id) {
-                fetchVendorFlowers(oldData.vendor_id);
-            }
-
-            // Add / remove row
-            document.body.addEventListener('click', (e) => {
-                if (e.target.classList.contains('add-row')) {
-                    const fid = e.target.getAttribute('data-flower');
-                    const tbody = document.querySelector(`tbody.rows[data-flower="${fid}"]`);
-                    const nextIdx = tbody.querySelectorAll('tr').length;
-                    tbody.insertAdjacentHTML('beforeend', buildRowHTML(fid, nextIdx));
-                }
-                if (e.target.classList.contains('remove-row')) {
-                    const tr = e.target.closest('tr');
-                    tr?.remove();
-                }
-            });
+        const vendorSel = document.getElementById('vendor_id');
+        vendorSel.addEventListener('change', (e) => {
+            fetchVendorFlowers(e.target.value);
         });
 
-        // Flash alerts
-        @if (session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Saved',
-                text: @json(session('success'))
-            });
-        @endif
-        @if (session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: @json(session('error'))
-            });
-        @endif
-    </script>
+        // Rehydrate after validation error
+        if (oldData.vendor_id) {
+            fetchVendorFlowers(oldData.vendor_id);
+        }
+
+        // Add / remove row
+        document.body.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-row')) {
+                const fid = e.target.getAttribute('data-flower');
+                const tbody = document.querySelector(`tbody.rows[data-flower="${fid}"]`);
+                const nextIdx = tbody.querySelectorAll('tr').length;
+                tbody.insertAdjacentHTML('beforeend', buildRowHTML(fid, nextIdx));
+            }
+            if (e.target.classList.contains('remove-row')) {
+                const tr = e.target.closest('tr');
+                tr?.remove();
+            }
+        });
+    });
+
+    // Flash alerts
+    @if (session('success'))
+        Swal.fire({ icon: 'success', title: 'Saved', text: @json(session('success')) });
+    @endif
+    @if (session('error'))
+        Swal.fire({ icon: 'error', title: 'Error', text: @json(session('error')) });
+    @endif
+</script>
+
 @endsection
