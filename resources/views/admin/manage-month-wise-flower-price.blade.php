@@ -94,51 +94,45 @@
 </div>
 
 <!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog">
-        <form method="POST" id="editForm">
-            @csrf
-            @method('PUT')
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Flower Price</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" name="id" id="edit_id">
+<form method="POST" id="editForm">
+    @csrf
+    <!-- no @method('PUT') here -->
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">Edit Flower Price</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" name="id" id="edit_id">
 
-                    <div class="mb-3">
-                        <label>Start Date</label>
-                        <input type="date" class="form-control" name="start_date" id="edit_start_date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>End Date</label>
-                        <input type="date" class="form-control" name="end_date" id="edit_end_date" required>
-                    </div>
-                    <div class="mb-3">
-                        <label>Quantity</label>
-                        <input type="number" class="form-control" name="quantity" id="edit_quantity" required>
-                    </div>
-                    
-                    <!-- Unit field (ID shown directly, readonly) -->
-                    <div class="mb-3">
-                        <label>Unit ID</label>
-                        <input type="text" class="form-control" name="unit_id" id="edit_unit_id" readonly>
-                    </div>
-
-                    <div class="mb-3">
-                        <label>Price</label>
-                        <input type="number" step="0.01" class="form-control" name="price_per_unit" id="edit_price" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update</button>
-                </div>
+            <div class="mb-3">
+                <label>Start Date</label>
+                <input type="date" class="form-control" name="start_date" id="edit_start_date" required>
             </div>
-        </form>
+            <div class="mb-3">
+                <label>End Date</label>
+                <input type="date" class="form-control" name="end_date" id="edit_end_date" required>
+            </div>
+            <div class="mb-3">
+                <label>Quantity</label>
+                <input type="number" class="form-control" name="quantity" id="edit_quantity" required>
+            </div>
+            <div class="mb-3">
+                <label>Unit ID</label>
+                <input type="text" class="form-control" name="unit_id" id="edit_unit_id" readonly>
+            </div>
+            <div class="mb-3">
+                <label>Price</label>
+                <input type="number" step="0.01" class="form-control" name="price_per_unit" id="edit_price" required>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </div>
     </div>
-</div>
+</form>
+
 
 @endsection
 
@@ -190,19 +184,20 @@
 
     <script>
     // Open Edit Modal
-    $(document).on('click', '.editBtn', function () {
-        $('#edit_id').val($(this).data('id'));
-        $('#edit_start_date').val($(this).data('start'));
-        $('#edit_end_date').val($(this).data('end'));
-        $('#edit_quantity').val($(this).data('qty'));
-        $('#edit_unit_id').val($(this).data('unit')); 
-         $('#edit_price').val($(this).data('price'));
+  $(document).on('click', '.editBtn', function () {
+    $('#edit_id').val($(this).data('id'));
+    $('#edit_start_date').val($(this).data('start'));
+    $('#edit_end_date').val($(this).data('end'));
+    $('#edit_quantity').val($(this).data('qty'));
+    $('#edit_unit_id').val($(this).data('unit'));
+    $('#edit_price').val($(this).data('price'));
 
-        let id = $(this).data('id');
-        $('#editForm').attr('action', '/flower-price/update/' + id);
+    let id = $(this).data('id');
+    $('#editForm').attr('action', '/flower-price/update/' + id); // ✅ POST route
 
-        $('#editModal').modal('show');
-    });
+    $('#editModal').modal('show');
+});
+
 
   // Delete Confirmation
 $(document).on('click', '.deleteBtn', function () {
