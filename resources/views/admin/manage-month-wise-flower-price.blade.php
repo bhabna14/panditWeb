@@ -67,7 +67,7 @@
                                     </span>
                                 </td>
                                 <td>{{ $t->quantity }}</td>
-                                <td>{{ $t->unit_name ?? '-' }}</td>
+                                <td>{{ $t->unit_id ?? '-' }}</td>
                                 <td><strong>₹{{ number_format($t->price_per_unit, 2) }}</strong></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning">Edit</button>
