@@ -16,7 +16,7 @@ use App\Models\MonthWiseFlowerPrice;
 class MonthWiseFlowerPriceController extends Controller
 {
 
-    public function create()
+   public function create()
     {
         $hasStatus = Schema::hasColumn('flower__vendor_details', 'status');
 
@@ -25,11 +25,54 @@ class MonthWiseFlowerPriceController extends Controller
             ->orderBy('vendor_name')
             ->get();
 
-        // Only pass vendors + units; flowers are fetched per vendor via AJAX
-        $units = PoojaUnit::orderBy('unit_name')->get(['id', 'unit_name']);
+        // Flowers are fetched per vendor via AJAX
+        $units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
 
         return view('admin.month-wise-flower-price', compact('vendors', 'units'));
     }
+
+    // GET /vendor-flowers?vendor_id=...
+    public function vendorFlowers(Request $request)
+    {
+        $request->validate([
+            'vendor_id' => 'required'
+        ]);
+
+        $vendor = FlowerVendor::select('vendor_id','flower_ids')->find($request->vendor_id);
+        if (!$vendor) {
+            return response()->json(['success' => false, 'message' => 'Vendor not found'], 404);
+        }
+
+        // Resolve vendor.flower_ids like "FLOW9148763" -> numeric product_id 9148763
+        $ids = collect($vendor->flower_ids ?? [])
+            ->map(function ($val) {
+                $digits = preg_replace('/\D+/', '', (string)$val);
+                return $digits !== '' ? (int)$digits : null;
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($ids)) {
+            return response()->json([
+                'success'   => true,
+                'vendor_id' => $vendor->vendor_id,
+                'flowers'   => [],
+            ]);
+        }
+
+        $flowers = FlowerProduct::whereIn('product_id', $ids)
+            ->orderBy('name')
+            ->get(['product_id','name','odia_name']);
+
+        return response()->json([
+            'success'   => true,
+            'vendor_id' => $vendor->vendor_id,
+            'flowers'   => $flowers,
+        ]);
+    }
+
 
     public function store(Request $request)
     {
@@ -104,46 +147,6 @@ class MonthWiseFlowerPriceController extends Controller
             DB::rollBack();
             return back()->withInput()->with('error', 'Failed to save. '.$e->getMessage());
         }
-    }
- public function vendorFlowers(Request $request)
-    {
-        $request->validate([
-            'vendor_id' => 'required'
-        ]);
-
-        $vendor = FlowerVendor::select('vendor_id','flower_ids')->find($request->vendor_id);
-        if (!$vendor) {
-            return response()->json(['success' => false, 'message' => 'Vendor not found'], 404);
-        }
-
-        // Resolve FLOW codes -> numeric product_id
-        $ids = collect($vendor->flower_ids ?? [])
-            ->map(function ($val) {
-                $digits = preg_replace('/\D+/', '', (string)$val); // handles "FLOW12345" / "12345"
-                return $digits !== '' ? (int)$digits : null;
-            })
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        if (empty($ids)) {
-            return response()->json([
-                'success'   => true,
-                'vendor_id' => $vendor->vendor_id,
-                'flowers'   => [],
-            ]);
-        }
-
-        $flowers = FlowerProduct::whereIn('product_id', $ids)
-            ->orderBy('name')
-            ->get(['product_id', 'name', 'odia_name']);
-
-        return response()->json([
-            'success'   => true,
-            'vendor_id' => $vendor->vendor_id,
-            'flowers'   => $flowers,
-        ]);
     }
 
 }

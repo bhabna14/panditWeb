@@ -74,7 +74,7 @@
     <form method="POST" action="{{ route('admin.monthWiseFlowerPrice.store') }}" id="mwfpForm">
         @csrf
 
-        <!-- Vendor + Search -->
+        <!-- Vendor -->
         <div class="card card-shadow mb-4">
             <div class="card-body">
                 <div class="row grid-gap">
@@ -91,14 +91,6 @@
                             @endforeach
                         </select>
                         <small class="text-muted">Flowers assigned to the selected vendor will appear below.</small>
-                    </div>
-
-                    <div class="col-md-6 d-flex align-items-end">
-                        <div class="w-100">
-                            <label class="form-label mb-1">Quick Search</label>
-                            <input type="text" id="flowerSearch" class="form-control"
-                                placeholder="Search flowers by name...">
-                        </div>
                     </div>
                 </div>
             </div>
@@ -148,26 +140,26 @@
             const pr = preset.price || '';
 
             return `
-        <tr data-idx="${idx}">
-            <td><input type="date" class="form-control" name="start_date[${fid}][]" value="${sd}" required></td>
-            <td><input type="date" class="form-control" name="end_date[${fid}][]" value="${ed}" required></td>
-            <td><input type="number" step="0.01" min="0" class="form-control" name="quantity[${fid}][]" value="${q}" required></td>
-            <td>
-                <select class="form-control" name="unit_id[${fid}][]" required>
-                    <option value="">Select unit</option>
-                    ${units.map(u => `<option value="${u.id}" ${Number(uid)===Number(u.id) ? 'selected':''}>${u.unit_name}</option>`).join('')}
-                </select>
-            </td>
-            <td>
-                <div class="input-group">
-                    <span class="input-group-text">₹</span>
-                    <input type="number" step="0.01" min="0" class="form-control" name="price[${fid}][]" value="${pr}" required>
-                </div>
-            </td>
-            <td class="text-center">
-                <button type="button" class="btn btn-sm btn-outline-danger remove-row">Remove</button>
-            </td>
-        </tr>`;
+    <tr data-idx="${idx}">
+        <td><input type="date" class="form-control" name="start_date[${fid}][]" value="${sd}" required></td>
+        <td><input type="date" class="form-control" name="end_date[${fid}][]" value="${ed}" required></td>
+        <td><input type="number" step="0.01" min="0" class="form-control" name="quantity[${fid}][]" value="${q}" required></td>
+        <td>
+            <select class="form-control" name="unit_id[${fid}][]" required>
+                <option value="">Select unit</option>
+                ${units.map(u => `<option value="${u.id}" ${Number(uid)===Number(u.id) ? 'selected':''}>${u.unit_name}</option>`).join('')}
+            </select>
+        </td>
+        <td>
+            <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" step="0.01" min="0" class="form-control" name="price[${fid}][]" value="${pr}" required>
+            </div>
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-sm btn-outline-danger remove-row">Remove</button>
+        </td>
+    </tr>`;
         }
 
         function buildFlowerDetailCard(flower) {
@@ -202,35 +194,35 @@
             }
 
             return `
-        <div class="card card-shadow mb-3 flower-detail" data-id="${fid}" data-name="${(name || '').toLowerCase()}">
-            <div class="card-body">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="h6 mb-0">${name}${flower.odia_name ? ` <small class="text-muted">(${flower.odia_name})</small>` : ''}</div>
-                    <div>
-                        <button type="button" class="btn btn-sm btn-outline-success add-row" data-flower="${fid}">
-                            + Add Row
-                        </button>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-bordered row-table align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Qty</th>
-                                <th>Unit</th>
-                                <th>Price</th>
-                                <th style="width: 100px;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="rows" data-flower="${fid}">
-                            ${rowsHTML}
-                        </tbody>
-                    </table>
+    <div class="card card-shadow mb-3 flower-detail" data-id="${fid}" data-name="${(name || '').toLowerCase()}">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="h6 mb-0">${name}${flower.odia_name ? ` <small class="text-muted">(${flower.odia_name})</small>` : ''}</div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-success add-row" data-flower="${fid}">
+                        + Add Row
+                    </button>
                 </div>
             </div>
-        </div>`;
+            <div class="table-responsive">
+                <table class="table table-bordered row-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Qty</th>
+                            <th>Unit</th>
+                            <th>Price</th>
+                            <th style="width: 100px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="rows" data-flower="${fid}">
+                        ${rowsHTML}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>`;
         }
 
         function renderFlowers(flowers) {
@@ -238,7 +230,7 @@
             container.innerHTML = '';
 
             if (!Array.isArray(flowers) || flowers.length === 0) {
-                // No alert per your requirement — just empty
+                // No alert per your requirement — just empty space
                 return;
             }
 
@@ -246,16 +238,7 @@
             sorted.forEach(f => container.insertAdjacentHTML('beforeend', buildFlowerDetailCard(f)));
         }
 
-        // Search the rendered cards
-        function searchInRendered(term) {
-            const q = (term || '').trim().toLowerCase();
-            document.querySelectorAll('#flowerDetailsContainer .flower-detail').forEach(card => {
-                const name = (card.getAttribute('data-name') || '').toLowerCase();
-                card.style.display = name.includes(q) ? '' : 'none';
-            });
-        }
-
-        // AJAX: fetch vendor’s flowers
+        // =============== AJAX & Boot ===============
         async function fetchVendorFlowers(vendorId) {
             if (!vendorId) {
                 renderFlowers([]);
@@ -285,7 +268,6 @@
             }
         }
 
-        // Boot
         document.addEventListener('DOMContentLoaded', () => {
             $('.select2').select2({
                 width: '100%',
@@ -294,20 +276,13 @@
 
             const vendorSel = document.getElementById('vendor_id');
             vendorSel.addEventListener('change', (e) => {
-                const s = document.getElementById('flowerSearch');
-                if (s) s.value = '';
                 fetchVendorFlowers(e.target.value);
             });
 
-            // Rehydrate vendor on validation error
+            // Rehydrate after validation error
             if (oldData.vendor_id) {
                 fetchVendorFlowers(oldData.vendor_id);
             }
-
-            // Search listener
-            document.getElementById('flowerSearch').addEventListener('input', (e) => {
-                searchInRendered(e.target.value);
-            });
 
             // Add / remove row
             document.body.addEventListener('click', (e) => {
