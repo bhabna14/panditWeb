@@ -137,4 +137,15 @@ class MonthWiseFlowerPriceController extends Controller
         }
     }
 
+     public function manageFlowerPrice()
+    {
+        $transactions = MonthWiseFlowerPrice::with([
+            'vendor:id,vendor_name',
+            'product:id,name',
+            'unit:id,unit_name'
+        ])->orderBy('id','desc')->get();
+
+        return view('admin.manage_flower_price', compact('transactions'));
+    }
+
 }

@@ -15,4 +15,18 @@ class MonthWiseFlowerPrice extends Model
         'vendor_id','product_id','start_date','end_date','quantity','unit_id','price_per_unit'
     ];
 
+     public function vendor()
+    {
+        return $this->belongsTo(FlowerVendor::class, 'vendor_id', 'vendor_id');
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(FlowerProduct::class, 'product_id', 'product_id');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(PoojaUnit::class, 'unit_id', 'id');
+    }
 }

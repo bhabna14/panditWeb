@@ -866,4 +866,6 @@ Route::controller(MonthWiseFlowerPriceController::class)->group(function() {
     Route::get('/month-wise-flower-price', 'create')->name('admin.monthWiseFlowerPrice');
     Route::post('/month-wise-flower-price', 'saveFlowerPrice')->name('admin.saveFlowerPrice');
     Route::get('/vendor-flowers', 'vendorFlowers')->name('admin.getVendorFlowers');
+    Route::get('/manage-flower-price', 'manageFlowerPrice')->name('admin.manageFlowerPrice');
+
 });
