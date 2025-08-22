@@ -868,6 +868,6 @@ Route::controller(MonthWiseFlowerPriceController::class)->group(function() {
     Route::get('/vendor-flowers', 'vendorFlowers')->name('admin.getVendorFlowers');
     Route::get('/manage-flower-price', 'manageFlowerPrice')->name('admin.manageFlowerPrice');
 Route::post('flower-price/update/{id}', 'updateFlowerPrice');
-    Route::delete('flower-price/delete/{id}','deleteFlowerPrice')->name('deleteFlowerPrice');
+    Route::delete('flower-price/delete/{id}','deleteFlowerPrice')->name('admin.deleteFlowerPrice');
 
 });
