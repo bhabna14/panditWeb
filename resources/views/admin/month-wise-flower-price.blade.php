@@ -74,7 +74,7 @@
     <form method="POST" action="{{ route('admin.monthWiseFlowerPrice.store') }}" id="mwfpForm">
         @csrf
 
-        <!-- Vendor -->
+        <!-- Vendor + Search -->
         <div class="card card-shadow mb-4">
             <div class="card-body">
                 <div class="row grid-gap">
@@ -89,9 +89,8 @@
                                     {{ $v->vendor_name }}
                                 </option>
                             @endforeach
-
                         </select>
-                        <small class="text-muted">Only flowers assigned to the selected vendor are shown.</small>
+                        <small class="text-muted">Flowers assigned to the selected vendor will appear below.</small>
                     </div>
 
                     <div class="col-md-6 d-flex align-items-end">
@@ -105,54 +104,17 @@
             </div>
         </div>
 
-        <!-- Flowers -->
+        <!-- Details (no chips / no checkboxes) -->
         <div class="card card-shadow mb-4">
             <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <div>
-                        <div class="fw-semibold">Flowers</div>
-                        <small class="text-muted">Check flowers. For each checked flower, you can add multiple rows (date
-                            range, qty, unit, price).</small>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary" id="selectAll">Select all</button>
-                        <button type="button" class="btn btn-sm btn-outline-secondary" id="clearAll">Clear</button>
-                    </div>
-                </div>
+                <div class="fw-semibold mb-2">Vendor Flowers & Prices</div>
+                <small class="text-muted">For each flower below, add one or more rows (date range, qty, unit,
+                    price).</small>
 
-                <div class="row" id="flowersGrid">
-                    @foreach ($flowers as $f)
-                        @php
-                            $checked = in_array($f->product_id, old('flower_ids', []));
-                            // If product_code ever exists in future, this will use it; otherwise fallback.
-                            $code = $f->product_code ?? 'FLOW' . $f->product_id;
-                        @endphp
-                        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 flower-item"
-                            data-name="{{ strtolower($f->name) }}" data-id="{{ $f->product_id }}"
-                            data-code="{{ strtoupper($code) }}">
-                            <label class="flower-chip w-100">
-                                <input class="form-check-input me-2 flower-checkbox" type="checkbox" name="flower_ids[]"
-                                    value="{{ $f->product_id }}" {{ $checked ? 'checked' : '' }}>
-                                <span>{{ $f->name }}
-                                    @if (!empty($f->odia_name))
-                                        <small class="text-muted">({{ $f->odia_name }})</small>
-                                    @endif
-                                </span>
-                                <span class="ms-auto pill">{{ $code }}</span>
-                            </label>
-                        </div>
-                    @endforeach
-
-                </div>
-
-                <div id="noFlowersMsg" class="alert alert-warning d-none mt-2">
-                    No flowers are assigned to this vendor.
-                </div>
+                <!-- Detail containers -->
+                <div id="flowerDetailsContainer" class="mt-3"></div>
             </div>
         </div>
-
-        <!-- Detail containers -->
-        <div id="flowerDetailsContainer"></div>
 
         <div class="text-end">
             <button type="submit" class="btn btn-primary btn-lg">Save</button>
@@ -164,21 +126,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // ========================
-        // Data from server
-        // ========================
+        /** ========================
+         * Data from server
+         * ====================== */
         const vendors = @json($vendors);
         const allFlowers = @json($flowers);
         const units = @json($units);
 
-        // Build a fast lookup Set for valid product_ids
-        const allFlowerIdsSet = new Set(
-            (allFlowers || []).map(f => Number(f.product_id)).filter(Number.isFinite)
+        /** ========================
+         * Build lookups
+         * ====================== */
+        // all valid numeric product_ids
+        const allFlowerIdsSet = new Set((allFlowers || [])
+            .map(f => Number(f.product_id))
+            .filter(Number.isFinite)
         );
 
-        // Build CODE -> product_id map
-        // Preferred: f.product_code (if you included it in $flowers)
-        // Fallback: "FLOW" + product_id (matches your stored codes)
+        // CODE -> product_id (fallback to "FLOW{product_id}")
         const codeToId = {};
         (allFlowers || []).forEach(f => {
             const pid = Number(f.product_id);
@@ -188,49 +152,41 @@
             codeToId[code] = pid;
         });
 
-        // Helper: resolve vendor-provided identifier ("FLOW123", "123", etc.) -> product_id
+        // resolve vendor’s stored id (e.g., "FLOW3419542" or "3419542") to numeric product_id
         const resolveToPid = (value) => {
             if (value == null) return null;
             const raw = String(value).trim().toUpperCase();
 
-            // 1) Exact code match (e.g. "FLOW3419542")
+            // exact code like FLOW123
             if (codeToId[raw]) return codeToId[raw];
 
-            // 2) Extract digits and try as product_id
+            // extract digits and try
             const digits = raw.match(/\d+/);
             if (digits) {
                 const pid = Number(digits[0]);
                 if (allFlowerIdsSet.has(pid)) return pid;
             }
 
-            // 3) Pure numeric?
+            // pure numeric?
             const num = Number(value);
             if (Number.isFinite(num) && allFlowerIdsSet.has(num)) return num;
 
             return null;
         };
 
-        // ========================
-        // Map vendor -> allowed numeric product_ids (deduped)
-        // Works when vendor.flower_ids are ["FLOW3419542", ...]
-        // ========================
+        // vendor_id -> [product_id,...]
         const vendorMap = {};
         (vendors || []).forEach(v => {
             const rawList = Array.isArray(v.flower_ids) ? v.flower_ids : [];
-            const resolved = rawList
-                .map(resolveToPid)
-                .filter(pid => pid !== null);
-
-            // Deduplicate
+            const resolved = rawList.map(resolveToPid).filter(pid => pid !== null);
             vendorMap[v.vendor_id] = Array.from(new Set(resolved));
         });
 
-        // ========================
-        // Old input (rehydrate on validation error)
-        // ========================
+        /** ========================
+         * Old input (rehydrate)
+         * ====================== */
         const oldData = {
             vendor_id: @json(old('vendor_id')),
-            selected: @json(old('flower_ids', [])),
             start_date: @json(old('start_date', [])),
             end_date: @json(old('end_date', [])),
             quantity: @json(old('quantity', [])),
@@ -238,9 +194,9 @@
             price: @json(old('price', [])),
         };
 
-        // ========================
-        // Row builder (unchanged)
-        // ========================
+        /** ========================
+         * Builders
+         * ====================== */
         function buildRowHTML(fid, idx, preset = {}) {
             const sd = preset.start_date || '';
             const ed = preset.end_date || '';
@@ -249,31 +205,28 @@
             const pr = preset.price || '';
 
             return `
-            <tr data-idx="${idx}">
-                <td><input type="date" class="form-control" name="start_date[${fid}][]" value="${sd}" required></td>
-                <td><input type="date" class="form-control" name="end_date[${fid}][]" value="${ed}" required></td>
-                <td><input type="number" step="0.01" min="0" class="form-control" name="quantity[${fid}][]" value="${q}" required></td>
-                <td>
-                    <select class="form-control" name="unit_id[${fid}][]" required>
-                        <option value="">Select unit</option>
-                        ${units.map(u => `<option value="${u.id}" ${Number(uid)===Number(u.id) ? 'selected':''}>${u.unit_name}</option>`).join('')}
-                    </select>
-                </td>
-                <td>
-                    <div class="input-group">
-                        <span class="input-group-text">₹</span>
-                        <input type="number" step="0.01" min="0" class="form-control" name="price[${fid}][]" value="${pr}" required>
-                    </div>
-                </td>
-                <td class="text-center">
-                    <button type="button" class="btn btn-sm btn-outline-danger remove-row">Remove</button>
-                </td>
-            </tr>`;
+    <tr data-idx="${idx}">
+        <td><input type="date" class="form-control" name="start_date[${fid}][]" value="${sd}" required></td>
+        <td><input type="date" class="form-control" name="end_date[${fid}][]" value="${ed}" required></td>
+        <td><input type="number" step="0.01" min="0" class="form-control" name="quantity[${fid}][]" value="${q}" required></td>
+        <td>
+            <select class="form-control" name="unit_id[${fid}][]" required>
+                <option value="">Select unit</option>
+                ${units.map(u => `<option value="${u.id}" ${Number(uid)===Number(u.id) ? 'selected':''}>${u.unit_name}</option>`).join('')}
+            </select>
+        </td>
+        <td>
+            <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input type="number" step="0.01" min="0" class="form-control" name="price[${fid}][]" value="${pr}" required>
+            </div>
+        </td>
+        <td class="text-center">
+            <button type="button" class="btn btn-sm btn-outline-danger remove-row">Remove</button>
+        </td>
+    </tr>`;
         }
 
-        // ========================
-        // Detail card builder (unchanged)
-        // ========================
         function buildFlowerDetailCard(fid) {
             const f = allFlowers.find(x => Number(x.product_id) === Number(fid));
             const name = f ? f.name : `Flower #${fid}`;
@@ -291,7 +244,7 @@
                 olds.quantity.length,
                 olds.unit_id.length,
                 olds.price.length,
-                1
+                1 // at least one row
             );
 
             let rowsHTML = '';
@@ -306,88 +259,76 @@
             }
 
             return `
-            <div class="card card-shadow mb-3 flower-detail" data-id="${fid}">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3">
-                        <div class="h6 mb-0">${name}</div>
-                        <div>
-                            <button type="button" class="btn btn-sm btn-outline-success add-row" data-flower="${fid}">
-                                + Add Row
-                            </button>
-                        </div>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered row-table align-middle mb-0">
-                            <thead>
-                                <tr>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                    <th>Qty</th>
-                                    <th>Unit</th>
-                                    <th>Price</th>
-                                    <th style="width: 100px;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="rows" data-flower="${fid}">
-                                ${rowsHTML}
-                            </tbody>
-                        </table>
-                    </div>
+    <div class="card card-shadow mb-3 flower-detail" data-id="${fid}" data-name="${(name || '').toLowerCase()}">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="h6 mb-0">${name}</div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-success add-row" data-flower="${fid}">
+                        + Add Row
+                    </button>
                 </div>
-            </div>`;
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered row-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Qty</th>
+                            <th>Unit</th>
+                            <th>Price</th>
+                            <th style="width: 100px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody class="rows" data-flower="${fid}">
+                        ${rowsHTML}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>`;
         }
 
-        function renderDetailsForSelected() {
+        /** ========================
+         * Rendering
+         * ====================== */
+        function renderAllDetailsForVendor(vendorId) {
             const container = document.getElementById('flowerDetailsContainer');
             container.innerHTML = '';
-            document.querySelectorAll('.flower-checkbox:checked').forEach(cb => {
-                container.insertAdjacentHTML('beforeend', buildFlowerDetailCard(cb.value));
-            });
-        }
 
-        // ========================
-        // Filter by vendor (now using resolved numeric IDs)
-        // ========================
-        function filterFlowersByVendor(vendorId) {
             const allowed = vendorMap[vendorId] || [];
-            let any = false;
+            if (!allowed.length) return;
 
-            // Uncheck all not allowed
-            document.querySelectorAll('.flower-checkbox').forEach(cb => {
-                if (!allowed.includes(Number(cb.value))) cb.checked = false;
-            });
+            // Sort flowers by name for nicer UX
+            const allowedWithNames = allowed
+                .map(fid => {
+                    const f = allFlowers.find(x => Number(x.product_id) === Number(fid));
+                    return {
+                        fid,
+                        name: f ? (f.name || '') : ''
+                    };
+                })
+                .sort((a, b) => a.name.localeCompare(b.name));
 
-            // Show allowed only
-            document.querySelectorAll('#flowersGrid .flower-item').forEach(item => {
-                const id = Number(item.dataset.id);
-                if (allowed.includes(id)) {
-                    item.classList.remove('disabled');
-                    item.style.display = '';
-                    any = true;
-                } else {
-                    item.classList.add('disabled');
-                    item.style.display = 'none';
-                }
-            });
-
-            document.getElementById('noFlowersMsg').classList.toggle('d-none', any);
-            renderDetailsForSelected();
-        }
-
-        // ========================
-        // Search by name (unchanged DOM contract)
-        // ========================
-        function searchFlowers(term) {
-            const q = term.trim().toLowerCase();
-            document.querySelectorAll('#flowersGrid .flower-item:not(.disabled)').forEach(item => {
-                const name = (item.getAttribute('data-name') || '').toLowerCase();
-                item.style.display = name.includes(q) ? '' : 'none';
+            allowedWithNames.forEach(({
+                fid
+            }) => {
+                container.insertAdjacentHTML('beforeend', buildFlowerDetailCard(fid));
             });
         }
 
-        // ========================
-        // Boot
-        // ========================
+        function searchInRendered(term) {
+            const q = (term || '').trim().toLowerCase();
+            document.querySelectorAll('#flowerDetailsContainer .flower-detail').forEach(card => {
+                const name = (card.getAttribute('data-name') || '').toLowerCase();
+                card.style.display = name.includes(q) ? '' : 'none';
+            });
+        }
+
+        /** ========================
+         * Boot
+         * ====================== */
         document.addEventListener('DOMContentLoaded', () => {
             // Select2
             $('.select2').select2({
@@ -397,29 +338,23 @@
 
             const vendorSel = document.getElementById('vendor_id');
             vendorSel.addEventListener('change', (e) => {
-                // Clear stale search text when switching vendor
+                // Clear stale search
                 const s = document.getElementById('flowerSearch');
                 if (s) s.value = '';
-                filterFlowersByVendor(e.target.value);
+                renderAllDetailsForVendor(e.target.value);
             });
 
-            // Initialize
+            // Initialize with old vendor (rehydrate)
             if (oldData.vendor_id) {
-                filterFlowersByVendor(oldData.vendor_id);
-            } else {
-                document.querySelectorAll('#flowersGrid .flower-item').forEach(i => i.style.display = 'none');
-                document.getElementById('noFlowersMsg').classList.add('d-none');
+                renderAllDetailsForVendor(oldData.vendor_id);
             }
 
             // Search
-            document.getElementById('flowerSearch').addEventListener('input', (e) => searchFlowers(e.target.value));
-
-            // Checkbox toggle -> render detail cards
-            document.getElementById('flowersGrid').addEventListener('change', (e) => {
-                if (e.target.classList.contains('flower-checkbox')) renderDetailsForSelected();
+            document.getElementById('flowerSearch').addEventListener('input', (e) => {
+                searchInRendered(e.target.value);
             });
 
-            // Add / remove row
+            // Add / remove rows (event delegation)
             document.body.addEventListener('click', (e) => {
                 if (e.target.classList.contains('add-row')) {
                     const fid = e.target.getAttribute('data-flower');
@@ -432,45 +367,24 @@
                     tr?.remove();
                 }
             });
-
-            // Select all / clear (only visible+allowed)
-            document.getElementById('selectAll').addEventListener('click', () => {
-                document.querySelectorAll('#flowersGrid .flower-item:not(.disabled)').forEach(item => {
-                    if (item.style.display !== 'none') {
-                        const cb = item.querySelector('.flower-checkbox');
-                        if (cb) cb.checked = true;
-                    }
-                });
-                renderDetailsForSelected();
-            });
-            document.getElementById('clearAll').addEventListener('click', () => {
-                document.querySelectorAll('#flowersGrid .flower-checkbox').forEach(cb => cb.checked =
-                false);
-                renderDetailsForSelected();
-            });
-
-            // Rehydrate details if old selected exists
-            if (oldData.selected && oldData.selected.length) {
-                renderDetailsForSelected();
-            }
         });
 
-        // ========================
-        // SweetAlert session
-        // ========================
-        @if (session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Saved',
-                text: @json(session('success'))
-            });
-        @endif
-        @if (session('error'))
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: @json(session('error'))
-            });
-        @endif
+        /** ========================
+         * SweetAlert session
+         * ====================== */
+        @{{ 'if' }}(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: 'Saved',
+            text: @json(session('success'))
+        });
+        @{{ 'endif' }}
+        @{{ 'if' }}(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: @json(session('error'))
+        });
+        @{{ 'endif' }}
     </script>
 @endsection
