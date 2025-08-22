@@ -66,7 +66,7 @@
                                 </span>
                             </td>
                             <td>{{ $t->quantity }}</td>
-                            <td>{{ $t->unit?->unit_name ?? '-' }}</td>
+                            <td>{{ $t->unit_id }}</td>
                             <td><strong>₹{{ number_format($t->price_per_unit, 2) }}</strong></td>
                             <td>
                                 <button class="btn btn-sm btn-warning editBtn"
@@ -119,15 +119,13 @@
                         <label>Quantity</label>
                         <input type="number" class="form-control" name="quantity" id="edit_quantity" required>
                     </div>
+                    
+                    <!-- Unit field (ID shown directly, readonly) -->
                     <div class="mb-3">
-                        <label>Unit</label>
-                        <select name="unit_id" id="edit_unit_id" class="form-control" required>
-                            <option value="">-- Select Unit --</option>
-                            @foreach($units as $unit)
-                                <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
-                            @endforeach
-                        </select>
+                        <label>Unit ID</label>
+                        <input type="text" class="form-control" name="unit_id" id="edit_unit_id" readonly>
                     </div>
+
                     <div class="mb-3">
                         <label>Price</label>
                         <input type="number" step="0.01" class="form-control" name="price_per_unit" id="edit_price" required>
@@ -197,8 +195,8 @@
         $('#edit_start_date').val($(this).data('start'));
         $('#edit_end_date').val($(this).data('end'));
         $('#edit_quantity').val($(this).data('qty'));
-        $('#edit_unit_id').val($(this).data('unit'));
-        $('#edit_price').val($(this).data('price'));
+        $('#edit_unit_id').val($(this).data('unit')); 
+         $('#edit_price').val($(this).data('price'));
 
         let id = $(this).data('id');
         $('#editForm').attr('action', '/admin/flower-price/update/' + id);
