@@ -76,9 +76,9 @@
                                         data-price="{{ $t->price_per_unit }}">
                                         Edit
                                     </button>
+<button class="btn btn-sm btn-danger deleteBtn" data-id="{{ $t->id }}">Delete</button>
 
-                                    <button class="btn btn-sm btn-danger deleteBtn"
-                                        data-id="{{ $t->id }}">Delete</button>
+                                    
                                 </td>
                             </tr>
                         @endforeach
