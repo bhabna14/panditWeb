@@ -15,7 +15,7 @@ use App\Models\MonthWiseFlowerPrice;
 
 class MonthWiseFlowerPriceController extends Controller
 {
-     public function create()
+    public function create()
     {
         // Check once; avoid calling in closure
         $hasStatus = Schema::hasColumn('flower__vendor_details', 'status');
@@ -27,11 +27,10 @@ class MonthWiseFlowerPriceController extends Controller
             ->get();
 
         // Master flowers
-        $flowers = FlowerProduct::where(function ($q) {
-                $q->where('category', 'Flower')->orWhere('category', 'flower');
-            })
-            ->orderBy('name')
-            ->get(['product_id', 'name', 'odia_name']);
+       $flowers = FlowerProduct::where(fn($q) => $q->where('category','Flower')->orWhere('category','flower'))
+    ->orderBy('name')
+    ->get(['product_id','name','odia_name','product_code']);
+
 
         // Units
         $units = PoojaUnit::orderBy('unit_name')->get(['id', 'unit_name']);

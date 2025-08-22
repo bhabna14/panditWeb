@@ -84,10 +84,12 @@
                             data-placeholder="Select a vendor">
                             <option value=""></option>
                             @foreach ($vendors as $v)
-                                <option value="{{ $v->vendor_id }}" {{ old('vendor_id') === $v->vendor_id ? 'selected' : '' }}>
+                                <option value="{{ $v->vendor_id }}"
+                                    {{ (string) old('vendor_id') === (string) $v->vendor_id ? 'selected' : '' }}>
                                     {{ $v->vendor_name }}
                                 </option>
                             @endforeach
+
                         </select>
                         <small class="text-muted">Only flowers assigned to the selected vendor are shown.</small>
                     </div>
@@ -120,9 +122,13 @@
 
                 <div class="row" id="flowersGrid">
                     @foreach ($flowers as $f)
-                        @php $checked = in_array($f->product_id, old('flower_ids', [])); @endphp
+                        @php
+                            $checked = in_array($f->product_id, old('flower_ids', []));
+                            $code = $f->product_code ?? 'FLOW' . $f->product_id;
+                        @endphp
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 flower-item"
-                            data-name="{{ strtolower($f->name) }}" data-id="{{ $f->product_id }}">
+                            data-name="{{ strtolower($f->name) }}" data-id="{{ $f->product_id }}"
+                            data-code="{{ strtoupper($code) }}">
                             <label class="flower-chip w-100">
                                 <input class="form-check-input me-2 flower-checkbox" type="checkbox" name="flower_ids[]"
                                     value="{{ $f->product_id }}" {{ $checked ? 'checked' : '' }}>
@@ -131,10 +137,11 @@
                                         <small class="text-muted">({{ $f->odia_name }})</small>
                                     @endif
                                 </span>
-                                <span class="ms-auto pill">#{{ $f->product_id }}</span>
+                                <span class="ms-auto pill">{{ $code }}</span>
                             </label>
                         </div>
                     @endforeach
+
                 </div>
 
                 <div id="noFlowersMsg" class="alert alert-warning d-none mt-2">
@@ -151,22 +158,75 @@
         </div>
     </form>
 @endsection
-
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // ========================
         // Data from server
+        // ========================
         const vendors = @json($vendors);
         const allFlowers = @json($flowers);
         const units = @json($units);
 
-        // Map vendor -> allowed flower IDs
-        const vendorMap = {};
-        vendors.forEach(v => vendorMap[v.vendor_id] = (v.flower_ids || []).map(Number));
+        // Build a fast lookup Set for valid product_ids
+        const allFlowerIdsSet = new Set(
+            (allFlowers || []).map(f => Number(f.product_id)).filter(Number.isFinite)
+        );
 
+        // Build CODE -> product_id map
+        // Preferred: f.product_code (if you included it in $flowers)
+        // Fallback: "FLOW" + product_id (matches your stored codes)
+        const codeToId = {};
+        (allFlowers || []).forEach(f => {
+            const pid = Number(f.product_id);
+            if (!Number.isFinite(pid)) return;
+            const fallbackCode = 'FLOW' + String(pid);
+            const code = String((f.product_code ?? fallbackCode)).toUpperCase();
+            codeToId[code] = pid;
+        });
+
+        // Helper: resolve vendor-provided identifier ("FLOW123", "123", etc.) -> product_id
+        const resolveToPid = (value) => {
+            if (value == null) return null;
+            const raw = String(value).trim().toUpperCase();
+
+            // 1) Exact code match (e.g. "FLOW3419542")
+            if (codeToId[raw]) return codeToId[raw];
+
+            // 2) Extract digits and try as product_id
+            const digits = raw.match(/\d+/);
+            if (digits) {
+                const pid = Number(digits[0]);
+                if (allFlowerIdsSet.has(pid)) return pid;
+            }
+
+            // 3) Pure numeric?
+            const num = Number(value);
+            if (Number.isFinite(num) && allFlowerIdsSet.has(num)) return num;
+
+            return null;
+        };
+
+        // ========================
+        // Map vendor -> allowed numeric product_ids (deduped)
+        // Works when vendor.flower_ids are ["FLOW3419542", ...]
+        // ========================
+        const vendorMap = {};
+        (vendors || []).forEach(v => {
+            const rawList = Array.isArray(v.flower_ids) ? v.flower_ids : [];
+            const resolved = rawList
+                .map(resolveToPid)
+                .filter(pid => pid !== null);
+
+            // Deduplicate
+            vendorMap[v.vendor_id] = Array.from(new Set(resolved));
+        });
+
+        // ========================
         // Old input (rehydrate on validation error)
+        // ========================
         const oldData = {
             vendor_id: @json(old('vendor_id')),
             selected: @json(old('flower_ids', [])),
@@ -177,11 +237,13 @@
             price: @json(old('price', [])),
         };
 
-        // Build a table row for one entry
+        // ========================
+        // Row builder (unchanged)
+        // ========================
         function buildRowHTML(fid, idx, preset = {}) {
             const sd = preset.start_date || '';
             const ed = preset.end_date || '';
-            const q = preset.quantity || '';
+            const q  = preset.quantity || '';
             const uid = preset.unit_id || '';
             const pr = preset.price || '';
 
@@ -208,30 +270,37 @@
             </tr>`;
         }
 
-        // Build the detail card for a selected flower
+        // ========================
+        // Detail card builder (unchanged)
+        // ========================
         function buildFlowerDetailCard(fid) {
             const f = allFlowers.find(x => Number(x.product_id) === Number(fid));
             const name = f ? f.name : `Flower #${fid}`;
 
-            // Old values for this flower (arrays)
             const olds = {
                 start_date: (oldData.start_date[String(fid)] || []),
-                end_date: (oldData.end_date[String(fid)] || []),
-                quantity: (oldData.quantity[String(fid)] || []),
-                unit_id: (oldData.unit_id[String(fid)] || []),
-                price: (oldData.price[String(fid)] || []),
+                end_date:   (oldData.end_date[String(fid)]   || []),
+                quantity:   (oldData.quantity[String(fid)]   || []),
+                unit_id:    (oldData.unit_id[String(fid)]    || []),
+                price:      (oldData.price[String(fid)]      || []),
             };
-            const maxRows = Math.max(olds.start_date.length, olds.end_date.length, olds.quantity.length, olds.unit_id
-                .length, olds.price.length, 1);
+            const maxRows = Math.max(
+                olds.start_date.length,
+                olds.end_date.length,
+                olds.quantity.length,
+                olds.unit_id.length,
+                olds.price.length,
+                1
+            );
 
             let rowsHTML = '';
             for (let i = 0; i < maxRows; i++) {
                 rowsHTML += buildRowHTML(fid, i, {
                     start_date: olds.start_date[i],
-                    end_date: olds.end_date[i],
-                    quantity: olds.quantity[i],
-                    unit_id: olds.unit_id[i],
-                    price: olds.price[i],
+                    end_date:   olds.end_date[i],
+                    quantity:   olds.quantity[i],
+                    unit_id:    olds.unit_id[i],
+                    price:      olds.price[i],
                 });
             }
 
@@ -275,6 +344,9 @@
             });
         }
 
+        // ========================
+        // Filter by vendor (now using resolved numeric IDs)
+        // ========================
         function filterFlowersByVendor(vendorId) {
             const allowed = vendorMap[vendorId] || [];
             let any = false;
@@ -284,7 +356,7 @@
                 if (!allowed.includes(Number(cb.value))) cb.checked = false;
             });
 
-            // Show allowed
+            // Show allowed only
             document.querySelectorAll('#flowersGrid .flower-item').forEach(item => {
                 const id = Number(item.dataset.id);
                 if (allowed.includes(id)) {
@@ -301,14 +373,20 @@
             renderDetailsForSelected();
         }
 
+        // ========================
+        // Search by name (unchanged DOM contract)
+        // ========================
         function searchFlowers(term) {
             const q = term.trim().toLowerCase();
             document.querySelectorAll('#flowersGrid .flower-item:not(.disabled)').forEach(item => {
-                const name = item.getAttribute('data-name') || '';
+                const name = (item.getAttribute('data-name') || '').toLowerCase();
                 item.style.display = name.includes(q) ? '' : 'none';
             });
         }
 
+        // ========================
+        // Boot
+        // ========================
         document.addEventListener('DOMContentLoaded', () => {
             // Select2
             $('.select2').select2({
@@ -317,7 +395,12 @@
             });
 
             const vendorSel = document.getElementById('vendor_id');
-            vendorSel.addEventListener('change', (e) => filterFlowersByVendor(e.target.value));
+            vendorSel.addEventListener('change', (e) => {
+                // Clear stale search text when switching vendor
+                const s = document.getElementById('flowerSearch');
+                if (s) s.value = '';
+                filterFlowersByVendor(e.target.value);
+            });
 
             // Initialize
             if (oldData.vendor_id) {
@@ -335,7 +418,7 @@
                 if (e.target.classList.contains('flower-checkbox')) renderDetailsForSelected();
             });
 
-            // Add row
+            // Add / remove row
             document.body.addEventListener('click', (e) => {
                 if (e.target.classList.contains('add-row')) {
                     const fid = e.target.getAttribute('data-flower');
@@ -360,8 +443,7 @@
                 renderDetailsForSelected();
             });
             document.getElementById('clearAll').addEventListener('click', () => {
-                document.querySelectorAll('#flowersGrid .flower-checkbox').forEach(cb => cb.checked =
-                false);
+                document.querySelectorAll('#flowersGrid .flower-checkbox').forEach(cb => cb.checked = false);
                 renderDetailsForSelected();
             });
 
@@ -371,7 +453,9 @@
             }
         });
 
+        // ========================
         // SweetAlert session
+        // ========================
         @if (session('success'))
             Swal.fire({
                 icon: 'success',

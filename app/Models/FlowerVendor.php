@@ -31,7 +31,9 @@ class FlowerVendor extends Model
         'flower_ids' => 'array',
     ];
 
-
+public function flowerProduct(){
+    return $this->hasMany(FlowerProduct::class,'flower_ids', 'product_id');
+}
     public function vendorBanks()
     {
         return $this->hasMany(FlowerVendorBank::class, 'vendor_id', 'vendor_id'); // Adjust as necessary
@@ -40,6 +42,8 @@ class FlowerVendor extends Model
     {
         return $this->hasMany(FlowerPickupDetails::class,'vendor_id', 'vendor_id');
     }
+
+    
 
 }
 
