@@ -70,18 +70,20 @@
                                 <td><strong>₹{{ number_format($t->price_per_unit, 2) }}</strong></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning editBtn" data-id="{{ $t->id }}"
-                                        data-vendor="{{ $t->vendor_id }}" data-product="{{ $t->product_id }}"
-                                        data-start="{{ $t->start_date }}" data-end="{{ $t->end_date }}"
+                                        data-start="{{ \Carbon\Carbon::parse($t->start_date)->format('Y-m-d') }}"
+                                        data-end="{{ \Carbon\Carbon::parse($t->end_date)->format('Y-m-d') }}"
                                         data-qty="{{ $t->quantity }}" data-unit="{{ $t->unit_id }}"
                                         data-price="{{ $t->price_per_unit }}">
                                         Edit
                                     </button>
+
                                     <button class="btn btn-sm btn-danger deleteBtn"
                                         data-id="{{ $t->id }}">Delete</button>
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
+
                 </table>
                 @if ($transactions->isEmpty())
                     <div class="text-center text-muted py-3">No records found</div>
@@ -90,10 +92,10 @@
         </div>
     </div>
 
-    <!-- ✅ Edit Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1">
+    {{-- Edit Modal --}}
+    <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" id="editForm">
+            <form method="POST" id="editForm" action="">
                 @csrf
                 @method('PUT')
 
@@ -102,31 +104,38 @@
                         <h5 class="modal-title">Edit Flower Price</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
+
                     <div class="modal-body">
                         <input type="hidden" name="id" id="edit_id">
 
                         <div class="mb-3">
-                            <label>Start Date</label>
+                            <label class="form-label">Start Date</label>
                             <input type="date" class="form-control" name="start_date" id="edit_start_date" required>
                         </div>
+
                         <div class="mb-3">
-                            <label>End Date</label>
+                            <label class="form-label">End Date</label>
                             <input type="date" class="form-control" name="end_date" id="edit_end_date" required>
                         </div>
+
                         <div class="mb-3">
-                            <label>Quantity</label>
-                            <input type="number" class="form-control" name="quantity" id="edit_quantity" required>
+                            <label class="form-label">Quantity</label>
+                            <input type="number" class="form-control" name="quantity" id="edit_quantity" step="0.01"
+                                required>
                         </div>
+
                         <div class="mb-3">
-                            <label>Unit ID</label>
+                            <label class="form-label">Unit ID</label>
                             <input type="text" class="form-control" name="unit_id" id="edit_unit_id" readonly>
                         </div>
+
                         <div class="mb-3">
-                            <label>Price</label>
+                            <label class="form-label">Price per Unit</label>
                             <input type="number" step="0.01" class="form-control" name="price_per_unit" id="edit_price"
                                 required>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary">Update</button>
@@ -184,22 +193,23 @@
         });
 
         // ✅ Open Edit Modal
-       $(document).ready(function () {
-    $('.editBtn').on('click', function () {
-        let id = $(this).data('id');
-        $('#edit_id').val(id);
-        $('#edit_start_date').val($(this).data('start'));
-        $('#edit_end_date').val($(this).data('end'));
-        $('#edit_quantity').val($(this).data('qty'));
-        $('#edit_unit_id').val($(this).data('unit'));
-        $('#edit_price').val($(this).data('price'));
+        $(document).on('click', '.editBtn', function() {
+            const id = $(this).data('id');
 
-        // set form action URL
-        $('#editForm').attr('action', '/flower-price/update/' + id);
+            $('#edit_id').val(id);
+            $('#edit_start_date').val($(this).data('start')); // already Y-m-d above
+            $('#edit_end_date').val($(this).data('end'));
+            $('#edit_quantity').val($(this).data('qty'));
+            $('#edit_unit_id').val($(this).data('unit'));
+            $('#edit_price').val($(this).data('price'));
 
-        $('#editModal').modal('show');
-    });
-});
+            // Build action using NAMED ROUTE to avoid prefix issues
+            let url = "{{ route('admin.flower-price.update', ':id') }}";
+            url = url.replace(':id', id);
+
+            $('#editForm').attr('action', url);
+            $('#editModal').modal('show');
+        });
 
         // ✅ Delete Confirmation
         $(document).on('click', '.deleteBtn', function() {

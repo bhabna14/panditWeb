@@ -15,6 +15,13 @@ class MonthWiseFlowerPrice extends Model
        'vendor_id','product_id','start_date','end_date','quantity','unit_id','price_per_unit'
     ];
 
+     protected $casts = [
+        'start_date'    => 'date',
+        'end_date'      => 'date',
+        'quantity'      => 'integer',
+        'price_per_unit'=> 'decimal:2',
+    ];
+
      public function vendor()
     {
         return $this->belongsTo(FlowerVendor::class, 'vendor_id', 'vendor_id');

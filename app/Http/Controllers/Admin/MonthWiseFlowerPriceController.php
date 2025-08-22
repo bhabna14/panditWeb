@@ -80,28 +80,21 @@ public function manageFlowerPrice()
 
     return view('admin.manage-month-wise-flower-price', compact('transactions','units'));
 }
+ public function updateFlowerPrice(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'start_date'     => ['required', 'date'],
+            'end_date'       => ['required', 'date', 'after_or_equal:start_date'],
+            'quantity'       => ['required', 'numeric', 'min:0'],
+            'unit_id'        => ['required', 'string', 'max:50'],
+            'price_per_unit' => ['required', 'numeric', 'min:0'],
+        ]);
 
-public function updateFlowerPrice(Request $request, $id)
-{
-    $request->validate([
-        'start_date'     => 'required|date',
-        'end_date'       => 'required|date|after_or_equal:start_date',
-        'quantity'       => 'required|integer',
-        'unit_id'        => 'required|exists:pooja_units,id',
-        'price_per_unit' => 'required|numeric|min:0',
-    ]);
+        $price = MonthWiseFlowerPrice::findOrFail($id);
+        $price->update($validated); // requires $fillable as above
 
-    $price = MonthWiseFlowerPrice::findOrFail($id);
-    $price->update([
-        'start_date'     => $request->start_date,
-        'end_date'       => $request->end_date,
-        'quantity'       => $request->quantity,
-        'unit_id'        => $request->unit_id,
-        'price_per_unit' => $request->price_per_unit,
-    ]);
-
-    return redirect()->back()->with('success', 'Flower price updated successfully!');
-}
+        return back()->with('success', 'Flower price updated successfully!');
+    }
 
 public function deleteFlowerPrice($id)
 {
