@@ -867,10 +867,14 @@ Route::controller(MonthWiseFlowerPriceController::class)->group(function() {
     Route::post('/month-wise-flower-price', 'saveFlowerPrice')->name('admin.saveFlowerPrice');
     Route::get('/vendor-flowers', 'vendorFlowers')->name('admin.getVendorFlowers');
     Route::get('/manage-flower-price', 'manageFlowerPrice')->name('admin.manageFlowerPrice');
-    Route::delete('flower-price/delete/{id}','deleteFlowerPrice')->name('admin.deleteFlowerPrice');
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::put('/flower-price/update/{id}', [MonthWiseFlowerPriceController::class, 'updateFlowerPrice'])
         ->name('flower-price.update');
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::delete('/flower-price/delete/{id}', [MonthWiseFlowerPriceController::class, 'deleteFlowerPrice'])
+        ->name('deleteFlowerPrice');
 });

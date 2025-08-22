@@ -95,13 +95,23 @@ public function manageFlowerPrice()
 
         return back()->with('success', 'Flower price updated successfully!');
     }
-
 public function deleteFlowerPrice($id)
 {
-    $price = MonthWiseFlowerPrice::findOrFail($id);
-    $price->delete();
+    try {
+        $price = MonthWiseFlowerPrice::findOrFail($id);
+        $price->delete();
 
-    return response()->json(['message' => 'Flower price deleted successfully!']);
+        return response()->json(['message' => 'Flower price deleted successfully!'], 200);
+    } catch (\Illuminate\Database\QueryException $e) {
+        // Example: FK constraint violation
+        return response()->json([
+            'message' => 'Cannot delete this record because it is referenced elsewhere.'
+        ], 409);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'message' => 'Unexpected error. Please try again.'
+        ], 500);
+    }
 }
 
 }
