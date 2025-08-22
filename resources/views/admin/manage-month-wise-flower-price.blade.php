@@ -32,7 +32,6 @@
                         + Add Flower Price
                     </a>
                 </li>
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.manageFlowerPrice') }}" class="btn btn-warning text-dark">Add Flower Price</a></li>
 
             </ol>
         </div>

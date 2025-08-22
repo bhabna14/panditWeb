@@ -25,6 +25,7 @@
     <div class="left-content">
         <span class="main-content-title mg-b-0 mg-b-lg-1">Month-wise Flower Price</span>
     </div>
+    <li class="breadcrumb-item tx-15"><a href="{{ route('admin.manageFlowerPrice') }}" class="btn btn-warning text-dark">Add Flower Price</a></li>
 </div>
 
 <div class="card mt-3">
