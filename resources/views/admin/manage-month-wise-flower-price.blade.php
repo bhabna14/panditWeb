@@ -13,6 +13,7 @@
             text-transform: uppercase;
             font-size: 12px;
         }
+
         .badge {
             font-size: 12px;
             padding: 5px 8px;
@@ -68,18 +69,15 @@
                                 <td>{{ $t->unit_id }}</td>
                                 <td><strong>₹{{ number_format($t->price_per_unit, 2) }}</strong></td>
                                 <td>
-                                    <button class="btn btn-sm btn-warning editBtn"
-                                        data-id="{{ $t->id }}"
-                                        data-vendor="{{ $t->vendor_id }}"
-                                        data-product="{{ $t->product_id }}"
-                                        data-start="{{ $t->start_date }}"
-                                        data-end="{{ $t->end_date }}"
-                                        data-qty="{{ $t->quantity }}"
-                                        data-unit="{{ $t->unit_id }}"
+                                    <button class="btn btn-sm btn-warning editBtn" data-id="{{ $t->id }}"
+                                        data-vendor="{{ $t->vendor_id }}" data-product="{{ $t->product_id }}"
+                                        data-start="{{ $t->start_date }}" data-end="{{ $t->end_date }}"
+                                        data-qty="{{ $t->quantity }}" data-unit="{{ $t->unit_id }}"
                                         data-price="{{ $t->price_per_unit }}">
                                         Edit
                                     </button>
-                                    <button class="btn btn-sm btn-danger deleteBtn" data-id="{{ $t->id }}">Delete</button>
+                                    <button class="btn btn-sm btn-danger deleteBtn"
+                                        data-id="{{ $t->id }}">Delete</button>
                                 </td>
                             </tr>
                         @endforeach
@@ -123,7 +121,8 @@
                         </div>
                         <div class="mb-3">
                             <label>Price</label>
-                            <input type="number" step="0.01" class="form-control" name="price_per_unit" id="edit_price" required>
+                            <input type="number" step="0.01" class="form-control" name="price_per_unit" id="edit_price"
+                                required>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -153,38 +152,55 @@
 
     <script>
         // ✅ DataTable init
-        $(function () {
+        $(function() {
             $('#flower-price-table').DataTable({
                 pageLength: 10,
                 responsive: true,
                 dom: 'Bfrtip',
-                buttons: [
-                    { extend: 'copy', className: 'btn btn-sm btn-secondary' },
-                    { extend: 'csv', className: 'btn btn-sm btn-success' },
-                    { extend: 'excel', className: 'btn btn-sm btn-info' },
-                    { extend: 'pdf', className: 'btn btn-sm btn-danger' },
-                    { extend: 'print', className: 'btn btn-sm btn-primary' }
+                buttons: [{
+                        extend: 'copy',
+                        className: 'btn btn-sm btn-secondary'
+                    },
+                    {
+                        extend: 'csv',
+                        className: 'btn btn-sm btn-success'
+                    },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-sm btn-info'
+                    },
+                    {
+                        extend: 'pdf',
+                        className: 'btn btn-sm btn-danger'
+                    },
+                    {
+                        extend: 'print',
+                        className: 'btn btn-sm btn-primary'
+                    }
                 ]
             });
         });
 
         // ✅ Open Edit Modal
-        $(document).on('click', '.editBtn', function () {
-            $('#edit_id').val($(this).data('id'));
+        $(document).on('click', '.editBtn', function() {
+            let id = $(this).data('id');
+
+            $('#edit_id').val(id);
             $('#edit_start_date').val($(this).data('start'));
             $('#edit_end_date').val($(this).data('end'));
             $('#edit_quantity').val($(this).data('qty'));
             $('#edit_unit_id').val($(this).data('unit'));
             $('#edit_price').val($(this).data('price'));
 
-            let id = $(this).data('id');
+            // ✅ point to correct POST route
             $('#editForm').attr('action', '/admin/flower-price/update/' + id);
 
-            $('#editModal').modal('show'); // ✅ Now works
+            $('#editModal').modal('show');
         });
 
+
         // ✅ Delete Confirmation
-        $(document).on('click', '.deleteBtn', function () {
+        $(document).on('click', '.deleteBtn', function() {
             let id = $(this).data('id');
             Swal.fire({
                 title: 'Are you sure?',
@@ -200,12 +216,14 @@
                     $.ajax({
                         url: "{{ route('admin.deleteFlowerPrice', '') }}/" + id,
                         type: 'DELETE',
-                        data: { _token: '{{ csrf_token() }}' },
-                        success: function (res) {
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(res) {
                             Swal.fire('Deleted!', res.message, 'success')
                                 .then(() => location.reload());
                         },
-                        error: function () {
+                        error: function() {
                             Swal.fire('Error!', 'Something went wrong.', 'error');
                         }
                     });
