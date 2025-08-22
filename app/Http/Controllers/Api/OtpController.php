@@ -298,14 +298,14 @@ class OtpController extends Controller
     public function verifyOtp(Request $request)
     {
         $validated = $request->validate([
-            'phone'        => 'required|string',
+            'phoneNumber'        => 'required|string',
             'otp'          => 'required|string|size:6',
             'device_id'    => 'nullable|string',
             'platform'     => 'nullable|string',
             'device_model' => 'nullable|string',
         ]);
 
-        $phone = $this->normalizePhone($validated['phone']);
+        $phone = $this->normalizePhone($validated['phoneNumber']);
         $user  = User::where('mobile_number', $phone)->first();
 
         if (!$user) {
