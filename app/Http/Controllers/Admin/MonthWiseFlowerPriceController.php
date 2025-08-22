@@ -101,79 +101,39 @@ class MonthWiseFlowerPriceController extends Controller
     //         'flowers'   => $flowers,
     //     ]);
     // }
-
-    public function store(Request $request)
+ public function saveFlowerPrice(Request $request)
     {
         $request->validate([
-            'vendor_id'    => 'required|string|exists:flower__vendor_details,vendor_id',
-            'flower_ids'   => 'required|array|min:1',
-            'flower_ids.*' => 'integer',
-
-            // nested, validated manually per-flower
-            'start_date'   => 'required|array',
-            'end_date'     => 'required|array',
-            'quantity'     => 'required|array',
-            'unit_id'      => 'required|array',
-            'price'        => 'required|array',
+            'vendor_id' => 'required',
+            'flower'    => 'required|array',
         ]);
-
-        $vendorId  = $request->vendor_id;
-        $flowerIds = $request->flower_ids;
-
-        // Optional: ensure selected flowers belong to vendor
-        $vendor   = FlowerVendor::select('vendor_id', 'flower_ids')->findOrFail($vendorId);
-        $allowed  = collect($vendor->flower_ids ?? [])->map(fn($v) => (int)$v)->all();
 
         DB::beginTransaction();
         try {
-            foreach ($flowerIds as $fid) {
-                $fid = (int) $fid;
-
-                if (!in_array($fid, $allowed, true)) {
-                    return back()->withInput()->with('error', 'One or more selected flowers are not assigned to this vendor.');
+            foreach ($request->flower as $flowerId => $entries) {
+                foreach ($entries as $row) {
+                    MonthWiseFlowerPrice::create([
+                        'vendor_id'      => $request->vendor_id,
+                        'product_id'     => $row['product_id'],
+                        'start_date'     => $row['from_date'],
+                        'end_date'       => $row['to_date'],
+                        'quantity'       => $row['quantity'],
+                        'unit_id'        => $row['unit'],
+                        'price_per_unit' => $row['price'],
+                    ]);
                 }
-
-                $start = $request->start_date[$fid] ?? null;
-                $end   = $request->end_date[$fid] ?? null;
-                $qty   = $request->quantity[$fid] ?? null;
-                $unit  = $request->unit_id[$fid] ?? null;
-                $price = $request->price[$fid] ?? null;
-
-                if (!$start || !$end || !$qty || !$unit || $price === null) {
-                    return back()->withInput()->with('error', 'Please fill all fields for each selected flower.');
-                }
-
-                $startDate = Carbon::parse($start);
-                $endDate   = Carbon::parse($end);
-                if ($endDate->lt($startDate)) {
-                    return back()->withInput()->with('error', 'End date must be on or after start date for each flower.');
-                }
-
-                if (!is_numeric($qty) || $qty <= 0) {
-                    return back()->withInput()->with('error', 'Quantity must be a positive number.');
-                }
-                if (!is_numeric($price) || $price < 0) {
-                    return back()->withInput()->with('error', 'Price must be zero or positive.');
-                }
-
-                MonthWiseFlowerPrice::create([
-                    'vendor_id'      => $vendorId,
-                    'product_id'     => $fid,
-                    'start_date'     => $startDate->toDateString(),
-                    'end_date'       => $endDate->toDateString(),
-                    'quantity'       => $qty,
-                    'unit_id'        => $unit,
-                    'price_per_unit' => $price,
-                ]);
             }
-
             DB::commit();
-            // ✅ redirect back to this page (rename if you use a different route name)
-            return redirect()->route('admin.monthWiseFlowerPrice')
-                ->with('success', 'Month-wise flower prices saved successfully!');
-        } catch (\Throwable $e) {
+
+            return redirect()
+                ->back()
+                ->with('success', 'Flower prices saved successfully!');
+
+        } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Failed to save. '.$e->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
 
