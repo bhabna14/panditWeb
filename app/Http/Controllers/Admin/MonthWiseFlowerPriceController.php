@@ -149,4 +149,28 @@ public function manageFlowerPrice()
     return view('admin.manage-month-wise-flower-price', compact('transactions'));
 }
 
+public function updateFlowerPrice(Request $request, $id)
+{
+    $request->validate([
+        'start_date' => 'required|date',
+        'end_date'   => 'required|date|after_or_equal:start_date',
+        'quantity'   => 'required|integer',
+        'unit_id'    => 'required|exists:pooja_units,id',
+        'price_per_unit' => 'required|numeric|min:0',
+    ]);
+
+    $price = MonthWiseFlowerPrice::findOrFail($id);
+    $price->update($request->all());
+
+    return redirect()->back()->with('success', 'Flower price updated successfully!');
+}
+
+public function deleteFlowerPrice($id)
+{
+    $price = MonthWiseFlowerPrice::findOrFail($id);
+    $price->delete();
+
+    return response()->json(['message' => 'Flower price deleted successfully!']);
+}
+
 }
