@@ -199,7 +199,7 @@
          $('#edit_price').val($(this).data('price'));
 
         let id = $(this).data('id');
-        $('#editForm').attr('action', '/admin/flower-price/update/' + id);
+        $('#editForm').attr('action', '/flower-price/update/' + id);
 
         $('#editModal').modal('show');
     });
