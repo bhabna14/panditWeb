@@ -195,7 +195,7 @@
         $('#edit_price').val($(this).data('price'));
 
         // set form action URL
-        $('#editForm').attr('action', '/admin/flower-price/update/' + id);
+        $('#editForm').attr('action', '/flower-price/update/' + id);
 
         $('#editModal').modal('show');
     });
