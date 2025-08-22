@@ -77,6 +77,7 @@
                         @endforeach
                     </tbody>
 
+
                 </table>
                 @if ($transactions->isEmpty())
                     <div class="text-center text-muted py-3">No records found</div>

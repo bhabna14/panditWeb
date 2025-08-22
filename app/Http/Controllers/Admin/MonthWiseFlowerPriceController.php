@@ -149,5 +149,4 @@ public function manageFlowerPrice()
     return view('admin.manage-month-wise-flower-price', compact('transactions'));
 }
 
-
 }
