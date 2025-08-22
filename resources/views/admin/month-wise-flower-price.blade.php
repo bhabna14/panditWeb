@@ -48,7 +48,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {{-- Rows will be dynamically appended here --}}
+                        {{-- Rows will be dynamically appended --}}
                     </tbody>
                 </table>
             </div>
@@ -61,6 +61,8 @@
 
 @section('scripts')
 <script>
+    let poojaUnits = @json($poojaUnits); // Pass from controller
+
     $(document).ready(function () {
         $('#vendor_id').on('change', function () {
             var vendorId = $(this).val();
@@ -75,6 +77,7 @@
                         tbody.empty();
 
                         $.each(res, function (i, flower) {
+                            // first row for each flower
                             addRow(flower.product_id, flower.name);
                         });
                     }
@@ -82,23 +85,39 @@
             }
         });
 
-        // Add Row
+        // Add Row button (generic add without flower)
         $('#addRow').click(function(){
             addRow('', '');
         });
 
+        // Add Row Function (supports multiple entries per flower)
         function addRow(productId, productName){
+            let uniq = Date.now() + Math.floor(Math.random()*1000);
+
+            let unitOptions = '';
+            $.each(poojaUnits, function(i, unit){
+                unitOptions += `<option value="${unit.unit_name}">${unit.unit_name}</option>`;
+            });
+
             var row = `<tr>
                 <td>
-                    <input type="hidden" name="flower[${Date.now()}][product_id]" value="${productId}">
+                    <input type="hidden" name="flower[${productId}][${uniq}][product_id]" value="${productId}">
                     <input type="text" class="form-control" value="${productName}" readonly>
                 </td>
-                <td><input type="date" name="flower[${Date.now()}][from_date]" class="form-control" required></td>
-                <td><input type="date" name="flower[${Date.now()}][to_date]" class="form-control" required></td>
-                <td><input type="number" name="flower[${Date.now()}][quantity]" class="form-control" required></td>
-                <td><input type="text" name="flower[${Date.now()}][unit]" class="form-control" required></td>
-                <td><input type="number" step="0.01" name="flower[${Date.now()}][price]" class="form-control" required></td>
-                <td><button type="button" class="btn btn-sm btn-danger removeRow">x</button></td>
+                <td><input type="date" name="flower[${productId}][${uniq}][from_date]" class="form-control" required></td>
+                <td><input type="date" name="flower[${productId}][${uniq}][to_date]" class="form-control" required></td>
+                <td><input type="number" name="flower[${productId}][${uniq}][quantity]" class="form-control" required></td>
+                <td>
+                    <select name="flower[${productId}][${uniq}][unit]" class="form-control" required>
+                        <option value="">-- Select Unit --</option>
+                        ${unitOptions}
+                    </select>
+                </td>
+                <td><input type="number" step="0.01" name="flower[${productId}][${uniq}][price]" class="form-control" required></td>
+                <td>
+                    <button type="button" class="btn btn-sm btn-danger removeRow">x</button>
+                    <button type="button" class="btn btn-sm btn-info duplicateRow">+</button>
+                </td>
             </tr>`;
             $("#flowerTable tbody").append(row);
         }
@@ -106,6 +125,14 @@
         // Remove Row
         $(document).on('click', '.removeRow', function(){
             $(this).closest('tr').remove();
+        });
+
+        // Duplicate Row (same flower)
+        $(document).on('click', '.duplicateRow', function(){
+            let row = $(this).closest('tr');
+            let productId = row.find('input[name*="[product_id]"]').val();
+            let productName = row.find('input[type=text]').val();
+            addRow(productId, productName);
         });
     });
 </script>

@@ -33,7 +33,8 @@ class MonthWiseFlowerPriceController extends Controller
      public function create()
     {
         $vendors = FlowerVendor::all();
-        return view('admin.month-wise-flower-price', compact('vendors'));
+           $poojaUnits = PoojaUnit::all(['id','unit_name']); // load units
+        return view('admin.flower_price', compact('vendors','poojaUnits'));
     }
 
      public function vendorFlowers(Request $request)
