@@ -223,6 +223,19 @@
                 </li>
 
                 <li class="slide">
+                    <a class="side-menu__item" href="{{ route('admin.monthWiseFlowerPrice') }}">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2a5 5 0 0 1 5 5c0 2.5-2.5 7-5 13-2.5-6-5-10.5-5-13a5 5 0 0 1 5-5zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a3 3 0 0 1 3 3c0 1.5-1.5 4.5-3 7.5-1.5-3-3-6-3-7.5a3 3 0 0 1 3-3z" />
+                            <text x="12" y="22" text-anchor="middle" font-size="7" fill="#7b8191"
+                                font-family="Arial">&#8377;</text>
+                        </svg>
+                        <span class="side-menu__label">Month Wise Flower Price</span>
+                    </a>
+                </li>
+
+                <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24">
@@ -270,8 +283,10 @@
                             <i class="angle fas fa-chevron-right"></i>
                         </a>
                         <ul class="slide-menu">
-                            <li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li>
-                            <li><a class="sub-side-menu__item" href="{{ route('managePujaList') }}">Manage Items</a></li>
+                            <li><a class="sub-side-menu__item"
+                                    href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li>
+                            <li><a class="sub-side-menu__item" href="{{ route('managePujaList') }}">Manage Items</a>
+                            </li>
                         </ul>
                     </li>
                 @endif

@@ -3,14 +3,48 @@
 @section('styles')
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
     <style>
-        .card-shadow { box-shadow: 0 10px 24px rgba(0,0,0,.06); border-radius: 16px; }
-        .pill { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #f1f5f9; }
-        .flower-chip { border: 1px solid #e5e7eb; border-radius: 12px; padding: 8px 10px; display:flex; align-items:center; gap:8px; }
-        .flower-item.disabled { opacity: .35; pointer-events: none; }
-        .required::after { content:" *"; color:#dc2626; }
-        .grid-gap { row-gap: 10px; }
-        .row-table thead th { white-space: nowrap; }
-        .row-table td { vertical-align: middle; }
+        .card-shadow {
+            box-shadow: 0 10px 24px rgba(0, 0, 0, .06);
+            border-radius: 16px;
+        }
+
+        .pill {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: #f1f5f9;
+        }
+
+        .flower-chip {
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .flower-item.disabled {
+            opacity: .35;
+            pointer-events: none;
+        }
+
+        .required::after {
+            content: " *";
+            color: #dc2626;
+        }
+
+        .grid-gap {
+            row-gap: 10px;
+        }
+
+        .row-table thead th {
+            white-space: nowrap;
+        }
+
+        .row-table td {
+            vertical-align: middle;
+        }
     </style>
 @endsection
 
@@ -30,7 +64,9 @@
         <div class="alert alert-danger">
             <strong>Fix the following:</strong>
             <ul class="mb-0">
-                @foreach ($errors->all() as $err)<li>{{ $err }}</li>@endforeach
+                @foreach ($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
             </ul>
         </div>
     @endif
@@ -44,10 +80,11 @@
                 <div class="row grid-gap">
                     <div class="col-md-6">
                         <label for="vendor_id" class="form-label required">Vendor</label>
-                        <select id="vendor_id" name="vendor_id" class="form-control select2" required data-placeholder="Select a vendor">
+                        <select id="vendor_id" name="vendor_id" class="form-control select2" required
+                            data-placeholder="Select a vendor">
                             <option value=""></option>
-                            @foreach($vendors as $v)
-                                <option value="{{ $v->vendor_id }}" {{ old('vendor_id')===$v->vendor_id?'selected':'' }}>
+                            @foreach ($vendors as $v)
+                                <option value="{{ $v->vendor_id }}" {{ old('vendor_id') === $v->vendor_id ? 'selected' : '' }}>
                                     {{ $v->vendor_name }}
                                 </option>
                             @endforeach
@@ -58,7 +95,8 @@
                     <div class="col-md-6 d-flex align-items-end">
                         <div class="w-100">
                             <label class="form-label mb-1">Quick Search</label>
-                            <input type="text" id="flowerSearch" class="form-control" placeholder="Search flowers by name...">
+                            <input type="text" id="flowerSearch" class="form-control"
+                                placeholder="Search flowers by name...">
                         </div>
                     </div>
                 </div>
@@ -71,7 +109,8 @@
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <div>
                         <div class="fw-semibold">Flowers</div>
-                        <small class="text-muted">Check flowers. For each checked flower, you can add multiple rows (date range, qty, unit, price).</small>
+                        <small class="text-muted">Check flowers. For each checked flower, you can add multiple rows (date
+                            range, qty, unit, price).</small>
                     </div>
                     <div class="d-flex gap-2">
                         <button type="button" class="btn btn-sm btn-outline-primary" id="selectAll">Select all</button>
@@ -80,16 +119,15 @@
                 </div>
 
                 <div class="row" id="flowersGrid">
-                    @foreach($flowers as $f)
+                    @foreach ($flowers as $f)
                         @php $checked = in_array($f->product_id, old('flower_ids', [])); @endphp
                         <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 col-12 mb-2 flower-item"
-                             data-name="{{ strtolower($f->name) }}" data-id="{{ $f->product_id }}">
+                            data-name="{{ strtolower($f->name) }}" data-id="{{ $f->product_id }}">
                             <label class="flower-chip w-100">
-                                <input class="form-check-input me-2 flower-checkbox"
-                                       type="checkbox" name="flower_ids[]"
-                                       value="{{ $f->product_id }}" {{ $checked ? 'checked' : '' }}>
+                                <input class="form-check-input me-2 flower-checkbox" type="checkbox" name="flower_ids[]"
+                                    value="{{ $f->product_id }}" {{ $checked ? 'checked' : '' }}>
                                 <span>{{ $f->name }}
-                                    @if(!empty($f->odia_name))
+                                    @if (!empty($f->odia_name))
                                         <small class="text-muted">({{ $f->odia_name }})</small>
                                     @endif
                                 </span>
@@ -130,22 +168,22 @@
 
         // Old input (rehydrate on validation error)
         const oldData = {
-            vendor_id:  @json(old('vendor_id')),
-            selected:   @json(old('flower_ids', [])),
+            vendor_id: @json(old('vendor_id')),
+            selected: @json(old('flower_ids', [])),
             start_date: @json(old('start_date', [])),
-            end_date:   @json(old('end_date', [])),
-            quantity:   @json(old('quantity', [])),
-            unit_id:    @json(old('unit_id', [])),
-            price:      @json(old('price', [])),
+            end_date: @json(old('end_date', [])),
+            quantity: @json(old('quantity', [])),
+            unit_id: @json(old('unit_id', [])),
+            price: @json(old('price', [])),
         };
 
         // Build a table row for one entry
-        function buildRowHTML(fid, idx, preset={}) {
+        function buildRowHTML(fid, idx, preset = {}) {
             const sd = preset.start_date || '';
             const ed = preset.end_date || '';
-            const q  = preset.quantity   || '';
-            const uid= preset.unit_id    || '';
-            const pr = preset.price      || '';
+            const q = preset.quantity || '';
+            const uid = preset.unit_id || '';
+            const pr = preset.price || '';
 
             return `
             <tr data-idx="${idx}">
@@ -178,21 +216,22 @@
             // Old values for this flower (arrays)
             const olds = {
                 start_date: (oldData.start_date[String(fid)] || []),
-                end_date:   (oldData.end_date[String(fid)]   || []),
-                quantity:   (oldData.quantity[String(fid)]   || []),
-                unit_id:    (oldData.unit_id[String(fid)]    || []),
-                price:      (oldData.price[String(fid)]      || []),
+                end_date: (oldData.end_date[String(fid)] || []),
+                quantity: (oldData.quantity[String(fid)] || []),
+                unit_id: (oldData.unit_id[String(fid)] || []),
+                price: (oldData.price[String(fid)] || []),
             };
-            const maxRows = Math.max(olds.start_date.length, olds.end_date.length, olds.quantity.length, olds.unit_id.length, olds.price.length, 1);
+            const maxRows = Math.max(olds.start_date.length, olds.end_date.length, olds.quantity.length, olds.unit_id
+                .length, olds.price.length, 1);
 
             let rowsHTML = '';
             for (let i = 0; i < maxRows; i++) {
                 rowsHTML += buildRowHTML(fid, i, {
                     start_date: olds.start_date[i],
-                    end_date:   olds.end_date[i],
-                    quantity:   olds.quantity[i],
-                    unit_id:    olds.unit_id[i],
-                    price:      olds.price[i],
+                    end_date: olds.end_date[i],
+                    quantity: olds.quantity[i],
+                    unit_id: olds.unit_id[i],
+                    price: olds.price[i],
                 });
             }
 
@@ -272,7 +311,10 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             // Select2
-            $('.select2').select2({ width: '100%', allowClear: true });
+            $('.select2').select2({
+                width: '100%',
+                allowClear: true
+            });
 
             const vendorSel = document.getElementById('vendor_id');
             vendorSel.addEventListener('change', (e) => filterFlowersByVendor(e.target.value));
@@ -318,7 +360,8 @@
                 renderDetailsForSelected();
             });
             document.getElementById('clearAll').addEventListener('click', () => {
-                document.querySelectorAll('#flowersGrid .flower-checkbox').forEach(cb => cb.checked = false);
+                document.querySelectorAll('#flowersGrid .flower-checkbox').forEach(cb => cb.checked =
+                false);
                 renderDetailsForSelected();
             });
 
@@ -329,11 +372,19 @@
         });
 
         // SweetAlert session
-        @if(session('success'))
-        Swal.fire({ icon: 'success', title: 'Saved', text: @json(session('success')) });
+        @if (session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Saved',
+                text: @json(session('success'))
+            });
         @endif
-        @if(session('error'))
-        Swal.fire({ icon: 'error', title: 'Error', text: @json(session('error')) });
+        @if (session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: @json(session('error'))
+            });
         @endif
     </script>
 @endsection
