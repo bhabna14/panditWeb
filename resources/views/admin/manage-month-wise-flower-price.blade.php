@@ -204,37 +204,38 @@
         $('#editModal').modal('show');
     });
 
-    // Delete Confirmation
-    $(document).on('click', '.deleteBtn', function () {
-        let id = $(this).data('id');
+  // Delete Confirmation
+$(document).on('click', '.deleteBtn', function () {
+    let id = $(this).data('id');
 
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "This will permanently delete the record!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/admin/flower-price/delete/' + id,
-                    type: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function (res) {
-                        Swal.fire('Deleted!', res.message, 'success')
-                            .then(() => location.reload());
-                    },
-                    error: function () {
-                        Swal.fire('Error!', 'Something went wrong.', 'error');
-                    }
-                });
-            }
-        });
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This record will be permanently deleted!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: "{{ route('admin.deleteFlowerPrice', '') }}/" + id, // ✅ route helper
+                type: 'DELETE',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function (res) {
+                    Swal.fire('Deleted!', res.message, 'success')
+                        .then(() => location.reload());
+                },
+                error: function () {
+                    Swal.fire('Error!', 'Something went wrong.', 'error');
+                }
+            });
+        }
     });
+});
+
 </script>
 @endsection

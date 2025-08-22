@@ -149,7 +149,6 @@ public function manageFlowerPrice()
 
     return view('admin.manage-month-wise-flower-price', compact('transactions','units'));
 }
-
 public function updateFlowerPrice(Request $request, $id)
 {
     $request->validate([
@@ -161,7 +160,13 @@ public function updateFlowerPrice(Request $request, $id)
     ]);
 
     $price = MonthWiseFlowerPrice::findOrFail($id);
-    $price->update($request->all());
+    $price->update([
+        'start_date'     => $request->start_date,
+        'end_date'       => $request->end_date,
+        'quantity'       => $request->quantity,
+        'unit_id'        => $request->unit_id,
+        'price_per_unit' => $request->price_per_unit,
+    ]);
 
     return redirect()->back()->with('success', 'Flower price updated successfully!');
 }
