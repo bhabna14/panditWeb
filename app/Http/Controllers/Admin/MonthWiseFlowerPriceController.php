@@ -136,16 +136,18 @@ class MonthWiseFlowerPriceController extends Controller
                 ->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
+public function manageFlowerPrice()
+{
+    $transactions = MonthWiseFlowerPrice::with([
+        'vendor:vendor_id,vendor_name',
+        'product:product_id,name',
+        'unit:id,unit_name'
+    ])
+    ->orderBy('id','desc')
+    ->get();
 
-     public function manageFlowerPrice()
-    {
-        $transactions = MonthWiseFlowerPrice::with([
-            'vendor:id,vendor_name',
-            'product:id,name',
-            'unit:id,unit_name'
-        ])->orderBy('id','desc')->get();
+    return view('admin.manage-month-wise-flower-price', compact('transactions'));
+}
 
-        return view('admin.manage-month-wise-flower-price', compact('transactions'));
-    }
 
 }

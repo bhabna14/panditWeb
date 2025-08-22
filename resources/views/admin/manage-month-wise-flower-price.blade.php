@@ -13,6 +13,7 @@
             text-transform: uppercase;
             font-size: 12px;
         }
+
         .badge {
             font-size: 12px;
             padding: 5px 8px;
@@ -54,11 +55,11 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($transactions as $index => $t)
+                        @foreach ($transactions as $index => $t)
                             <tr>
                                 <td>{{ $index + 1 }}</td>
-                                <td>{{ $t->vendor?->vendor_name }}</td>
-                                <td>{{ $t->product?->name }}</td>
+                                <td>{{ $t->vendor?->vendor_name ?? '-' }}</td>
+                                <td>{{ $t->product?->name ?? '-' }}</td>
                                 <td>
                                     <span class="badge bg-light text-dark">
                                         {{ \Carbon\Carbon::parse($t->start_date)->format('d M Y') }} →
@@ -66,8 +67,8 @@
                                     </span>
                                 </td>
                                 <td>{{ $t->quantity }}</td>
-                                <td>{{ $t->unit?->unit_name }}</td>
-                                <td><strong>₹{{ number_format($t->price_per_unit,2) }}</strong></td>
+                                <td>{{ $t->unit?->unit_name ?? '-' }}</td>
+                                <td><strong>₹{{ number_format($t->price_per_unit, 2) }}</strong></td>
                                 <td>
                                     <button class="btn btn-sm btn-warning">Edit</button>
                                     <button class="btn btn-sm btn-danger">Delete</button>
@@ -75,8 +76,9 @@
                             </tr>
                         @endforeach
                     </tbody>
+
                 </table>
-                @if($transactions->isEmpty())
+                @if ($transactions->isEmpty())
                     <div class="text-center text-muted py-3">No records found</div>
                 @endif
             </div>
@@ -100,17 +102,31 @@
     <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
 
     <script>
-        $(function () {
+        $(function() {
             $('#flower-price-table').DataTable({
                 pageLength: 10,
                 responsive: true,
                 dom: 'Bfrtip',
-                buttons: [
-                    { extend: 'copy', className: 'btn btn-sm btn-secondary' },
-                    { extend: 'csv', className: 'btn btn-sm btn-success' },
-                    { extend: 'excel', className: 'btn btn-sm btn-info' },
-                    { extend: 'pdf', className: 'btn btn-sm btn-danger' },
-                    { extend: 'print', className: 'btn btn-sm btn-primary' }
+                buttons: [{
+                        extend: 'copy',
+                        className: 'btn btn-sm btn-secondary'
+                    },
+                    {
+                        extend: 'csv',
+                        className: 'btn btn-sm btn-success'
+                    },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-sm btn-info'
+                    },
+                    {
+                        extend: 'pdf',
+                        className: 'btn btn-sm btn-danger'
+                    },
+                    {
+                        extend: 'print',
+                        className: 'btn btn-sm btn-primary'
+                    }
                 ]
             });
         });
