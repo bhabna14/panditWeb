@@ -297,9 +297,14 @@ class ProductApiController extends Controller
             ], 500);
         }
     }
- 
 
-    public function ProductOrdersList()
+    use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+use App\Models\ProductOrder;
+use App\Models\ProductRequest;
+
+public function ProductOrdersList()
 {
     try {
         $userId = Auth::guard('sanctum')->user()->userid;
@@ -313,32 +318,31 @@ class ProductApiController extends Controller
                 'user',
                 'address.localityDetails',
                 'flowerProduct' => function ($q) {
-                    $q->with([
-                        'packageItems' => function ($pi) {
-                            $pi->with([
-                                'item:id,item_name',              // Pooja item name
-                                'variant:id,item_id,title,price' // Variant details
-                            ]);
-                        },
-                    ]);
+                    // ✅ only load existing relation; no nested item/variant
+                    $q->with(['packageItems']);
                 },
             ])
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($order) {
+                // Normalize product image URL
                 if ($order->flowerProduct && $order->flowerProduct->product_image) {
-                    $order->flowerProduct->product_image_url = url($order->flowerProduct->product_image);
+                    $img = $order->flowerProduct->product_image;
+                    $order->flowerProduct->product_image_url = Str::startsWith($img, ['http://','https://'])
+                        ? $img
+                        : url($img);
                 }
 
-                // If product category is "package", format package items
+                // If product is a package, expose package items from new columns
                 if ($order->flowerProduct && strtolower($order->flowerProduct->category) === 'package') {
                     $order->flowerProduct->package_items_details = $order->flowerProduct->packageItems->map(function ($pi) {
                         return [
-                            'item_name'    => $pi->item->item_name ?? null,
-                            'variant_name' => $pi->variant->title ?? null,
-                            'price'        => $pi->variant->price ?? null,
+                            'item_name' => $pi->item_name ?? null,
+                            'quantity'  => $pi->quantity ?? null,
+                            'unit'      => $pi->unit ?? null,
+                            'price'     => $pi->price ?? null,
                         ];
-                    });
+                    })->values();
                 }
 
                 return $order;
@@ -351,14 +355,8 @@ class ProductApiController extends Controller
                     $query->with('flowerPayments');
                 },
                 'flowerProduct' => function ($q) {
-                    $q->with([
-                        'packageItems' => function ($pi) {
-                            $pi->with([
-                                'item:id,item_name',
-                                'variant:id,item_id,title,price'
-                            ]);
-                        },
-                    ]);
+                    // ✅ only load existing relation; no nested item/variant
+                    $q->with(['packageItems']);
                 },
                 'user',
                 'address.localityDetails',
@@ -367,19 +365,24 @@ class ProductApiController extends Controller
             ->orderBy('id', 'desc')
             ->get()
             ->map(function ($request) {
+                // Normalize product image URL
                 if ($request->flowerProduct && $request->flowerProduct->product_image) {
-                    $request->flowerProduct->product_image_url = url($request->flowerProduct->product_image);
+                    $img = $request->flowerProduct->product_image;
+                    $request->flowerProduct->product_image_url = Str::startsWith($img, ['http://','https://'])
+                        ? $img
+                        : url($img);
                 }
 
-                // Add package details if product is a package
+                // If product is a package, expose package items from new columns
                 if ($request->flowerProduct && strtolower($request->flowerProduct->category) === 'package') {
                     $request->flowerProduct->package_items_details = $request->flowerProduct->packageItems->map(function ($pi) {
                         return [
-                            'item_name'    => $pi->item->item_name ?? null,
-                            'variant_name' => $pi->variant->title ?? null,
-                            'price'        => $pi->variant->price ?? null,
+                            'item_name' => $pi->item_name ?? null,
+                            'quantity'  => $pi->quantity ?? null,
+                            'unit'      => $pi->unit ?? null,
+                            'price'     => $pi->price ?? null,
                         ];
-                    });
+                    })->values();
                 }
 
                 return $request;
@@ -389,12 +392,12 @@ class ProductApiController extends Controller
             'success' => 200,
             'data' => [
                 'subscriptions_order' => $subscriptionsOrder,
-                'requested_orders' => $requestedOrders,
+                'requested_orders'    => $requestedOrders,
             ],
         ], 200);
 
-    } catch (\Exception $e) {
-        \Log::error('Failed to fetch orders list: ' . $e->getMessage());
+    } catch (\Throwable $e) {
+        Log::error('Failed to fetch orders list: ' . $e->getMessage());
 
         return response()->json([
             'success' => false,
@@ -402,6 +405,5 @@ class ProductApiController extends Controller
         ], 500);
     }
 }
-
 
 }

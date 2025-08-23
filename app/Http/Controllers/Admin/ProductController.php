@@ -474,6 +474,7 @@ public function storeItem(Request $request)
     $base = Str::slug($data['item_name'], '-');
     $slug = $base ?: 'item';
     $i = 2;
+    
     while (Poojaitemlists::where('slug', $slug)->exists()) {
         $slug = $base.'-'.$i++;
     }
@@ -481,8 +482,6 @@ public function storeItem(Request $request)
     Poojaitemlists::create([
         'item_name'    => $data['item_name'],
         'slug'         => $slug,
-        'product_type' => null,     // set if needed
-        'status'       => 'active', // default
     ]);
 
     return back()->with('success', 'Item added successfully.');
