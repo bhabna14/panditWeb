@@ -28,9 +28,9 @@ class ProductController extends Controller
     return view('admin.add-product', compact('Poojaitemlist', 'pooja_list', 'pooja_units'));
 }
 
-    public function createProduct(Request $request)
+  public function createProduct(Request $request)
     {
-        // 1) Validate
+        // 1) Validate base product + package arrays (no variants)
         $validated = $request->validate([
             'name'        => ['required','string','max:255'],
             'odia_name'   => ['nullable','string','max:255'],
@@ -42,41 +42,100 @@ class ProductController extends Controller
 
             'product_image' => ['required','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
 
-            // Package
-            'item_id'    => ['nullable','array'],
-            'variant_id' => ['nullable','array'],
-            'variant_id.*' => ['nullable','integer'],
+            // Package rows (no variants)
+            'item_id'       => ['nullable','array'],
+            'item_id.*'     => ['nullable','integer'],
+            'quantity'      => ['nullable','array'],
+            'quantity.*'    => ['nullable','numeric','min:0'],
+            'unit_id'       => ['nullable','array'],
+            'unit_id.*'     => ['nullable','integer'],
+            'item_price'    => ['nullable','array'],
+            'item_price.*'  => ['nullable','numeric','min:0'],
 
             // Benefits
             'benefit'   => ['nullable','array'],
             'benefit.*' => ['nullable','string','max:255'],
 
             // Flower-only
-            'mala_provided'      => ['nullable','required_if:category,Flower','in:yes,no'],
-            'flower_available'   => ['nullable','required_if:category,Flower','in:yes,no'],
-            'available_from'     => ['nullable','required_if:category,Flower','date'],
-            'available_to'       => ['nullable','required_if:category,Flower','date','after_or_equal:available_from'],
+            'mala_provided'    => ['nullable','required_if:category,Flower','in:yes,no'],
+            'flower_available' => ['nullable','required_if:category,Flower','in:yes,no'],
+            // Dates are required only when flower_available == yes
+            'available_from'   => ['nullable','required_if:flower_available,yes','date'],
+            'available_to'     => ['nullable','required_if:flower_available,yes','date','after_or_equal:available_from'],
 
             // Subscription-only
-            'duration'           => ['nullable','required_if:category,Subscription','in:1,3,6'],
+            'duration'         => ['nullable','required_if:category,Subscription','in:1,3,6'],
 
             // Stock (hidden for Flower; still validate if present)
-            'stock'              => ['nullable','integer','min:0'],
+            'stock'            => ['nullable','integer','min:0'],
         ], [
             'price.lte' => 'Sale price must be less than or equal to MRP.',
             'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
         ]);
 
-        // Extra server-side checks
+        // 1a) Build & validate package rows if category is Package
+        $packageRows = [];
         if (($validated['category'] ?? null) === 'Package') {
-            $items    = $request->input('item_id', []);
-            $variants = $request->input('variant_id', []);
-            if (!is_array($items) || count($items) < 1) {
+            $items    = (array) $request->input('item_id', []);
+            $qtys     = (array) $request->input('quantity', []);
+            $unitIds  = (array) $request->input('unit_id', []);
+            $prices   = (array) $request->input('item_price', []);
+
+            // collect valid row indices based on item_id presence
+            foreach ($items as $i => $itemId) {
+                if ($itemId === null || $itemId === '' ) { continue; }
+
+                $qty   = $qtys[$i]    ?? null;
+                $unit  = $unitIds[$i] ?? null;
+                $price = $prices[$i]  ?? null;
+
+                if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
+                    return back()
+                        ->withErrors(['package' => 'Each package row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])
+                        ->withInput();
+                }
+
+                if (!is_numeric($qty) || $qty < 0) {
+                    return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
+                }
+                if (!is_numeric($price) || $price < 0) {
+                    return back()->withErrors(['package' => 'Item Price must be a non-negative number. (Row '.($i+1).')'])->withInput();
+                }
+
+                $packageRows[] = [
+                    'item_id'  => (int)$itemId,
+                    'quantity' => (float)$qty,
+                    'unit_id'  => (int)$unit,
+                    'price'    => (float)$price,
+                    'idx'      => $i, // keep for error messages if needed
+                ];
+            }
+
+            if (count($packageRows) < 1) {
                 return back()->withErrors(['item_id' => 'Please add at least one package item.'])->withInput();
             }
-            if (count($items) !== count($variants)) {
-                return back()->withErrors(['variant_id' => 'Each package item must have a corresponding variant.'])->withInput();
+
+            // Resolve item names & unit names up-front (save names, not IDs)
+            $itemIds  = collect($packageRows)->pluck('item_id')->unique()->values();
+            $unitIdsC = collect($packageRows)->pluck('unit_id')->unique()->values();
+
+            $itemNamesById = Poojaitemlists::whereIn('id', $itemIds)->pluck('item_name', 'id');
+            $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)->pluck('unit_name', 'id');
+
+            // ensure everything exists
+            if ($itemNamesById->count() !== $itemIds->count()) {
+                return back()->withErrors(['item_id' => 'One or more selected items were not found.'])->withInput();
             }
+            if ($unitNamesById->count() !== $unitIdsC->count()) {
+                return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
+            }
+
+            // attach resolved names for insert
+            $packageRows = array_map(function ($row) use ($itemNamesById, $unitNamesById) {
+                $row['item_name'] = (string) ($itemNamesById[$row['item_id']] ?? '');
+                $row['unit_name'] = (string) ($unitNamesById[$row['unit_id']] ?? '');
+                return $row;
+            }, $packageRows);
         }
 
         // 2) Handle image
@@ -88,9 +147,9 @@ class ProductController extends Controller
         }
 
         // 3) Derivations
-        $isFlower = ($validated['category'] === 'Flower');
+        $isFlower  = (($validated['category'] ?? null) === 'Flower');
         $productId = $isFlower
-            ? 'FLOW' . mt_rand(1000000, 9999999)
+            ? 'FLOW'    . mt_rand(1000000, 9999999)
             : 'PRODUCT' . mt_rand(1000000, 9999999);
 
         $slug = Str::slug($validated['name'], '-');
@@ -101,18 +160,18 @@ class ProductController extends Controller
             $benefitString = $cleanedBenefits ? implode('#', $cleanedBenefits) : null;
         }
 
-        // Normalize flower radios to booleans
-        $malaProvidedBool = null;
+        // radios -> booleans
+        $malaProvidedBool      = null;
         $isFlowerAvailableBool = null;
         if ($isFlower) {
-            $malaProvidedBool      = isset($validated['mala_provided']) ? $validated['mala_provided'] === 'yes' : null;
+            $malaProvidedBool      = isset($validated['mala_provided'])    ? $validated['mala_provided'] === 'yes'    : null;
             $isFlowerAvailableBool = isset($validated['flower_available']) ? $validated['flower_available'] === 'yes' : null;
         }
 
-        // 4) Persist (transactional with package items)
+        // 4) Persist
         DB::transaction(function () use (
             $request, $validated, $productId, $slug, $benefitString, $imageUrl,
-            $malaProvidedBool, $isFlowerAvailableBool, $isFlower
+            $malaProvidedBool, $isFlowerAvailableBool, $isFlower, $packageRows
         ) {
             $product = new FlowerProduct();
             $product->product_id    = $productId;
@@ -125,28 +184,30 @@ class ProductController extends Controller
             $product->category      = $validated['category'];
             $product->pooja_id      = $request->input('pooja_id', null);
 
-            // For Flower, ignore/hard-null stock & duration (they're hidden client-side)
-            $product->stock         = $isFlower ? null : ($request->input('stock') !== null ? (int)$request->input('stock') : 0);
+            // For Flower, ignore stock & duration
+            $product->stock         = $isFlower ? null : ($request->filled('stock') ? (int)$request->input('stock') : 0);
             $product->duration      = $isFlower ? null : $request->input('duration', null);
 
             $product->benefits      = $benefitString;
             $product->product_image = $imageUrl;
 
-            // Flower-only columns
+            // Flower-only
             $product->mala_provided       = $malaProvidedBool;       // bool|null
             $product->is_flower_available = $isFlowerAvailableBool;  // bool|null
             $product->available_from      = $isFlower ? $request->input('available_from') : null; // Y-m-d
-            $product->available_to        = $isFlower ? $request->input('available_to') : null;
+            $product->available_to        = $isFlower ? $request->input('available_to')   : null;
 
             $product->save();
 
-            // Package items
-            if ($validated['category'] === 'Package' && $request->filled('item_id')) {
-                foreach ((array)$request->input('item_id') as $idx => $itemId) {
+            // Package items (save item_name + unit name + qty + price)
+            if (($validated['category'] ?? null) === 'Package' && !empty($packageRows)) {
+                foreach ($packageRows as $row) {
                     PackageItem::create([
                         'product_id' => $product->product_id,
-                        'item_id'    => $itemId,
-                        'variant_id' => $request->input("variant_id.$idx"),
+                        'item_name'  => $row['item_name'],
+                        'quantity'   => $row['quantity'],
+                        'unit'       => $row['unit_name'], // save name, not id
+                        'price'      => $row['price'],
                     ]);
                 }
             }
