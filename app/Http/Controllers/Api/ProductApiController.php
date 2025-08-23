@@ -298,12 +298,6 @@ class ProductApiController extends Controller
         }
     }
 
-    use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use App\Models\ProductOrder;
-use App\Models\ProductRequest;
-
 public function ProductOrdersList()
 {
     try {
