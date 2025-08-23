@@ -48,15 +48,17 @@
             $oldPrices  = old('item_price', []);
             $hasOldRows = is_array($oldItemIds) && count($oldItemIds) > 0;
 
-            // Prefill from controller (already normalized to item_id, quantity, unit_id, price)
+            // Prefill from controller (already normalized to item_id, quantity, unit_id, price + labels)
             $prefill = [];
             if (!$hasOldRows && !empty($packageItems) && is_array($packageItems)) {
                 foreach ($packageItems as $row) {
                     $prefill[] = [
-                        'item_id'  => $row['item_id']  ?? null,
-                        'quantity' => $row['quantity'] ?? null,
-                        'unit_id'  => $row['unit_id']  ?? null,
-                        'price'    => $row['price']    ?? null,
+                        'item_id'    => $row['item_id']    ?? null,
+                        'quantity'   => $row['quantity']   ?? null,
+                        'unit_id'    => $row['unit_id']    ?? null,
+                        'price'      => $row['price']      ?? null,
+                        'item_label' => $row['item_label'] ?? null,
+                        'unit_label' => $row['unit_label'] ?? null,
                     ];
                 }
             }
@@ -148,61 +150,76 @@
 
             {{-- Package fields (Item + Qty + Unit + Item Price) --}}
             <div id="packageFields" class="col-md-12 mb-3" style="{{ $isPackage ? '' : 'display:none;' }}">
-  <div id="packageItems">
-    @for ($i = 0; $i < $rowsCount; $i++)
-      @php
-        $itemId = $oldItemIds[$i] ?? ($prefill[$i]['item_id'] ?? null);
-        $qty    = $oldQtys[$i]    ?? ($prefill[$i]['quantity'] ?? null);
-        $unitId = $oldUnitIds[$i] ?? ($prefill[$i]['unit_id'] ?? null);
-        $price  = $oldPrices[$i]  ?? ($prefill[$i]['price'] ?? null);
-      @endphp
+                <div id="packageItems">
+                    @for ($i = 0; $i < $rowsCount; $i++)
+                        @php
+                            $itemId    = $oldItemIds[$i] ?? ($prefill[$i]['item_id'] ?? null);
+                            $qty       = $oldQtys[$i]    ?? ($prefill[$i]['quantity'] ?? null);
+                            $unitId    = $oldUnitIds[$i] ?? ($prefill[$i]['unit_id'] ?? null);
+                            $price     = $oldPrices[$i]  ?? ($prefill[$i]['price'] ?? null);
+                            $itemLabel = $prefill[$i]['item_label'] ?? null;
+                            $unitLabel = $prefill[$i]['unit_label'] ?? null;
+                        @endphp
 
-      <div class="row mb-3 package-row align-items-end">
-        <div class="col-md-4">
-          <label class="form-label">Item</label>
-          <select class="form-control select2 item-select" name="item_id[]" required>
-            <option value="">Select Puja List</option>
-            @foreach ($Poojaitemlist as $pujalist)
-              <option value="{{ $pujalist->id }}"
-                {{ (int) $pujalist->id === (int) $itemId ? 'selected' : '' }}>
-                {{ $pujalist->item_name }}
-              </option>
-            @endforeach
-          </select>
-        </div>
+                        <div class="row mb-3 package-row align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">Item</label>
+                                <select class="form-control select2 item-select" name="item_id[]" required>
+                                    @if (empty($itemId) && !empty($itemLabel))
+                                        {{-- Fallback if we couldn’t map name -> id --}}
+                                        <option value="" selected disabled>{{ $itemLabel }} (not found)</option>
+                                        <option value="">— Select Puja List —</option>
+                                    @else
+                                        <option value="">— Select Puja List —</option>
+                                    @endif
 
-        <div class="col-md-2">
-          <label class="form-label">Qty</label>
-          <input type="number" class="form-control" name="quantity[]" min="0" step="any"
-                 value="{{ $qty }}" placeholder="0" required>
-        </div>
+                                    @foreach ($Poojaitemlist as $pujalist)
+                                        <option value="{{ $pujalist->id }}"
+                                            {{ (int) $pujalist->id === (int) $itemId ? 'selected' : '' }}>
+                                            {{ $pujalist->item_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
-        <div class="col-md-3">
-          <label class="form-label">Unit</label>
-          <select class="form-control select2 unit-select" name="unit_id[]" required>
-            <option value="">Select Unit</option>
-            @foreach ($pooja_units as $u)
-              <option value="{{ $u->id }}"
-                {{ (int) $u->id === (int) $unitId ? 'selected' : '' }}>
-                {{ $u->unit_name }}
-              </option>
-            @endforeach
-          </select>
-        </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Qty</label>
+                                <input type="number" class="form-control" name="quantity[]" min="0" step="any"
+                                       value="{{ $qty }}" placeholder="0" required>
+                            </div>
 
-        <div class="col-md-3">
-          <label class="form-label">Item Price (Rs.)</label>
-          <input type="number" class="form-control" name="item_price[]" min="0" step="0.01"
-                 value="{{ $price }}" placeholder="0.00" required>
-        </div>
-      </div>
-    @endfor
-  </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Unit</label>
+                                <select class="form-control select2 unit-select" name="unit_id[]" required>
+                                    @if (empty($unitId) && !empty($unitLabel))
+                                        {{-- Fallback if we couldn’t map name -> id --}}
+                                        <option value="" selected disabled>{{ $unitLabel }} (not found)</option>
+                                        <option value="">— Select Unit —</option>
+                                    @else
+                                        <option value="">— Select Unit —</option>
+                                    @endif
 
-  <button type="button" id="addMore" class="btn btn-secondary">Add More</button>
-  <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
-</div>
+                                    @foreach ($pooja_units as $u)
+                                        <option value="{{ $u->id }}"
+                                            {{ (int) $u->id === (int) $unitId ? 'selected' : '' }}>
+                                            {{ $u->unit_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
+                            <div class="col-md-3">
+                                <label class="form-label">Item Price (Rs.)</label>
+                                <input type="number" class="form-control" name="item_price[]" min="0" step="0.01"
+                                       value="{{ $price }}" placeholder="0.00" required>
+                            </div>
+                        </div>
+                    @endfor
+                </div>
+
+                <button type="button" id="addMore" class="btn btn-secondary">Add More</button>
+                <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
+            </div>
 
             <div class="col-md-6 mb-3">
                 <label for="product_image" class="form-label">Product Image</label>
@@ -268,7 +285,7 @@
   <div class="col-md-4">
     <label class="form-label">Item</label>
     <select class="form-control select2 item-select" name="item_id[]" required>
-      <option value="">Select Puja List</option>
+      <option value="">— Select Puja List —</option>
       @foreach ($Poojaitemlist as $pujalist)
         <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
       @endforeach
@@ -281,7 +298,7 @@
   <div class="col-md-3">
     <label class="form-label">Unit</label>
     <select class="form-control select2 unit-select" name="unit_id[]" required>
-      <option value="">Select Unit</option>
+      <option value="">— Select Unit —</option>
       @foreach ($pooja_units as $u)
         <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
       @endforeach

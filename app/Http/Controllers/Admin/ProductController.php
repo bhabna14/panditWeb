@@ -214,57 +214,56 @@ class ProductController extends Controller
     }
 
   public function editProduct($id)
-{
-    $product = FlowerProduct::findOrFail($id);
+    {
+        $product = FlowerProduct::findOrFail($id);
 
-    // Dropdown data
-    $Poojaitemlist = Poojaitemlists::where('status', 'active')
-        ->orderBy('item_name')
-        ->get(['id','item_name']);
+        // 1) Load ALL items & units so previously saved rows always appear in <select>
+        $Poojaitemlist = Poojaitemlists::orderBy('item_name')
+            ->get(['id','item_name']);
 
-    $pooja_units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
+        $pooja_units = PoojaUnit::orderBy('unit_name')
+            ->get(['id','unit_name']);
 
-    // Existing flat rows (saved as text names)
-    $rows = PackageItem::where('product_id', $product->product_id)
-        ->get(['item_name','unit','quantity','price']);
+        // 2) Old rows saved as text names
+        $rows = PackageItem::where('product_id', $product->product_id)
+            ->get(['item_name','unit','quantity','price']);
 
-    // Build normalized lookup maps: name -> id (trim+lower)
-    $itemIdByName = Poojaitemlists::select('id','item_name')
-        ->get()
-        ->reduce(function ($carry, $r) {
-            $carry[mb_strtolower(trim($r->item_name))] = (int) $r->id;
-            return $carry;
-        }, []);
+        // 3) Build normalized lookup maps: name -> id
+        $itemIdByName = $Poojaitemlist
+            ->reduce(function ($carry, $r) {
+                $carry[mb_strtolower(trim($r->item_name))] = (int) $r->id;
+                return $carry;
+            }, []);
 
-    $unitIdByName = PoojaUnit::select('id','unit_name')
-        ->get()
-        ->reduce(function ($carry, $r) {
-            $carry[mb_strtolower(trim($r->unit_name))] = (int) $r->id;
-            return $carry;
-        }, []);
+        $unitIdByName = $pooja_units
+            ->reduce(function ($carry, $r) {
+                $carry[mb_strtolower(trim($r->unit_name))] = (int) $r->id;
+                return $carry;
+            }, []);
 
-    // Map text -> IDs for the form
-    $packageItems = $rows->map(function ($r) use ($itemIdByName, $unitIdByName) {
-        $itemKey = mb_strtolower(trim((string) $r->item_name));
-        $unitKey = mb_strtolower(trim((string) $r->unit));
+        // 4) Map text -> IDs for the form (and keep original labels as fallback)
+        $packageItems = $rows->map(function ($r) use ($itemIdByName, $unitIdByName) {
+            $itemKey = mb_strtolower(trim((string) $r->item_name));
+            $unitKey = mb_strtolower(trim((string) $r->unit));
 
-        return [
-            'item_id'  => $itemIdByName[$itemKey] ?? null,
-            'quantity' => $r->quantity,
-            'unit_id'  => $unitIdByName[$unitKey] ?? null,
-            'price'    => $r->price,
-        ];
-    })->values()->toArray();
+            return [
+                'item_id'     => $itemIdByName[$itemKey] ?? null,
+                'quantity'    => $r->quantity,
+                'unit_id'     => $unitIdByName[$unitKey] ?? null,
+                'price'       => $r->price,
+                // Keep originals for a graceful fallback option if mapping fails
+                'item_label'  => (string) $r->item_name,
+                'unit_label'  => (string) $r->unit,
+            ];
+        })->values()->toArray();
 
-    // IMPORTANT: pass ALL four vars
-    return view('admin.edit-product', compact(
-        'product',
-        'Poojaitemlist',
-        'pooja_units',
-        'packageItems'
-    ));
-}
-
+        return view('admin.edit-product', compact(
+            'product',
+            'Poojaitemlist',
+            'pooja_units',
+            'packageItems'
+        ));
+    }
     public function updateProduct(Request $request, $id)
     {
         $product = FlowerProduct::findOrFail($id);
