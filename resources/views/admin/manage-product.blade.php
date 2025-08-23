@@ -82,7 +82,7 @@
                                     <th>Sale Price</th>
                                     <th>Stock</th>
                                     <th>Category</th>
-                                    <th>Category Details</th> {{-- NEW --}}
+                                    <th>Category Details</th>
                                     <th>Status</th>
                                     <th>Package Item</th>
                                     <th>Benefit</th>
@@ -101,14 +101,14 @@
                                                 style="width:100px;height:100px;object-fit:cover;">
                                         </td>
 
-                                        <td>Rs. {{ number_format($product->mrp, 2) }}</td>
-                                        <td>Rs. {{ number_format($product->price, 2) }}</td>
+                                        <td>Rs. {{ number_format((float) $product->mrp, 2) }}</td>
+                                        <td>Rs. {{ number_format((float) $product->price, 2) }}</td>
 
                                         <td>{{ $product->stock ?? '-' }}</td>
 
                                         <td>{{ $product->category }}</td>
 
-                                        {{-- NEW: Category-specific details --}}
+                                        {{-- Category-specific details --}}
                                         <td>
                                             @switch($product->category)
                                                 @case('Flower')
@@ -155,7 +155,7 @@
 
                                         <td>{{ ucfirst($product->status) }}</td>
 
-                                        {{-- Existing Package Items modal/button --}}
+                                        {{-- Package Items modal/button (NO variants) --}}
                                         <td>
                                             @if ($product->packageItems->isNotEmpty())
                                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
@@ -173,37 +173,63 @@
                                                             <div class="modal-header bg-primary text-white">
                                                                 <h5 class="modal-title"
                                                                     id="productModalLabel{{ $product->product_id }}">
-                                                                    Product Details
+                                                                    Package Items
                                                                 </h5>
                                                                 <button type="button" class="btn-close btn-close-white"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body p-4">
-                                                                <div class="container-fluid">
-                                                                    <h6 class="mb-3 text-secondary">Package Items & Variants
-                                                                    </h6>
-                                                                    <ul class="list-group">
-                                                                        @foreach ($product->packageItems as $packageItem)
-                                                                            <li
-                                                                                class="list-group-item d-flex justify-content-between align-items-center">
-                                                                                <div>
-                                                                                    <strong>Item:</strong>
-                                                                                    {{ $packageItem->item->item_name ?? 'N/A' }}<br>
-                                                                                    <small class="text-muted">
-                                                                                        Variant:
-                                                                                        {{ $packageItem->variant->title ?? 'N/A' }}
-                                                                                    </small>
-                                                                                </div>
-                                                                                <span
-                                                                                    class="badge bg-success text-white">Available</span>
-                                                                            </li>
-                                                                        @endforeach
-                                                                    </ul>
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-sm align-middle">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th>#</th>
+                                                                                <th>Item</th>
+                                                                                <th class="text-end">Qty</th>
+                                                                                <th>Unit</th>
+                                                                                <th class="text-end">Item Price (Rs.)</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            @foreach ($product->packageItems as $idx => $packageItem)
+                                                                                <tr>
+                                                                                    <td>{{ $idx + 1 }}</td>
+                                                                                    <td>{{ $packageItem->item_name ?? 'N/A' }}
+                                                                                    </td>
+                                                                                    <td class="text-end">
+                                                                                        {{ rtrim(rtrim(number_format((float) $packageItem->quantity, 3, '.', ''), '0'), '.') }}
+                                                                                    </td>
+                                                                                    <td>{{ $packageItem->unit ?? '-' }}
+                                                                                    </td>
+                                                                                    <td class="text-end">Rs.
+                                                                                        {{ number_format((float) $packageItem->price, 2) }}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endforeach
+                                                                        </tbody>
+                                                                        <tfoot>
+                                                                            <tr>
+                                                                                <th colspan="4" class="text-end">Total
+                                                                                </th>
+                                                                                <th class="text-end">
+                                                                                    Rs.
+                                                                                    {{ number_format(
+                                                                                        (float) $product->packageItems->sum(function ($i) {
+                                                                                            return (float) $i->price;
+                                                                                        }),
+                                                                                        2,
+                                                                                    ) }}
+                                                                                </th>
+                                                                            </tr>
+                                                                        </tfoot>
+                                                                    </table>
                                                                 </div>
                                                             </div>
                                                             <div class="modal-footer bg-light">
                                                                 <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">Close</button>
+                                                                    data-bs-dismiss="modal">
+                                                                    Close
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -273,6 +299,7 @@
                                 @endforeach
                             </tbody>
                         </table>
+
                     </div>
 
                 </div>
