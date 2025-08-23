@@ -582,11 +582,24 @@
 
             // Flower availability toggles date fields & required
             function updateFlowerDatesRequired() {
+                const isFlower = categorySelect.value === 'Flower';
+                if (!isFlower) return;
+
                 const active = flowerActive?.checked === true;
-                if (availableFrom) availableFrom.required = !!active;
-                if (availableTo) availableTo.required = !!active;
-                showFlowerDates(active && categorySelect.value === 'Flower');
+
+                // Show group already handled in applyCategoryRules; here we gate usability
+                [availableFrom, availableTo].forEach(el => {
+                    if (!el) return;
+                    el.required = !!active; // required only when Active
+                    el.disabled = !active; // disabled when Inactive or not chosen yet
+                    if (!active) {
+                        el.value = ''; // clear values when not active
+                        el.removeAttribute('min');
+                        el.removeAttribute('max');
+                    }
+                });
             }
+
             [flowerActive, flowerInactive].forEach(r => {
                 if (r) r.addEventListener('change', updateFlowerDatesRequired);
             });
