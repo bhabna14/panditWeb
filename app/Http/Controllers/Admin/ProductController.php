@@ -214,49 +214,54 @@ class ProductController extends Controller
     }
 
     public function editProduct($id)
-    {
-        $product = FlowerProduct::findOrFail($id);
+{
+    $product = FlowerProduct::findOrFail($id);
 
-        // Active items for the item <select>
-        $Poojaitemlist = Poojaitemlists::where('status', 'active')
-            ->orderBy('item_name')
-            ->get(['id','item_name']);
+    // For the dropdowns
+    $Poojaitemlist = Poojaitemlists::where('status', 'active')
+        ->orderBy('item_name')
+        ->get(['id','item_name']);
 
-        // All units for the unit <select>
-        $pooja_units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
+    $pooja_units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
 
-        // Existing package rows (your table stores names, not IDs)
-        $rows = PackageItem::where('product_id', $product->product_id)->get();
+    // Existing package rows saved as plain text (item_name, unit, quantity, price)
+    $rows = PackageItem::where('product_id', $product->product_id)->get(['item_name','unit','quantity','price']);
 
-        // Build fast lookup maps to avoid N+1
-        $itemNames = $rows->pluck('item_name')->filter()->unique()->values();
-        $unitNames = $rows->pluck('unit')->filter()->unique()->values();
+    // Build normalized lookup maps: item_name -> id, unit_name -> id (trim + lowercase)
+    $allItems = Poojaitemlists::pluck('id','item_name');   // [ 'Dhoop' => 1, 'Agarbatti' => 2, ... ]
+    $allUnits = PoojaUnit::pluck('id','unit_name');        // [ 'Kg' => 3, 'Piece' => 4, ... ]
 
-        $itemIdByName = $itemNames->isNotEmpty()
-            ? Poojaitemlists::whereIn('item_name', $itemNames)->pluck('id','item_name')
-            : collect();
-
-        $unitIdByName = $unitNames->isNotEmpty()
-            ? PoojaUnit::whereIn('unit_name', $unitNames)->pluck('id','unit_name')
-            : collect();
-
-        // Normalize rows for the form (item_id, quantity, unit_id, price)
-        $packageItems = $rows->map(function ($r) use ($itemIdByName, $unitIdByName) {
-            return [
-                'item_id'  => $itemIdByName[$r->item_name] ?? null,
-                'quantity' => $r->quantity,
-                'unit_id'  => $unitIdByName[$r->unit] ?? null,
-                'price'    => $r->price,
-            ];
-        })->toArray();
-
-        return view('admin.edit-product', compact(
-            'product',
-            'Poojaitemlist',
-            'pooja_units',
-            'packageItems'   // <- use this in your Blade for prefilled rows
-        ));
+    $itemIdByName = [];
+    foreach ($allItems as $name => $id) {
+        $itemIdByName[mb_strtolower(trim($name))] = (int) $id;
     }
+
+    $unitIdByName = [];
+    foreach ($allUnits as $name => $id) {
+        $unitIdByName[mb_strtolower(trim($name))] = (int) $id;
+    }
+
+    // Normalize rows for the form (map names back to IDs; keep quantity/price)
+    $packageItems = $rows->map(function ($r) use ($itemIdByName, $unitIdByName) {
+        $itemKey = mb_strtolower(trim((string) $r->item_name));
+        $unitKey = mb_strtolower(trim((string) $r->unit));
+
+        return [
+            'item_id'  => $itemIdByName[$itemKey] ?? null,
+            'quantity' => $r->quantity,
+            'unit_id'  => $unitIdByName[$unitKey] ?? null,
+            'price'    => $r->price,
+        ];
+    })->toArray();
+
+    return view('admin.edit-product', compact(
+        'product',
+        'Poojaitemlist',
+        'pooja_units',
+        'packageItems'
+    ));
+}
+
 
     public function updateProduct(Request $request, $id)
     {

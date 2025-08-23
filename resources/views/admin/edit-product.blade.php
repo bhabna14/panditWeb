@@ -38,23 +38,17 @@
         @csrf
 
         @php
-            $malaDefault = old(
-                'mala_provided',
-                is_null($product->mala_provided) ? '' : ($product->mala_provided ? 'yes' : 'no'),
-            );
-            $availDefault = old(
-                'flower_available',
-                is_null($product->is_flower_available) ? '' : ($product->is_flower_available ? 'yes' : 'no'),
-            );
+            $malaDefault = old('mala_provided', is_null($product->mala_provided) ? '' : ($product->mala_provided ? 'yes' : 'no'));
+            $availDefault = old('flower_available', is_null($product->is_flower_available) ? '' : ($product->is_flower_available ? 'yes' : 'no'));
 
             // Old inputs (if validation failed)
-            $oldItemIds  = old('item_id', []);
-            $oldQtys     = old('quantity', []);
-            $oldUnitIds  = old('unit_id', []);
-            $oldPrices   = old('item_price', []);
-            $hasOldRows  = is_array($oldItemIds) && count($oldItemIds) > 0;
+            $oldItemIds = old('item_id', []);
+            $oldQtys    = old('quantity', []);
+            $oldUnitIds = old('unit_id', []);
+            $oldPrices  = old('item_price', []);
+            $hasOldRows = is_array($oldItemIds) && count($oldItemIds) > 0;
 
-            // Prefill from controller ($packageItems is normalized to item_id, quantity, unit_id, price)
+            // Prefill from controller (already normalized to item_id, quantity, unit_id, price)
             $prefill = [];
             if (!$hasOldRows && !empty($packageItems) && is_array($packageItems)) {
                 foreach ($packageItems as $row) {
@@ -356,7 +350,7 @@
                 if (rows.length > 1) $(this).closest('.benefit-row').remove();
             });
 
-            // Add/Remove rows — use the actual IDs in your markup
+            // Add/Remove rows
             $('#addMore').on('click', function () {
                 $packageItems.append(buildPackageRowHtml());
                 initSelect2($packageItems.children().last());
