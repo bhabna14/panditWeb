@@ -21,5 +21,10 @@ class FlowerProduct extends Model
     {
         return $this->hasMany(PackageItem::class, 'product_id', 'product_id');
     }
+
+    public function pooja()
+    {
+        return $this->belongsTo(\App\Models\Poojalist::class, 'pooja_id', 'id');
+    }
     
 }
