@@ -15,8 +15,7 @@
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
                 <li class="breadcrumb-item tx-15"><a href="{{ url('admin/manage-product') }}"
                         class="btn btn-warning text-dark">Manage Product</a></li>
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active tx-15" aria-current="page">ADD Product</li>
+                
             </ol>
         </div>
     </div>
