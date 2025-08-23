@@ -182,28 +182,44 @@
             </div>
 
             <!-- PACKAGE: ITEMS + VARIANTS -->
+             <!-- PACKAGE: ITEMS (+ Qty, Unit, Item Price) -->
             <div id="packageFields" class="col-md-12 mb-3 controlled hidden" data-block="package">
                 <label class="form-label d-block mb-2"><span id="label-package-items">Package Items</span></label>
+
                 <div id="packageItems">
-                    <div class="row mb-3 package-row">
-                        <div class="col-md-6">
+                    <div class="row mb-3 package-row align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Item</label>
                             <select class="form-control select2 item-select" name="item_id[]" required>
                                 <option value="">Select Puja List</option>
                                 @foreach ($Poojaitemlist as $pujalist)
-                                    <option value="{{ $pujalist->id }}"
-                                        data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
-                                        {{ $pujalist->item_name }}
-                                    </option>
+                                    <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <select class="form-control select2 variant-select" name="variant_id[]" required>
-                                <option value="">Select Variant</option>
+
+                        <div class="col-md-2">
+                            <label class="form-label">Qty</label>
+                            <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Unit</label>
+                            <select class="form-control select2 unit-select" name="unit_id[]" required>
+                                <option value="">Select Unit</option>
+                                @foreach ($pooja_units as $u)
+                                    <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                                @endforeach
                             </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Item Price (Rs.)</label>
+                            <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
                         </div>
                     </div>
                 </div>
+
                 <button type="button" id="addMore" class="btn btn-secondary">Add More</button>
                 <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
             </div>
@@ -258,480 +274,296 @@
     </script>
 
     <script>
-        (function() {
-            // Init Select2 for any already-in-DOM selects
-            function initSelect2(scope) {
-                $(scope || document).find('.select2').each(function() {
-                    if (!$(this).data('select2')) $(this).select2({
-                        width: '100%'
-                    });
-                });
+(function() {
+    // Init Select2 for any already-in-DOM selects
+    function initSelect2(scope) {
+        $(scope || document).find('.select2').each(function() {
+            if (!$(this).data('select2')) {
+                $(this).select2({ width: '100%' });
             }
-            initSelect2();
+        });
+    }
+    initSelect2();
 
-            // ------- Elements -------
-            const categorySelect = document.getElementById('category');
-            const controlledBlocks = document.querySelectorAll('.controlled');
+    // ------- Elements -------
+    const categorySelect   = document.getElementById('category');
+    const controlledBlocks = document.querySelectorAll('.controlled');
 
-            const groups = {
-                core: document.querySelectorAll('[data-block="core"]'),
-                stock: document.querySelectorAll('[data-block="stock"]'),
-                subscription: document.querySelectorAll('[data-block="subscription"]'),
-                flower: document.querySelectorAll('[data-block="flower"]'),
-                flowerDates: document.querySelectorAll('[data-block="flowerDates"]'),
-                package: document.querySelectorAll('[data-block="package"]')
-            };
+    const groups = {
+        core:          document.querySelectorAll('[data-block="core"]'),
+        stock:         document.querySelectorAll('[data-block="stock"]'),
+        subscription:  document.querySelectorAll('[data-block="subscription"]'),
+        flower:        document.querySelectorAll('[data-block="flower"]'),
+        flowerDates:   document.querySelectorAll('[data-block="flowerDates"]'),
+        package:       document.querySelectorAll('[data-block="package"]')
+    };
 
-            // Fields
-            const availableFrom = document.getElementById('available_from');
-            const availableTo = document.getElementById('available_to');
-            const flowerActive = document.getElementById('flowerActive');
-            const flowerInactive = document.getElementById('flowerInactive');
+    // Fields
+    const availableFrom  = document.getElementById('available_from');
+    const availableTo    = document.getElementById('available_to');
+    const flowerActive   = document.getElementById('flowerActive');
+    const flowerInactive = document.getElementById('flowerInactive');
 
-            // Labels we rewrite
-            const $labels = {
-                name: $('#label-name'),
-                odiaName: $('#label-odia-name'),
-                mrp: $('#label-mrp'),
-                price: $('#label-price'),
-                image: $('#label-image'),
-                description: $('#label-description'),
-                benefit: $('#label-benefit'),
-                stock: $('#label-stock'),
-                duration: $('#label-duration'),
-                mala: $('#label-mala'),
-                availability: $('#label-availability'),
-                availableFrom: $('#label-available-from'),
-                availableTo: $('#label-available-to'),
-                pooja: $('#label-pooja'),
-                packageItems: $('#label-package-items')
-            };
+    // Labels we rewrite
+    const $labels = {
+        name: $('#label-name'),
+        odiaName: $('#label-odia-name'),
+        mrp: $('#label-mrp'),
+        price: $('#label-price'),
+        image: $('#label-image'),
+        description: $('#label-description'),
+        benefit: $('#label-benefit'),
+        stock: $('#label-stock'),
+        duration: $('#label-duration'),
+        mala: $('#label-mala'),
+        availability: $('#label-availability'),
+        availableFrom: $('#label-available-from'),
+        availableTo: $('#label-available-to'),
+        pooja: $('#label-pooja'),
+        packageItems: $('#label-package-items')
+    };
 
-            const $inputs = {
-                name: $('#name'),
-                odiaName: $('#odia_name'),
-                mrp: $('#mrp'),
-                price: $('#price'),
-                description: $('#description'),
-                image: $('#product_image')
-            };
+    const $inputs = {
+        name: $('#name'),
+        odiaName: $('#odia_name'),
+        mrp: $('#mrp'),
+        price: $('#price'),
+        description: $('#description'),
+        image: $('#product_image')
+    };
 
-            const LABELS = {
-                default: {
-                    name: 'Product Name',
-                    odiaName: 'Product Name (Odia)',
-                    mrp: 'MRP (Rs.)',
-                    price: 'Sale Price (Rs.)',
-                    image: 'Product Image',
-                    description: 'Description',
-                    benefit: 'Benefits',
-                    stock: 'Stock'
-                },
-                'Flower': {
-                    name: 'Flower Name',
-                    odiaName: 'Flower Name (Odia)',
-                    mrp: 'Flower MRP (Rs.)',
-                    price: 'Flower Price (Rs.)',
-                    image: 'Flower Image',
-                    description: 'Flower Description',
-                    benefit: 'Flower Benefits',
-                    stock: 'Stock'
-                },
-                'Package': {
-                    name: 'Package Name',
-                    odiaName: 'Package Name (Odia)',
-                    mrp: 'Package MRP (Rs.)',
-                    price: 'Package Price (Rs.)',
-                    image: 'Package Image',
-                    description: 'Package Description',
-                    benefit: 'Package Benefits',
-                    stock: 'Stock'
-                },
-                'Subscription': {
-                    name: 'Subscription Name',
-                    odiaName: 'Subscription Name (Odia)',
-                    mrp: 'Subscription MRP (Rs.)',
-                    price: 'Subscription Price (Rs.)',
-                    image: 'Subscription Image',
-                    description: 'Subscription Description',
-                    benefit: 'Subscription Benefits',
-                    stock: 'Stock'
-                },
-                'Puja Item': {
-                    name: 'Item Name',
-                    odiaName: 'Item Name (Odia)',
-                    mrp: 'Item MRP (Rs.)',
-                    price: 'Item Price (Rs.)',
-                    image: 'Item Image',
-                    description: 'Item Description',
-                    benefit: 'Item Benefits',
-                    stock: 'Stock'
-                },
-                'Immediateproduct': {
-                    name: 'Customized Flower Name',
-                    odiaName: 'Customized Flower Name (Odia)',
-                    mrp: 'Customized Flower MRP (Rs.)',
-                    price: 'Customized Flower Price (Rs.)',
-                    image: 'Customized Flower Image',
-                    description: 'Customized Flower Description',
-                    benefit: 'Benefits',
-                    stock: 'Stock'
-                },
-                'Customizeproduct': {
-                    name: 'Customized Product Name',
-                    odiaName: 'Customized Product Name (Odia)',
-                    mrp: 'Customized Product MRP (Rs.)',
-                    price: 'Customized Product Price (Rs.)',
-                    image: 'Customized Product Image',
-                    description: 'Customized Product Description',
-                    benefit: 'Benefits',
-                    stock: 'Stock'
-                },
-                'Books': {
-                    name: 'Book Title',
-                    odiaName: 'Book Title (Odia)',
-                    mrp: 'Book MRP (Rs.)',
-                    price: 'Book Price (Rs.)',
-                    image: 'Book Cover Image',
-                    description: 'Book Description',
-                    benefit: 'Key Benefits',
-                    stock: 'Stock'
-                }
-            };
+    const LABELS = {
+        default: { name:'Product Name', odiaName:'Product Name (Odia)', mrp:'MRP (Rs.)', price:'Sale Price (Rs.)', image:'Product Image', description:'Description', benefit:'Benefits', stock:'Stock' },
+        'Flower': { name:'Flower Name', odiaName:'Flower Name (Odia)', mrp:'Flower MRP (Rs.)', price:'Flower Price (Rs.)', image:'Flower Image', description:'Flower Description', benefit:'Flower Benefits', stock:'Stock' },
+        'Package': { name:'Package Name', odiaName:'Package Name (Odia)', mrp:'Package MRP (Rs.)', price:'Package Price (Rs.)', image:'Package Image', description:'Package Description', benefit:'Package Benefits', stock:'Stock' },
+        'Subscription': { name:'Subscription Name', odiaName:'Subscription Name (Odia)', mrp:'Subscription MRP (Rs.)', price:'Subscription Price (Rs.)', image:'Subscription Image', description:'Subscription Description', benefit:'Subscription Benefits', stock:'Stock' },
+        'Puja Item': { name:'Item Name', odiaName:'Item Name (Odia)', mrp:'Item MRP (Rs.)', price:'Item Price (Rs.)', image:'Item Image', description:'Item Description', benefit:'Item Benefits', stock:'Stock' },
+        'Immediateproduct': { name:'Customized Flower Name', odiaName:'Customized Flower Name (Odia)', mrp:'Customized Flower MRP (Rs.)', price:'Customized Flower Price (Rs.)', image:'Customized Flower Image', description:'Customized Flower Description', benefit:'Benefits', stock:'Stock' },
+        'Customizeproduct': { name:'Customized Product Name', odiaName:'Customized Product Name (Odia)', mrp:'Customized Product MRP (Rs.)', price:'Customized Product Price (Rs.)', image:'Customized Product Image', description:'Customized Product Description', benefit:'Benefits', stock:'Stock' },
+        'Books': { name:'Book Title', odiaName:'Book Title (Odia)', mrp:'Book MRP (Rs.)', price:'Book Price (Rs.)', image:'Book Cover Image', description:'Book Description', benefit:'Key Benefits', stock:'Stock' }
+    };
 
-            const PLACEHOLDERS = {
-                default: {
-                    name: 'Enter product name',
-                    odiaName: 'Enter product name in Odia',
-                    mrp: 'Enter MRP',
-                    price: 'Enter sale price',
-                    description: 'Enter description'
-                },
-                'Flower': {
-                    name: 'Enter flower name',
-                    odiaName: 'Enter flower name in Odia',
-                    mrp: 'Enter flower MRP',
-                    price: 'Enter flower price',
-                    description: 'Enter flower description'
-                },
-                'Package': {
-                    name: 'Enter package name',
-                    odiaName: 'Enter package name in Odia',
-                    mrp: 'Enter package MRP',
-                    price: 'Enter package price',
-                    description: 'Enter package description'
-                },
-                'Subscription': {
-                    name: 'Enter subscription name',
-                    odiaName: 'Enter subscription name in Odia',
-                    mrp: 'Enter subscription MRP',
-                    price: 'Enter subscription price',
-                    description: 'Enter subscription description'
-                },
-                'Puja Item': {
-                    name: 'Enter item name',
-                    odiaName: 'Enter item name in Odia',
-                    mrp: 'Enter item MRP',
-                    price: 'Enter item price',
-                    description: 'Enter item description'
-                },
-                'Immediateproduct': {
-                    name: 'Enter customized flower name',
-                    odiaName: 'Enter customized flower name in Odia',
-                    mrp: 'Enter customized flower MRP',
-                    price: 'Enter customized flower price',
-                    description: 'Enter customized flower description'
-                },
-                'Customizeproduct': {
-                    name: 'Enter customized product name',
-                    odiaName: 'Enter customized product name in Odia',
-                    mrp: 'Enter customized product MRP',
-                    price: 'Enter customized product price',
-                    description: 'Enter customized product description'
-                },
-                'Books': {
-                    name: 'Enter book title',
-                    odiaName: 'Enter book title in Odia',
-                    mrp: 'Enter book MRP',
-                    price: 'Enter book price',
-                    description: 'Enter book description'
-                }
-            };
+    const PLACEHOLDERS = {
+        default: { name:'Enter product name', odiaName:'Enter product name in Odia', mrp:'Enter MRP', price:'Enter sale price', description:'Enter description' },
+        'Flower': { name:'Enter flower name', odiaName:'Enter flower name in Odia', mrp:'Enter flower MRP', price:'Enter flower price', description:'Enter flower description' },
+        'Package': { name:'Enter package name', odiaName:'Enter package name in Odia', mrp:'Enter package MRP', price:'Enter package price', description:'Enter package description' },
+        'Subscription': { name:'Enter subscription name', odiaName:'Enter subscription name in Odia', mrp:'Enter subscription MRP', price:'Enter subscription price', description:'Enter subscription description' },
+        'Puja Item': { name:'Enter item name', odiaName:'Enter item name in Odia', mrp:'Enter item MRP', price:'Enter item price', description:'Enter item description' },
+        'Immediateproduct': { name:'Enter customized flower name', odiaName:'Enter customized flower name in Odia', mrp:'Enter customized flower MRP', price:'Enter customized flower price', description:'Enter customized flower description' },
+        'Customizeproduct': { name:'Enter customized product name', odiaName:'Enter customized product name in Odia', mrp:'Enter customized product MRP', price:'Enter customized product price', description:'Enter customized product description' },
+        'Books': { name:'Enter book title', odiaName:'Enter book title in Odia', mrp:'Enter book MRP', price:'Enter book price', description:'Enter book description' }
+    };
 
-            function setLabelsByCategory(cat) {
-                const map = LABELS[cat] || LABELS.default;
-                $labels.name.text(map.name);
-                $labels.odiaName.text(map.odiaName);
-                $labels.mrp.text(map.mrp);
-                $labels.price.text(map.price);
-                $labels.image.text(map.image);
-                $labels.description.text(map.description);
-                $labels.benefit.text(map.benefit);
-                $labels.stock.text(map.stock);
+    function setLabelsByCategory(cat) {
+        const map = LABELS[cat] || LABELS.default;
+        $labels.name.text(map.name);
+        $labels.odiaName.text(map.odiaName);
+        $labels.mrp.text(map.mrp);
+        $labels.price.text(map.price);
+        $labels.image.text(map.image);
+        $labels.description.text(map.description);
+        $labels.benefit.text(map.benefit);
+        $labels.stock.text(map.stock);
 
-                const ph = PLACEHOLDERS[cat] || PLACEHOLDERS.default;
-                $inputs.name.attr('placeholder', ph.name);
-                $inputs.odiaName.attr('placeholder', ph.odiaName);
-                $inputs.mrp.attr('placeholder', ph.mrp);
-                $inputs.price.attr('placeholder', ph.price);
-                $inputs.description.attr('placeholder', ph.description);
+        const ph = PLACEHOLDERS[cat] || PLACEHOLDERS.default;
+        $inputs.name.attr('placeholder', ph.name);
+        $inputs.odiaName.attr('placeholder', ph.odiaName);
+        $inputs.mrp.attr('placeholder', ph.mrp);
+        $inputs.price.attr('placeholder', ph.price);
+        $inputs.description.attr('placeholder', ph.description);
 
-                // Flower-only label overrides
-                if (cat === 'Flower') {
-                    $labels.mala.text('Is mala provided with this flower?');
-                    $labels.availability.text('Is this flower available?');
-                    $labels.availableFrom.text('Available From');
-                    $labels.availableTo.text('Available To');
-                } else {
-                    $labels.mala.text('Is mala provided?');
-                    $labels.availability.text('Is this available?');
-                    $labels.availableFrom.text('Available From');
-                    $labels.availableTo.text('Available To');
-                }
+        if (cat === 'Flower') {
+            $labels.mala.text('Is mala provided with this flower?');
+            $labels.availability.text('Is this flower available?');
+            $labels.availableFrom.text('Available From');
+            $labels.availableTo.text('Available To');
+        } else {
+            $labels.mala.text('Is mala provided?');
+            $labels.availability.text('Is this available?');
+            $labels.availableFrom.text('Available From');
+            $labels.availableTo.text('Available To');
+        }
 
-                // Package-only label overrides
-                if (cat === 'Package') {
-                    $labels.pooja.text('Pooja (Festival)');
-                    $labels.packageItems.text('Package Items');
-                } else {
-                    $labels.pooja.text('Pooja');
-                    $labels.packageItems.text('Items');
-                }
+        if (cat === 'Package') {
+            $labels.pooja.text('Pooja (Festival)');
+            $labels.packageItems.text('Package Items');
+        } else {
+            $labels.pooja.text('Pooja');
+            $labels.packageItems.text('Items');
+        }
+    }
+
+    function showGroup(nodeList, show) {
+        nodeList.forEach(el => {
+            if (show) {
+                el.classList.remove('hidden');
+                el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = false);
+            } else {
+                el.classList.add('hidden');
+                el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = true);
+                el.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea').forEach(i => i.value = '');
+                el.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(i => i.checked = false);
+                el.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; $(s).trigger('change'); });
             }
+        });
+    }
 
-            function showGroup(nodeList, show) {
-                nodeList.forEach(el => {
-                    if (show) {
-                        el.classList.remove('hidden');
-                        el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = false);
-                    } else {
-                        el.classList.add('hidden');
-                        el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = true);
-                        el.querySelectorAll(
-                                'input[type="text"], input[type="number"], input[type="date"], textarea')
-                            .forEach(i => i.value = '');
-                        el.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(i => i
-                            .checked = false);
-                        el.querySelectorAll('select').forEach(s => {
-                            s.selectedIndex = 0;
-                            $(s).trigger('change');
-                        });
-                    }
-                });
+    const showCore         = (b)=>showGroup(groups.core, b);
+    const showStock        = (b)=>showGroup(groups.stock, b);
+    const showSubscription = (b)=>showGroup(groups.subscription, b);
+    const showFlower       = (b)=>showGroup(groups.flower, b);
+    const showFlowerDates  = (b)=>showGroup(groups.flowerDates, b);
+    const showPackage      = (b)=>showGroup(groups.package, b);
+
+    function applyCategoryRules() {
+        const cat = categorySelect.value;
+
+        if (!cat) {
+            controlledBlocks.forEach(el => el.classList.add('hidden'));
+            controlledBlocks.forEach(el => el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = true));
+            return;
+        }
+
+        showCore(true);
+        setLabelsByCategory(cat);
+
+        const isFlower       = (cat === 'Flower');
+        const isPackage      = (cat === 'Package');
+        const isSubscription = (cat === 'Subscription');
+
+        showStock(!isFlower);
+        showSubscription(isSubscription);
+
+        showFlower(isFlower);
+        showFlowerDates(isFlower); // visible when Flower; enabled by radio below
+        updateFlowerDatesRequired();
+
+        showPackage(isPackage);
+    }
+
+    // Keep "To" >= "From"
+    function wireDateBounds() {
+        if (!availableFrom || !availableTo) return;
+        availableFrom.addEventListener('change', function() {
+            availableTo.min = availableFrom.value || '';
+            if (availableTo.value && availableFrom.value && availableTo.value < availableFrom.value) {
+                availableTo.value = '';
             }
+        });
+        availableTo.addEventListener('change', function() {
+            availableFrom.max = availableTo.value || '';
+        });
+    }
+    wireDateBounds();
 
-            const showCore = (b) => showGroup(groups.core, b);
-            const showStock = (b) => showGroup(groups.stock, b);
-            const showSubscription = (b) => showGroup(groups.subscription, b);
-            const showFlower = (b) => showGroup(groups.flower, b);
-            const showFlowerDates = (b) => showGroup(groups.flowerDates, b);
-            const showPackage = (b) => showGroup(groups.package, b);
+    // Flower availability toggles date fields & required
+    function updateFlowerDatesRequired() {
+        const isFlower = categorySelect.value === 'Flower';
+        if (!isFlower) return;
 
-            function applyCategoryRules() {
-                const cat = categorySelect.value;
+        const active = flowerActive?.checked === true;
 
-                // If no category: hide everything except category
-                if (!cat) {
-                    controlledBlocks.forEach(el => el.classList.add('hidden'));
-                    controlledBlocks.forEach(el => el.querySelectorAll('input, select, textarea, button').forEach(i => i
-                        .disabled = true));
-                    return;
-                }
-
-                // Core visible for all once category chosen
-                showCore(true);
-
-                // Labels & placeholders
-                setLabelsByCategory(cat);
-
-                // Switches
-                const isFlower = (cat === 'Flower');
-                const isPackage = (cat === 'Package');
-                const isSubscription = (cat === 'Subscription');
-
-                // Stock: visible for all EXCEPT Flower
-                showStock(!isFlower);
-
-                // Subscription
-                showSubscription(isSubscription);
-
-                // Flower
-                showFlower(isFlower);
-                // Show date fields whenever category is Flower; enable/require controlled by radios
-                showFlowerDates(isFlower);
-                updateFlowerDatesRequired();
-
-                // Package
-                showPackage(isPackage);
+        [availableFrom, availableTo].forEach(el => {
+            if (!el) return;
+            el.required = !!active;   // required only when Active
+            el.disabled = !active;    // disabled if not Active
+            if (!active) {
+                el.value = '';
+                el.removeAttribute('min');
+                el.removeAttribute('max');
             }
+        });
+    }
+    [flowerActive, flowerInactive].forEach(r => { if (r) r.addEventListener('change', updateFlowerDatesRequired); });
 
-            // Keep "To" >= "From"
-            function wireDateBounds() {
-                if (!availableFrom || !availableTo) return;
-                availableFrom.addEventListener('change', function() {
-                    availableTo.min = availableFrom.value || '';
-                    if (availableTo.value && availableFrom.value && availableTo.value < availableFrom.value) {
-                        availableTo.value = '';
-                    }
-                });
-                availableTo.addEventListener('change', function() {
-                    availableFrom.max = availableTo.value || '';
-                });
-            }
-            wireDateBounds();
+    // BENEFITS: add/remove
+    const benefitFields = document.getElementById('benefitFields');
+    benefitFields.addEventListener('click', function(e) {
+        if (e.target.closest('.add-benefit')) {
+            const row = e.target.closest('.benefit-row');
+            const newRow = row.cloneNode(true);
+            newRow.querySelector('input').value = '';
+            newRow.querySelector('.remove-benefit').style.display = 'inline-block';
+            benefitFields.appendChild(newRow);
+        }
+        if (e.target.closest('.remove-benefit')) {
+            const rows = benefitFields.querySelectorAll('.benefit-row');
+            if (rows.length > 1) e.target.closest('.benefit-row').remove();
+        }
+    });
 
-            // Flower availability toggles date fields & required
-            function updateFlowerDatesRequired() {
-                const isFlower = categorySelect.value === 'Flower';
-                if (!isFlower) return;
+    // PACKAGE rows (Item + Qty + Unit + Price)
+    const packageItems    = document.getElementById('packageItems');
+    const addMoreButton   = document.getElementById('addMore');
+    const removeLastButton= document.getElementById('removeLast');
 
-                const active = flowerActive?.checked === true;
+    addMoreButton.addEventListener('click', function() {
+        const newRow = document.createElement('div');
+        newRow.classList.add('row', 'mb-3', 'package-row', 'align-items-end');
+        newRow.innerHTML = `
+            <div class="col-md-4">
+                <label class="form-label">Item</label>
+                <select class="form-control select2 item-select" name="item_id[]" required>
+                    <option value="">Select Puja List</option>
+                    @foreach ($Poojaitemlist as $pujalist)
+                        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Qty</label>
+                <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Unit</label>
+                <select class="form-control select2 unit-select" name="unit_id[]" required>
+                    <option value="">Select Unit</option>
+                    @foreach ($pooja_units as $u)
+                        <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Item Price (Rs.)</label>
+                <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+        `;
+        packageItems.appendChild(newRow);
+        initSelect2(newRow);
+    });
 
-                // Show group already handled in applyCategoryRules; here we gate usability
-                [availableFrom, availableTo].forEach(el => {
-                    if (!el) return;
-                    el.required = !!active; // required only when Active
-                    el.disabled = !active; // disabled when Inactive or not chosen yet
-                    if (!active) {
-                        el.value = ''; // clear values when not active
-                        el.removeAttribute('min');
-                        el.removeAttribute('max');
-                    }
-                });
-            }
+    removeLastButton.addEventListener('click', function() {
+        const rows = packageItems.querySelectorAll('.package-row');
+        if (rows.length > 1) rows[rows.length - 1].remove();
+    });
 
-            [flowerActive, flowerInactive].forEach(r => {
-                if (r) r.addEventListener('change', updateFlowerDatesRequired);
-            });
+    // Category change: native + Select2 events
+    $(document).on('change', '#category', function() {
+        applyCategoryRules();
+        updateFlowerDatesRequired();
+    });
+    $('#category').on('select2:select', function() {
+        applyCategoryRules();
+        updateFlowerDatesRequired();
+    });
 
-            // Image preview
-            const imgInput = document.getElementById('product_image');
-            const imgPreview = document.getElementById('imagePreview');
-            if (imgInput && imgPreview) {
-                imgInput.addEventListener('change', function() {
-                    const file = this.files && this.files[0];
-                    if (!file) {
-                        imgPreview.style.display = 'none';
-                        imgPreview.src = '';
-                        return;
-                    }
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        imgPreview.src = e.target.result;
-                        imgPreview.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                });
-            }
+    // Initial
+    applyCategoryRules();
+    updateFlowerDatesRequired();
 
-            // BENEFITS: add/remove
-            const benefitFields = document.getElementById('benefitFields');
-            benefitFields.addEventListener('click', function(e) {
-                if (e.target.closest('.add-benefit')) {
-                    const row = e.target.closest('.benefit-row');
-                    const newRow = row.cloneNode(true);
-                    newRow.querySelector('input').value = '';
-                    newRow.querySelector('.remove-benefit').style.display = 'inline-block';
-                    benefitFields.appendChild(newRow);
-                }
-                if (e.target.closest('.remove-benefit')) {
-                    const rows = benefitFields.querySelectorAll('.benefit-row');
-                    if (rows.length > 1) e.target.closest('.benefit-row').remove();
-                }
-            });
+    // Image preview
+    const imgInput = document.getElementById('product_image');
+    const imgPreview = document.getElementById('imagePreview');
+    if (imgInput && imgPreview) {
+        imgInput.addEventListener('change', function() {
+            const file = this.files && this.files[0];
+            if (!file) { imgPreview.style.display='none'; imgPreview.src=''; return; }
+            const reader = new FileReader();
+            reader.onload = e => { imgPreview.src = e.target.result; imgPreview.style.display='block'; };
+            reader.readAsDataURL(file);
+        });
+    }
+})();
+</script>
 
-            // PACKAGE: rows add/remove + variants loader
-            const packageItems = document.getElementById('packageItems');
-            const addMoreButton = document.getElementById('addMore');
-            const removeLastButton = document.getElementById('removeLast');
-
-            function loadVariantsFor(itemSelect) {
-                const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-                const variants = selectedOption?.getAttribute('data-variants');
-                const variantSelect = itemSelect.closest('.row').querySelector('.variant-select');
-
-                // reset
-                variantSelect.innerHTML = '<option value="">Select Variant</option>';
-
-                if (variants) {
-                    try {
-                        let parsed = variants;
-                        if (typeof parsed === 'string') {
-                            parsed = parsed.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
-                            parsed = JSON.parse(parsed);
-                        }
-                        parsed.forEach(v => {
-                            const opt = document.createElement('option');
-                            opt.value = v.id;
-                            opt.textContent = `${v.title} - ${v.price}`;
-                            variantSelect.appendChild(opt);
-                        });
-                    } catch (e) {
-                        console.error('Error parsing variant data:', e);
-                    }
-                }
-                $(variantSelect).trigger('change');
-            }
-
-            function initializeItemChangeListener(scope) {
-                const itemSelect = scope.querySelector('.item-select');
-                if (!itemSelect) return;
-                itemSelect.addEventListener('change', function() {
-                    loadVariantsFor(itemSelect);
-                });
-            }
-
-            // init default row
-            initializeItemChangeListener(document.querySelector('.package-row'));
-
-            // add row
-            addMoreButton.addEventListener('click', function() {
-                const newRow = document.createElement('div');
-                newRow.classList.add('row', 'mb-3', 'package-row');
-                newRow.innerHTML = `
-                    <div class="col-md-6">
-                        <select class="form-control select2 item-select" name="item_id[]" required>
-                            <option value="">Select Puja List</option>
-                            @foreach ($Poojaitemlist as $pujalist)
-                                <option value="{{ $pujalist->id }}"
-                                    data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
-                                    {{ $pujalist->item_name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <select class="form-control select2 variant-select" name="variant_id[]" required>
-                            <option value="">Select Variant</option>
-                        </select>
-                    </div>
-                `;
-                packageItems.appendChild(newRow);
-                initSelect2(newRow);
-                initializeItemChangeListener(newRow);
-            });
-
-            // remove last row
-            removeLastButton.addEventListener('click', function() {
-                const rows = packageItems.querySelectorAll('.package-row');
-                if (rows.length > 1) rows[rows.length - 1].remove();
-            });
-
-
-            // Work with both native change and Select2
-            $(document).on('change', '#category', function() {
-                applyCategoryRules();
-                updateFlowerDatesRequired();
-            });
-            $('#category').on('select2:select', function() {
-                applyCategoryRules();
-                updateFlowerDatesRequired();
-            });
-
-
-            // Initial: keep only category visible
-            applyCategoryRules();
-            updateFlowerDatesRequired();
-        })();
-    </script>
 @endsection

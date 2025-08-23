@@ -12,17 +12,17 @@ class PackageItem extends Model
     protected $table = 'product__package_item';
 
     protected $fillable = [
-        'product_id', 'item_id', 'variant_id'
+        'product_id','item_name','quantity','unit','price'
     ];
 
-    public function item()
-{
-    return $this->belongsTo(Poojaitemlists::class, 'item_id');
-}
+//     public function item()
+// {
+//     return $this->belongsTo(Poojaitemlists::class, 'item_id');
+// }
 
-public function variant()
-{
-    return $this->belongsTo(Variant::class, 'variant_id');
-}
+// public function variant()
+// {
+//     return $this->belongsTo(Variant::class, 'variant_id');
+// }
 
 }
