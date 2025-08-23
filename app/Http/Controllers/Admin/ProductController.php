@@ -257,7 +257,7 @@ class ProductController extends Controller
             'packageItems'   // <- use this in your Blade for prefilled rows
         ));
     }
-    
+
     public function updateProduct(Request $request, $id)
     {
         $product = FlowerProduct::findOrFail($id);
