@@ -557,9 +557,9 @@
 
                 // Flower
                 showFlower(isFlower);
-                // Flower dates appear only if "Active" selected
-                const showDates = isFlower && (flowerActive?.checked === true);
-                showFlowerDates(showDates);
+                // Show date fields whenever category is Flower; enable/require controlled by radios
+                showFlowerDates(isFlower);
+                updateFlowerDatesRequired();
 
                 // Package
                 showPackage(isPackage);
