@@ -239,35 +239,50 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const categorySelect = document.getElementById('category');
-            const packageFields = document.getElementById('packageFields');
-            const poojafields = document.getElementById('poojafields');
-            const packageItems = document.getElementById('packageItems');
-            const addMoreButton = document.getElementById('addMore');
+            const categorySelect   = document.getElementById('category');
+            const packageFields    = document.getElementById('packageFields');
+            const poojafields      = document.getElementById('poojafields');
+            const packageItems     = document.getElementById('packageItems');
+            const addMoreButton    = document.getElementById('addMore');
             const removeLastButton = document.getElementById('removeLast');
 
-            // Show or hide package fields based on category selection
-            categorySelect.addEventListener('change', function() {
-                if (this.value === 'Package') {
-                    packageFields.style.display = 'block';
-                    poojafields.style.display = 'block';
+            // NEW: Duration group wrapper (the .mb-3 around the select)
+            const durationSelect = document.getElementById('duration');
+            const durationGroup  = durationSelect ? durationSelect.closest('.mb-3') : null;
 
-                } else {
-                    packageFields.style.display = 'none';
+            function updateByCategory() {
+                const cat = categorySelect.value;
+                const isPackage = (cat === 'Package');
+                const isSubscription = (cat === 'Subscription');
+
+                // Show/hide Package-related blocks
+                packageFields.style.display = isPackage ? 'block' : 'none';
+                poojafields.style.display   = isPackage ? 'block' : 'none';
+
+                // Show duration only for Subscription; hide otherwise (including Package)
+                if (durationGroup) {
+                    durationGroup.style.display = isSubscription ? 'block' : 'none';
+                    if (!isSubscription) {
+                        durationSelect.selectedIndex = 0; // clear selection when hidden
+                    }
                 }
-            });
+            }
+
+            // Handle category changes
+            categorySelect.addEventListener('change', updateByCategory);
+            updateByCategory(); // run once on load
 
             // Add more package items
             addMoreButton.addEventListener('click', function() {
                 const newItemRow = document.createElement('div');
                 newItemRow.classList.add('row', 'mb-3');
-
                 newItemRow.innerHTML = `
                     <div class="col-md-6">
                         <select class="form-control select2 item-select" name="item_id[]" required>
                             <option value="">Select Puja List</option>
                             @foreach ($Poojaitemlist as $pujalist)
-                                <option value="{{ $pujalist->id }}" data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
+                                <option value="{{ $pujalist->id }}"
+                                    data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
                                     {{ $pujalist->item_name }}
                                 </option>
                             @endforeach
@@ -278,8 +293,7 @@
                             <option value="">Select Variant</option>
                         </select>
                     </div>
-                    `;
-
+                `;
                 packageItems.appendChild(newItemRow);
 
                 // Reinitialize event listeners for dynamically added items
@@ -294,7 +308,7 @@
                 }
             });
 
-            // Function to initialize item change listener
+            // Variants loader
             function initializeItemChangeListener(itemSelect) {
                 itemSelect.addEventListener('change', function() {
                     const selectedOption = itemSelect.options[itemSelect.selectedIndex];
@@ -310,8 +324,7 @@
 
                             // Decode HTML entities and parse JSON
                             if (typeof parsedVariants === 'string') {
-                                parsedVariants = parsedVariants.replace(/&quot;/g, '"').replace(/&amp;/g,
-                                    '&');
+                                parsedVariants = parsedVariants.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
                                 parsedVariants = JSON.parse(parsedVariants);
                             }
 
