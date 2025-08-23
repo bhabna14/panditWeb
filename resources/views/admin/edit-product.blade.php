@@ -46,6 +46,17 @@
     <form action="{{ route('admin.update-product', $product->id) }}" method="post" enctype="multipart/form-data">
         @csrf
 
+        @php
+            $malaDefault = old(
+                'mala_provided',
+                is_null($product->mala_provided) ? '' : ($product->mala_provided ? 'yes' : 'no'),
+            );
+            $availDefault = old(
+                'flower_available',
+                is_null($product->is_flower_available) ? '' : ($product->is_flower_available ? 'yes' : 'no'),
+            );
+        @endphp
+
         <div class="row">
 
             <div class="col-md-6 mb-3">
@@ -57,68 +68,88 @@
             <div class="col-md-6 mb-3">
                 <label for="odia_name" class="form-label">Product Name (Odia)</label>
                 <input type="text" name="odia_name" class="form-control" id="odia_name"
-                    value="{{ $product->odia_name ?? '' }}" required>
+                    value="{{ old('odia_name', $product->odia_name) }}">
             </div>
 
             <div class="col-md-3 mb-3">
                 <label for="mrp" class="form-label">MRP (Rs.)</label>
-                <input type="number" name="mrp" class="form-control" id="mrp" value="{{ $product->mrp }}"
-                    required>
+                <input type="number" name="mrp" class="form-control" id="mrp"
+                    value="{{ old('mrp', $product->mrp) }}" required>
             </div>
 
             <div class="col-md-3 mb-3">
                 <label for="price" class="form-label">Price (Rs.)</label>
-                <input type="number" name="price" class="form-control" id="price" value="{{ $product->price }}"
-                    required>
+                <input type="number" name="price" class="form-control" id="price"
+                    value="{{ old('price', $product->price) }}" required>
             </div>
 
             <div class="col-md-6 mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select name="category" id="category" class="form-control select2" required>
-                    <option value="Puja Item" {{ $product->category == 'Puja Item' ? 'selected' : '' }}>Puja Item</option>
-                    <option value="Subscription" {{ $product->category == 'Subscription' ? 'selected' : '' }}>Subscription
+                    <option value="Puja Item" {{ old('category', $product->category) == 'Puja Item' ? 'selected' : '' }}>
+                        Puja Item</option>
+                    <option value="Subscription"
+                        {{ old('category', $product->category) == 'Subscription' ? 'selected' : '' }}>Subscription</option>
+                    <option value="Flower" {{ old('category', $product->category) == 'Flower' ? 'selected' : '' }}>Flower
                     </option>
-                    <option value="Flower" {{ $product->category == 'Flower' ? 'selected' : '' }}>Flower</option>
-                    <option value="Immediateproduct" {{ $product->category == 'Immediateproduct' ? 'selected' : '' }}>
-                        Customize Flower</option>
-                    <option value="Customizeproduct" {{ $product->category == 'Customizeproduct' ? 'selected' : '' }}>
-                        Customize Product</option>
-                    <option value="Package" {{ $product->category == 'Package' ? 'selected' : '' }}>Package</option>
-                    <option value="Books" {{ $product->category == 'Books' ? 'selected' : '' }}>Books</option>
+                    <option value="Immediateproduct"
+                        {{ old('category', $product->category) == 'Immediateproduct' ? 'selected' : '' }}>Customize Flower
+                    </option>
+                    <option value="Customizeproduct"
+                        {{ old('category', $product->category) == 'Customizeproduct' ? 'selected' : '' }}>Customize Product
+                    </option>
+                    <option value="Package" {{ old('category', $product->category) == 'Package' ? 'selected' : '' }}>
+                        Package</option>
+                    <option value="Books" {{ old('category', $product->category) == 'Books' ? 'selected' : '' }}>Books
+                    </option>
                 </select>
             </div>
 
-            <!-- Mala Provided Field (for Flower category) -->
-            <div class="col-md-4 mb-3" id="malaProvidedField" style="display: none;">
+            <!-- Flower-only: Mala Provided -->
+            <div class="col-md-4 mb-3" id="malaProvidedField" style="display:none;">
                 <label class="form-label">Is Mala Provided with this Flower?</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="mala_provided" id="malaYes" value="yes"
-                        {{ old('mala_provided', $product->mala_provided ?? '') == 'yes' ? 'checked' : '' }}>
+                        {{ $malaDefault === 'yes' ? 'checked' : '' }}>
                     <label class="form-check-label" for="malaYes">Yes</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="mala_provided" id="malaNo" value="no"
-                        {{ old('mala_provided', $product->mala_provided ?? '') == 'no' ? 'checked' : '' }}>
+                        {{ $malaDefault === 'no' ? 'checked' : '' }}>
                     <label class="form-check-label" for="malaNo">No</label>
                 </div>
             </div>
-            <!-- Flower Availability Field (for Flower category) -->
-            <div class="col-md-4 mb-3" id="flowerAvailabilityField" style="display: none;">
+
+            <!-- Flower-only: Availability (Active/Inactive) -->
+            <div class="col-md-4 mb-3" id="flowerAvailabilityField" style="display:none;">
                 <label class="form-label">Is this Flower Available?</label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="flower_available" id="flowerActive" value="yes"
-                        {{ old('flower_available', $product->flower_available ?? '') == 'yes' ? 'checked' : '' }}>
+                        {{ $availDefault === 'yes' ? 'checked' : '' }}>
                     <label class="form-check-label" for="flowerActive">Active</label>
                 </div>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="flower_available" id="flowerInactive"
-                        value="no"
-                        {{ old('flower_available', $product->flower_available ?? '') == 'no' ? 'checked' : '' }}>
+                        value="no" {{ $availDefault === 'no' ? 'checked' : '' }}>
                     <label class="form-check-label" for="flowerInactive">Inactive</label>
                 </div>
             </div>
 
-            <div id="packageFields" class="col-md-12 mb-3">
+            <!-- Flower-only: Available From / To -->
+            <div class="col-md-4 mb-3" id="flowerFromField" style="display:none;">
+                <label for="available_from" class="form-label">Available From</label>
+                <input type="date" name="available_from" id="available_from" class="form-control"
+                    value="{{ old('available_from', $product->available_from) }}">
+            </div>
+
+            <div class="col-md-4 mb-3" id="flowerToField" style="display:none;">
+                <label for="available_to" class="form-label">Available To</label>
+                <input type="date" name="available_to" id="available_to" class="form-control"
+                    value="{{ old('available_to', $product->available_to) }}">
+            </div>
+
+            <!-- Package fields -->
+            <div id="packageFields" class="col-md-12 mb-3" style="display:none;">
                 <div id="packageItems">
                     @foreach ($selectedItems as $selected)
                         <div class="row mb-3">
@@ -163,13 +194,12 @@
                 <label class="form-label">Benefits</label>
                 <div id="benefitsWrapper">
                     @php
-                        $benefits = !empty($product->benefits) ? explode(',', $product->benefits) : [''];
+                        $benefits = !empty($product->benefits) ? explode('#', $product->benefits) : [''];
                     @endphp
-
-                    @foreach ($benefits as $index => $benefit)
+                    @foreach ($benefits as $benefit)
                         <div class="input-group mb-2 benefit-row">
                             <input type="text" name="benefits[]" class="form-control" value="{{ trim($benefit) }}"
-                                placeholder="Enter benefit" required>
+                                placeholder="Enter benefit">
                             <button type="button" class="btn btn-danger removeBenefit">Remove</button>
                         </div>
                     @endforeach
@@ -177,10 +207,9 @@
                 <button type="button" class="btn btn-secondary" id="addBenefit">Add Benefit</button>
             </div>
 
-
             <div class="col-md-12 mb-3">
                 <label for="description" class="form-label">Description</label>
-                <textarea name="description" class="form-control" id="description" rows="4" required>{{ $product->description }}</textarea>
+                <textarea name="description" class="form-control" id="description" rows="4" required>{{ old('description', $product->description) }}</textarea>
             </div>
 
             <div class="col-md-12 mt-4">
@@ -189,6 +218,7 @@
 
         </div>
     </form>
+
 @endsection
 
 @section('modal')
@@ -210,143 +240,145 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const categorySelect = document.getElementById('category');
+
+            // Flower-only blocks
+            const malaField = document.getElementById('malaProvidedField');
+            const flowerField = document.getElementById('flowerAvailabilityField');
+            const flowerFromField = document.getElementById('flowerFromField');
+            const flowerToField = document.getElementById('flowerToField');
+            const availableFrom = document.getElementById('available_from');
+            const availableTo = document.getElementById('available_to');
+
+            // Package blocks
             const packageFields = document.getElementById('packageFields');
             const packageItems = document.getElementById('packageItems');
             const addMoreButton = document.getElementById('addMore');
             const removeLastButton = document.getElementById('removeLast');
 
-            // Show or hide package fields based on category selection
-            categorySelect.addEventListener('change', function() {
-                if (this.value === 'Package') {
-                    packageFields.style.display = 'block';
-                } else {
-                    packageFields.style.display = 'none';
-                }
-            });
+            // BENEFITS add/remove
+            const benefitsWrapper = document.getElementById('benefitsWrapper');
+            const addBenefitBtn = document.getElementById('addBenefit');
 
-            // Add more package items
-            addMoreButton.addEventListener('click', function() {
-                const newItemRow = document.createElement('div');
-                newItemRow.classList.add('row', 'mb-3');
+            function show(el, yes = true) {
+                if (!el) return;
+                el.style.display = yes ? 'block' : 'none';
+            }
 
-                newItemRow.innerHTML = `
-            <div class="col-md-6">
-                <select class="form-control select2 item-select" name="item_id[]" required>
-                    <option value="">Select Puja List</option>
-                    @foreach ($Poojaitemlist as $pujalist)
-                        <option value="{{ $pujalist->id }}" data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
-                            {{ $pujalist->item_name }}
-                        </option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-6">
-                <select class="form-control select2 variant-select" name="variant_id[]" required>
-                    <option value="">Select Variant</option>
-                </select>
-            </div>
-        `;
+            function toggleByCategory() {
+                const cat = categorySelect.value;
+                const isFlower = cat === 'Flower';
+                const isPackage = cat === 'Package';
 
-                packageItems.appendChild(newItemRow);
+                // Flower shows: radios + date range; else hide
+                show(malaField, isFlower);
+                show(flowerField, isFlower);
+                show(flowerFromField, isFlower);
+                show(flowerToField, isFlower);
 
-                // Reinitialize event listeners for dynamically added items
-                initializeItemChangeListener(newItemRow.querySelector('.item-select'));
-            });
+                // Package fields
+                show(packageFields, isPackage);
+            }
 
-            // Remove the last added item
-            removeLastButton.addEventListener('click', function() {
-                const rows = packageItems.querySelectorAll('.row');
-                if (rows.length > 1) {
-                    rows[rows.length - 1].remove();
-                }
-            });
+            // keep "To" >= "From"
+            if (availableFrom && availableTo) {
+                availableFrom.addEventListener('change', function() {
+                    availableTo.min = availableFrom.value || '';
+                    if (availableTo.value && availableFrom.value && availableTo.value < availableFrom
+                        .value) {
+                        availableTo.value = '';
+                    }
+                });
+                availableTo.addEventListener('change', function() {
+                    availableFrom.max = availableTo.value || '';
+                });
+                // initialize min/max on load
+                if (availableFrom.value) availableTo.min = availableFrom.value;
+                if (availableTo.value) availableFrom.max = availableTo.value;
+            }
 
-            // Function to initialize item change listener
-            function initializeItemChangeListener(itemSelect) {
-                itemSelect.addEventListener('change', function() {
-                    const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-                    const variants = selectedOption.getAttribute('data-variants');
-                    const variantSelect = itemSelect.closest('.row').querySelector('.variant-select');
+            // Package: add/remove rows and load variants for new rows (using data-variants on options)
+            if (addMoreButton && removeLastButton && packageItems) {
+                addMoreButton.addEventListener('click', function() {
+                    const newRow = document.createElement('div');
+                    newRow.classList.add('row', 'mb-3');
+                    newRow.innerHTML = `
+                <div class="col-md-6">
+                    <select class="form-control select2 item-select" name="item_id[]" required>
+                        <option value="">Select Puja List</option>
+                        @foreach ($Poojaitemlist as $pujalist)
+                            <option value="{{ $pujalist->id }}"
+                                data-variants="{{ htmlspecialchars(json_encode($pujalist->variants), ENT_QUOTES, 'UTF-8') }}">
+                                {{ $pujalist->item_name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <select class="form-control select2 variant-select" name="variant_id[]" required>
+                        <option value="">Select Variant</option>
+                    </select>
+                </div>`;
+                    packageItems.appendChild(newRow);
 
-                    // Clear previous options
-                    variantSelect.innerHTML = '<option value="">Select Variant</option>';
+                    // init listener for this row
+                    const itemSelect = newRow.querySelector('.item-select');
+                    initializeItemChangeListener(itemSelect);
+                });
 
-                    if (variants) {
+                removeLastButton.addEventListener('click', function() {
+                    const rows = packageItems.querySelectorAll('.row');
+                    if (rows.length > 0) rows[rows.length - 1].remove();
+                });
+
+                function initializeItemChangeListener(itemSelect) {
+                    if (!itemSelect) return;
+                    itemSelect.addEventListener('change', function() {
+                        const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+                        const variantsAttr = selectedOption.getAttribute('data-variants');
+                        const variantSelect = itemSelect.closest('.row').querySelector('.variant-select');
+                        variantSelect.innerHTML = '<option value="">Select Variant</option>';
+                        if (!variantsAttr) return;
+
                         try {
-                            let parsedVariants = variants;
-
-                            // Decode HTML entities and parse JSON
-                            if (typeof parsedVariants === 'string') {
-                                parsedVariants = parsedVariants.replace(/&quot;/g, '"').replace(/&amp;/g,
-                                    '&');
-                                parsedVariants = JSON.parse(parsedVariants);
-                            }
-
-                            // Populate the variant dropdown
-                            parsedVariants.forEach(function(variant) {
-                                const option = document.createElement('option');
-                                option.value = variant.id;
-                                option.textContent = `${variant.title} - ${variant.price}`;
-                                variantSelect.appendChild(option);
+                            let variants = variantsAttr.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+                            variants = JSON.parse(variants);
+                            variants.forEach(v => {
+                                const opt = document.createElement('option');
+                                opt.value = v.id;
+                                opt.textContent = `${v.title}`;
+                                variantSelect.appendChild(opt);
                             });
                         } catch (e) {
-                            console.error('Error parsing variant data:', e);
+                            console.error('Variant parse error:', e);
                         }
+                    });
+                }
+
+                // bind existing .item-selects (if any)
+                document.querySelectorAll('.item-select').forEach(initializeItemChangeListener);
+            }
+
+            // Benefits add/remove
+            if (addBenefitBtn && benefitsWrapper) {
+                addBenefitBtn.addEventListener('click', function() {
+                    const div = document.createElement('div');
+                    div.className = 'input-group mb-2 benefit-row';
+                    div.innerHTML = `
+                <input type="text" name="benefits[]" class="form-control" placeholder="Enter benefit">
+                <button type="button" class="btn btn-danger removeBenefit">Remove</button>`;
+                    benefitsWrapper.appendChild(div);
+                });
+                benefitsWrapper.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('removeBenefit')) {
+                        const rows = benefitsWrapper.querySelectorAll('.benefit-row');
+                        if (rows.length > 1) e.target.closest('.benefit-row').remove();
                     }
                 });
             }
 
-            // Initialize listeners for the default row
-            document.querySelectorAll('.item-select').forEach(initializeItemChangeListener);
-        });
-    </script>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const benefitsWrapper = document.getElementById('benefitsWrapper');
-            const addBenefitBtn = document.getElementById('addBenefit');
-
-            addBenefitBtn.addEventListener('click', function() {
-                const div = document.createElement('div');
-                div.className = 'input-group mb-2 benefit-row';
-                div.innerHTML = `
-                            <input type="text" name="benefits[]" class="form-control" placeholder="Enter benefit" required>
-                            <button type="button" class="btn btn-danger removeBenefit">Remove</button>
-                        `;
-                benefitsWrapper.appendChild(div);
-            });
-
-            benefitsWrapper.addEventListener('click', function(e) {
-                if (e.target.classList.contains('removeBenefit')) {
-                    const rows = benefitsWrapper.querySelectorAll('.benefit-row');
-                    if (rows.length > 1) {
-                        e.target.closest('.benefit-row').remove();
-                    }
-                }
-            });
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const categorySelect = document.getElementById('category');
-            const malaField = document.getElementById('malaProvidedField');
-            const flowerField = document.getElementById('flowerAvailabilityField');
-
-            function toggleFlowerFields() {
-                if (categorySelect.value === 'Flower') {
-                    malaField.style.display = 'block';
-                    flowerField.style.display = 'block';
-                } else {
-                    malaField.style.display = 'none';
-                    flowerField.style.display = 'none';
-                }
-            }
-
-            // Initial check on page load
-            toggleFlowerFields();
-
-            // Listen for changes
-            categorySelect.addEventListener('change', toggleFlowerFields);
+            // init
+            categorySelect.addEventListener('change', toggleByCategory);
+            toggleByCategory(); // run once on load
         });
     </script>
 @endsection

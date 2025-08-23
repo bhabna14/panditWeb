@@ -15,7 +15,7 @@
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
                 <li class="breadcrumb-item tx-15"><a href="{{ url('admin/manage-product') }}"
                         class="btn btn-warning text-dark">Manage Product</a></li>
-                
+
             </ol>
         </div>
     </div>
@@ -239,16 +239,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const categorySelect   = document.getElementById('category');
-            const packageFields    = document.getElementById('packageFields');
-            const poojafields      = document.getElementById('poojafields');
-            const packageItems     = document.getElementById('packageItems');
-            const addMoreButton    = document.getElementById('addMore');
+            const categorySelect = document.getElementById('category');
+            const packageFields = document.getElementById('packageFields');
+            const poojafields = document.getElementById('poojafields');
+            const packageItems = document.getElementById('packageItems');
+            const addMoreButton = document.getElementById('addMore');
             const removeLastButton = document.getElementById('removeLast');
 
             // NEW: Duration group wrapper (the .mb-3 around the select)
             const durationSelect = document.getElementById('duration');
-            const durationGroup  = durationSelect ? durationSelect.closest('.mb-3') : null;
+            const durationGroup = durationSelect ? durationSelect.closest('.mb-3') : null;
 
             function updateByCategory() {
                 const cat = categorySelect.value;
@@ -257,7 +257,7 @@
 
                 // Show/hide Package-related blocks
                 packageFields.style.display = isPackage ? 'block' : 'none';
-                poojafields.style.display   = isPackage ? 'block' : 'none';
+                poojafields.style.display = isPackage ? 'block' : 'none';
 
                 // Show duration only for Subscription; hide otherwise (including Package)
                 if (durationGroup) {
@@ -324,7 +324,8 @@
 
                             // Decode HTML entities and parse JSON
                             if (typeof parsedVariants === 'string') {
-                                parsedVariants = parsedVariants.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+                                parsedVariants = parsedVariants.replace(/&quot;/g, '"').replace(/&amp;/g,
+                                    '&');
                                 parsedVariants = JSON.parse(parsedVariants);
                             }
 
