@@ -215,15 +215,50 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Product created successfully.');
     }
+public function editProduct($id)
+{
+    $product = FlowerProduct::findOrFail($id);
 
-    public function editProduct($id)
-    {
-        $Poojaitemlist = Poojaitemlists::with('variants')->where('status', 'active')->get();
-        $product = FlowerProduct::findOrFail($id);
-        $selectedItems = PackageItem::where('product_id', $product->product_id)->get();
+    // Active items for the item <select>
+    $Poojaitemlist = Poojaitemlists::where('status', 'active')
+        ->orderBy('item_name')
+        ->get(['id','item_name']);
 
-        return view('admin.edit-product', compact('product', 'Poojaitemlist', 'selectedItems'));
-    }
+    // All units for the unit <select>
+    $pooja_units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
+
+    // Existing package rows (your table stores names, not IDs)
+    $rows = PackageItem::where('product_id', $product->product_id)->get();
+
+    // Build fast lookup maps to avoid N+1
+    $itemNames = $rows->pluck('item_name')->filter()->unique()->values();
+    $unitNames = $rows->pluck('unit')->filter()->unique()->values();
+
+    $itemIdByName = $itemNames->isNotEmpty()
+        ? Poojaitemlists::whereIn('item_name', $itemNames)->pluck('id','item_name')
+        : collect();
+
+    $unitIdByName = $unitNames->isNotEmpty()
+        ? PoojaUnit::whereIn('unit_name', $unitNames)->pluck('id','unit_name')
+        : collect();
+
+    // Normalize rows for the form (item_id, quantity, unit_id, price)
+    $packageItems = $rows->map(function ($r) use ($itemIdByName, $unitIdByName) {
+        return [
+            'item_id'  => $itemIdByName[$r->item_name] ?? null,
+            'quantity' => $r->quantity,
+            'unit_id'  => $unitIdByName[$r->unit] ?? null,
+            'price'    => $r->price,
+        ];
+    })->toArray();
+
+    return view('admin.edit-product', compact(
+        'product',
+        'Poojaitemlist',
+        'pooja_units',
+        'packageItems'   // <- use this in your Blade for prefilled rows
+    ));
+}
 
     public function updateProduct(Request $request, $id)
     {

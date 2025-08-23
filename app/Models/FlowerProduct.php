@@ -24,7 +24,7 @@ class FlowerProduct extends Model
 
     public function pooja()
     {
-        return $this->belongsTo(\App\Models\Poojalist::class, 'pooja_id', 'id');
+        return $this->belongsTo(Poojalist::class, 'pooja_id', 'id');
     }
     
 }
