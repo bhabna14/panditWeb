@@ -71,8 +71,8 @@
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
 
-                    <div class="table-responsive  export-table">
-                        <table id="file-datatable" class="table table-bordered ">
+                    <div class="table-responsive export-table">
+                        <table id="file-datatable" class="table table-bordered">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -82,6 +82,7 @@
                                     <th>Sale Price</th>
                                     <th>Stock</th>
                                     <th>Category</th>
+                                    <th>Category Details</th> {{-- NEW --}}
                                     <th>Status</th>
                                     <th>Package Item</th>
                                     <th>Benefit</th>
@@ -92,18 +93,69 @@
                                 @foreach ($products as $product)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $product->name }}</td>
-                                        <td>
-                                            <img src="{{ $product->product_image }}" alt="user"
-                                                style="widows: 100px;height:100px">
-                                        </td>
-                                        <td>Rs. {{ number_format($product->mrp, 2) }}</td>
 
+                                        <td>{{ $product->name }}</td>
+
+                                        <td>
+                                            <img src="{{ $product->product_image }}" alt="product"
+                                                style="width:100px;height:100px;object-fit:cover;">
+                                        </td>
+
+                                        <td>Rs. {{ number_format($product->mrp, 2) }}</td>
                                         <td>Rs. {{ number_format($product->price, 2) }}</td>
-                                        <td>{{ $product->stock }}</td>
+
+                                        <td>{{ $product->stock ?? '-' }}</td>
+
                                         <td>{{ $product->category }}</td>
+
+                                        {{-- NEW: Category-specific details --}}
+                                        <td>
+                                            @switch($product->category)
+                                                @case('Flower')
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <span class="badge bg-light text-dark">
+                                                            Mala:
+                                                            {{ $product->mala_provided === null ? '-' : ($product->mala_provided ? 'Yes' : 'No') }}
+                                                        </span>
+                                                        <span
+                                                            class="badge {{ $product->is_flower_available ? 'bg-success' : 'bg-secondary' }}">
+                                                            {{ $product->is_flower_available ? 'Active' : 'Inactive' }}
+                                                        </span>
+                                                        <span class="badge bg-light text-dark">
+                                                            {{ $product->available_from ? \Carbon\Carbon::parse($product->available_from)->format('d M Y') : '-' }}
+                                                            &rarr;
+                                                            {{ $product->available_to ? \Carbon\Carbon::parse($product->available_to)->format('d M Y') : '-' }}
+                                                        </span>
+                                                    </div>
+                                                @break
+
+                                                @case('Subscription')
+                                                    <span class="badge bg-info">
+                                                        Duration: {{ $product->duration ? $product->duration . ' mo' : '-' }}
+                                                    </span>
+                                                @break
+
+                                                @case('Package')
+                                                    <div class="d-flex flex-column gap-1">
+                                                        @if (optional($product->pooja)->pooja_name)
+                                                            <span class="badge bg-secondary">
+                                                                Pooja: {{ $product->pooja->pooja_name }}
+                                                            </span>
+                                                        @endif
+                                                        <span class="badge bg-primary">
+                                                            Items: {{ $product->packageItems->count() }}
+                                                        </span>
+                                                    </div>
+                                                @break
+
+                                                @default
+                                                    —
+                                            @endswitch
+                                        </td>
+
                                         <td>{{ ucfirst($product->status) }}</td>
 
+                                        {{-- Existing Package Items modal/button --}}
                                         <td>
                                             @if ($product->packageItems->isNotEmpty())
                                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
@@ -136,10 +188,11 @@
                                                                                 class="list-group-item d-flex justify-content-between align-items-center">
                                                                                 <div>
                                                                                     <strong>Item:</strong>
-                                                                                    {{ $packageItem->item->item_name ?? 'N/A' }}
-                                                                                    <br>
-                                                                                    <small class="text-muted">Variant:
-                                                                                        {{ $packageItem->variant->title ?? 'N/A' }}</small>
+                                                                                    {{ $packageItem->item->item_name ?? 'N/A' }}<br>
+                                                                                    <small class="text-muted">
+                                                                                        Variant:
+                                                                                        {{ $packageItem->variant->title ?? 'N/A' }}
+                                                                                    </small>
                                                                                 </div>
                                                                                 <span
                                                                                     class="badge bg-success text-white">Available</span>
@@ -156,9 +209,8 @@
                                                     </div>
                                                 </div>
                                             @else
-                                                <button type="button" class="btn btn-sm btn-secondary" disabled>
-                                                    No Items
-                                                </button>
+                                                <button type="button" class="btn btn-sm btn-secondary" disabled>No
+                                                    Items</button>
                                             @endif
                                         </td>
 
@@ -193,7 +245,6 @@
                                                                     @endforeach
                                                                 </ul>
                                                             </div>
-
                                                             <div class="modal-footer bg-light">
                                                                 <button type="button" class="btn btn-secondary"
                                                                     data-bs-dismiss="modal">Close</button>
@@ -202,22 +253,28 @@
                                                     </div>
                                                 </div>
                                             @else
-                                                <button type="button" class="btn btn-sm btn-secondary" disabled>
-                                                    No Benefit
-                                                </button>
+                                                <button type="button" class="btn btn-sm btn-secondary" disabled>No
+                                                    Benefit</button>
                                             @endif
                                         </td>
 
                                         <td>
-                                            <a href="{{ url('admin/edit-product/' . $product->id) }}"  class="btn btn-sm btn-warning"><i class="fa fa-edit"></i></a>
-                                            <a href="{{ url('admin/delete-product/' . $product->id) }}"  class="btn btn-sm btn-danger"  onclick="return confirm('Are you sure you want to delete this product?');"><i class="fa fa-trash"></i></a>
+                                            <a href="{{ url('admin/edit-product/' . $product->id) }}"
+                                                class="btn btn-sm btn-warning">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url('admin/delete-product/' . $product->id) }}"
+                                                class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Are you sure you want to delete this product?');">
+                                                <i class="fa fa-trash"></i>
+                                            </a>
                                         </td>
-
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
+
                 </div>
             </div>
         </div>
