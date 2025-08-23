@@ -43,7 +43,6 @@ public function createProduct(Request $request)
 
         // Package
         'item_id'    => ['nullable','array'],
-        'item_id.*'  => ['integer'],
         'variant_id' => ['nullable','array'],
         'variant_id.*' => ['nullable','integer'],
 
