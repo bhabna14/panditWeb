@@ -191,7 +191,7 @@
             </div>
 
             <!-- PACKAGE: ITEMS + VARIANTS -->
-             <!-- PACKAGE: ITEMS (+ Qty, Unit, Item Price) -->
+            <!-- PACKAGE: ITEMS (+ Qty, Unit, Item Price) -->
             <div id="packageFields" class="col-md-12 mb-3 controlled hidden" data-block="package">
                 <label class="form-label d-block mb-2"><span id="label-package-items">Package Items</span></label>
 
@@ -209,7 +209,8 @@
 
                         <div class="col-md-2">
                             <label class="form-label">Qty</label>
-                            <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
+                            <input type="number" class="form-control" name="quantity[]" min="0" step="any"
+                                placeholder="0" required>
                         </div>
 
                         <div class="col-md-3">
@@ -224,7 +225,8 @@
 
                         <div class="col-md-3">
                             <label class="form-label">Item Price (Rs.)</label>
-                            <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
+                            <input type="number" class="form-control" name="item_price[]" min="0"
+                                step="0.01" placeholder="0.00" required>
                         </div>
                     </div>
                 </div>
@@ -308,233 +310,364 @@
     </script>
 
     <script>
-(function() {
-    // Init Select2 for any already-in-DOM selects
-    function initSelect2(scope) {
-        $(scope || document).find('.select2').each(function() {
-            if (!$(this).data('select2')) {
-                $(this).select2({ width: '100%' });
+        (function() {
+            // Init Select2 for any already-in-DOM selects
+            function initSelect2(scope) {
+                $(scope || document).find('.select2').each(function() {
+                    if (!$(this).data('select2')) {
+                        $(this).select2({
+                            width: '100%'
+                        });
+                    }
+                });
             }
-        });
-    }
-    initSelect2();
+            initSelect2();
 
-    // ------- Elements -------
-    const categorySelect   = document.getElementById('category');
-    const controlledBlocks = document.querySelectorAll('.controlled');
+            // ------- Elements -------
+            const categorySelect = document.getElementById('category');
+            const controlledBlocks = document.querySelectorAll('.controlled');
 
-    const groups = {
-        core:          document.querySelectorAll('[data-block="core"]'),
-        stock:         document.querySelectorAll('[data-block="stock"]'),
-        subscription:  document.querySelectorAll('[data-block="subscription"]'),
-        flower:        document.querySelectorAll('[data-block="flower"]'),
-        flowerDates:   document.querySelectorAll('[data-block="flowerDates"]'),
-        package:       document.querySelectorAll('[data-block="package"]')
-    };
+            const groups = {
+                core: document.querySelectorAll('[data-block="core"]'),
+                stock: document.querySelectorAll('[data-block="stock"]'),
+                subscription: document.querySelectorAll('[data-block="subscription"]'),
+                flower: document.querySelectorAll('[data-block="flower"]'),
+                flowerDates: document.querySelectorAll('[data-block="flowerDates"]'),
+                package: document.querySelectorAll('[data-block="package"]')
+            };
 
-    // Fields
-    const availableFrom  = document.getElementById('available_from');
-    const availableTo    = document.getElementById('available_to');
-    const flowerActive   = document.getElementById('flowerActive');
-    const flowerInactive = document.getElementById('flowerInactive');
+            // Fields
+            const availableFrom = document.getElementById('available_from');
+            const availableTo = document.getElementById('available_to');
+            const flowerActive = document.getElementById('flowerActive');
+            const flowerInactive = document.getElementById('flowerInactive');
 
-    // Labels we rewrite
-    const $labels = {
-        name: $('#label-name'),
-        odiaName: $('#label-odia-name'),
-        mrp: $('#label-mrp'),
-        price: $('#label-price'),
-        image: $('#label-image'),
-        description: $('#label-description'),
-        benefit: $('#label-benefit'),
-        stock: $('#label-stock'),
-        duration: $('#label-duration'),
-        mala: $('#label-mala'),
-        availability: $('#label-availability'),
-        availableFrom: $('#label-available-from'),
-        availableTo: $('#label-available-to'),
-        pooja: $('#label-pooja'),
-        packageItems: $('#label-package-items')
-    };
+            // Labels we rewrite
+            const $labels = {
+                name: $('#label-name'),
+                odiaName: $('#label-odia-name'),
+                mrp: $('#label-mrp'),
+                price: $('#label-price'),
+                image: $('#label-image'),
+                description: $('#label-description'),
+                benefit: $('#label-benefit'),
+                stock: $('#label-stock'),
+                duration: $('#label-duration'),
+                mala: $('#label-mala'),
+                availability: $('#label-availability'),
+                availableFrom: $('#label-available-from'),
+                availableTo: $('#label-available-to'),
+                pooja: $('#label-pooja'),
+                packageItems: $('#label-package-items')
+            };
 
-    const $inputs = {
-        name: $('#name'),
-        odiaName: $('#odia_name'),
-        mrp: $('#mrp'),
-        price: $('#price'),
-        description: $('#description'),
-        image: $('#product_image')
-    };
+            const $inputs = {
+                name: $('#name'),
+                odiaName: $('#odia_name'),
+                mrp: $('#mrp'),
+                price: $('#price'),
+                description: $('#description'),
+                image: $('#product_image')
+            };
 
-    const LABELS = {
-        default: { name:'Product Name', odiaName:'Product Name (Odia)', mrp:'MRP (Rs.)', price:'Sale Price (Rs.)', image:'Product Image', description:'Description', benefit:'Benefits', stock:'Stock' },
-        'Flower': { name:'Flower Name', odiaName:'Flower Name (Odia)', mrp:'Flower MRP (Rs.)', price:'Flower Price (Rs.)', image:'Flower Image', description:'Flower Description', benefit:'Flower Benefits', stock:'Stock' },
-        'Package': { name:'Package Name', odiaName:'Package Name (Odia)', mrp:'Package MRP (Rs.)', price:'Package Price (Rs.)', image:'Package Image', description:'Package Description', benefit:'Package Benefits', stock:'Stock' },
-        'Subscription': { name:'Subscription Name', odiaName:'Subscription Name (Odia)', mrp:'Subscription MRP (Rs.)', price:'Subscription Price (Rs.)', image:'Subscription Image', description:'Subscription Description', benefit:'Subscription Benefits', stock:'Stock' },
-        'Puja Item': { name:'Item Name', odiaName:'Item Name (Odia)', mrp:'Item MRP (Rs.)', price:'Item Price (Rs.)', image:'Item Image', description:'Item Description', benefit:'Item Benefits', stock:'Stock' },
-        'Immediateproduct': { name:'Customized Flower Name', odiaName:'Customized Flower Name (Odia)', mrp:'Customized Flower MRP (Rs.)', price:'Customized Flower Price (Rs.)', image:'Customized Flower Image', description:'Customized Flower Description', benefit:'Benefits', stock:'Stock' },
-        'Customizeproduct': { name:'Customized Product Name', odiaName:'Customized Product Name (Odia)', mrp:'Customized Product MRP (Rs.)', price:'Customized Product Price (Rs.)', image:'Customized Product Image', description:'Customized Product Description', benefit:'Benefits', stock:'Stock' },
-        'Books': { name:'Book Title', odiaName:'Book Title (Odia)', mrp:'Book MRP (Rs.)', price:'Book Price (Rs.)', image:'Book Cover Image', description:'Book Description', benefit:'Key Benefits', stock:'Stock' }
-    };
+            const LABELS = {
+                default: {
+                    name: 'Product Name',
+                    odiaName: 'Product Name (Odia)',
+                    mrp: 'MRP (Rs.)',
+                    price: 'Sale Price (Rs.)',
+                    image: 'Product Image',
+                    description: 'Description',
+                    benefit: 'Benefits',
+                    stock: 'Stock'
+                },
+                'Flower': {
+                    name: 'Flower Name',
+                    odiaName: 'Flower Name (Odia)',
+                    mrp: 'Flower MRP (Rs.)',
+                    price: 'Flower Price (Rs.)',
+                    image: 'Flower Image',
+                    description: 'Flower Description',
+                    benefit: 'Flower Benefits',
+                    stock: 'Stock'
+                },
+                'Package': {
+                    name: 'Package Name',
+                    odiaName: 'Package Name (Odia)',
+                    mrp: 'Package MRP (Rs.)',
+                    price: 'Package Price (Rs.)',
+                    image: 'Package Image',
+                    description: 'Package Description',
+                    benefit: 'Package Benefits',
+                    stock: 'Stock'
+                },
+                'Subscription': {
+                    name: 'Subscription Name',
+                    odiaName: 'Subscription Name (Odia)',
+                    mrp: 'Subscription MRP (Rs.)',
+                    price: 'Subscription Price (Rs.)',
+                    image: 'Subscription Image',
+                    description: 'Subscription Description',
+                    benefit: 'Subscription Benefits',
+                    stock: 'Stock'
+                },
+                'Puja Item': {
+                    name: 'Item Name',
+                    odiaName: 'Item Name (Odia)',
+                    mrp: 'Item MRP (Rs.)',
+                    price: 'Item Price (Rs.)',
+                    image: 'Item Image',
+                    description: 'Item Description',
+                    benefit: 'Item Benefits',
+                    stock: 'Stock'
+                },
+                'Immediateproduct': {
+                    name: 'Customized Flower Name',
+                    odiaName: 'Customized Flower Name (Odia)',
+                    mrp: 'Customized Flower MRP (Rs.)',
+                    price: 'Customized Flower Price (Rs.)',
+                    image: 'Customized Flower Image',
+                    description: 'Customized Flower Description',
+                    benefit: 'Benefits',
+                    stock: 'Stock'
+                },
+                'Customizeproduct': {
+                    name: 'Customized Product Name',
+                    odiaName: 'Customized Product Name (Odia)',
+                    mrp: 'Customized Product MRP (Rs.)',
+                    price: 'Customized Product Price (Rs.)',
+                    image: 'Customized Product Image',
+                    description: 'Customized Product Description',
+                    benefit: 'Benefits',
+                    stock: 'Stock'
+                },
+                'Books': {
+                    name: 'Book Title',
+                    odiaName: 'Book Title (Odia)',
+                    mrp: 'Book MRP (Rs.)',
+                    price: 'Book Price (Rs.)',
+                    image: 'Book Cover Image',
+                    description: 'Book Description',
+                    benefit: 'Key Benefits',
+                    stock: 'Stock'
+                }
+            };
 
-    const PLACEHOLDERS = {
-        default: { name:'Enter product name', odiaName:'Enter product name in Odia', mrp:'Enter MRP', price:'Enter sale price', description:'Enter description' },
-        'Flower': { name:'Enter flower name', odiaName:'Enter flower name in Odia', mrp:'Enter flower MRP', price:'Enter flower price', description:'Enter flower description' },
-        'Package': { name:'Enter package name', odiaName:'Enter package name in Odia', mrp:'Enter package MRP', price:'Enter package price', description:'Enter package description' },
-        'Subscription': { name:'Enter subscription name', odiaName:'Enter subscription name in Odia', mrp:'Enter subscription MRP', price:'Enter subscription price', description:'Enter subscription description' },
-        'Puja Item': { name:'Enter item name', odiaName:'Enter item name in Odia', mrp:'Enter item MRP', price:'Enter item price', description:'Enter item description' },
-        'Immediateproduct': { name:'Enter customized flower name', odiaName:'Enter customized flower name in Odia', mrp:'Enter customized flower MRP', price:'Enter customized flower price', description:'Enter customized flower description' },
-        'Customizeproduct': { name:'Enter customized product name', odiaName:'Enter customized product name in Odia', mrp:'Enter customized product MRP', price:'Enter customized product price', description:'Enter customized product description' },
-        'Books': { name:'Enter book title', odiaName:'Enter book title in Odia', mrp:'Enter book MRP', price:'Enter book price', description:'Enter book description' }
-    };
+            const PLACEHOLDERS = {
+                default: {
+                    name: 'Enter product name',
+                    odiaName: 'Enter product name in Odia',
+                    mrp: 'Enter MRP',
+                    price: 'Enter sale price',
+                    description: 'Enter description'
+                },
+                'Flower': {
+                    name: 'Enter flower name',
+                    odiaName: 'Enter flower name in Odia',
+                    mrp: 'Enter flower MRP',
+                    price: 'Enter flower price',
+                    description: 'Enter flower description'
+                },
+                'Package': {
+                    name: 'Enter package name',
+                    odiaName: 'Enter package name in Odia',
+                    mrp: 'Enter package MRP',
+                    price: 'Enter package price',
+                    description: 'Enter package description'
+                },
+                'Subscription': {
+                    name: 'Enter subscription name',
+                    odiaName: 'Enter subscription name in Odia',
+                    mrp: 'Enter subscription MRP',
+                    price: 'Enter subscription price',
+                    description: 'Enter subscription description'
+                },
+                'Puja Item': {
+                    name: 'Enter item name',
+                    odiaName: 'Enter item name in Odia',
+                    mrp: 'Enter item MRP',
+                    price: 'Enter item price',
+                    description: 'Enter item description'
+                },
+                'Immediateproduct': {
+                    name: 'Enter customized flower name',
+                    odiaName: 'Enter customized flower name in Odia',
+                    mrp: 'Enter customized flower MRP',
+                    price: 'Enter customized flower price',
+                    description: 'Enter customized flower description'
+                },
+                'Customizeproduct': {
+                    name: 'Enter customized product name',
+                    odiaName: 'Enter customized product name in Odia',
+                    mrp: 'Enter customized product MRP',
+                    price: 'Enter customized product price',
+                    description: 'Enter customized product description'
+                },
+                'Books': {
+                    name: 'Enter book title',
+                    odiaName: 'Enter book title in Odia',
+                    mrp: 'Enter book MRP',
+                    price: 'Enter book price',
+                    description: 'Enter book description'
+                }
+            };
 
-    function setLabelsByCategory(cat) {
-        const map = LABELS[cat] || LABELS.default;
-        $labels.name.text(map.name);
-        $labels.odiaName.text(map.odiaName);
-        $labels.mrp.text(map.mrp);
-        $labels.price.text(map.price);
-        $labels.image.text(map.image);
-        $labels.description.text(map.description);
-        $labels.benefit.text(map.benefit);
-        $labels.stock.text(map.stock);
+            function setLabelsByCategory(cat) {
+                const map = LABELS[cat] || LABELS.default;
+                $labels.name.text(map.name);
+                $labels.odiaName.text(map.odiaName);
+                $labels.mrp.text(map.mrp);
+                $labels.price.text(map.price);
+                $labels.image.text(map.image);
+                $labels.description.text(map.description);
+                $labels.benefit.text(map.benefit);
+                $labels.stock.text(map.stock);
 
-        const ph = PLACEHOLDERS[cat] || PLACEHOLDERS.default;
-        $inputs.name.attr('placeholder', ph.name);
-        $inputs.odiaName.attr('placeholder', ph.odiaName);
-        $inputs.mrp.attr('placeholder', ph.mrp);
-        $inputs.price.attr('placeholder', ph.price);
-        $inputs.description.attr('placeholder', ph.description);
+                const ph = PLACEHOLDERS[cat] || PLACEHOLDERS.default;
+                $inputs.name.attr('placeholder', ph.name);
+                $inputs.odiaName.attr('placeholder', ph.odiaName);
+                $inputs.mrp.attr('placeholder', ph.mrp);
+                $inputs.price.attr('placeholder', ph.price);
+                $inputs.description.attr('placeholder', ph.description);
 
-        if (cat === 'Flower') {
-            $labels.mala.text('Is mala provided with this flower?');
-            $labels.availability.text('Is this flower available?');
-            $labels.availableFrom.text('Available From');
-            $labels.availableTo.text('Available To');
-        } else {
-            $labels.mala.text('Is mala provided?');
-            $labels.availability.text('Is this available?');
-            $labels.availableFrom.text('Available From');
-            $labels.availableTo.text('Available To');
-        }
+                if (cat === 'Flower') {
+                    $labels.mala.text('Is mala provided with this flower?');
+                    $labels.availability.text('Is this flower available?');
+                    $labels.availableFrom.text('Available From');
+                    $labels.availableTo.text('Available To');
+                } else {
+                    $labels.mala.text('Is mala provided?');
+                    $labels.availability.text('Is this available?');
+                    $labels.availableFrom.text('Available From');
+                    $labels.availableTo.text('Available To');
+                }
 
-        if (cat === 'Package') {
-            $labels.pooja.text('Pooja (Festival)');
-            $labels.packageItems.text('Package Items');
-        } else {
-            $labels.pooja.text('Pooja');
-            $labels.packageItems.text('Items');
-        }
-    }
-
-    function showGroup(nodeList, show) {
-        nodeList.forEach(el => {
-            if (show) {
-                el.classList.remove('hidden');
-                el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = false);
-            } else {
-                el.classList.add('hidden');
-                el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = true);
-                el.querySelectorAll('input[type="text"], input[type="number"], input[type="date"], textarea').forEach(i => i.value = '');
-                el.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(i => i.checked = false);
-                el.querySelectorAll('select').forEach(s => { s.selectedIndex = 0; $(s).trigger('change'); });
+                if (cat === 'Package') {
+                    $labels.pooja.text('Pooja (Festival)');
+                    $labels.packageItems.text('Package Items');
+                } else {
+                    $labels.pooja.text('Pooja');
+                    $labels.packageItems.text('Items');
+                }
             }
-        });
-    }
 
-    const showCore         = (b)=>showGroup(groups.core, b);
-    const showStock        = (b)=>showGroup(groups.stock, b);
-    const showSubscription = (b)=>showGroup(groups.subscription, b);
-    const showFlower       = (b)=>showGroup(groups.flower, b);
-    const showFlowerDates  = (b)=>showGroup(groups.flowerDates, b);
-    const showPackage      = (b)=>showGroup(groups.package, b);
-
-    function applyCategoryRules() {
-        const cat = categorySelect.value;
-
-        if (!cat) {
-            controlledBlocks.forEach(el => el.classList.add('hidden'));
-            controlledBlocks.forEach(el => el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = true));
-            return;
-        }
-
-        showCore(true);
-        setLabelsByCategory(cat);
-
-        const isFlower       = (cat === 'Flower');
-        const isPackage      = (cat === 'Package');
-        const isSubscription = (cat === 'Subscription');
-
-        showStock(!isFlower);
-        showSubscription(isSubscription);
-
-        showFlower(isFlower);
-        showFlowerDates(isFlower); // visible when Flower; enabled by radio below
-        updateFlowerDatesRequired();
-
-        showPackage(isPackage);
-    }
-
-    // Keep "To" >= "From"
-    function wireDateBounds() {
-        if (!availableFrom || !availableTo) return;
-        availableFrom.addEventListener('change', function() {
-            availableTo.min = availableFrom.value || '';
-            if (availableTo.value && availableFrom.value && availableTo.value < availableFrom.value) {
-                availableTo.value = '';
+            function showGroup(nodeList, show) {
+                nodeList.forEach(el => {
+                    if (show) {
+                        el.classList.remove('hidden');
+                        el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = false);
+                    } else {
+                        el.classList.add('hidden');
+                        el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = true);
+                        el.querySelectorAll(
+                                'input[type="text"], input[type="number"], input[type="date"], textarea')
+                            .forEach(i => i.value = '');
+                        el.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(i => i
+                            .checked = false);
+                        el.querySelectorAll('select').forEach(s => {
+                            s.selectedIndex = 0;
+                            $(s).trigger('change');
+                        });
+                    }
+                });
             }
-        });
-        availableTo.addEventListener('change', function() {
-            availableFrom.max = availableTo.value || '';
-        });
-    }
-    wireDateBounds();
 
-    // Flower availability toggles date fields & required
-    function updateFlowerDatesRequired() {
-        const isFlower = categorySelect.value === 'Flower';
-        if (!isFlower) return;
+            const showCore = (b) => showGroup(groups.core, b);
+            const showStock = (b) => showGroup(groups.stock, b);
+            const showSubscription = (b) => showGroup(groups.subscription, b);
+            const showFlower = (b) => showGroup(groups.flower, b);
+            const showFlowerDates = (b) => showGroup(groups.flowerDates, b);
+            const showPackage = (b) => showGroup(groups.package, b);
 
-        const active = flowerActive?.checked === true;
+            function applyCategoryRules() {
+                const cat = categorySelect.value;
 
-        [availableFrom, availableTo].forEach(el => {
-            if (!el) return;
-            el.required = !!active;   // required only when Active
-            el.disabled = !active;    // disabled if not Active
-            if (!active) {
-                el.value = '';
-                el.removeAttribute('min');
-                el.removeAttribute('max');
+                if (!cat) {
+                    controlledBlocks.forEach(el => el.classList.add('hidden'));
+                    controlledBlocks.forEach(el => el.querySelectorAll('input, select, textarea, button').forEach(i => i
+                        .disabled = true));
+                    return;
+                }
+
+                showCore(true);
+                setLabelsByCategory(cat);
+
+                const isFlower = (cat === 'Flower');
+                const isPackage = (cat === 'Package');
+                const isSubscription = (cat === 'Subscription');
+
+                showStock(!isFlower);
+                showSubscription(isSubscription);
+
+                showFlower(isFlower);
+                showFlowerDates(isFlower); // visible when Flower; enabled by radio below
+                updateFlowerDatesRequired();
+
+                showPackage(isPackage);
             }
-        });
-    }
-    [flowerActive, flowerInactive].forEach(r => { if (r) r.addEventListener('change', updateFlowerDatesRequired); });
 
-    // BENEFITS: add/remove
-    const benefitFields = document.getElementById('benefitFields');
-    benefitFields.addEventListener('click', function(e) {
-        if (e.target.closest('.add-benefit')) {
-            const row = e.target.closest('.benefit-row');
-            const newRow = row.cloneNode(true);
-            newRow.querySelector('input').value = '';
-            newRow.querySelector('.remove-benefit').style.display = 'inline-block';
-            benefitFields.appendChild(newRow);
-        }
-        if (e.target.closest('.remove-benefit')) {
-            const rows = benefitFields.querySelectorAll('.benefit-row');
-            if (rows.length > 1) e.target.closest('.benefit-row').remove();
-        }
-    });
+            // Keep "To" >= "From"
+            function wireDateBounds() {
+                if (!availableFrom || !availableTo) return;
+                availableFrom.addEventListener('change', function() {
+                    availableTo.min = availableFrom.value || '';
+                    if (availableTo.value && availableFrom.value && availableTo.value < availableFrom.value) {
+                        availableTo.value = '';
+                    }
+                });
+                availableTo.addEventListener('change', function() {
+                    availableFrom.max = availableTo.value || '';
+                });
+            }
+            wireDateBounds();
 
-    // PACKAGE rows (Item + Qty + Unit + Price)
-    const packageItems    = document.getElementById('packageItems');
-    const addMoreButton   = document.getElementById('addMore');
-    const removeLastButton= document.getElementById('removeLast');
+            // Flower availability toggles date fields & required
+            function updateFlowerDatesRequired() {
+                const isFlower = categorySelect.value === 'Flower';
+                if (!isFlower) return;
 
-    addMoreButton.addEventListener('click', function() {
-        const newRow = document.createElement('div');
-        newRow.classList.add('row', 'mb-3', 'package-row', 'align-items-end');
-        newRow.innerHTML = `
+                const active = flowerActive?.checked === true;
+
+                [availableFrom, availableTo].forEach(el => {
+                    if (!el) return;
+                    el.required = !!active; // required only when Active
+                    el.disabled = !active; // disabled if not Active
+                    if (!active) {
+                        el.value = '';
+                        el.removeAttribute('min');
+                        el.removeAttribute('max');
+                    }
+                });
+            }
+            [flowerActive, flowerInactive].forEach(r => {
+                if (r) r.addEventListener('change', updateFlowerDatesRequired);
+            });
+
+            // BENEFITS: add/remove
+            const benefitFields = document.getElementById('benefitFields');
+            benefitFields.addEventListener('click', function(e) {
+                if (e.target.closest('.add-benefit')) {
+                    const row = e.target.closest('.benefit-row');
+                    const newRow = row.cloneNode(true);
+                    newRow.querySelector('input').value = '';
+                    newRow.querySelector('.remove-benefit').style.display = 'inline-block';
+                    benefitFields.appendChild(newRow);
+                }
+                if (e.target.closest('.remove-benefit')) {
+                    const rows = benefitFields.querySelectorAll('.benefit-row');
+                    if (rows.length > 1) e.target.closest('.benefit-row').remove();
+                }
+            });
+
+            // PACKAGE rows (Item + Qty + Unit + Price)
+            const packageItems = document.getElementById('packageItems');
+            const addMoreButton = document.getElementById('addMore');
+            const removeLastButton = document.getElementById('removeLast');
+
+            addMoreButton.addEventListener('click', function() {
+                const newRow = document.createElement('div');
+                newRow.classList.add('row', 'mb-3', 'package-row', 'align-items-end');
+                newRow.innerHTML = `
             <div class="col-md-4">
                 <label class="form-label">Item</label>
                 <select class="form-control select2 item-select" name="item_id[]" required>
@@ -562,42 +695,48 @@
                 <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
             </div>
         `;
-        packageItems.appendChild(newRow);
-        initSelect2(newRow);
-    });
+                packageItems.appendChild(newRow);
+                initSelect2(newRow);
+            });
 
-    removeLastButton.addEventListener('click', function() {
-        const rows = packageItems.querySelectorAll('.package-row');
-        if (rows.length > 1) rows[rows.length - 1].remove();
-    });
+            removeLastButton.addEventListener('click', function() {
+                const rows = packageItems.querySelectorAll('.package-row');
+                if (rows.length > 1) rows[rows.length - 1].remove();
+            });
 
-    // Category change: native + Select2 events
-    $(document).on('change', '#category', function() {
-        applyCategoryRules();
-        updateFlowerDatesRequired();
-    });
-    $('#category').on('select2:select', function() {
-        applyCategoryRules();
-        updateFlowerDatesRequired();
-    });
+            // Category change: native + Select2 events
+            $(document).on('change', '#category', function() {
+                applyCategoryRules();
+                updateFlowerDatesRequired();
+            });
+            $('#category').on('select2:select', function() {
+                applyCategoryRules();
+                updateFlowerDatesRequired();
+            });
 
-    // Initial
-    applyCategoryRules();
-    updateFlowerDatesRequired();
+            // Initial
+            applyCategoryRules();
+            updateFlowerDatesRequired();
 
-    // Image preview
-    const imgInput = document.getElementById('product_image');
-    const imgPreview = document.getElementById('imagePreview');
-    if (imgInput && imgPreview) {
-        imgInput.addEventListener('change', function() {
-            const file = this.files && this.files[0];
-            if (!file) { imgPreview.style.display='none'; imgPreview.src=''; return; }
-            const reader = new FileReader();
-            reader.onload = e => { imgPreview.src = e.target.result; imgPreview.style.display='block'; };
-            reader.readAsDataURL(file);
-        });
-    }
-})();
-</script>
-
+            // Image preview
+            const imgInput = document.getElementById('product_image');
+            const imgPreview = document.getElementById('imagePreview');
+            if (imgInput && imgPreview) {
+                imgInput.addEventListener('change', function() {
+                    const file = this.files && this.files[0];
+                    if (!file) {
+                        imgPreview.style.display = 'none';
+                        imgPreview.src = '';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        imgPreview.src = e.target.result;
+                        imgPreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+        })();
+    </script>
 @endsection

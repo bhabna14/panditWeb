@@ -463,26 +463,30 @@ class ProductController extends Controller
         return view('admin.manage-product', compact('products'));
     }
 
-     public function storeItem(Request $request)
-    {
-        // Validate
-        $validated = $request->validate([
-            'item_name'    => ['required', 'string', 'max:255', 'unique:poojaitem_list,item_name'],
-        ]);
+     
+public function storeItem(Request $request)
+{
+    $data = $request->validate([
+        'item_name' => ['required','string','max:255','unique:poojaitem_list,item_name'],
+    ]);
 
-        // Build a unique slug from the item name
-        $baseSlug = Str::slug($validated['item_name'], '-');
-        $slug = $this->uniqueSlug($baseSlug);
-
-        // Create
-        Poojaitemlists::create([
-            'item_name'    => $validated['item_name'],
-            'slug'         => $slug,
-        ]);
-
-        // Redirect back to the same page (your modal lives there)
-        return back()->with('success', 'Item added successfully.');
+    // build unique slug
+    $base = Str::slug($data['item_name'], '-');
+    $slug = $base ?: 'item';
+    $i = 2;
+    while (Poojaitemlists::where('slug', $slug)->exists()) {
+        $slug = $base.'-'.$i++;
     }
+
+    Poojaitemlists::create([
+        'item_name'    => $data['item_name'],
+        'slug'         => $slug,
+        'product_type' => null,     // set if needed
+        'status'       => 'active', // default
+    ]);
+
+    return back()->with('success', 'Item added successfully.');
+}
 
     /**
      * Ensure slug is unique on poojaitem_list.slug

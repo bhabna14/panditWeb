@@ -272,7 +272,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::post('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
     Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
 
-        Route::post('/items-store',[ProductController::class,'storeItem'])->name('items.store');
+Route::post('/items-store', [ProductController::class, 'storeItem'])->name('items.store');
 
 
 
