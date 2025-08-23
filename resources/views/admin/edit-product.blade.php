@@ -298,6 +298,57 @@
                 @endif
             </div>
 
+            @php
+                $isPackage = old('category', $product->category) === 'Package';
+            @endphp
+
+            <!-- Package fields (Item + Qty + Unit + Item Price) -->
+            <div id="packageFields" class="col-md-12 mb-3" style="{{ $isPackage ? '' : 'display:none;' }}">
+                <div id="packageItems">
+                    @if ($hasOldRows)
+                        {{-- ... your existing @foreach ($oldItemIds as $i => $oldItemId) rows stay the same ... --}}
+                    @elseif (!empty($preparedPackage))
+                        {{-- ... your existing @foreach ($preparedPackage as $row) rows stay the same ... --}}
+                    @else
+                        {{-- default one empty row --}}
+                        <div class="row mb-3 package-row align-items-end">
+                            <div class="col-md-4">
+                                <label class="form-label">Item</label>
+                                <select class="form-control select2 item-select" name="item_id[]" required>
+                                    <option value="">Select Puja List</option>
+                                    @foreach ($Poojaitemlist as $pujalist)
+                                        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Qty</label>
+                                <input type="number" class="form-control" name="quantity[]" min="0"
+                                    step="any" placeholder="0" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Unit</label>
+                                <select class="form-control select2 unit-select" name="unit_id[]" required>
+                                    <option value="">Select Unit</option>
+                                    @foreach ($pooja_units as $u)
+                                        <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Item Price (Rs.)</label>
+                                <input type="number" class="form-control" name="item_price[]" min="0"
+                                    step="0.01" placeholder="0.00" required>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <button type="button" id="addMore" class="btn btn-secondary">Add More</button>
+                <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
+            </div>
+
+
             <div class="col-md-12 mb-3">
                 <label class="form-label">Benefits</label>
                 <div id="benefitsWrapper">
@@ -318,6 +369,8 @@
                 <button type="button" class="btn btn-secondary" id="addBenefit">Add Benefit</button>
             </div>
 
+
+
             <div class="col-md-12 mb-3">
                 <label for="description" class="form-label">Description</label>
                 <textarea name="description" class="form-control" id="description" rows="4" required>{{ old('description', $product->description) }}</textarea>
@@ -336,7 +389,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
         (function() {
-            // Ensure Select2 is initialized after the page’s own Select2 bundle loads.
             function initSelect2(scope) {
                 $(scope || document).find('.select2').each(function() {
                     if (!$(this).data('select2')) {
@@ -350,35 +402,75 @@
 
             const $category = $('#category');
             const $pkgFields = $('#packageFields');
+            const $packageItems = $('#packageItems');
+
             const $malaField = $('#malaProvidedField');
             const $availField = $('#flowerAvailabilityField');
             const $fromField = $('#flowerFromField');
             const $toField = $('#flowerToField');
             const $fromInput = $('#available_from');
             const $toInput = $('#available_to');
-            const $flowerActive = $('#flowerActive');
-            const $flowerInactive = $('#flowerInactive');
+
+            // Build one fresh package row (server options are printed into the template)
+            function buildPackageRowHtml() {
+                return `
+        <div class="row mb-3 package-row align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Item</label>
+                <select class="form-control select2 item-select" name="item_id[]" required>
+                    <option value="">Select Puja List</option>
+                    @foreach ($Poojaitemlist as $pujalist)
+                        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Qty</label>
+                <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Unit</label>
+                <select class="form-control select2 unit-select" name="unit_id[]" required>
+                    <option value="">Select Unit</option>
+                    @foreach ($pooja_units as $u)
+                        <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Item Price (Rs.)</label>
+                <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+        </div>`;
+            }
+
+            function ensureAtLeastOnePackageRow() {
+                const rows = $packageItems.find('.package-row');
+                if (rows.length === 0) {
+                    $packageItems.append(buildPackageRowHtml());
+                    initSelect2($packageItems.children().last());
+                }
+            }
 
             function applyCategoryUI() {
                 const cat = $category.val();
-
                 const isFlower = (cat === 'Flower');
                 const isPackage = (cat === 'Package');
 
-                $malaField.toggle(isFlower);
-                $availField.toggle(isFlower);
-                $fromField.toggle(isFlower);
-                $toField.toggle(isFlower);
+                // Toggle Flower fields
+                $('#malaProvidedField, #flowerAvailabilityField, #flowerFromField, #flowerToField').toggle(isFlower);
 
+                // Toggle Package fields
                 $pkgFields.toggle(isPackage);
+                if (isPackage) ensureAtLeastOnePackageRow();
 
                 updateFlowerDateRequirements();
                 initSelect2();
             }
 
             function updateFlowerDateRequirements() {
-                const cat = $category.val();
-                if (cat !== 'Flower') {
+                const isFlower = ($category.val() === 'Flower');
+                if (!isFlower) {
                     $fromInput.prop({
                         required: false,
                         disabled: false
@@ -400,25 +492,16 @@
                 }
             }
 
-            // date bounds
+            // Date constraints
             $fromInput.on('change', function() {
                 $toInput.attr('min', this.value || '');
-                if ($toInput.val() && this.value && $toInput.val() < this.value) {
-                    $toInput.val('');
-                }
+                if ($toInput.val() && this.value && $toInput.val() < this.value) $toInput.val('');
             });
             $toInput.on('change', function() {
                 $fromInput.attr('max', this.value || '');
             });
 
-            // Category change (native + select2)
-            $(document).on('change', '#category', applyCategoryUI);
-            $('#category').on('select2:select', applyCategoryUI);
-
-            // Availability change
-            $('#flowerActive, #flowerInactive').on('change', updateFlowerDateRequirements);
-
-            // Benefits add/remove
+            // Benefits add/remove (unchanged)
             $('#addBenefit').on('click', function() {
                 $('#benefitsWrapper').append(`
             <div class="input-group mb-2 benefit-row">
@@ -433,49 +516,20 @@
             });
 
             // Package rows add/remove
-            const $packageItems = $('#packageItems');
-
             $('#addMore').on('click', function() {
-                const rowHtml = `
-            <div class="row mb-3 package-row align-items-end">
-                <div class="col-md-4">
-                    <label class="form-label">Item</label>
-                    <select class="form-control select2 item-select" name="item_id[]" required>
-                        <option value="">Select Puja List</option>
-                        @foreach ($Poojaitemlist as $pujalist)
-                            <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <label class="form-label">Qty</label>
-                    <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Unit</label>
-                    <select class="form-control select2 unit-select" name="unit_id[]" required>
-                        <option value="">Select Unit</option>
-                        @foreach ($pooja_units as $u)
-                            <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Item Price (Rs.)</label>
-                    <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
-                </div>
-            </div>
-        `;
-                $packageItems.append(rowHtml);
+                $packageItems.append(buildPackageRowHtml());
                 initSelect2($packageItems.children().last());
             });
-
             $('#removeLast').on('click', function() {
                 const rows = $packageItems.find('.package-row');
                 if (rows.length > 1) rows.last().remove();
             });
 
-            // Initial UI state on load
+            // Category change handlers
+            $(document).on('change', '#category', applyCategoryUI);
+            $('#category').on('select2:select', applyCategoryUI);
+
+            // Initial UI on load
             applyCategoryUI();
         })();
     </script>
