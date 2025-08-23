@@ -3,6 +3,23 @@
 @section('styles')
     <!-- Internal Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+
+    <style>
+        .hidden {
+            display: none !important;
+        }
+
+        .label-note {
+            font-weight: 500;
+        }
+
+        .img-preview {
+            max-height: 70px;
+            display: none;
+            margin-top: 6px;
+            border-radius: 6px;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -42,38 +59,13 @@
         </div>
     @endif
 
-    <form action="{{ route('admin.products.store') }}" method="post" enctype="multipart/form-data">
+    <form action="{{ route('admin.products.store') }}" method="post" enctype="multipart/form-data" id="categorySmartForm">
         @csrf
+
         <div class="row">
-            <!-- Product Name -->
+            <!-- CATEGORY (always visible) -->
             <div class="col-md-4 mb-3">
-                <label for="name" class="form-label">Product Name</label>
-                <input type="text" name="name" class="form-control" id="name" placeholder="Enter product name"
-                    required>
-            </div>
-
-            <!-- Odia Product Name -->
-            <div class="col-md-4 mb-3">
-                <label for="odia_name" class="form-label">Product Name (Odia)</label>
-                <input type="text" name="odia_name" class="form-control" id="odia_name"
-                    placeholder="Enter product name in Odia">
-            </div>
-
-            <!-- Price -->
-            <div class="col-md-4 mb-3">
-                <label for="mrp" class="form-label">MRP (Rs.)</label>
-                <input type="number" name="mrp" class="form-control" id="mrp" placeholder="Enter product mrp"
-                    required>
-            </div>
-            <div class="col-md-4 mb-3">
-                <label for="price" class="form-label">Sale Price (Rs.)</label>
-                <input type="number" name="price" class="form-control" id="price"
-                    placeholder="Enter product sale price" required>
-            </div>
-
-            <!-- Category -->
-            <div class="col-md-4 mb-3">
-                <label for="category" class="form-label">Category</label>
+                <label for="category" class="form-label"><span id="label-category">Category</span></label>
                 <select name="category" id="category" class="form-control select2" required>
                     <option value="" disabled selected>Select Category</option>
                     <option value="Puja Item">Puja Item</option>
@@ -86,9 +78,65 @@
                 </select>
             </div>
 
-            <!-- Mala Provided Field (for Flower category) -->
-            <div class="col-md-4 mb-3" id="malaProvidedField" style="display: none;">
-                <label class="form-label">Is Mala Provided with this Flower?</label>
+            <!-- Everything else is initially hidden until a category is chosen -->
+            <!-- NAME -->
+            <div class="col-md-4 mb-3 controlled hidden" data-block="core">
+                <label for="name" class="form-label"><span id="label-name">Product Name</span></label>
+                <input type="text" name="name" class="form-control" id="name" placeholder="Enter product name"
+                    required>
+            </div>
+
+            <!-- ODIA NAME -->
+            <div class="col-md-4 mb-3 controlled hidden" data-block="core">
+                <label for="odia_name" class="form-label"><span id="label-odia-name">Product Name (Odia)</span></label>
+                <input type="text" name="odia_name" class="form-control" id="odia_name"
+                    placeholder="Enter product name in Odia">
+            </div>
+
+            <!-- MRP -->
+            <div class="col-md-4 mb-3 controlled hidden" data-block="core">
+                <label for="mrp" class="form-label"><span id="label-mrp">MRP (Rs.)</span></label>
+                <input type="number" name="mrp" class="form-control" id="mrp" min="0" step="0.01"
+                    placeholder="Enter MRP" required>
+            </div>
+
+            <!-- PRICE -->
+            <div class="col-md-4 mb-3 controlled hidden" data-block="core">
+                <label for="price" class="form-label"><span id="label-price">Sale Price (Rs.)</span></label>
+                <input type="number" name="price" class="form-control" id="price" min="0" step="0.01"
+                    placeholder="Enter sale price" required>
+            </div>
+
+            <!-- SUBSCRIPTION: DURATION -->
+            <div class="col-md-4 mb-3 controlled hidden" id="durationGroup" data-block="subscription">
+                <label for="duration" class="form-label"><span id="label-duration">Subscription Duration
+                        (Months)</span></label>
+                <select name="duration" id="duration" class="form-control select2">
+                    <option value="" disabled selected>Select Package</option>
+                    <option value="1">1 Month</option>
+                    <option value="3">3 Months</option>
+                    <option value="6">6 Months</option>
+                </select>
+            </div>
+
+            <!-- STOCK -->
+            <div class="col-md-4 mb-3 controlled hidden" id="stockGroup" data-block="stock">
+                <label for="stock" class="form-label"><span id="label-stock">Stock</span></label>
+                <input type="number" name="stock" class="form-control" id="stock" min="0"
+                    placeholder="Enter stock quantity">
+            </div>
+
+            <!-- IMAGE -->
+            <div class="col-md-4 mb-3 controlled hidden" data-block="core">
+                <label for="product_image" class="form-label"><span id="label-image">Product Image</span></label>
+                <input type="file" name="product_image" class="form-control" id="product_image" accept="image/*"
+                    required>
+                <img id="imagePreview" class="img-preview" alt="Preview">
+            </div>
+
+            <!-- FLOWER: MALA PROVIDED -->
+            <div class="col-md-4 mb-3 controlled hidden" id="malaProvidedField" data-block="flower">
+                <label class="form-label"><span id="label-mala">Is Mala provided with this flower?</span></label>
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="mala_provided" id="malaYes" value="yes">
                     <label class="form-check-label" for="malaYes">Yes</label>
@@ -99,11 +147,12 @@
                 </div>
             </div>
 
-            <!-- Flower Availability Field (for Flower category) -->
-            <div class="col-md-4 mb-3" id="flowerAvailabilityField" style="display: none;">
-                <label class="form-label">Is this Flower Available?</label>
+            <!-- FLOWER: AVAILABLE? -->
+            <div class="col-md-4 mb-3 controlled hidden" id="flowerAvailabilityField" data-block="flower">
+                <label class="form-label"><span id="label-availability">Is this flower available?</span></label>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="flower_available" id="flowerActive" value="yes">
+                    <input class="form-check-input" type="radio" name="flower_available" id="flowerActive"
+                        value="yes">
                     <label class="form-check-label" for="flowerActive">Active</label>
                 </div>
                 <div class="form-check">
@@ -113,36 +162,36 @@
                 </div>
             </div>
 
-            <!-- NEW: Flower availability dates (shown only when category=Flower) -->
-            <div class="col-md-4 mb-3" id="flowerFromField" style="display:none;">
-                <label for="available_from" class="form-label">Available From</label>
+            <!-- FLOWER: DATE FROM/TO -->
+            <div class="col-md-4 mb-3 controlled hidden" id="flowerFromField" data-block="flowerDates">
+                <label for="available_from" class="form-label"><span id="label-available-from">Available
+                        From</span></label>
                 <input type="date" name="available_from" id="available_from" class="form-control">
             </div>
 
-            <div class="col-md-4 mb-3" id="flowerToField" style="display:none;">
-                <label for="available_to" class="form-label">Available To</label>
+            <div class="col-md-4 mb-3 controlled hidden" id="flowerToField" data-block="flowerDates">
+                <label for="available_to" class="form-label"><span id="label-available-to">Available To</span></label>
                 <input type="date" name="available_to" id="available_to" class="form-control">
             </div>
 
-            <!-- Pooja (for Package) -->
-            <div class="col-md-4 mb-3" id="poojafields" style="display: none;">
-                <div class="form-group">
-                    <label for="pooja_name" class="form-label">Pooja Name</label>
-                    <select class="form-control" id="pooja_id" name="pooja_id">
-                        <option value="">Select Festival</option>
-                        @foreach ($pooja_list as $pooja)
-                            <option value="{{ $pooja->id }}">{{ $pooja->pooja_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+            <!-- PACKAGE: FESTIVAL/POOJA -->
+            <div class="col-md-4 mb-3 controlled hidden" id="poojafields" data-block="package">
+                <label for="pooja_id" class="form-label"><span id="label-pooja">Pooja (Festival)</span></label>
+                <select class="form-control select2" id="pooja_id" name="pooja_id">
+                    <option value="">Select Festival</option>
+                    @foreach ($pooja_list as $pooja)
+                        <option value="{{ $pooja->id }}">{{ $pooja->pooja_name }}</option>
+                    @endforeach
+                </select>
             </div>
 
-            <!-- Package fields -->
-            <div id="packageFields" class="col-md-12 mb-3" style="display: none;">
+            <!-- PACKAGE: ITEMS + VARIANTS -->
+            <div id="packageFields" class="col-md-12 mb-3 controlled hidden" data-block="package">
+                <label class="form-label d-block mb-2"><span id="label-package-items">Package Items</span></label>
                 <div id="packageItems">
-                    <div class="row mb-3">
+                    <div class="row mb-3 package-row">
                         <div class="col-md-6">
-                            <select class="form-control select2 item-select" name="item_id[]">
+                            <select class="form-control select2 item-select" name="item_id[]" required>
                                 <option value="">Select Puja List</option>
                                 @foreach ($Poojaitemlist as $pujalist)
                                     <option value="{{ $pujalist->id }}"
@@ -153,7 +202,7 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <select class="form-control select2 variant-select" name="variant_id[]">
+                            <select class="form-control select2 variant-select" name="variant_id[]" required>
                                 <option value="">Select Variant</option>
                             </select>
                         </div>
@@ -163,54 +212,33 @@
                 <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
             </div>
 
-            <!-- Subscription Duration -->
-            <div class="col-md-4 mb-3">
-                <label for="duration" class="form-label">Subscription Duration (Months)</label>
-                <select name="duration" id="duration" class="form-control select2">
-                    <option value="" disabled selected>Select Package</option>
-                    <option value="1">1 Month</option>
-                    <option value="3">3 Months</option>
-                    <option value="6">6 Months</option>
-                </select>
-            </div>
-
-            <!-- Stock -->
-            <div class="col-md-4 mb-3">
-                <label for="stock" class="form-label">Stock</label>
-                <input type="number" name="stock" class="form-control" id="stock"
-                    placeholder="Enter stock quantity">
-            </div>
-
-            <!-- Product Image -->
-            <div class="col-md-4 mb-3">
-                <label for="product_image" class="form-label">Product Image</label>
-                <input type="file" name="product_image" class="form-control" id="product_image" required>
-            </div>
-
-            <!-- Benefits -->
-            <div class="col-md-4 mb-3">
-                <label for="benefit" class="form-label">Benefits</label>
+            <!-- BENEFITS -->
+            <div class="col-md-4 mb-3 controlled hidden" data-block="core">
+                <label for="benefit" class="form-label"><span id="label-benefit">Benefits</span></label>
                 <div id="benefitFields">
                     <div class="input-group mb-2 benefit-row">
                         <input type="text" name="benefit[]" class="form-control" placeholder="Enter benefit"
                             required>
-                        <button type="button" class="btn btn-success add-benefit" title="Add Benefit"><i
-                                class="fa fa-plus"></i> Add</button>
+                        <button type="button" class="btn btn-success add-benefit" title="Add Benefit">
+                            <i class="fa fa-plus"></i> Add
+                        </button>
                         <button type="button" class="btn btn-danger remove-benefit" title="Remove Benefit"
-                            style="display:none;"><i class="fa fa-minus"></i> Remove</button>
+                            style="display:none;">
+                            <i class="fa fa-minus"></i> Remove
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Description -->
-            <div class="col-md-12 mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea name="description" class="form-control" id="description" rows="3"
-                    placeholder="Enter product description" required></textarea>
+            <!-- DESCRIPTION -->
+            <div class="col-md-12 mb-3 controlled hidden" data-block="core">
+                <label for="description" class="form-label"><span id="label-description">Description</span></label>
+                <textarea name="description" class="form-control" id="description" rows="3" placeholder="Enter description"
+                    required></textarea>
             </div>
 
             <!-- Submit Button -->
-            <div class="col-md-12 mt-4">
+            <div class="col-md-12 mt-4 controlled hidden" data-block="core">
                 <button type="submit" class="btn btn-primary">Add Product</button>
             </div>
         </div>
@@ -221,62 +249,466 @@
 @endsection
 
 @section('scripts')
-    <!-- Form-layouts js -->
     <script src="{{ asset('assets/js/form-layouts.js') }}"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     <script>
-        $(document).ready(function() {
-            $('.select2').select2(); // Initialize Select2 for dropdowns
-        });
-    </script>
-    <script>
+        // toast fades
         setTimeout(function() {
             $('#Message').fadeOut('fast');
         }, 2500);
     </script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        (function() {
+            const $doc = $(document);
+
+            // Init Select2 for any already-in-DOM selects
+            function initSelect2(scope) {
+                $(scope || document).find('.select2').each(function() {
+                    // avoid double init – Select2 guards well but we check anyway
+                    if (!$(this).data('select2')) {
+                        $(this).select2({
+                            width: '100%'
+                        });
+                    }
+                });
+            }
+
+            initSelect2();
+
+            // ------- Elements -------
             const categorySelect = document.getElementById('category');
-            const packageFields = document.getElementById('packageFields');
-            const poojafields = document.getElementById('poojafields');
+
+            // Core groups
+            const controlledBlocks = document.querySelectorAll('.controlled');
+
+            const groups = {
+                core: document.querySelectorAll('[data-block="core"]'),
+                stock: document.querySelectorAll('[data-block="stock"]'),
+                subscription: document.querySelectorAll('[data-block="subscription"]'),
+                flower: document.querySelectorAll('[data-block="flower"]'),
+                flowerDates: document.querySelectorAll('[data-block="flowerDates"]'),
+                package: document.querySelectorAll('[data-block="package"]')
+            };
+
+            // Fields
+            const availableFrom = document.getElementById('available_from');
+            const availableTo = document.getElementById('available_to');
+            const flowerActive = document.getElementById('flowerActive');
+            const flowerInactive = document.getElementById('flowerInactive');
+
+            // Labels (spans we will rewrite)
+            const $labels = {
+                name: $('#label-name'),
+                odiaName: $('#label-odia-name'),
+                mrp: $('#label-mrp'),
+                price: $('#label-price'),
+                image: $('#label-image'),
+                description: $('#label-description'),
+                benefit: $('#label-benefit'),
+                stock: $('#label-stock'),
+                duration: $('#label-duration'),
+                mala: $('#label-mala'),
+                availability: $('#label-availability'),
+                availableFrom: $('#label-available-from'),
+                availableTo: $('#label-available-to'),
+                pooja: $('#label-pooja'),
+                packageItems: $('#label-package-items')
+            };
+
+            const $inputs = {
+                name: $('#name'),
+                odiaName: $('#odia_name'),
+                mrp: $('#mrp'),
+                price: $('#price'),
+                description: $('#description'),
+                image: $('#product_image')
+            };
+
+            const LABELS = {
+                default: {
+                    name: 'Product Name',
+                    odiaName: 'Product Name (Odia)',
+                    mrp: 'MRP (Rs.)',
+                    price: 'Sale Price (Rs.)',
+                    image: 'Product Image',
+                    description: 'Description',
+                    benefit: 'Benefits',
+                    stock: 'Stock'
+                },
+                'Flower': {
+                    name: 'Flower Name',
+                    odiaName: 'Flower Name (Odia)',
+                    mrp: 'Flower MRP (Rs.)',
+                    price: 'Flower Price (Rs.)',
+                    image: 'Flower Image',
+                    description: 'Flower Description',
+                    benefit: 'Flower Benefits',
+                    stock: 'Stock' // will be hidden for Flower anyway
+                },
+                'Package': {
+                    name: 'Package Name',
+                    odiaName: 'Package Name (Odia)',
+                    mrp: 'Package MRP (Rs.)',
+                    price: 'Package Price (Rs.)',
+                    image: 'Package Image',
+                    description: 'Package Description',
+                    benefit: 'Package Benefits',
+                    stock: 'Stock'
+                },
+                'Subscription': {
+                    name: 'Subscription Name',
+                    odiaName: 'Subscription Name (Odia)',
+                    mrp: 'Subscription MRP (Rs.)',
+                    price: 'Subscription Price (Rs.)',
+                    image: 'Subscription Image',
+                    description: 'Subscription Description',
+                    benefit: 'Subscription Benefits',
+                    stock: 'Stock'
+                },
+                'Puja Item': {
+                    name: 'Item Name',
+                    odiaName: 'Item Name (Odia)',
+                    mrp: 'Item MRP (Rs.)',
+                    price: 'Item Price (Rs.)',
+                    image: 'Item Image',
+                    description: 'Item Description',
+                    benefit: 'Item Benefits',
+                    stock: 'Stock'
+                },
+                'Immediateproduct': {
+                    name: 'Customized Flower Name',
+                    odiaName: 'Customized Flower Name (Odia)',
+                    mrp: 'Customized Flower MRP (Rs.)',
+                    price: 'Customized Flower Price (Rs.)',
+                    image: 'Customized Flower Image',
+                    description: 'Customized Flower Description',
+                    benefit: 'Benefits',
+                    stock: 'Stock'
+                },
+                'Customizeproduct': {
+                    name: 'Customized Product Name',
+                    odiaName: 'Customized Product Name (Odia)',
+                    mrp: 'Customized Product MRP (Rs.)',
+                    price: 'Customized Product Price (Rs.)',
+                    image: 'Customized Product Image',
+                    description: 'Customized Product Description',
+                    benefit: 'Benefits',
+                    stock: 'Stock'
+                },
+                'Books': {
+                    name: 'Book Title',
+                    odiaName: 'Book Title (Odia)',
+                    mrp: 'Book MRP (Rs.)',
+                    price: 'Book Price (Rs.)',
+                    image: 'Book Cover Image',
+                    description: 'Book Description',
+                    benefit: 'Key Benefits',
+                    stock: 'Stock'
+                }
+            };
+
+            const PLACEHOLDERS = {
+                default: {
+                    name: 'Enter product name',
+                    odiaName: 'Enter product name in Odia',
+                    mrp: 'Enter MRP',
+                    price: 'Enter sale price',
+                    description: 'Enter description'
+                },
+                'Flower': {
+                    name: 'Enter flower name',
+                    odiaName: 'Enter flower name in Odia',
+                    mrp: 'Enter flower MRP',
+                    price: 'Enter flower price',
+                    description: 'Enter flower description'
+                },
+                'Package': {
+                    name: 'Enter package name',
+                    odiaName: 'Enter package name in Odia',
+                    mrp: 'Enter package MRP',
+                    price: 'Enter package price',
+                    description: 'Enter package description'
+                },
+                'Subscription': {
+                    name: 'Enter subscription name',
+                    odiaName: 'Enter subscription name in Odia',
+                    mrp: 'Enter subscription MRP',
+                    price: 'Enter subscription price',
+                    description: 'Enter subscription description'
+                },
+                'Puja Item': {
+                    name: 'Enter item name',
+                    odiaName: 'Enter item name in Odia',
+                    mrp: 'Enter item MRP',
+                    price: 'Enter item price',
+                    description: 'Enter item description'
+                },
+                'Immediateproduct': {
+                    name: 'Enter customized flower name',
+                    odiaName: 'Enter customized flower name in Odia',
+                    mrp: 'Enter customized flower MRP',
+                    price: 'Enter customized flower price',
+                    description: 'Enter customized flower description'
+                },
+                'Customizeproduct': {
+                    name: 'Enter customized product name',
+                    odiaName: 'Enter customized product name in Odia',
+                    mrp: 'Enter customized product MRP',
+                    price: 'Enter customized product price',
+                    description: 'Enter customized product description'
+                },
+                'Books': {
+                    name: 'Enter book title',
+                    odiaName: 'Enter book title in Odia',
+                    mrp: 'Enter book MRP',
+                    price: 'Enter book price',
+                    description: 'Enter book description'
+                }
+            };
+
+            function setLabelsByCategory(cat) {
+                const map = LABELS[cat] || LABELS.default;
+                $labels.name.text(map.name);
+                $labels.odiaName.text(map.odiaName);
+                $labels.mrp.text(map.mrp);
+                $labels.price.text(map.price);
+                $labels.image.text(map.image);
+                $labels.description.text(map.description);
+                $labels.benefit.text(map.benefit);
+                $labels.stock.text(map.stock);
+
+                const ph = PLACEHOLDERS[cat] || PLACEHOLDERS.default;
+                $inputs.name.attr('placeholder', ph.name);
+                $inputs.odiaName.attr('placeholder', ph.odiaName);
+                $inputs.mrp.attr('placeholder', ph.mrp);
+                $inputs.price.attr('placeholder', ph.price);
+                $inputs.description.attr('placeholder', ph.description);
+
+                // Flower-only label overrides
+                if (cat === 'Flower') {
+                    $labels.mala.text('Is mala provided with this flower?');
+                    $labels.availability.text('Is this flower available?');
+                    $labels.availableFrom.text('Available From');
+                    $labels.availableTo.text('Available To');
+                } else {
+                    $labels.mala.text('Is mala provided?');
+                    $labels.availability.text('Is this available?');
+                    $labels.availableFrom.text('Available From');
+                    $labels.availableTo.text('Available To');
+                }
+
+                // Package-only label overrides
+                if (cat === 'Package') {
+                    $labels.pooja.text('Pooja (Festival)');
+                    $labels.packageItems.text('Package Items');
+                } else {
+                    $labels.pooja.text('Pooja');
+                    $labels.packageItems.text('Items');
+                }
+            }
+
+            function showGroup(nodeList, show) {
+                nodeList.forEach(el => {
+                    if (show) {
+                        el.classList.remove('hidden');
+                        // enable all fields inside
+                        el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = false);
+                    } else {
+                        el.classList.add('hidden');
+                        // disable all fields inside
+                        el.querySelectorAll('input, select, textarea, button').forEach(i => i.disabled = true);
+                        // clear values if inputs
+                        el.querySelectorAll(
+                                'input[type="text"], input[type="number"], input[type="date"], textarea')
+                            .forEach(i => i.value = '');
+                        el.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(i => i
+                            .checked = false);
+                        el.querySelectorAll('select').forEach(s => {
+                            s.selectedIndex = 0;
+                            $(s).trigger('change');
+                        });
+                    }
+                });
+            }
+
+            function showCore(show) {
+                showGroup(groups.core, show);
+            }
+
+            function showStock(show) {
+                showGroup(groups.stock, show);
+            }
+
+            function showSubscription(show) {
+                showGroup(groups.subscription, show);
+            }
+
+            function showFlower(show) {
+                showGroup(groups.flower, show);
+            }
+
+            function showFlowerDates(show) {
+                showGroup(groups.flowerDates, show);
+            }
+
+            function showPackage(show) {
+                showGroup(groups.package, show);
+            }
+
+            function applyCategoryRules() {
+                const cat = categorySelect.value;
+
+                // If no category: hide everything except category
+                if (!cat) {
+                    controlledBlocks.forEach(el => el.classList.add('hidden'));
+                    // disable all
+                    controlledBlocks.forEach(el => el.querySelectorAll('input, select, textarea, button').forEach(i => i
+                        .disabled = true));
+                    return;
+                }
+
+                // Core visible for all once category chosen
+                showCore(true);
+
+                // Labels & placeholders
+                setLabelsByCategory(cat);
+
+                // Switches
+                const isFlower = (cat === 'Flower');
+                const isPackage = (cat === 'Package');
+                const isSubscription = (cat === 'Subscription');
+
+                // Stock: visible for all EXCEPT Flower
+                showStock(!isFlower);
+
+                // Subscription
+                showSubscription(isSubscription);
+
+                // Flower
+                showFlower(isFlower);
+                // Flower dates appear only if "Active" selected
+                const showDates = isFlower && (flowerActive?.checked === true);
+                showFlowerDates(showDates);
+
+                // Package
+                showPackage(isPackage);
+            }
+
+            // Keep "To" >= "From"
+            function wireDateBounds() {
+                if (!availableFrom || !availableTo) return;
+                availableFrom.addEventListener('change', function() {
+                    availableTo.min = availableFrom.value || '';
+                    if (availableTo.value && availableFrom.value && availableTo.value < availableFrom.value) {
+                        availableTo.value = '';
+                    }
+                });
+                availableTo.addEventListener('change', function() {
+                    availableFrom.max = availableTo.value || '';
+                });
+            }
+            wireDateBounds();
+
+            // Flower availability toggles date fields & required
+            function updateFlowerDatesRequired() {
+                const active = flowerActive?.checked === true;
+                if (availableFrom) availableFrom.required = !!active;
+                if (availableTo) availableTo.required = !!active;
+                showFlowerDates(active && categorySelect.value === 'Flower');
+            }
+
+            [flowerActive, flowerInactive].forEach(r => {
+                if (r) r.addEventListener('change', updateFlowerDatesRequired);
+            });
+
+            // Image preview
+            const imgInput = document.getElementById('product_image');
+            const imgPreview = document.getElementById('imagePreview');
+            if (imgInput && imgPreview) {
+                imgInput.addEventListener('change', function() {
+                    const file = this.files && this.files[0];
+                    if (!file) {
+                        imgPreview.style.display = 'none';
+                        imgPreview.src = '';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        imgPreview.src = e.target.result;
+                        imgPreview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // BENEFITS: add/remove
+            const benefitFields = document.getElementById('benefitFields');
+            benefitFields.addEventListener('click', function(e) {
+                if (e.target.closest('.add-benefit')) {
+                    const row = e.target.closest('.benefit-row');
+                    const newRow = row.cloneNode(true);
+                    newRow.querySelector('input').value = '';
+                    newRow.querySelector('.remove-benefit').style.display = 'inline-block';
+                    benefitFields.appendChild(newRow);
+                }
+                if (e.target.closest('.remove-benefit')) {
+                    const rows = benefitFields.querySelectorAll('.benefit-row');
+                    if (rows.length > 1) e.target.closest('.benefit-row').remove();
+                }
+            });
+
+            // PACKAGE: rows add/remove + variants loader
             const packageItems = document.getElementById('packageItems');
             const addMoreButton = document.getElementById('addMore');
             const removeLastButton = document.getElementById('removeLast');
 
-            // NEW: Duration group wrapper (the .mb-3 around the select)
-            const durationSelect = document.getElementById('duration');
-            const durationGroup = durationSelect ? durationSelect.closest('.mb-3') : null;
+            function loadVariantsFor(itemSelect) {
+                const selectedOption = itemSelect.options[itemSelect.selectedIndex];
+                const variants = selectedOption?.getAttribute('data-variants');
+                const variantSelect = itemSelect.closest('.row').querySelector('.variant-select');
 
-            function updateByCategory() {
-                const cat = categorySelect.value;
-                const isPackage = (cat === 'Package');
-                const isSubscription = (cat === 'Subscription');
+                // reset
+                variantSelect.innerHTML = '<option value="">Select Variant</option>';
 
-                // Show/hide Package-related blocks
-                packageFields.style.display = isPackage ? 'block' : 'none';
-                poojafields.style.display = isPackage ? 'block' : 'none';
-
-                // Show duration only for Subscription; hide otherwise (including Package)
-                if (durationGroup) {
-                    durationGroup.style.display = isSubscription ? 'block' : 'none';
-                    if (!isSubscription) {
-                        durationSelect.selectedIndex = 0; // clear selection when hidden
+                if (variants) {
+                    try {
+                        let parsed = variants;
+                        if (typeof parsed === 'string') {
+                            parsed = parsed.replace(/&quot;/g, '"').replace(/&amp;/g, '&');
+                            parsed = JSON.parse(parsed);
+                        }
+                        parsed.forEach(v => {
+                            const opt = document.createElement('option');
+                            opt.value = v.id;
+                            opt.textContent = `${v.title} - ${v.price}`;
+                            variantSelect.appendChild(opt);
+                        });
+                    } catch (e) {
+                        console.error('Error parsing variant data:', e);
                     }
                 }
+                $(variantSelect).trigger('change');
             }
 
-            // Handle category changes
-            categorySelect.addEventListener('change', updateByCategory);
-            updateByCategory(); // run once on load
+            function initializeItemChangeListener(scope) {
+                const itemSelect = scope.querySelector('.item-select');
+                if (!itemSelect) return;
+                itemSelect.addEventListener('change', function() {
+                    loadVariantsFor(itemSelect);
+                });
+            }
 
-            // Add more package items
+            // init default row
+            initializeItemChangeListener(document.querySelector('.package-row'));
+
+            // add row
             addMoreButton.addEventListener('click', function() {
-                const newItemRow = document.createElement('div');
-                newItemRow.classList.add('row', 'mb-3');
-                newItemRow.innerHTML = `
+                const newRow = document.createElement('div');
+                newRow.classList.add('row', 'mb-3', 'package-row');
+                newRow.innerHTML = `
                     <div class="col-md-6">
                         <select class="form-control select2 item-select" name="item_id[]" required>
                             <option value="">Select Puja List</option>
@@ -294,171 +726,26 @@
                         </select>
                     </div>
                 `;
-                packageItems.appendChild(newItemRow);
-
-                // Reinitialize event listeners for dynamically added items
-                initializeItemChangeListener(newItemRow.querySelector('.item-select'));
+                packageItems.appendChild(newRow);
+                initSelect2(newRow);
+                initializeItemChangeListener(newRow);
             });
 
-            // Remove the last added item
+            // remove last row
             removeLastButton.addEventListener('click', function() {
-                const rows = packageItems.querySelectorAll('.row');
-                if (rows.length > 1) {
-                    rows[rows.length - 1].remove();
-                }
+                const rows = packageItems.querySelectorAll('.package-row');
+                if (rows.length > 1) rows[rows.length - 1].remove();
             });
 
-            // Variants loader
-            function initializeItemChangeListener(itemSelect) {
-                itemSelect.addEventListener('change', function() {
-                    const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-                    const variants = selectedOption.getAttribute('data-variants');
-                    const variantSelect = itemSelect.closest('.row').querySelector('.variant-select');
-
-                    // Clear previous options
-                    variantSelect.innerHTML = '<option value="">Select Variant</option>';
-
-                    if (variants) {
-                        try {
-                            let parsedVariants = variants;
-
-                            // Decode HTML entities and parse JSON
-                            if (typeof parsedVariants === 'string') {
-                                parsedVariants = parsedVariants.replace(/&quot;/g, '"').replace(/&amp;/g,
-                                    '&');
-                                parsedVariants = JSON.parse(parsedVariants);
-                            }
-
-                            // Populate the variant dropdown
-                            parsedVariants.forEach(function(variant) {
-                                const option = document.createElement('option');
-                                option.value = variant.id;
-                                option.textContent = `${variant.title} - ${variant.price}`;
-                                variantSelect.appendChild(option);
-                            });
-                        } catch (e) {
-                            console.error('Error parsing variant data:', e);
-                        }
-                    }
-                });
-            }
-
-            // Initialize listeners for the default row
-            document.querySelectorAll('.item-select').forEach(initializeItemChangeListener);
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const benefitFields = document.getElementById('benefitFields');
-
-            benefitFields.addEventListener('click', function(e) {
-                if (e.target.classList.contains('add-benefit')) {
-                    const row = e.target.closest('.benefit-row');
-                    const newRow = row.cloneNode(true);
-                    newRow.querySelector('input').value = '';
-                    newRow.querySelector('.remove-benefit').style.display = 'inline-block';
-                    benefitFields.appendChild(newRow);
-                }
-                if (e.target.classList.contains('remove-benefit')) {
-                    const row = e.target.closest('.benefit-row');
-                    if (benefitFields.querySelectorAll('.benefit-row').length > 1) {
-                        row.remove();
-                    }
-                }
+            // CATEGORY change
+            categorySelect.addEventListener('change', function() {
+                applyCategoryRules();
+                updateFlowerDatesRequired();
             });
-        });
-    </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const categorySelect = document.getElementById('category');
-
-            const malaProvidedField = document.getElementById('malaProvidedField');
-            const flowerAvailabilityField = document.getElementById('flowerAvailabilityField');
-
-            const flowerFromField = document.getElementById('flowerFromField');
-            const flowerToField = document.getElementById('flowerToField');
-            const availableFrom = document.getElementById('available_from');
-            const availableTo = document.getElementById('available_to');
-
-            // NEW: wrappers for Duration + Stock (their .mb-3 containers)
-            const durationSelect = document.getElementById('duration');
-            const stockInput = document.getElementById('stock');
-            const durationGroup = durationSelect ? durationSelect.closest('.mb-3') : null;
-            const stockGroup = stockInput ? stockInput.closest('.mb-3') : null;
-
-            function setRequiredForFlower(on) {
-                [availableFrom, availableTo].forEach(el => {
-                    if (!el) return;
-                    if (on) {
-                        el.setAttribute('required', 'required');
-                    } else {
-                        el.removeAttribute('required');
-                    }
-                });
-            }
-
-            function clearFlowerDates() {
-                if (availableFrom) availableFrom.value = '';
-                if (availableTo) availableTo.value = '';
-                if (availableFrom) availableFrom.removeAttribute('max');
-                if (availableTo) availableTo.removeAttribute('min');
-            }
-
-            function toggleFlowerFields() {
-                const isFlower = categorySelect.value === 'Flower';
-
-                // show/hide standard flower fields
-                malaProvidedField.style.display = isFlower ? 'block' : 'none';
-                flowerAvailabilityField.style.display = isFlower ? 'block' : 'none';
-
-                // show/hide new date fields
-                flowerFromField.style.display = isFlower ? 'block' : 'none';
-                flowerToField.style.display = isFlower ? 'block' : 'none';
-
-                // NEW: hide Duration + Stock when Flower selected; show otherwise
-                if (durationGroup) durationGroup.style.display = isFlower ? 'none' : '';
-                if (stockGroup) stockGroup.style.display = isFlower ? 'none' : '';
-
-                // If hiding, clear their values to avoid unintended submits
-                if (isFlower) {
-                    if (durationSelect) durationSelect.selectedIndex = 0; // back to "Select Package"
-                    if (stockInput) stockInput.value = '';
-                }
-
-                // required + cleanup for flower-only fields
-                setRequiredForFlower(isFlower);
-                if (!isFlower) {
-                    malaProvidedField.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
-                    flowerAvailabilityField.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
-                    clearFlowerDates();
-                }
-            }
-
-            // keep "To" >= "From"
-            if (availableFrom && availableTo) {
-                availableFrom.addEventListener('change', function() {
-                    availableTo.min = availableFrom.value || '';
-                    if (availableTo.value && availableFrom.value && availableTo.value < availableFrom
-                        .value) {
-                        availableTo.value = '';
-                    }
-                });
-                availableTo.addEventListener('change', function() {
-                    availableFrom.max = availableTo.value || '';
-                });
-            }
-
-            // init on load + on change
-            categorySelect.addEventListener('change', toggleFlowerFields);
-            toggleFlowerFields();
-        });
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const categorySelect = document.getElementById('category');
-        });
+            // Initial: keep only category visible
+            applyCategoryRules();
+            updateFlowerDatesRequired();
+        })();
     </script>
 @endsection
