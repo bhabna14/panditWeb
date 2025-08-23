@@ -148,58 +148,61 @@
 
             {{-- Package fields (Item + Qty + Unit + Item Price) --}}
             <div id="packageFields" class="col-md-12 mb-3" style="{{ $isPackage ? '' : 'display:none;' }}">
-                <div id="packageItems">
-                    @for ($i = 0; $i < $rowsCount; $i++)
-                        @php
-                            $itemId = $oldItemIds[$i] ?? ($prefill[$i]['item_id'] ?? null);
-                            $qty    = $oldQtys[$i]    ?? ($prefill[$i]['quantity'] ?? null);
-                            $unitId = $oldUnitIds[$i] ?? ($prefill[$i]['unit_id'] ?? null);
-                            $price  = $oldPrices[$i]  ?? ($prefill[$i]['price'] ?? null);
-                        @endphp
+  <div id="packageItems">
+    @for ($i = 0; $i < $rowsCount; $i++)
+      @php
+        $itemId = $oldItemIds[$i] ?? ($prefill[$i]['item_id'] ?? null);
+        $qty    = $oldQtys[$i]    ?? ($prefill[$i]['quantity'] ?? null);
+        $unitId = $oldUnitIds[$i] ?? ($prefill[$i]['unit_id'] ?? null);
+        $price  = $oldPrices[$i]  ?? ($prefill[$i]['price'] ?? null);
+      @endphp
 
-                        <div class="row mb-3 package-row align-items-end">
-                            <div class="col-md-4">
-                                <label class="form-label">Item</label>
-                                <select class="form-control select2 item-select" name="item_id[]" required>
-                                    <option value="">Select Puja List</option>
-                                    @foreach ($Poojaitemlist as $pujalist)
-                                        
-                                        <option value="{{ $pujalist->id }}" {{ (int)$pujalist->id === (int)$itemId ? 'selected' : '' }}>
+      <div class="row mb-3 package-row align-items-end">
+        <div class="col-md-4">
+          <label class="form-label">Item</label>
+          <select class="form-control select2 item-select" name="item_id[]" required>
+            <option value="">Select Puja List</option>
+            @foreach ($Poojaitemlist as $pujalist)
+              <option value="{{ $pujalist->id }}"
+                {{ (int) $pujalist->id === (int) $itemId ? 'selected' : '' }}>
+                {{ $pujalist->item_name }}
+              </option>
+            @endforeach
+          </select>
+        </div>
 
-                                    @endforeach
-                                </select>
-                            </div>
+        <div class="col-md-2">
+          <label class="form-label">Qty</label>
+          <input type="number" class="form-control" name="quantity[]" min="0" step="any"
+                 value="{{ $qty }}" placeholder="0" required>
+        </div>
 
-                            <div class="col-md-2">
-                                <label class="form-label">Qty</label>
-                                <input type="number" class="form-control" name="quantity[]" min="0" step="any"
-                                       value="{{ $qty }}" placeholder="0" required>
-                            </div>
+        <div class="col-md-3">
+          <label class="form-label">Unit</label>
+          <select class="form-control select2 unit-select" name="unit_id[]" required>
+            <option value="">Select Unit</option>
+            @foreach ($pooja_units as $u)
+              <option value="{{ $u->id }}"
+                {{ (int) $u->id === (int) $unitId ? 'selected' : '' }}>
+                {{ $u->unit_name }}
+              </option>
+            @endforeach
+          </select>
+        </div>
 
-                            <div class="col-md-3">
-                                <label class="form-label">Unit</label>
-                                <select class="form-control select2 unit-select" name="unit_id[]" required>
-                                    <option value="">Select Unit</option>
-                                    @foreach ($pooja_units as $u)
-                                        
-                                        <option value="{{ $u->id }}" {{ (int)$u->id === (int)$unitId ? 'selected' : '' }}>
+        <div class="col-md-3">
+          <label class="form-label">Item Price (Rs.)</label>
+          <input type="number" class="form-control" name="item_price[]" min="0" step="0.01"
+                 value="{{ $price }}" placeholder="0.00" required>
+        </div>
+      </div>
+    @endfor
+  </div>
 
-                                    @endforeach
-                                </select>
-                            </div>
+  <button type="button" id="addMore" class="btn btn-secondary">Add More</button>
+  <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
+</div>
 
-                            <div class="col-md-3">
-                                <label class="form-label">Item Price (Rs.)</label>
-                                <input type="number" class="form-control" name="item_price[]" min="0" step="0.01"
-                                       value="{{ $price }}" placeholder="0.00" required>
-                            </div>
-                        </div>
-                    @endfor
-                </div>
-
-                <button type="button" id="addMore" class="btn btn-secondary">Add More</button>
-                <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
-            </div>
 
             <div class="col-md-6 mb-3">
                 <label for="product_image" class="form-label">Product Image</label>
