@@ -213,35 +213,37 @@ class ProductController extends Controller
         return redirect()->back()->with('success', 'Product created successfully.');
     }
 
-    public function editProduct($id)
+  public function editProduct($id)
 {
     $product = FlowerProduct::findOrFail($id);
 
-    // For the dropdowns
+    // Dropdown data
     $Poojaitemlist = Poojaitemlists::where('status', 'active')
         ->orderBy('item_name')
         ->get(['id','item_name']);
 
     $pooja_units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
 
-    // Existing package rows saved as plain text (item_name, unit, quantity, price)
-    $rows = PackageItem::where('product_id', $product->product_id)->get(['item_name','unit','quantity','price']);
+    // Existing flat rows (saved as text names)
+    $rows = PackageItem::where('product_id', $product->product_id)
+        ->get(['item_name','unit','quantity','price']);
 
-    // Build normalized lookup maps: item_name -> id, unit_name -> id (trim + lowercase)
-    $allItems = Poojaitemlists::pluck('id','item_name');   // [ 'Dhoop' => 1, 'Agarbatti' => 2, ... ]
-    $allUnits = PoojaUnit::pluck('id','unit_name');        // [ 'Kg' => 3, 'Piece' => 4, ... ]
+    // Build normalized lookup maps: name -> id (trim+lower)
+    $itemIdByName = Poojaitemlists::select('id','item_name')
+        ->get()
+        ->reduce(function ($carry, $r) {
+            $carry[mb_strtolower(trim($r->item_name))] = (int) $r->id;
+            return $carry;
+        }, []);
 
-    $itemIdByName = [];
-    foreach ($allItems as $name => $id) {
-        $itemIdByName[mb_strtolower(trim($name))] = (int) $id;
-    }
+    $unitIdByName = PoojaUnit::select('id','unit_name')
+        ->get()
+        ->reduce(function ($carry, $r) {
+            $carry[mb_strtolower(trim($r->unit_name))] = (int) $r->id;
+            return $carry;
+        }, []);
 
-    $unitIdByName = [];
-    foreach ($allUnits as $name => $id) {
-        $unitIdByName[mb_strtolower(trim($name))] = (int) $id;
-    }
-
-    // Normalize rows for the form (map names back to IDs; keep quantity/price)
+    // Map text -> IDs for the form
     $packageItems = $rows->map(function ($r) use ($itemIdByName, $unitIdByName) {
         $itemKey = mb_strtolower(trim((string) $r->item_name));
         $unitKey = mb_strtolower(trim((string) $r->unit));
@@ -252,8 +254,9 @@ class ProductController extends Controller
             'unit_id'  => $unitIdByName[$unitKey] ?? null,
             'price'    => $r->price,
         ];
-    })->toArray();
+    })->values()->toArray();
 
+    // IMPORTANT: pass ALL four vars
     return view('admin.edit-product', compact(
         'product',
         'Poojaitemlist',
@@ -261,7 +264,6 @@ class ProductController extends Controller
         'packageItems'
     ));
 }
-
 
     public function updateProduct(Request $request, $id)
     {

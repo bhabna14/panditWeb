@@ -163,10 +163,9 @@
                                 <select class="form-control select2 item-select" name="item_id[]" required>
                                     <option value="">Select Puja List</option>
                                     @foreach ($Poojaitemlist as $pujalist)
-                                        <option value="{{ $pujalist->id }}"
-                                            {{ (int) $pujalist->id === (int) $itemId ? 'selected' : '' }}>
-                                            {{ $pujalist->item_name }}
-                                        </option>
+                                        
+                                        <option value="{{ $pujalist->id }}" {{ (int)$pujalist->id === (int)$itemId ? 'selected' : '' }}>
+
                                     @endforeach
                                 </select>
                             </div>
@@ -182,10 +181,9 @@
                                 <select class="form-control select2 unit-select" name="unit_id[]" required>
                                     <option value="">Select Unit</option>
                                     @foreach ($pooja_units as $u)
-                                        <option value="{{ $u->id }}"
-                                            {{ (int) $u->id === (int) $unitId ? 'selected' : '' }}>
-                                            {{ $u->unit_name }}
-                                        </option>
+                                        
+                                        <option value="{{ $u->id }}" {{ (int)$u->id === (int)$unitId ? 'selected' : '' }}>
+
                                     @endforeach
                                 </select>
                             </div>
