@@ -19,7 +19,6 @@
             </ol>
         </div>
     </div>
-    <!-- /breadcrumb -->
 
     @if ($errors->any())
         <div class="alert alert-danger">

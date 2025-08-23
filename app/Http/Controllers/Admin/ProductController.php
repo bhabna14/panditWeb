@@ -12,6 +12,9 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+
 class ProductController extends Controller
 {
 
@@ -23,99 +26,134 @@ class ProductController extends Controller
         return view('admin.add-product', compact('Poojaitemlist','pooja_list'));
     }
 
-    public function createProduct(Request $request)
-    {
-        // Validate the incoming request data
-        $validated = $request->validate([
-            'name'           => 'required|string|max:255',
-            'odia_name'      => 'nullable|string|max:255',
-            'price'          => 'required|numeric',
-            'mrp'            => 'required|numeric',
-            'description'    => 'required|string',
-            'category'       => 'required|string',
-            'pooja_id'       => 'nullable|string',
-            'product_image'  => 'required|image|mimes:jpeg,png,jpg,gif|max:10000',
 
-            // Package items
-            'item_id'        => 'nullable|array',
-            'variant_id'     => 'nullable|array',
+public function createProduct(Request $request)
+{
+    // 1) Validate
+    $validated = $request->validate([
+        'name'        => ['required','string','max:255'],
+        'odia_name'   => ['nullable','string','max:255'],
+        'price'       => ['required','numeric','min:0','lte:mrp'],
+        'mrp'         => ['required','numeric','min:0'],
+        'description' => ['required','string'],
+        'category'    => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
+        'pooja_id'    => ['nullable','integer'],
 
-            // Benefits
-            'benefit'        => 'nullable|array',
-            'benefit.*'      => 'nullable|string|max:255',
+        'product_image' => ['required','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
 
-            // New Flower-only fields
-            'mala_provided'    => 'nullable|required_if:category,Flower|in:yes,no',
-            'flower_available' => 'nullable|required_if:category,Flower|in:yes,no', // yes=Active, no=Inactive
-        ]);
+        // Package
+        'item_id'    => ['nullable','array'],
+        'item_id.*'  => ['integer'],
+        'variant_id' => ['nullable','array'],
+        'variant_id.*' => ['nullable','integer'],
 
-        // Handle the product image upload (fixed path handling)
-        $imageUrl = null;
-        if ($request->hasFile('product_image')) {
-            $hashName = $request->file('product_image')->hashName(); // e.g. xxxxx.jpg
-            $request->file('product_image')->move(public_path('product_images'), $hashName);
-            $imageUrl = asset('product_images/' . $hashName);
+        // Benefits
+        'benefit'   => ['nullable','array'],
+        'benefit.*' => ['nullable','string','max:255'],
+
+        // Flower-only
+        'mala_provided'      => ['nullable','required_if:category,Flower','in:yes,no'],
+        'flower_available'   => ['nullable','required_if:category,Flower','in:yes,no'],
+        'available_from'     => ['nullable','required_if:category,Flower','date'],
+        'available_to'       => ['nullable','required_if:category,Flower','date','after_or_equal:available_from'],
+
+        // Subscription-only
+        'duration'           => ['nullable','required_if:category,Subscription','in:1,3,6'],
+
+        // Stock (hidden for Flower; still validate if present)
+        'stock'              => ['nullable','integer','min:0'],
+    ], [
+        'price.lte' => 'Sale price must be less than or equal to MRP.',
+        'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
+    ]);
+
+    // Extra server-side checks
+    if (($validated['category'] ?? null) === 'Package') {
+        $items    = $request->input('item_id', []);
+        $variants = $request->input('variant_id', []);
+        if (!is_array($items) || count($items) < 1) {
+            return back()->withErrors(['item_id' => 'Please add at least one package item.'])->withInput();
         }
-
-        // Generate a unique product ID based on the category
-        $productId = ($validated['category'] === 'Flower')
-            ? 'FLOW' . mt_rand(1000000, 9999999)
-            : 'PRODUCT' . mt_rand(1000000, 9999999);
-
-        // Generate a slug for the product name
-        $slug = Str::slug($validated['name'], '-');
-
-        // Join benefits as '#' separated string (as in your code)
-        $benefitString = null;
-        if (!empty($validated['benefit'])) {
-            $cleanedBenefits = array_filter(array_map('trim', $validated['benefit']));
-            $benefitString = implode('#', $cleanedBenefits);
+        if (count($items) !== count($variants)) {
+            return back()->withErrors(['variant_id' => 'Each package item must have a corresponding variant.'])->withInput();
         }
+    }
 
-        // Normalize new flower-only fields (map yes/no -> boolean)
-        $malaProvidedBool = null;
-        $isFlowerAvailableBool = null;
+    // 2) Handle image
+    $imageUrl = null;
+    if ($request->hasFile('product_image')) {
+        $hashName = $request->file('product_image')->hashName(); // xxxxx.jpg
+        $request->file('product_image')->move(public_path('product_images'), $hashName);
+        $imageUrl = asset('product_images/' . $hashName);
+    }
 
-        if ($validated['category'] === 'Flower') {
-            $malaProvidedBool       = isset($validated['mala_provided']) ? ($validated['mala_provided'] === 'yes') : null;
-            $isFlowerAvailableBool  = isset($validated['flower_available']) ? ($validated['flower_available'] === 'yes') : null;
-        }
+    // 3) Derivations
+    $isFlower = ($validated['category'] === 'Flower');
+    $productId = $isFlower
+        ? 'FLOW' . mt_rand(1000000, 9999999)
+        : 'PRODUCT' . mt_rand(1000000, 9999999);
 
-        // Create the product record
+    $slug = Str::slug($validated['name'], '-');
+
+    $benefitString = null;
+    if (!empty($validated['benefit'])) {
+        $cleanedBenefits = array_filter(array_map('trim', $validated['benefit']));
+        $benefitString = $cleanedBenefits ? implode('#', $cleanedBenefits) : null;
+    }
+
+    // Normalize flower radios to booleans
+    $malaProvidedBool = null;
+    $isFlowerAvailableBool = null;
+    if ($isFlower) {
+        $malaProvidedBool      = isset($validated['mala_provided']) ? $validated['mala_provided'] === 'yes' : null;
+        $isFlowerAvailableBool = isset($validated['flower_available']) ? $validated['flower_available'] === 'yes' : null;
+    }
+
+    // 4) Persist (transactional with package items)
+    DB::transaction(function () use (
+        $request, $validated, $productId, $slug, $benefitString, $imageUrl,
+        $malaProvidedBool, $isFlowerAvailableBool, $isFlower
+    ) {
         $product = new FlowerProduct();
-        $product->product_id        = $productId;
-        $product->name              = $validated['name'];
-        $product->odia_name         = $validated['odia_name'] ?? null;
-        $product->slug              = $slug;
-        $product->price             = $validated['price'];
-        $product->mrp               = $validated['mrp'];
-        $product->description       = $validated['description'];
-        $product->category          = $validated['category'];
-        $product->pooja_id          = $request->input('pooja_id', null);
-        $product->stock             = $request->input('stock', 0);
-        $product->duration          = $request->input('duration', null);
-        $product->benefits          = $benefitString; // '#' separated, same as before
-        $product->product_image     = $imageUrl;
+        $product->product_id    = $productId;
+        $product->name          = $validated['name'];
+        $product->odia_name     = $validated['odia_name'] ?? null;
+        $product->slug          = $slug;
+        $product->price         = $validated['price'];
+        $product->mrp           = $validated['mrp'];
+        $product->description   = $validated['description'];
+        $product->category      = $validated['category'];
+        $product->pooja_id      = $request->input('pooja_id', null);
 
-        // New columns
-        $product->mala_provided     = $malaProvidedBool;       // boolean|null
-        $product->is_flower_available = $isFlowerAvailableBool; // boolean|null
+        // For Flower, ignore/hard-null stock & duration (they're hidden client-side)
+        $product->stock         = $isFlower ? null : ($request->input('stock') !== null ? (int)$request->input('stock') : 0);
+        $product->duration      = $isFlower ? null : $request->input('duration', null);
+
+        $product->benefits      = $benefitString;
+        $product->product_image = $imageUrl;
+
+        // Flower-only columns
+        $product->mala_provided       = $malaProvidedBool;       // bool|null
+        $product->is_flower_available = $isFlowerAvailableBool;  // bool|null
+        $product->available_from      = $isFlower ? $request->input('available_from') : null; // Y-m-d
+        $product->available_to        = $isFlower ? $request->input('available_to') : null;
 
         $product->save();
 
-        // Handle package items if the category is "Package"
-        if ($validated['category'] === 'Package' && $request->has('item_id')) {
-            foreach ($validated['item_id'] as $key => $itemId) {
+        // Package items
+        if ($validated['category'] === 'Package' && $request->filled('item_id')) {
+            foreach ((array)$request->input('item_id') as $idx => $itemId) {
                 PackageItem::create([
                     'product_id' => $product->product_id,
                     'item_id'    => $itemId,
-                    'variant_id' => $request->variant_id[$key] ?? null,
+                    'variant_id' => $request->input("variant_id.$idx"),
                 ]);
             }
         }
+    });
 
-        return redirect()->back()->with('success', 'Product created successfully.');
-    }
+    return redirect()->back()->with('success', 'Product created successfully.');
+}
 
     public function editProduct($id)
     {
