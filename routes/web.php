@@ -875,6 +875,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::delete('/flower-price/delete/{id}', [MonthWiseFlowerPriceController::class, 'deleteFlowerPrice'])
-        ->name('deleteFlowerPrice');
+    Route::delete('/flower-price/delete/{id}', [MonthWiseFlowerPriceController::class, 'deleteFlowerPrice'])->name('deleteFlowerPrice');
 });

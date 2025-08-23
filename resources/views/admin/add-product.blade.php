@@ -63,7 +63,7 @@
 
             <!-- Price -->
             <div class="col-md-4 mb-3">
-                <label for="price" class="form-label">MRP (Rs.)</label>
+                <label for="mrp" class="form-label">MRP (Rs.)</label>
                 <input type="number" name="mrp" class="form-control" id="mrp" placeholder="Enter product mrp"
                     required>
             </div>
@@ -100,6 +100,7 @@
                     <label class="form-check-label" for="malaNo">No</label>
                 </div>
             </div>
+
             <!-- Flower Availability Field (for Flower category) -->
             <div class="col-md-4 mb-3" id="flowerAvailabilityField" style="display: none;">
                 <label class="form-label">Is this Flower Available?</label>
@@ -114,24 +115,31 @@
                 </div>
             </div>
 
+            <!-- NEW: Flower availability dates (shown only when category=Flower) -->
+            <div class="col-md-4 mb-3" id="flowerFromField" style="display:none;">
+                <label for="available_from" class="form-label">Available From</label>
+                <input type="date" name="available_from" id="available_from" class="form-control">
+            </div>
 
+            <div class="col-md-4 mb-3" id="flowerToField" style="display:none;">
+                <label for="available_to" class="form-label">Available To</label>
+                <input type="date" name="available_to" id="available_to" class="form-control">
+            </div>
+
+            <!-- Pooja (for Package) -->
             <div class="col-md-4 mb-3" id="poojafields" style="display: none;">
                 <div class="form-group">
                     <label for="pooja_name" class="form-label">Pooja Name</label>
-
                     <select class="form-control" id="pooja_id" name="pooja_id">
                         <option value="">Select Festival</option>
                         @foreach ($pooja_list as $pooja)
-                            <option value="{{ $pooja->id }}">
-                                {{ $pooja->pooja_name }}
-                            </option>
+                            <option value="{{ $pooja->id }}">{{ $pooja->pooja_name }}</option>
                         @endforeach
                     </select>
-
                 </div>
             </div>
 
-            <!-- Additional fields for Package category -->
+            <!-- Package fields -->
             <div id="packageFields" class="col-md-12 mb-3" style="display: none;">
                 <div id="packageItems">
                     <div class="row mb-3">
@@ -157,7 +165,7 @@
                 <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
             </div>
 
-
+            <!-- Subscription Duration -->
             <div class="col-md-4 mb-3">
                 <label for="duration" class="form-label">Subscription Duration (Months)</label>
                 <select name="duration" id="duration" class="form-control select2">
@@ -175,14 +183,13 @@
                     placeholder="Enter stock quantity">
             </div>
 
-            <!-- Subscription Duration -->
-
+            <!-- Product Image -->
             <div class="col-md-4 mb-3">
                 <label for="product_image" class="form-label">Product Image</label>
-                <input type="file" name="product_image" class="form-control" id="product_image"
-                    placeholder="Enter stock quantity" required>
+                <input type="file" name="product_image" class="form-control" id="product_image" required>
             </div>
 
+            <!-- Benefits -->
             <div class="col-md-4 mb-3">
                 <label for="benefit" class="form-label">Benefits</label>
                 <div id="benefitFields">
@@ -197,9 +204,6 @@
                 </div>
             </div>
 
-            <!-- Benefit Multi-Select Field -->
-
-
             <!-- Description -->
             <div class="col-md-12 mb-3">
                 <label for="description" class="form-label">Description</label>
@@ -211,8 +215,6 @@
             <div class="col-md-12 mt-4">
                 <button type="submit" class="btn btn-primary">Add Product</button>
             </div>
-
-
         </div>
     </form>
 @endsection
@@ -359,22 +361,72 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const categorySelect = document.getElementById('category');
+
             const malaProvidedField = document.getElementById('malaProvidedField');
             const flowerAvailabilityField = document.getElementById('flowerAvailabilityField');
 
-            categorySelect.addEventListener('change', function() {
-                if (this.value === 'Flower') {
-                    malaProvidedField.style.display = 'block';
-                    flowerAvailabilityField.style.display = 'block';
+            const flowerFromField = document.getElementById('flowerFromField');
+            const flowerToField = document.getElementById('flowerToField');
+            const availableFrom = document.getElementById('available_from');
+            const availableTo = document.getElementById('available_to');
 
-                } else {
-                    malaProvidedField.style.display = 'none';
-                    // Optionally clear selection
+            function setRequiredForFlower(on) {
+                [availableFrom, availableTo].forEach(el => {
+                    if (!el) return;
+                    if (on) {
+                        el.setAttribute('required', 'required');
+                    } else {
+                        el.removeAttribute('required');
+                    }
+                });
+            }
+
+            function clearFlowerDates() {
+                if (availableFrom) availableFrom.value = '';
+                if (availableTo) availableTo.value = '';
+                if (availableFrom) availableFrom.removeAttribute('max');
+                if (availableTo) availableTo.removeAttribute('min');
+            }
+
+            function toggleFlowerFields() {
+                const isFlower = categorySelect.value === 'Flower';
+
+                // show/hide standard flower fields
+                malaProvidedField.style.display = isFlower ? 'block' : 'none';
+                flowerAvailabilityField.style.display = isFlower ? 'block' : 'none';
+
+                // show/hide new date fields
+                flowerFromField.style.display = isFlower ? 'block' : 'none';
+                flowerToField.style.display = isFlower ? 'block' : 'none';
+
+                // required + cleanup
+                setRequiredForFlower(isFlower);
+                if (!isFlower) {
+                    // clear radios & dates when leaving Flower
                     malaProvidedField.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
-                    flowerAvailabilityField.querySelectorAll('input[type=radio]').forEach(r => r.checked =
-                        false);
+                    flowerAvailabilityField.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
+                    clearFlowerDates();
                 }
-            });
+            }
+
+            // keep "To" >= "From"
+            if (availableFrom && availableTo) {
+                availableFrom.addEventListener('change', function() {
+                    availableTo.min = availableFrom.value || '';
+                    // If current To is before new From, clear To
+                    if (availableTo.value && availableFrom.value && availableTo.value < availableFrom
+                        .value) {
+                        availableTo.value = '';
+                    }
+                });
+                availableTo.addEventListener('change', function() {
+                    availableFrom.max = availableTo.value || '';
+                });
+            }
+
+            // init on load + on change
+            categorySelect.addEventListener('change', toggleFlowerFields);
+            toggleFlowerFields();
         });
     </script>
 
@@ -383,5 +435,4 @@
             const categorySelect = document.getElementById('category');
         });
     </script>
-
 @endsection

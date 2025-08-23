@@ -76,9 +76,8 @@
                                         data-price="{{ $t->price_per_unit }}">
                                         Edit
                                     </button>
-<button class="btn btn-sm btn-danger deleteBtn" data-id="{{ $t->id }}">Delete</button>
-
-                                    
+                                    <button class="btn btn-sm btn-danger deleteBtn"
+                                        data-id="{{ $t->id }}">Delete</button>
                                 </td>
                             </tr>
                         @endforeach
@@ -212,45 +211,45 @@
         });
 
         // ✅ Delete Confirmation
-       $(document).on('click', '.deleteBtn', function () {
-    const id = $(this).data('id');
+        $(document).on('click', '.deleteBtn', function() {
+            const id = $(this).data('id');
 
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'This record will be permanently deleted!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#6c757d',
-        confirmButtonText: 'Yes, delete it!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (!result.isConfirmed) return;
+            Swal.fire({
+                title: 'Are you sure?',
+                text: 'This record will be permanently deleted!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (!result.isConfirmed) return;
 
-        // Build URL from named route to keep the /admin prefix correct
-        let url = "{{ route('admin.deleteFlowerPrice', ':id') }}";
-        url = url.replace(':id', id);
+                // Build URL from named route to keep the /admin prefix correct
+                let url = "{{ route('admin.deleteFlowerPrice', ':id') }}";
+                url = url.replace(':id', id);
 
-        $.ajax({
-            url: url,
-            method: 'POST', // <- POST + spoof DELETE
-            data: {
-                _method: 'DELETE',
-                _token: $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function (res) {
-                Swal.fire('Deleted!', res.message || 'Deleted successfully.', 'success')
-                    .then(() => location.reload());
-            },
-            error: function (xhr) {
-                // Show server-provided message if available
-                const msg = (xhr.responseJSON && xhr.responseJSON.message)
-                    ? xhr.responseJSON.message
-                    : 'Something went wrong.';
-                Swal.fire('Error!', msg, 'error');
-            }
+                $.ajax({
+                    url: url,
+                    method: 'POST', // <- POST + spoof DELETE
+                    data: {
+                        _method: 'DELETE',
+                        _token: $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(res) {
+                        Swal.fire('Deleted!', res.message || 'Deleted successfully.', 'success')
+                            .then(() => location.reload());
+                    },
+                    error: function(xhr) {
+                        // Show server-provided message if available
+                        const msg = (xhr.responseJSON && xhr.responseJSON.message) ?
+                            xhr.responseJSON.message :
+                            'Something went wrong.';
+                        Swal.fire('Error!', msg, 'error');
+                    }
+                });
+            });
         });
-    });
-});
     </script>
 @endsection
