@@ -370,6 +370,12 @@
             const availableFrom = document.getElementById('available_from');
             const availableTo = document.getElementById('available_to');
 
+            // NEW: wrappers for Duration + Stock (their .mb-3 containers)
+            const durationSelect = document.getElementById('duration');
+            const stockInput = document.getElementById('stock');
+            const durationGroup = durationSelect ? durationSelect.closest('.mb-3') : null;
+            const stockGroup = stockInput ? stockInput.closest('.mb-3') : null;
+
             function setRequiredForFlower(on) {
                 [availableFrom, availableTo].forEach(el => {
                     if (!el) return;
@@ -399,10 +405,19 @@
                 flowerFromField.style.display = isFlower ? 'block' : 'none';
                 flowerToField.style.display = isFlower ? 'block' : 'none';
 
-                // required + cleanup
+                // NEW: hide Duration + Stock when Flower selected; show otherwise
+                if (durationGroup) durationGroup.style.display = isFlower ? 'none' : '';
+                if (stockGroup) stockGroup.style.display = isFlower ? 'none' : '';
+
+                // If hiding, clear their values to avoid unintended submits
+                if (isFlower) {
+                    if (durationSelect) durationSelect.selectedIndex = 0; // back to "Select Package"
+                    if (stockInput) stockInput.value = '';
+                }
+
+                // required + cleanup for flower-only fields
                 setRequiredForFlower(isFlower);
                 if (!isFlower) {
-                    // clear radios & dates when leaving Flower
                     malaProvidedField.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
                     flowerAvailabilityField.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
                     clearFlowerDates();
@@ -413,7 +428,6 @@
             if (availableFrom && availableTo) {
                 availableFrom.addEventListener('change', function() {
                     availableTo.min = availableFrom.value || '';
-                    // If current To is before new From, clear To
                     if (availableTo.value && availableFrom.value && availableTo.value < availableFrom
                         .value) {
                         availableTo.value = '';
