@@ -19,8 +19,4 @@ class Poojaitemlists extends Model
         'status',
     ];
 
-    public function variants()
-    {
-        return $this->hasMany(Variant::class, 'item_id');
-    }
 }

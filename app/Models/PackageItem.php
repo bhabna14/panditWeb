@@ -15,14 +15,4 @@ class PackageItem extends Model
         'product_id','item_name','quantity','unit','price'
     ];
 
-//     public function item()
-// {
-//     return $this->belongsTo(Poojaitemlists::class, 'item_id');
-// }
-
-// public function variant()
-// {
-//     return $this->belongsTo(Variant::class, 'variant_id');
-// }
-
 }

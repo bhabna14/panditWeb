@@ -28,11 +28,20 @@
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">ADD Product</span>
         </div>
+
+
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
                 <li class="breadcrumb-item tx-15">
                     <a href="{{ url('admin/manage-product') }}" class="btn btn-warning text-dark">Manage Product</a>
                 </li>
+
+                <li class="breadcrumb-item tx-15">
+                    <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#addItemModal">
+                        Add Item
+                    </button>
+                </li>
+
             </ol>
         </div>
     </div>
@@ -255,6 +264,31 @@
             </div>
         </div>
     </form>
+
+    <!-- Add Item Modal -->
+    <div class="modal fade" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="{{ route('items.store') }}" method="POST" id="addItemForm">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addItemModalLabel">Add New Item Name</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-6">
+                            <label for="item_name" class="form-label">Item Name</label>
+                            <input type="text" name="item_name" id="item_name" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Add Item</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @section('modal')
