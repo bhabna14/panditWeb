@@ -272,6 +272,9 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::post('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
     Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
 
+        Route::post('/items-store',[ProductController::class,'storeItem'])->name('items.store');
+
+
 
     // product dashboard
     Route::controller(ProductRequestController::class)->group(function() {
@@ -868,7 +871,6 @@ Route::controller(MonthWiseFlowerPriceController::class)->group(function() {
     Route::get('/vendor-flowers', 'vendorFlowers')->name('admin.getVendorFlowers');
     Route::get('/manage-flower-price', 'manageFlowerPrice')->name('admin.manageFlowerPrice');
 
-    Route::post('/items-store','storeItem')->name('items.store');
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {
