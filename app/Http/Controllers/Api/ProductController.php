@@ -112,48 +112,53 @@ public function getCurrentOrders(Request $request)
 
 public function packageItems()
 {
-    // Eager-load package items + their item & variant to avoid N+1 queries
-    $products = FlowerProduct::where('status', 'active')->where('category', 'Package')
+    // Only active Package products; eager-load the new flat packageItems fields
+    $products = FlowerProduct::where('status', 'active')
+        ->where('category', 'Package')
         ->with([
-            'packageItems:id,product_id,item_id,variant_id',
-            'packageItems.item:id,item_name,product_type,status',
-            'packageItems.variant:id,item_id,title,price',
+            'packageItems:id,product_id,item_name,quantity,unit,price',
         ])
         ->get();
 
-    // Transform response: attach package_items only for Package category
     $data = $products->map(function ($p) {
+        // normalize image URL if it’s a relative path
+        $image = $p->product_image;
+        $imageUrl = $image
+            ? (Str::startsWith($image, ['http://', 'https://']) ? $image : url($image))
+            : null;
+
         $base = [
-            'product_id'         => $p->product_id,
-            'name'               => $p->name,
-            'odia_name'          => $p->odia_name,
-            'product_image'      => $p->product_image,
-            'price'              => $p->price,
-            'mrp'                => $p->mrp,
-            'description'        => $p->description,
-            'category'           => $p->category,
-            'stock'              => $p->stock,
-            'duration'           => $p->duration,
-            'benefits'           => $p->benefits,
-            'status'             => $p->status,
+            'product_id'    => $p->product_id,
+            'name'          => $p->name,
+            'odia_name'     => $p->odia_name,
+            'product_image' => $imageUrl,
+            'price'         => $p->price,
+            'mrp'           => $p->mrp,
+            'description'   => $p->description,
+            'category'      => $p->category,
+            'stock'         => $p->stock,
+            'duration'      => $p->duration,
+            'benefits'      => $p->benefits,
+            'status'        => $p->status,
         ];
 
-        if (Str::lower($p->category) === 'package') {
-            $base['package_items'] = $p->packageItems
-                ->map(function ($pi) {
-                    return [
-                        'item_id'        => $pi->item_id,
-                        'item_name'      => optional($pi->item)->item_name,
-                        'variant_id'     => $pi->variant_id,
-                        'variant_title'  => optional($pi->variant)->title,
-                        'variant_price'  => optional($pi->variant)->price,
-                    ];
-                })
-                ->values();
-        }
+        // New format: item_name, quantity, unit, price (no item/variant relations)
+        $items = $p->packageItems->map(function ($pi) {
+            return [
+                'item_name' => $pi->item_name ?? null,
+                'quantity'  => is_null($pi->quantity) ? null : (float) $pi->quantity,
+                'unit'      => $pi->unit ?? null,
+                'price'     => is_null($pi->price) ? null : (float) $pi->price,
+            ];
+        })->values();
+
+        $base['package_items']  = $items;
+        $base['package_total']  = (float) $p->packageItems->sum(function ($row) {
+            return (float) ($row->price ?? 0);
+        });
 
         return $base;
-    });
+    })->values();
 
     return response()->json([
         'status'  => 200,
