@@ -102,6 +102,21 @@
                         <li><a class="sub-side-menu__item" href="{{ route('admin.manageOfferDetails')}}">Manage Refer Offer</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('refer.offerClaim') }}">Add Offer Claim</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('refer.manageOfferClaim') }}">Manage Offer Claim</a></li>
+                    </ul>
+                </li>
+
+                <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 17.93V20a1 1 0 0 1-2 0v-.07A8.07 8.07 0 0 1 4.07 13H4a1 1 0 0 1 0-2h.07A8.07 8.07 0 0 1 11 4.07V4a1 1 0 0 1 2 0v.07A8.07 8.07 0 0 1 19.93 11H20a1 1 0 0 1 0 2h-.07A8.07 8.07 0 0 1 13 19.93z"/>
+                        </svg>
+                        <span class="side-menu__label">MARKETING DETAILS</span>
+                        <i class="angle fas fa-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.getVisitPlace')}}">Visit Place</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.visitPlace')}}">Manage Visit Place</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.followUpSubscriptions')}}">Follow Up</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.promotionList') }}">Add Flower Promotion</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPromotion') }}">Manage Flower Promotion</a></li>
                     </ul>
@@ -203,22 +218,6 @@
                     </ul>
                 </li>
 
-                <li class="slide">
-                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path d="M4 4h16v2H4zm0 4h10v2H4zm0 4h16v2H4zm0 4h10v2H4z" />
-                        </svg>
-                        <span class="side-menu__label">Marketing</span>
-                        <i class="angle fas fa-chevron-right"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.followUpSubscriptions') }}">Follow
-                                Up</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.getVisitPlace') }}">Visit Place</a>
-                        </li>
-                    </ul>
-                </li>
 
                 @if (session('admin_role') === 'admin')
                     <li class="slide">
