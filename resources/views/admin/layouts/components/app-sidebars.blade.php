@@ -46,40 +46,69 @@
 
                 <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                            <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z" />
                         </svg>
                         <span class="side-menu__label">CUSTOMER DETAILS</span>
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
                         <li><a class="sub-side-menu__item" href="{{ url('admin/manage-users') }}">Manage User</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.address.categories') }}">Address Summary</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.managelocality') }}">Manage Locality</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.address.categories') }}">Address
+                                Summary</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.managelocality') }}">Manage
+                                Locality</a></li>
                     </ul>
                 </li>
 
                 <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M12 2a5 5 0 0 1 5 5c0 2.5-2.5 7-5 13-2.5-6-5-10.5-5-13a5 5 0 0 1 5-5zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a3 3 0 0 1 3 3c0 1.5-1.5 4.5-3 7.5-1.5-3-3-6-3-7.5a3 3 0 0 1 3-3z"/>
-                    </svg>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M12 2a5 5 0 0 1 5 5c0 2.5-2.5 7-5 13-2.5-6-5-10.5-5-13a5 5 0 0 1 5-5zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a3 3 0 0 1 3 3c0 1.5-1.5 4.5-3 7.5-1.5-3-3-6-3-7.5a3 3 0 0 1 3-3z" />
+                        </svg>
                         <span class="side-menu__label">VENDOR DETAILS</span>
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{route('admin.addVendorDetails')  }}">Add Vendor</a></li>
-                        <li><a class="sub-side-menu__item" href="{{route('admin.managevendor')  }}">Manage Vendor</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageflowerpickupdetails') }}">Manage Flower Pickup</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.monthWiseFlowerPrice')  }}">Add Vendor Flower Price</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPrice')  }}">Manage Vendor Flower Price</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.addVendorDetails') }}">Add Vendor</a>
+                        </li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.managevendor') }}">Manage Vendor</a>
+                        </li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageflowerpickupdetails') }}">Manage
+                                Flower Pickup</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.monthWiseFlowerPrice') }}">Add Vendor
+                                Flower Price</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPrice') }}">Manage Vendor
+                                Flower Price</a></li>
+                    </ul>
+                </li>
+
+                <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z" />
+                        </svg>
+                        <span class="side-menu__label">OFFER DETAILS</span>
+                        <i class="angle fas fa-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.offerDetails')}}">Add Refer Offer</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOfferDetails')}}">Manage Refer Offer</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('refer.offerClaim') }}">Add Offer Claim</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('refer.manageOfferClaim') }}">Manage Offer Claim</a></li>
                     </ul>
                 </li>
 
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.orders.index') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
                             <path
                                 d="M20 6h-4V4H8v2H4v2h16V6zm0 4H4v10h16V10zM6 18v-6h2v6H6zm4 0v-6h4v6h-4zm6 0v-6h2v6h-2z" />
                         </svg>
@@ -89,8 +118,8 @@
 
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.manageRiderDetails') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
                             <path
                                 d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5H14V3H6v6h5v2H7c-1.1 0-2 .9-2 2v5h2v-3h2v3h9v-5c0-.64-.24-1.22-.63-1.66l1.54-3.45c.13-.3.15-.64.01-.94z" />
                         </svg>
@@ -100,8 +129,8 @@
 
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.manageOrderAssign') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
                             <path d="M4 6h16v2H4zM4 12h16v2H4zM4 18h16v2H4z" />
                         </svg>
                         <span class="side-menu__label">Apartment Assign</span>
@@ -116,17 +145,6 @@
                                 d="M13 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7 0-3.87 3.13-7 7-7 3.87 0 7 3.13 7 7 0 3.87-3.13 7-7 7zm.5-12h-2v6l5.25 3.15.75-1.23-4-2.37V7z" />
                         </svg>
                         <span class="side-menu__label">Delivery History</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.offerDetails') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z" />
-                        </svg>
-                        <span class="side-menu__label">Offer Details</span>
                     </a>
                 </li>
 
@@ -171,32 +189,6 @@
                                 d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11zm0-13H5V6h14v1z" />
                         </svg>
                         <span class="side-menu__label">Festival Calendar</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('refer.offerCreate') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13s-7-7.75-7-13a7 7 0 0 1 7-7zm0 9.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
-                            <circle cx="12" cy="9.5" r="1.5" />
-                            <path d="M15 12h2v2h-2zM7 12h2v2H7z" />
-                        </svg>
-                        <span class="side-menu__label">Refer Offer</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('refer.manageOfferClaim') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2a7 7 0 0 1 7 7c0 5.25-7 13-7 13s-7-7.75-7-13a7 7 0 0 1 7-7zm0 9.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
-                            <circle cx="12" cy="9.5" r="1.5" />
-                            <path d="M15 12h2v2h-2zM7 12h2v2H7z" />
-                        </svg>
-                        <span class="side-menu__label">Refer Offer Claim</span>
                     </a>
                 </li>
 
