@@ -11,7 +11,7 @@ class FlowerProduct extends Model
 
     protected $table = 'flower_products';
 
-    protected $fillable = ['product_id','name','odia_name','product_image', 'price','mrp', 'description', 'category','mala_provided', 'is_flower_available','available_from','available_to','stock', 'duration','benefits','status'];
+    protected $fillable = ['product_id','name','odia_name','product_image', 'price','mrp','discount', 'description', 'category','mala_provided', 'is_flower_available','available_from','available_to','stock', 'duration','benefits','status'];
 
     public function pickupDetails()
     {

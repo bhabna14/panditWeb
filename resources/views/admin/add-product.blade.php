@@ -111,6 +111,11 @@
                 <input type="number" name="price" class="form-control" id="price" min="0" step="0.01"
                     placeholder="Enter sale price" required>
             </div>
+            <!-- DISCOUNT -->
+            <div class="col-md-4 mb-3 controlled hidden" data-block="core">
+                <label for="discount" class="form-label"><span id="label-discount">Discount (%)</span></label>
+                <input type="number" name="discount" class="form-control" id="discount" min="0" max="100" step="0.01" placeholder="Enter discount percentage">
+            </div>
 
             <!-- SUBSCRIPTION: DURATION -->
             <div class="col-md-4 mb-3 controlled hidden" id="durationGroup" data-block="subscription">

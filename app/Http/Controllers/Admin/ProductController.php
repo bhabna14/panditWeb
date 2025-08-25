@@ -36,6 +36,7 @@ class ProductController extends Controller
             'odia_name'   => ['nullable','string','max:255'],
             'price'       => ['required','numeric','min:0','lte:mrp'],
             'mrp'         => ['required','numeric','min:0'],
+            'discount'    => ['nullable','numeric','min:0'],
             'description' => ['required','string'],
             'category'    => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
             'pooja_id'    => ['nullable','integer'], // will be nulled unless category=Package
@@ -175,6 +176,7 @@ class ProductController extends Controller
             $product->slug          = $slug;
             $product->price         = $validated['price'];
             $product->mrp           = $validated['mrp'];
+            $product->discount           = $validated['discount'] ?? null;
             $product->description   = $validated['description'];
             $product->category      = $validated['category'];
 
@@ -213,7 +215,7 @@ class ProductController extends Controller
         return redirect()->back()->with('success', 'Product created successfully.');
     }
 
-  public function editProduct($id)
+    public function editProduct($id)
     {
         $product = FlowerProduct::findOrFail($id);
 
@@ -264,6 +266,7 @@ class ProductController extends Controller
             'packageItems'
         ));
     }
+
     public function updateProduct(Request $request, $id)
     {
         $product = FlowerProduct::findOrFail($id);
@@ -465,34 +468,30 @@ class ProductController extends Controller
 
         return view('admin.manage-product', compact('products'));
     }
+ 
+    public function storeItem(Request $request)
+    {
+        $data = $request->validate([
+            'item_name' => ['required','string','max:255','unique:poojaitem_list,item_name'],
+        ]);
 
-     
-public function storeItem(Request $request)
-{
-    $data = $request->validate([
-        'item_name' => ['required','string','max:255','unique:poojaitem_list,item_name'],
-    ]);
+        // build unique slug
+        $base = Str::slug($data['item_name'], '-');
+        $slug = $base ?: 'item';
+        $i = 2;
+        
+        while (Poojaitemlists::where('slug', $slug)->exists()) {
+            $slug = $base.'-'.$i++;
+        }
 
-    // build unique slug
-    $base = Str::slug($data['item_name'], '-');
-    $slug = $base ?: 'item';
-    $i = 2;
-    
-    while (Poojaitemlists::where('slug', $slug)->exists()) {
-        $slug = $base.'-'.$i++;
+        Poojaitemlists::create([
+            'item_name'    => $data['item_name'],
+            'slug'         => $slug,
+        ]);
+
+        return back()->with('success', 'Item added successfully.');
     }
 
-    Poojaitemlists::create([
-        'item_name'    => $data['item_name'],
-        'slug'         => $slug,
-    ]);
-
-    return back()->with('success', 'Item added successfully.');
-}
-
-    /**
-     * Ensure slug is unique on poojaitem_list.slug
-     */
     protected function uniqueSlug(string $base): string
     {
         $slug   = $base ?: 'item';

@@ -109,7 +109,7 @@ class ProductController extends Controller
         }
     }
 
- public function packageItems()
+    public function packageItems()
     {
         // Only active Package products; eager-load the new flat packageItems fields
         $products = FlowerProduct::where('status', 'active')
