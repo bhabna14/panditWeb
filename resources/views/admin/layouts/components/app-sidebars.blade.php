@@ -81,8 +81,6 @@
                                 Order (New User)</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Demo
                                 Customize Order</a></li>
-
-
                         {{-- <li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li> --}}
                     </ul>
                 </li>
