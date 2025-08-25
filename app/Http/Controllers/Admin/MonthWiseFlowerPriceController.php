@@ -67,13 +67,14 @@ class MonthWiseFlowerPriceController extends Controller
         }
     }
 
-   public function manageFlowerPrice()
+  public function manageFlowerPrice()
 {
-    // Load vendors that actually have price rows
+    // Vendors that actually have price rows, with product & unit eager-loaded
     $vendors = FlowerVendor::with([
         'monthPrices' => function ($q) {
             $q->with(['product:product_id,name', 'unit:id,unit_name'])
-              ->orderByDesc('id');
+              ->orderBy('product_id')       // group visually by flower
+              ->orderByDesc('start_date');  // newest ranges first
         },
     ])
     ->whereHas('monthPrices')

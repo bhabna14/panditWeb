@@ -58,7 +58,6 @@
                         <li><a class="sub-side-menu__item" href="{{ url('admin/manage-users') }}">Manage User</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.address.categories') }}">Address
                                 Summary</a></li>
-
                     </ul>
                 </li>
 

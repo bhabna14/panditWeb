@@ -4,6 +4,7 @@
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
+
     <style>
         .toolbar {
             display: flex;
@@ -45,6 +46,26 @@
             font-size: 12px;
             color: #64748b;
         }
+
+        .flower-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .flower-head {
+            background: #fbfdff;
+            border-bottom: 1px solid #eef2f7;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .flower-title {
+            font-weight: 600;
+        }
     </style>
 @endsection
 
@@ -71,8 +92,8 @@
                 <input id="vendorFilter" class="form-control search-input" type="text"
                     placeholder="Filter vendors by name...">
                 <div class="btn-group">
-                    <button id="expandAll" class="btn btn-outline-secondary btn-sm">Expand All</button>
-                    <button id="collapseAll" class="btn btn-outline-secondary btn-sm">Collapse All</button>
+                    <button id="expandAllVendors" class="btn btn-outline-secondary btn-sm">Expand All Vendors</button>
+                    <button id="collapseAllVendors" class="btn btn-outline-secondary btn-sm">Collapse All Vendors</button>
                 </div>
                 <span class="text-muted ms-auto">Vendors: <strong>{{ $vendors->count() }}</strong></span>
             </div>
@@ -86,7 +107,9 @@
                             $accId = 'v_' . preg_replace('/[^A-Za-z0-9_\-]/', '_', (string) $vendor->vendor_id);
                             $open = $i === 0 ? 'show' : ''; // open first vendor by default
                             $expanded = $i === 0 ? 'true' : 'false';
-                            $uniqueFlowers = $vendor->monthPrices->unique('product_id')->count();
+
+                            // Group this vendor's rows by flower (product_id)
+$byFlower = $vendor->monthPrices->groupBy('product_id');
                         @endphp
 
                         <div class="accordion-item vendor-item" data-vendor-name="{{ strtolower($vendor->vendor_name) }}">
@@ -107,72 +130,107 @@
                                             </div>
                                         </div>
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="pill">{{ $uniqueFlowers }} flowers</span>
+                                            <span class="pill">{{ $byFlower->count() }} flowers</span>
                                             <span class="pill">{{ $vendor->monthPrices->count() }} entries</span>
                                         </div>
                                     </div>
                                 </button>
                             </h2>
+
                             <div id="collapse_{{ $accId }}" class="accordion-collapse collapse {{ $open }}"
                                 aria-labelledby="heading_{{ $accId }}" data-bs-parent="#vendorAccordion">
                                 <div class="accordion-body">
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered align-middle mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width:26%">Flower</th>
-                                                    <th style="width:22%">Date Range</th>
-                                                    <th style="width:12%">Qty</th>
-                                                    <th style="width:12%">Unit</th>
-                                                    <th style="width:14%">Price</th>
-                                                    <th style="width:14%">Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @forelse ($vendor->monthPrices as $row)
-                                                    <tr>
-                                                        <td>{{ $row->product?->name ?? $row->product_id }}</td>
-                                                        <td>
-                                                            <span class="badge bg-light text-dark">
-                                                                {{ $row->start_date?->format('d M Y') ?? \Carbon\Carbon::parse($row->start_date)->format('d M Y') }}
-                                                                →
-                                                                {{ $row->end_date?->format('d M Y') ?? \Carbon\Carbon::parse($row->end_date)->format('d M Y') }}
-                                                            </span>
-                                                        </td>
-                                                        <td>{{ $row->quantity }}</td>
-                                                        <td>{{ $row->unit?->unit_name ?? $row->unit_id }}</td>
-                                                        <td><strong>₹{{ number_format($row->price_per_unit, 2) }}</strong>
-                                                        </td>
-                                                        <td>
-                                                            <button class="btn btn-sm btn-warning editBtn"
-                                                                data-id="{{ $row->id }}"
-                                                                data-start="{{ $row->start_date?->format('Y-m-d') ?? \Carbon\Carbon::parse($row->start_date)->format('Y-m-d') }}"
-                                                                data-end="{{ $row->end_date?->format('Y-m-d') ?? \Carbon\Carbon::parse($row->end_date)->format('Y-m-d') }}"
-                                                                data-qty="{{ $row->quantity }}"
-                                                                data-unit="{{ $row->unit_id }}"
-                                                                data-price="{{ $row->price_per_unit }}">
-                                                                Edit
-                                                            </button>
-                                                            <button class="btn btn-sm btn-danger deleteBtn"
-                                                                data-id="{{ $row->id }}">
-                                                                Delete
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                @empty
-                                                    <tr>
-                                                        <td colspan="6" class="text-center text-muted">No entries for
-                                                            this vendor.</td>
-                                                    </tr>
-                                                @endforelse
-                                            </tbody>
-                                        </table>
+
+                                    <div class="d-flex justify-content-end mb-2">
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-secondary expand-flowers"
+                                                data-vendor="{{ $accId }}">Expand Flowers</button>
+                                            <button class="btn btn-outline-secondary collapse-flowers"
+                                                data-vendor="{{ $accId }}">Collapse Flowers</button>
+                                        </div>
                                     </div>
+
+                                    {{-- Flower groups --}}
+                                    <div id="flowers_{{ $accId }}">
+                                        @forelse ($byFlower as $productId => $rows)
+                                            @php
+                                                $first = $rows->first();
+                                                $flowerName = $first->product?->name ?? $productId;
+                                                $flowerCardId =
+                                                    'f_' .
+                                                    $accId .
+                                                    '_' .
+                                                    preg_replace('/[^A-Za-z0-9_\-]/', '_', (string) $productId);
+                                            @endphp
+
+                                            <div class="flower-card">
+                                                <div class="flower-head" data-bs-toggle="collapse"
+                                                    data-bs-target="#body_{{ $flowerCardId }}" aria-expanded="false">
+                                                    <div class="flower-title">{{ $flowerName }}</div>
+                                                    <div class="pill">{{ $rows->count() }} entries</div>
+                                                </div>
+
+                                                <div id="body_{{ $flowerCardId }}" class="collapse">
+                                                    <div class="p-3">
+                                                        <div class="table-responsive">
+                                                            <table class="table table-bordered align-middle mb-0">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th style="width:26%">Date Range</th>
+                                                                        <th style="width:14%">Qty</th>
+                                                                        <th style="width:14%">Unit</th>
+                                                                        <th style="width:18%">Price</th>
+                                                                        <th style="width:28%">Action</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    @foreach ($rows as $row)
+                                                                        <tr>
+                                                                            <td>
+                                                                                <span class="badge bg-light text-dark">
+                                                                                    {{ $row->start_date?->format('d M Y') ?? \Carbon\Carbon::parse($row->start_date)->format('d M Y') }}
+                                                                                    →
+                                                                                    {{ $row->end_date?->format('d M Y') ?? \Carbon\Carbon::parse($row->end_date)->format('d M Y') }}
+                                                                                </span>
+                                                                            </td>
+                                                                            <td>{{ $row->quantity }}</td>
+                                                                            <td>{{ $row->unit?->unit_name ?? $row->unit_id }}
+                                                                            </td>
+                                                                            <td><strong>₹{{ number_format($row->price_per_unit, 2) }}</strong>
+                                                                            </td>
+                                                                            <td>
+                                                                                <button
+                                                                                    class="btn btn-sm btn-warning editBtn"
+                                                                                    data-id="{{ $row->id }}"
+                                                                                    data-start="{{ $row->start_date?->format('Y-m-d') ?? \Carbon\Carbon::parse($row->start_date)->format('Y-m-d') }}"
+                                                                                    data-end="{{ $row->end_date?->format('Y-m-d') ?? \Carbon\Carbon::parse($row->end_date)->format('Y-m-d') }}"
+                                                                                    data-qty="{{ $row->quantity }}"
+                                                                                    data-unit="{{ $row->unit_id }}"
+                                                                                    data-price="{{ $row->price_per_unit }}">
+                                                                                    Edit
+                                                                                </button>
+                                                                                <button
+                                                                                    class="btn btn-sm btn-danger deleteBtn"
+                                                                                    data-id="{{ $row->id }}">Delete</button>
+                                                                            </td>
+                                                                        </tr>
+                                                                    @endforeach
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <div class="text-center text-muted">No flowers found for this vendor.</div>
+                                        @endforelse
+                                    </div>
+
                                 </div>
                             </div>
-                        </div><!-- /.accordion-item -->
+                        </div>
                     @endforeach
-                </div><!-- /.accordion -->
+                </div>
             @endif
 
         </div>
@@ -232,7 +290,7 @@
 @section('scripts')
     <!-- SweetAlert2 for deletes -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Bootstrap bundle (collapse/accordion) if not already included in layout -->
+    <!-- Bootstrap bundle (collapse) if not already in layout -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
@@ -245,20 +303,40 @@
             });
         });
 
-        // Expand All / Collapse All
-        document.getElementById('expandAll').addEventListener('click', function() {
+        // Expand/Collapse all vendors
+        document.getElementById('expandAllVendors').addEventListener('click', function() {
             document.querySelectorAll('#vendorAccordion .accordion-collapse').forEach(el => {
                 if (!el.classList.contains('show')) new bootstrap.Collapse(el, {
                     toggle: true
                 });
             });
         });
-        document.getElementById('collapseAll').addEventListener('click', function() {
+        document.getElementById('collapseAllVendors').addEventListener('click', function() {
             document.querySelectorAll('#vendorAccordion .accordion-collapse.show').forEach(el => {
                 new bootstrap.Collapse(el, {
                     toggle: true
                 });
             });
+        });
+
+        // Per-vendor: expand/collapse all flowers
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('expand-flowers')) {
+                const id = e.target.getAttribute('data-vendor');
+                document.querySelectorAll('#flowers_' + id + ' .collapse').forEach(el => {
+                    if (!el.classList.contains('show')) new bootstrap.Collapse(el, {
+                        toggle: true
+                    });
+                });
+            }
+            if (e.target.classList.contains('collapse-flowers')) {
+                const id = e.target.getAttribute('data-vendor');
+                document.querySelectorAll('#flowers_' + id + ' .collapse.show').forEach(el => {
+                    new bootstrap.Collapse(el, {
+                        toggle: true
+                    });
+                });
+            }
         });
 
         // Open Edit Modal
