@@ -58,7 +58,32 @@
                         <li><a class="sub-side-menu__item" href="{{ url('admin/manage-users') }}">Manage User</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.address.categories') }}">Address
                                 Summary</a></li>
-                       
+
+                    </ul>
+                </li>
+
+                <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M17 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 2v2H7V6h10zm0 4v8H7v-8h10zm-5 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
+                        </svg>
+                        <span class="side-menu__label">SUBSCRIPTION DETAILS</span>
+                        <i class="angle fas fa-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/add-product') }}">Add Product</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('manageproduct') }}">Manage Product</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/existing-user') }}">Subscription Order
+                                (Existing User)</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Subscription
+                                Order (New User)</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Demo
+                                Customize Order</a></li>
+
+
+                        {{-- <li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li> --}}
                     </ul>
                 </li>
 
@@ -77,19 +102,22 @@
                         </li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.managevendor') }}">Manage Vendor</a>
                         </li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageflowerpickupdetails') }}">Manage
+                        <li><a class="sub-side-menu__item"
+                                href="{{ route('admin.manageflowerpickupdetails') }}">Manage
                                 Flower Pickup</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.monthWiseFlowerPrice') }}">Add Vendor
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.monthWiseFlowerPrice') }}">Add
+                                Vendor
                                 Flower Price</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPrice') }}">Manage Vendor
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPrice') }}">Manage
+                                Vendor
                                 Flower Price</a></li>
                     </ul>
                 </li>
 
                 <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
                             <path
                                 d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z" />
                         </svg>
@@ -97,9 +125,11 @@
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.offerDetails') }}">Add Refer Offer</a>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.offerDetails') }}">Add Refer
+                                Offer</a>
                         </li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOfferDetails') }}">Manage Refer
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOfferDetails') }}">Manage
+                                Refer
                                 Offer</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('refer.offerClaim') }}">Add Offer Claim</a>
                         </li>
@@ -177,27 +207,6 @@
                                 Received</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('manageOfficeFund') }}">Manage Fund
                                 Received</a></li>
-                    </ul>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M17 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 2v2H7V6h10zm0 4v8H7v-8h10zm-5 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
-                        </svg>
-                        <span class="side-menu__label">SUBSCRIPTION DETAILS</span>
-                        <i class="angle fas fa-chevron-right"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/existing-user') }}">Subscription Order
-                                (Existing User)</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Subscription
-                                Order (New User)</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Demo
-                                Customize Order</a></li>
-                        {{-- <li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li> --}}
                     </ul>
                 </li>
 
