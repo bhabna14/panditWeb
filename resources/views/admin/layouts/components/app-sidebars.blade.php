@@ -102,6 +102,8 @@
                         <li><a class="sub-side-menu__item" href="{{ route('admin.manageOfferDetails')}}">Manage Refer Offer</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('refer.offerClaim') }}">Add Offer Claim</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('refer.manageOfferClaim') }}">Manage Offer Claim</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.promotionList') }}">Add Flower Promotion</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPromotion') }}">Manage Flower Promotion</a></li>
                     </ul>
                 </li>
 
@@ -145,17 +147,6 @@
                                 d="M13 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7 0-3.87 3.13-7 7-7 3.87 0 7 3.13 7 7 0 3.87-3.13 7-7 7zm.5-12h-2v6l5.25 3.15.75-1.23-4-2.37V7z" />
                         </svg>
                         <span class="side-menu__label">Delivery History</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.promotionList') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M21 7l-1-5H4L3 7H1v2h2l1 12h14l1-12h2V7h-2zm-2 12H5l-1-10h14l-1 10zm-7-9h2v2h-2V10zm0 4h2v2h-2v-2z" />
-                        </svg>
-                        <span class="side-menu__label">Flower Promotion</span>
                     </a>
                 </li>
 
