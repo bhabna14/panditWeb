@@ -58,8 +58,7 @@
                         <li><a class="sub-side-menu__item" href="{{ url('admin/manage-users') }}">Manage User</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.address.categories') }}">Address
                                 Summary</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.managelocality') }}">Manage
-                                Locality</a></li>
+                       
                     </ul>
                 </li>
 
@@ -154,6 +153,8 @@
                                 Assign</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.manageOrderAssign') }}">Manage
                                 Apartment Assign</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.managelocality') }}">Manage
+                                Locality</a></li>
                     </ul>
                 </li>
 
@@ -196,7 +197,27 @@
                                 Order (New User)</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Demo
                                 Customize Order</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li>
+                        {{-- <li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li> --}}
+                    </ul>
+                </li>
+
+                <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M7 18c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H7zM6 6h12v2H6z" />
+                        </svg>
+                        <span class="side-menu__label">FINANCE REPORT</span>
+                        <i class="angle fas fa-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription
+                                Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower
+                                Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower
+                                Reports</a></li>
                     </ul>
                 </li>
 
@@ -220,44 +241,6 @@
                         </svg>
                         <span class="side-menu__label">Festival Calendar</span>
                     </a>
-                </li>
-
-                @if (session('admin_role') === 'admin')
-                    <li class="slide">
-                        <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                            <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                                height="24" viewBox="0 0 24 24">
-                                <path d="M10 4v4H4v2h6v4h2V10h6V8h-6V4z" />
-                            </svg>
-                            <span class="side-menu__label">Product Admin</span>
-                            <i class="angle fas fa-chevron-right"></i>
-                        </a>
-                        <ul class="slide-menu">
-                            
-                            <li><a class="sub-side-menu__item" href="{{ route('managePujaList') }}">Manage Items</a>
-                            </li>
-                        </ul>
-                    </li>
-                @endif
-
-                <li class="slide">
-                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M7 18c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H7zM6 6h12v2H6z" />
-                        </svg>
-                        <span class="side-menu__label">FINANCE REPORT</span>
-                        <i class="angle fas fa-chevron-right"></i>
-                    </a>
-                    <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription
-                                Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower
-                                Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower
-                                Reports</a></li>
-                    </ul>
                 </li>
             </ul>
 
