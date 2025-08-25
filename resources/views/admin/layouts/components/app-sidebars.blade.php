@@ -45,25 +45,35 @@
                 </li>
 
                 <li class="slide">
-                    <a class="side-menu__item" href="{{ url('admin/manage-users') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
-                            <path
-                                d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V20h14v-3.5C15 14.17 10.33 13 8 13zm8 0c-.29 0-.62.02-.97.05C15.67 14.17 18 15.17 18 16.5V20h4v-3.5c0-2.33-4.67-3.5-6-3.5z" />
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                            <path d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-3.3 0-10 1.7-10 5v3h20v-3c0-3.3-6.7-5-10-5z"/>
                         </svg>
-                        <span class="side-menu__label">Manage Users</span>
+                        <span class="side-menu__label">CUSTOMER DETAILS</span>
+                        <i class="angle fas fa-chevron-right"></i>
                     </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/manage-users') }}">Manage User</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.address.categories') }}">Address Summary</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.managelocality') }}">Manage Locality</a></li>
+                    </ul>
                 </li>
 
                 <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.managelocality') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
-                            <path
-                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" />
-                        </svg>
-                        <span class="side-menu__label">Manage Locality</span>
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M12 2a5 5 0 0 1 5 5c0 2.5-2.5 7-5 13-2.5-6-5-10.5-5-13a5 5 0 0 1 5-5zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a3 3 0 0 1 3 3c0 1.5-1.5 4.5-3 7.5-1.5-3-3-6-3-7.5a3 3 0 0 1 3-3z"/>
+                    </svg>
+                        <span class="side-menu__label">VENDOR DETAILS</span>
+                        <i class="angle fas fa-chevron-right"></i>
                     </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{route('admin.addVendorDetails')  }}">Add Vendor</a></li>
+                        <li><a class="sub-side-menu__item" href="{{route('admin.managevendor')  }}">Manage Vendor</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageflowerpickupdetails') }}">Manage Flower Pickup</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.monthWiseFlowerPrice')  }}">Add Vendor Flower Price</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPrice')  }}">Manage Vendor Flower Price</a></li>
+                    </ul>
                 </li>
 
                 <li class="slide">
@@ -74,16 +84,6 @@
                                 d="M20 6h-4V4H8v2H4v2h16V6zm0 4H4v10h16V10zM6 18v-6h2v6H6zm4 0v-6h4v6h-4zm6 0v-6h2v6h-2z" />
                         </svg>
                         <span class="side-menu__label">Manage Flower Orders</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.managevendor') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                            viewBox="0 0 24 24">
-                            <path d="M3 4v16h18V4H3zm16 14H5V6h14v12zM8 8h2v2H8V8zm4 0h4v2h-4V8z" />
-                        </svg>
-                        <span class="side-menu__label">Manage Vendors</span>
                     </a>
                 </li>
 
@@ -109,17 +109,6 @@
                 </li>
 
                 <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.manageflowerpickupdetails') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M20 8h-3V6c0-1.1-.9-2-2-2H5C3.9 4 3 4.9 3 6v9h2c0 1.1.9 2 2 2h1c1.1 0 2-.9 2-2h6c0 1.1.9 2 2 2h1c1.1 0 2-.9 2-2V9c0-.55-.45-1-1-1z" />
-                        </svg>
-                        <span class="side-menu__label">Manage Flower Pickup</span>
-                    </a>
-                </li>
-
-                <li class="slide">
                     <a class="side-menu__item" href="{{ url('admin/manage-delivery-history') }}">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24">
@@ -127,17 +116,6 @@
                                 d="M13 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7 0-3.87 3.13-7 7-7 3.87 0 7 3.13 7 7 0 3.87-3.13 7-7 7zm.5-12h-2v6l5.25 3.15.75-1.23-4-2.37V7z" />
                         </svg>
                         <span class="side-menu__label">Delivery History</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.address.categories') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z" />
-                        </svg>
-                        <span class="side-menu__label">Address Summary</span>
                     </a>
                 </li>
 
@@ -219,19 +197,6 @@
                             <path d="M15 12h2v2h-2zM7 12h2v2H7z" />
                         </svg>
                         <span class="side-menu__label">Refer Offer Claim</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.monthWiseFlowerPrice') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M12 2a5 5 0 0 1 5 5c0 2.5-2.5 7-5 13-2.5-6-5-10.5-5-13a5 5 0 0 1 5-5zm0 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm0 2a3 3 0 0 1 3 3c0 1.5-1.5 4.5-3 7.5-1.5-3-3-6-3-7.5a3 3 0 0 1 3-3z" />
-                            <text x="12" y="22" text-anchor="middle" font-size="7" fill="#7b8191"
-                                font-family="Arial">&#8377;</text>
-                        </svg>
-                        <span class="side-menu__label">Month Wise Flower Price</span>
                     </a>
                 </li>
 
