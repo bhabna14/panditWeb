@@ -16,7 +16,7 @@ use App\Models\MonthWiseFlowerPrice;
 class MonthWiseFlowerPriceController extends Controller
 {
     
-     public function create()
+    public function create()
     {
         $vendors = FlowerVendor::all();
         $poojaUnits = PoojaUnit::all(['id','unit_name']); // load units
@@ -66,21 +66,25 @@ class MonthWiseFlowerPriceController extends Controller
                 ->with('error', 'Something went wrong: ' . $e->getMessage());
         }
     }
-public function manageFlowerPrice()
-{
-    $transactions = MonthWiseFlowerPrice::with([
-        'vendor:vendor_id,vendor_name',
-        'product:product_id,name',
-        'unit:id,unit_name'
-    ])
-    ->orderBy('id','desc')
-    ->get();
 
-    $units = PoojaUnit::get();
+    public function manageFlowerPrice()
+    {
+        // Load vendors that actually have rows, with their prices, product & unit
+        $vendors = FlowerVendor::with([
+            'monthPrices' => function($q) {
+                $q->orderByDesc('id');
+            },
+            'monthPrices.product',
+            'monthPrices.unit'
+        ])
+        ->whereHas('monthPrices')
+        ->orderBy('vendor_name')
+        ->get();
+        return view('admin.manage-month-wise-flower-price', compact('vendors'));
 
-    return view('admin.manage-month-wise-flower-price', compact('transactions','units'));
-}
- public function updateFlowerPrice(Request $request, $id)
+    }
+
+    public function updateFlowerPrice(Request $request, $id)
     {
         $validated = $request->validate([
             'start_date'     => ['required', 'date'],
@@ -95,23 +99,24 @@ public function manageFlowerPrice()
 
         return back()->with('success', 'Flower price updated successfully!');
     }
-public function deleteFlowerPrice($id)
-{
-    try {
-        $price = MonthWiseFlowerPrice::findOrFail($id);
-        $price->delete();
 
-        return response()->json(['message' => 'Flower price deleted successfully!'], 200);
-    } catch (\Illuminate\Database\QueryException $e) {
-        // Example: FK constraint violation
-        return response()->json([
-            'message' => 'Cannot delete this record because it is referenced elsewhere.'
-        ], 409);
-    } catch (\Throwable $e) {
-        return response()->json([
-            'message' => 'Unexpected error. Please try again.'
-        ], 500);
+    public function deleteFlowerPrice($id)
+    {
+        try {
+            $price = MonthWiseFlowerPrice::findOrFail($id);
+            $price->delete();
+
+            return response()->json(['message' => 'Flower price deleted successfully!'], 200);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Example: FK constraint violation
+            return response()->json([
+                'message' => 'Cannot delete this record because it is referenced elsewhere.'
+            ], 409);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Unexpected error. Please try again.'
+            ], 500);
+        }
     }
-}
 
 }

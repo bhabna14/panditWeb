@@ -31,6 +31,12 @@ class FlowerVendor extends Model
         'flower_ids' => 'array',
     ];
 
+     public function monthPrices()
+    {
+        return $this->hasMany(MonthWiseFlowerPrice::class, 'vendor_id', 'vendor_id')
+            ->with(['product:product_id,name', 'unit:id,unit_name']);
+    }
+
 public function flowerProduct(){
     return $this->hasMany(FlowerProduct::class,'flower_ids', 'product_id');
 }
