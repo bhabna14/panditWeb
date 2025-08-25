@@ -67,19 +67,18 @@ class MonthWiseFlowerPriceController extends Controller
         }
     }
 
-    public function manageFlowerPrice()
-    {
-        // Load vendors that actually have rows, with their prices, product & unit
-        $vendors = FlowerVendor::with([
-            'monthPrices' => function($q) {
-                $q->orderByDesc('id');
-            },
-            'monthPrices.product',
-            'monthPrices.unit'
-        ])
-        ->whereHas('monthPrices')
-        ->orderBy('vendor_name')
-        ->get();
+   public function manageFlowerPrice()
+{
+    // Load vendors that actually have price rows
+    $vendors = FlowerVendor::with([
+        'monthPrices' => function ($q) {
+            $q->with(['product:product_id,name', 'unit:id,unit_name'])
+              ->orderByDesc('id');
+        },
+    ])
+    ->whereHas('monthPrices')
+    ->orderBy('vendor_name')
+    ->get();
         return view('admin.manage-month-wise-flower-price', compact('vendors'));
 
     }
