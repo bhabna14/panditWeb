@@ -277,6 +277,7 @@ class ProductController extends Controller
             'odia_name'     => ['nullable','string','max:255'],
             'mrp'           => ['required','numeric','min:0'],
             'price'         => ['required','numeric','min:0','lte:mrp'],
+            'discount'      => ['nullable','numeric','min:0'],
             'category'      => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
             'stock'         => ['nullable','integer','min:0'],
             'duration'      => ['nullable','required_if:category,Subscription','in:1,3,6'],
@@ -401,6 +402,7 @@ class ProductController extends Controller
             $product->odia_name   = $validated['odia_name'] ?? null;
             $product->price       = $validated['price'];
             $product->mrp         = $validated['mrp'];
+            $product->discount    = $validated['discount'] ?? null;
             $product->description = $validated['description'];
             $product->category    = $validated['category'];
 

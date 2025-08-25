@@ -102,6 +102,12 @@
                     value="{{ old('price', $product->price) }}" min="0" step="0.01" required>
             </div>
 
+            <div class="col-md-3 mb-3">
+                <label for="discount" class="form-label">Discount (%)</label>
+                <input type="number" name="discount" class="form-control" id="discount"
+                    value="{{ old('discount', $product->discount) }}" min="0" max="100" step="0.01">
+            </div>
+
             <div class="col-md-6 mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select name="category" id="category" class="form-control select2" required>

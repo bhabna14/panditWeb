@@ -80,6 +80,7 @@
                                     <th>Image</th>
                                     <th>MRP</th>
                                     <th>Sale Price</th>
+                                    <th>Discount</th>
                                     <th>Stock</th>
                                     <th>Category</th>
                                     <th>Category Details</th>
@@ -103,6 +104,15 @@
 
                                         <td>Rs. {{ number_format((float) $product->mrp, 2) }}</td>
                                         <td>Rs. {{ number_format((float) $product->price, 2) }}</td>
+                                        <td>
+                                            @if ($product->discount !== null && $product->discount > 0)
+                                                <span class="badge bg-success">
+                                                    {{ rtrim(rtrim(number_format((float) $product->discount, 2, '.', ''), '0'), '.') }}%
+                                                </span>
+                                            @else
+                                                <span class="badge bg-secondary">-</span>
+                                            @endif
+                                        </td>
 
                                         <td>{{ $product->stock ?? '-' }}</td>
 
