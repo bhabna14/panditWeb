@@ -69,7 +69,7 @@
                             <path
                                 d="M17 4H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 2v2H7V6h10zm0 4v8H7v-8h10zm-5 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4z" />
                         </svg>
-                        <span class="side-menu__label">SUBSCRIPTION DETAILS</span>
+                        <span class="side-menu__label">SUBSCRIPTION</span>
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
@@ -81,7 +81,7 @@
                                 Order (New User)</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Demo
                                 Customize Order</a></li>
-                        {{-- <li><a class="sub-side-menu__item" href="{{ route('admin.productSubscriptionOrder') }}">Manage Order</a></li> --}}
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.orders.index') }}">Manage Flower Subscription</a></li>
                     </ul>
                 </li>
 
@@ -226,17 +226,6 @@
                         <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower
                                 Reports</a></li>
                     </ul>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.orders.index') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M20 6h-4V4H8v2H4v2h16V6zm0 4H4v10h16V10zM6 18v-6h2v6H6zm4 0v-6h4v6h-4zm6 0v-6h2v6h-2z" />
-                        </svg>
-                        <span class="side-menu__label">Manage Flower Orders</span>
-                    </a>
                 </li>
 
                 <li class="slide">
