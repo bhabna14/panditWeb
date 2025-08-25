@@ -40,7 +40,7 @@
                             <path
                                 d="M3 13h1v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7h1a1 1 0 0 0 .7-1.7l-9-9a1 1 0 0 0-1.4 0l-9 9A1 1 0 0 0 3 13zm7 7v-5h4v5h-4z" />
                         </svg>
-                        <span class="side-menu__label">Flower Dashboard</span>
+                        <span class="side-menu__label">FLOWER DASHBOARD</span>
                     </a>
                 </li>
 
