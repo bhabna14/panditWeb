@@ -392,7 +392,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/edit-rider-details/{id}', 'editRiderDetails')->name('admin.editRiderDetails');
         Route::put('/update-rider-details/{id}', 'updateRiderDetails')->name('admin.updateRiderDetails');
         Route::get('/manage-order-assign', 'manageOrderAssign')->name('admin.manageOrderAssign');
-        Route::get('/add-order-assign', 'addOrderAssign')->name('admin.addRiderDetails');
+        Route::get('/add-order-assign', 'addOrderAssign')->name('admin.addOrderAssign');
         Route::get('/get-apartments', 'getApartments')->name('admin.getApartments');
         Route::post('/save-order-assign', 'saveOrderAssign')->name('admin.saveOrderAssign');
         Route::get('/edit-order-assign/{id}', 'editOrderAssign')->name('admin.editOrderAssign');

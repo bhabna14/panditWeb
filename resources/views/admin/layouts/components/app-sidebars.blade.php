@@ -122,6 +122,23 @@
                     </ul>
                 </li>
 
+                  <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path d="M20 8h-3V4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h1a3 3 0 0 0 6 0h2a3 3 0 0 0 6 0h1a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2zm-7 10a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8-1h-1a3 3 0 0 0-6 0h-2a3 3 0 0 0-6 0H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h3a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1zm-3 1a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+                    </svg>
+                        <span class="side-menu__label">DELIVERY DETAILS</span>
+                        <i class="angle fas fa-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/manage-delivery-history') }}">Delivery History</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.addRiderDetails') }}">Add Rider</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageRiderDetails') }}">Manage Rider</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.addOrderAssign')  }}">Add Apartment Assign</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOrderAssign')  }}">Manage Apartment Assign</a></li>
+                    </ul>
+                </li>
+
                 <li class="slide">
                     <a class="side-menu__item" href="{{ route('admin.orders.index') }}">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
@@ -130,17 +147,6 @@
                                 d="M20 6h-4V4H8v2H4v2h16V6zm0 4H4v10h16V10zM6 18v-6h2v6H6zm4 0v-6h4v6h-4zm6 0v-6h2v6h-2z" />
                         </svg>
                         <span class="side-menu__label">Manage Flower Orders</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.manageRiderDetails') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5H14V3H6v6h5v2H7c-1.1 0-2 .9-2 2v5h2v-3h2v3h9v-5c0-.64-.24-1.22-.63-1.66l1.54-3.45c.13-.3.15-.64.01-.94z" />
-                        </svg>
-                        <span class="side-menu__label">Manage Rider</span>
                     </a>
                 </li>
 
