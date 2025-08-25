@@ -98,44 +98,80 @@
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.offerDetails')}}">Add Refer Offer</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOfferDetails')}}">Manage Refer Offer</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('refer.offerClaim') }}">Add Offer Claim</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('refer.manageOfferClaim') }}">Manage Offer Claim</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.offerDetails') }}">Add Refer Offer</a>
+                        </li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOfferDetails') }}">Manage Refer
+                                Offer</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('refer.offerClaim') }}">Add Offer Claim</a>
+                        </li>
+                        <li><a class="sub-side-menu__item" href="{{ route('refer.manageOfferClaim') }}">Manage Offer
+                                Claim</a></li>
                     </ul>
                 </li>
 
                 <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                            <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 17.93V20a1 1 0 0 1-2 0v-.07A8.07 8.07 0 0 1 4.07 13H4a1 1 0 0 1 0-2h.07A8.07 8.07 0 0 1 11 4.07V4a1 1 0 0 1 2 0v.07A8.07 8.07 0 0 1 19.93 11H20a1 1 0 0 1 0 2h-.07A8.07 8.07 0 0 1 13 19.93z"/>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 17.93V20a1 1 0 0 1-2 0v-.07A8.07 8.07 0 0 1 4.07 13H4a1 1 0 0 1 0-2h.07A8.07 8.07 0 0 1 11 4.07V4a1 1 0 0 1 2 0v.07A8.07 8.07 0 0 1 19.93 11H20a1 1 0 0 1 0 2h-.07A8.07 8.07 0 0 1 13 19.93z" />
                         </svg>
                         <span class="side-menu__label">MARKETING DETAILS</span>
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.getVisitPlace')}}">Visit Place</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.visitPlace')}}">Manage Visit Place</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.followUpSubscriptions')}}">Follow Up</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.promotionList') }}">Add Flower Promotion</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPromotion') }}">Manage Flower Promotion</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.getVisitPlace') }}">Visit Place</a>
+                        </li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.visitPlace') }}">Manage Visit
+                                Place</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.followUpSubscriptions') }}">Follow
+                                Up</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.promotionList') }}">Add Flower
+                                Promotion</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageFlowerPromotion') }}">Manage
+                                Flower Promotion</a></li>
                     </ul>
                 </li>
 
-                  <li class="slide">
+                <li class="slide">
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
-                    <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path d="M20 8h-3V4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h1a3 3 0 0 0 6 0h2a3 3 0 0 0 6 0h1a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2zm-7 10a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8-1h-1a3 3 0 0 0-6 0h-2a3 3 0 0 0-6 0H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h3a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1zm-3 1a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                    </svg>
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M20 8h-3V4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h1a3 3 0 0 0 6 0h2a3 3 0 0 0 6 0h1a1 1 0 0 0 1-1v-7a2 2 0 0 0-2-2zm-7 10a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm8-1h-1a3 3 0 0 0-6 0h-2a3 3 0 0 0-6 0H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h3a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1zm-3 1a1 1 0 1 1-2 0 1 1 0 0 1 2 0z" />
+                        </svg>
                         <span class="side-menu__label">DELIVERY DETAILS</span>
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/manage-delivery-history') }}">Delivery History</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.addRiderDetails') }}">Add Rider</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageRiderDetails') }}">Manage Rider</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.addOrderAssign')  }}">Add Apartment Assign</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOrderAssign')  }}">Manage Apartment Assign</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/manage-delivery-history') }}">Delivery
+                                History</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.addRiderDetails') }}">Add Rider</a>
+                        </li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageRiderDetails') }}">Manage
+                                Rider</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.addOrderAssign') }}">Add Apartment
+                                Assign</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOrderAssign') }}">Manage
+                                Apartment Assign</a></li>
+                    </ul>
+                </li>
+
+                <li class="slide">
+                    <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
+                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
+                            height="24" viewBox="0 0 24 24">
+                            <path
+                                d="M4 17v2a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-2H4zm16-10V7a1 1 0 0 1-1 1H5A1 1 0 0 1 4 7V5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1zm-2 4v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1z" />
+                        </svg>
+                        <span class="side-menu__label">FINANCE DETAILS</span>
+                        <i class="angle fas fa-chevron-right"></i>
+                    </a>
+                    <ul class="slide-menu">
+                        <li><a class="sub-side-menu__item" href="{{route('admin.officeTransactionDetails')}}">Add Office Transaction</a></li>
+                        <li><a class="sub-side-menu__item" href="{{route('manageOfficePayments')}}">Manage Office Transaction</a></li>
+                        <li><a class="sub-side-menu__item" href="{{route('admin.officeFundReceived')}}">Add Fund Received</a></li>
+                        <li><a class="sub-side-menu__item" href="{{route('manageOfficeFund')}}">Manage Fund Received</a></li>
                     </ul>
                 </li>
 
@@ -147,49 +183,6 @@
                                 d="M20 6h-4V4H8v2H4v2h16V6zm0 4H4v10h16V10zM6 18v-6h2v6H6zm4 0v-6h4v6h-4zm6 0v-6h2v6h-2z" />
                         </svg>
                         <span class="side-menu__label">Manage Flower Orders</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.manageOrderAssign') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path d="M4 6h16v2H4zM4 12h16v2H4zM4 18h16v2H4z" />
-                        </svg>
-                        <span class="side-menu__label">Apartment Assign</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ url('admin/manage-delivery-history') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M13 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7 0-3.87 3.13-7 7-7 3.87 0 7 3.13 7 7 0 3.87-3.13 7-7 7zm.5-12h-2v6l5.25 3.15.75-1.23-4-2.37V7z" />
-                        </svg>
-                        <span class="side-menu__label">Delivery History</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.officeTransactionDetails') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M2 7c0-1.1.9-2 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7zm2 0v2h16V7H4zm16 4H4v6h16v-6z" />
-                        </svg>
-                        <span class="side-menu__label">Make Payment</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a class="side-menu__item" href="{{ route('admin.officeFundReceived') }}">
-                        <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
-                            height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M12 21c-4.97 0-9-4.03-9-9s4.03-9 9-9 9 4.03 9 9-4.03 9-9 9zm1-13h-2v2H8v2h3v2h-2v2h2v2h2v-2h2v-2h-3v-2h2v-2h-2V8z" />
-                        </svg>
-                        <span class="side-menu__label">Fund Received</span>
                     </a>
                 </li>
 
