@@ -3,7 +3,6 @@
 @section('styles')
     <!-- Internal Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
     <style>
         .hidden {
@@ -115,8 +114,7 @@
             <!-- DISCOUNT -->
             <div class="col-md-4 mb-3 controlled hidden" data-block="core">
                 <label for="discount" class="form-label"><span id="label-discount">Discount (%)</span></label>
-                <input type="number" name="discount" class="form-control" id="discount" min="0" max="100"
-                    step="0.01" placeholder="Enter discount percentage">
+                <input type="number" name="discount" class="form-control" id="discount" min="0" max="100" step="0.01" placeholder="Enter discount percentage">
             </div>
 
             <!-- SUBSCRIPTION: DURATION -->
@@ -178,17 +176,13 @@
             <div class="col-md-4 mb-3 controlled hidden" id="flowerFromField" data-block="flowerDates">
                 <label for="available_from" class="form-label"><span id="label-available-from">Available
                         From</span></label>
-                <input type="text" name="available_from" id="available_from" class="form-control datepick"
-                    placeholder="YYYY-MM-DD" autocomplete="off">
+                <input type="date" name="available_from" id="available_from" class="form-control">
             </div>
 
             <div class="col-md-4 mb-3 controlled hidden" id="flowerToField" data-block="flowerDates">
                 <label for="available_to" class="form-label"><span id="label-available-to">Available To</span></label>
-                <input type="text" name="available_to" id="available_to" class="form-control datepick"
-                    placeholder="YYYY-MM-DD" autocomplete="off">
+                <input type="date" name="available_to" id="available_to" class="form-control">
             </div>
-
-
 
             <!-- PACKAGE: FESTIVAL/POOJA -->
             <div class="col-md-4 mb-3 controlled hidden" id="poojafields" data-block="package">
@@ -312,7 +306,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/form-layouts.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
         // toast fades
@@ -323,29 +316,6 @@
 
     <script>
         (function() {
-
-            let fpFrom, fpTo;
-
-            function initDatePickers() {
-                fpFrom = flatpickr('#available_from', {
-                    dateFormat: 'Y-m-d',
-                    allowInput: true,
-                    disableMobile: true,
-                    onChange: function(selectedDates, dateStr) {
-                        if (fpTo) fpTo.set('minDate', dateStr || null);
-                    }
-                });
-                fpTo = flatpickr('#available_to', {
-                    dateFormat: 'Y-m-d',
-                    allowInput: true,
-                    disableMobile: true,
-                    onChange: function(selectedDates, dateStr) {
-                        if (fpFrom) fpFrom.set('maxDate', dateStr || null);
-                    }
-                });
-            }
-            initDatePickers();
-
             // Init Select2 for any already-in-DOM selects
             function initSelect2(scope) {
                 $(scope || document).find('.select2').each(function() {
@@ -627,9 +597,7 @@
                 showCore(true);
                 setLabelsByCategory(cat);
 
-if (isFlower && !flowerActive.checked && !flowerInactive.checked) {
-    flowerActive.checked = true; // default to Active the first time
-}
+                const isFlower = (cat === 'Flower');
                 const isPackage = (cat === 'Package');
                 const isSubscription = (cat === 'Subscription');
 
