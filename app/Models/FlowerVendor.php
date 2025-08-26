@@ -22,9 +22,11 @@ class FlowerVendor extends Model
         'email_id', 
         'vendor_category', 
         'payment_type', 
-        'vendor_gst', 
+        'vendor_gst',
         'vendor_address',
         'flower_ids',
+        'date_of_joining',
+        'vendor_document'
     ];
 
      protected $casts = [
@@ -37,21 +39,19 @@ class FlowerVendor extends Model
             ->with(['product:product_id,name', 'unit:id,unit_name']);
     }
 
-public function flowerProduct(){
-    return $this->hasMany(FlowerProduct::class,'flower_ids', 'product_id');
-}
-
+    public function flowerProduct(){
+        return $this->hasMany(FlowerProduct::class,'flower_ids', 'product_id');
+    }
 
     public function vendorBanks()
     {
         return $this->hasMany(FlowerVendorBank::class, 'vendor_id', 'vendor_id'); // Adjust as necessary
     }
+
     public function pickupDetails()
     {
         return $this->hasMany(FlowerPickupDetails::class,'vendor_id', 'vendor_id');
     }
-
-    
 
 }
 

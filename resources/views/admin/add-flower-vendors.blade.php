@@ -52,8 +52,12 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="vendor_category">Vendor Category <span style="color:red">*</span></label>
-                                    <input type="text" class="form-control" id="vendor_category" name="vendor_category"
-                                        placeholder="Enter Vendor Category" required>
+                                    <select class="form-control" id="vendor_category" name="vendor_category" required>
+                                        <option value="">Select Vendor Category</option>
+                                        <option value="farmer">Farmer</option>
+                                        <option value="retailer">Retailer</option>
+                                        <option value="dealer">Dealer</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -74,7 +78,20 @@
                                     <input type="text" class="form-control" id="vendor_gst" name="vendor_gst">
                                 </div>
                             </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="date_of_joining">Date of Joining <span style="color:red">*</span></label>
+                                    <input type="date" class="form-control" id="date_of_joining" name="date_of_joining" required>
+                                </div>
+                            </div>
 
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="vendor_document">Vendor Document (PDF)</label>
+                                    <input type="file" class="form-control" id="vendor_document" name="vendor_document" accept="application/pdf">
+                                    <small class="text-muted">Upload vendor document in PDF format.</small>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group">
