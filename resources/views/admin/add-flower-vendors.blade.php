@@ -24,9 +24,8 @@
         <div class="col-12 col-sm-12">
             <div class="card">
                 <div class="card-body pt-0 pt-4">
-                    <form method="POST" action="{{ route('admin.saveVendorDetails') }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('admin.saveVendorDetails') }}">
                         @csrf
-
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -35,44 +34,28 @@
                                         placeholder="Enter Venoor Name" required>
                                 </div>
                             </div>
-
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="phone_no">Phone Number <span style="color:red">*</span></label>
                                     <input type="number" class="form-control" id="phone_no" name="phone_no" required>
                                 </div>
                             </div>
-
-                            <!-- NEW: Date of Joining -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="date_of_joining">Date of Joining</label>
-                                    <input type="date" class="form-control" id="date_of_joining" name="date_of_joining">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <!-- existing fields unchanged -->
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="email_id">Email Id </label>
                                     <input type="email" class="form-control" id="email_id" name="email_id">
                                 </div>
                             </div>
+                        </div>
 
+                        <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="vendor_category">Vendor Category <span style="color:red">*</span></label>
-                                    <select class="form-control" id="vendor_category" name="vendor_category" required>
-                                        <option value="">Select Vendor Category</option>
-                                        <option value="Farmer">Farmer</option>
-                                        <option value="Dealer">Dealer</option>
-                                        <option value="Retailer">Retailer</option>
-                                    </select>
+                                    <input type="text" class="form-control" id="vendor_category" name="vendor_category"
+                                        placeholder="Enter Vendor Category" required>
                                 </div>
                             </div>
-
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="payment_type">Payment Type</label>
@@ -84,10 +67,7 @@
                                     </select>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="row">
-                            <!-- existing fields unchanged -->
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="vendor_gst">GST NO.</label>
@@ -95,15 +75,6 @@
                                 </div>
                             </div>
 
-                            <!-- NEW: Vendor Document Upload -->
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label for="vendor_document">Vendor Document (PDF/JPG)</label>
-                                    <input type="file" class="form-control" id="vendor_document" name="vendor_document"
-                                        accept="application/pdf,image/jpeg">
-                                    <small class="text-muted">Max 5MB. Allowed: .pdf, .jpg/.jpeg</small>
-                                </div>
-                            </div>
                         </div>
 
                         <div class="form-group">
@@ -112,11 +83,94 @@
                         </div>
 
                         {{-- Flowers Provided (Category = Flower) --}}
-                        <!-- ... your existing Flowers card markup remains unchanged ... -->
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
+                                    <div>
+                                        <label class="form-label mb-0">Select Flowers</label>
+                                        <small class="text-muted d-block">Choose one or more flowers supplied by this
+                                            vendor.</small>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <input type="text" id="flowerSearch" class="form-control"
+                                            placeholder="Search flowers..." style="min-width: 220px;">
+                                        <button type="button" class="btn btn-outline-primary" id="selectAllFlowers">Select
+                                            all</button>
+                                        <button type="button" class="btn btn-outline-secondary"
+                                            id="clearAllFlowers">Clear</button>
+                                    </div>
+                                </div>
+
+                                @if (isset($flowers) && $flowers->count())
+                                    <div class="row" id="flowersGrid">
+                                        @foreach ($flowers as $flower)
+                                            <div class="col-lg-3 col-md-4 col-sm-6 col-12 mb-2 flower-item">
+                                                <div class="form-check p-2 border rounded">
+                                                    <input class="form-check-input flower-checkbox" type="checkbox"
+                                                        id="flower_{{ $flower->product_id }}" name="flower_ids[]"
+                                                        value="{{ $flower->product_id }}">
+                                                    <label class="form-check-label ms-1"
+                                                        for="flower_{{ $flower->product_id }}">
+                                                        {{ $flower->name }}
+                                                        @if (!empty($flower->odia_name))
+                                                            <small class="text-muted">({{ $flower->odia_name }})</small>
+                                                        @endif
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="alert alert-warning mb-0">
+                                        No flower products found for category <strong>Flower</strong>.
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
 
                         <div id="bank-details-container"
                             style="background-color: rgba(239, 227, 180, 0.5);padding: 20px;border-radius: 15px;margin: 5px">
-                            <!-- ... existing bank details section unchanged ... -->
+                            <div class="bank-details">
+                                <div class="row">
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="bank_name">Bank Name</label>
+                                            <input type="text" class="form-control" name="bank_name[]"
+                                                placeholder="Enter Bank Name">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="account_no">Account Number</label>
+                                            <input type="number" class="form-control" name="account_no[]"
+                                                placeholder="Enter Account Number" maxlength="17">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="ifsc_code">IFSC Code</label>
+                                            <input type="text" class="form-control" name="ifsc_code[]"
+                                                placeholder="Enter IFSC Code" maxlength="15"
+                                                oninput="this.value = this.value.toUpperCase()">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="upi_id">UPI Number/ID</label>
+                                            <input type="text" class="form-control" name="upi_id[]"
+                                                placeholder="Enter UPI Number/ID">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 mt-4">
+                                        <button type="button" class="btn btn-danger remove-bank-section">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <button type="button" class="btn btn-success" id="add-bank-section">Add Bank</button>
@@ -126,8 +180,8 @@
                         <div class="text-center">
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
-                    </form>
 
+                    </form>
                 </div>
             </div>
         </div>
@@ -136,14 +190,14 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        @if (session('success'))
+        @if(session('success'))
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
                 text: "{{ session('success') }}",
                 confirmButtonColor: '#3085d6'
             })
-        @elseif (session('error'))
+        @elseif(session('error'))
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
