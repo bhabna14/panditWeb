@@ -145,7 +145,7 @@ class FlowerVendorController extends Controller
             'email_id'         => ['nullable', 'email', 'max:255', Rule::unique('flower__vendor_details', 'email_id')],
             'vendor_category'  => ['required', Rule::in(['farmer', 'retailer', 'dealer'])],
             'payment_type'     => ['nullable', Rule::in(['UPI', 'Bank', 'Cash'])],
-            'vendor_gst'       => ['nullable', 'regex:/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][A-Z0-9]Z[A-Z0-9]$/'],
+            'vendor_gst'       => ['nullable'],
             'vendor_address'   => ['nullable', 'string', 'max:1000'],
             'date_of_joining'  => ['required', 'date', 'before_or_equal:today'],
             'vendor_document'  => ['nullable', 'file', 'mimes:pdf', 'max:5120'], // 5 MB
