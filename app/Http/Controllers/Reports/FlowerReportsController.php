@@ -190,57 +190,60 @@ public function reportCustomize(Request $request)
     return view('admin.reports.flower-customize-report');
 }
 
-
 public function flowerPickUp(Request $request)
 {
-    // Set default date range if not AJAX
-    if ($request->ajax()) {
-        $fromDate = $request->from_date;
-        $toDate = $request->to_date;
-    } else {
-        $fromDate = Carbon::now()->startOfMonth()->toDateString();
-        $toDate = Carbon::now()->toDateString();
-    }
+    // Resolve date range (defaults for initial page load)
+    $fromDate = $request->input('from_date', Carbon::now()->startOfMonth()->toDateString());
+    $toDate   = $request->input('to_date',   Carbon::now()->toDateString());
 
-    // Fetch vendor list for dropdown
-    $vendors = FlowerVendor::select('vendor_id', 'vendor_name')->get();
+    // Vendors for dropdown
+    $vendors = FlowerVendor::select('vendor_id', 'vendor_name')->orderBy('vendor_name')->get();
 
+    // Build query with eager loads
     $query = FlowerPickupDetails::with([
         'flowerPickupItems.flower',
         'flowerPickupItems.unit',
         'vendor',
-        'rider'
-    ])->whereBetween('pickup_date', [$fromDate, $toDate]);
+        'rider',
+    ])
+    ->whereDate('pickup_date', '>=', $fromDate)
+    ->whereDate('pickup_date', '<=', $toDate);
 
-    // Filter by vendor
-    if ($request->vendor_id) {
+    // Optional filters
+    if ($request->filled('vendor_id')) {
         $query->where('vendor_id', $request->vendor_id);
     }
-
-    // Filter by payment method
-    if ($request->payment_mode) {
+    if ($request->filled('payment_mode')) {            // matches your form field
         $query->where('payment_method', $request->payment_mode);
     }
 
     $reportData = $query->get();
 
-    // For AJAX: return JSON
+    // Totals
+    $totalPrice = (float) $reportData->sum('total_price');
+    $todayPrice = (float) $reportData
+        ->filter(fn($row) => Carbon::parse($row->pickup_date)->isToday())
+        ->sum('total_price');
+
+    // AJAX: return JSON payload for DataTables or XHR
     if ($request->ajax()) {
         return response()->json([
-            'data' => $reportData,
-            'total_price' => $reportData->sum('total_price'),
-            'today_price' => $reportData->where('pickup_date', now()->toDateString())->sum('total_price')
+            'data'         => $reportData,
+            'total_price'  => $totalPrice,
+            'today_price'  => $todayPrice,
+            'from_date'    => $fromDate,
+            'to_date'      => $toDate,
         ]);
     }
 
-    // For page load: return view
+    // Initial page load
     return view('admin.reports.flower-pick-up-reports', [
-        'reportData' => $reportData,
-        'total_price' => $reportData->sum('total_price'),
-        'today_price' => $reportData->where('pickup_date', now()->toDateString())->sum('total_price'),
-        'fromDate' => $fromDate,
-        'toDate' => $toDate,
-        'vendors' => $vendors,
+        'reportData'  => $reportData,
+        'total_price' => $totalPrice,
+        'today_price' => $todayPrice,
+        'fromDate'    => $fromDate,
+        'toDate'      => $toDate,
+        'vendors'     => $vendors,
     ]);
 }
 }

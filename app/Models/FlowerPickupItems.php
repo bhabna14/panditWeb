@@ -21,9 +21,12 @@ class FlowerPickupItems extends Model
         return $this->belongsTo(FlowerProduct::class, 'flower_id', 'product_id');
     }
     
-    public function unit() {
-        return $this->belongsTo(PoojaUnit::class,'unit_id');
-    }
+  public function unit()
+{
+    return $this->belongsTo(PoojaUnit::class, 'unit_id', 'id')
+        ->withDefault(['unit_name' => 'N/A']);
+}
+
 
 
 }

@@ -93,20 +93,26 @@
             <tbody id="reportTableBody">
                 @foreach ($reportData as $item)
                     <tr>
-                        <td>{{ $item->pickup_date }}</td>
-                        <td>{{ $item->vendor->vendor_name ?? '-' }}</td>
-                        <td>{{ $item->rider->rider_name ?? '-' }}</td>
-                        <td>{{ $item->paid_by }}</td>
+                        <td>{{ \Carbon\Carbon::parse($item->pickup_date)->format('d M Y') }}</td>
+                        <td>{{ $item->vendor->vendor_name ?? '—' }}</td>
+                        <td>{{ $item->rider->rider_name ?? '—' }}</td>
+                        <td>{{ $item->paid_by ? ucfirst($item->paid_by) : '—' }}</td>
                         <td>
-                            @foreach ($item->flowerPickupItems as $f)
-                                {{ $f->flower->name }} ({{ $f->quantity }} {{ $f->unit->unit_name }})<br>
-                            @endforeach
+                            @forelse ($item->flowerPickupItems as $f)
+                                {{ $f->flower?->name ?? '—' }}
+                                ({{ rtrim(rtrim(number_format((float) $f->quantity, 2), '0'), '.') }}
+                                {{ $f->unit?->unit_name ?? '—' }})
+                                <br>
+                            @empty
+                                —
+                            @endforelse
                         </td>
-                        <td>{{ $item->status }}</td>
-                        <td>₹{{ $item->total_price }}</td>
+                        <td>{{ $item->status ? ucfirst($item->status) : '—' }}</td>
+                        <td>₹{{ number_format((float) $item->total_price, 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>
+
         </table>
     </div>
 @endsection
