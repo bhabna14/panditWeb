@@ -132,7 +132,7 @@ class FlowerVendorController extends Controller
 //     }
 // }
 
-    public function sasaveVendorDetails(Request $request)
+    public function saveVendorDetails(Request $request)
     {
         // ---- Validate request ----
         $validated = $request->validate([
