@@ -202,6 +202,8 @@
                 <input type="date" name="available_to" id="available_to" class="form-control">
             </div>
 
+            
+
             <!-- PACKAGE: FESTIVAL/POOJA -->
             <div class="col-md-4 mb-3 controlled hidden" id="poojafields" data-block="package">
                 <label for="pooja_id" class="form-label"><span id="label-pooja">Pooja (Festival)</span></label>
@@ -321,55 +323,55 @@
 @section('scripts')
     <!-- IMPORTANT: Load jQuery first, then Select2, then your scripts -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-    <script>
-        // Initialize once DOM is ready
-        document.addEventListener('DOMContentLoaded', function() {
-            const fromEl = document.querySelector('#available_from');
-            const toEl = document.querySelector('#available_to');
+<script>
+  // Initialize once DOM is ready
+  document.addEventListener('DOMContentLoaded', function () {
+    const fromEl = document.querySelector('#available_from');
+    const toEl   = document.querySelector('#available_to');
 
-            // Guard if elements are missing
-            if (!fromEl || !toEl) return;
+    // Guard if elements are missing
+    if (!fromEl || !toEl) return;
 
-            // Keep references so we can adjust constraints
-            let fpFrom, fpTo;
+    // Keep references so we can adjust constraints
+    let fpFrom, fpTo;
 
-            fpFrom = flatpickr(fromEl, {
-                dateFormat: 'Y-m-d',
-                allowInput: true,
-                onChange: function(selectedDates, dateStr) {
-                    if (dateStr && fpTo) fpTo.set('minDate', dateStr);
-                }
-            });
+    fpFrom = flatpickr(fromEl, {
+      dateFormat: 'Y-m-d',
+      allowInput: true,
+      onChange: function (selectedDates, dateStr) {
+        if (dateStr && fpTo) fpTo.set('minDate', dateStr);
+      }
+    });
 
-            fpTo = flatpickr(toEl, {
-                dateFormat: 'Y-m-d',
-                allowInput: true,
-                onChange: function(selectedDates, dateStr) {
-                    if (dateStr && fpFrom) fpFrom.set('maxDate', dateStr);
-                }
-            });
+    fpTo = flatpickr(toEl, {
+      dateFormat: 'Y-m-d',
+      allowInput: true,
+      onChange: function (selectedDates, dateStr) {
+        if (dateStr && fpFrom) fpFrom.set('maxDate', dateStr);
+      }
+    });
 
-            // If you show/hide this block dynamically, force a redraw when showing
-            // Example: your existing function
-            const groups = {
-                flowerDates: document.querySelectorAll('[data-block="flowerDates"]')
-            };
+    // If you show/hide this block dynamically, force a redraw when showing
+    // Example: your existing function
+    const groups = {
+      flowerDates: document.querySelectorAll('[data-block="flowerDates"]')
+    };
 
-            const showGroup = (nodeList, show) => {
-                nodeList.forEach(el => el.classList.toggle('hidden', !show));
-                // Redraw pickers after they become visible
-                if (show) {
-                    fpFrom && fpFrom.redraw();
-                    fpTo && fpTo.redraw();
-                }
-            };
+    const showGroup = (nodeList, show) => {
+      nodeList.forEach(el => el.classList.toggle('hidden', !show));
+      // Redraw pickers after they become visible
+      if (show) {
+        fpFrom && fpFrom.redraw();
+        fpTo && fpTo.redraw();
+      }
+    };
 
-            // Use *this* instead of your previous inline to guarantee redraws:
-            window.showFlowerDates = (b) => showGroup(groups.flowerDates, b);
-        });
-    </script>
+    // Use *this* instead of your previous inline to guarantee redraws:
+    window.showFlowerDates = (b) => showGroup(groups.flowerDates, b);
+  });
+</script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
