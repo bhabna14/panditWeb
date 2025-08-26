@@ -194,14 +194,12 @@
             <div class="col-md-4 mb-3 controlled hidden" id="flowerFromField" data-block="flowerDates">
                 <label for="available_from" class="form-label"><span id="label-available-from">Available
                         From</span></label>
-                <input type="date" name="available_from" id="available_from" class="form-control"
-                    value="{{ old('available_from', $product->available_from) }}">
+                <input type="date" name="available_from" id="available_from" class="form-control">
             </div>
 
             <div class="col-md-4 mb-3 controlled hidden" id="flowerToField" data-block="flowerDates">
                 <label for="available_to" class="form-label"><span id="label-available-to">Available To</span></label>
-                <input type="date" name="available_to" id="available_to" class="form-control"
-                    value="{{ old('available_to', $product->available_to) }}">
+                <input type="date" name="available_to" id="available_to" class="form-control">
             </div>
 
             <!-- PACKAGE: FESTIVAL/POOJA -->
