@@ -57,7 +57,7 @@ public function saveVendorDetails(Request $request)
 
             // NEW fields
             'date_of_joining' => 'nullable|date',
-            'vendor_document' => 'nullable|file|mimes:pdf,jpg,jpeg|max:5120', // 5MB
+            'vendor_document' => 'nullable|image|mimes:pdf,jpg,jpeg|max:5120', // 5MB
         ]);
 
         // Create vendor
