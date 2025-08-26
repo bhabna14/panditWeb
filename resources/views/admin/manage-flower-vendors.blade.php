@@ -47,6 +47,8 @@
                                     <th class="border-bottom-0">Email</th>
                                     <th class="border-bottom-0">Categories</th>
                                     <th class="border-bottom-0">Payment Type</th>
+                                    {{-- <th class="border-bottom-0">Joined On</th>
+                                    <th class="border-bottom-0">Document Image</th> --}}
                                     <th class="border-bottom-0">Gst</th>
                                     <th class="border-bottom-0">Vendor Address</th>
                                     <th class="border-bottom-0">Bank Details</th>
@@ -65,6 +67,18 @@
                                         <td>{{ $vendor->email_id }}</td>
                                         <td>{{ $vendor->vendor_category }}</td>
                                         <td>{{ $vendor->payment_type }}</td>
+                                        {{-- <td>{{ \Carbon\Carbon::parse($vendor->date_of_joining)->format('d-m-Y') }}</td>
+                                        <td>
+                                            @if ($vendor->vendor_document)
+                                                <a href="{{ asset('storage/vendor_documents/' . $vendor->vendor_document) }}"
+                                                    target="_blank">
+                                                    <img src="{{ asset('storage/vendor_documents/' . $vendor->vendor_document) }}"
+                                                        alt="Document Image" style="width: 50px; height: 50px;">
+                                                </a>
+                                            @else
+                                                N/A
+                                            @endif
+                                        </td> --}}
                                         <td>{{ $vendor->vendor_gst }}</td>
                                         <td>{{ $vendor->vendor_address }}</td>
                                         <td>
