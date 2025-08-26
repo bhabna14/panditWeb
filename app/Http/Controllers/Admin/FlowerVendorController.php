@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Validation\Rule;
 
 class FlowerVendorController extends Controller
 {
@@ -31,8 +32,6 @@ class FlowerVendorController extends Controller
     }
 public function saveVendorDetails(Request $request)
 {
-
-
     try {
         // Validate request
         $validated = $request->validate([
@@ -55,26 +54,41 @@ public function saveVendorDetails(Request $request)
             'ifsc_code.*'     => 'nullable|string|max:15',
             'upi_id'          => 'nullable|array',
             'upi_id.*'        => 'nullable|string|max:64',
+
+            // NEW fields
+            'date_of_joining' => 'nullable|date',
+            'vendor_document' => 'nullable|file|mimes:pdf,jpg,jpeg|max:5120', // 5MB
         ]);
 
         // Create vendor
         $vendor = new FlowerVendor();
-        $vendor->vendor_id       = (string) \Str::uuid();   // unique ID
-        $vendor->vendor_name     = $validated['vendor_name'];
-        $vendor->phone_no        = $validated['phone_no'];
-        $vendor->email_id        = $validated['email_id'] ?? null;
-        $vendor->vendor_category = $validated['vendor_category'];
-        $vendor->payment_type    = $validated['payment_type'] ?? null;
-        $vendor->vendor_gst      = $validated['vendor_gst'] ?? null;
-        $vendor->vendor_address  = $validated['vendor_address'] ?? null;
-        $vendor->flower_ids      = $validated['flower_ids'] ?? [];
+        $vendor->vendor_id        = (string) \Str::uuid();   // unique ID
+        $vendor->vendor_name      = $validated['vendor_name'];
+        $vendor->phone_no         = $validated['phone_no'];
+        $vendor->email_id         = $validated['email_id'] ?? null;
+        $vendor->vendor_category  = $validated['vendor_category'];
+        $vendor->payment_type     = $validated['payment_type'] ?? null;
+        $vendor->vendor_gst       = $validated['vendor_gst'] ?? null;
+        $vendor->vendor_address   = $validated['vendor_address'] ?? null;
+        $vendor->flower_ids       = $validated['flower_ids'] ?? [];
+        $vendor->date_of_joining  = $validated['date_of_joining'] ?? null; // NEW
+        $vendor->vendor_document = null; // NEW (ensure column exists)
+
+        // If you want the file saved with the vendor_id in the filename:
+        if ($request->hasFile('vendor_document')) {
+            $file = $request->file('vendor_document');
+            $ext  = $file->getClientOriginalExtension();
+            // store in storage/app/public/vendor_docs/{vendor_id}.{ext}
+            $storedPath = $file->storeAs('vendor_docs', $vendor->vendor_id.'.'.$ext, 'public');
+            $vendor->vendor_document = $storedPath;
+        }
 
         $vendor->save();
 
         // Save multiple bank details
         if (!empty($validated['bank_name'])) {
             foreach ($validated['bank_name'] as $index => $bankName) {
-                if (!empty($bankName) || !empty($validated['account_no'][$index]) || !empty($validated['upi_id'][$index])) {
+                if (!empty($bankName) || !empty($validated['account_no'][$index] ?? null) || !empty($validated['upi_id'][$index] ?? null)) {
                     FlowerVendorBank::create([
                         'vendor_id'  => $vendor->vendor_id,
                         'bank_name'  => $bankName,
