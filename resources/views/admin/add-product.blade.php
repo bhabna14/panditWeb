@@ -627,7 +627,9 @@
                 showCore(true);
                 setLabelsByCategory(cat);
 
-                const isFlower = (cat === 'Flower');
+if (isFlower && !flowerActive.checked && !flowerInactive.checked) {
+    flowerActive.checked = true; // default to Active the first time
+}
                 const isPackage = (cat === 'Package');
                 const isSubscription = (cat === 'Subscription');
 
