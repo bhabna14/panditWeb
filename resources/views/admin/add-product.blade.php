@@ -323,6 +323,29 @@
 
     <script>
         (function() {
+
+            let fpFrom, fpTo;
+
+            function initDatePickers() {
+                fpFrom = flatpickr('#available_from', {
+                    dateFormat: 'Y-m-d',
+                    allowInput: true,
+                    disableMobile: true,
+                    onChange: function(selectedDates, dateStr) {
+                        if (fpTo) fpTo.set('minDate', dateStr || null);
+                    }
+                });
+                fpTo = flatpickr('#available_to', {
+                    dateFormat: 'Y-m-d',
+                    allowInput: true,
+                    disableMobile: true,
+                    onChange: function(selectedDates, dateStr) {
+                        if (fpFrom) fpFrom.set('maxDate', dateStr || null);
+                    }
+                });
+            }
+            initDatePickers();
+
             // Init Select2 for any already-in-DOM selects
             function initSelect2(scope) {
                 $(scope || document).find('.select2').each(function() {
