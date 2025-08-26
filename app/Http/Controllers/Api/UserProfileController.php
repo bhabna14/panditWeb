@@ -52,9 +52,8 @@ class UserProfileController extends Controller
     {
         $request->validate([
             'name' => 'string|max:255',
-            // 'phonenumber' => 'required|string|max:15',
             'email' => 'email|max:255',
-            // 'dob' => 'nullable|date',
+            'dob' => 'nullable|date',
             'about' => 'nullable|string',
             'gender' => 'nullable|string',
             'userphoto' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
@@ -69,9 +68,8 @@ class UserProfileController extends Controller
         }
     
         $user->name = $request->input('name');
-        // $user->mobile_number = $request->input('phonenumber');
         $user->email = $request->input('email');
-        // $user->dob = $request->input('dob');
+        $user->dob = $request->input('dob');
         $user->about = $request->input('about');
         $user->gender = $request->input('gender');
     

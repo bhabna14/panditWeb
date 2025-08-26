@@ -246,4 +246,5 @@ public function flowerPickUp(Request $request)
         'vendors'     => $vendors,
     ]);
 }
+
 }

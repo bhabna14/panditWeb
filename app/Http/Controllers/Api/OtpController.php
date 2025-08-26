@@ -265,7 +265,7 @@ class OtpController extends Controller
     //     return $code;
     // }
 
-     public function sendOtp(Request $request)
+    public function sendOtp(Request $request)
     {
         $validated = $request->validate([
             'phone' => 'required|string',
@@ -291,19 +291,6 @@ class OtpController extends Controller
         ], 200);
     }
 
-    /**
-     * POST /api/auth/verify-otp
-     * Body:
-     * {
-     *   "phone": "9876543210",
-     *   "otp": "000000",
-     *   "device_id": "abc123",          // optional
-     *   "platform": "android|ios|web",   // optional
-     *   "device_model": "OnePlus 9"      // optional
-     * }
-     *
-     * Verifies the fixed OTP and returns a Sanctum token (if installed).
-     */
     public function verifyOtp(Request $request)
     {
         $validated = $request->validate([
@@ -346,8 +333,6 @@ class OtpController extends Controller
             'user'       => $user,
         ], 200);
     }
-
-    // /* ---------------------- helpers (no third-party) ---------------------- */
 
     private function normalizePhone(string $raw): string
     {
