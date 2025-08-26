@@ -74,12 +74,9 @@
                     <ul class="slide-menu">
                         <li><a class="sub-side-menu__item" href="{{ url('admin/add-product') }}">Add Product</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('manageproduct') }}">Manage Product</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/existing-user') }}">Subscription Order
-                                (Existing User)</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Subscription
-                                Order (New User)</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Demo
-                                Customize Order</a></li>
+                                                <li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Create Order (New)</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/existing-user') }}">Create Order (Existing)</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Customize Order</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.orders.index') }}">Manage Flower Subscription</a></li>
                     </ul>
                 </li>
