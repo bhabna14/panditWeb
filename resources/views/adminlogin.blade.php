@@ -51,7 +51,6 @@
                                                                 </div>
                                                             @endif
 
-
                                                             <form id="loginForm" method="POST"
                                                                 action="{{ route('adminauthenticate') }}">
                                                                 @csrf

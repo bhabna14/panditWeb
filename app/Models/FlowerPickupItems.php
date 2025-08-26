@@ -14,14 +14,13 @@ class FlowerPickupItems extends Model
         'flower_id',
         'unit_id',
         'quantity',
-        'price', // Nullable, updated later
+        'price', 
     ];
     public function flower()
     {
         return $this->belongsTo(FlowerProduct::class, 'flower_id', 'product_id');
     }
     
-
     public function unit() {
         return $this->belongsTo(PoojaUnit::class,'unit_id');
     }

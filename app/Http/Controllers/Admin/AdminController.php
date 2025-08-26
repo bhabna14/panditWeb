@@ -304,7 +304,6 @@ class AdminController extends Controller
 
     public function adminlogout()
     {
-      
         return view("adminlogin");
     }
 
