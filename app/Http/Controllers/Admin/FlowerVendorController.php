@@ -142,7 +142,7 @@ class FlowerVendorController extends Controller
             ->orderBy('name')
             ->get(['product_id', 'name', 'odia_name']);
 
-        return view('admin.manage-vendors', compact('vendor_details', 'flowers'));
+        return view('admin.manage-flower-vendors', compact('vendor_details', 'flowers'));
     }
 
     public function vendorAllDetails($id){
