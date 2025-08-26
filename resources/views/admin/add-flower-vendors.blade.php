@@ -52,8 +52,24 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="vendor_category">Vendor Category <span style="color:red">*</span></label>
-                                    <input type="text" class="form-control" id="vendor_category" name="vendor_category"
-                                        placeholder="Enter Vendor Category" required>
+                                    <select class="form-control" id="vendor_category" name="vendor_category" required>
+                                        <option value="">Select Vendor Category</option>
+                                        <option value="Farmer">Farmer</option>
+                                        <option value="Retailer">Retailer</option>
+                                        <option value="Dealer">Dealer</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="date_of_joining">Date of Joining <span style="color:red">*</span></label>
+                                    <input type="date" class="form-control" id="date_of_joining" name="date_of_joining" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="vendor_document">Vendor Document</label>
+                                    <input type="file" class="form-control" id="vendor_document" name="vendor_document" accept=".pdf,.jpg,.jpeg,.png">
                                 </div>
                             </div>
                             <div class="col-md-4">
