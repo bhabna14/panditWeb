@@ -19,6 +19,23 @@
             margin-top: 6px;
             border-radius: 6px;
         }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            display: inline-block !important;
+            opacity: 1 !important;
+            cursor: pointer;
+        }
+
+        /* Restore default appearance if it was reset */
+        input[type="date"] {
+            appearance: auto;
+            -webkit-appearance: auto;
+        }
+
+        /* Your show/hide helper */
+        .hidden {
+            display: none !important;
+        }
     </style>
 @endsection
 
@@ -114,7 +131,8 @@
             <!-- DISCOUNT -->
             <div class="col-md-4 mb-3 controlled hidden" data-block="core">
                 <label for="discount" class="form-label"><span id="label-discount">Discount (%)</span></label>
-                <input type="number" name="discount" class="form-control" id="discount" min="0" max="100" step="0.01" placeholder="Enter discount percentage">
+                <input type="number" name="discount" class="form-control" id="discount" min="0" max="100"
+                    step="0.01" placeholder="Enter discount percentage">
             </div>
 
             <!-- SUBSCRIPTION: DURATION -->
@@ -176,12 +194,14 @@
             <div class="col-md-4 mb-3 controlled hidden" id="flowerFromField" data-block="flowerDates">
                 <label for="available_from" class="form-label"><span id="label-available-from">Available
                         From</span></label>
-                <input type="date" name="available_from" id="available_from" class="form-control">
+                <input type="date" name="available_from" id="available_from" class="form-control"
+                    value="{{ old('available_from', $product->available_from) }}">
             </div>
 
             <div class="col-md-4 mb-3 controlled hidden" id="flowerToField" data-block="flowerDates">
                 <label for="available_to" class="form-label"><span id="label-available-to">Available To</span></label>
-                <input type="date" name="available_to" id="available_to" class="form-control">
+                <input type="date" name="available_to" id="available_to" class="form-control"
+                    value="{{ old('available_to', $product->available_to) }}">
             </div>
 
             <!-- PACKAGE: FESTIVAL/POOJA -->
@@ -195,7 +215,6 @@
                 </select>
             </div>
 
-            <!-- PACKAGE: ITEMS + VARIANTS -->
             <!-- PACKAGE: ITEMS (+ Qty, Unit, Item Price) -->
             <div id="packageFields" class="col-md-12 mb-3 controlled hidden" data-block="package">
                 <label class="form-label d-block mb-2"><span id="label-package-items">Package Items</span></label>
@@ -303,6 +322,57 @@
 
 @section('scripts')
     <!-- IMPORTANT: Load jQuery first, then Select2, then your scripts -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        // Initialize once DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const fromEl = document.querySelector('#available_from');
+            const toEl = document.querySelector('#available_to');
+
+            // Guard if elements are missing
+            if (!fromEl || !toEl) return;
+
+            // Keep references so we can adjust constraints
+            let fpFrom, fpTo;
+
+            fpFrom = flatpickr(fromEl, {
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                onChange: function(selectedDates, dateStr) {
+                    if (dateStr && fpTo) fpTo.set('minDate', dateStr);
+                }
+            });
+
+            fpTo = flatpickr(toEl, {
+                dateFormat: 'Y-m-d',
+                allowInput: true,
+                onChange: function(selectedDates, dateStr) {
+                    if (dateStr && fpFrom) fpFrom.set('maxDate', dateStr);
+                }
+            });
+
+            // If you show/hide this block dynamically, force a redraw when showing
+            // Example: your existing function
+            const groups = {
+                flowerDates: document.querySelectorAll('[data-block="flowerDates"]')
+            };
+
+            const showGroup = (nodeList, show) => {
+                nodeList.forEach(el => el.classList.toggle('hidden', !show));
+                // Redraw pickers after they become visible
+                if (show) {
+                    fpFrom && fpFrom.redraw();
+                    fpTo && fpTo.redraw();
+                }
+            };
+
+            // Use *this* instead of your previous inline to guarantee redraws:
+            window.showFlowerDates = (b) => showGroup(groups.flowerDates, b);
+        });
+    </script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/form-layouts.js') }}"></script>
