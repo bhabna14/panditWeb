@@ -76,7 +76,7 @@ class FlowerVendorController extends Controller
                     ->value('max_num');
 
                 $next = (int)$lastNum + 1; // if null, becomes 1
-                
+
                 $newVendorId = $prefix . str_pad((string)$next, 4, '0', STR_PAD_LEFT);
 
                 // ===== Create vendor row =====
@@ -136,28 +136,25 @@ class FlowerVendorController extends Controller
     {
         // Active vendors + banks
         $vendor_details = FlowerVendor::where('status', 'active')
-            ->with('vendorBanks')
-            ->get();
+        ->with('vendorBanks')
+        ->get();
 
         // All flower products (category = Flower) for checkbox list in modal
         $flowers = FlowerProduct::where(function ($q) {
-                $q->where('category', 'Flower')->orWhere('category', 'flower');
-            })
-            ->orderBy('name')
-            ->get(['product_id', 'name', 'odia_name']);
+            $q->where('category', 'Flower')->orWhere('category', 'flower');
+        })
+        ->orderBy('name')
+        ->get(['product_id', 'name', 'odia_name']);
 
         return view('admin.manage-flower-vendors', compact('vendor_details', 'flowers'));
     }
 
     public function vendorAllDetails($id){
-
         $pickupDetails = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
         ->where('vendor_id', $id)
         ->get()
         ->groupBy('pickup_date');
-    
         return view('admin.vendor-all-details', compact('pickupDetails'));
-    
     }
 
     public function deleteVendorDetails($id)

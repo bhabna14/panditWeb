@@ -47,8 +47,8 @@
                                     <th class="border-bottom-0">Email</th>
                                     <th class="border-bottom-0">Categories</th>
                                     <th class="border-bottom-0">Payment Type</th>
-                                    {{-- <th class="border-bottom-0">Joined On</th>
-                                    <th class="border-bottom-0">Document Image</th> --}}
+                                    <th class="border-bottom-0">Joined On</th>
+                                    <th class="border-bottom-0">Document Image</th>
                                     <th class="border-bottom-0">Gst</th>
                                     <th class="border-bottom-0">Vendor Address</th>
                                     <th class="border-bottom-0">Bank Details</th>
@@ -67,18 +67,21 @@
                                         <td>{{ $vendor->email_id }}</td>
                                         <td>{{ $vendor->vendor_category }}</td>
                                         <td>{{ $vendor->payment_type }}</td>
-                                        {{-- <td>{{ \Carbon\Carbon::parse($vendor->date_of_joining)->format('d-m-Y') }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($vendor->date_of_joining)->format('d-m-Y') }}</td>
                                         <td>
                                             @if ($vendor->vendor_document)
-                                                <a href="{{ asset('storage/vendor_documents/' . $vendor->vendor_document) }}"
-                                                    target="_blank">
-                                                    <img src="{{ asset('storage/vendor_documents/' . $vendor->vendor_document) }}"
-                                                        alt="Document Image" style="width: 50px; height: 50px;">
-                                                </a>
+                                                <button type="button" class="btn btn-outline-primary btn-sm view-doc-btn"
+                                                    data-bs-toggle="modal" data-bs-target="#vendorDocModal"
+                                                    data-doc-url="{{ asset('storage/' . $vendor->vendor_document) }}"
+                                                    {{-- if you saved to storage/app/public/vendor_docs/... --}}
+                                                    data-doc-name="Document — {{ $vendor->vendor_name }}">
+                                                    View Document
+                                                </button>
                                             @else
-                                                N/A
+                                                <span class="text-muted">N/A</span>
                                             @endif
-                                        </td> --}}
+                                        </td>
+
                                         <td>{{ $vendor->vendor_gst }}</td>
                                         <td>{{ $vendor->vendor_address }}</td>
                                         <td>
@@ -120,6 +123,29 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="vendorDocModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vendor Document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="docContent" class="w-100 d-flex justify-content-center align-items-center"
+                        style="min-height:60vh;">
+                        <div class="text-muted">Loading…</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="docDownloadBtn" href="#" class="btn btn-secondary" target="_blank" rel="noopener">Open in
+                        new tab</a>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Flower List Modal -->
     <div class="modal fade" id="flowerModal" tabindex="-1" aria-labelledby="flowerModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -235,6 +261,53 @@
             } else {
                 flowerListContainer.innerHTML = '<li class="list-group-item text-muted">No flowers assigned.</li>';
             }
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalEl = document.getElementById('vendorDocModal');
+
+            modalEl.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const url = button.getAttribute('data-doc-url');
+                const name = button.getAttribute('data-doc-name') || 'Vendor Document';
+
+                // figure out extension from URL (ignore query string)
+                const clean = (url || '').split('?')[0];
+                const ext = (clean.split('.').pop() || '').toLowerCase();
+
+                const contentEl = modalEl.querySelector('#docContent');
+                const downloadEl = modalEl.querySelector('#docDownloadBtn');
+                modalEl.querySelector('.modal-title').textContent = name;
+                downloadEl.href = url;
+
+                contentEl.innerHTML = '';
+
+                if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext)) {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.alt = name;
+                    img.className = 'img-fluid rounded shadow-sm';
+                    contentEl.appendChild(img);
+                } else if (ext === 'pdf') {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = url + '#zoom=page-width';
+                    iframe.width = '100%';
+                    iframe.height = '600';
+                    iframe.style.border = '0';
+                    contentEl.appendChild(iframe);
+                } else {
+                    contentEl.innerHTML =
+                        '<p class="text-muted">Preview not available. ' +
+                        '<a href="' + url + '" target="_blank" rel="noopener">Click to download</a>.</p>';
+                }
+            });
+
+            // optional: cleanup so PDFs stop rendering when modal closes
+            modalEl.addEventListener('hidden.bs.modal', function() {
+                modalEl.querySelector('#docContent').innerHTML = '';
+            });
         });
     </script>
 @endsection
