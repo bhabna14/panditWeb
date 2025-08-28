@@ -12,7 +12,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-
     use Notifiable;
     /**     *
      * @var array
@@ -22,13 +21,12 @@ class User extends Authenticatable
         'userid','name', 'mobile_number','referral_code','code_status', 'otp','email', 'order_id', 'expiry', 'hash', 'client_id', 'client_secret', 'otp_length', 'channel', 'userphoto',
     ];
 
-    
-    
     /**
      * The attributes that should be hidden for arrays.
      *
      * @var array
      */
+
     protected $hidden = [
         'client_secret', 'hash',
     ];
@@ -42,18 +40,17 @@ class User extends Authenticatable
         'expiry' => 'datetime',
     ];
 
-    
     public function addressDetails()
-{
-    return $this->hasOne(UserAddress::class, 'user_id', 'userid')->where('default', 1);
-}
+    {
+        return $this->hasOne(UserAddress::class, 'user_id', 'userid')->where('default', 1);
+    }
 
     public function bankdetail()
     {
         return $this->hasOne(Bankdetail::class);
     }
 
-     public function referrer()
+    public function referrer()
     {
         return $this->belongsTo(User::class, 'referrer_user_id'); // 'id' by default
     }
@@ -69,10 +66,8 @@ class User extends Authenticatable
     }
 
     public function orders()
-{
-    return $this->hasMany(Order::class, 'user_id', 'userid');
-}
-
-
+    {
+        return $this->hasMany(Order::class, 'user_id', 'userid');
+    }
 
 }

@@ -10,5 +10,7 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 class Admin extends Authenticatable implements AuthenticatableContract
 {
     use HasFactory;
+
     protected $table = 'admins';
+
 }

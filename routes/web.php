@@ -226,7 +226,7 @@ Route::controller(AdminController::class)->group(function() {
 
 ## super admin login
 Route::controller(SuperAdminController::class)->group(function() {
-    Route::get('superadmin/', 'superadminlogin')->name('login');
+    Route::get('superadmin/', 'superadminlogin')->name('superadminlogin');
     Route::post('superadmin/authenticate', 'authenticate')->name('authenticate');
     Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
     Route::post('superadmin/logout', 'sulogout')->name('sulogout');
