@@ -31,81 +31,90 @@ class FlowerVendorController extends Controller
         return view('admin/add-flower-vendors', compact('flowers'));
     }
 
-    public function saveVendorDetails(Request $request)
-    {
-        try {
-            // Validate request
-            $validated = $request->validate([
-                'vendor_name'     => 'required|string|max:255',
-                'phone_no'        => 'required|string|max:20',
-                'vendor_category' => 'required|string|max:255',
-                'email_id'        => 'nullable|email|max:255',
-                'payment_type'    => 'nullable|in:UPI,Bank,Cash',
-                'vendor_gst'      => 'nullable|string|max:20',
-                'vendor_address'  => 'nullable|string|max:500',
-                'flower_ids'      => 'nullable|array',
-                'flower_ids.*'    => 'nullable|string',
+public function saveVendorDetails(Request $request)
+{
+    try {
+        // Validate request
+        $validated = $request->validate([
+            'vendor_name'     => 'required|string|max:255',
+            'phone_no'        => 'required|string|max:20',
+            'vendor_category' => 'required|string|max:255',
+            'email_id'        => 'nullable|email|max:255',
+            'payment_type'    => 'nullable|in:UPI,Bank,Cash',
+            'vendor_gst'      => 'nullable|string|max:20',
+            'vendor_address'  => 'nullable|string|max:500',
+            'flower_ids'      => 'nullable|array',
+            'flower_ids.*'    => 'nullable|string',
 
-                // Bank details
-                'bank_name'       => 'nullable|array',
-                'bank_name.*'     => 'nullable|string|max:255',
-                'account_no'      => 'nullable|array',
-                'account_no.*'    => 'nullable|string|max:32',
-                'ifsc_code'       => 'nullable|array',
-                'ifsc_code.*'     => 'nullable|string|max:15',
-                'upi_id'          => 'nullable|array',
-                'upi_id.*'        => 'nullable|string|max:64',
+            // Bank details
+            'bank_name'       => 'nullable|array',
+            'bank_name.*'     => 'nullable|string|max:255',
+            'account_no'      => 'nullable|array',
+            'account_no.*'    => 'nullable|string|max:32',
+            'ifsc_code'       => 'nullable|array',
+            'ifsc_code.*'     => 'nullable|string|max:15',
+            'upi_id'          => 'nullable|array',
+            'upi_id.*'        => 'nullable|string|max:64',
 
-                // NEW fields
-                'date_of_joining' => 'nullable|date',
-                'vendor_document' => 'nullable|image|mimes:pdf,jpg,jpeg|max:5120', // 5MB
-            ]);
+            // NEW fields
+            'date_of_joining' => 'nullable|date',
 
-            // Create vendor
-            $vendor = new FlowerVendor();
-            $vendor->vendor_id        = (string) \Str::uuid();   // unique ID
-            $vendor->vendor_name      = $validated['vendor_name'];
-            $vendor->phone_no         = $validated['phone_no'];
-            $vendor->email_id         = $validated['email_id'] ?? null;
-            $vendor->vendor_category  = $validated['vendor_category'];
-            $vendor->payment_type     = $validated['payment_type'] ?? null;
-            $vendor->vendor_gst       = $validated['vendor_gst'] ?? null;
-            $vendor->vendor_address   = $validated['vendor_address'] ?? null;
-            $vendor->flower_ids       = $validated['flower_ids'] ?? [];
-            $vendor->date_of_joining  = $validated['date_of_joining'] ?? null; // NEW
-            $vendor->vendor_document = null; // NEW (ensure column exists)
+            // ✅ Accept PDF or image files (jpg/jpeg/png) up to 5 MB
+            'vendor_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
 
-            // If you want the file saved with the vendor_id in the filename:
-            if ($request->hasFile('vendor_document')) {
-                $file = $request->file('vendor_document');
-                $ext  = $file->getClientOriginalExtension();
-                // store in storage/app/public/vendor_docs/{vendor_id}.{ext}
-                $storedPath = $file->storeAs('vendor_docs', $vendor->vendor_id.'.'.$ext, 'public');
-                $vendor->vendor_document = $storedPath;
-            }
+        // Create vendor
+        $vendor = new FlowerVendor();
+        $vendor->vendor_id        = (string) \Str::uuid();
+        $vendor->vendor_name      = $validated['vendor_name'];
+        $vendor->phone_no         = $validated['phone_no'];
+        $vendor->email_id         = $validated['email_id'] ?? null;
+        $vendor->vendor_category  = $validated['vendor_category'];
+        $vendor->payment_type     = $validated['payment_type'] ?? null;
+        $vendor->vendor_gst       = $validated['vendor_gst'] ?? null;
+        $vendor->vendor_address   = $validated['vendor_address'] ?? null;
+        $vendor->flower_ids       = $validated['flower_ids'] ?? [];
+        $vendor->date_of_joining  = $validated['date_of_joining'] ?? null;
+        $vendor->vendor_document  = null;
 
-            $vendor->save();
+        // Handle file upload (PDF or image)
+        if ($request->hasFile('vendor_document')) {
+            $file = $request->file('vendor_document');
 
-            // Save multiple bank details
-            if (!empty($validated['bank_name'])) {
-                foreach ($validated['bank_name'] as $index => $bankName) {
-                    if (!empty($bankName) || !empty($validated['account_no'][$index] ?? null) || !empty($validated['upi_id'][$index] ?? null)) {
-                        FlowerVendorBank::create([
-                            'vendor_id'  => $vendor->vendor_id,
-                            'bank_name'  => $bankName,
-                            'account_no' => $validated['account_no'][$index] ?? null,
-                            'ifsc_code'  => $validated['ifsc_code'][$index] ?? null,
-                            'upi_id'     => $validated['upi_id'][$index] ?? null,
-                        ]);
-                    }
+            // Use a stable filename to avoid collisions; keep original extension
+            $ext        = strtolower($file->getClientOriginalExtension()); // pdf|jpg|jpeg|png
+            $fileName   = $vendor->vendor_id . '-' . time() . '.' . $ext;
+            $storedPath = $file->storeAs('vendor_docs', $fileName, 'public'); // storage/app/public/vendor_docs/...
+
+            $vendor->vendor_document = $storedPath; // e.g. vendor_docs/uuid-169321....pdf
+        }
+
+        $vendor->save();
+
+        // Save bank rows if provided
+        if (!empty($validated['bank_name'])) {
+            foreach ($validated['bank_name'] as $index => $bankName) {
+                $hasAny = !empty($bankName)
+                    || !empty($validated['account_no'][$index] ?? null)
+                    || !empty($validated['upi_id'][$index] ?? null);
+
+                if ($hasAny) {
+                    FlowerVendorBank::create([
+                        'vendor_id'  => $vendor->vendor_id,
+                        'bank_name'  => $bankName,
+                        'account_no' => $validated['account_no'][$index] ?? null,
+                        'ifsc_code'  => $validated['ifsc_code'][$index] ?? null,
+                        'upi_id'     => $validated['upi_id'][$index] ?? null,
+                    ]);
                 }
             }
-
-            return redirect()->back()->with('success', 'Vendor details saved successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to save vendor. '.$e->getMessage());
         }
+
+        return redirect()->back()->with('success', 'Vendor details saved successfully!');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Failed to save vendor. '.$e->getMessage());
     }
+}
 
     public function manageVendorDetails()
     {
