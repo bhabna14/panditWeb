@@ -883,8 +883,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
+    // Auth
     Route::get('login', [SuperAdminController::class, 'showLogin'])->name('login');
     Route::post('authenticate', [SuperAdminController::class, 'authenticate'])->name('authenticate');
-    Route::get('dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
-    Route::post('logout', [SuperAdminController::class,'sulogout'])->name('sulogout');
+    Route::post('logout', [SuperAdminController::class, 'sulogout'])->name('sulogout');
+
+    // Admin-only
+    Route::middleware(['auth:admins', 'role:admin,superadmin'])->group(function () {
+        Route::get('dashboard', [SuperAdminController::class, 'adminDashboard'])->name('dashboard');
+    });
 });

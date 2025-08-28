@@ -30,7 +30,7 @@ class Admin extends Authenticatable implements AuthenticatableContract
         'email_verified_at' => 'datetime',
     ];
 
-    // Auto-hash on set (won't double-hash if already hashed)
+    // Auto-hash on set (avoids double-hashing)
     protected function password(): Attribute
     {
         return Attribute::make(

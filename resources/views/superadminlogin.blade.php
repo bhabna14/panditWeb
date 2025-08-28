@@ -46,26 +46,35 @@
                                                                     </ul>
                                                                 </div>
                                                             @endif
-                                                            <form action="{{ route('authenticate') }}"
-                                                                method="post">
+                                                            <form action="{{ route('admin.authenticate') }}" method="post">
                                                                 @csrf
                                                                 <div class="form-group">
-                                                                    <label>email</label> <input class="form-control"
-                                                                        placeholder="Enter your Username" name="email"
-                                                                        type="text">
-                                                                </div>
-                                                                <div class="form-group">
-                                                                    <label>Password</label> <input class="form-control"
-                                                                        placeholder="Enter your password" name="password"
-                                                                        type="password">
+                                                                    <label>Email</label>
+                                                                    <input
+                                                                        class="form-control @error('email') is-invalid @enderror"
+                                                                        placeholder="Enter your email" name="email"
+                                                                        type="email" value="{{ old('email') }}">
+                                                                    @error('email')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
                                                                 </div>
 
-                                                                <!-- <a href="{{ url('index') }}" class="btn btn-primary btn-block">Sign In</a> -->
+                                                                <div class="form-group">
+                                                                    <label>Password</label>
+                                                                    <input
+                                                                        class="form-control @error('password') is-invalid @enderror"
+                                                                        placeholder="Enter your password" name="password"
+                                                                        type="password">
+                                                                    @error('password')
+                                                                        <small class="text-danger">{{ $message }}</small>
+                                                                    @enderror
+                                                                </div>
+
                                                                 <input type="submit"
                                                                     class="col-md-3 offset-md-5 btn btn-primary"
                                                                     value="Login">
-
                                                             </form>
+
                                                         </div>
                                                         <div class="tab-pane" id="tab6">
                                                             <div id="mobile-num"

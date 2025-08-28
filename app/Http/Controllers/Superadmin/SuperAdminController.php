@@ -14,7 +14,11 @@ class SuperAdminController extends Controller
 {
     public function showLogin()
     {
-        return view("superadminlogin");
+        // If already logged in, send to role-based dashboard
+        if (Auth::guard('admins')->check()) {
+            return redirect($this->redirectFor(Auth::guard('admins')->user()->role));
+        }
+        return view('superadminlogin'); // your blade
     }
 
     public function authenticate(Request $request)
@@ -28,28 +32,28 @@ class SuperAdminController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::guard('admins')->user();
+
+            // Status gate (optional)
             if (data_get($user, 'status') && strtolower($user->status) !== 'active') {
                 Auth::guard('admins')->logout();
                 return back()->withErrors(['email' => 'Your account is inactive.'])->onlyInput('email');
             }
 
-            return redirect()->intended(route('admin.dashboard'));
+            // ✅ Role-wise redirect
+            return redirect()->intended($this->redirectFor($user->role));
         }
 
         return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
     }
 
-    public function logout(Request $request)
+    public function sulogout(Request $request) // keep your route name
     {
-        Auth::logout();
-
+        Auth::guard('admins')->logout();
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
-        return redirect('/superadmin');
+        return redirect()->route('admin.login');
     }
-
     public function dashboard()
     {
         return view('/superadmin/dashboard');
