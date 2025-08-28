@@ -21,31 +21,36 @@ class SuperAdminController extends Controller
         return view('superadminlogin'); // your blade
     }
 
-    public function authenticate(Request $request)
-    {
-        $credentials = $request->validate([
-            'email'    => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+   public function authenticate(Request $request)
+{
+    $data = $request->validate([
+        'email'    => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
-        if (Auth::guard('admins')->attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+    // normalize email
+    $credentials = [
+        'email'    => strtolower(trim($data['email'])),
+        'password' => $data['password'],
+    ];
 
-            $user = Auth::guard('admins')->user();
+    if (Auth::guard('admins')->attempt($credentials, $request->boolean('remember'))) {
+        $request->session()->regenerate();
 
-            // Status gate (optional)
-            if (data_get($user, 'status') && strtolower($user->status) !== 'active') {
-                Auth::guard('admins')->logout();
-                return back()->withErrors(['email' => 'Your account is inactive.'])->onlyInput('email');
-            }
+        $user = Auth::guard('admins')->user();
 
-            // ✅ Role-wise redirect
-            return redirect()->intended($this->redirectFor($user->role));
+        // Optional: status check
+        if (data_get($user, 'status') && strtolower($user->status) !== 'active') {
+            Auth::guard('admins')->logout();
+            return back()->withErrors(['email' => 'Your account is inactive.'])->onlyInput('email');
         }
 
-        return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
+        // Role-based redirect (your existing helper)
+        return redirect()->intended($this->redirectFor($user->role));
     }
 
+    return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
+}
     public function sulogout(Request $request) // keep your route name
     {
         Auth::guard('admins')->logout();
