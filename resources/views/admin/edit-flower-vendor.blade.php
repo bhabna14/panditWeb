@@ -53,10 +53,10 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="POST" action="{{ route('admin.updateVendorDetails', $vendordetails->vendor_id) }}">
+                    <form method="POST" action="{{ route('admin.updateVendorDetails', $vendordetails->vendor_id) }}"
+                        enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-
 
                         <!-- Vendor Fields -->
                         <div class="row">
@@ -70,6 +70,7 @@
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="phone_no">Phone Number <span style="color:red">*</span></label>
@@ -80,6 +81,7 @@
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="email_id">Email ID</label>
@@ -97,34 +99,40 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="vendor_category">Vendor Category <span style="color:red">*</span></label>
-                                    <input type="text" class="form-control" id="vendor_category" name="vendor_category"
-                                        value="{{ old('vendor_category', $vendordetails->vendor_category ?? '') }}"
-                                        required>
+                                    <select class="form-control" id="vendor_category" name="vendor_category" required>
+                                        <option value="">Select Vendor Category</option>
+                                        @php
+                                            $vc = old('vendor_category', $vendordetails->vendor_category ?? '');
+                                        @endphp
+                                        <option value="Farmer" {{ $vc === 'Farmer' ? 'selected' : '' }}>Farmer</option>
+                                        <option value="Retailer" {{ $vc === 'Retailer' ? 'selected' : '' }}>Retailer
+                                        </option>
+                                        <option value="Dealer" {{ $vc === 'Dealer' ? 'selected' : '' }}>Dealer</option>
+                                    </select>
                                     @error('vendor_category')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="payment_type">Payment Type</label>
                                     <select class="form-control" id="payment_type" name="payment_type">
+                                        @php
+                                            $pt = old('payment_type', $vendordetails->payment_type ?? '');
+                                        @endphp
                                         <option value="">Select Payment Type</option>
-                                        <option value="UPI"
-                                            {{ old('payment_type', $vendordetails->payment_type ?? '') == 'UPI' ? 'selected' : '' }}>
-                                            UPI</option>
-                                        <option value="Bank"
-                                            {{ old('payment_type', $vendordetails->payment_type ?? '') == 'Bank' ? 'selected' : '' }}>
-                                            Bank</option>
-                                        <option value="Cash"
-                                            {{ old('payment_type', $vendordetails->payment_type ?? '') == 'Cash' ? 'selected' : '' }}>
-                                            Cash</option>
+                                        <option value="UPI" {{ $pt === 'UPI' ? 'selected' : '' }}>UPI</option>
+                                        <option value="Bank" {{ $pt === 'Bank' ? 'selected' : '' }}>Bank</option>
+                                        <option value="Cash" {{ $pt === 'Cash' ? 'selected' : '' }}>Cash</option>
                                     </select>
                                     @error('payment_type')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
                                 </div>
                             </div>
+
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="vendor_gst">GST Number</label>
@@ -135,28 +143,60 @@
                                     @enderror
                                 </div>
                             </div>
-
                         </div>
+
+                        <!-- Address -->
                         <div class="col-md-12">
                             <div class="form-group">
                                 <label for="vendor_address">Vendor Address</label>
-                                <textarea name="vendor_address" class="form-control" id="vendor_address">{{ $vendordetails->vendor_address }}</textarea>
+                                <textarea name="vendor_address" class="form-control" id="vendor_address">{{ old('vendor_address', $vendordetails->vendor_address) }}</textarea>
                             </div>
                         </div>
 
-
-                        <!-- Bank Details -->
+                        <!-- Joining date + Document -->
                         <div class="row">
-                            <div class="col-md-12 mt-4">
-                                <h4>Bank Details</h4>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="date_of_joining">Date of Joining</label>
+                                    <input type="date" class="form-control" id="date_of_joining"
+                                        name="date_of_joining"
+                                        value="{{ old('date_of_joining', !empty($vendordetails->date_of_joining) ? \Carbon\Carbon::parse($vendordetails->date_of_joining)->format('Y-m-d') : '') }}">
+                                    @error('date_of_joining')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+                            </div>
 
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <label for="vendor_document">Vendor Document (PDF / JPG / JPEG / PNG, max 5MB)</label>
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <input type="file" class="form-control" id="vendor_document"
+                                            name="vendor_document" accept=".pdf,.jpg,.jpeg,.png">
+                                        @if (!empty($vendordetails->vendor_document))
+                                            <button type="button" class="btn btn-outline-primary btn-sm"
+                                                data-bs-toggle="modal" data-bs-target="#vendorDocModal"
+                                                data-doc-url="{{ asset('storage/' . $vendordetails->vendor_document) }}"
+                                                data-doc-name="Document — {{ $vendordetails->vendor_name }}">
+                                                View Current
+                                            </button>
+                                        @endif
+                                    </div>
+                                    @error('vendor_document')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                    @if (!empty($vendordetails->vendor_document))
+                                        <small class="text-muted d-block mt-1">
+                                            Current file: {{ basename($vendordetails->vendor_document) }}
+                                        </small>
+                                    @endif
+                                </div>
                             </div>
                         </div>
 
                         <!-- Flowers Provided (Category = Flower) -->
                         <div class="card mt-3">
                             <div class="card-body">
-                               
                                 @if (isset($flowers) && $flowers->count())
                                     <div class="row" id="flowersGrid">
                                         @foreach ($flowers as $flower)
@@ -165,7 +205,7 @@
                                                     <input class="form-check-input flower-checkbox" type="checkbox"
                                                         id="flower_{{ $flower->product_id }}" name="flower_ids[]"
                                                         value="{{ $flower->product_id }}"
-                                                        {{ in_array($flower->product_id, $vendordetails->flower_ids ?? []) ? 'checked' : '' }}>
+                                                        {{ in_array($flower->product_id, old('flower_ids', $vendordetails->flower_ids ?? [])) ? 'checked' : '' }}>
                                                     <label class="form-check-label ms-1"
                                                         for="flower_{{ $flower->product_id }}">
                                                         {{ $flower->name }}
@@ -185,6 +225,12 @@
                             </div>
                         </div>
 
+                        <!-- Bank Details -->
+                        <div class="row">
+                            <div class="col-md-12 mt-4">
+                                <h4>Bank Details</h4>
+                            </div>
+                        </div>
 
                         <div id="bank-details-container">
                             @if (isset($vendordetails) && $vendordetails->vendorBanks->isNotEmpty())
@@ -237,7 +283,6 @@
                                                     @enderror
                                                 </div>
                                             </div>
-
                                         </div>
                                         <button type="button" class="btn btn-danger remove-bank-section">Remove Bank
                                             Section</button>
@@ -248,13 +293,37 @@
                             @endif
                         </div>
 
-                        <!-- Submit Button -->
-                        <div class="form-group text-center">
+                        <!-- Submit -->
+                        <div class="form-group text-center mt-3">
                             <button type="button" id="add-bank-section" class="btn btn-success">Add Bank
                                 Section</button>
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                     </form>
+
+                    {{-- Modal for viewing document --}}
+                    <div class="modal fade" id="vendorDocModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Vendor Document</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div id="docContent" class="w-100 d-flex justify-content-center align-items-center"
+                                        style="min-height:60vh;">
+                                        <div class="text-muted">Loading…</div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <a id="docDownloadBtn" href="#" class="btn btn-secondary" target="_blank"
+                                        rel="noopener">Open in new tab</a>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -307,4 +376,49 @@
         });
     </script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalEl = document.getElementById('vendorDocModal');
+
+            if (modalEl) {
+                modalEl.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const url = button?.getAttribute('data-doc-url') || '';
+                    const name = button?.getAttribute('data-doc-name') || 'Vendor Document';
+
+                    const clean = url.split('?')[0];
+                    const ext = (clean.split('.').pop() || '').toLowerCase();
+
+                    const contentEl = modalEl.querySelector('#docContent');
+                    const downloadEl = modalEl.querySelector('#docDownloadBtn');
+                    modalEl.querySelector('.modal-title').textContent = name;
+                    downloadEl.href = url;
+
+                    contentEl.innerHTML = '';
+
+                    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'].includes(ext)) {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = name;
+                        img.className = 'img-fluid rounded shadow-sm';
+                        contentEl.appendChild(img);
+                    } else if (ext === 'pdf') {
+                        const iframe = document.createElement('iframe');
+                        iframe.src = url + '#zoom=page-width';
+                        iframe.width = '100%';
+                        iframe.height = '600';
+                        iframe.style.border = '0';
+                        contentEl.appendChild(iframe);
+                    } else {
+                        contentEl.innerHTML = '<p class="text-muted">Preview not available. <a href="' +
+                            url + '" target="_blank" rel="noopener">Click to open</a>.</p>';
+                    }
+                });
+
+                modalEl.addEventListener('hidden.bs.modal', function() {
+                    modalEl.querySelector('#docContent').innerHTML = '';
+                });
+            }
+        });
+    </script>
 @endsection
