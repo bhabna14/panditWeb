@@ -91,7 +91,10 @@ return [
         'driver' => 'eloquent',
         'model' => App\Models\User::class,
     ],
-
+    'superadmins' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Superadmin::class,
+    ],
     'admins' => [
         'driver' => 'eloquent',
         'model' => App\Models\Admin::class,

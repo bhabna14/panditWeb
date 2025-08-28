@@ -49,23 +49,15 @@ class AdminMiddleware
     // }
 
 
-   public function handle(Request $request, Closure $next, ...$roles)
+    public function handle(Request $request, Closure $next)
     {
-        $user = Auth::guard('admins')->user();
-
-        if (!$user) {
-            return redirect()->route('admin.login');
+        // Check if the user is authenticated with the 'admins' guard
+        if (!Auth::guard('admins')->check()) {
+            // If not authenticated, redirect to the login page
+            return redirect()->route('adminlogin');
         }
-
-        // If no roles passed, allow any authenticated admin
-        if (empty($roles)) {
-            return $next($request);
-        }
-
-        if (!in_array(strtolower($user->role), array_map('strtolower', $roles), true)) {
-            abort(403, 'You do not have permission to access this area.');
-        }
-
+    
+        // Proceed with the request if authenticated
         return $next($request);
     }
 }
