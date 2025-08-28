@@ -48,15 +48,11 @@
             <div class="col-lg-12 col-md-">
                 <div class="card custom-card">
                     <div class="card-body">
-
                         <div class="row">
-                            <input type="hidden" class="form-control" id="exampleInputEmail1" name="userid"
-                                value="JA{{ rand(1000, 9999) }}">
-
+                            <input type="hidden" class="form-control" id="exampleInputEmail1" name="userid" value="JA{{ rand(1000, 9999) }}">
                         </div>
                         <div class="row">
                             <div class="col-md-4">
-
                                 <div class="form-group">
                                     <label for="exampleInputEmail1">Name</label>
                                     <input type="text" class="form-control" id="exampleInputEmail1" value=""
@@ -64,7 +60,6 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-
                                 <div class="form-group">
                                     <label for="exampleInputEmail1">Email</label>
                                     <input type="email" class="form-control" id="exampleInputEmail1" value=""
@@ -72,13 +67,11 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-
                                 <div class="form-group">
                                     <label for="exampleInputEmail1">Phone Number</label>
                                     <input type="text" class="form-control" id="exampleInputEmail1" value="+91"
                                         name="phonenumber" placeholder="Enter Phone Number">
                                 </div>
-
                             </div>
                         </div>
                     </div>
@@ -86,11 +79,9 @@
             </div>
         </div>
         <!-- /row -->
-
         <div class="row">
             <div class="col-md-6">
                 <div class="form-group">
-                    <!-- <button class="btn btn-primary add_item_btn" id="adddoc">Add More</button> -->
                     <input type="submit" class="btn btn-primary" value="Submit">
                 </div>
             </div>
