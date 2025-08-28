@@ -3,22 +3,39 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Hash;
 
 class Admin extends Authenticatable implements AuthenticatableContract
 {
-   use HasFactory;
+    use HasFactory;
 
-   protected $table = 'admins';
+    protected $table = 'admins';
 
-   protected $fillable = [
+    protected $fillable = [
         'name',
         'email',
         'password',
         'role',
-        'status'
+        'status',
+        'email_verified_at',
+        'remember_token',
     ];
 
+    protected $hidden = ['password', 'remember_token'];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    // Auto-hash on set (won't double-hash if already hashed)
+    protected function password(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) =>
+                !empty($value) && Hash::needsRehash($value) ? Hash::make($value) : $value
+        );
+    }
 }

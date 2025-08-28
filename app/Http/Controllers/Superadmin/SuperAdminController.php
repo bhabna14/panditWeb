@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 
 class SuperAdminController extends Controller
 {
-    public function superadminlogin()
+    public function showLogin()
     {
         return view("superadminlogin");
     }
@@ -20,13 +20,23 @@ class SuperAdminController extends Controller
     public function authenticate(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required',
-            'password' => 'required'
+            'email'    => ['required', 'email'],
+            'password' => ['required'],
         ]);
-        if (Auth::guard('superadmins')->attempt($request->only('email', 'password'))) {
-            return redirect()->intended('/superadmin/dashboard');
+
+        if (Auth::guard('admins')->attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+
+            $user = Auth::guard('admins')->user();
+            if (data_get($user, 'status') && strtolower($user->status) !== 'active') {
+                Auth::guard('admins')->logout();
+                return back()->withErrors(['email' => 'Your account is inactive.'])->onlyInput('email');
+            }
+
+            return redirect()->intended(route('admin.dashboard'));
         }
-        return redirect()->back()->withErrors(['email' => 'Invalid credentials.']); // Redirect back with error message
+
+        return back()->withErrors(['email' => 'Invalid email or password.'])->onlyInput('email');
     }
 
     public function logout(Request $request)

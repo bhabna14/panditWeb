@@ -225,14 +225,19 @@ Route::controller(AdminController::class)->group(function() {
 });
 
 ## super admin login
-Route::controller(SuperAdminController::class)->group(function() {
-    Route::get('superadmin/', 'superadminlogin')->name('superadminlogin');
-    Route::post('superadmin/authenticate', 'authenticate')->name('authenticate');
-    Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
-    Route::post('superadmin/logout', 'sulogout')->name('sulogout');
-    Route::post('superadmin/logout', 'sulogout')->name('sulogout');
-});
+// Route::controller(SuperAdminController::class)->group(function() {
+//     Route::get('superadmin/', 'superadminlogin')->name('superadminlogin');
+//     Route::post('superadmin/authenticate', 'authenticate')->name('authenticate');
+//     Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
+//     Route::post('superadmin/logout', 'sulogout')->name('sulogout');
+// });
 
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('login', [SuperAdminController::class, 'showLogin'])->name('adminLogin');
+    Route::post('authenticate', [SuperAdminController::class, 'authenticate'])->name('authenticate');
+    Route::get('dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
+    Route::post('logout', [SuperAdminController::class,'sulogout'])->name('sulogout');
+});
 
 ##super admin routes
 Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
