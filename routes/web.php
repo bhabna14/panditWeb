@@ -225,12 +225,13 @@ Route::controller(AdminController::class)->group(function() {
 });
 
 ## super admin login
-// Route::controller(SuperAdminController::class)->group(function() {
-//     Route::get('superadmin/', 'superadminlogin')->name('superadminlogin');
-//     Route::post('superadmin/authenticate', 'authenticate')->name('authenticate');
-//     Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
-//     Route::post('superadmin/logout', 'sulogout')->name('sulogout');
-// });
+Route::controller(SuperAdminController::class)->group(function() {
+    Route::get('superadmin/', 'superadminlogin')->name('login');
+    Route::post('superadmin/authenticate', 'authenticate')->name('authenticate');
+    Route::get('superadmin/dashboard', 'dashboard')->name('dashboard');
+    Route::post('superadmin/logout', 'sulogout')->name('sulogout');
+    Route::post('superadmin/logout', 'sulogout')->name('sulogout');
+});
 
 
 ##super admin routes
@@ -879,17 +880,4 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('/flower-price/delete/{id}', [MonthWiseFlowerPriceController::class, 'deleteFlowerPrice'])->name('deleteFlowerPrice');
-});
-
-
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Auth
-    Route::get('login', [SuperAdminController::class, 'showLogin'])->name('login');
-    Route::post('authenticate', [SuperAdminController::class, 'authenticate'])->name('authenticate');
-    Route::post('logout', [SuperAdminController::class, 'sulogout'])->name('sulogout');
-
-    // Admin-only
-    Route::middleware(['auth:admins', 'role:admin,superadmin'])->group(function () {
-        Route::get('dashboard', [SuperAdminController::class, 'adminDashboard'])->name('dashboard');
-    });
 });
