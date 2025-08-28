@@ -46,7 +46,7 @@
                                                                     </ul>
                                                                 </div>
                                                             @endif
-                                                            <form action="{{ route('adminLogin') }}"
+                                                            <form action="{{ route('authenticate') }}"
                                                                 method="post">
                                                                 @csrf
                                                                 <div class="form-group">

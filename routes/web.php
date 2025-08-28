@@ -883,7 +883,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::get('login', [SuperAdminController::class, 'showLogin'])->name('adminLogin');
+    Route::get('login', [SuperAdminController::class, 'showLogin'])->name('login');
     Route::post('authenticate', [SuperAdminController::class, 'authenticate'])->name('authenticate');
     Route::get('dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
     Route::post('logout', [SuperAdminController::class,'sulogout'])->name('sulogout');
