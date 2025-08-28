@@ -76,10 +76,7 @@ class FlowerVendorController extends Controller
                     ->value('max_num');
 
                 $next = (int)$lastNum + 1; // if null, becomes 1
-                if ($next > 9999) {
-                    throw new \RuntimeException('Vendor code limit (VENDOR9999) reached.');
-                }
-
+                
                 $newVendorId = $prefix . str_pad((string)$next, 4, '0', STR_PAD_LEFT);
 
                 // ===== Create vendor row =====
