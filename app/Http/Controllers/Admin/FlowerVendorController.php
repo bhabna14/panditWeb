@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Storage;
 
 class FlowerVendorController extends Controller
 {
@@ -30,9 +31,12 @@ class FlowerVendorController extends Controller
 
         return view('admin/add-flower-vendors', compact('flowers'));
     }
+
+
 public function saveVendorDetails(Request $request)
 {
     try {
+        // Validate
         $validated = $request->validate([
             'vendor_name'     => 'required|string|max:255',
             'phone_no'        => 'required|string|max:20',
@@ -44,7 +48,6 @@ public function saveVendorDetails(Request $request)
             'flower_ids'      => 'nullable|array',
             'flower_ids.*'    => 'nullable|string',
 
-            // bank arrays
             'bank_name'       => 'nullable|array',
             'bank_name.*'     => 'nullable|string|max:255',
             'account_no'      => 'nullable|array',
@@ -55,52 +58,84 @@ public function saveVendorDetails(Request $request)
             'upi_id.*'        => 'nullable|string|max:64',
 
             'date_of_joining' => 'nullable|date',
-            // ✅ file upload: PDF or image up to 5MB
+            // PDF or image (jpg/jpeg/png) up to 5 MB
             'vendor_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
-        $vendor = new FlowerVendor();
-        $vendor->vendor_id        = (string) \Str::uuid();
-        $vendor->vendor_name      = $validated['vendor_name'];
-        $vendor->phone_no         = $validated['phone_no'];
-        $vendor->email_id         = $validated['email_id'] ?? null;
-        $vendor->vendor_category  = $validated['vendor_category'];
-        $vendor->payment_type     = $validated['payment_type'] ?? null;
-        $vendor->vendor_gst       = $validated['vendor_gst'] ?? null;
-        $vendor->vendor_address   = $validated['vendor_address'] ?? null;
-        $vendor->flower_ids       = $validated['flower_ids'] ?? [];
-        $vendor->date_of_joining  = $validated['date_of_joining'] ?? null;
-        $vendor->vendor_document  = null;
+        // Everything important happens inside a transaction so the code is unique even under load
+        $vendor = DB::transaction(function () use ($validated, $request) {
 
-        if ($request->hasFile('vendor_document')) {
-            $file      = $request->file('vendor_document');
-            $ext       = strtolower($file->getClientOriginalExtension()); // pdf|jpg|jpeg|png
-            $fileName  = $vendor->vendor_id . '-' . time() . '.' . $ext;
-            $stored    = $file->storeAs('vendor_docs', $fileName, 'public'); // storage/app/public/vendor_docs
-            $vendor->vendor_document = $stored;
-        }
+            // ===== Generate next vendor code: VENDOR0001, VENDOR0002, ... =====
+            $prefix   = 'VENDOR';
+            $startPos = strlen($prefix) + 1; // 7 for "VENDOR0001"
 
-        $vendor->save();
+            // Lock matching rows, find the highest numeric suffix (MySQL syntax)
+            $lastNum = DB::table('flower__vendor_details')
+                ->where('vendor_id', 'LIKE', $prefix.'%')
+                ->lockForUpdate()
+                ->select(DB::raw('MAX(CAST(SUBSTRING(vendor_id, '.$startPos.') AS UNSIGNED)) AS max_num'))
+                ->value('max_num');
 
-        if (!empty($validated['bank_name'])) {
-            foreach ($validated['bank_name'] as $i => $bankName) {
-                if (!empty($bankName) || !empty($validated['account_no'][$i] ?? null) || !empty($validated['upi_id'][$i] ?? null)) {
-                    FlowerVendorBank::create([
-                        'vendor_id'  => $vendor->vendor_id,
-                        'bank_name'  => $bankName,
-                        'account_no' => $validated['account_no'][$i] ?? null,
-                        'ifsc_code'  => $validated['ifsc_code'][$i] ?? null,
-                        'upi_id'     => $validated['upi_id'][$i] ?? null,
-                    ]);
+            $next = (int)$lastNum + 1; // if null, becomes 1
+            if ($next > 9999) {
+                throw new \RuntimeException('Vendor code limit (VENDOR9999) reached.');
+            }
+
+            $newVendorId = $prefix . str_pad((string)$next, 4, '0', STR_PAD_LEFT);
+
+            // ===== Create vendor row =====
+            $vendor = new FlowerVendor();
+            $vendor->vendor_id        = $newVendorId; // primary key
+            $vendor->vendor_name      = $validated['vendor_name'];
+            $vendor->phone_no         = $validated['phone_no'];
+            $vendor->email_id         = $validated['email_id'] ?? null;
+            $vendor->vendor_category  = $validated['vendor_category'];
+            $vendor->payment_type     = $validated['payment_type'] ?? null;
+            $vendor->vendor_gst       = $validated['vendor_gst'] ?? null;
+            $vendor->vendor_address   = $validated['vendor_address'] ?? null;
+            $vendor->flower_ids       = $validated['flower_ids'] ?? [];
+            $vendor->date_of_joining  = $validated['date_of_joining'] ?? null;
+            $vendor->vendor_document  = null;
+
+            // Handle file upload (optional)
+            if ($request->hasFile('vendor_document')) {
+                $file     = $request->file('vendor_document');
+                $ext      = strtolower($file->getClientOriginalExtension()); // pdf|jpg|jpeg|png
+                $fileName = $newVendorId . '-' . time() . '.' . $ext;
+                $path     = $file->storeAs('vendor_docs', $fileName, 'public'); // storage/app/public/vendor_docs/...
+                $vendor->vendor_document = $path;
+            }
+
+            $vendor->save();
+
+            // Bank rows (optional)
+            if (!empty($validated['bank_name'])) {
+                foreach ($validated['bank_name'] as $i => $bankName) {
+                    $hasAny = !empty($bankName)
+                        || !empty($validated['account_no'][$i] ?? null)
+                        || !empty($validated['upi_id'][$i] ?? null);
+
+                    if ($hasAny) {
+                        FlowerVendorBank::create([
+                            'vendor_id'  => $vendor->vendor_id,
+                            'bank_name'  => $bankName,
+                            'account_no' => $validated['account_no'][$i] ?? null,
+                            'ifsc_code'  => $validated['ifsc_code'][$i] ?? null,
+                            'upi_id'     => $validated['upi_id'][$i] ?? null,
+                        ]);
+                    }
                 }
             }
-        }
 
-        return back()->with('success', 'Vendor details saved successfully!');
-    } catch (\Exception $e) {
+            return $vendor;
+        });
+
+        return back()->with('success', 'Vendor saved! ID: '.$vendor->vendor_id);
+    } catch (\Throwable $e) {
         return back()->with('error', 'Failed to save vendor. '.$e->getMessage());
     }
 }
+
     public function manageVendorDetails()
     {
         // Active vendors + banks
