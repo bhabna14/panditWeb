@@ -9,8 +9,16 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 
 class Admin extends Authenticatable implements AuthenticatableContract
 {
-    use HasFactory;
+   use HasFactory;
 
-    protected $table = 'admins';
+   protected $table = 'admins';
+
+   protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'status'
+    ];
 
 }

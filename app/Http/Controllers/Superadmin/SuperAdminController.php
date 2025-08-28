@@ -10,7 +10,6 @@ use App\Models\Admin;
 
 use Illuminate\Support\Facades\Hash;
 
-
 class SuperAdminController extends Controller
 {
     public function superadminlogin()

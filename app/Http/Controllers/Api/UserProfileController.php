@@ -52,7 +52,7 @@ class UserProfileController extends Controller
     {
         $request->validate([
             'name' => 'string|max:255',
-            'email' => 'email|max:255',
+            'email' => 'nullable|max:255',
             'dob' => 'nullable|date',
             'about' => 'nullable|string',
             'gender' => 'nullable|string',

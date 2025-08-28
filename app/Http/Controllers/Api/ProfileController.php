@@ -12,10 +12,8 @@ use App\Models\PanditVedic;
 use App\Models\PanditLogin;
 use App\Models\PanditTitle;
 
-
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
-
 
 class ProfileController extends Controller
 {
