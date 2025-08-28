@@ -22,7 +22,7 @@
                                     <div class="wd-100p"><div class="d-flex mb-4"><a href="#"><img src="{{asset('assets/img/brand/logo.png')}}" class="sign-favicon ht-40" alt="logo"></a></div>
                                         <div class="">
                                             <div class="main-signup-header">
-                                                <h2>Welcome Superadmin!</h2>
+                                                <h2>Welcome Superadmin</h2>
                                                 <h6 class="font-weight-semibold mb-4">Please sign in to continue.</h6>
                                                 <div class="panel panel-primary">
                                                 <div class=" tab-menu-heading mb-2 border-bottom-0">

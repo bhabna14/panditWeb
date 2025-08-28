@@ -13,7 +13,6 @@ use Illuminate\Support\Facades\Hash;
 
 class SuperAdminController extends Controller
 {
-    //
     public function superadminlogin()
     {
         return view("superadminlogin");
@@ -93,7 +92,6 @@ class SuperAdminController extends Controller
             'name' => 'required',
             'email' => 'required|email',
             'phonenumber' => 'required|digits:10',
-            
         ]);
 
         $adminlists = Admin::find($id);
@@ -102,7 +100,6 @@ class SuperAdminController extends Controller
         $adminlists->phonenumber = $request->phonenumber;
         if ($adminlists->update()) {
             return redirect('/superadmin/adminlist')->with('success', 'Admin updated successfully.');
-
         } else {
             return redirect()->back()->with('error', 'Failed to Update.');
         }
