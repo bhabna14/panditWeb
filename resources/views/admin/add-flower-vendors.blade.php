@@ -24,7 +24,7 @@
         <div class="col-12 col-sm-12">
             <div class="card">
                 <div class="card-body pt-0 pt-4">
-                    <form method="POST" action="{{ route('admin.saveVendorDetails') }}">
+                    <form method="POST" action="{{ route('admin.saveVendorDetails') }}" enctype="multipart/form-data">
                         @csrf
                         <div class="row">
                             <div class="col-md-4">
@@ -63,13 +63,15 @@
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="date_of_joining">Date of Joining <span style="color:red">*</span></label>
-                                    <input type="date" class="form-control" id="date_of_joining" name="date_of_joining" required>
+                                    <input type="date" class="form-control" id="date_of_joining" name="date_of_joining"
+                                        required>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="vendor_document">Vendor Document</label>
-                                    <input type="file" class="form-control" id="vendor_document" name="vendor_document" accept=".pdf,.jpg,.jpeg,.png">
+                                    <input type="file" class="form-control" id="vendor_document" name="vendor_document"
+                                        accept=".pdf,.jpg,.jpeg,.png">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -110,7 +112,8 @@
                                     <div class="d-flex gap-2">
                                         <input type="text" id="flowerSearch" class="form-control"
                                             placeholder="Search flowers..." style="min-width: 220px;">
-                                        <button type="button" class="btn btn-outline-primary" id="selectAllFlowers">Select
+                                        <button type="button" class="btn btn-outline-primary"
+                                            id="selectAllFlowers">Select
                                             all</button>
                                         <button type="button" class="btn btn-outline-secondary"
                                             id="clearAllFlowers">Clear</button>
@@ -206,14 +209,14 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        @if(session('success'))
+        @if (session('success'))
             Swal.fire({
                 icon: 'success',
                 title: 'Success',
                 text: "{{ session('success') }}",
                 confirmButtonColor: '#3085d6'
             })
-        @elseif(session('error'))
+        @elseif (session('error'))
             Swal.fire({
                 icon: 'error',
                 title: 'Error',

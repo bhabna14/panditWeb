@@ -30,11 +30,9 @@ class FlowerVendorController extends Controller
 
         return view('admin/add-flower-vendors', compact('flowers'));
     }
-
 public function saveVendorDetails(Request $request)
 {
     try {
-        // Validate request
         $validated = $request->validate([
             'vendor_name'     => 'required|string|max:255',
             'phone_no'        => 'required|string|max:20',
@@ -46,7 +44,7 @@ public function saveVendorDetails(Request $request)
             'flower_ids'      => 'nullable|array',
             'flower_ids.*'    => 'nullable|string',
 
-            // Bank details
+            // bank arrays
             'bank_name'       => 'nullable|array',
             'bank_name.*'     => 'nullable|string|max:255',
             'account_no'      => 'nullable|array',
@@ -56,14 +54,11 @@ public function saveVendorDetails(Request $request)
             'upi_id'          => 'nullable|array',
             'upi_id.*'        => 'nullable|string|max:64',
 
-            // NEW fields
             'date_of_joining' => 'nullable|date',
-
-            // ✅ Accept PDF or image files (jpg/jpeg/png) up to 5 MB
+            // ✅ file upload: PDF or image up to 5MB
             'vendor_document' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);
 
-        // Create vendor
         $vendor = new FlowerVendor();
         $vendor->vendor_id        = (string) \Str::uuid();
         $vendor->vendor_name      = $validated['vendor_name'];
@@ -77,45 +72,35 @@ public function saveVendorDetails(Request $request)
         $vendor->date_of_joining  = $validated['date_of_joining'] ?? null;
         $vendor->vendor_document  = null;
 
-        // Handle file upload (PDF or image)
         if ($request->hasFile('vendor_document')) {
-            $file = $request->file('vendor_document');
-
-            // Use a stable filename to avoid collisions; keep original extension
-            $ext        = strtolower($file->getClientOriginalExtension()); // pdf|jpg|jpeg|png
-            $fileName   = $vendor->vendor_id . '-' . time() . '.' . $ext;
-            $storedPath = $file->storeAs('vendor_docs', $fileName, 'public'); // storage/app/public/vendor_docs/...
-
-            $vendor->vendor_document = $storedPath; // e.g. vendor_docs/uuid-169321....pdf
+            $file      = $request->file('vendor_document');
+            $ext       = strtolower($file->getClientOriginalExtension()); // pdf|jpg|jpeg|png
+            $fileName  = $vendor->vendor_id . '-' . time() . '.' . $ext;
+            $stored    = $file->storeAs('vendor_docs', $fileName, 'public'); // storage/app/public/vendor_docs
+            $vendor->vendor_document = $stored;
         }
 
         $vendor->save();
 
-        // Save bank rows if provided
         if (!empty($validated['bank_name'])) {
-            foreach ($validated['bank_name'] as $index => $bankName) {
-                $hasAny = !empty($bankName)
-                    || !empty($validated['account_no'][$index] ?? null)
-                    || !empty($validated['upi_id'][$index] ?? null);
-
-                if ($hasAny) {
+            foreach ($validated['bank_name'] as $i => $bankName) {
+                if (!empty($bankName) || !empty($validated['account_no'][$i] ?? null) || !empty($validated['upi_id'][$i] ?? null)) {
                     FlowerVendorBank::create([
                         'vendor_id'  => $vendor->vendor_id,
                         'bank_name'  => $bankName,
-                        'account_no' => $validated['account_no'][$index] ?? null,
-                        'ifsc_code'  => $validated['ifsc_code'][$index] ?? null,
-                        'upi_id'     => $validated['upi_id'][$index] ?? null,
+                        'account_no' => $validated['account_no'][$i] ?? null,
+                        'ifsc_code'  => $validated['ifsc_code'][$i] ?? null,
+                        'upi_id'     => $validated['upi_id'][$i] ?? null,
                     ]);
                 }
             }
         }
 
-        return redirect()->back()->with('success', 'Vendor details saved successfully!');
+        return back()->with('success', 'Vendor details saved successfully!');
     } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Failed to save vendor. '.$e->getMessage());
+        return back()->with('error', 'Failed to save vendor. '.$e->getMessage());
     }
 }
-
     public function manageVendorDetails()
     {
         // Active vendors + banks
