@@ -121,14 +121,14 @@ class ProductController extends Controller
             $unitIdsC = collect($packageRows)->pluck('unit_id')->unique()->values();
 
             // FIX: item names come from Poojaitemlists
-            $itemNamesById = Poojaitemlists::whereIn('id', $itemIds)->pluck('item_name', 'id');
+            $itemNamesById = FlowerProduct::whereIn('id', $itemIds)->pluck('name', 'id');
             $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)->pluck('unit_name', 'id');
 
             if ($itemNamesById->count() !== $itemIds->count())  return back()->withErrors(['item_id' => 'One or more selected items were not found.'])->withInput();
             if ($unitNamesById->count() !== $unitIdsC->count()) return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
 
             $packageRows = array_map(function ($row) use ($itemNamesById, $unitNamesById) {
-                $row['item_name'] = (string) ($itemNamesById[$row['item_id']] ?? '');
+                $row['name'] = (string) ($itemNamesById[$row['item_id']] ?? '');
                 $row['unit_name'] = (string) ($unitNamesById[$row['unit_id']] ?? '');
                 return $row;
             }, $packageRows);
@@ -171,14 +171,14 @@ class ProductController extends Controller
             $sItemIds  = collect($subscriptionRows)->pluck('item_id')->unique()->values();
             $sUnitIdsC = collect($subscriptionRows)->pluck('unit_id')->unique()->values();
 
-            $sItemNamesById = Poojaitemlists::whereIn('id', $sItemIds)->pluck('item_name', 'id');
+            $sItemNamesById = FlowerProduct::whereIn('id', $sItemIds)->pluck('name', 'id');
             $sUnitNamesById = PoojaUnit::whereIn('id', $sUnitIdsC)->pluck('unit_name', 'id');
 
             if ($sItemNamesById->count() !== $sItemIds->count())  return back()->withErrors(['sub_item_id' => 'One or more selected subscription items were not found.'])->withInput();
             if ($sUnitNamesById->count() !== $sUnitIdsC->count()) return back()->withErrors(['sub_unit_id' => 'One or more selected subscription units were not found.'])->withInput();
 
             $subscriptionRows = array_map(function ($row) use ($sItemNamesById, $sUnitNamesById) {
-                $row['item_name'] = (string) ($sItemNamesById[$row['item_id']] ?? '');
+                $row['name'] = (string) ($sItemNamesById[$row['item_id']] ?? '');
                 $row['unit_name'] = (string) ($sUnitNamesById[$row['unit_id']] ?? '');
                 return $row;
             }, $subscriptionRows);
