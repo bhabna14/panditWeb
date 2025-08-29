@@ -27,10 +27,9 @@ class ProductController extends Controller
 
         return view('admin.add-product', compact('flowerlist', 'pooja_list', 'pooja_units'));
     }
-
+        
     public function createProduct(Request $request)
     {
-        // 1) Validate base product + arrays
         $validated = $request->validate([
             'name'        => ['required','string','max:255'],
             'odia_name'   => ['nullable','string','max:255'],
@@ -39,7 +38,7 @@ class ProductController extends Controller
             'discount'    => ['nullable','numeric','min:0'],
             'description' => ['required','string'],
             'category'    => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
-            'pooja_id'    => ['nullable','integer'], // nulled unless category=Package
+            'pooja_id'    => ['nullable','integer'],
 
             'product_image' => ['required','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
 
@@ -77,20 +76,20 @@ class ProductController extends Controller
             'available_from'   => ['nullable','required_if:flower_available,yes','date'],
             'available_to'     => ['nullable','required_if:flower_available,yes','date','after_or_equal:available_from'],
 
-            // Stock (hidden for Flower; still validate if present)
+            // Stock
             'stock'            => ['nullable','integer','min:0'],
         ], [
             'price.lte' => 'Sale price must be less than or equal to MRP.',
             'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
         ]);
 
-        // 1a) Build & validate PACKAGE rows
+        // -------- PACKAGE rows (use Poojaitemlists for item names) ----------
         $packageRows = [];
         if (($validated['category'] ?? null) === 'Package') {
-            $items    = (array) $request->input('item_id', []);
-            $qtys     = (array) $request->input('quantity', []);
-            $unitIds  = (array) $request->input('unit_id', []);
-            $prices   = (array) $request->input('item_price', []);
+            $items   = (array) $request->input('item_id', []);
+            $qtys    = (array) $request->input('quantity', []);
+            $unitIds = (array) $request->input('unit_id', []);
+            $prices  = (array) $request->input('item_price', []);
 
             foreach ($items as $i => $itemId) {
                 if ($itemId === null || $itemId === '') continue;
@@ -102,7 +101,7 @@ class ProductController extends Controller
                 if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
                     return back()->withErrors(['package' => 'Each package row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])->withInput();
                 }
-                if (!is_numeric($qty) || $qty < 0)   return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
+                if (!is_numeric($qty) || $qty < 0)     return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
                 if (!is_numeric($price) || $price < 0) return back()->withErrors(['package' => 'Item Price must be a non-negative number. (Row '.($i+1).')'])->withInput();
 
                 $packageRows[] = [
@@ -121,7 +120,8 @@ class ProductController extends Controller
             $itemIds  = collect($packageRows)->pluck('item_id')->unique()->values();
             $unitIdsC = collect($packageRows)->pluck('unit_id')->unique()->values();
 
-            $itemNamesById = FlowerProduct::whereIn('id', $itemIds)->pluck('name', 'id');
+            // FIX: item names come from Poojaitemlists
+            $itemNamesById = Poojaitemlists::whereIn('id', $itemIds)->pluck('item_name', 'id');
             $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)->pluck('unit_name', 'id');
 
             if ($itemNamesById->count() !== $itemIds->count())  return back()->withErrors(['item_id' => 'One or more selected items were not found.'])->withInput();
@@ -134,7 +134,7 @@ class ProductController extends Controller
             }, $packageRows);
         }
 
-        // 1b) Build & validate SUBSCRIPTION ITEM rows
+        // -------- SUBSCRIPTION item rows (already correct) ----------
         $subscriptionRows = [];
         if (($validated['category'] ?? null) === 'Subscription') {
             $sItems   = (array) $request->input('sub_item_id', []);
@@ -152,7 +152,7 @@ class ProductController extends Controller
                 if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
                     return back()->withErrors(['subscription_items' => 'Each subscription row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])->withInput();
                 }
-                if (!is_numeric($qty) || $qty < 0)   return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
+                if (!is_numeric($qty) || $qty < 0)     return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
                 if (!is_numeric($price) || $price < 0) return back()->withErrors(['subscription_items' => 'Item Price must be a non-negative number. (Row '.($i+1).')'])->withInput();
 
                 $subscriptionRows[] = [
@@ -164,7 +164,6 @@ class ProductController extends Controller
                 ];
             }
 
-            // Optional: require at least one row when Subscription selected
             if (count($subscriptionRows) < 1) {
                 return back()->withErrors(['sub_item_id' => 'Please add at least one subscription item.'])->withInput();
             }
@@ -185,7 +184,7 @@ class ProductController extends Controller
             }, $subscriptionRows);
         }
 
-        // 2) Handle image
+        // Image
         $imageUrl = null;
         if ($request->hasFile('product_image')) {
             $hashName = $request->file('product_image')->hashName();
@@ -193,7 +192,7 @@ class ProductController extends Controller
             $imageUrl = asset('product_images/' . $hashName);
         }
 
-        // 3) Derivations
+        // Derivations
         $isFlower = (($validated['category'] ?? null) === 'Flower');
         $isSub    = (($validated['category'] ?? null) === 'Subscription');
 
@@ -206,7 +205,6 @@ class ProductController extends Controller
             $benefitString = $cleanedBenefits ? implode('#', $cleanedBenefits) : null;
         }
 
-        // radios -> booleans
         $malaProvidedBool      = null;
         $isFlowerAvailableBool = null;
         if ($isFlower) {
@@ -214,7 +212,7 @@ class ProductController extends Controller
             $isFlowerAvailableBool = isset($validated['flower_available']) ? $validated['flower_available'] === 'yes' : null;
         }
 
-        // 4) Persist
+        // Persist
         DB::transaction(function () use (
             $request, $validated, $productId, $slug, $benefitString, $imageUrl,
             $malaProvidedBool, $isFlowerAvailableBool, $isFlower, $isSub,
@@ -231,22 +229,18 @@ class ProductController extends Controller
             $product->description   = $validated['description'];
             $product->category      = $validated['category'];
 
-            // Save pooja_id only if Package; null otherwise
             $product->pooja_id      = ($validated['category'] === 'Package') ? $request->input('pooja_id', null) : null;
 
-            // Stock & duration
             $product->stock         = $isFlower ? null : ($request->filled('stock') ? (int)$request->input('stock') : 0);
             $product->duration      = $isSub ? $request->input('duration', null) : null;
-
-            // Single per-day price for Subscription
             $product->per_day_price = $isSub ? (float) $request->input('per_day_price', 0) : null;
 
             $product->benefits      = $benefitString;
             $product->product_image = $imageUrl;
 
             // Flower-only
-            $product->mala_provided       = $malaProvidedBool;       // bool|null
-            $product->is_flower_available = $isFlowerAvailableBool;  // bool|null
+            $product->mala_provided       = $malaProvidedBool;
+            $product->is_flower_available = $isFlowerAvailableBool;
             $product->available_from      = $isFlower ? $request->input('available_from') : null;
             $product->available_to        = $isFlower ? $request->input('available_to')   : null;
 
@@ -259,7 +253,7 @@ class ProductController extends Controller
                         'product_id' => $product->product_id,
                         'item_name'  => $row['item_name'],
                         'quantity'   => $row['quantity'],
-                        'unit'       => $row['unit_name'], // save unit name
+                        'unit'       => $row['unit_name'],
                         'price'      => $row['price'],
                     ]);
                 }
@@ -272,7 +266,7 @@ class ProductController extends Controller
                         'product_id' => $product->product_id,
                         'item_name'  => $row['item_name'],
                         'quantity'   => $row['quantity'],
-                        'unit'       => $row['unit_name'], // save unit name
+                        'unit'       => $row['unit_name'],
                         'price'      => $row['price'],
                     ]);
                 }
