@@ -22,10 +22,10 @@ class ProductController extends Controller
     public function addproduct()
     {
         $pooja_list     = Poojalist::where('status', 'active')->get();
-        $Poojaitemlist  = Poojaitemlists::where('status', 'active')->get(); // variants no longer needed
+        $flowerlist  = FlowerProduct::where('status', 'active')->where('category','Flower')->get(); // variants no longer needed
         $pooja_units    = PoojaUnit::orderBy('unit_name')->get();
 
-        return view('admin.add-product', compact('Poojaitemlist', 'pooja_list', 'pooja_units'));
+        return view('admin.add-product', compact('flowerlist', 'pooja_list', 'pooja_units'));
     }
 
     public function createProduct(Request $request)
