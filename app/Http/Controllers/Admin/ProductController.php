@@ -377,6 +377,217 @@ class ProductController extends Controller
         return view('admin.manage-product', compact('products'));
     }
 
+    public function updateProduct(Request $request, $id)
+    {
+            $product = FlowerProduct::findOrFail($id);
+
+        // 1) Validate
+        $validated = $request->validate([
+            'name'          => ['required','string','max:255'],
+            'odia_name'     => ['nullable','string','max:255'],
+            'mrp'           => ['required','numeric','min:0'],
+            'price'         => ['required','numeric','min:0','lte:mrp'],
+            'discount'      => ['nullable','numeric','min:0'],
+            'category'      => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
+            'stock'         => ['nullable','integer','min:0'],
+
+            // Subscription-only
+            'duration'        => ['nullable','required_if:category,Subscription','in:1,3,6'],
+            'per_day_price'   => ['nullable','required_if:category,Subscription','numeric','min:0'],
+
+            'product_image' => ['nullable','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
+            'description'   => ['required','string'],
+
+            // Line rows for Package & Subscription
+            'item_id'       => ['nullable','array'],
+            'item_id.*'     => ['nullable','integer'],
+            'quantity'      => ['nullable','array'],
+            'quantity.*'    => ['nullable','numeric','min:0'],
+            'unit_id'       => ['nullable','array'],
+            'unit_id.*'     => ['nullable','integer'],
+            'item_price'    => ['nullable','array'],
+            'item_price.*'  => ['nullable','numeric','min:0'],
+
+            // Benefits
+            'benefits'      => ['nullable','array'],
+            'benefits.*'    => ['nullable','string','max:255'],
+
+            // Flower-only
+            'mala_provided'    => ['nullable','required_if:category,Flower','in:yes,no'],
+            'flower_available' => ['nullable','required_if:category,Flower','in:yes,no'],
+            'available_from'   => ['nullable','required_if:flower_available,yes','date'],
+            'available_to'     => ['nullable','required_if:flower_available,yes','date','after_or_equal:available_from'],
+
+            // Package-only meta
+            'pooja_id'         => ['nullable','integer'],
+        ], [
+            'price.lte' => 'Sale price must be less than or equal to MRP.',
+            'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
+        ]);
+
+        // 2) Build line rows (for Package OR Subscription)
+        $lineRows = [];
+        $category = $validated['category'] ?? null;
+
+        if (in_array($category, ['Package','Subscription'], true)) {
+            $items   = (array) $request->input('item_id', []);
+            $qtys    = (array) $request->input('quantity', []);
+            $unitIds = (array) $request->input('unit_id', []);
+            $prices  = (array) $request->input('item_price', []);
+
+            foreach ($items as $i => $itemId) {
+                if ($itemId === null || $itemId === '') continue;
+
+                $qty   = $qtys[$i]    ?? null;
+                $unit  = $unitIds[$i] ?? null;
+                $price = $prices[$i]  ?? null;
+
+                if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
+                    return back()->withErrors([
+                        'package' => 'Each row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'
+                    ])->withInput();
+                }
+                if (!is_numeric($qty) || $qty < 0) {
+                    return back()->withErrors([
+                        'package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'
+                    ])->withInput();
+                }
+                if (!is_numeric($price) || $price < 0) {
+                    return back()->withErrors([
+                        'package' => 'Item Price must be a non-negative number. (Row '.($i+1).')'
+                    ])->withInput();
+                }
+
+                $lineRows[] = [
+                    'item_id'  => (int) $itemId,
+                    'quantity' => (float) $qty,
+                    'unit_id'  => (int) $unit,
+                    'price'    => (float) $price,
+                ];
+            }
+
+            if (count($lineRows) < 1) {
+                return back()->withErrors(['item_id' => 'Please add at least one item.'])->withInput();
+            }
+
+            // Resolve names (store names, not IDs) — from FlowerProduct where category=Flower
+            $itemIds  = collect($lineRows)->pluck('item_id')->unique()->values()->all();
+            $unitIdsC = collect($lineRows)->pluck('unit_id')->unique()->values()->all();
+
+            // Build INT-keyed maps to avoid type issues
+            $itemNamesById = FlowerProduct::whereIn('id', $itemIds)
+                ->where('category', 'Flower')
+                ->get(['id','name'])
+                ->keyBy('id')                   // keys are ints
+                ->map(fn($r) => (string) $r->name)
+                ->toArray();
+
+            $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)
+                ->get(['id','unit_name'])
+                ->keyBy('id')
+                ->map(fn($r) => (string) $r->unit_name)
+                ->toArray();
+
+            if (count($itemNamesById) !== count($itemIds)) {
+                return back()->withErrors(['item_id' => 'One or more selected items were not found among Flower products.'])->withInput();
+            }
+            if (count($unitNamesById) !== count($unitIdsC)) {
+                return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
+            }
+
+            // Attach resolved names
+            foreach ($lineRows as &$r) {
+                $iid = (int) $r['item_id'];
+                $uid = (int) $r['unit_id'];
+                $r['item_name'] = $itemNamesById[$iid] ?? '';   // ✅ safe int indexing
+                $r['unit_name'] = $unitNamesById[$uid] ?? '';
+            }
+            unset($r);
+        }
+
+        // 3) Persist
+        DB::transaction(function () use ($request, $validated, $product, $lineRows) {
+            $isFlower       = ($validated['category'] === 'Flower');
+            $isSubscription = ($validated['category'] === 'Subscription');
+            $isPackage      = ($validated['category'] === 'Package');
+
+            // Benefits -> "#"
+            $benefitString = null;
+            if (!empty($validated['benefits'])) {
+                $cleaned = array_filter(array_map('trim', $validated['benefits']));
+                $benefitString = $cleaned ? implode('#', $cleaned) : null;
+            }
+
+            // Slug refresh if name changed
+            if ($product->name !== $validated['name']) {
+                $product->slug = Str::slug($validated['name'], '-');
+            }
+
+            // Flower radios
+            $malaProvidedBool    = null;
+            $flowerAvailableBool = null;
+            if ($isFlower) {
+                $malaProvidedBool    = $request->filled('mala_provided')    ? $request->mala_provided === 'yes'    : null;
+                $flowerAvailableBool = $request->filled('flower_available') ? $request->flower_available === 'yes' : null;
+            }
+
+            // Main fields
+            $product->name        = $validated['name'];
+            $product->odia_name   = $validated['odia_name'] ?? null;
+            $product->price       = $validated['price'];
+            $product->mrp         = $validated['mrp'];
+            $product->discount    = $validated['discount'] ?? null;
+            $product->description = $validated['description'];
+            $product->category    = $validated['category'];
+
+            // Stock & Subscription meta
+            $product->stock          = $isFlower ? null : ($request->input('stock') !== null ? (int)$request->input('stock') : ($product->stock ?? 0));
+            $product->duration       = $isSubscription ? $request->input('duration') : null;
+            $product->per_day_price  = $isSubscription ? (float) $request->input('per_day_price', 0) : null;
+
+            // Package meta
+            $product->pooja_id = $isPackage ? $request->input('pooja_id', null) : null;
+
+            // Benefits & Flower-only
+            $product->benefits            = $benefitString;
+            $product->mala_provided       = $malaProvidedBool;
+            $product->is_flower_available = $flowerAvailableBool;
+            $product->available_from      = $isFlower ? $request->input('available_from') : null;
+            $product->available_to        = $isFlower ? $request->input('available_to')   : null;
+
+            // Image replace
+            if ($request->hasFile('product_image')) {
+                if ($product->product_image && file_exists(public_path('product_images/' . basename($product->product_image)))) {
+                    @unlink(public_path('product_images/' . basename($product->product_image)));
+                }
+                $hashName = $request->file('product_image')->hashName();
+                $request->file('product_image')->move(public_path('product_images'), $hashName);
+                $product->product_image = asset('product_images/' . $hashName);
+            }
+
+            $product->save();
+
+            // Rebuild line rows for Package & Subscription
+            PackageItem::where('product_id', $product->product_id)->delete();
+
+            if (($isPackage || $isSubscription) && !empty($lineRows)) {
+                foreach ($lineRows as $row) {
+                    PackageItem::create([
+                        'product_id' => $product->product_id,
+                        'item_name'  => $row['item_name'],  // ✅ always from FlowerProduct->name
+                        'quantity'   => $row['quantity'],
+                        'unit'       => $row['unit_name'],  // store unit name
+                        'price'      => $row['price'],
+                    ]);
+                }
+            }
+        });
+
+        return redirect()
+            ->route('admin.edit-product', $product->id)
+            ->with('success', 'Product updated successfully.');
+    }
+
     public function storeItem(Request $request)
     {
         $data = $request->validate([
