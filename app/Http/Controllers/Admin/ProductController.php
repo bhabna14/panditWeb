@@ -347,11 +347,15 @@ class ProductController extends Controller
             'discount'      => ['nullable','numeric','min:0'],
             'category'      => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
             'stock'         => ['nullable','integer','min:0'],
-            'duration'      => ['nullable','required_if:category,Subscription','in:1,3,6'],
+
+            // Subscription-only
+            'duration'        => ['nullable','required_if:category,Subscription','in:1,3,6'],
+            'per_day_price'   => ['nullable','required_if:category,Subscription','numeric','min:0'],
+
             'product_image' => ['nullable','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
             'description'   => ['required','string'],
 
-            // Package rows (IDs come from the Blade selects)
+            // Line rows used for both Package & Subscription
             'item_id'       => ['nullable','array'],
             'item_id.*'     => ['nullable','integer'],
             'quantity'      => ['nullable','array'],
@@ -371,16 +375,16 @@ class ProductController extends Controller
             'available_from'   => ['nullable','required_if:flower_available,yes','date'],
             'available_to'     => ['nullable','required_if:flower_available,yes','date','after_or_equal:available_from'],
 
-            // Package-only
+            // Package-only (ignored for others)
             'pooja_id'         => ['nullable','integer'],
         ], [
             'price.lte' => 'Sale price must be less than or equal to MRP.',
             'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
         ]);
 
-        // 2) Build package rows (only if category is Package)
-        $packageRows = [];
-        if (($validated['category'] ?? null) === 'Package') {
+        // 2) Build line rows (for Package OR Subscription)
+        $lineRows = [];
+        if (in_array(($validated['category'] ?? null), ['Package','Subscription'], true)) {
             $items   = (array) $request->input('item_id', []);
             $qtys    = (array) $request->input('quantity', []);
             $unitIds = (array) $request->input('unit_id', []);
@@ -395,7 +399,7 @@ class ProductController extends Controller
 
                 if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
                     return back()
-                        ->withErrors(['package' => 'Each package row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])
+                        ->withErrors(['package' => 'Each row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])
                         ->withInput();
                 }
                 if (!is_numeric($qty) || $qty < 0) {
@@ -405,7 +409,7 @@ class ProductController extends Controller
                     return back()->withErrors(['package' => 'Item Price must be a non-negative number. (Row '.($i+1).')'])->withInput();
                 }
 
-                $packageRows[] = [
+                $lineRows[] = [
                     'item_id'  => (int) $itemId,
                     'quantity' => (float) $qty,
                     'unit_id'  => (int) $unit,
@@ -413,13 +417,13 @@ class ProductController extends Controller
                 ];
             }
 
-            if (count($packageRows) < 1) {
-                return back()->withErrors(['item_id' => 'Please add at least one package item.'])->withInput();
+            if (count($lineRows) < 1) {
+                return back()->withErrors(['item_id' => 'Please add at least one item.'])->withInput();
             }
 
             // Resolve names now (we store names, not IDs)
-            $itemIds  = collect($packageRows)->pluck('item_id')->unique()->values();
-            $unitIdsC = collect($packageRows)->pluck('unit_id')->unique()->values();
+            $itemIds  = collect($lineRows)->pluck('item_id')->unique()->values();
+            $unitIdsC = collect($lineRows)->pluck('unit_id')->unique()->values();
 
             $itemNamesById = Poojaitemlists::whereIn('id', $itemIds)->pluck('item_name', 'id');
             $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)->pluck('unit_name', 'id');
@@ -431,15 +435,15 @@ class ProductController extends Controller
                 return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
             }
 
-            $packageRows = array_map(function ($row) use ($itemNamesById, $unitNamesById) {
+            $lineRows = array_map(function ($row) use ($itemNamesById, $unitNamesById) {
                 $row['item_name'] = (string) ($itemNamesById[$row['item_id']] ?? '');
                 $row['unit_name'] = (string) ($unitNamesById[$row['unit_id']] ?? '');
                 return $row;
-            }, $packageRows);
+            }, $lineRows);
         }
 
         // 3) Persist
-        DB::transaction(function () use ($request, $validated, $product, $packageRows) {
+        DB::transaction(function () use ($request, $validated, $product, $lineRows) {
             $isFlower       = ($validated['category'] === 'Flower');
             $isSubscription = ($validated['category'] === 'Subscription');
             $isPackage      = ($validated['category'] === 'Package');
@@ -473,19 +477,20 @@ class ProductController extends Controller
             $product->description = $validated['description'];
             $product->category    = $validated['category'];
 
-            // Stock & Duration
-            $product->stock    = $isFlower ? null : ($request->input('stock') !== null ? (int)$request->input('stock') : ($product->stock ?? 0));
-            $product->duration = $isSubscription ? $request->input('duration') : null;
+            // Stock & Subscription meta
+            $product->stock          = $isFlower ? null : ($request->input('stock') !== null ? (int)$request->input('stock') : ($product->stock ?? 0));
+            $product->duration       = $isSubscription ? $request->input('duration') : null;
+            $product->per_day_price  = $isSubscription ? (float) $request->input('per_day_price', 0) : null;
 
-            // Package-specific meta
+            // Package meta
             $product->pooja_id = $isPackage ? $request->input('pooja_id', null) : null;
 
             // Benefits & Flower-only
-            $product->benefits              = $benefitString;
-            $product->mala_provided         = $malaProvidedBool;
-            $product->is_flower_available   = $flowerAvailableBool;
-            $product->available_from        = $isFlower ? $request->input('available_from') : null;
-            $product->available_to          = $isFlower ? $request->input('available_to')   : null;
+            $product->benefits            = $benefitString;
+            $product->mala_provided       = $malaProvidedBool;
+            $product->is_flower_available = $flowerAvailableBool;
+            $product->available_from      = $isFlower ? $request->input('available_from') : null;
+            $product->available_to        = $isFlower ? $request->input('available_to')   : null;
 
             // Image upload (replace old)
             if ($request->hasFile('product_image')) {
@@ -494,22 +499,21 @@ class ProductController extends Controller
                 }
                 $hashName = $request->file('product_image')->hashName();
                 $request->file('product_image')->move(public_path('product_images'), $hashName);
-                // store absolute URL because your Blade prints {{ $product->product_image }}
                 $product->product_image = asset('product_images/' . $hashName);
             }
 
             $product->save();
 
-            // Rebuild package rows
+            // Rebuild line rows for Package & Subscription
             PackageItem::where('product_id', $product->product_id)->delete();
 
-            if ($isPackage && !empty($packageRows)) {
-                foreach ($packageRows as $row) {
+            if (($isPackage || $isSubscription) && !empty($lineRows)) {
+                foreach ($lineRows as $row) {
                     PackageItem::create([
                         'product_id' => $product->product_id,
                         'item_name'  => $row['item_name'],
                         'quantity'   => $row['quantity'],
-                        'unit'       => $row['unit_name'],
+                        'unit'       => $row['unit_name'], // store unit name
                         'price'      => $row['price'],
                     ]);
                 }

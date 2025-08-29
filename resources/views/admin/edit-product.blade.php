@@ -74,7 +74,10 @@
             // How many rows to render
             $rowsCount = max(count($oldItemIds), count($prefill), 1);
 
-            $isPackage = old('category', $product->category) === 'Package';
+            $currentCat = old('category', $product->category);
+            $isPackage = $currentCat === 'Package';
+            $isSubscription = $currentCat === 'Subscription';
+            $showLineRows = $isPackage || $isSubscription; // show rows for both package & subscription
         @endphp
 
         <div class="row">
@@ -111,24 +114,16 @@
             <div class="col-md-6 mb-3">
                 <label for="category" class="form-label">Category</label>
                 <select name="category" id="category" class="form-control select2" required>
-                    <option value="Puja Item"
-                        {{ old('category', $product->category) == 'Puja Item' ? 'selected' : '' }}>Puja Item
+                    <option value="Puja Item" {{ $currentCat == 'Puja Item' ? 'selected' : '' }}>Puja Item</option>
+                    <option value="Subscription" {{ $currentCat == 'Subscription' ? 'selected' : '' }}>Subscription
                     </option>
-                    <option value="Subscription"
-                        {{ old('category', $product->category) == 'Subscription' ? 'selected' : '' }}>Subscription
-                    </option>
-                    <option value="Flower"
-                        {{ old('category', $product->category) == 'Flower' ? 'selected' : '' }}>Flower</option>
-                    <option value="Immediateproduct"
-                        {{ old('category', $product->category) == 'Immediateproduct' ? 'selected' : '' }}>Customize Flower
-                    </option>
-                    <option value="Customizeproduct"
-                        {{ old('category', $product->category) == 'Customizeproduct' ? 'selected' : '' }}>Customize Product
-                    </option>
-                    <option value="Package"
-                        {{ old('category', $product->category) == 'Package' ? 'selected' : '' }}>Package</option>
-                    <option value="Books"
-                        {{ old('category', $product->category) == 'Books' ? 'selected' : '' }}>Books</option>
+                    <option value="Flower" {{ $currentCat == 'Flower' ? 'selected' : '' }}>Flower</option>
+                    <option value="Immediateproduct" {{ $currentCat == 'Immediateproduct' ? 'selected' : '' }}>Customize
+                        Flower</option>
+                    <option value="Customizeproduct" {{ $currentCat == 'Customizeproduct' ? 'selected' : '' }}>Customize
+                        Product</option>
+                    <option value="Package" {{ $currentCat == 'Package' ? 'selected' : '' }}>Package</option>
+                    <option value="Books" {{ $currentCat == 'Books' ? 'selected' : '' }}>Books</option>
                 </select>
             </div>
 
@@ -173,8 +168,15 @@
                     value="{{ old('available_to', $product->available_to) }}">
             </div>
 
-            {{-- Package fields (Item + Qty + Unit + Item Price) --}}
-            <div id="packageFields" class="col-md-12 mb-3" style="{{ $isPackage ? '' : 'display:none;' }}">
+            {{-- Subscription-only: Per-Day Price --}}
+            <div class="col-md-4 mb-3" id="perDayPriceField" style="{{ $isSubscription ? '' : 'display:none;' }}">
+                <label for="per_day_price" class="form-label">Per-Day Price (Rs.)</label>
+                <input type="number" name="per_day_price" id="per_day_price" class="form-control"
+                    value="{{ old('per_day_price', $product->per_day_price) }}" min="0" step="0.01">
+            </div>
+
+            {{-- Line item fields (Item + Qty + Unit + Item Price) for Package & Subscription --}}
+            <div id="packageFields" class="col-md-12 mb-3" style="{{ $showLineRows ? '' : 'display:none;' }}">
                 <div id="packageItems">
                     @for ($i = 0; $i < $rowsCount; $i++)
                         @php
@@ -191,13 +193,11 @@
                                 <label class="form-label">Item</label>
                                 <select class="form-control select2 item-select" name="item_id[]" required>
                                     @if (empty($itemId) && !empty($itemLabel))
-                                        {{-- Fallback if we couldn’t map name -> id --}}
                                         <option value="" selected disabled>{{ $itemLabel }} (not found)</option>
                                         <option value="">— Select Puja List —</option>
                                     @else
                                         <option value="">— Select Puja List —</option>
                                     @endif
-
                                     @foreach ($Poojaitemlist as $pujalist)
                                         <option value="{{ $pujalist->id }}"
                                             {{ (int) $pujalist->id === (int) $itemId ? 'selected' : '' }}>
@@ -217,13 +217,11 @@
                                 <label class="form-label">Unit</label>
                                 <select class="form-control select2 unit-select" name="unit_id[]" required>
                                     @if (empty($unitId) && !empty($unitLabel))
-                                        {{-- Fallback if we couldn’t map name -> id --}}
                                         <option value="" selected disabled>{{ $unitLabel }} (not found)</option>
                                         <option value="">— Select Unit —</option>
                                     @else
                                         <option value="">— Select Unit —</option>
                                     @endif
-
                                     @foreach ($pooja_units as $u)
                                         <option value="{{ $u->id }}"
                                             {{ (int) $u->id === (int) $unitId ? 'selected' : '' }}>
@@ -304,46 +302,48 @@
             initSelect2();
 
             const $category = $('#category');
-            const $pkgFields = $('#packageFields');
+            const $lineFields = $('#packageFields'); // used for both Package & Subscription
             const $packageItems = $('#packageItems');
             const $fromInput = $('#available_from');
             const $toInput = $('#available_to');
+            const $perDayField = $('#perDayPriceField');
+            const $perDayInput = $('#per_day_price');
 
-            function buildPackageRowHtml() {
+            function buildRowHtml() {
                 return `
-<div class="row mb-3 package-row align-items-end">
-  <div class="col-md-4">
-    <label class="form-label">Item</label>
-    <select class="form-control select2 item-select" name="item_id[]" required>
-      <option value="">— Select Puja List —</option>
-      @foreach ($Poojaitemlist as $pujalist)
-        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
-      @endforeach
-    </select>
-  </div>
-  <div class="col-md-2">
-    <label class="form-label">Qty</label>
-    <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
-  </div>
-  <div class="col-md-3">
-    <label class="form-label">Unit</label>
-    <select class="form-control select2 unit-select" name="unit_id[]" required>
-      <option value="">— Select Unit —</option>
-      @foreach ($pooja_units as $u)
-        <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
-      @endforeach
-    </select>
-  </div>
-  <div class="col-md-3">
-    <label class="form-label">Item Price (Rs.)</label>
-    <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
-  </div>
-</div>`;
+        <div class="row mb-3 package-row align-items-end">
+            <div class="col-md-4">
+                <label class="form-label">Item</label>
+                <select class="form-control select2 item-select" name="item_id[]" required>
+                    <option value="">— Select Puja List —</option>
+                    @foreach ($Poojaitemlist as $pujalist)
+                        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Qty</label>
+                <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Unit</label>
+                <select class="form-control select2 unit-select" name="unit_id[]" required>
+                    <option value="">— Select Unit —</option>
+                    @foreach ($pooja_units as $u)
+                        <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Item Price (Rs.)</label>
+                <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+        </div>`;
             }
 
-            function ensureAtLeastOnePackageRow() {
+            function ensureAtLeastOneRow() {
                 if ($packageItems.find('.package-row').length === 0) {
-                    $packageItems.append(buildPackageRowHtml());
+                    $packageItems.append(buildRowHtml());
                     initSelect2($packageItems.children().last());
                 }
             }
@@ -352,10 +352,18 @@
                 const cat = $category.val();
                 const isFlower = (cat === 'Flower');
                 const isPackage = (cat === 'Package');
+                const isSub = (cat === 'Subscription');
+                const showLines = isPackage || isSub;
 
                 $('#malaProvidedField, #flowerAvailabilityField, #flowerFromField, #flowerToField').toggle(isFlower);
-                $pkgFields.toggle(isPackage);
-                if (isPackage) ensureAtLeastOnePackageRow();
+
+                $lineFields.toggle(showLines);
+                if (showLines) ensureAtLeastOneRow();
+
+                // Per-day price shown & required only for Subscription
+                $perDayField.toggle(isSub);
+                $perDayInput.prop('required', isSub);
+                if (!isSub) $perDayInput.val('');
 
                 updateFlowerDateRequirements();
                 initSelect2();
@@ -388,19 +396,19 @@
             // Benefits add/remove
             $('#addBenefit').on('click', function() {
                 $('#benefitsWrapper').append(`
-<div class="input-group mb-2 benefit-row">
-  <input type="text" name="benefits[]" class="form-control" placeholder="Enter benefit">
-  <button type="button" class="btn btn-danger removeBenefit">Remove</button>
-</div>`);
+        <div class="input-group mb-2 benefit-row">
+            <input type="text" name="benefits[]" class="form-control" placeholder="Enter benefit">
+            <button type="button" class="btn btn-danger removeBenefit">Remove</button>
+        </div>`);
             });
             $(document).on('click', '.removeBenefit', function() {
                 const rows = $('#benefitsWrapper .benefit-row');
                 if (rows.length > 1) $(this).closest('.benefit-row').remove();
             });
 
-            // Add/Remove rows
+            // Add/Remove line rows
             $('#addMore').on('click', function() {
-                $packageItems.append(buildPackageRowHtml());
+                $packageItems.append(buildRowHtml());
                 initSelect2($packageItems.children().last());
             });
             $('#removeLast').on('click', function() {
