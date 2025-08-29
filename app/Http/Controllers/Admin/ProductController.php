@@ -462,10 +462,6 @@ class ProductController extends Controller
                 ];
             }
 
-            if (count($lineRows) < 1) {
-                return back()->withErrors(['item_id' => 'Please add at least one item.'])->withInput();
-            }
-
             // Resolve names (store names, not IDs) — from FlowerProduct where category=Flower
             $itemIds  = collect($lineRows)->pluck('item_id')->unique()->values()->all();
             $unitIdsC = collect($lineRows)->pluck('unit_id')->unique()->values()->all();
