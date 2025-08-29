@@ -287,7 +287,7 @@ class ProductController extends Controller
         $product = FlowerProduct::findOrFail($id);
 
         // 1) Load ALL items & units for selects
-        $Poojaitemlist = Poojaitemlists::orderBy('item_name')->get(['id','item_name']);
+        $Poojaitemlist = FlowerProduct::orderBy('name')->where('category','Flower')->get(['id','name']);
         $pooja_units   = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
 
         // 2) Existing line rows (names stored in PackageItem for both Package & Subscription)
@@ -346,6 +346,7 @@ class ProductController extends Controller
 
         return redirect()->route('manageproduct')->with('success', 'Product deleted successfully.');
     }
+    
 public function manageproduct()
 {
     $products = FlowerProduct::query()

@@ -200,7 +200,7 @@
                                 @endif
                                 @foreach ($Poojaitemlist as $pujalist)
                                     <option value="{{ $pujalist->id }}" {{ (int)$pujalist->id === (int)$itemId ? 'selected' : '' }}>
-                                        {{ $pujalist->item_name }}
+                                        {{ $pujalist->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -312,7 +312,7 @@
                 <select class="form-control select2 item-select" name="item_id[]" required>
                     <option value="">— Select Puja List —</option>
                     @foreach ($Poojaitemlist as $pujalist)
-                        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                        <option value="{{ $pujalist->id }}">{{ $pujalist->name }}</option>
                     @endforeach
                 </select>
             </div>
