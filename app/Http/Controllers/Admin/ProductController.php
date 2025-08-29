@@ -27,7 +27,7 @@ class ProductController extends Controller
 
         return view('admin.add-product', compact('flowerlist', 'pooja_list', 'pooja_units'));
     }
-        
+
     public function createProduct(Request $request)
     {
         $validated = $request->validate([
@@ -83,7 +83,7 @@ class ProductController extends Controller
             'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
         ]);
 
-        // -------- PACKAGE rows (use Poojaitemlists for item names) ----------
+        // -------- PACKAGE rows (resolve item names from FlowerProduct where category=Flower) ----------
         $packageRows = [];
         if (($validated['category'] ?? null) === 'Package') {
             $items   = (array) $request->input('item_id', []);
@@ -120,21 +120,29 @@ class ProductController extends Controller
             $itemIds  = collect($packageRows)->pluck('item_id')->unique()->values();
             $unitIdsC = collect($packageRows)->pluck('unit_id')->unique()->values();
 
-            // FIX: item names come from Poojaitemlists
-            $itemNamesById = FlowerProduct::whereIn('id', $itemIds)->pluck('name', 'id');
+            // ✅ Use FlowerProduct names (only category=Flower)
+            $itemNamesById = FlowerProduct::whereIn('id', $itemIds)
+                ->where('category', 'Flower')
+                ->pluck('name', 'id');
+
             $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)->pluck('unit_name', 'id');
 
-            if ($itemNamesById->count() !== $itemIds->count())  return back()->withErrors(['item_id' => 'One or more selected items were not found.'])->withInput();
-            if ($unitNamesById->count() !== $unitIdsC->count()) return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
+            if ($itemNamesById->count() !== $itemIds->count())  {
+                return back()->withErrors(['item_id' => 'One or more selected items were not found among Flower products.'])->withInput();
+            }
+            if ($unitNamesById->count() !== $unitIdsC->count()) {
+                return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
+            }
 
+            // Map to the exact keys we save later
             $packageRows = array_map(function ($row) use ($itemNamesById, $unitNamesById) {
-                $row['name'] = (string) ($itemNamesById[$row['item_id']] ?? '');
+                $row['item_name'] = (string) ($itemNamesById[$row['item_id']] ?? '');
                 $row['unit_name'] = (string) ($unitNamesById[$row['unit_id']] ?? '');
                 return $row;
             }, $packageRows);
         }
 
-        // -------- SUBSCRIPTION item rows (already correct) ----------
+        // -------- SUBSCRIPTION item rows (same source: FlowerProduct) ----------
         $subscriptionRows = [];
         if (($validated['category'] ?? null) === 'Subscription') {
             $sItems   = (array) $request->input('sub_item_id', []);
@@ -171,14 +179,22 @@ class ProductController extends Controller
             $sItemIds  = collect($subscriptionRows)->pluck('item_id')->unique()->values();
             $sUnitIdsC = collect($subscriptionRows)->pluck('unit_id')->unique()->values();
 
-            $sItemNamesById = FlowerProduct::whereIn('id', $sItemIds)->pluck('name', 'id');
+            // ✅ Use FlowerProduct names (only category=Flower)
+            $sItemNamesById = FlowerProduct::whereIn('id', $sItemIds)
+                ->where('category', 'Flower')
+                ->pluck('name', 'id');
+
             $sUnitNamesById = PoojaUnit::whereIn('id', $sUnitIdsC)->pluck('unit_name', 'id');
 
-            if ($sItemNamesById->count() !== $sItemIds->count())  return back()->withErrors(['sub_item_id' => 'One or more selected subscription items were not found.'])->withInput();
-            if ($sUnitNamesById->count() !== $sUnitIdsC->count()) return back()->withErrors(['sub_unit_id' => 'One or more selected subscription units were not found.'])->withInput();
+            if ($sItemNamesById->count() !== $sItemIds->count())  {
+                return back()->withErrors(['sub_item_id' => 'One or more selected subscription items were not found among Flower products.'])->withInput();
+            }
+            if ($sUnitNamesById->count() !== $sUnitIdsC->count()) {
+                return back()->withErrors(['sub_unit_id' => 'One or more selected subscription units were not found.'])->withInput();
+            }
 
             $subscriptionRows = array_map(function ($row) use ($sItemNamesById, $sUnitNamesById) {
-                $row['name'] = (string) ($sItemNamesById[$row['item_id']] ?? '');
+                $row['item_name'] = (string) ($sItemNamesById[$row['item_id']] ?? '');
                 $row['unit_name'] = (string) ($sUnitNamesById[$row['unit_id']] ?? '');
                 return $row;
             }, $subscriptionRows);
@@ -251,7 +267,7 @@ class ProductController extends Controller
                 foreach ($packageRows as $row) {
                     PackageItem::create([
                         'product_id' => $product->product_id,
-                        'item_name'  => $row['item_name'],
+                        'item_name'  => $row['item_name'], // ✅ FlowerProduct->name
                         'quantity'   => $row['quantity'],
                         'unit'       => $row['unit_name'],
                         'price'      => $row['price'],
@@ -264,7 +280,7 @@ class ProductController extends Controller
                 foreach ($subscriptionRows as $row) {
                     PackageItem::create([
                         'product_id' => $product->product_id,
-                        'item_name'  => $row['item_name'],
+                        'item_name'  => $row['item_name'], // ✅ FlowerProduct->name
                         'quantity'   => $row['quantity'],
                         'unit'       => $row['unit_name'],
                         'price'      => $row['price'],
@@ -341,25 +357,25 @@ class ProductController extends Controller
         return redirect()->route('manageproduct')->with('success', 'Product deleted successfully.');
     }
 
-public function manageproduct()
-{
-    $products = FlowerProduct::query()
-        ->where('status', 'active')
-        ->select([
-            'id','product_id','name','product_image','mrp','price','discount','stock',
-            'category','status','benefits',
-            'mala_provided','is_flower_available','available_from','available_to',
-            'duration','per_day_price','pooja_id'
-        ])
-        ->with([
-            'pooja:id,pooja_name',
-            'packageItems:id,product_id,item_name,quantity,unit,price',
-        ])
-        ->orderByDesc('id')
-        ->get();
+    public function manageproduct()
+    {
+        $products = FlowerProduct::query()
+            ->where('status', 'active')
+            ->select([
+                'id','product_id','name','product_image','mrp','price','discount','stock',
+                'category','status','benefits',
+                'mala_provided','is_flower_available','available_from','available_to',
+                'duration','per_day_price','pooja_id'
+            ])
+            ->with([
+                'pooja:id,pooja_name',
+                'packageItems:id,product_id,item_name,quantity,unit,price',
+            ])
+            ->orderByDesc('id')
+            ->get();
 
-    return view('admin.manage-product', compact('products'));
-}
+        return view('admin.manage-product', compact('products'));
+    }
 
     public function storeItem(Request $request)
     {
