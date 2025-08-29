@@ -209,24 +209,16 @@
                 </select>
             </div>
 
+            <!-- 🔁 CHANGED: Single Per-Day Price (no add/remove, no Day field) -->
             <div id="subscriptionDayFields" class="col-md-12 mb-3 controlled hidden" data-block="subscription">
-                <label class="form-label d-block mb-2"><span id="label-subscription-prices">Day-wise Prices</span></label>
+                <label class="form-label d-block mb-2"><span id="label-subscription-prices">Per-Day Price</span></label>
 
-                <div id="subscriptionDayItems">
-                    <div class="row mb-3 subscription-day-row align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label">Day</label>
-                            <input type="number" class="form-control" name="day[]" min="1" placeholder="Day" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Price (Rs.)</label>
-                            <input type="number" class="form-control" name="day_price[]" min="0" step="0.01" placeholder="0.00" required>
-                        </div>
+                <div class="row mb-3 align-items-end">
+                    <div class="col-md-6">
+                        <label class="form-label">Per-Day Price (Rs.)</label>
+                        <input type="number" class="form-control" name="per_day_price" min="0" step="0.01" placeholder="0.00" required>
                     </div>
                 </div>
-
-                <button type="button" id="addSubscriptionDayRow" class="btn btn-secondary">Add Day</button>
-                <button type="button" id="removeSubscriptionDayRow" class="btn btn-danger">Remove Last Day</button>
             </div>
 
             <div id="subscriptionItemFields" class="col-md-12 mb-3 controlled hidden" data-block="subscription">
@@ -334,82 +326,6 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('assets/js/form-layouts.js') }}"></script>
 
-    <!-- Row templates (server-rendered Blade inside is okay) -->
-    <script type="text/template" id="tpl-package-row">
-        <div class="row mb-3 package-row align-items-end">
-            <div class="col-md-4">
-                <label class="form-label">Item</label>
-                <select class="form-control select2 item-select" name="item_id[]" required>
-                    <option value="">Select Puja List</option>
-                    @foreach ($Poojaitemlist as $pujalist)
-                        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Qty</label>
-                <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Unit</label>
-                <select class="form-control select2 unit-select" name="unit_id[]" required>
-                    <option value="">Select Unit</option>
-                    @foreach ($pooja_units as $u)
-                        <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Item Price (Rs.)</label>
-                <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
-            </div>
-        </div>
-    </script>
-
-    <script type="text/template" id="tpl-subscription-day-row">
-        <div class="row mb-3 subscription-day-row align-items-end">
-            <div class="col-md-4">
-                <label class="form-label">Day</label>
-                <input type="number" class="form-control" name="day[]" min="1" placeholder="Day" required>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Price (Rs.)</label>
-                <input type="number" class="form-control" name="day_price[]" min="0" step="0.01" placeholder="0.00" required>
-            </div>
-        </div>
-    </script>
-
-    <script type="text/template" id="tpl-subscription-item-row">
-        <div class="row mb-3 subscription-item-row align-items-end">
-            <div class="col-md-4">
-                <label class="form-label">Item</label>
-                <select class="form-control select2 item-select" name="sub_item_id[]" required>
-                    <option value="">Select Puja List</option>
-                    @foreach ($Poojaitemlist as $pujalist)
-                        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label">Qty</label>
-                <input type="number" class="form-control" name="sub_quantity[]" min="0" step="any" placeholder="0" required>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Unit</label>
-                <select class="form-control select2 unit-select" name="sub_unit_id[]" required>
-                    <option value="">Select Unit</option>
-                    @foreach ($pooja_units as $u)
-                        <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">Item Price (Rs.)</label>
-                <input type="number" class="form-control" name="sub_item_price[]" min="0" step="0.01" placeholder="0.00" required>
-            </div>
-        </div>
-    </script>
-
     <script>
         // Toast fades
         setTimeout(() => $('#Message').fadeOut('fast'), 2500);
@@ -509,14 +425,14 @@
 
             // Which blocks to show per category
             const VISIBILITY = {
-                'Flower':        { core:true, stock:false, subscription:false, flower:true, flowerDates:true, package:false },
+                'Flower':        { core:true, stock:false, subscription:false, flower:true,  flowerDates:true,  package:false },
                 'Package':       { core:true, stock:true,  subscription:false, flower:false, flowerDates:false, package:true  },
                 'Subscription':  { core:true, stock:true,  subscription:true,  flower:false, flowerDates:false, package:false },
                 'Puja Item':     { core:true, stock:true,  subscription:false, flower:false, flowerDates:false, package:false },
                 'Immediateproduct': { core:true, stock:true, subscription:false, flower:false, flowerDates:false, package:false },
                 'Customizeproduct': { core:true, stock:true, subscription:false, flower:false, flowerDates:false, package:false },
                 'Books':         { core:true, stock:true,  subscription:false, flower:false, flowerDates:false, package:false },
-                'default':       { core:false,stock:false, subscription:false, flower:false, flowerDates:false, package:false }
+                    default:     { core:false,stock:false, subscription:false, flower:false, flowerDates:false, package:false }
             };
 
             function setLabelsByCategory(cat) {
@@ -539,23 +455,24 @@
 
                 // Contextual tweaks
                 if (cat === 'Flower') {
-                    $labels.mala.text('Is mala provided with this flower?');
-                    $labels.availability.text('Is this flower available?');
-                    $labels.availableFrom.text('Available From');
-                    $labels.availableTo.text('Available To');
+                    $('#label-mala').text('Is mala provided with this flower?');
+                    $('#label-availability').text('Is this flower available?');
+                    $('#label-available-from').text('Available From');
+                    $('#label-available-to').text('Available To');
                 } else {
-                    $labels.mala.text('Is mala provided?');
-                    $labels.availability.text('Is this available?');
-                    $labels.availableFrom.text('Available From');
-                    $labels.availableTo.text('Available To');
+                    $('#label-mala').text('Is mala provided?');
+                    $('#label-availability').text('Is this available?');
+                    $('#label-available-from').text('Available From');
+                    $('#label-available-to').text('Available To');
                 }
                 if (cat === 'Package') {
-                    $labels.pooja.text('Pooja (Festival)');
-                    $labels.packageItems.text('Package Items');
+                    $('#label-pooja').text('Pooja (Festival)');
+                    $('#label-package-items').text('Package Items');
                 } else {
-                    $labels.pooja.text('Pooja');
-                    $labels.packageItems.text('Items');
+                    $('#label-pooja').text('Pooja');
+                    $('#label-package-items').text('Items');
                 }
+                // Subscription price label already set to "Per-Day Price"
             }
 
             function applyCategoryRules() {
@@ -604,30 +521,86 @@
                 });
             }
 
-            // ---------- Dynamic rows ----------
+            // ---------- Dynamic rows (Package + Subscription Items only) ----------
             const packageItems = document.getElementById('packageItems');
             const addMoreButton = document.getElementById('addMore');
             const removeLastButton = document.getElementById('removeLast');
-
-            const subscriptionDayItems = document.getElementById('subscriptionDayItems');
-            const addSubscriptionDayRow = document.getElementById('addSubscriptionDayRow');
-            const removeSubscriptionDayRow = document.getElementById('removeSubscriptionDayRow');
 
             const subscriptionItems = document.getElementById('subscriptionItems');
             const addSubscriptionItemRow = document.getElementById('addSubscriptionItemRow');
             const removeSubscriptionItemRow = document.getElementById('removeSubscriptionItemRow');
 
-            function addRow(container, tplId) {
-                const html = document.getElementById(tplId).innerHTML.trim();
+            function addRow(container, html) {
                 const temp = document.createElement('div');
-                temp.innerHTML = html;
+                temp.innerHTML = html.trim();
                 const node = temp.firstElementChild;
                 container.appendChild(node);
                 initSelect2(node);
             }
 
+            // Package row template (inline for perf)
+            const tplPackageRow = `
+                <div class="row mb-3 package-row align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Item</label>
+                        <select class="form-control select2 item-select" name="item_id[]" required>
+                            <option value="">Select Puja List</option>
+                            @foreach ($Poojaitemlist as $pujalist)
+                                <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Qty</label>
+                        <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Unit</label>
+                        <select class="form-control select2 unit-select" name="unit_id[]" required>
+                            <option value="">Select Unit</option>
+                            @foreach ($pooja_units as $u)
+                                <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Item Price (Rs.)</label>
+                        <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
+                    </div>
+                </div>`;
+
+            const tplSubscriptionItemRow = `
+                <div class="row mb-3 subscription-item-row align-items-end">
+                    <div class="col-md-4">
+                        <label class="form-label">Item</label>
+                        <select class="form-control select2 item-select" name="sub_item_id[]" required>
+                            <option value="">Select Puja List</option>
+                            @foreach ($Poojaitemlist as $pujalist)
+                                <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Qty</label>
+                        <input type="number" class="form-control" name="sub_quantity[]" min="0" step="any" placeholder="0" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Unit</label>
+                        <select class="form-control select2 unit-select" name="sub_unit_id[]" required>
+                            <option value="">Select Unit</option>
+                            @foreach ($pooja_units as $u)
+                                <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Item Price (Rs.)</label>
+                        <input type="number" class="form-control" name="sub_item_price[]" min="0" step="0.01" placeholder="0.00" required>
+                    </div>
+                </div>`;
+
             if (addMoreButton) {
-                addMoreButton.addEventListener('click', () => addRow(packageItems, 'tpl-package-row'));
+                addMoreButton.addEventListener('click', () => addRow(packageItems, tplPackageRow));
             }
             if (removeLastButton) {
                 removeLastButton.addEventListener('click', () => {
@@ -636,16 +609,8 @@
                 });
             }
 
-            if (addSubscriptionDayRow && removeSubscriptionDayRow) {
-                addSubscriptionDayRow.addEventListener('click', () => addRow(subscriptionDayItems, 'tpl-subscription-day-row'));
-                removeSubscriptionDayRow.addEventListener('click', () => {
-                    const rows = subscriptionDayItems.querySelectorAll('.subscription-day-row');
-                    if (rows.length > 1) rows[rows.length - 1].remove();
-                });
-            }
-
             if (addSubscriptionItemRow && removeSubscriptionItemRow) {
-                addSubscriptionItemRow.addEventListener('click', () => addRow(subscriptionItems, 'tpl-subscription-item-row'));
+                addSubscriptionItemRow.addEventListener('click', () => addRow(subscriptionItems, tplSubscriptionItemRow));
                 removeSubscriptionItemRow.addEventListener('click', () => {
                     const rows = subscriptionItems.querySelectorAll('.subscription-item-row');
                     if (rows.length > 1) rows[rows.length - 1].remove();
@@ -672,12 +637,8 @@
             });
 
             // Category change (native + Select2)
-            $(document).on('change', '#category', function () {
-                applyCategoryRules();
-            });
-            $('#category').on('select2:select', function () {
-                applyCategoryRules();
-            });
+            $(document).on('change', '#category', function () { applyCategoryRules(); });
+            $('#category').on('select2:select', function () { applyCategoryRules(); });
 
             // Flower availability change
             [flowerActive, flowerInactive].forEach(r => r && r.addEventListener('change', updateFlowerDatesRequired));
