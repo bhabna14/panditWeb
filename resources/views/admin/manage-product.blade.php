@@ -71,12 +71,31 @@
             <div class="card custom-card overflow-hidden">
                 <div class="card-body">
 
+                    @php
+                        // Small helpers to keep markup clean
+                        $money = function ($n) {
+                            return is_numeric($n) ? 'Rs. ' . number_format((float) $n, 2) : '-';
+                        };
+                        $pct = function ($n) {
+                            return $n !== null && $n > 0
+                                ? rtrim(rtrim(number_format((float) $n, 2, '.', ''), '0'), '.') . '%'
+                                : null;
+                        };
+                        $qtyFmt = function ($n) {
+                            if ($n === null) {
+                                return '-';
+                            }
+                            $s = rtrim(rtrim(number_format((float) $n, 3, '.', ''), '0'), '.');
+                            return $s === '' ? '0' : $s;
+                        };
+                    @endphp
+
                     <div class="table-responsive export-table">
-                        <table id="file-datatable" class="table table-bordered">
+                        <table id="file-datatable" class="table table-bordered align-middle">
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Product Name</th>
+                                    <th>Product</th>
                                     <th>Image</th>
                                     <th>MRP</th>
                                     <th>Sale Price</th>
@@ -85,72 +104,83 @@
                                     <th>Category</th>
                                     <th>Category Details</th>
                                     <th>Status</th>
-                                    <th>Package Item</th>
-                                    <th>Benefit</th>
+                                    <th>Items</th>
+                                    <th>Benefits</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
+
                             <tbody>
                                 @foreach ($products as $product)
                                     <tr>
                                         <td>{{ $loop->iteration }}</td>
 
-                                        <td>{{ $product->name }}</td>
+                                        <td class="fw-500">{{ $product->name }}</td>
 
                                         <td>
-                                            <img src="{{ $product->product_image }}" alt="product"
-                                                style="width:100px;height:100px;object-fit:cover;">
+                                            <img src="{{ $product->product_image }}" alt="product image"
+                                                style="width:100px;height:100px;object-fit:cover;border-radius:6px;"
+                                                loading="lazy">
                                         </td>
 
-                                        <td>Rs. {{ number_format((float) $product->mrp, 2) }}</td>
-                                        <td>Rs. {{ number_format((float) $product->price, 2) }}</td>
+                                        <td>{{ $money($product->mrp) }}</td>
+                                        <td>{{ $money($product->price) }}</td>
+
                                         <td>
-                                            @if ($product->discount !== null && $product->discount > 0)
-                                                <span class="badge bg-success">
-                                                    {{ rtrim(rtrim(number_format((float) $product->discount, 2, '.', ''), '0'), '.') }}%
-                                                </span>
+                                            @if ($pct($product->discount))
+                                                <span class="badge bg-success">{{ $pct($product->discount) }}</span>
                                             @else
-                                                <span class="badge bg-secondary">-</span>
+                                                <span class="badge bg-secondary">—</span>
                                             @endif
                                         </td>
 
-                                        <td>{{ $product->stock ?? '-' }}</td>
+                                        <td>{{ $product->stock ?? '—' }}</td>
 
                                         <td>{{ $product->category }}</td>
 
-                                        {{-- Category-specific details --}}
+                                        {{-- Category-specific details (now shows Per-Day Price for Subscription) --}}
                                         <td>
                                             @switch($product->category)
                                                 @case('Flower')
                                                     <div class="d-flex flex-column gap-1">
                                                         <span class="badge bg-light text-dark">
                                                             Mala:
-                                                            {{ $product->mala_provided === null ? '-' : ($product->mala_provided ? 'Yes' : 'No') }}
+                                                            {{ $product->mala_provided === null ? '—' : ($product->mala_provided ? 'Yes' : 'No') }}
                                                         </span>
                                                         <span
                                                             class="badge {{ $product->is_flower_available ? 'bg-success' : 'bg-secondary' }}">
                                                             {{ $product->is_flower_available ? 'Active' : 'Inactive' }}
                                                         </span>
                                                         <span class="badge bg-light text-dark">
-                                                            {{ $product->available_from ? \Carbon\Carbon::parse($product->available_from)->format('d M Y') : '-' }}
+                                                            {{ $product->available_from ? \Carbon\Carbon::parse($product->available_from)->format('d M Y') : '—' }}
                                                             &rarr;
-                                                            {{ $product->available_to ? \Carbon\Carbon::parse($product->available_to)->format('d M Y') : '-' }}
+                                                            {{ $product->available_to ? \Carbon\Carbon::parse($product->available_to)->format('d M Y') : '—' }}
                                                         </span>
                                                     </div>
                                                 @break
 
                                                 @case('Subscription')
-                                                    <span class="badge bg-info">
-                                                        Duration: {{ $product->duration ? $product->duration . ' mo' : '-' }}
-                                                    </span>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <span class="badge bg-info">
+                                                            Duration: {{ $product->duration ? $product->duration . ' mo' : '—' }}
+                                                        </span>
+                                                        <span class="badge bg-primary">
+                                                            Per-Day:
+                                                            {{ $product->per_day_price !== null ? $money($product->per_day_price) : '—' }}
+                                                        </span>
+                                                        @if ($product->packageItems->isNotEmpty())
+                                                            <span class="badge bg-secondary">
+                                                                Items: {{ $product->packageItems->count() }}
+                                                            </span>
+                                                        @endif
+                                                    </div>
                                                 @break
 
                                                 @case('Package')
                                                     <div class="d-flex flex-column gap-1">
                                                         @if (optional($product->pooja)->pooja_name)
-                                                            <span class="badge bg-secondary">
-                                                                Pooja: {{ $product->pooja->pooja_name }}
-                                                            </span>
+                                                            <span class="badge bg-secondary">Pooja:
+                                                                {{ $product->pooja->pooja_name }}</span>
                                                         @endif
                                                         <span class="badge bg-primary">
                                                             Items: {{ $product->packageItems->count() }}
@@ -165,29 +195,30 @@
 
                                         <td>{{ ucfirst($product->status) }}</td>
 
-                                        {{-- Package Items modal/button (NO variants) --}}
+                                        {{-- Items modal/button (used for Package & Subscription) --}}
                                         <td>
                                             @if ($product->packageItems->isNotEmpty())
                                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
-                                                    data-bs-target="#productModal{{ $product->product_id }}">
+                                                    data-bs-target="#itemsModal{{ $product->product_id }}">
                                                     View Items
                                                 </button>
 
-                                                <!-- Modal -->
-                                                <div class="modal fade" id="productModal{{ $product->product_id }}"
+                                                <!-- Items Modal -->
+                                                <div class="modal fade" id="itemsModal{{ $product->product_id }}"
                                                     tabindex="-1"
-                                                    aria-labelledby="productModalLabel{{ $product->product_id }}"
+                                                    aria-labelledby="itemsModalLabel{{ $product->product_id }}"
                                                     aria-hidden="true">
                                                     <div class="modal-dialog modal-lg">
                                                         <div class="modal-content shadow-lg border-0">
                                                             <div class="modal-header bg-primary text-white">
                                                                 <h5 class="modal-title"
-                                                                    id="productModalLabel{{ $product->product_id }}">
-                                                                    Package Items
+                                                                    id="itemsModalLabel{{ $product->product_id }}">
+                                                                    {{ $product->category === 'Package' ? 'Package Items' : 'Subscription Items' }}
                                                                 </h5>
                                                                 <button type="button" class="btn-close btn-close-white"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
+
                                                             <div class="modal-body p-4">
                                                                 <div class="table-responsive">
                                                                     <table class="table table-sm align-middle">
@@ -197,7 +228,7 @@
                                                                                 <th>Item</th>
                                                                                 <th class="text-end">Qty</th>
                                                                                 <th>Unit</th>
-                                                                                <th class="text-end">Item Price (Rs.)</th>
+                                                                                <th class="text-end">Item Price</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
@@ -207,12 +238,12 @@
                                                                                     <td>{{ $packageItem->item_name ?? 'N/A' }}
                                                                                     </td>
                                                                                     <td class="text-end">
-                                                                                        {{ rtrim(rtrim(number_format((float) $packageItem->quantity, 3, '.', ''), '0'), '.') }}
+                                                                                        {{ $qtyFmt($packageItem->quantity) }}
                                                                                     </td>
-                                                                                    <td>{{ $packageItem->unit ?? '-' }}
+                                                                                    <td>{{ $packageItem->unit ?? '—' }}
                                                                                     </td>
-                                                                                    <td class="text-end">Rs.
-                                                                                        {{ number_format((float) $packageItem->price, 2) }}
+                                                                                    <td class="text-end">
+                                                                                        {{ $money($packageItem->price) }}
                                                                                     </td>
                                                                                 </tr>
                                                                             @endforeach
@@ -222,24 +253,17 @@
                                                                                 <th colspan="4" class="text-end">Total
                                                                                 </th>
                                                                                 <th class="text-end">
-                                                                                    Rs.
-                                                                                    {{ number_format(
-                                                                                        (float) $product->packageItems->sum(function ($i) {
-                                                                                            return (float) $i->price;
-                                                                                        }),
-                                                                                        2,
-                                                                                    ) }}
+                                                                                    {{ $money($product->packageItems->sum(fn($i) => (float) $i->price)) }}
                                                                                 </th>
                                                                             </tr>
                                                                         </tfoot>
                                                                     </table>
                                                                 </div>
                                                             </div>
+
                                                             <div class="modal-footer bg-light">
                                                                 <button type="button" class="btn btn-secondary"
-                                                                    data-bs-dismiss="modal">
-                                                                    Close
-                                                                </button>
+                                                                    data-bs-dismiss="modal">Close</button>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -250,11 +274,12 @@
                                             @endif
                                         </td>
 
+                                        {{-- Benefits --}}
                                         <td>
                                             @if (!empty($product->benefits))
                                                 <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
                                                     data-bs-target="#benefitModal{{ $product->product_id }}">
-                                                    Benefit
+                                                    View
                                                 </button>
 
                                                 <!-- Benefit Modal -->
@@ -267,16 +292,16 @@
                                                             <div class="modal-header bg-success text-white">
                                                                 <h5 class="modal-title"
                                                                     id="benefitModalLabel{{ $product->product_id }}">
-                                                                    Product Benefit
-                                                                </h5>
+                                                                    Product Benefits</h5>
                                                                 <button type="button" class="btn-close btn-close-white"
                                                                     data-bs-dismiss="modal" aria-label="Close"></button>
                                                             </div>
                                                             <div class="modal-body p-4">
                                                                 <ul class="mb-0">
                                                                     @foreach (explode('#', $product->benefits) as $benefit)
-                                                                        @if (trim($benefit) !== '')
-                                                                            <li>{{ trim($benefit) }}</li>
+                                                                        @php $benefit = trim($benefit); @endphp
+                                                                        @if ($benefit !== '')
+                                                                            <li>{{ $benefit }}</li>
                                                                         @endif
                                                                     @endforeach
                                                                 </ul>
@@ -294,7 +319,7 @@
                                             @endif
                                         </td>
 
-                                        <td>
+                                        <td class="text-nowrap">
                                             <a href="{{ url('admin/edit-product/' . $product->id) }}"
                                                 class="btn btn-sm btn-warning">
                                                 <i class="fa fa-edit"></i>
@@ -309,13 +334,13 @@
                                 @endforeach
                             </tbody>
                         </table>
-
                     </div>
 
                 </div>
             </div>
         </div>
     </div>
+
     <!-- End Row -->
 @endsection
 
