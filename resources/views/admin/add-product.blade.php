@@ -166,8 +166,8 @@
                             <label class="form-label">Item</label>
                             <select class="form-control select2 item-select" name="item_id[]" required>
                                 <option value="">Select Puja List</option>
-                                @foreach ($Poojaitemlist as $pujalist)
-                                    <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                                @foreach ($flowerlist as $flower)
+                                    <option value="{{ $flower->id }}">{{ $flower->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -230,8 +230,8 @@
                             <label class="form-label">Item</label>
                             <select class="form-control select2 item-select" name="sub_item_id[]" required>
                                 <option value="">Select Puja List</option>
-                                @foreach ($flowerlist as $flowerlist)
-                                    <option value="{{ $flowerlist->id }}">{{ $flowerlist->name }}</option>
+                                @foreach ($flowerlist as $flower)
+                                    <option value="{{ $flower->id }}">{{ $flower->name }}</option>
                                 @endforeach
                             </select>
                         </div>
