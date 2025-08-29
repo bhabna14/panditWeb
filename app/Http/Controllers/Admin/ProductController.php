@@ -292,79 +292,74 @@ class ProductController extends Controller
         return redirect()->back()->with('success', 'Product created successfully.');
     }
 
-    public function editProduct($id)
-    {
-            $product = FlowerProduct::findOrFail($id);
+   public function editProduct($id)
+{
+    $product = FlowerProduct::findOrFail($id);
 
-            // 1) Items = Flower products; Units = all units
-            $Poojaitemlist = FlowerProduct::where('category', 'Flower')
-                ->orderBy('name')
-                ->get(['id','name']);
+    // Items to choose from = all Flower products
+    $Poojaitemlist = FlowerProduct::where('category', 'Flower')
+        ->orderBy('name')
+        ->get(['id','name']);
 
-            $pooja_units = PoojaUnit::orderBy('unit_name')
-                ->get(['id','unit_name']);
+    // Units
+    $pooja_units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
 
-            // 2) Existing saved rows (names stored in PackageItem)
-            $rows = PackageItem::where('product_id', $product->product_id)
-                ->get(['item_name','unit','quantity','price']);
+    // Previously saved rows (names are stored in PackageItem)
+    $rows = PackageItem::where('product_id', $product->product_id)
+        ->get(['item_name','unit','quantity','price']);
 
-            // 3) Build lookup maps using the CORRECT columns
-            $itemIdByName = $Poojaitemlist->reduce(function ($carry, $r) {
-                $carry[mb_strtolower(trim($r->name))] = (int) $r->id;
-                return $carry;
-            }, []);
-
-            $unitIdByName = $pooja_units->reduce(function ($carry, $r) {
-                $carry[mb_strtolower(trim($r->unit_name))] = (int) $r->id;
-                return $carry;
-            }, []);
-
-            $norm = fn($v) => mb_strtolower(trim((string) $v));
-
-            // 4) Map text -> IDs for the form (keep labels + not_found flags)
-            $packageItems = $rows->map(function ($r) use ($itemIdByName, $unitIdByName, $norm) {
-                $itemKey = $norm($r->item_name);
-                $unitKey = $norm($r->unit);
-
-                $itemId = $itemIdByName[$itemKey] ?? null;
-                $unitId = $unitIdByName[$unitKey] ?? null;
-
-                return [
-                    'item_id'        => $itemId,
-                    'quantity'       => $r->quantity,
-                    'unit_id'        => $unitId,
-                    'price'          => $r->price,
-
-                    'item_label'     => (string) $r->item_name,
-                    'unit_label'     => (string) $r->unit,
-
-                    'item_not_found' => $itemId === null && strlen(trim((string)$r->item_name)) > 0,
-                    'unit_not_found' => $unitId === null && strlen(trim((string)$r->unit)) > 0,
-                ];
-            })->values()->toArray();
-
-            // 5) If there are NO rows but category is Subscription/Package,
-            //    push ONE EMPTY ROW so the UI always shows the fields
-            if (empty($packageItems) && in_array($product->category, ['Package','Subscription'], true)) {
-                $packageItems = [[
-                    'item_id'        => null,
-                    'quantity'       => null,
-                    'unit_id'        => null,
-                    'price'          => null,
-                    'item_label'     => null,
-                    'unit_label'     => null,
-                    'item_not_found' => false,
-                    'unit_not_found' => false,
-                ]];
-            }
-
-            return view('admin.edit-product', compact(
-                'product',
-                'Poojaitemlist',
-                'pooja_units',
-                'packageItems'
-            ));
+    // Build maps name -> id
+    $itemIdByName = [];
+    foreach ($Poojaitemlist as $it) {
+        $itemIdByName[mb_strtolower(trim($it->name))] = (int) $it->id;
     }
+    $unitIdByName = [];
+    foreach ($pooja_units as $u) {
+        $unitIdByName[mb_strtolower(trim($u->unit_name))] = (int) $u->id;
+    }
+    $norm = fn($v) => mb_strtolower(trim((string)$v));
+
+    // Map stored text -> IDs for the form
+    $packageItems = $rows->map(function ($r) use ($itemIdByName, $unitIdByName, $norm) {
+        $itemId = $itemIdByName[$norm($r->item_name)] ?? null;
+        $unitId = $unitIdByName[$norm($r->unit)] ?? null;
+
+        return [
+            'item_id'        => $itemId,
+            'quantity'       => $r->quantity,
+            'unit_id'        => $unitId,
+            'price'          => $r->price,
+
+            'item_label'     => (string) $r->item_name,
+            'unit_label'     => (string) $r->unit,
+
+            'item_not_found' => $itemId === null && strlen(trim((string) $r->item_name)) > 0,
+            'unit_not_found' => $unitId === null && strlen(trim((string) $r->unit)) > 0,
+        ];
+    })->values()->toArray();
+
+    // If no rows yet but the product is Subscription/Package, show one empty line row
+    if (empty($packageItems) && in_array($product->category, ['Package','Subscription'], true)) {
+        $packageItems = [[
+            'item_id'        => null,
+            'quantity'       => null,
+            'unit_id'        => null,
+            'price'          => null,
+            'item_label'     => null,
+            'unit_label'     => null,
+            'item_not_found' => false,
+            'unit_not_found' => false,
+        ]];
+    }
+
+    return view('admin.edit-product', compact(
+        'product',
+        'Poojaitemlist',
+        'pooja_units',
+        'packageItems'
+    ));
+}
+
 
     public function deleteProduct($id)
     {
