@@ -268,7 +268,7 @@ class ProductController extends Controller
             // SUBSCRIPTION items
             if ($isSub && !empty($subscriptionRows)) {
                 foreach ($subscriptionRows as $row) {
-                    SubscriptionItem::create([
+                    PackageItem::create([
                         'product_id' => $product->product_id,
                         'item_name'  => $row['item_name'],
                         'quantity'   => $row['quantity'],
