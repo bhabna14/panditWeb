@@ -209,24 +209,19 @@
                         <div class="row mb-3 package-row align-items-end">
                             <div class="col-md-4">
                                 <label class="form-label">Item</label>
-                                <select class="form-control select2 item-select" name="item_id[]" required>
-                                    {{-- Optional: show the raw stored name if it doesn't exist in the list (not selected) --}}
+                                <select class="form-control select2 item-select" name="item_name[]" required>
                                     @if (!empty($itemNF) && !empty($itemLabel))
                                         <option value="" disabled>{{ $itemLabel }} (not in list)</option>
                                     @endif
                                     <option value="">— Select Item —</option>
-
                                     @foreach ($Poojaitemlist as $pujalist)
                                         @php
-                                            // Prefer id match (old input / mapped id), else fallback to name match
-                                            $matchById = isset($itemId) && (int) $pujalist->id === (int) $itemId;
                                             $matchByName =
                                                 !empty($itemLabel) &&
                                                 mb_strtolower(trim($pujalist->name)) ===
                                                     mb_strtolower(trim($itemLabel));
                                         @endphp
-                                        <option value="{{ $pujalist->id }}"
-                                            {{ $matchById || $matchByName ? 'selected' : '' }}>
+                                        <option value="{{ $pujalist->name }}" {{ $matchByName ? 'selected' : '' }}>
                                             {{ $pujalist->name }}
                                         </option>
                                     @endforeach
@@ -241,23 +236,18 @@
 
                             <div class="col-md-3">
                                 <label class="form-label">Unit</label>
-                                <select class="form-control select2 unit-select" name="unit_id[]" required>
-                                    {{-- Optional: show the raw stored name if it doesn't exist in the list (not selected) --}}
+                                <select class="form-control select2 unit-select" name="unit[]" required>
                                     @if (!empty($unitNF) && !empty($unitLabel))
                                         <option value="" disabled>{{ $unitLabel }} (not in list)</option>
                                     @endif
                                     <option value="">— Select Unit —</option>
-
                                     @foreach ($pooja_units as $u)
                                         @php
-                                            // Prefer id match, else fallback to name match
-                                            $uMatchById = isset($unitId) && (int) $u->id === (int) $unitId;
                                             $uMatchByName =
                                                 !empty($unitLabel) &&
                                                 mb_strtolower(trim($u->unit_name)) === mb_strtolower(trim($unitLabel));
                                         @endphp
-                                        <option value="{{ $u->id }}"
-                                            {{ $uMatchById || $uMatchByName ? 'selected' : '' }}>
+                                        <option value="{{ $u->unit_name }}" {{ $uMatchByName ? 'selected' : '' }}>
                                             {{ $u->unit_name }}
                                         </option>
                                     @endforeach
@@ -346,35 +336,36 @@
 
             function buildRowHtml() {
                 return `
-                <div class="row mb-3 package-row align-items-end">
-                    <div class="col-md-4">
-                        <label class="form-label">Item</label>
-                        <select class="form-control select2 item-select" name="item_id[]" required>
-                            <option value="">— Select Item —</option>
-                            @foreach ($Poojaitemlist as $pujalist)
-                                <option value="{{ $pujalist->id }}">{{ $pujalist->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Qty</label>
-                        <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Unit</label>
-                        <select class="form-control select2 unit-select" name="unit_id[]" required>
-                            <option value="">— Select Unit —</option>
-                            @foreach ($pooja_units as $u)
-                                <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Item Price (Rs.)</label>
-                        <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
-                    </div>
-                </div>`;
+                    <div class="row mb-3 package-row align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Item</label>
+                            <select class="form-control select2 item-select" name="item_name[]" required>
+                                <option value="">— Select Item —</option>
+                                @foreach ($Poojaitemlist as $pujalist)
+                                    <option value="{{ $pujalist->name }}">{{ $pujalist->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Qty</label>
+                            <input type="number" class="form-control" name="quantity[]" min="0" step="any" placeholder="0" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Unit</label>
+                            <select class="form-control select2 unit-select" name="unit[]" required>
+                                <option value="">— Select Unit —</option>
+                                @foreach ($pooja_units as $u)
+                                    <option value="{{ $u->unit_name }}">{{ $u->unit_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Item Price (Rs.)</label>
+                            <input type="number" class="form-control" name="item_price[]" min="0" step="0.01" placeholder="0.00" required>
+                        </div>
+                    </div>`;
             }
+
 
             function ensureAtLeastOneRow() {
                 if ($packageItems.find('.package-row').length === 0) {
