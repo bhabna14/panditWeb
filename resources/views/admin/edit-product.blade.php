@@ -49,14 +49,14 @@
                 is_null($product->is_flower_available) ? '' : ($product->is_flower_available ? 'yes' : 'no'),
             );
 
-            // Old inputs (if validation failed)
+            // Old inputs if validation failed
             $oldItemIds = old('item_id', []);
             $oldQtys = old('quantity', []);
             $oldUnitIds = old('unit_id', []);
             $oldPrices = old('item_price', []);
             $hasOldRows = is_array($oldItemIds) && count($oldItemIds) > 0;
 
-            // Prefill from controller (already normalized to item_id, quantity, unit_id, price + labels)
+            // Prefill rows from controller
             $prefill = [];
             if (!$hasOldRows && !empty($packageItems) && is_array($packageItems)) {
                 foreach ($packageItems as $row) {
@@ -67,17 +67,18 @@
                         'price' => $row['price'] ?? null,
                         'item_label' => $row['item_label'] ?? null,
                         'unit_label' => $row['unit_label'] ?? null,
+                        'item_not_found' => $row['item_not_found'] ?? false,
+                        'unit_not_found' => $row['unit_not_found'] ?? false,
                     ];
                 }
             }
 
-            // How many rows to render
             $rowsCount = max(count($oldItemIds), count($prefill), 1);
 
             $currentCat = old('category', $product->category);
             $isPackage = $currentCat === 'Package';
             $isSubscription = $currentCat === 'Subscription';
-            $showLineRows = $isPackage || $isSubscription; // show rows for both package & subscription
+            $showLineRows = $isPackage || $isSubscription; // show for both
         @endphp
 
         <div class="row">
@@ -186,15 +187,17 @@
                             $price = $oldPrices[$i] ?? ($prefill[$i]['price'] ?? null);
                             $itemLabel = $prefill[$i]['item_label'] ?? null;
                             $unitLabel = $prefill[$i]['unit_label'] ?? null;
+                            $itemNF = $prefill[$i]['item_not_found'] ?? false;
+                            $unitNF = $prefill[$i]['unit_not_found'] ?? false;
                         @endphp
 
                         <div class="row mb-3 package-row align-items-end">
                             <div class="col-md-4">
                                 <label class="form-label">Item</label>
                                 <select class="form-control select2 item-select" name="item_id[]" required>
-                                    @if (empty($itemId) && !empty($itemLabel))
-                                        <option value="" selected disabled>{{ $itemLabel }} (not found)</option>
-                                        <option value="">— Select Puja List —</option>
+                                    @if ($itemNF && $itemLabel)
+                                        {{-- Show original label so user sees what was stored; form will require re-selection --}}
+                                        <option value="" selected>{{ $itemLabel }} (please re-select)</option>
                                     @else
                                         <option value="">— Select Puja List —</option>
                                     @endif
@@ -216,9 +219,8 @@
                             <div class="col-md-3">
                                 <label class="form-label">Unit</label>
                                 <select class="form-control select2 unit-select" name="unit_id[]" required>
-                                    @if (empty($unitId) && !empty($unitLabel))
-                                        <option value="" selected disabled>{{ $unitLabel }} (not found)</option>
-                                        <option value="">— Select Unit —</option>
+                                    @if ($unitNF && $unitLabel)
+                                        <option value="" selected>{{ $unitLabel }} (please re-select)</option>
                                     @else
                                         <option value="">— Select Unit —</option>
                                     @endif
