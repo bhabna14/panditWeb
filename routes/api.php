@@ -210,6 +210,8 @@ Route::post('/verify-otpless', [OtpController::class, 'verifyOtp'])->name('api.v
 Route::middleware('auth:sanctum')->post('/userLogout', [OtpController::class, 'userLogout']);
 Route::post('/login-mobile', [OtpController::class, 'loginWithMobile']);
 
+Route::post('/send-otp-ios', [OtpController::class, 'sendOtpIos'])->name('api.send-otp-ios');
+Route::post('/verify-otpless-ios', [OtpController::class, 'verifyOtpIos'])->name('api.verify-otp-ios');
 
 Route::middleware('auth:sanctum')->get('/order-history', [UserProfileController::class, 'orderHistory']);
 

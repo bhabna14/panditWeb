@@ -185,23 +185,17 @@
 									<a class="side-menu__item" href="{{url('admin/manage-subadmins')}}"><img src="{{asset('assets/img/brand/administrator.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Manage Subadmins</span></a>
 								</li>
 								
-
-								
-								
 								<li class="slide">
 									<a class="side-menu__item" href="{{route('admin.managelocality')}}"><img src="{{asset('assets/img/brand/location.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Manage Locality</span></a>
 								</li>
 								
-
 								<li class="slide">
 									<a class="side-menu__item" href="{{url('admin/manage-product')}}"><img src="{{asset('assets/img/brand/order.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Manage Product</span></a>
 								</li>
+
 								<li class="slide">
 									<a class="side-menu__item" href="{{route('admin.orders.index')}}"><img src="{{asset('assets/img/brand/flower.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Manage Flower Orders</span></a>
 								</li>
-
-								
-							
 
 								<li class="slide">
 									<a class="side-menu__item" href="{{route('admin.managevendor')}}"><img src="{{asset('assets/img/brand/vendor.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Manage Vendors</span></a>
@@ -225,9 +219,7 @@
 									<ul class="slide-menu">
 										<li><a class="sub-side-menu__item" href="{{url('admin/existing-user')}}">Subscription Order (Existing User)</a></li>
 										<li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Subscription Order (New User)</a></li>
-
 										<li><a class="sub-side-menu__item" href="{{url('admin/demo-customize-order')}}">Demo Customize Order</a></li>
-										
 									</ul>
 								</li>
 								<li class="slide">

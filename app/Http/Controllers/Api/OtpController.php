@@ -82,190 +82,190 @@ class OtpController extends Controller
         ], 200);
     }
 
-    // public function sendOtp(Request $request)
-    // {
-    //     $request->validate([
-    //         'phone' => 'required|string',
-    //     ]);
-
-    //     $otp = random_int(100000, 999999);
-    //     $phone = $request->phone;
-    //     $shortToken = Str::random(6); // max 15 characters
-
-    //     // Check if user already exists
-    //     $pandit = User::where('mobile_number', $phone)->first();
-
-    //     if ($pandit) {
-    //         // ✅ Existing user: update OTP
-    //         $pandit->otp = $otp;
-
-    //         // If referral_code is missing, generate one
-    //         if (empty($pandit->referral_code)) {
-    //             $pandit->referral_code = $this->generateReferralCode();
-    //         }
-
-    //         $pandit->save();
-    //         $status = 'existing';
-    //     } else {
-    //         // ✅ New user: create with referral_code
-    //         $pandit = User::create([
-    //             'mobile_number'  => $phone,
-    //             'otp'            => $otp,
-    //             'userid'         => 'USER' . random_int(10000, 99999),
-    //             'referral_code'  => $this->generateReferralCode(),
-    //         ]);
-    //         $status = 'new';
-    //     }
-
-    //     // ✅ MSG91 WhatsApp template payload
-    //     $payload = [
-    //         "integrated_number" => env('MSG91_WA_NUMBER'),
-    //         "content_type" => "template",
-    //         "payload" => [
-    //             "messaging_product" => "whatsapp",
-    //             "to" => $phone,
-    //             "type" => "template",
-    //             "template" => [
-    //                 "name" => env('MSG91_WA_TEMPLATE'),
-    //                 "language" => [
-    //                     "code" => "en",
-    //                     "policy" => "deterministic"
-    //                 ],
-    //                 "namespace" => env('MSG91_WA_NAMESPACE'),
-    //                 "components" => [
-    //                     [
-    //                         "type" => "body",
-    //                         "parameters" => [
-    //                             [
-    //                                 "type" => "text",
-    //                                 "text" => (string) $otp
-    //                             ]
-    //                         ]
-    //                     ],
-    //                     [
-    //                         "type" => "button",
-    //                         "sub_type" => "url",
-    //                         "index" => 0,
-    //                         "parameters" => [
-    //                             [
-    //                                 "type" => "text",
-    //                                 "text" => $shortToken
-    //                             ]
-    //                         ]
-    //                     ]
-    //                 ]
-    //             ]
-    //         ]
-    //     ];
-
-    //     try {
-    //         $response = Http::withHeaders([
-    //             'Content-Type' => 'application/json',
-    //             'authkey' => env('MSG91_AUTHKEY'),
-    //         ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
-
-    //         $result = $response->json();
-
-    //         if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
-    //             return response()->json([
-    //                 'success' => false,
-    //                 'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
-    //                 'error'   => $result
-    //             ], 401);
-    //         }
-
-    //         return response()->json([
-    //             'success'      => true,
-    //             'message'      => 'OTP sent successfully',
-    //             'user_status'  => $status,
-    //             'token'        => $shortToken,
-    //             // (Optional) expose referral_code when applicable
-    //             'referral_code'=> $pandit->referral_code,
-    //             'api_response' => $result
-    //         ]);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to send OTP',
-    //             'error'   => $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-        
-    // public function verifyOtp(Request $request)
-    // {
-    //     $request->validate([
-    //         'phoneNumber'  => 'required|string',
-    //         'otp'          => 'required|string',
-    //         'device_id'    => 'required|string',
-    //         'platform'     => 'required|string',
-    //         'device_model' => 'required|string',
-    //     ]);
-
-    //     // Find user by phone number
-    //     $user = User::where('mobile_number', $request->phoneNumber)->first();
-
-    //     if (!$user) {
-    //         return response()->json([
-    //             'message' => 'Mobile number not found. Please request OTP first.'
-    //         ], 404);
-    //     }
-
-    //     // Check OTP match
-    //     if ((string)$user->otp !== (string)$request->otp) {
-    //         return response()->json([
-    //             'message' => 'Invalid OTP.'
-    //         ], 401);
-    //     }
-
-    //     // ✅ OTP is valid — ensure a referral code exists at *login time*
-    //     if (empty($user->referral_code)) {
-    //         $user->referral_code = $this->generateReferralCode();
-    //     }
-
-    //     // Clear OTP and persist changes (referral_code + otp)
-    //     $user->otp = null;
-    //     $user->save();
-
-    //     // Store device info
-    //     UserDevice::updateOrCreate(
-    //         [
-    //             'device_id' => $request->device_id,
-    //             // If your UserDevice.user_id is a numeric FK to users.id, change this to $user->id
-    //             'user_id'   => $user->userid,
-    //         ],
-    //         [
-    //             'platform'     => $request->platform,
-    //             'device_model' => $request->device_model,
-    //         ]
-    //     );
-
-    //     // Generate Sanctum token
-    //     $token = $user->createToken('API Token')->plainTextToken;
-
-    //     return response()->json([
-    //         'message'    => 'User authenticated successfully.',
-    //         'token'      => $token,
-    //         'token_type' => 'Bearer',
-    //         'user'       => $user, // includes referral_code
-    //     ], 200);
-    // }
-
-    // private function generateReferralCode(int $length = 7): string
-    // {
-    //     $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    //     do {
-    //         $code = '';
-    //         for ($i = 0; $i < $length; $i++) {
-    //             $code .= $alphabet[random_int(0, strlen($alphabet) - 1)];
-    //         }
-    //         $exists = User::where('referral_code', $code)->exists();
-    //     } while ($exists);
-
-    //     return $code;
-    // }
-
     public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+        ]);
+
+        $otp = random_int(100000, 999999);
+        $phone = $request->phone;
+        $shortToken = Str::random(6); // max 15 characters
+
+        // Check if user already exists
+        $pandit = User::where('mobile_number', $phone)->first();
+
+        if ($pandit) {
+            // ✅ Existing user: update OTP
+            $pandit->otp = $otp;
+
+            // If referral_code is missing, generate one
+            if (empty($pandit->referral_code)) {
+                $pandit->referral_code = $this->generateReferralCode();
+            }
+
+            $pandit->save();
+            $status = 'existing';
+        } else {
+            // ✅ New user: create with referral_code
+            $pandit = User::create([
+                'mobile_number'  => $phone,
+                'otp'            => $otp,
+                'userid'         => 'USER' . random_int(10000, 99999),
+                'referral_code'  => $this->generateReferralCode(),
+            ]);
+            $status = 'new';
+        }
+
+        // ✅ MSG91 WhatsApp template payload
+        $payload = [
+            "integrated_number" => env('MSG91_WA_NUMBER'),
+            "content_type" => "template",
+            "payload" => [
+                "messaging_product" => "whatsapp",
+                "to" => $phone,
+                "type" => "template",
+                "template" => [
+                    "name" => env('MSG91_WA_TEMPLATE'),
+                    "language" => [
+                        "code" => "en",
+                        "policy" => "deterministic"
+                    ],
+                    "namespace" => env('MSG91_WA_NAMESPACE'),
+                    "components" => [
+                        [
+                            "type" => "body",
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => (string) $otp
+                                ]
+                            ]
+                        ],
+                        [
+                            "type" => "button",
+                            "sub_type" => "url",
+                            "index" => 0,
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => $shortToken
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'authkey' => env('MSG91_AUTHKEY'),
+            ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
+
+            $result = $response->json();
+
+            if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
+                    'error'   => $result
+                ], 401);
+            }
+
+            return response()->json([
+                'success'      => true,
+                'message'      => 'OTP sent successfully',
+                'user_status'  => $status,
+                'token'        => $shortToken,
+                // (Optional) expose referral_code when applicable
+                'referral_code'=> $pandit->referral_code,
+                'api_response' => $result
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to send OTP',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
+    }
+        
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'phoneNumber'  => 'required|string',
+            'otp'          => 'required|string',
+            'device_id'    => 'required|string',
+            'platform'     => 'required|string',
+            'device_model' => 'required|string',
+        ]);
+
+        // Find user by phone number
+        $user = User::where('mobile_number', $request->phoneNumber)->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'Mobile number not found. Please request OTP first.'
+            ], 404);
+        }
+
+        // Check OTP match
+        if ((string)$user->otp !== (string)$request->otp) {
+            return response()->json([
+                'message' => 'Invalid OTP.'
+            ], 401);
+        }
+
+        // ✅ OTP is valid — ensure a referral code exists at *login time*
+        if (empty($user->referral_code)) {
+            $user->referral_code = $this->generateReferralCode();
+        }
+
+        // Clear OTP and persist changes (referral_code + otp)
+        $user->otp = null;
+        $user->save();
+
+        // Store device info
+        UserDevice::updateOrCreate(
+            [
+                'device_id' => $request->device_id,
+                // If your UserDevice.user_id is a numeric FK to users.id, change this to $user->id
+                'user_id'   => $user->userid,
+            ],
+            [
+                'platform'     => $request->platform,
+                'device_model' => $request->device_model,
+            ]
+        );
+
+        // Generate Sanctum token
+        $token = $user->createToken('API Token')->plainTextToken;
+
+        return response()->json([
+            'message'    => 'User authenticated successfully.',
+            'token'      => $token,
+            'token_type' => 'Bearer',
+            'user'       => $user, // includes referral_code
+        ], 200);
+    }
+
+    private function generateReferralCode(int $length = 7): string
+    {
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        do {
+            $code = '';
+            for ($i = 0; $i < $length; $i++) {
+                $code .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+            }
+            $exists = User::where('referral_code', $code)->exists();
+        } while ($exists);
+
+        return $code;
+    }
+
+    public function sendOtpIos(Request $request)
     {
         $validated = $request->validate([
             'phone' => 'required|string',
@@ -278,7 +278,7 @@ class OtpController extends Controller
             ['mobile_number' => $phone],
             [
                 'userid'        => $this->generateUniqueUserId(),
-                'referral_code' => $this->generateReferralCode(),
+                'referral_code' => $this->generateReferralCodeIos(),
             ]
         );
 
@@ -291,7 +291,7 @@ class OtpController extends Controller
         ], 200);
     }
 
-    public function verifyOtp(Request $request)
+    public function verifyOtpIos(Request $request)
     {
         $validated = $request->validate([
             'phoneNumber'        => 'required|string',
@@ -353,7 +353,7 @@ class OtpController extends Controller
         return $candidate;
     }
 
-    private function generateReferralCode(): string
+    private function generateReferralCodeIos(): string
     {
         do {
             $code = Str::upper(Str::random(8));
