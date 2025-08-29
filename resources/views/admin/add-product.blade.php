@@ -113,7 +113,8 @@
             <!-- DISCOUNT -->
             <div class="col-md-4 mb-3 controlled hidden" data-block="core">
                 <label for="discount" class="form-label"><span id="label-discount">Discount (%)</span></label>
-                <input type="number" name="discount" class="form-control" id="discount" min="0" max="100" step="0.01" placeholder="Enter discount percentage">
+                <input type="number" name="discount" class="form-control" id="discount" min="0" max="100"
+                    step="0.01" placeholder="Enter discount percentage">
             </div>
 
             <!-- SUBSCRIPTION: DURATION -->
@@ -238,6 +239,86 @@
                 <button type="button" id="addMore" class="btn btn-secondary">Add More</button>
                 <button type="button" id="removeLast" class="btn btn-danger">Remove Last</button>
             </div>
+            <!-- SUBSCRIPTION: DURATION -->
+            <div class="col-md-4 mb-3 controlled hidden" id="durationGroup" data-block="subscription">
+                <label for="duration" class="form-label"><span id="label-duration">Subscription Duration
+                        (Months)</span></label>
+                <select name="duration" id="duration" class="form-control select2">
+                    <option value="" disabled selected>Select Package</option>
+                    <option value="1">1 Month</option>
+                    <option value="3">3 Months</option>
+                    <option value="6">6 Months</option>
+                </select>
+            </div>
+
+            <!-- SUBSCRIPTION: DAY-WISE PRICES -->
+            <div id="subscriptionDayFields" class="col-md-12 mb-3 controlled hidden" data-block="subscription">
+                <label class="form-label d-block mb-2"><span id="label-subscription-prices">Day-wise Prices</span></label>
+
+                <div id="subscriptionDayItems">
+                    <div class="row mb-3 subscription-day-row align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Day</label>
+                            <input type="number" class="form-control" name="day[]" min="1" placeholder="Day"
+                                required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Price (Rs.)</label>
+                            <input type="number" class="form-control" name="day_price[]" min="0" step="0.01"
+                                placeholder="0.00" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="addSubscriptionDayRow" class="btn btn-secondary">Add Day</button>
+                <button type="button" id="removeSubscriptionDayRow" class="btn btn-danger">Remove Last Day</button>
+            </div>
+
+            <!-- SUBSCRIPTION: ITEMS -->
+            <div id="subscriptionItemFields" class="col-md-12 mb-3 controlled hidden" data-block="subscription">
+                <label class="form-label d-block mb-2"><span id="label-subscription-items">Subscription
+                        Items</span></label>
+
+                <div id="subscriptionItems">
+                    <div class="row mb-3 subscription-item-row align-items-end">
+                        <div class="col-md-4">
+                            <label class="form-label">Item</label>
+                            <select class="form-control select2 item-select" name="sub_item_id[]" required>
+                                <option value="">Select Puja List</option>
+                                @foreach ($Poojaitemlist as $pujalist)
+                                    <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-2">
+                            <label class="form-label">Qty</label>
+                            <input type="number" class="form-control" name="sub_quantity[]" min="0"
+                                step="any" placeholder="0" required>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Unit</label>
+                            <select class="form-control select2 unit-select" name="sub_unit_id[]" required>
+                                <option value="">Select Unit</option>
+                                @foreach ($pooja_units as $u)
+                                    <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label">Item Price (Rs.)</label>
+                            <input type="number" class="form-control" name="sub_item_price[]" min="0"
+                                step="0.01" placeholder="0.00" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" id="addSubscriptionItemRow" class="btn btn-secondary">Add Item</button>
+                <button type="button" id="removeSubscriptionItemRow" class="btn btn-danger">Remove Last Item</button>
+            </div>
+
 
             <!-- BENEFITS -->
             <div class="col-md-4 mb-3 controlled hidden" data-block="core">
@@ -741,6 +822,82 @@
                     reader.readAsDataURL(file);
                 });
             }
+
+            // --- SUBSCRIPTION DAY-WISE ROWS ---
+            const subscriptionDayItems = document.getElementById('subscriptionDayItems');
+            const addSubscriptionDayRow = document.getElementById('addSubscriptionDayRow');
+            const removeSubscriptionDayRow = document.getElementById('removeSubscriptionDayRow');
+
+            if (addSubscriptionDayRow && removeSubscriptionDayRow) {
+                addSubscriptionDayRow.addEventListener('click', function() {
+                    const newRow = document.createElement('div');
+                    newRow.classList.add('row', 'mb-3', 'subscription-day-row', 'align-items-end');
+                    newRow.innerHTML = `
+            <div class="col-md-4">
+                <label class="form-label">Day</label>
+                <input type="number" class="form-control" name="day[]" min="1" placeholder="Day" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Price (Rs.)</label>
+                <input type="number" class="form-control" name="day_price[]" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+        `;
+                    subscriptionDayItems.appendChild(newRow);
+                });
+
+                removeSubscriptionDayRow.addEventListener('click', function() {
+                    const rows = subscriptionDayItems.querySelectorAll('.subscription-day-row');
+                    if (rows.length > 1) rows[rows.length - 1].remove();
+                });
+            }
+
+            // --- SUBSCRIPTION ITEM ROWS ---
+            const subscriptionItems = document.getElementById('subscriptionItems');
+            const addSubscriptionItemRow = document.getElementById('addSubscriptionItemRow');
+            const removeSubscriptionItemRow = document.getElementById('removeSubscriptionItemRow');
+
+            if (addSubscriptionItemRow && removeSubscriptionItemRow) {
+                addSubscriptionItemRow.addEventListener('click', function() {
+                    const newRow = document.createElement('div');
+                    newRow.classList.add('row', 'mb-3', 'subscription-item-row', 'align-items-end');
+                    newRow.innerHTML = `
+            <div class="col-md-4">
+                <label class="form-label">Item</label>
+                <select class="form-control select2 item-select" name="sub_item_id[]" required>
+                    <option value="">Select Puja List</option>
+                    @foreach ($Poojaitemlist as $pujalist)
+                        <option value="{{ $pujalist->id }}">{{ $pujalist->item_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Qty</label>
+                <input type="number" class="form-control" name="sub_quantity[]" min="0" step="any" placeholder="0" required>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Unit</label>
+                <select class="form-control select2 unit-select" name="sub_unit_id[]" required>
+                    <option value="">Select Unit</option>
+                    @foreach ($pooja_units as $u)
+                        <option value="{{ $u->id }}">{{ $u->unit_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Item Price (Rs.)</label>
+                <input type="number" class="form-control" name="sub_item_price[]" min="0" step="0.01" placeholder="0.00" required>
+            </div>
+        `;
+                    subscriptionItems.appendChild(newRow);
+                    initSelect2(newRow); // re-init select2
+                });
+
+                removeSubscriptionItemRow.addEventListener('click', function() {
+                    const rows = subscriptionItems.querySelectorAll('.subscription-item-row');
+                    if (rows.length > 1) rows[rows.length - 1].remove();
+                });
+            }
+
         })();
     </script>
 @endsection
