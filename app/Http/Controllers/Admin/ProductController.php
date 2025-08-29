@@ -121,7 +121,7 @@ class ProductController extends Controller
             $itemIds  = collect($packageRows)->pluck('item_id')->unique()->values();
             $unitIdsC = collect($packageRows)->pluck('unit_id')->unique()->values();
 
-            $itemNamesById = Poojaitemlists::whereIn('id', $itemIds)->pluck('item_name', 'id');
+            $itemNamesById = FlowerProduct::whereIn('id', $itemIds)->pluck('name', 'id');
             $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)->pluck('unit_name', 'id');
 
             if ($itemNamesById->count() !== $itemIds->count())  return back()->withErrors(['item_id' => 'One or more selected items were not found.'])->withInput();
@@ -346,7 +346,7 @@ class ProductController extends Controller
 
         return redirect()->route('manageproduct')->with('success', 'Product deleted successfully.');
     }
-    
+
 public function manageproduct()
 {
     $products = FlowerProduct::query()
