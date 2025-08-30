@@ -80,4 +80,22 @@ class Subscription extends Model
        return $this->belongsTo(User::class, 'user_id', 'userid');
    }
 
+   
+use Carbon\Carbon;
+
+public function scopeActiveOn($q, Carbon $date)
+{
+    return $q->where(function ($q) {
+            $q->where('status', 'active')->orWhere('is_active', 1);
+        })
+        ->whereDate('start_date', '<=', $date->toDateString())
+        ->whereDate('end_date', '>=', $date->toDateString())
+        ->where(function ($q) use ($date) {
+            $q->whereNull('pause_start_date')
+              ->orWhereNull('pause_end_date')
+              ->orWhereDate('pause_end_date', '<', $date->toDateString())
+              ->orWhereDate('pause_start_date', '>', $date->toDateString());
+        });
+}
+
 }

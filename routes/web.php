@@ -49,6 +49,7 @@ use App\Http\Controllers\Admin\OfficeTransactionController;
 use App\Http\Controllers\Admin\MonthWiseFlowerPriceController;
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 use App\Http\Controllers\Admin\ProductRequestController;
+use App\Http\Controllers\Admin\FlowerEstimateController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -877,4 +878,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::delete('/flower-price/delete/{id}', [MonthWiseFlowerPriceController::class, 'deleteFlowerPrice'])->name('deleteFlowerPrice');
+});
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/reports/flower-estimates', [FlowerEstimateController::class, 'index'])->name('reports.flower_estimates');
+    Route::get('/reports/flower-estimates/export', [FlowerEstimateController::class, 'exportCsv'])->name('reports.flower_estimates.export');
 });
