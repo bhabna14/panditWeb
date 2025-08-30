@@ -268,7 +268,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::post('/purchaseSubscription', [ProductController::class, 'purchaseSubscription']);
     Route::post('/deactivate-expired-subscriptions', [ProductController::class, 'deactivateExpiredSubscriptions']);
     Route::get('/edit-product/{id}', [ProductController::class, 'editProduct'])->name('admin.edit-product');
-    Route::post('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
+    Route::put('/update-product/{id}', [ProductController::class, 'updateProduct'])->name('admin.update-product');
     Route::get('/delete-product/{id}', [ProductController::class, 'deleteProduct'])->name('admin.delete-product');
 
     Route::post('/items-store', [ProductController::class, 'storeItem'])->name('items.store');

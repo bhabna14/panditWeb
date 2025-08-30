@@ -70,8 +70,8 @@
             - $pooja_units: list of PoojaUnit (id, unit_name)
         -->
 
-    <form action="{{ route('admin.update-product', $product->id) }}" method="post" enctype="multipart/form-data"
-        id="categorySmartForm">
+    <form action="{{ route('admin.update-product', $product->id) }}" method="post" enctype="multipart/form-data" id="categorySmartForm">
+       
         @csrf
         @method('PUT')
 
