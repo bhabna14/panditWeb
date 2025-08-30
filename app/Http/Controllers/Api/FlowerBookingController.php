@@ -607,10 +607,10 @@ class FlowerBookingController extends Controller
                     ->where('action', 'paused')
                     ->latest('id')
                     ->first();
-                
+
                 $overlapQuery = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
                     ->where('order_id', $order_id)
-                    ->where('action', 'paused')
+                    ->where('status', 'paused')
                     ->when($subscription->status === 'paused' && $existingPauseLog, function ($q) use ($existingPauseLog) {
                         $q->where('id', '!=', $existingPauseLog->id);
                     })
@@ -680,7 +680,7 @@ class FlowerBookingController extends Controller
                 }
 
                 // 8) Update subscription -> status paused + set window + new_date
-                $subscription->status           = 'paused';
+                $subscription->status           = 'active';
                 $subscription->pause_start_date = $pauseStartDate->toDateString();
                 $subscription->pause_end_date   = $pauseEndDate->toDateString();
                 $subscription->new_date         = $newEndDate->toDateString();
