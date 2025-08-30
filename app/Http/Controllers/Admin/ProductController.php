@@ -855,7 +855,7 @@ class ProductController extends Controller
             }
         });
 
-        return redirect()->route('admin.products.edit', $product->id)->with('success', 'Product updated successfully.');
+        return redirect()->route('manageproduct')->with('success', 'Product updated successfully.');
     }
 
     public function storeItem(Request $request)
