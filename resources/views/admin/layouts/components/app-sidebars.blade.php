@@ -221,6 +221,7 @@
                                 Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower
                                 Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('reports.flower_estimates') }}">Flower Estimate</a></li>
                     </ul>
                 </li>
 
