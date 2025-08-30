@@ -69,7 +69,7 @@ class FlowerEstimateController extends Controller
         Carbon $end,
         Collection $flowerByProductId,
         Collection $flowerByNormName
-    ): array {
+     ): array {
         $subs = $this->activeSubscriptionsOverlapping($start, $end);
 
         $perDay = [];
@@ -117,9 +117,6 @@ class FlowerEstimateController extends Controller
         ];
     }
 
-    /**
-     * Active subscriptions (status 'active' or is_active=1) overlapping the range.
-     */
     protected function activeSubscriptionsOverlapping(Carbon $start, Carbon $end)
     {
         return Subscription::query()
@@ -149,12 +146,12 @@ class FlowerEstimateController extends Controller
     ): array {
         $deliveries = $subscriptions->filter(function ($s) use ($date) {
             $inWindow = Carbon::parse($s->start_date)->startOfDay()->lte($date)
-                      && Carbon::parse($s->end_date)->endOfDay()->gte($date);
+                    && Carbon::parse($s->end_date)->endOfDay()->gte($date);
 
             $paused = false;
             if ($s->pause_start_date && $s->pause_end_date) {
                 $paused = Carbon::parse($s->pause_start_date)->startOfDay()->lte($date)
-                       && Carbon::parse($s->pause_end_date)->endOfDay()->gte($date);
+                    && Carbon::parse($s->pause_end_date)->endOfDay()->gte($date);
             }
 
             return $inWindow && !$paused;

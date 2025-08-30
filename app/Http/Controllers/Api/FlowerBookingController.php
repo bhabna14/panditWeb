@@ -573,7 +573,7 @@ class FlowerBookingController extends Controller
     
     public function pause(Request $request, $order_id)
     {
-        // 1) Validate input (inclusive pause window)
+        // 1) Validate input (inclusive window)
         $request->validate([
             'pause_start_date' => ['required','date'],
             'pause_end_date'   => ['required','date'],
@@ -594,28 +594,57 @@ class FlowerBookingController extends Controller
 
         try {
             return DB::transaction(function () use ($order_id, $pauseStartDate, $pauseEndDate, $plannedPausedDays) {
+
                 // 2) Lock subscription row
                 $subscription = Subscription::where('order_id', $order_id)
                     ->whereIn('status', ['active', 'paused'])
                     ->lockForUpdate()
                     ->firstOrFail();
 
-                // 3) Find the latest existing "paused" log for this order (if any)
+                // 3) The "current" paused cycle (if we are already paused)
                 $existingPauseLog = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
                     ->where('order_id', $order_id)
                     ->where('action', 'paused')
                     ->latest('id')
                     ->first();
+                
+                $overlapQuery = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                    ->where('order_id', $order_id)
+                    ->where('action', 'paused')
+                    ->when($subscription->status === 'paused' && $existingPauseLog, function ($q) use ($existingPauseLog) {
+                        $q->where('id', '!=', $existingPauseLog->id);
+                    })
+                    ->where(function ($q) use ($pauseStartDate, $pauseEndDate) {
+                        $q->whereBetween('pause_start_date', [$pauseStartDate, $pauseEndDate])
+                        ->orWhereBetween('pause_end_date',   [$pauseStartDate, $pauseEndDate])
+                        ->orWhere(function ($q2) use ($pauseStartDate, $pauseEndDate) {
+                            $q2->where('pause_start_date', '<=', $pauseStartDate)
+                                ->where('pause_end_date',   '>=', $pauseEndDate);
+                        });
+                    });
 
-                // 4) Determine the base end date BEFORE applying the new pause
-                // If we previously extended (new_date), back out the previous paused days to avoid double counting.
-                $baseEnd = Carbon::parse($subscription->new_date ?: $subscription->end_date)->startOfDay();
-                if ($existingPauseLog && $subscription->new_date) {
-                    // reverse previous extension
-                    $baseEnd = (clone $baseEnd)->subDays((int) $existingPauseLog->paused_days);
+                if ($overlapQuery->exists()) {
+                    return response()->json([
+                        'success' => 422,
+                        'message' => 'This pause window overlaps with another pause request for the same subscription.',
+                    ], 422);
                 }
 
-                // 5) Compute the new end date = base + plannedPausedDays
+                // 5) Determine base end date BEFORE applying this pause
+                // Use effective end (COALESCE(new_date, end_date))
+                $effectiveEnd = Carbon::parse($subscription->new_date ?: $subscription->end_date)->startOfDay();
+
+                // If we are currently paused and editing that same paused cycle,
+                // undo the previous extension first to avoid double counting.
+                $baseEnd = clone $effectiveEnd;
+                if ($subscription->status === 'paused' && $existingPauseLog) {
+                    $prevPausedDays = (int) ($existingPauseLog->paused_days ?? 0);
+                    if ($prevPausedDays > 0) {
+                        $baseEnd = (clone $effectiveEnd)->subDays($prevPausedDays);
+                    }
+                }
+
+                // 6) Compute new end date = base + plannedPausedDays
                 $newEndDate = (clone $baseEnd)->addDays($plannedPausedDays);
 
                 Log::info('Pausing subscription', [
@@ -627,10 +656,11 @@ class FlowerBookingController extends Controller
                     'base_end'            => $baseEnd->toDateString(),
                     'new_end'             => $newEndDate->toDateString(),
                     'had_new_date'        => (bool) $subscription->new_date,
+                    'status_before'       => $subscription->status,
                 ]);
 
-                // 6) Upsert the pause log
-                if ($existingPauseLog) {
+                // 7) Upsert the pause log (create if new, update if editing)
+                if ($subscription->status === 'paused' && $existingPauseLog) {
                     $existingPauseLog->update([
                         'pause_start_date' => $pauseStartDate->toDateString(),
                         'pause_end_date'   => $pauseEndDate->toDateString(),
@@ -649,7 +679,7 @@ class FlowerBookingController extends Controller
                     ]);
                 }
 
-                // 7) Update subscription -> status paused + set window + new_date
+                // 8) Update subscription -> status paused + set window + new_date
                 $subscription->status           = 'paused';
                 $subscription->pause_start_date = $pauseStartDate->toDateString();
                 $subscription->pause_end_date   = $pauseEndDate->toDateString();
@@ -734,7 +764,7 @@ class FlowerBookingController extends Controller
                     'had_new_date'    => (bool) $subscription->new_date,
                 ]);
 
-                // 4) Sanity checks on resume date (must be within pause period, inclusive)
+                // 4) Resume must be within pause period (inclusive)
                 if ($resumeDate->lt($pauseStartDate) || $resumeDate->gt($pauseEndDate)) {
                     return response()->json([
                         'success' => 422,
@@ -742,34 +772,28 @@ class FlowerBookingController extends Controller
                     ], 422);
                 }
 
-                // 5) Compute planned vs actual paused days
-                // planned paused days (inclusive window)
-                $plannedPausedDays  = $pauseStartDate->diffInDays($pauseEndDate) + 1;
-                // actual paused days in effect before resume; if resume on start day => 0
-                $actualPausedDays   = $pauseStartDate->diffInDays($resumeDate);
-                $remainingPausedDays= max(0, $plannedPausedDays - $actualPausedDays);
+                // 5) Planned vs actual paused days
+                $plannedPausedDays   = $pauseStartDate->diffInDays($pauseEndDate) + 1; // inclusive
+                $actualPausedDays    = $pauseStartDate->diffInDays($resumeDate);      // resume on start ⇒ 0
+                $remainingPausedDays = max(0, $plannedPausedDays - $actualPausedDays);
 
-                // 6) Calculate the correct new end date
-                // Case A: you had already extended new_date at pause time by plannedPausedDays.
-                //         Now subtract UNUSED days (remainingPausedDays) to bring it back.
-                // Case B: you never extended; extend end date only by actualPausedDays.
+                // 6) Correct new end date adjustment
+                // If pause() already extended new_date by planned days, now roll back the unused remainder.
+                // If not (legacy data), extend only by the actually paused days.
                 if (!empty($subscription->new_date)) {
-                    // Already extended earlier by planned days → subtract the remainder
                     $newEndDate = (clone $currentEndDate)->subDays($remainingPausedDays);
                 } else {
-                    // Not extended earlier → extend only by actually paused days
                     $newEndDate = (clone $currentEndDate)->addDays($actualPausedDays);
                 }
 
-                // 7) Persist changes: activate + clear pause window + set new_date
+                // 7) Persist: activate + clear pause window + set new_date
                 $subscription->status            = 'active';
                 $subscription->new_date          = $newEndDate->toDateString();
                 $subscription->pause_start_date  = null;
                 $subscription->pause_end_date    = null;
-                // optional: $subscription->is_active = 1;
                 $subscription->save();
 
-                // 8) Log entry
+                // 8) Log resume
                 SubscriptionPauseResumeLog::create([
                     'subscription_id'  => $subscription->subscription_id,
                     'order_id'         => $order_id,
@@ -782,7 +806,7 @@ class FlowerBookingController extends Controller
                     'meta'             => json_encode([
                         'planned_paused_days'   => $plannedPausedDays,
                         'remaining_paused_days' => $remainingPausedDays,
-                        'had_new_date_at_pause' => (bool) $subscription->new_date,
+                        'had_new_date_at_pause' => true, // with the new pause() logic this is always true
                     ]),
                 ]);
 
