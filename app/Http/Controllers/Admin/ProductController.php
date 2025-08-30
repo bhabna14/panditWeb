@@ -292,58 +292,73 @@ class ProductController extends Controller
         return redirect()->back()->with('success', 'Product created successfully.');
     }
 
-   public function editProduct($id)
-{
-    $product = FlowerProduct::findOrFail($id);
+    // public function editProduct($id)
+    // {
+    //     $product = FlowerProduct::findOrFail($id);
 
-    // Items list = Flower products (names)
-    $Poojaitemlist = FlowerProduct::where('category', 'Flower')
-        ->orderBy('name')
-        ->get(['id','name']);
+    //     // Items list = Flower products (names)
+    //     $Poojaitemlist = FlowerProduct::where('category', 'Flower')
+    //         ->orderBy('name')
+    //         ->get(['id','name']);
 
-    // Units = all units (names)
-    $pooja_units = PoojaUnit::orderBy('unit_name')
-        ->get(['id','unit_name']);
+    //     // Units = all units (names)
+    //     $pooja_units = PoojaUnit::orderBy('unit_name')
+    //         ->get(['id','unit_name']);
 
-    // Existing rows (we stored names already)
-    $rows = PackageItem::where('product_id', $product->product_id)
-        ->get(['item_name','unit','quantity','price']);
+    //     // Existing rows (we stored names already)
+    //     $rows = PackageItem::where('product_id', $product->product_id)
+    //         ->get(['item_name','unit','quantity','price']);
 
-    // Build simple array for the Blade (only labels + numbers)
-    $packageItems = $rows->map(function ($r) {
-        return [
-            'item_label'  => (string) $r->item_name,
-            'unit_label'  => (string) $r->unit,
-            'quantity'    => $r->quantity,
-            'price'       => $r->price,
+    //     // Build simple array for the Blade (only labels + numbers)
+    //     $packageItems = $rows->map(function ($r) {
+    //         return [
+    //             'item_label'  => (string) $r->item_name,
+    //             'unit_label'  => (string) $r->unit,
+    //             'quantity'    => $r->quantity,
+    //             'price'       => $r->price,
 
-            // flags for UI (not strictly needed now, but harmless)
-            'item_not_found' => false,
-            'unit_not_found' => false,
-        ];
-    })->values()->toArray();
+    //             // flags for UI (not strictly needed now, but harmless)
+    //             'item_not_found' => false,
+    //             'unit_not_found' => false,
+    //         ];
+    //     })->values()->toArray();
 
-    // Ensure at least one empty row for Package/Subscription with no items yet
-    if (empty($packageItems) && in_array($product->category, ['Package','Subscription'], true)) {
-        $packageItems = [[
-            'item_label'     => null,
-            'unit_label'     => null,
-            'quantity'       => null,
-            'price'          => null,
-            'item_not_found' => false,
-            'unit_not_found' => false,
-        ]];
+    //     // Ensure at least one empty row for Package/Subscription with no items yet
+    //     if (empty($packageItems) && in_array($product->category, ['Package','Subscription'], true)) {
+    //         $packageItems = [[
+    //             'item_label'     => null,
+    //             'unit_label'     => null,
+    //             'quantity'       => null,
+    //             'price'          => null,
+    //             'item_not_found' => false,
+    //             'unit_not_found' => false,
+    //         ]];
+    //     }
+
+    //     return view('admin.edit-product', compact(
+    //         'product',
+    //         'Poojaitemlist',
+    //         'pooja_units',
+    //         'packageItems'
+    //     ));
+    // }
+
+    public function editProduct($id)
+    {
+        $product = FlowerProduct::with([
+        'pooja:id,pooja_name',
+        'packageItems:id,product_id,item_name,quantity,unit,price',
+        ])->findOrFail($id);
+
+
+        $pooja_list = Poojalist::where('status', 'active')->get(['id','pooja_name']);
+        $flowerlist = FlowerProduct::where('status', 'active')->where('category','Flower')->get(['id','name']);
+        $pooja_units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
+
+
+        // Blade shipped earlier: resources/views/admin/edit-product.blade.php
+        return view('admin.edit-product', compact('product', 'pooja_list', 'flowerlist', 'pooja_units'));
     }
-
-    return view('admin.edit-product', compact(
-        'product',
-        'Poojaitemlist',
-        'pooja_units',
-        'packageItems'
-    ));
-}
-
-
 
     public function deleteProduct($id)
     {
