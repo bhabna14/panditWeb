@@ -254,7 +254,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->post('/purchase-subscription', [FlowerBookingController::class, 'purchaseSubscription']);
 Route::middleware('auth:sanctum')->post('/subscription/pause/{order_id}', [FlowerBookingController::class, 'pause'])->name('subscription.pause');
 Route::middleware('auth:sanctum')->post('/subscription/resume/{order_id}', [FlowerBookingController::class, 'resume'])->name('subscription.resume');
-
+Route::post('/subscriptions/delete-pause/{order_id}', [FlowerBookingController::class, 'deletePause'])->name('subscriptions.pause.delete');
 Route::middleware('auth:sanctum')->post('/make-payment/{id}', [FlowerBookingController::class, 'markPaymentApi']);
 
 Route::middleware('auth:sanctum')->post('/flower-requests', [FlowerBookingController::class, 'storerequest']);
