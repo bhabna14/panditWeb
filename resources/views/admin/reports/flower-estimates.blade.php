@@ -105,10 +105,7 @@
                 </a>
             </div>
         </div>
-        <div class="note mt-2">
-            <span class="chip badge">Tomorrow uses <strong>COALESCE(new_date, end_date)</strong>, excludes
-                <strong>paused</strong> & <strong>expired</strong>.</span>
-        </div>
+        
     </form>
 
     {{-- Tomorrow Summary --}}
