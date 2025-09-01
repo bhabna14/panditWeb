@@ -123,23 +123,14 @@ public function flowerDashboard()
             ->where('status', 'active') // Status must be active
             ->count();
 
-            $subscriptionEndFiveDays = Subscription::where(function ($query) {
-                $query->where(function ($subQuery) {
-                    $subQuery->whereNotNull('new_date')
-                        ->whereBetween('new_date', [
-                            Carbon::today()->subDays(4), // 4 days ago
-                            Carbon::today()              // today
-                        ]);
-                })->orWhere(function ($subQuery) {
-                    $subQuery->whereNull('new_date')
-                        ->whereBetween('end_date', [
-                            Carbon::today()->subDays(4),
-                            Carbon::today()
-                        ]);
-                });
-            })
-            ->where('status', 'active')
-            ->count();
+            $tz         = config('app.timezone');
+            $winStart   = Carbon::today($tz)->startOfDay();
+            $winEnd     = (clone $winStart)->addDays(4)->endOfDay();
+
+            // END date logic: use new_date if present else end_date
+            $subscriptionEndFiveDays = Subscription::where('status', 'active')
+                ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd])
+                ->count();
 
             $expiredSubscriptions = Subscription::where('status', 'expired')
                 ->whereNotIn('user_id', function ($query) {
@@ -205,6 +196,7 @@ public function flowerDashboard()
 
             // Total Refer = all referral rows
             $totalRefer = FLowerReferal::count();
+
 
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',

@@ -73,17 +73,12 @@ class FlowerOrderController extends Controller
         }
 
         if ($filter === 'fivedays') {
-            // If you actually want "upcoming 5 days", use today..+4
-            $winStart = (clone $todayStart);
-            $winEnd   = (clone $todayStart)->addDays(4)->endOfDay();
+            $tz         = config('app.timezone');
+            $winStart   = Carbon::today($tz)->startOfDay();
+            $winEnd     = (clone $winStart)->addDays(4)->endOfDay();
 
-            $query->where(function ($q) use ($winStart, $winEnd) {
-                $q->where(function ($sq) use ($winStart, $winEnd) {
-                    $sq->whereNotNull('new_date')->whereBetween('new_date', [$winStart, $winEnd]);
-                })->orWhere(function ($sq) use ($winStart, $winEnd) {
-                    $sq->whereNull('new_date')->whereBetween('end_date', [$winStart, $winEnd]);
-                });
-            })->where('status', 'active');
+            $query->where('status', 'active')
+                ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd]);
         }
 
         if ($filter === 'todayrequest') {
