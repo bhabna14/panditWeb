@@ -52,7 +52,6 @@ class FlowerOrderController extends Controller
                 });
         }
 
-
         if ($filter === 'renewed') {
             // If you want to keep your original logic, leave this block as-is.
             // (Better alternative is "user has >1 subs", but keeping your current behavior)
@@ -110,22 +109,39 @@ class FlowerOrderController extends Controller
         }
 
         if ($filter === 'expired') {
-            $subQuery = DB::table('subscriptions')
-                ->select('user_id', DB::raw('MAX(end_date) as latest_end_date'))
-                ->where('status', 'expired')
-                ->whereNotIn('user_id', function ($q) {
-                    $q->select('user_id')->from('subscriptions')
-                    ->whereIn('status', ['active', 'paused', 'resume']);
-                })
-                ->groupBy('user_id');
+        $liveStatuses = ['active', 'paused', 'resume'];
 
-            $query->joinSub($subQuery, 'latest_subscriptions', function ($join) {
-                    $join->on('subscriptions.user_id', '=', 'latest_subscriptions.user_id')
-                        ->on('subscriptions.end_date', '=', 'latest_subscriptions.latest_end_date');
-                })
-                ->select('subscriptions.*')
-                ->orderByDesc('subscriptions.end_date');
-        }
+        // Subquery: users who have no active/paused/resume AND we want their latest expired date
+        $subQuery = DB::table('subscriptions as s')
+            ->select('s.user_id', DB::raw('MAX(s.end_date) as latest_end_date'))
+            ->where('s.status', 'expired')
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                ->from('subscriptions as sa')
+                ->whereColumn('sa.user_id', 's.user_id')
+                ->whereIn('sa.status', $liveStatuses);
+            })
+            ->groupBy('s.user_id');
+
+        // Join to bring back exactly one (latest) expired row per such user
+        $query->joinSub($subQuery, 'latest_expired', function ($join) {
+                $join->on('subscriptions.user_id', '=', 'latest_expired.user_id')
+                    ->on('subscriptions.end_date', '=', 'latest_expired.latest_end_date');
+            })
+            ->where('subscriptions.status', 'expired')
+
+            // Extra safety: don't show expired rows where same ORDER has a live status
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                ->from('subscriptions as so')
+                ->whereColumn('so.order_id', 'subscriptions.order_id')
+                ->whereIn('so.status', $liveStatuses);
+            })
+
+            ->select('subscriptions.*')
+            ->orderByDesc('subscriptions.end_date');
+    }
+
 
         if ($filter === 'paused') {
             $query->where('status', 'paused');

@@ -132,15 +132,30 @@ public function flowerDashboard()
                 ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd])
                 ->count();
 
-            $expiredSubscriptions = Subscription::where('status', 'expired')
-                ->whereNotIn('user_id', function ($query) {
-                    $query->select('user_id')
-                        ->from('subscriptions')
-                        ->whereIn('status', ['active', 'paused', 'resume']);
+            $liveStatuses = ['active', 'paused', 'resume'];
+
+            $expiredSubscriptions = Subscription::query()
+                ->where('status', 'expired')
+
+                // Exclude users who have ANY active/paused/resume subscription
+                ->whereNotExists(function ($q) use ($liveStatuses) {
+                    $q->select(DB::raw(1))
+                    ->from('subscriptions as s2')
+                    ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                    ->whereIn('s2.status', $liveStatuses);
                 })
+
+                // Extra safety: Exclude expired rows where the SAME order has an active/paused/resume
+                ->whereNotExists(function ($q) use ($liveStatuses) {
+                    $q->select(DB::raw(1))
+                    ->from('subscriptions as s3')
+                    ->whereColumn('s3.order_id', 'subscriptions.order_id')
+                    ->whereIn('s3.status', $liveStatuses);
+                })
+
+                // Count distinct users
                 ->distinct('user_id')
-                ->latest('end_date')
-                ->count();
+                ->count('user_id');
 
             $nonAssignedRidersCount = Subscription::where('status', 'active')
             ->whereHas('order', function ($q) {
