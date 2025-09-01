@@ -67,7 +67,7 @@
 
                         <div class="mb-3">
                             <label for="editUserName" class="form-label">Customer Name</label>
-                            <input type="text" class="form-control" id="editUserName" name="name" readonly>
+                            <input type="text" class="form-control" id="editUserName" name="name">
                         </div>
 
                         <div class="mb-3">
