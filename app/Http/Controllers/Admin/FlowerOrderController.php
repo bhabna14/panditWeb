@@ -46,10 +46,12 @@ class FlowerOrderController extends Controller
         $filter = $request->query('filter');
 
         if ($filter === 'rider') {
-            $query->whereHas('order', function ($q) {
-                $q->whereNull('rider_id')->orWhere('rider_id', '');
-            });
+            $query->where('status', 'active') // ✅ ensure only active
+                ->whereHas('order', function ($q) {
+                    $q->whereNull('rider_id')->orWhere('rider_id', '');
+                });
         }
+
 
         if ($filter === 'renewed') {
             // If you want to keep your original logic, leave this block as-is.

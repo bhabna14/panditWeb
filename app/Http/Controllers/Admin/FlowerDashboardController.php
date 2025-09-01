@@ -142,16 +142,12 @@ public function flowerDashboard()
                 ->latest('end_date')
                 ->count();
 
-            $nonAssignedRidersCount = Subscription::with('relatedOrder')
-            ->where('status', 'active')
-            ->whereHas('relatedOrder', function ($query) {
-                $query->where(function ($q) {
-                    $q->whereNull('rider_id')
-                        ->orWhere('rider_id', '');
-                });
+            $nonAssignedRidersCount = Subscription::where('status', 'active')
+            ->whereHas('order', function ($q) {
+                $q->whereNull('rider_id')->orWhere('rider_id', '');
             })
             ->count();
-        
+
             $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
 
             $pausedSubscriptions = Subscription::where('status', 'paused')->count();
