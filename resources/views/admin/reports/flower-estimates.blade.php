@@ -36,6 +36,11 @@
             border: 1px solid #eaeef3;
         }
 
+        .chip.badge {
+            background: #eefbf0;
+            border-color: #d9f3de;
+        }
+
         .amount {
             font-variant-numeric: tabular-nums;
         }
@@ -58,6 +63,11 @@
             align-items: center;
             gap: .4rem;
         }
+
+        .note {
+            font-size: .82rem;
+            color: #5f6b7a;
+        }
     </style>
 @endsection
 
@@ -65,7 +75,7 @@
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">Flower Requirement Estimates</span>
-            <div class="muted">Day-wise and Month-wise quantity & price estimates</div>
+            <div class="muted">Tomorrow, Day-wise, and Month-wise quantity & price estimates</div>
         </div>
         <ol class="breadcrumb d-flex justify-content-between align-items-center">
             <li class="breadcrumb-item tx-15"><a href="{{ url('admin/dashboard') }}">Dashboard</a></li>
@@ -95,16 +105,78 @@
                 </a>
             </div>
         </div>
+        <div class="note mt-2">
+            <span class="chip badge">Tomorrow uses <strong>COALESCE(new_date, end_date)</strong>, excludes
+                <strong>paused</strong> & <strong>expired</strong>.</span>
+        </div>
     </form>
 
-    {{-- Day Summary --}}
+    {{-- Tomorrow Summary --}}
+    <div class="card card-soft mb-4">
+        <div class="sticky-summary">
+            <div class="hstack">
+                <div><strong>Tomorrow:</strong> {{ $tomorrow->toFormattedDateString() }}</div>
+                <div class="chip">Items: {{ count($tomorrowEstimate['lines']) }}</div>
+                <div class="chip">Total Qty: <span
+                        class="amount">{{ number_format($tomorrowEstimate['total_qty'], 2) }}</span></div>
+                <div class="chip">Est. Cost: <strong class="amount">₹
+                        {{ number_format($tomorrowEstimate['total_cost'], 2) }}</strong></div>
+                <div class="chip badge">Excludes Paused & Expired</div>
+            </div>
+        </div>
+        <div class="card-body">
+            @if (empty($tomorrowEstimate['lines']))
+                <div class="muted">No active subscription deliveries for tomorrow.</div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 36px;">#</th>
+                                <th>Flower</th>
+                                <th>Unit</th>
+                                <th class="text-end">Qty</th>
+                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php $i = 1; @endphp
+                            @foreach ($tomorrowEstimate['lines'] as $row)
+                                <tr>
+                                    <td>{{ $i++ }}</td>
+                                    <td>{{ $row['flower_name'] }}</td>
+                                    <td><span class="chip">{{ $row['unit'] }}</span></td>
+                                    <td class="text-end amount">{{ number_format($row['qty'], 2) }}</td>
+                                    <td class="text-end amount">₹ {{ number_format($row['unit_price'], 2) }}</td>
+                                    <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3" class="text-end">Totals</th>
+                                <th class="text-end amount">{{ number_format($tomorrowEstimate['total_qty'], 2) }}</th>
+                                <th></th>
+                                <th class="text-end amount"><strong>₹
+                                        {{ number_format($tomorrowEstimate['total_cost'], 2) }}</strong></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Day Summary (selected date) --}}
     <div class="card card-soft mb-4">
         <div class="sticky-summary">
             <div class="hstack">
                 <div><strong>Date:</strong> {{ $date->toFormattedDateString() }}</div>
                 <div class="chip">Items: {{ count($dayEstimate['lines']) }}</div>
-                <div class="chip">Total Qty: <span class="amount">{{ number_format($dayEstimate['total_qty'], 2) }}</span>
-                </div>
+                <div class="chip">Total Qty: <span
+                        class="amount">{{ number_format($dayEstimate['total_qty'], 2) }}</span></div>
                 <div class="chip">Est. Cost: <strong class="amount">₹
                         {{ number_format($dayEstimate['total_cost'], 2) }}</strong></div>
             </div>
