@@ -114,8 +114,6 @@
             <div class="hstack">
                 <div><strong>Tomorrow:</strong> {{ $tomorrow->toFormattedDateString() }}</div>
                 <div class="chip">Items: {{ count($tomorrowEstimate['lines']) }}</div>
-                <div class="chip">Total Qty: <span
-                        class="amount">{{ number_format($tomorrowEstimate['total_qty'], 2) }}</span></div>
                 <div class="chip">Est. Cost: <strong class="amount">₹
                         {{ number_format($tomorrowEstimate['total_cost'], 2) }}</strong></div>
                 <div class="chip badge">Excludes Paused & Expired</div>
@@ -172,8 +170,6 @@
             <div class="hstack">
                 <div><strong>Date:</strong> {{ $date->toFormattedDateString() }}</div>
                 <div class="chip">Items: {{ count($dayEstimate['lines']) }}</div>
-                <div class="chip">Total Qty: <span
-                        class="amount">{{ number_format($dayEstimate['total_qty'], 2) }}</span></div>
                 <div class="chip">Est. Cost: <strong class="amount">₹
                         {{ number_format($dayEstimate['total_cost'], 2) }}</strong></div>
             </div>
@@ -229,8 +225,6 @@
             <div class="hstack">
                 <div><strong>Month:</strong> {{ $monthStart->format('F Y') }}</div>
                 <div class="chip">Distinct Flowers: {{ count($monthEstimate['by_flower']) }}</div>
-                <div class="chip">Total Qty: <span
-                        class="amount">{{ number_format($monthEstimate['total_qty'], 2) }}</span></div>
                 <div class="chip">Est. Cost: <strong class="amount">₹
                         {{ number_format($monthEstimate['total_cost'], 2) }}</strong></div>
             </div>
