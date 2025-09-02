@@ -55,7 +55,6 @@ class FlowerEstimateController extends Controller
             'selectedMonth'     => $monthStart->format('Y-m'),
         ]);
     }
-
     /**
      * Estimate for a single date (legacy rules: end_date only).
      */
@@ -67,7 +66,6 @@ class FlowerEstimateController extends Controller
         $subs = $this->activeSubscriptionsOverlapping($date, $date);
         return $this->tallyForSubscriptionsOnDate($subs, $date, $flowerByProductId, $flowerByNormName);
     }
-
     /**
      * Estimate for a date range (legacy rules: end_date only).
      */
@@ -122,7 +120,6 @@ class FlowerEstimateController extends Controller
             'total_cost'=> $totalCost,
         ];
     }
-
     /**
      * Active subscriptions (status 'active' or is_active=1) overlapping the range, using end_date only.
      */
@@ -141,7 +138,6 @@ class FlowerEstimateController extends Controller
                 'status','is_active','new_date'
             ]);
     }
-
     /**
      * Tomorrow-specific: use effective end = COALESCE(new_date, end_date), exclude expired.
      * (Still excludes paused for the specific tomorrow date.)
@@ -172,7 +168,6 @@ class FlowerEstimateController extends Controller
         $subs = $this->activeSubscriptionsOverlappingEffective($tomorrow, $tomorrow);
         return $this->tallyForSubscriptionsOnDate($subs, $tomorrow, $flowerByProductId, $flowerByNormName);
     }
-
     /**
      * For a day, compute the flower requirement from subscriptions.
      * - Direct flower product => +1 unit per subscription per day (adjust if you store per-day qty).
@@ -294,7 +289,6 @@ class FlowerEstimateController extends Controller
             ->replaceMatches('/\s+/', ' ')
             ->toString();
     }
-
     /**
      * CSV export: now includes Tomorrow, Day, and Month sections.
      */

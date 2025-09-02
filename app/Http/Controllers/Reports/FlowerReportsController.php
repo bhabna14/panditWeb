@@ -192,7 +192,7 @@ public function reportCustomize(Request $request)
 
 public function flowerPickUp(Request $request)
 {
-    // Resolve date range (defaults for initial page load)
+    // Resolve date range w(defaults for initial page load)
     $fromDate = $request->input('from_date', Carbon::now()->startOfMonth()->toDateString());
     $toDate   = $request->input('to_date',   Carbon::now()->toDateString());
 

@@ -50,6 +50,7 @@ use App\Http\Controllers\Admin\MonthWiseFlowerPriceController;
 use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 use App\Http\Controllers\Admin\ProductRequestController;
 use App\Http\Controllers\Admin\FlowerEstimateController;
+use App\Http\Controllers\Admin\FlowerEstimateCompareController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -884,4 +885,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/flower-estimates', [FlowerEstimateController::class, 'index'])->name('reports.flower_estimates');
     Route::get('/reports/flower-estimates/export', [FlowerEstimateController::class, 'exportCsv'])->name('reports.flower_estimates.export');
+});
+
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/reports/flower-compare', [FlowerEstimateCompareController::class, 'index'])
+        ->name('reports.flower_compare');
+
+    // Optional CSV export for the compare view
+    Route::get('/reports/flower-compare/export', [FlowerEstimateCompareController::class, 'exportCsv'])
+        ->name('reports.flower_compare.export');
 });

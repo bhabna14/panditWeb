@@ -27,6 +27,4 @@ class FlowerPickupItems extends Model
         ->withDefault(['unit_name' => 'N/A']);
 }
 
-
-
 }
