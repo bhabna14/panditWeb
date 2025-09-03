@@ -139,20 +139,20 @@
             {{-- Filters --}}
             <form class="pc-filter mb-3" method="GET" action="{{ route('payment.collection.index') }}">
                 <div class="row g-2 align-items-end">
-                    <div class="col-sm-3">
+                    {{-- <div class="col-sm-3">
                         <label class="form-label mb-1">Search</label>
                         <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" class="form-control"
                             placeholder="Name, mobile, order, subscription, product">
-                    </div>
-                    <div class="col-sm-2">
+                    </div> --}}
+                    <div class="col-sm-3">
                         <label class="form-label mb-1">From</label>
                         <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="form-control">
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                         <label class="form-label mb-1">To</label>
                         <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="form-control">
                     </div>
-                    <div class="col-sm-2">
+                    <div class="col-sm-3">
                         <label class="form-label mb-1">Method</label>
                         <select name="method" class="form-select">
                             <option value="">All</option>
@@ -162,7 +162,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-sm-1">
+                    {{-- <div class="col-sm-1">
                         <label class="form-label mb-1">Min ₹</label>
                         <input type="number" step="0.01" name="min" value="{{ $filters['min'] ?? '' }}"
                             class="form-control">
@@ -171,7 +171,7 @@
                         <label class="form-label mb-1">Max ₹</label>
                         <input type="number" step="0.01" name="max" value="{{ $filters['max'] ?? '' }}"
                             class="form-control">
-                    </div>
+                    </div> --}}
                     <div class="col-sm-1 d-flex gap-2">
                         <button class="btn btn-primary w-100" type="submit">Filter</button>
                     </div>
