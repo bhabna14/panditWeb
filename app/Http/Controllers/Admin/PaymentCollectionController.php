@@ -11,17 +11,15 @@ class PaymentCollectionController extends Controller
 {
     public function index(Request $request)
     {
-        // ---- Filters from query string ----
         $filters = [
             'q'      => trim($request->get('q', '')),
-            'from'   => $request->get('from'),         // YYYY-MM-DD
-            'to'     => $request->get('to'),           // YYYY-MM-DD
-            'method' => $request->get('method', ''),   // Cash/UPI/...
-            'min'    => $request->get('min'),          // number
-            'max'    => $request->get('max'),          // number
+            'from'   => $request->get('from'),
+            'to'     => $request->get('to'),
+            'method' => $request->get('method', ''),
+            'min'    => $request->get('min'),
+            'max'    => $request->get('max'),
         ];
 
-        // ---- Base query for PENDING payments ----
         $pendingBase = DB::table('flower_payments as fp')
             ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
             ->join('users as u', 'u.userid', '=', 'fp.user_id')
@@ -46,7 +44,6 @@ class PaymentCollectionController extends Controller
                 'u.mobile_number',
             ]);
 
-        // ---- Apply filters on PENDING ----
         if ($filters['q'] !== '') {
             $q = $filters['q'];
             $pendingBase->where(function ($qq) use ($q) {
@@ -58,32 +55,16 @@ class PaymentCollectionController extends Controller
                    ->orWhere('p.category', 'like', "%{$q}%");
             });
         }
-        if ($filters['from']) {
-            $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
-        }
-        if ($filters['to']) {
-            $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
-        }
-        if ($filters['method'] !== '') {
-            $pendingBase->where('fp.payment_method', $filters['method']);
-        }
-        if (is_numeric($filters['min'])) {
-            $pendingBase->where('fp.paid_amount', '>=', (float) $filters['min']);
-        }
-        if (is_numeric($filters['max'])) {
-            $pendingBase->where('fp.paid_amount', '<=', (float) $filters['max']);
-        }
+        if ($filters['from']) $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
+        if ($filters['to'])   $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
+        if ($filters['method'] !== '') $pendingBase->where('fp.payment_method', $filters['method']);
+        if (is_numeric($filters['min'])) $pendingBase->where('fp.paid_amount', '>=', (float)$filters['min']);
+        if (is_numeric($filters['max'])) $pendingBase->where('fp.paid_amount', '<=', (float)$filters['max']);
 
-        // Collect rows
-        $pendingPayments = (clone $pendingBase)
-            ->orderByDesc('fp.id')
-            ->get();
+        $pendingPayments     = (clone $pendingBase)->orderByDesc('fp.id')->get();
+        $pendingTotalAmount  = (clone $pendingBase)->sum('fp.paid_amount');
+        $pendingCount        = (clone $pendingBase)->count();
 
-        // Totals (same filters)
-        $pendingTotalAmount = (clone $pendingBase)->sum('fp.paid_amount');
-        $pendingCount       = (clone $pendingBase)->count();
-
-        // ---- Expired subscriptions (latest per user, and only users with no live sub) ----
         $liveStatuses = ['active', 'paused', 'resume'];
 
         $subQuery = DB::table('subscriptions as s')
@@ -137,9 +118,10 @@ class PaymentCollectionController extends Controller
             'methods'             => ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'],
         ]);
     }
-public function collect(Request $request)
+
+    public function collect(Request $request)
     {
-        // 1) Validate incoming fields from the modal
+        // Validate fields from modal
         $data = $request->validate([
             'payment_row_id' => ['required', 'integer', 'exists:flower_payments,id'],
             'amount'         => ['required', 'numeric', 'min:0'],
@@ -147,7 +129,7 @@ public function collect(Request $request)
             'received_by'    => ['required', 'string', 'max:100'],
         ]);
 
-        // 2) Ensure the row is still pending
+        // Confirm row exists and is pending
         $payment = DB::table('flower_payments')
             ->where('id', $data['payment_row_id'])
             ->first();
@@ -155,16 +137,15 @@ public function collect(Request $request)
         if (!$payment) {
             return back()->with('error', 'Payment row not found.');
         }
-
-        if (strtolower($payment->payment_status) !== 'pending') {
+        if (strtolower((string)$payment->payment_status) !== 'pending') {
             return back()->with('error', 'Payment is not in pending state.');
         }
 
-        // 3) Update to PAID
+        // Update to PAID
         $updated = DB::table('flower_payments')
             ->where('id', $data['payment_row_id'])
             ->update([
-                'paid_amount'    => $data['amount'],      // final collected amount
+                'paid_amount'    => $data['amount'],
                 'payment_method' => $data['payment_method'],
                 'payment_status' => 'paid',
                 'received_by'    => $data['received_by'],
