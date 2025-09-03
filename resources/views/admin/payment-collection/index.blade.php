@@ -237,6 +237,7 @@
                                         data-amount="{{ $row->amount ?? 0 }}">
                                         Collect
                                     </button>
+
                                 </td>
                             </tr>
                         @empty
@@ -360,7 +361,7 @@
 
             collectButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
-                    idInput.value = btn.dataset.paymentRowId;
+                    idInput.value = btn.dataset.paymentRowId || '';
                     userInput.value = btn.dataset.username || '';
                     mobInput.value = btn.dataset.mobile || '';
                     amtInput.value = btn.dataset.amount || 0;

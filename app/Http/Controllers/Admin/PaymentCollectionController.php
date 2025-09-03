@@ -137,21 +137,42 @@ class PaymentCollectionController extends Controller
             'methods'             => ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'],
         ]);
     }
-
-    public function collect(Request $request)
+public function collect(Request $request)
     {
+        // 1) Validate incoming fields from the modal
+        $data = $request->validate([
+            'payment_row_id' => ['required', 'integer', 'exists:flower_payments,id'],
+            'amount'         => ['required', 'numeric', 'min:0'],
+            'payment_method' => ['required', Rule::in(['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'])],
+            'received_by'    => ['required', 'string', 'max:100'],
+        ]);
+
+        // 2) Ensure the row is still pending
+        $payment = DB::table('flower_payments')
+            ->where('id', $data['payment_row_id'])
+            ->first();
+
+        if (!$payment) {
+            return back()->with('error', 'Payment row not found.');
+        }
+
+        if (strtolower($payment->payment_status) !== 'pending') {
+            return back()->with('error', 'Payment is not in pending state.');
+        }
+
+        // 3) Update to PAID
         $updated = DB::table('flower_payments')
             ->where('id', $data['payment_row_id'])
-            ->where('payment_status', 'pending')
             ->update([
-                'paid_amount'    => $data['amount'],
+                'paid_amount'    => $data['amount'],      // final collected amount
                 'payment_method' => $data['payment_method'],
                 'payment_status' => 'paid',
                 'received_by'    => $data['received_by'],
+                'updated_at'     => now(),
             ]);
 
         if (!$updated) {
-            return back()->with('error', 'Payment was not in pending state or not found.');
+            return back()->with('error', 'Update failed.');
         }
 
         return redirect()
