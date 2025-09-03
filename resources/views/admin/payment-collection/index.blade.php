@@ -96,7 +96,6 @@
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div>
                 <h4 class="mb-1">Payment Collection</h4>
-                <div class="text-muted">Track **pending** flower payments and see **expired** subscriptions.</div>
             </div>
             <div class="d-flex flex-wrap gap-2">
                 <div class="pc-chip pc-chip--green" title="Total pending amount">
