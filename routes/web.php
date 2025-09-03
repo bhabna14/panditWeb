@@ -51,6 +51,7 @@ use App\Http\Controllers\Admin\Product\ProductSubscriptionController;
 use App\Http\Controllers\Admin\ProductRequestController;
 use App\Http\Controllers\Admin\FlowerEstimateController;
 use App\Http\Controllers\Admin\FlowerEstimateCompareController;
+use App\Http\Controllers\Admin\PaymentCollectionController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -895,4 +896,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Optional CSV export for the compare view
     Route::get('/reports/flower-compare/export', [FlowerEstimateCompareController::class, 'exportCsv'])
         ->name('reports.flower_compare.export');
+});
+
+Route::prefix('admin')->middleware(['auth:admins'])->group(function () {
+    Route::get('/payment-collection', [PaymentCollectionController::class, 'index'])
+        ->name('payment.collection.index');
+
+    Route::post('/payment-collection/collect', [PaymentCollectionController::class, 'collect'])
+        ->name('payment.collection.collect');
 });

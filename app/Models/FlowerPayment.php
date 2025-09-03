@@ -17,5 +17,6 @@ class FlowerPayment extends Model
         'payment_method',
         'paid_amount',
         'payment_status',
+        'received_by',
     ];
 }
