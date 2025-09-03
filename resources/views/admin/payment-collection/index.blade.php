@@ -42,8 +42,6 @@
             <th>#</th>
             <th>User</th>
             <th>Mobile</th>
-            <th>Order</th>
-            <th>Subscription</th>
             <th>Duration</th>
             <th>Type</th>
             <th>Amount (Due)</th>
@@ -62,8 +60,6 @@
               <td>{{ $i + 1 }}</td>
               <td>{{ $row->user_name }}</td>
               <td>{{ $row->mobile_number }}</td>
-              <td>#{{ $row->order_id }}</td>
-              <td>#{{ $row->subscription_id }}</td>
               <td>{{ $start->format('d M Y') }} — {{ $end->format('d M Y') }} ({{ $durationDays }}d)</td>
               <td>{{ $row->product_category ?? '—' }} @if($row->product_name) ({{ $row->product_name }}) @endif</td>
               <td>₹ {{ number_format($row->amount ?? 0, 2) }}</td>
@@ -99,8 +95,6 @@
             <th>#</th>
             <th>User</th>
             <th>Mobile</th>
-            <th>Order</th>
-            <th>Subscription</th>
             <th>Duration</th>
             <th>Type</th>
             <th>Status</th>
@@ -117,8 +111,6 @@
               <td>{{ $i + 1 }}</td>
               <td>{{ $row->user_name }}</td>
               <td>{{ $row->mobile_number }}</td>
-              <td>#{{ $row->order_id }}</td>
-              <td>#{{ $row->subscription_id }}</td>
               <td>{{ $start->format('d M Y') }} — {{ $end->format('d M Y') }} ({{ $durationDays }}d)</td>
               <td>{{ $row->product_category ?? '—' }} @if($row->product_name) ({{ $row->product_name }}) @endif</td>
               <td><span class="badge bg-secondary">Expired</span></td>
