@@ -25,6 +25,13 @@ class Subscription extends Model
         'new_date',
         'status'
     ];
+
+    
+   public function flowerPayments()
+   {
+       return $this->hasMany(FlowerPayment::class, 'order_id', 'order_id');
+   }
+   
    // In Subscription.php model
    public static function expireIfEnded()
    {
@@ -69,11 +76,6 @@ class Subscription extends Model
    public function pauseResumeLog()
    {
        return $this->hasMany(SubscriptionPauseResumeLog::class, 'order_id', 'order_id');
-   }
-   
-   public function flowerPayments()
-   {
-       return $this->hasMany(FlowerPayment::class, 'order_id', 'order_id');
    }
    
    public function users()

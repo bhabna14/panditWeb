@@ -119,45 +119,86 @@ class PaymentCollectionController extends Controller
         ]);
     }
 
-    public function collect(Request $request)
+    // public function collect(Request $request)
+    // {
+    //     // Validate fields from modal
+    //     $data = $request->validate([
+    //         'payment_row_id' => ['required', 'integer', 'exists:flower_payments,id'],
+    //         'amount'         => ['required', 'numeric', 'min:0'],
+    //         'payment_method' => ['required', Rule::in(['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'])],
+    //         'received_by'    => ['required', 'string', 'max:100'],
+    //     ]);
+
+    //     // Confirm row exists and is pending
+    //     $payment = DB::table('flower_payments')
+    //         ->where('id', $data['payment_row_id'])
+    //         ->first();
+
+    //     if (!$payment) {
+    //         return back()->with('error', 'Payment row not found.');
+    //     }
+    //     if (strtolower((string)$payment->payment_status) !== 'pending') {
+    //         return back()->with('error', 'Payment is not in pending state.');
+    //     }
+
+    //     // Update to PAID
+    //     $updated = DB::table('flower_payments')
+    //         ->where('id', $data['payment_row_id'])
+    //         ->update([
+    //             'paid_amount'    => $data['amount'],
+    //             'payment_method' => $data['payment_method'],
+    //             'payment_status' => 'paid',
+    //             'received_by'    => $data['received_by'],
+    //             'updated_at'     => now(),
+    //         ]);
+
+    //     if (!$updated) {
+    //         return back()->with('error', 'Update failed.');
+    //     }
+
+    //     return redirect()
+    //         ->route('payment.collection.index', [], 303)
+    //         ->with('success', 'Payment marked as paid successfully.');
+    // }
+
+    public function collect(Request $request, $id)
     {
-        // Validate fields from modal
-        $data = $request->validate([
-            'payment_row_id' => ['required', 'integer', 'exists:flower_payments,id'],
-            'amount'         => ['required', 'numeric', 'min:0'],
-            'payment_method' => ['required', Rule::in(['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'])],
-            'received_by'    => ['required', 'string', 'max:100'],
+        // keep methods consistent with your index()
+        $allowedMethods = ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'];
+
+        $validated = $request->validate([
+            'amount'       => ['required','numeric','min:0'],
+            'payment_method' => ['required','string','in:' . implode(',', $allowedMethods)],
+            'received_by'  => ['required','string','max:100'],
         ]);
 
-        // Confirm row exists and is pending
-        $payment = DB::table('flower_payments')
-            ->where('id', $data['payment_row_id'])
-            ->first();
+        // only allow marking a pending payment to paid
+        $payment = FlowerPayment::query()
+            ->where('id', $id)
+            ->where('payment_status', 'pending')
+            ->firstOrFail();
 
-        if (!$payment) {
-            return back()->with('error', 'Payment row not found.');
-        }
-        if (strtolower((string)$payment->payment_status) !== 'pending') {
-            return back()->with('error', 'Payment is not in pending state.');
-        }
+        DB::transaction(function () use ($payment, $validated) {
+            $payment->paid_amount    = $validated['amount'];
+            $payment->payment_method = $validated['payment_method'];
+            $payment->received_by    = $validated['received_by'];
+            $payment->payment_status = 'paid';
+            $payment->save();
+        });
 
-        // Update to PAID
-        $updated = DB::table('flower_payments')
-            ->where('id', $data['payment_row_id'])
-            ->update([
-                'paid_amount'    => $data['amount'],
-                'payment_method' => $data['payment_method'],
-                'payment_status' => 'paid',
-                'received_by'    => $data['received_by'],
-                'updated_at'     => now(),
-            ]);
-
-        if (!$updated) {
-            return back()->with('error', 'Update failed.');
-        }
-
-        return redirect()
-            ->route('payment.collection.index', [], 303)
-            ->with('success', 'Payment marked as paid successfully.');
+        return response()->json([
+            'ok'      => true,
+            'message' => 'Payment marked as paid.',
+            'data'    => [
+                'id'              => $payment->id,
+                'order_id'        => $payment->order_id,
+                'payment_id'      => $payment->payment_id,
+                'paid_amount'     => (float)$payment->paid_amount,
+                'payment_method'  => $payment->payment_method,
+                'received_by'     => $payment->received_by,
+                'payment_status'  => $payment->payment_status,
+                'updated_at'      => $payment->updated_at?->toDateTimeString(),
+            ],
+        ]);
     }
 }

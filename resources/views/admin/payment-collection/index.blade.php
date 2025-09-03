@@ -2,6 +2,8 @@
 
 @section('content')
     @php use Carbon\Carbon; @endphp
+    {{-- if not already included in your layout --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
         /* Pretty header & chips */
@@ -139,11 +141,6 @@
             {{-- Filters --}}
             <form class="pc-filter mb-3" method="GET" action="{{ route('payment.collection.index') }}">
                 <div class="row g-2 align-items-end">
-                    {{-- <div class="col-sm-3">
-                        <label class="form-label mb-1">Search</label>
-                        <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" class="form-control"
-                            placeholder="Name, mobile, order, subscription, product">
-                    </div> --}}
                     <div class="col-sm-3">
                         <label class="form-label mb-1">From</label>
                         <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="form-control">
@@ -162,16 +159,6 @@
                             @endforeach
                         </select>
                     </div>
-                    {{-- <div class="col-sm-1">
-                        <label class="form-label mb-1">Min ₹</label>
-                        <input type="number" step="0.01" name="min" value="{{ $filters['min'] ?? '' }}"
-                            class="form-control">
-                    </div>
-                    <div class="col-sm-1">
-                        <label class="form-label mb-1">Max ₹</label>
-                        <input type="number" step="0.01" name="max" value="{{ $filters['max'] ?? '' }}"
-                            class="form-control">
-                    </div> --}}
                     <div class="col-sm-1 d-flex gap-2">
                         <button class="btn btn-primary w-100" type="submit">Filter</button>
                     </div>
@@ -199,12 +186,12 @@
                     <tbody>
                         @forelse($pendingPayments as $i => $row)
                             @php
-                                $start = Carbon::parse($row->start_date);
-                                $end = Carbon::parse($row->end_date);
+                                $start = Carbon\Carbon::parse($row->start_date);
+                                $end = Carbon\Carbon::parse($row->end_date);
                                 $durationDays = $start->diffInDays($end) + 1;
-                                $since = $row->pending_since ? Carbon::parse($row->pending_since) : null;
+                                $since = $row->pending_since ? Carbon\Carbon::parse($row->pending_since) : null;
                             @endphp
-                            <tr>
+                            <tr data-row-id="{{ $row->payment_row_id }}">
                                 <td class="text-muted">{{ $i + 1 }}</td>
                                 <td>
                                     <div class="fw-semibold">{{ $row->user_name }}</div>
@@ -212,9 +199,13 @@
                                         #{{ $row->subscription_id }}</div>
                                 </td>
                                 <td>{{ $row->mobile_number }}</td>
-                                <td>{{ $start->format('d M Y') }} — {{ $end->format('d M Y') }} <span
-                                        class="text-muted small">({{ $durationDays }}d)</span></td>
-                                <td>{{ $row->product_category ?? '—' }} @if ($row->product_name)
+                                <td>
+                                    {{ $start->format('d M Y') }} — {{ $end->format('d M Y') }}
+                                    <span class="text-muted small">({{ $durationDays }}d)</span>
+                                </td>
+                                <td>
+                                    {{ $row->product_category ?? '—' }}
+                                    @if ($row->product_name)
                                         <span class="text-muted small">({{ $row->product_name }})</span>
                                     @endif
                                 </td>
@@ -226,18 +217,18 @@
                                         —
                                     @endif
                                 </td>
-                                <td class="fw-bold">₹ {{ number_format($row->amount ?? 0, 2) }}</td>
-                                <td><span
-                                        class="badge badge-soft badge-pending">{{ ucfirst($row->payment_status) }}</span>
+                                <td class="fw-bold amount-cell">₹ {{ number_format($row->amount ?? 0, 2) }}</td>
+                                <td class="status-cell">
+                                    <span class="badge badge-soft badge-pending">{{ ucfirst($row->payment_status) }}</span>
                                 </td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary btn-collect" data-bs-toggle="modal"
-                                        data-bs-target="#collectModal" data-payment-row-id="{{ $row->payment_row_id }}"
-                                        data-username="{{ $row->user_name }}" data-mobile="{{ $row->mobile_number }}"
-                                        data-amount="{{ $row->amount ?? 0 }}">
+                                    <button type="button" class="btn btn-sm btn-success btn-collect"
+                                        data-id="{{ $row->payment_row_id }}" data-order="{{ $row->order_id }}"
+                                        data-user="{{ $row->user_name }}" data-amount="{{ $row->amount ?? 0 }}"
+                                        data-method="{{ $row->payment_method ?? '' }}" data-bs-toggle="modal"
+                                        data-bs-target="#collectModal">
                                         Collect
                                     </button>
-
                                 </td>
                             </tr>
                         @empty
@@ -298,52 +289,48 @@
         </div>
     </div>
 
-    {{-- ============ COLLECT MODAL ============ --}}
     <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <form method="POST" action="{{ route('payment.collection.collect') }}" class="modal-content">
-                @csrf
+            <form id="collectForm" class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="collectModalLabel">Collect Payment</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
 
                 <div class="modal-body">
-                    <input type="hidden" name="payment_row_id" id="payment_row_id">
+                    <input type="hidden" name="payment_id" id="payment_id">
+
                     <div class="mb-2">
-                        <label class="form-label">User</label>
-                        <input type="text" class="form-control" id="modal_user" readonly>
+                        <div class="small text-muted" id="collectInfo">Order —</div>
                     </div>
-                    <div class="mb-2">
-                        <label class="form-label">Mobile</label>
-                        <input type="text" class="form-control" id="modal_mobile" readonly>
-                    </div>
-                    <div class="mb-2">
+
+                    <div class="mb-3">
                         <label class="form-label">Amount</label>
-                        <input type="number" step="0.01" min="0" class="form-control" name="amount"
-                            id="modal_amount" required>
+                        <input type="number" step="0.01" min="0" class="form-control" name="amount" id="amount" required>
                     </div>
-                    <div class="mb-2">
+
+                    <div class="mb-3">
                         <label class="form-label">Mode of Payment</label>
-                        <select class="form-select" name="payment_method" required>
-                            <option value="" disabled selected>Select</option>
-                            <option>Cash</option>
-                            <option>UPI</option>
-                            <option>Card</option>
-                            <option>Bank Transfer</option>
-                            <option>Other</option>
+                        <select class="form-select" name="payment_method" id="payment_method" required>
+                            <option value="" disabled selected>Select method</option>
+                            @foreach ($methods as $m)
+                                <option value="{{ $m }}">{{ $m }}</option>
+                            @endforeach
                         </select>
                     </div>
-                    <div class="mb-1">
+
+                    <div class="mb-2">
                         <label class="form-label">Received By</label>
-                        <input type="text" class="form-control" name="received_by" placeholder="Collector's name"
-                            required>
+                        <input type="text" class="form-control" name="received_by" id="received_by"
+                               value="{{ auth()->user()->name ?? '' }}" maxlength="100" required>
                     </div>
+
+                    <div class="form-text">Confirm the amount and who received the payment.</div>
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Mark as Paid</button>
+                    <button type="submit" class="btn btn-primary" id="collectSubmit">Mark as Paid</button>
                 </div>
             </form>
         </div>
@@ -351,22 +338,77 @@
 @endsection
 
 @push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const collectButtons = document.querySelectorAll('.btn-collect');
-            const idInput = document.getElementById('payment_row_id');
-            const userInput = document.getElementById('modal_user');
-            const mobInput = document.getElementById('modal_mobile');
-            const amtInput = document.getElementById('modal_amount');
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-            collectButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    idInput.value = btn.dataset.paymentRowId || '';
-                    userInput.value = btn.dataset.username || '';
-                    mobInput.value = btn.dataset.mobile || '';
-                    amtInput.value = btn.dataset.amount || 0;
+    <script>
+        (function () {
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // when clicking Collect button, prefill and store id
+            $(document).on('click', '.btn-collect', function () {
+                const btn     = $(this);
+                const id      = btn.data('id');
+                const order   = btn.data('order');
+                const user    = btn.data('user');
+                const amount  = btn.data('amount') || 0;
+                const method  = btn.data('method') || '';
+
+                $('#payment_id').val(id);
+                $('#amount').val(amount);
+                $('#payment_method').val(method || '');
+                $('#collectInfo').text(`Order #${order} • ${user}`);
+            });
+
+            // submit modal form
+            $('#collectForm').on('submit', function (e) {
+                e.preventDefault();
+                const id = $('#payment_id').val();
+                const url = "{{ route('payment.collection.collect', ['id' => '___ID___']) }}".replace('___ID___', id);
+
+                const payload = {
+                    amount: $('#amount').val(),
+                    payment_method: $('#payment_method').val(),
+                    received_by: $('#received_by').val(),
+                };
+
+                $('#collectSubmit').prop('disabled', true).text('Saving...');
+
+                $.ajax({
+                    method: 'POST',
+                    url: url,
+                    headers: {'X-CSRF-TOKEN': token},
+                    data: payload,
+                    success: function (res) {
+                        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('collectModal'));
+                        if (modal) modal.hide();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Done',
+                            text: res.message || 'Payment marked as paid.',
+                            timer: 1400,
+                            showConfirmButton: false
+                        });
+
+                        // simplest: reload to refresh list (paid row disappears)
+                        window.location.reload();
+                    },
+                    error: function (xhr) {
+                        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
+                        let msg = 'Failed to mark as paid.';
+                        if (xhr?.responseJSON?.message) msg = xhr.responseJSON.message;
+                        if (xhr?.responseJSON?.errors) {
+                            // show first validation error
+                            const first = Object.values(xhr.responseJSON.errors)[0];
+                            if (first && first[0]) msg = first[0];
+                        }
+                        Swal.fire({icon: 'error', title: 'Oops', text: msg});
+                    }
                 });
             });
-        });
+        })();
     </script>
 @endpush
