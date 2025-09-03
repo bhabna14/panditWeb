@@ -168,6 +168,8 @@ class PaymentCollectionController extends Controller
 
     public function collect(Request $request, $id)
     {
+
+        dd($request->all(), $id);
         // keep methods consistent with your index()
         $allowedMethods = ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'];
 
