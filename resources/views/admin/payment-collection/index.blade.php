@@ -193,11 +193,11 @@
                     <tbody>
                         @forelse($pendingPayments as $i => $row)
                             @php
-                                $start = Carbon\Carbon::parse($row->start_date);
-                                $end = Carbon\Carbon::parse($row->end_date);
-                                $durationDays = $start->diffInDays($end) + 1;
-                                $since = $row->pending_since ? Carbon\Carbon::parse($row->pending_since) : null;
+                                $start = Carbon::parse($row->start_date);
+                                $end = Carbon::parse($row->end_date);
+                                $since = $row->pending_since ? Carbon::parse($row->pending_since) : null;
                             @endphp
+
                             <tr data-row-id="{{ $row->payment_row_id }}">
                                 <td class="text-muted">{{ $i + 1 }}</td>
                                 <td>
