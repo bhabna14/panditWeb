@@ -82,6 +82,13 @@
             border-color: #fed7aa;
         }
 
+        .badge-paid {
+            background: #e6ffed;
+            color: #1e7e34;
+            border: 1px solid #c3f0d2;
+        }
+
+
         .badge-expired {
             color: #374151;
             background: #f3f4f6;
@@ -306,7 +313,8 @@
 
                     <div class="mb-3">
                         <label class="form-label">Amount</label>
-                        <input type="number" step="0.01" min="0" class="form-control" name="amount" id="amount" required>
+                        <input type="number" step="0.01" min="0" class="form-control" name="amount"
+                            id="amount" required>
                     </div>
 
                     <div class="mb-3">
@@ -322,7 +330,7 @@
                     <div class="mb-2">
                         <label class="form-label">Received By</label>
                         <input type="text" class="form-control" name="received_by" id="received_by"
-                               value="{{ auth()->user()->name ?? '' }}" maxlength="100" required>
+                            value="{{ auth()->user()->name ?? '' }}" maxlength="100" required>
                     </div>
 
                     <div class="form-text">Confirm the amount and who received the payment.</div>
@@ -339,21 +347,22 @@
 
 @push('scripts')
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        (function () {
+        (function() {
             const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             // when clicking Collect button, prefill and store id
-            $(document).on('click', '.btn-collect', function () {
-                const btn     = $(this);
-                const id      = btn.data('id');
-                const order   = btn.data('order');
-                const user    = btn.data('user');
-                const amount  = btn.data('amount') || 0;
-                const method  = btn.data('method') || '';
+            $(document).on('click', '.btn-collect', function() {
+                const btn = $(this);
+                const id = btn.data('id');
+                const order = btn.data('order');
+                const user = btn.data('user');
+                const amount = btn.data('amount') || 0;
+                const method = btn.data('method') || '';
 
                 $('#payment_id').val(id);
                 $('#amount').val(amount);
@@ -362,10 +371,11 @@
             });
 
             // submit modal form
-            $('#collectForm').on('submit', function (e) {
+            $('#collectForm').on('submit', function(e) {
                 e.preventDefault();
                 const id = $('#payment_id').val();
-                const url = "{{ route('payment.collection.collect', ['id' => '___ID___']) }}".replace('___ID___', id);
+                const url = "{{ route('payment.collection.collect', ['id' => '___ID___']) }}".replace(
+                    '___ID___', id);
 
                 const payload = {
                     amount: $('#amount').val(),
@@ -378,11 +388,14 @@
                 $.ajax({
                     method: 'POST',
                     url: url,
-                    headers: {'X-CSRF-TOKEN': token},
+                    headers: {
+                        'X-CSRF-TOKEN': token
+                    },
                     data: payload,
-                    success: function (res) {
+                    success: function(res) {
                         $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('collectModal'));
+                        const modal = bootstrap.Modal.getInstance(document.getElementById(
+                            'collectModal'));
                         if (modal) modal.hide();
 
                         Swal.fire({
@@ -396,7 +409,7 @@
                         // simplest: reload to refresh list (paid row disappears)
                         window.location.reload();
                     },
-                    error: function (xhr) {
+                    error: function(xhr) {
                         $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
                         let msg = 'Failed to mark as paid.';
                         if (xhr?.responseJSON?.message) msg = xhr.responseJSON.message;
@@ -405,7 +418,11 @@
                             const first = Object.values(xhr.responseJSON.errors)[0];
                             if (first && first[0]) msg = first[0];
                         }
-                        Swal.fire({icon: 'error', title: 'Oops', text: msg});
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops',
+                            text: msg
+                        });
                     }
                 });
             });
