@@ -297,6 +297,7 @@
             </div>
         </div>
     </div>
+
     {{-- ============ COLLECT MODAL ============ --}}
     <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -309,23 +310,19 @@
 
                 <div class="modal-body">
                     <input type="hidden" name="payment_row_id" id="payment_row_id">
-
                     <div class="mb-2">
                         <label class="form-label">User</label>
                         <input type="text" class="form-control" id="modal_user" readonly>
                     </div>
-
                     <div class="mb-2">
                         <label class="form-label">Mobile</label>
                         <input type="text" class="form-control" id="modal_mobile" readonly>
                     </div>
-
                     <div class="mb-2">
                         <label class="form-label">Amount</label>
                         <input type="number" step="0.01" min="0" class="form-control" name="amount"
                             id="modal_amount" required>
                     </div>
-
                     <div class="mb-2">
                         <label class="form-label">Mode of Payment</label>
                         <select class="form-select" name="payment_method" required>
@@ -337,7 +334,6 @@
                             <option>Other</option>
                         </select>
                     </div>
-
                     <div class="mb-1">
                         <label class="form-label">Received By</label>
                         <input type="text" class="form-control" name="received_by" placeholder="Collector's name"
@@ -352,25 +348,25 @@
             </form>
         </div>
     </div>
+@endsection
 
-    @push('scripts')
-   
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const collectButtons = document.querySelectorAll('.btn-collect');
-                const idInput = document.getElementById('payment_row_id');
-                const userInput = document.getElementById('modal_user');
-                const mobInput = document.getElementById('modal_mobile');
-                const amtInput = document.getElementById('modal_amount');
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const collectButtons = document.querySelectorAll('.btn-collect');
+            const idInput = document.getElementById('payment_row_id');
+            const userInput = document.getElementById('modal_user');
+            const mobInput = document.getElementById('modal_mobile');
+            const amtInput = document.getElementById('modal_amount');
 
-                collectButtons.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        idInput.value = btn.dataset.paymentRowId || '';
-                        userInput.value = btn.dataset.username || '';
-                        mobInput.value = btn.dataset.mobile || '';
-                        amtInput.value = btn.dataset.amount || 0;
-                    });
+            collectButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    idInput.value = btn.dataset.paymentRowId || '';
+                    userInput.value = btn.dataset.username || '';
+                    mobInput.value = btn.dataset.mobile || '';
+                    amtInput.value = btn.dataset.amount || 0;
                 });
             });
-        </script>
-    @endpush
+        });
+    </script>
+@endpush
