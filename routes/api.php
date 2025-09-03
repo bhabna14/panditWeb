@@ -259,6 +259,7 @@ Route::middleware('auth:sanctum')->post('/make-payment/{id}', [FlowerBookingCont
 
 Route::middleware('auth:sanctum')->post('/flower-requests', [FlowerBookingController::class, 'storerequest']);
 Route::middleware('auth:sanctum')->get('/orders-list', [FlowerBookingController::class, 'ordersList']);
+Route::middleware('auth:sanctum')->post('/flower-requests/cancel/{request_id}',[FlowerBookingController::class, 'cancel']);
 
 Route::middleware('auth:sanctum')->post('/product-subscription', [ProductApiController::class, 'productSubscription']);
 Route::middleware('auth:sanctum')->post('/product-requests', [ProductApiController::class, 'productRequest']);

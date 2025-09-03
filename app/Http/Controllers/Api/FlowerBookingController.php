@@ -440,29 +440,6 @@ class FlowerBookingController extends Controller
                         $requestRow->flowerProduct->product_image_url = $requestRow->flowerProduct->product_image;
                     }
 
-                    // GARLAND DETAILS
-                    // $garlandItems = $requestRow->flowerRequestItems
-                    //     ->where('type', 'garland')
-                    //     ->values();
-
-                    // $requestRow->garland_items = $garlandItems->map(function ($item) {
-                    //     return [
-                    //         'id'               => $item->id,
-                    //         'garland_name'     => $item->garland_name,
-                    //         'garland_quantity' => (int) $item->garland_quantity,
-                    //         'garland_size'     => $item->garland_size,
-                    //         'flower_count'     => (int) $item->flower_count,
-                    //         'created_at'       => $item->created_at,
-                    //         'updated_at'       => $item->updated_at,
-                    //     ];
-                    // });
-
-                    // $requestRow->garland_summary = [
-                    //     'items'              => $garlandItems->count(),
-                    //     'total_quantity'     => (int) $garlandItems->sum('garland_quantity'),
-                    //     'total_flower_count' => (int) $garlandItems->sum('flower_count'),
-                    // ];
-
                     return $requestRow;
                 });
 
@@ -1768,6 +1745,63 @@ class FlowerBookingController extends Controller
                 'status' => 'error',
                 'message' => 'Failed to fetch applications.',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+     public function cancel(Request $request, $request_id)
+    {
+        $validated = $request->validate([
+            'cancel_by'     => 'nullable|string',
+            'cancel_reason' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $result = DB::transaction(function () use ($request_id, $validated) {
+                // Lock the row to avoid race conditions
+                $flowerRequest = FlowerRequest::where('request_id', $request_id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                // Update fields
+                $flowerRequest->status        = 'Rejected';
+                $flowerRequest->cancel_by     = $validated['cancel_by'];
+                $flowerRequest->cancel_reason = $validated['cancel_reason'];
+                $flowerRequest->save();
+
+                return $flowerRequest;
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Customize order cancelled successfully.',
+                'data'    => [
+                    'request_id'     => $result->request_id,
+                    'status'         => $result->status,
+                    'cancel_by'      => $result->cancel_by,
+                    'cancel_reason'  => $result->cancel_reason,
+                    'updated_at'     => $result->updated_at,
+                ],
+            ], 200);
+
+        } catch (ModelNotFoundException $e) {
+            // If you strictly want only 200 / 500, you can convert this to 500.
+            // Returning 404 is often better, but following your ask:
+            Log::warning('FlowerRequest not found for cancel', ['request_id' => $request_id]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Customize order not found.',
+            ], 500);
+
+        } catch (\Throwable $e) {
+            Log::error('Cancel customize order failed', [
+                'request_id' => $request_id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Internal server error.',
             ], 500);
         }
     }
