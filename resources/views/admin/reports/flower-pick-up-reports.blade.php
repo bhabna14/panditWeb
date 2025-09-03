@@ -9,7 +9,6 @@
 @endsection
 
 @section('content')
-    <!-- CSRF Token for AJAX -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <div class="breadcrumb-header justify-content-between">
@@ -28,7 +27,7 @@
             <div class="card border-success shadow-sm">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-success mb-1">Total Price</h6>
-                    <h4 class="fw-bold mb-0" id="totalPrice">₹{{ $total_price }}</h4>
+                    <h4 class="fw-bold mb-0" id="totalPrice">₹{{ number_format((float)$total_price, 2) }}</h4>
                 </div>
             </div>
         </div>
@@ -36,13 +35,13 @@
             <div class="card border-info shadow-sm">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-info mb-1">Today's Price</h6>
-                    <h4 class="fw-bold mb-0" id="todayPrice">₹{{ $today_price }}</h4>
+                    <h4 class="fw-bold mb-0" id="todayPrice">₹{{ number_format((float)$today_price, 2) }}</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filter Form -->
+    <!-- Filters -->
     <div class="row g-3 align-items-end mb-4">
         <div class="col-md-3">
             <label for="from_date" class="form-label fw-semibold">From Date</label>
@@ -76,7 +75,7 @@
         </div>
     </div>
 
-    <!-- Data Table -->
+    <!-- Table -->
     <div class="table-responsive export-table">
         <table id="file-datatable" class="table table-bordered">
             <thead>
@@ -100,25 +99,22 @@
                         <td>
                             @forelse ($item->flowerPickupItems as $f)
                                 {{ $f->flower?->name ?? '—' }}
-                                ({{ rtrim(rtrim(number_format((float) $f->quantity, 2), '0'), '.') }}
-                                {{ $f->unit?->unit_name ?? '—' }})
-                                <br>
+                                ({{ rtrim(rtrim(number_format((float)$f->quantity, 2), '0'), '.') }}
+                                {{ $f->unit?->unit_name ?? '—' }})<br>
                             @empty
                                 —
                             @endforelse
                         </td>
                         <td>{{ $item->status ? ucfirst($item->status) : '—' }}</td>
-                        <td>₹{{ number_format((float) $item->total_price, 2) }}</td>
+                        <td>₹{{ number_format((float)$item->total_price, 2) }}</td>
                     </tr>
                 @endforeach
             </tbody>
-
         </table>
     </div>
 @endsection
 
 @section('scripts')
-    <!-- Scripts & Plugins -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.5/js/dataTables.bootstrap5.min.js"></script>
@@ -128,19 +124,32 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        $(document).ready(function() {
+        // Avoid DataTables alert popups
+        $.fn.dataTable.ext.errMode = 'none';
+
+        function capFirst(str) {
+            if (!str) return '-';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+        function money(n) {
+            n = parseFloat(n || 0);
+            return '₹' + n.toFixed(2);
+        }
+
+        $(document).ready(function () {
+            $('.select2').select2();
+
             let table = $('#file-datatable').DataTable({
                 responsive: true,
-                destroy: true,
                 searching: true,
                 paging: true,
-                info: true,
+                info: true
             });
 
-            $('#searchBtn').on('click', function() {
-                const fromDate = $('#from_date').val();
-                const toDate = $('#to_date').val();
-                const vendorId = $('#vendor_id').val();
+            $('#searchBtn').on('click', function () {
+                const fromDate    = $('#from_date').val();
+                const toDate      = $('#to_date').val();
+                const vendorId    = $('#vendor_id').val();
                 const paymentMode = $('#payment_mode').val();
 
                 if (!fromDate || !toDate) {
@@ -158,35 +167,39 @@
                         payment_mode: paymentMode,
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
-                    success: function(response) {
-                        table.clear().draw();
+                    success: function (response) {
+                        table.clear();
 
-                        response.data.forEach(item => {
-                            const flowerDetails = item.flower_pickup_items.map(i =>
-                                `${i.flower.name} (${i.quantity} ${i.unit.unit_name})`
-                            ).join('<br>');
+                        (response.data || []).forEach(item => {
+                            const items = (item.flower_pickup_items || []).map(i => {
+                                const flowerName = i.flower?.name || '—';
+                                const unitName   = i.unit?.unit_name || '';
+                                const qty        = (parseFloat(i.quantity || 0)).toString();
+                                return `${flowerName} (${qty} ${unitName})`;
+                            }).join('<br>');
 
+                            // IMPORTANT: 7 cells in the same order as <th>
                             table.row.add([
-                                item.pickup_date,
+                                moment(item.pickup_date).isValid() ? moment(item.pickup_date).format('DD MMM YYYY') : (item.pickup_date || '-'),
                                 item.vendor?.vendor_name || '-',
                                 item.rider?.rider_name || '-',
-                                flowerDetails,
-                                item.status,
-                                '₹' + item.total_price
-                            ]).draw(false);
+                                capFirst(item.paid_by),
+                                items || '—',
+                                capFirst(item.status),
+                                money(item.total_price)
+                            ]);
                         });
 
-                        $('#totalPrice').text('₹' + response.total_price);
-                        $('#todayPrice').text('₹' + response.today_price);
+                        table.draw(false);
+
+                        $('#totalPrice').text(money(response.total_price));
+                        $('#todayPrice').text(money(response.today_price));
                     },
-                    error: function() {
+                    error: function () {
                         Swal.fire('Error', 'Unable to fetch data.', 'error');
                     }
                 });
             });
-
-            // Optional: auto-trigger search on load if needed
-            // $('#searchBtn').trigger('click');
         });
     </script>
 @endsection

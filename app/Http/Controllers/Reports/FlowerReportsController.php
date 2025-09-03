@@ -189,17 +189,13 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
-
 public function flowerPickUp(Request $request)
 {
-    // Resolve date range w(defaults for initial page load)
     $fromDate = $request->input('from_date', Carbon::now()->startOfMonth()->toDateString());
     $toDate   = $request->input('to_date',   Carbon::now()->toDateString());
 
-    // Vendors for dropdown
     $vendors = FlowerVendor::select('vendor_id', 'vendor_name')->orderBy('vendor_name')->get();
 
-    // Build query with eager loads
     $query = FlowerPickupDetails::with([
         'flowerPickupItems.flower',
         'flowerPickupItems.unit',
@@ -209,34 +205,31 @@ public function flowerPickUp(Request $request)
     ->whereDate('pickup_date', '>=', $fromDate)
     ->whereDate('pickup_date', '<=', $toDate);
 
-    // Optional filters
     if ($request->filled('vendor_id')) {
         $query->where('vendor_id', $request->vendor_id);
     }
-    if ($request->filled('payment_mode')) {            // matches your form field
+    if ($request->filled('payment_mode')) {
         $query->where('payment_method', $request->payment_mode);
     }
 
     $reportData = $query->get();
 
-    // Totals
     $totalPrice = (float) $reportData->sum('total_price');
     $todayPrice = (float) $reportData
-        ->filter(fn($row) => Carbon::parse($row->pickup_date)->isToday())
+        ->filter(fn ($row) => Carbon::parse($row->pickup_date)->isToday())
         ->sum('total_price');
 
-    // AJAX: return JSON payload for DataTables or XHR
     if ($request->ajax()) {
+        // Return raw models; JS formats date/currency.
         return response()->json([
-            'data'         => $reportData,
-            'total_price'  => $totalPrice,
-            'today_price'  => $todayPrice,
-            'from_date'    => $fromDate,
-            'to_date'      => $toDate,
+            'data'        => $reportData,
+            'total_price' => $totalPrice,
+            'today_price' => $todayPrice,
+            'from_date'   => $fromDate,
+            'to_date'     => $toDate,
         ]);
     }
 
-    // Initial page load
     return view('admin.reports.flower-pick-up-reports', [
         'reportData'  => $reportData,
         'total_price' => $totalPrice,
