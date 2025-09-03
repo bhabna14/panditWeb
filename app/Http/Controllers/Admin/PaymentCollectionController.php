@@ -140,13 +140,6 @@ class PaymentCollectionController extends Controller
 
     public function collect(Request $request)
     {
-        $data = $request->validate([
-            'payment_row_id' => ['required', 'integer', 'exists:flower_payments,id'],
-            'amount'         => ['required', 'numeric', 'min:0'],
-            'payment_method' => ['required', Rule::in(['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'])],
-            'received_by'    => ['required', 'string', 'max:100'],
-        ]);
-
         $updated = DB::table('flower_payments')
             ->where('id', $data['payment_row_id'])
             ->where('payment_status', 'pending')
@@ -155,7 +148,6 @@ class PaymentCollectionController extends Controller
                 'payment_method' => $data['payment_method'],
                 'payment_status' => 'paid',
                 'received_by'    => $data['received_by'],
-                'updated_at'     => now(),
             ]);
 
         if (!$updated) {
