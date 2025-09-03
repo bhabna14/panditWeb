@@ -195,10 +195,9 @@
                             @php
                                 $start = Carbon::parse($row->start_date);
                                 $end = Carbon::parse($row->end_date);
-                                $durationDays = $start->diffInDays($end) + 1; // <-- add this line
+                                $durationDays = $start->diffInDays($end) + 1;
                                 $since = $row->pending_since ? Carbon::parse($row->pending_since) : null;
                             @endphp
-
 
                             <tr data-row-id="{{ $row->payment_row_id }}">
                                 <td class="text-muted">{{ $i + 1 }}</td>
@@ -246,6 +245,7 @@
                             </tr>
                         @endforelse
                     </tbody>
+
                 </table>
             </div>
         </div>
@@ -299,135 +299,131 @@
     </div>
 
     <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="collectForm" class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="collectModalLabel">Collect Payment</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
+  <div class="modal-dialog">
+    <form id="collectForm" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="collectModalLabel">Collect Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
 
-                <div class="modal-body">
-                    <input type="hidden" name="payment_id" id="payment_id">
-
-                    <div class="mb-2">
-                        <div class="small text-muted" id="collectInfo">Order —</div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Amount</label>
-                        <input type="number" step="0.01" min="0" class="form-control" name="amount"
-                            id="amount" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Mode of Payment</label>
-                        <select class="form-select" name="payment_method" id="payment_method" required>
-                            <option value="" disabled selected>Select method</option>
-                            @foreach ($methods as $m)
-                                <option value="{{ $m }}">{{ $m }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label">Received By</label>
-                        <input type="text" class="form-control" name="received_by" id="received_by"
-                            value="{{ auth()->user()->name ?? '' }}" maxlength="100" required>
-                    </div>
-
-                    <div class="form-text">Confirm the amount and who received the payment.</div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="collectSubmit">Mark as Paid</button>
-                </div>
-            </form>
+      <div class="modal-body">
+        <input type="hidden" name="payment_id" id="payment_id">
+        <div class="mb-2">
+          <div class="small text-muted" id="collectInfo">Order —</div>
         </div>
-    </div>
+
+        <div class="mb-3">
+          <label class="form-label">Amount</label>
+          <input type="number" step="0.01" min="0" class="form-control" name="amount" id="amount" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Mode of Payment</label>
+          <select class="form-select" name="payment_method" id="payment_method" required>
+            <option value="" disabled selected>Select method</option>
+            @foreach ($methods as $m)
+              <option value="{{ $m }}">{{ $m }}</option>
+            @endforeach
+          </select>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Received By</label>
+          <input type="text" class="form-control" name="received_by" id="received_by"
+                 value="{{ auth('admins')->user()->name ?? '' }}" maxlength="100" required>
+        </div>
+
+        <div class="form-text">Confirm the amount and who received the payment.</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="collectSubmit">Mark as Paid</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 @endsection
+@section('scripts')
+  {{-- Include these if your layout doesn’t already --}}
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-@push('scripts')
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    (function () {
+      const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    <script>
-        (function() {
-            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      // Open modal + prefill
+      $(document).on('click', '.btn-collect', function () {
+        const btn    = $(this);
+        const id     = btn.data('id');
+        const order  = btn.data('order');
+        const user   = btn.data('user');
+        const amount = btn.data('amount') || 0;
+        const method = btn.data('method') || '';
 
-            // when clicking Collect button, prefill and store id
-            $(document).on('click', '.btn-collect', function() {
-                const btn = $(this);
-                const id = btn.data('id');
-                const order = btn.data('order');
-                const user = btn.data('user');
-                const amount = btn.data('amount') || 0;
-                const method = btn.data('method') || '';
+        $('#payment_id').val(id);
+        $('#amount').val(amount);
+        $('#payment_method').val(method);
+        $('#collectInfo').text(`Order #${order} • ${user}`);
+      });
 
-                $('#payment_id').val(id);
-                $('#amount').val(amount);
-                $('#payment_method').val(method || '');
-                $('#collectInfo').text(`Order #${order} • ${user}`);
+      // Submit
+      $('#collectForm').on('submit', function (e) {
+        e.preventDefault();
+        const id  = $('#payment_id').val();
+        const url = "{{ route('payment.collection.collect', ['id' => '___ID___']) }}".replace('___ID___', id);
+
+        const payload = {
+          amount: $('#amount').val(),
+          payment_method: $('#payment_method').val(),
+          received_by: $('#received_by').val(),
+        };
+
+        $('#collectSubmit').prop('disabled', true).text('Saving...');
+
+        $.ajax({
+          method: 'POST',
+          url: url,
+          headers: {
+            'X-CSRF-TOKEN': token,
+            'Accept': 'application/json'   // ensures Laravel returns JSON on validation errors
+          },
+          data: payload,
+          success: function (res) {
+            $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
+
+            const modalEl = document.getElementById('collectModal');
+            const modal   = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.hide();
+
+            Swal.fire({
+              icon: 'success',
+              title: 'Done',
+              text: res.message || 'Payment marked as paid.',
+              timer: 1400,
+              showConfirmButton: false
             });
 
-            // submit modal form
-            $('#collectForm').on('submit', function(e) {
-                e.preventDefault();
-                const id = $('#payment_id').val();
-                const url = "{{ route('payment.collection.collect', ['id' => '___ID___']) }}".replace(
-                    '___ID___', id);
+            // Refresh the list so the paid row disappears
+            window.location.reload();
+          },
+          error: function (xhr) {
+            $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
 
-                const payload = {
-                    amount: $('#amount').val(),
-                    payment_method: $('#payment_method').val(),
-                    received_by: $('#received_by').val(),
-                };
+            let msg = 'Failed to mark as paid.';
+            if (xhr?.responseJSON?.message) msg = xhr.responseJSON.message;
+            if (xhr?.responseJSON?.errors) {
+              const first = Object.values(xhr.responseJSON.errors)[0];
+              if (first && first[0]) msg = first[0];
+            }
 
-                $('#collectSubmit').prop('disabled', true).text('Saving...');
-
-                $.ajax({
-                    method: 'POST',
-                    url: url,
-                    headers: {
-                        'X-CSRF-TOKEN': token
-                    },
-                    data: payload,
-                    success: function(res) {
-                        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
-                        const modal = bootstrap.Modal.getInstance(document.getElementById(
-                            'collectModal'));
-                        if (modal) modal.hide();
-
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Done',
-                            text: res.message || 'Payment marked as paid.',
-                            timer: 1400,
-                            showConfirmButton: false
-                        });
-
-                        // simplest: reload to refresh list (paid row disappears)
-                        window.location.reload();
-                    },
-                    error: function(xhr) {
-                        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
-                        let msg = 'Failed to mark as paid.';
-                        if (xhr?.responseJSON?.message) msg = xhr.responseJSON.message;
-                        if (xhr?.responseJSON?.errors) {
-                            // show first validation error
-                            const first = Object.values(xhr.responseJSON.errors)[0];
-                            if (first && first[0]) msg = first[0];
-                        }
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops',
-                            text: msg
-                        });
-                    }
-                });
-            });
-        })();
-    </script>
-@endpush
+            Swal.fire({ icon: 'error', title: 'Oops', text: msg });
+          }
+        });
+      });
+    })();
+  </script>
+@endsection

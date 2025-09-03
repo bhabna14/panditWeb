@@ -165,21 +165,22 @@ class PaymentCollectionController extends Controller
     //         ->route('payment.collection.index', [], 303)
     //         ->with('success', 'Payment marked as paid successfully.');
     // }
-
-    public function collect(Request $request, $id)
+  public function collect(Request $request, $id)
     {
-
-        dd($request->all(), $id);
-        // keep methods consistent with your index()
+        // keep methods consistent with your index() view
         $allowedMethods = ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'];
 
+        // force JSON behavior on validation errors for AJAX callers
+        if (! $request->wantsJson()) {
+            $request->headers->set('Accept', 'application/json');
+        }
+
         $validated = $request->validate([
-            'amount'       => ['required','numeric','min:0'],
-            'payment_method' => ['required','string','in:' . implode(',', $allowedMethods)],
-            'received_by'  => ['required','string','max:100'],
+            'amount'          => ['required', 'numeric', 'min:0'],
+            'payment_method'  => ['required', 'string', 'in:' . implode(',', $allowedMethods)],
+            'received_by'     => ['required', 'string', 'max:100'],
         ]);
 
-        // only allow marking a pending payment to paid
         $payment = FlowerPayment::query()
             ->where('id', $id)
             ->where('payment_status', 'pending')
@@ -200,12 +201,12 @@ class PaymentCollectionController extends Controller
                 'id'              => $payment->id,
                 'order_id'        => $payment->order_id,
                 'payment_id'      => $payment->payment_id,
-                'paid_amount'     => (float)$payment->paid_amount,
+                'paid_amount'     => (float) $payment->paid_amount,
                 'payment_method'  => $payment->payment_method,
                 'received_by'     => $payment->received_by,
                 'payment_status'  => $payment->payment_status,
-                'updated_at'      => $payment->updated_at?->toDateTimeString(),
+                'updated_at'      => optional($payment->updated_at)->toDateTimeString(),
             ],
-        ]);
+        ], 200);
     }
 }
