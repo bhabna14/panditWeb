@@ -902,10 +902,10 @@ Route::prefix('admin')->middleware(['auth:admins'])->group(function () {
     Route::get('/payment-collection', [PaymentCollectionController::class, 'index'])
         ->name('payment.collection.index');
 
-    // Route::post('/payment-collection/collect', [PaymentCollectionController::class, 'collect'])
-    //     ->name('payment.collection.collect');
+    Route::post('/payment-collection/collect/{id}', [PaymentCollectionController::class, 'collect'])
+        ->name('payment.collection.collect');
 });
 
-Route::post('/admin/payment-collection/{id}/collect', [PaymentCollectionController::class, 'collect'])
-    ->name('payment.collection.collect')
-    ->middleware(['auth']); 
+// Route::post('/admin/payment-collection//collect', [PaymentCollectionController::class, 'collect'])
+//     ->name('payment.collection.collect')
+//     ->middleware(['auth']); 
