@@ -5,6 +5,7 @@ namespace App\Console;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 use Illuminate\Support\Facades\Log;
+// use App\Console\Commands\AutoRejectFlowerRequests;
 
 class Kernel extends ConsoleKernel
 {
@@ -17,6 +18,7 @@ class Kernel extends ConsoleKernel
         \App\Console\Commands\UpdateSubscriptionStatusActivetoPause::class,
         \App\Console\Commands\UpdateSubscriptionStatusExpired::class,
         \App\Console\Commands\UpdatePausedSubscriptions::class, // ✅ REGISTERED HERE
+        \App\Console\Commands\AutoRejectFlowerRequests::class,
     ];
 
     /**
@@ -55,6 +57,10 @@ class Kernel extends ConsoleKernel
                  ->onFailure(function () {
                      Log::error('subscription:resume-paused failed to execute');
                  });
+
+        $schedule->command('flower:auto-reject-requests')
+            ->dailyAt('00:15')
+            ->timezone('Asia/Kolkata');
 
         // ✅ Log that scheduler is running
         Log::info('Scheduler running at: ' . now());
