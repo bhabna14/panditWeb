@@ -195,8 +195,10 @@
                             @php
                                 $start = Carbon::parse($row->start_date);
                                 $end = Carbon::parse($row->end_date);
+                                $durationDays = $start->diffInDays($end) + 1; // <-- add this line
                                 $since = $row->pending_since ? Carbon::parse($row->pending_since) : null;
                             @endphp
+
 
                             <tr data-row-id="{{ $row->payment_row_id }}">
                                 <td class="text-muted">{{ $i + 1 }}</td>
