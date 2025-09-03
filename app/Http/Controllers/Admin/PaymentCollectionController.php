@@ -6,15 +6,23 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
-use Carbon\Carbon;
 
 class PaymentCollectionController extends Controller
 {
     public function index(Request $request)
     {
-        // ----- PENDING PAYMENTS -----
-        // Flower payments with status 'pending' + useful joins for display.
-        $pendingPayments = DB::table('flower_payments as fp')
+        // ---- Filters from query string ----
+        $filters = [
+            'q'      => trim($request->get('q', '')),
+            'from'   => $request->get('from'),         // YYYY-MM-DD
+            'to'     => $request->get('to'),           // YYYY-MM-DD
+            'method' => $request->get('method', ''),   // Cash/UPI/...
+            'min'    => $request->get('min'),          // number
+            'max'    => $request->get('max'),          // number
+        ];
+
+        // ---- Base query for PENDING payments ----
+        $pendingBase = DB::table('flower_payments as fp')
             ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
             ->join('users as u', 'u.userid', '=', 'fp.user_id')
             ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
@@ -24,8 +32,10 @@ class PaymentCollectionController extends Controller
                 'fp.payment_id',
                 'fp.order_id',
                 'fp.user_id',
-                'fp.paid_amount as amount', // treated as due amount for pending
+                'fp.paid_amount as amount',
                 'fp.payment_status',
+                'fp.payment_method',
+                'fp.created_at as pending_since',
                 's.subscription_id',
                 's.start_date',
                 's.end_date',
@@ -34,12 +44,46 @@ class PaymentCollectionController extends Controller
                 'p.category as product_category',
                 'u.name as user_name',
                 'u.mobile_number',
-            ])
+            ]);
+
+        // ---- Apply filters on PENDING ----
+        if ($filters['q'] !== '') {
+            $q = $filters['q'];
+            $pendingBase->where(function ($qq) use ($q) {
+                $qq->where('u.name', 'like', "%{$q}%")
+                   ->orWhere('u.mobile_number', 'like', "%{$q}%")
+                   ->orWhere('fp.order_id', 'like', "%{$q}%")
+                   ->orWhere('s.subscription_id', 'like', "%{$q}%")
+                   ->orWhere('p.name', 'like', "%{$q}%")
+                   ->orWhere('p.category', 'like', "%{$q}%");
+            });
+        }
+        if ($filters['from']) {
+            $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
+        }
+        if ($filters['to']) {
+            $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
+        }
+        if ($filters['method'] !== '') {
+            $pendingBase->where('fp.payment_method', $filters['method']);
+        }
+        if (is_numeric($filters['min'])) {
+            $pendingBase->where('fp.paid_amount', '>=', (float) $filters['min']);
+        }
+        if (is_numeric($filters['max'])) {
+            $pendingBase->where('fp.paid_amount', '<=', (float) $filters['max']);
+        }
+
+        // Collect rows
+        $pendingPayments = (clone $pendingBase)
             ->orderByDesc('fp.id')
             ->get();
 
-        // ----- EXPIRED SUBSCRIPTIONS -----
-        // Show each user’s latest expired sub ONLY if they have no live (active/paused/resume) sub.
+        // Totals (same filters)
+        $pendingTotalAmount = (clone $pendingBase)->sum('fp.paid_amount');
+        $pendingCount       = (clone $pendingBase)->count();
+
+        // ---- Expired subscriptions (latest per user, and only users with no live sub) ----
         $liveStatuses = ['active', 'paused', 'resume'];
 
         $subQuery = DB::table('subscriptions as s')
@@ -53,7 +97,7 @@ class PaymentCollectionController extends Controller
             })
             ->groupBy('s.user_id');
 
-        $expiredSubs = DB::table('subscriptions')
+        $expiredBase = DB::table('subscriptions')
             ->joinSub($subQuery, 'latest_expired', function ($join) {
                 $join->on('subscriptions.user_id', '=', 'latest_expired.user_id')
                      ->on('subscriptions.end_date', '=', 'latest_expired.latest_end_date');
@@ -78,19 +122,24 @@ class PaymentCollectionController extends Controller
                 'u.mobile_number',
                 'p.name as product_name',
                 'p.category as product_category',
-            ])
-            ->orderByDesc('subscriptions.end_date')
-            ->get();
+            ]);
+
+        $expiredSubs  = (clone $expiredBase)->orderByDesc('subscriptions.end_date')->get();
+        $expiredCount = (clone $expiredBase)->count();
 
         return view('admin.payment-collection.index', [
-            'pendingPayments' => $pendingPayments,
-            'expiredSubs'     => $expiredSubs,
+            'pendingPayments'     => $pendingPayments,
+            'pendingTotalAmount'  => $pendingTotalAmount,
+            'pendingCount'        => $pendingCount,
+            'expiredSubs'         => $expiredSubs,
+            'expiredCount'        => $expiredCount,
+            'filters'             => $filters,
+            'methods'             => ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'],
         ]);
     }
 
     public function collect(Request $request)
     {
-        // We’ll update a single flower_payments row from the modal.
         $data = $request->validate([
             'payment_row_id' => ['required', 'integer', 'exists:flower_payments,id'],
             'amount'         => ['required', 'numeric', 'min:0'],
@@ -98,7 +147,6 @@ class PaymentCollectionController extends Controller
             'received_by'    => ['required', 'string', 'max:100'],
         ]);
 
-        // Only switch from pending -> paid (or received)
         $updated = DB::table('flower_payments')
             ->where('id', $data['payment_row_id'])
             ->where('payment_status', 'pending')
@@ -106,7 +154,7 @@ class PaymentCollectionController extends Controller
                 'paid_amount'    => $data['amount'],
                 'payment_method' => $data['payment_method'],
                 'payment_status' => 'paid',
-                'received_by'    => $data['received_by'], // requires column (see migration note)
+                'received_by'    => $data['received_by'],
                 'updated_at'     => now(),
             ]);
 
