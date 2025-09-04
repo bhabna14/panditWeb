@@ -7,13 +7,42 @@
     <link href="{{ asset('assets/plugins/SmartPhoto-master/smartphoto.css') }}" rel="stylesheet">
 
     <style>
-        /* ===== Pretty, colorful profile header ===== */
+        :root {
+            --pf-bg: #ffffff;
+            --pf-surface: #f8fafc;
+            --pf-border: #e5e7eb;
+            --pf-primary: #4f46e5;
+            /* indigo */
+            --pf-primary-weak: #eef2ff;
+            --pf-accent: #06b6d4;
+            /* cyan */
+            --pf-danger: #ef4444;
+            --pf-success: #16a34a;
+            --pf-warning: #f59e0b;
+            --pf-text: #0f172a;
+            --pf-muted: #64748b;
+            --pf-shadow: 0 8px 30px rgba(2, 6, 23, .06);
+        }
+
+        /* ===== Page Scaffolding ===== */
+        body {
+            background: var(--pf-bg);
+        }
+
+        .page-card {
+            border: 1px solid var(--pf-border);
+            border-radius: 16px;
+            background: var(--pf-bg);
+            box-shadow: var(--pf-shadow);
+        }
+
+        /* ===== Profile Header ===== */
         .profile-hero {
             background: linear-gradient(135deg, #f3f4ff 0%, #e9fbff 100%);
             border: 1px solid #e9ecf5;
             border-radius: 16px;
             padding: 18px;
-            box-shadow: 0 6px 18px rgba(25, 42, 70, 0.06);
+            box-shadow: var(--pf-shadow);
         }
 
         .profile-image img {
@@ -32,48 +61,120 @@
             right: 6px;
             bottom: 6px;
             border: 2px solid #fff;
+            border-radius: 999px;
         }
 
+        .custom-size-icon {
+            font-size: 26px;
+            margin-bottom: 10px;
+        }
+
+        /* ===== Metric Cards ===== */
         .metric-card {
             border: 1px solid #eef1f7;
             border-radius: 14px;
             background: #fff;
-            box-shadow: 0 6px 20px rgba(75, 85, 99, .06);
+            box-shadow: var(--pf-shadow);
             transition: transform .15s ease, box-shadow .2s ease;
+            min-width: 180px;
         }
 
         .metric-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(75, 85, 99, .12);
+            box-shadow: 0 16px 42px rgba(2, 6, 23, .12);
         }
 
         .metric-title {
             font-size: .85rem;
             letter-spacing: .02em;
-            color: #64748b;
+            color: var(--pf-muted);
             text-transform: uppercase;
         }
 
         .metric-value {
             font-weight: 800;
             font-size: 1.35rem;
-            color: #0f172a;
+            color: var(--pf-text);
         }
 
-        .badge-chip {
+        /* ===== Segmented Tabs (New) ===== */
+        .seg-tabs-wrap {
+            position: sticky;
+            top: 68px;
+            z-index: 6;
+            background: var(--pf-bg);
+            border-bottom: 1px solid var(--pf-border);
+        }
+
+        .seg-tabs {
+            display: flex;
+            gap: .5rem;
+            overflow-x: auto;
+            padding: .75rem;
+            scrollbar-width: thin;
+        }
+
+        .seg-tab {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
+            gap: .5rem;
+            padding: .55rem .9rem;
+            border: 1px solid var(--pf-border);
             border-radius: 999px;
-            font-weight: 600;
-            font-size: .85rem;
-            border: 1px solid #e5e7eb;
             background: #fff;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+            color: #111827;
+            text-decoration: none;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
         }
 
-        /* ===== Status pills ===== */
+        .seg-tab .count {
+            background: var(--pf-surface);
+            border: 1px solid var(--pf-border);
+            padding: 0 .5rem;
+            border-radius: 999px;
+            font-size: .75rem;
+        }
+
+        .seg-tab.active,
+        .seg-tab[aria-selected="true"] {
+            background: var(--pf-primary-weak);
+            border-color: var(--pf-primary);
+            color: #111827;
+            box-shadow: 0 6px 16px rgba(79, 70, 229, .18);
+        }
+
+        .seg-tab .icon {
+            font-size: 1rem;
+        }
+
+        /* ===== Tables ===== */
+        .table-modern thead th {
+            background: var(--pf-surface);
+            border-bottom: 1px solid var(--pf-border);
+            font-weight: 700;
+        }
+
+        .table-modern tbody td {
+            vertical-align: middle;
+        }
+
+        .table-toolbar {
+            display: flex;
+            gap: .75rem;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: .75rem;
+        }
+
+        .table-toolbar .form-control {
+            max-width: 280px;
+            border-radius: 10px;
+            border-color: var(--pf-border);
+        }
+
+        /* ===== Status Pills ===== */
         .status-pill {
             padding: .35rem .6rem;
             border-radius: 999px;
@@ -106,51 +207,32 @@
             color: #3730a3;
         }
 
-        /* ===== Tabs ===== */
-        .profile-nav-line .nav-link {
-            border: 1px solid transparent;
-            border-radius: 999px;
-            margin-right: .5rem;
-            padding: .5rem .9rem;
-            font-weight: 600;
-        }
-
-        .profile-nav-line .nav-link.active {
-            background: #c7d2fe;
-            color: #fff;
-            border-color: #111827;
-            box-shadow: 0 6px 16px rgba(17, 24, 39, .18);
-        }
-
-        /* ===== Tables ===== */
-        table.table th {
-            white-space: nowrap;
-            background: #f8fafc;
-        }
-
-        table.table td {
-            vertical-align: middle;
-        }
-
-        /* Icons */
-        .custom-size-icon {
-            font-size: 26px;
-            margin-bottom: 10px;
-        }
-
-        .prof-details {
-            width: 220px;
-            margin-right: 15px;
-        }
-
-        /* Address cards */
+        /* ===== Address Cards ===== */
         .addr-card {
-            border: 1px solid #e5e7eb;
+            border: 1px solid var(--pf-border);
             border-radius: 14px;
         }
 
         .addr-card .badge {
             font-weight: 700;
+        }
+
+        /* Minor tweaks */
+        .text-muted-2 {
+            color: var(--pf-muted);
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: .85rem;
+            border: 1px solid var(--pf-border);
+            background: #fff;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
         }
     </style>
 @endsection
@@ -180,30 +262,24 @@
                             <img class="br-5" alt="{{ $user->name }}"
                                 src="{{ asset($user->userphoto ? 'storage/' . $user->userphoto : 'front-assets/img/images.jfif') }}">
                         </a>
-                        <span class="bg-success text-white rounded-pill profile-online"></span>
+                        <span class="bg-success text-white profile-online"></span>
                     </span>
                 </div>
 
                 <div class="my-md-auto mt-4 me-3">
                     <h4 class="fw-bold mb-1">{{ $user->name }}</h4>
-
                     <div class="d-flex flex-column gap-1 text-muted">
                         <span><i class="fa fa-phone me-2"></i><strong>Phone:</strong> {{ $user->mobile_number }}</span>
                         <span><i class="fa fa-envelope me-2"></i><strong>Email:</strong> {{ $user->email }}</span>
                         <span><i class="fa fa-venus-mars me-2"></i><strong>Gender:</strong> {{ $user->gender }}</span>
                         <span><i class="fa fa-calendar-alt me-2"></i><strong>Joined:</strong>
                             {{ $user->created_at ? \Carbon\Carbon::parse($user->created_at)->format('M j, Y') : 'NA' }}</span>
-                        <span>
-                            <i class="fa fa-calendar-check me-2"></i>
-                            <strong>First Subscription Start:</strong>
+                        <span><i class="fa fa-calendar-check me-2"></i><strong>First Subscription Start:</strong>
                             {{ $orders->count()
                                 ? (optional($orders->sortBy('start_date')->first())->start_date
                                     ? \Carbon\Carbon::parse($orders->sortBy('start_date')->first()->start_date)->format('M j, Y')
                                     : 'NA')
-                                : 'NA' }}
-                        </span>
-
-
+                                : 'NA' }}</span>
                     </div>
                 </div>
 
@@ -231,271 +307,264 @@
                 </div>
             </div>
 
-            <div class="card custom-card mt-3">
-                <div class="card-footer py-0">
-                    <div class="profile-tab tab-menu-heading border-bottom-0">
-                        <nav class="nav main-nav-line p-3 profile-nav-line border-0 br-5 mb-0">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#order" style="color: black">
-                                Subscription Orders
-                                <span class="badge bg-dark ms-2">{{ $orders->count() }}</span>
-                            </a>
-                            <a class="nav-link" data-bs-toggle="tab" href="#requestorder" style="color: black">
-                                Customize Orders
-                                <span class="badge bg-dark ms-2">{{ $pendingRequests->count() }}</span>
-                            </a>
-                            <a class="nav-link" data-bs-toggle="tab" href="#address" style="color: black">
-                                Addresses
-                                <span class="badge bg-dark ms-2">{{ $addressdata->count() }}</span>
-                            </a>
-                        </nav>
-                    </div>
+            <!-- Segmented Tabs (new look) -->
+            <div class="seg-tabs-wrap page-card mt-3">
+                <div class="seg-tabs" role="tablist" aria-label="Profile sections">
+                    <a class="seg-tab active" id="tab-orders" data-bs-toggle="tab" href="#pane-orders" role="tab"
+                        aria-controls="pane-orders" aria-selected="true">
+                        <i class="icon fa fa-list"></i> Subscription Orders
+                        <span class="count">{{ $orders->count() }}</span>
+                    </a>
+                    <a class="seg-tab" id="tab-requests" data-bs-toggle="tab" href="#pane-requests" role="tab"
+                        aria-controls="pane-requests" aria-selected="false">
+                        <i class="icon fa fa-tools"></i> Customize Orders
+                        <span class="count">{{ $pendingRequests->count() }}</span>
+                    </a>
+                    <a class="seg-tab" id="tab-addresses" data-bs-toggle="tab" href="#pane-addresses" role="tab"
+                        aria-controls="pane-addresses" aria-selected="false">
+                        <i class="icon fa fa-map-marker-alt"></i> Addresses
+                        <span class="count">{{ $addressdata->count() }}</span>
+                    </a>
+                    <a class="seg-tab" id="tab-about" data-bs-toggle="tab" href="#pane-about" role="tab"
+                        aria-controls="pane-about" aria-selected="false">
+                        <i class="icon fa fa-user"></i> About
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- === Tabs === --}}
-    <div class="row row-sm">
+    {{-- ===== Panes ===== --}}
+    <div class="row row-sm mt-3">
         <div class="col-12">
-            <div class="custom-card main-content-body-profile">
-                <div class="tab-content">
+            <div class="tab-content">
 
-                    {{-- Subscription Orders --}}
-                    <div class="main-content-body tab-pane border-top-0 active" id="order">
-                        <div class="border-0 p-3">
-                            <div class="table-responsive">
-                                <table id="subsTable" class="table table-bordered align-middle">
-                                    <thead>
+                {{-- Orders Pane --}}
+                <div class="tab-pane fade show active" id="pane-orders" role="tabpanel" aria-labelledby="tab-orders">
+                    <div class="page-card p-3 mt-2">
+                        <div class="table-toolbar">
+                            <input id="searchSubs" type="text" class="form-control"
+                                placeholder="Search subscriptions..." aria-label="Search subscriptions">
+                        </div>
+                        <div class="table-responsive">
+                            <table id="subsTable" class="table table-bordered table-hover align-middle table-modern">
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Purchase Date</th>
+                                        <th>Start Date</th>
+                                        <th>Product Details</th>
+                                        <th>Payment Mode</th>
+                                        <th>Payment Date</th>
+                                        <th>Total Price</th>
+                                        <th>Status</th>
+                                        <th style="min-width:120px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($orders as $order)
+                                        @php
+                                            $start = $order->start_date
+                                                ? \Carbon\Carbon::parse($order->start_date)
+                                                : null;
+                                            $endBase = $order->new_date ?: $order->end_date;
+                                            $end = $endBase ? \Carbon\Carbon::parse($endBase) : null;
+                                            $purchase = $order->created_at
+                                                ? \Carbon\Carbon::parse($order->created_at)
+                                                : null;
+
+                                            $latestPaid = $order->latestPaidPayment ?? null;
+                                            if (!$latestPaid && isset($order->flowerPayments)) {
+                                                $latestPaid = $order->flowerPayments->sortByDesc('created_at')->first();
+                                            }
+                                        @endphp
                                         <tr>
-                                            <th>Order ID</th>
-                                            <th>Purchase Date</th>
-                                            <th>Start Date</th>
-                                            <th>Product Details</th>
-                                            <th>Payment Mode</th>
-                                            <th>Payment Date</th>
-                                            <th>Total Price</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
+                                            <td class="fw-semibold">{{ $order->order_id }}</td>
+                                            <td>{{ $purchase ? $purchase->format('M j, Y') : 'NA' }}</td>
+                                            <td>{{ $start ? $start->format('M j, Y') : 'NA' }}</td>
+                                            <td>
+                                                <div class="fw-semibold">
+                                                    {{ optional($order->flowerProducts)->name ?? 'NA' }}</div>
+                                                @if ($start && $end)
+                                                    <small class="text-muted-2">({{ $start->format('F j, Y') }} –
+                                                        {{ $end->format('F j, Y') }})</small>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                {{ $latestPaid && $latestPaid->payment_method
+                                                    ? ucwords(str_replace('_', ' ', $latestPaid->payment_method))
+                                                    : 'NA' }}
+                                            </td>
+                                            <td>
+                                                {{ $latestPaid && $latestPaid->created_at ? $latestPaid->created_at->format('M j, Y') : 'NA' }}
+                                            </td>
+                                            <td>₹{{ number_format(optional($order->order)->total_price ?? 0, 2) }}</td>
+                                            <td>
+                                                @php
+                                                    $status = strtolower($order->status ?? '');
+                                                    $pill = match ($status) {
+                                                        'active' => 'status-running',
+                                                        'paused' => 'status-paused',
+                                                        'expired' => 'status-expired',
+                                                        'pending' => 'status-pending',
+                                                        default => 'badge bg-secondary',
+                                                    };
+                                                @endphp
+                                                <span
+                                                    class="status-pill {{ $pill }}">{{ ucfirst($order->status ?? 'NA') }}</span>
+                                            </td>
+                                            <td>
+                                                @if (isset($order->id))
+                                                    <a href="{{ route('admin.orders.show', $order->id) }}"
+                                                        class="btn btn-sm btn-primary">
+                                                        View Details
+                                                    </a>
+                                                @else
+                                                    <span class="text-muted">NA</span>
+                                                @endif
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($orders as $order)
-                                            @php
-                                                $start = $order->start_date
-                                                    ? \Carbon\Carbon::parse($order->start_date)
-                                                    : null;
-                                                $endBase = $order->new_date ?: $order->end_date;
-                                                $end = $endBase ? \Carbon\Carbon::parse($endBase) : null;
-                                                $purchase = $order->created_at
-                                                    ? \Carbon\Carbon::parse($order->created_at)
-                                                    : null;
-
-                                                // Prefer the latest *paid* payment; if none, fall back to most recent payment record (any status).
-                                                $latestPaid = $order->latestPaidPayment ?? null;
-                                                if (!$latestPaid && isset($order->flowerPayments)) {
-                                                    $latestPaid = $order->flowerPayments
-                                                        ->sortByDesc('created_at')
-                                                        ->first();
-                                                }
-                                            @endphp
-                                            <tr>
-                                                <td class="fw-semibold">{{ $order->order_id }}</td>
-                                                <td>{{ $purchase ? $purchase->format('M j, Y') : 'NA' }}</td>
-                                                <td>{{ $start ? $start->format('M j, Y') : 'NA' }}</td>
-                                                <td>
-                                                    <div class="fw-semibold">
-                                                        {{ optional($order->flowerProducts)->name ?? 'NA' }}</div>
-                                                    @if ($start && $end)
-                                                        <small class="text-muted">
-                                                            ({{ $start->format('F j, Y') }} –
-                                                            {{ $end->format('F j, Y') }})
-                                                        </small>
-                                                    @endif
-                                                </td>
-
-                                                {{-- NEW: Payment Mode --}}
-                                                <td>
-                                                    {{ $latestPaid && $latestPaid->payment_method
-                                                        ? ucwords(str_replace('_', ' ', $latestPaid->payment_method))
-                                                        : 'NA' }}
-                                                </td>
-
-                                                {{-- NEW: Payment Date (created_at) --}}
-                                                <td>
-                                                    {{ $latestPaid && $latestPaid->created_at ? $latestPaid->created_at->format('M j, Y') : 'NA' }}
-                                                </td>
-
-                                                <td>₹{{ number_format(optional($order->order)->total_price ?? 0, 2) }}</td>
-
-                                                <td>
-                                                    @php
-                                                        $status = strtolower($order->status ?? '');
-                                                        $pill = match ($status) {
-                                                            'active' => 'status-running',
-                                                            'paused' => 'status-paused',
-                                                            'expired' => 'status-expired',
-                                                            'pending' => 'status-pending',
-                                                            default => 'badge bg-secondary',
-                                                        };
-                                                    @endphp
-                                                    <span
-                                                        class="status-pill {{ $pill }}">{{ ucfirst($order->status ?? 'NA') }}</span>
-                                                </td>
-
-                                                <td>
-                                                    @if (isset($order->id))
-                                                        <a href="{{ route('admin.orders.show', $order->id) }}"
-                                                            class="btn btn-sm btn-primary">
-                                                            View Details
-                                                        </a>
-                                                    @else
-                                                        <span class="text-muted">NA</span>
-                                                    @endif
-                                                </td>
-                                            </tr>
-                                        @endforeach
-
-                                    </tbody>
-                                </table>
-                            </div>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            @if (!$orders->count())
+                                <div class="alert alert-info mb-0">No subscription orders yet.</div>
+                            @endif
                         </div>
                     </div>
+                </div>
 
-                    {{-- Request Orders --}}
-                    <div class="main-content-body tab-pane border-top-0" id="requestorder">
-                        <div class="border-0 p-3">
-                            <div class="table-responsive">
-                                <table id="reqTable" class="table table-bordered align-middle">
-                                    <thead>
+                {{-- Customize / Request Orders Pane --}}
+                <div class="tab-pane fade" id="pane-requests" role="tabpanel" aria-labelledby="tab-requests">
+                    <div class="page-card p-3 mt-2">
+                        <div class="table-toolbar">
+                            <input id="searchReq" type="text" class="form-control"
+                                placeholder="Search custom requests..." aria-label="Search custom requests">
+                        </div>
+                        <div class="table-responsive">
+                            <table id="reqTable" class="table table-bordered table-hover align-middle table-modern">
+                                <thead>
+                                    <tr>
+                                        <th>Request</th>
+                                        <th>Delivery Date</th>
+                                        <th>Flower Items</th>
+                                        <th>Status</th>
+                                        <th style="min-width:120px;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($pendingRequests as $rq)
+                                        @php
+                                            $rqDate = $rq->date
+                                                ? \Carbon\Carbon::parse($rq->date)->format('M j, Y')
+                                                : 'NA';
+                                            $rqStatus = strtolower($rq->status ?? 'pending');
+                                            $rqPill = match ($rqStatus) {
+                                                'pending' => 'status-pending',
+                                                'approved' => 'status-running',
+                                                'paid' => 'status-running',
+                                                'cancelled' => 'status-expired',
+                                                default => 'status-pending',
+                                            };
+                                        @endphp
                                         <tr>
-                                            <th>Request</th>
-                                            <th>Delivery Date</th>
-                                            <th>Flower Items</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach ($pendingRequests as $rq)
-                                            @php
-                                                $rqDate = $rq->date
-                                                    ? \Carbon\Carbon::parse($rq->date)->format('M j, Y')
-                                                    : 'NA';
-                                                $rqStatus = strtolower($rq->status ?? 'pending');
-                                                $rqPill = match ($rqStatus) {
-                                                    'pending' => 'status-pending',
-                                                    'approved' => 'status-running',
-                                                    'paid' => 'status-running',
-                                                    'cancelled' => 'status-expired',
-                                                    default => 'status-pending',
-                                                };
-                                            @endphp
-                                            <tr>
-                                                <td>
-                                                    <div class="fw-bold">#{{ $rq->request_id }}</div>
-                                                    <small class="text-muted d-block mt-1">
-                                                        {{ optional($rq->user)->name }} —
-                                                        {{ optional($rq->user)->mobile_number }}
-                                                    </small>
-                                                </td>
-                                                <td>{{ $rqDate }}</td>
-                                                <td>
-                                                    @if ($rq->flowerRequestItems && $rq->flowerRequestItems->count())
-                                                        <ul class="mb-0 ps-3">
-                                                            @foreach ($rq->flowerRequestItems as $item)
-                                                                <li>{{ $item->flower_name }} —
-                                                                    {{ $item->flower_quantity }} {{ $item->flower_unit }}
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    @else
-                                                        <span class="text-muted">No items</span>
+                                            <td>
+                                                <div class="fw-bold">#{{ $rq->request_id }}</div>
+                                                <small class="text-muted-2 d-block mt-1">
+                                                    {{ optional($rq->user)->name }} —
+                                                    {{ optional($rq->user)->mobile_number }}
+                                                </small>
+                                            </td>
+                                            <td>{{ $rqDate }}</td>
+                                            <td>
+                                                @if ($rq->flowerRequestItems && $rq->flowerRequestItems->count())
+                                                    <ul class="mb-0 ps-3">
+                                                        @foreach ($rq->flowerRequestItems as $item)
+                                                            <li>{{ $item->flower_name }} — {{ $item->flower_quantity }}
+                                                                {{ $item->flower_unit }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                @else
+                                                    <span class="text-muted">No items</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span
+                                                    class="status-pill {{ $rqPill }}">{{ ucfirst($rq->status ?? 'Pending') }}</span>
+                                                <div class="small text-muted mt-1">
+                                                    @if ($rq->status == 'pending')
+                                                        Order placed — update price
+                                                    @elseif ($rq->status == 'approved')
+                                                        Payment pending
+                                                    @elseif ($rq->status == 'paid')
+                                                        Payment completed
                                                     @endif
-                                                </td>
-                                                <td>
-                                                    <span class="status-pill {{ $rqPill }}">
-                                                        {{ ucfirst($rq->status ?? 'Pending') }}
-                                                    </span>
-                                                    <div class="small text-muted mt-1">
-                                                        @if ($rq->status == 'pending')
-                                                            Order placed — update price
-                                                        @elseif ($rq->status == 'approved')
-                                                            Payment pending
-                                                        @elseif ($rq->status == 'paid')
-                                                            Payment completed
-                                                        @endif
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    {{-- Put your action buttons/links here if any --}}
-                                                    <span class="badge-chip">
-                                                        <i class="fa fa-info-circle"></i>
-                                                        {{ strtoupper($rq->status ?? 'NA') }}
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                            </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="chip"><i
+                                                        class="fa fa-info-circle"></i>{{ strtoupper($rq->status ?? 'NA') }}</span>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                            @if (!$pendingRequests->count())
+                                <div class="alert alert-info mb-0">No customized requests found.</div>
+                            @endif
                         </div>
                     </div>
+                </div>
 
-                    {{-- Addresses --}}
-                    <div class="main-content-body tab-pane border-top-0" id="address">
-                        <div class="border-0 p-3">
-                            <div class="row g-3">
-                                @forelse ($addressdata as $address)
-                                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
-                                        <div class="card addr-card h-100 shadow-sm">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <h6 class="mb-0 fw-bold">{{ $address->address_type ?? 'Address' }}
-                                                    </h6>
-                                                    @if ($address->default == 1)
-                                                        <span class="badge bg-success">Default</span>
-                                                    @endif
+                {{-- Addresses Pane --}}
+                <div class="tab-pane fade" id="pane-addresses" role="tabpanel" aria-labelledby="tab-addresses">
+                    <div class="page-card p-3 mt-2">
+                        <div class="row g-3">
+                            @forelse ($addressdata as $address)
+                                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                                    <div class="card addr-card h-100 shadow-sm">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <h6 class="mb-0 fw-bold">{{ $address->address_type ?? 'Address' }}</h6>
+                                                @if ($address->default == 1)
+                                                    <span class="badge bg-success">Default</span>
+                                                @endif
+                                            </div>
+                                            <div class="text-muted small">
+                                                <div><strong>Address:</strong> {{ $address->apartment_flat_plot ?? '' }}
                                                 </div>
-                                                <div class="text-muted small">
-                                                    <div><strong>Address:</strong>
-                                                        {{ $address->apartment_flat_plot ?? '' }}</div>
-                                                    <div><strong>Apartment:</strong> {{ $address->apartment_name ?? '' }}
-                                                    </div>
-                                                    <div><strong>Locality:</strong>
-                                                        {{ optional($address->localityDetails)->locality_name ?? '' }}
-                                                    </div>
-                                                    <div><strong>Landmark:</strong> {{ $address->landmark ?? '' }}</div>
-                                                    <div><strong>City:</strong> {{ $address->city ?? '' }}</div>
-                                                    <div><strong>State:</strong> {{ $address->state ?? '' }}</div>
-                                                    <div><strong>PIN:</strong> {{ $address->pincode ?? '' }}</div>
-                                                </div>
+                                                <div><strong>Apartment:</strong> {{ $address->apartment_name ?? '' }}</div>
+                                                <div><strong>Locality:</strong>
+                                                    {{ optional($address->localityDetails)->locality_name ?? '' }}</div>
+                                                <div><strong>Landmark:</strong> {{ $address->landmark ?? '' }}</div>
+                                                <div><strong>City:</strong> {{ $address->city ?? '' }}</div>
+                                                <div><strong>State:</strong> {{ $address->state ?? '' }}</div>
+                                                <div><strong>PIN:</strong> {{ $address->pincode ?? '' }}</div>
                                             </div>
                                         </div>
                                     </div>
-                                @empty
-                                    <div class="col-12">
-                                        <div class="alert alert-info mb-0">No active addresses found.</div>
-                                    </div>
-                                @endforelse
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- About (kept, hidden by default) --}}
-                    <div class="main-content-body tab-pane border-top-0" id="about">
-                        <div class="card">
-                            <div class="card-body p-0 border-0 rounded-10">
-                                <div class="p-4">
-                                    <h4 class="tx-15 text-uppercase mb-3">About</h4>
-                                    <p class="m-b-5">{{ $user->about ?? 'No additional information available.' }}</p>
                                 </div>
-                                <div class="border-top"></div>
-                            </div>
+                            @empty
+                                <div class="col-12">
+                                    <div class="alert alert-info mb-0">No active addresses found.</div>
+                                </div>
+                            @endforelse
                         </div>
                     </div>
+                </div>
 
-                </div> {{-- tab-content --}}
-            </div>
+                {{-- About Pane --}}
+                <div class="tab-pane fade" id="pane-about" role="tabpanel" aria-labelledby="tab-about">
+                    <div class="page-card p-0 mt-2">
+                        <div class="p-4">
+                            <h4 class="tx-15 text-uppercase mb-3">About</h4>
+                            <p class="m-b-5">{{ $user->about ?? 'No additional information available.' }}</p>
+                        </div>
+                        <div class="border-top"></div>
+                    </div>
+                </div>
+
+            </div> {{-- tab-content --}}
         </div>
     </div>
 @endsection
@@ -516,10 +585,18 @@
             });
         });
 
-        // Defensive DataTables init (if plugin is available globally)
+        // Sync segmented-tabs 'active' class with Bootstrap tabs
+        document.querySelectorAll('.seg-tab').forEach(function(tab) {
+            tab.addEventListener('shown.bs.tab', function() {
+                document.querySelectorAll('.seg-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+
+        // Defensive DataTables + search toolbars
         (function() {
             if (window.jQuery && $.fn.DataTable) {
-                $('#subsTable').DataTable({
+                var subsDT = $('#subsTable').DataTable({
                     pageLength: 10,
                     order: [
                         [1, 'desc']
@@ -527,13 +604,21 @@
                     autoWidth: false,
                     responsive: true
                 });
-                $('#reqTable').DataTable({
+                var reqDT = $('#reqTable').DataTable({
                     pageLength: 10,
                     order: [
                         [1, 'desc']
                     ],
                     autoWidth: false,
                     responsive: true
+                });
+
+                // Toolbar search bindings
+                $('#searchSubs').on('keyup change', function() {
+                    subsDT.search(this.value).draw();
+                });
+                $('#searchReq').on('keyup change', function() {
+                    reqDT.search(this.value).draw();
                 });
             }
         })();
