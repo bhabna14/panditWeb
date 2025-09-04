@@ -323,9 +323,9 @@
                                 <thead>
                                     <tr>
                                         <th>Customer Details</th>
-                                        <th>Purchase Date</th>
+                                        <th>First Purchase Date</th>
                                         <th>Subscription Period</th>
-                                        <th>Price</th>
+                                        <th>Subscription Price</th>
                                         <th>Status</th>
                                         <th>Assigned Rider</th>
                                         <th>Subscription</th>
