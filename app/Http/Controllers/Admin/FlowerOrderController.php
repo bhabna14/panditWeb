@@ -13,6 +13,7 @@ use App\Models\Notification;
 use App\Models\RiderDetails;
 use App\Models\DeliveryHistory;
 use App\Models\FlowerPickupDetails;
+use App\Models\ReferOfferClaim;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -358,50 +359,66 @@ class FlowerOrderController extends Controller
         return view('admin.layouts.components.app-header', compact('notifications'));
     }
 
-    public function showCustomerDetails($userid)
-    {
-        // User by business key `userid`
-        $user = User::where('userid', $userid)->firstOrFail();
+   public function showCustomerDetails($userid)
+{
+    // User by business key `userid`
+    $user = User::where('userid', $userid)->firstOrFail();
 
-        // Active addresses with locality relation
-        $addressdata = UserAddress::where('user_id', $userid)
-            ->where('status', 'active')
-            ->with('localityDetails')
-            ->get();
+    // Active addresses with locality relation
+    $addressdata = UserAddress::where('user_id', $userid)
+        ->where('status', 'active')
+        ->with('localityDetails')
+        ->get();
 
-        // Subscriptions + related data
-        $orders = Subscription::where('user_id', $userid)
-            ->with([
-                'flowerProducts',
-                'order.address',              // ensure order + nested address is loaded
-                'flowerPayments',
-            ])
-            ->orderBy('id', 'desc')
-            ->get();
+    // Subscriptions + related data
+    $orders = Subscription::where('user_id', $userid)
+        ->with([
+            'flowerProducts',
+            'order.address',
+            'flowerPayments',
+        ])
+        ->orderBy('id', 'desc')
+        ->get();
 
-        // Flower requests + items + user + address (and attach any created order)
-        $pendingRequests = FlowerRequest::where('user_id', $userid)
-            ->with(['flowerProduct', 'user', 'address', 'flowerRequestItems'])
-            ->orderBy('id', 'desc')
-            ->get();
+    // Flower requests + items + user + address (and attach any created order)
+    $pendingRequests = FlowerRequest::where('user_id', $userid)
+        ->with(['flowerProduct', 'user', 'address', 'flowerRequestItems'])
+        ->orderBy('id', 'desc')
+        ->get();
 
-        foreach ($pendingRequests as $request) {
-            $request->setRelation(
-                'order',
-                Order::where('request_id', $request->request_id)->with('flowerPayments')->first()
-            );
-        }
-
-        // Metrics
-        $totalOrders   = Subscription::where('user_id', $userid)->count();
-        $ongoingOrders = Subscription::where('user_id', $userid)->where('status', 'active')->count();
-        $totalSpend    = FlowerPayment::where('user_id', $userid)->sum('paid_amount');
-
-        return view(
-            'admin.flower-order.show-customer-details',
-            compact('user', 'addressdata', 'pendingRequests', 'orders', 'totalOrders', 'ongoingOrders', 'totalSpend')
+    foreach ($pendingRequests as $request) {
+        $request->setRelation(
+            'order',
+            Order::where('request_id', $request->request_id)->with('flowerPayments')->first()
         );
     }
+
+    // Metrics
+    $totalOrders   = Subscription::where('user_id', $userid)->count();
+    $ongoingOrders = Subscription::where('user_id', $userid)->where('status', 'active')->count();
+    $totalSpend    = FlowerPayment::where('user_id', $userid)->sum('paid_amount');
+
+    // NEW: Total Refer (number of distinct users who claimed this user's offer)
+    $totalRefer = ReferOfferClaim::whereHas('offer', function ($q) use ($userid) {
+            $q->where('user_id', $userid); // the offer belongs to this user (referrer)
+        })
+        ->distinct('user_id')          // distinct claimants
+        ->count('user_id');
+
+    return view(
+        'admin.flower-order.show-customer-details',
+        compact(
+            'user',
+            'addressdata',
+            'pendingRequests',
+            'orders',
+            'totalOrders',
+            'ongoingOrders',
+            'totalSpend',
+            'totalRefer' // pass to view
+        )
+    );
+}
 
     public function showorderdetails($id)
     {

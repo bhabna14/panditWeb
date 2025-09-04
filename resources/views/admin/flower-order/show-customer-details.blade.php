@@ -223,6 +223,11 @@
                         <div class="metric-title">Total Spend</div>
                         <div class="metric-value">₹{{ number_format($totalSpend, 2) }}</div>
                     </div>
+                    <div class="metric-card p-3 text-center">
+                        <i class="fa fa-user-friends text-info custom-size-icon"></i>
+                        <div class="metric-title">Total Refer</div>
+                        <div class="metric-value">{{ $totalRefer ?? 0 }}</div>
+                    </div>
                 </div>
             </div>
 
