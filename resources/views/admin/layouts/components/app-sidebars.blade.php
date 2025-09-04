@@ -78,6 +78,7 @@
                         <li><a class="sub-side-menu__item" href="{{ url('admin/existing-user') }}">Create Order (Existing)</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Customize Order</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.orders.index') }}">Manage Flower Subscription</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('payment.collection.index') }}">Payment Collection</a></li>
                     </ul>
                 </li>
 
