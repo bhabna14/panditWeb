@@ -22,24 +22,30 @@ use Illuminate\Support\Facades\DB;
 class NewUserOrderController extends Controller
 {
 
-    public function newUserOrder()
-    {
-        $flowers = FlowerProduct::where('status', 'active')
-            ->where('category', 'Subscription')
-            ->get();
-    
-        // Get all localities and apartments
-        $localities = Locality::where('status', 'active')
-            ->select('locality_name', 'unique_code', 'pincode')
-            ->get();
-    
-        $apartments = Apartment::where('status', 'active')->get();
-    
-        // Group apartments by locality_id
-        $apartmentsByLocality = $apartments->groupBy('locality_id');
-    
-        return view('new-user-order', compact('localities', 'flowers', 'apartmentsByLocality'));
-    }
+   public function newUserOrder()
+{
+    $flowers = FlowerProduct::where('status', 'active')
+        ->where('category', 'Subscription')
+        ->orderBy('name')
+        ->get();
+
+    // Include 'id' so we can use locality_id in the view
+    $localities = Locality::where('status', 'active')
+        ->select('id', 'locality_name', 'unique_code', 'pincode')
+        ->orderBy('locality_name')
+        ->get();
+
+    $apartments = Apartment::where('status', 'active')
+        ->select('id', 'apartment_name', 'locality_id')
+        ->orderBy('apartment_name')
+        ->get();
+
+    // Group by locality_id (matches the data-locality-id used in the view)
+    $apartmentsByLocality = $apartments->groupBy('locality_id');
+
+    return view('new-user-order', compact('localities', 'flowers', 'apartmentsByLocality'));
+}
+
     
 public function saveNewUserOrder(Request $request)
 {
