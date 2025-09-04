@@ -897,13 +897,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/flower-compare/export', [FlowerEstimateCompareController::class, 'exportCsv'])
         ->name('reports.flower_compare.export');
 });
-
 Route::prefix('admin')->middleware(['auth:admins'])->group(function () {
     Route::get('/payment-collection', [PaymentCollectionController::class, 'index'])
         ->name('payment.collection.index');
 
     Route::post('/payment-collection/collect/{id}', [PaymentCollectionController::class, 'collect'])
         ->name('payment.collection.collect');
+
+    // (Optional, cleaner) Route–model binding version:
+    // Route::post('/payment-collection/collect/{payment}', [PaymentCollectionController::class, 'collect'])
+    //     ->name('payment.collection.collect');
 });
 
 // Route::post('/admin/payment-collection//collect', [PaymentCollectionController::class, 'collect'])

@@ -165,29 +165,34 @@ class PaymentCollectionController extends Controller
     //         ->route('payment.collection.index', [], 303)
     //         ->with('success', 'Payment marked as paid successfully.');
     // }
-  public function collect(Request $request, $id)
+   public function collect(Request $request, $id)
     {
-        dd("soumua");
-        // keep methods consistent with your index() view
+        // IMPORTANT: remove dd() so AJAX can proceed
+        // dd("soumua");
+
         $allowedMethods = ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'];
 
-        // force JSON behavior on validation errors for AJAX callers
+        // Force JSON for AJAX callers
         if (! $request->wantsJson()) {
             $request->headers->set('Accept', 'application/json');
         }
 
         $validated = $request->validate([
-            'amount'          => ['required', 'numeric', 'min:0'],
-            'payment_method'  => ['required', 'string', 'in:' . implode(',', $allowedMethods)],
-            'received_by'     => ['required', 'string', 'max:100'],
+            'amount'         => ['required', 'numeric', 'min:0'],
+            'payment_method' => ['required', 'string', Rule::in($allowedMethods)],
+            'received_by'    => ['required', 'string', 'max:100'],
         ]);
 
+        // Grab the pending payment row by PRIMARY KEY = $id
         $payment = FlowerPayment::query()
-            ->where('id', $id)
+            ->whereKey($id)
             ->where('payment_status', 'pending')
             ->firstOrFail();
 
         DB::transaction(function () use ($payment, $validated) {
+            // Optional: lock to prevent race conditions
+            $payment->lockForUpdate();
+
             $payment->paid_amount    = $validated['amount'];
             $payment->payment_method = $validated['payment_method'];
             $payment->received_by    = $validated['received_by'];
@@ -199,14 +204,14 @@ class PaymentCollectionController extends Controller
             'ok'      => true,
             'message' => 'Payment marked as paid.',
             'data'    => [
-                'id'              => $payment->id,
-                'order_id'        => $payment->order_id,
-                'payment_id'      => $payment->payment_id,
-                'paid_amount'     => (float) $payment->paid_amount,
-                'payment_method'  => $payment->payment_method,
-                'received_by'     => $payment->received_by,
-                'payment_status'  => $payment->payment_status,
-                'updated_at'      => optional($payment->updated_at)->toDateTimeString(),
+                'id'             => $payment->id,
+                'order_id'       => $payment->order_id,
+                'payment_id'     => $payment->payment_id,
+                'paid_amount'    => (float) $payment->paid_amount,
+                'payment_method' => $payment->payment_method,
+                'received_by'    => $payment->received_by,
+                'payment_status' => $payment->payment_status,
+                'updated_at'     => optional($payment->updated_at)->toDateTimeString(),
             ],
         ], 200);
     }

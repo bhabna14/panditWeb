@@ -230,13 +230,17 @@
                                     <span class="badge badge-soft badge-pending">{{ ucfirst($row->payment_status) }}</span>
                                 </td>
                                 <td>
+                                    {{-- In your table row button --}}
                                     <button type="button" class="btn btn-sm btn-success btn-collect"
-                                        data-id="{{ $row->payment_row_id }}" data-order="{{ $row->order_id }}"
-                                        data-user="{{ $row->user_name }}" data-amount="{{ $row->amount ?? 0 }}"
-                                        data-method="{{ $row->payment_method ?? '' }}" data-bs-toggle="modal"
-                                        data-bs-target="#collectModal">
+                                        data-id="{{ $row->payment_row_id }}" {{-- <- this MUST be the PK "id" of flower_payments --}}
+                                        data-order="{{ $row->order_id }}" data-user="{{ $row->user_name }}"
+                                        data-amount="{{ $row->amount ?? 0 }}"
+                                        data-method="{{ $row->payment_method ?? '' }}"
+                                        data-url="{{ route('payment.collection.collect', $row->payment_row_id) }}"
+                                        data-bs-toggle="modal" data-bs-target="#collectModal">
                                         Collect
                                     </button>
+
                                 </td>
                             </tr>
                         @empty
@@ -299,131 +303,142 @@
     </div>
 
     <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form id="collectForm" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="collectModalLabel">Collect Payment</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+        <div class="modal-dialog">
+            <form id="collectForm" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="collectModalLabel">Collect Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-      <div class="modal-body">
-        <input type="hidden" name="payment_id" id="payment_id">
-        <div class="mb-2">
-          <div class="small text-muted" id="collectInfo">Order —</div>
+                <div class="modal-body">
+                    <input type="hidden" name="payment_id" id="payment_id">
+                    <div class="mb-2">
+                        <div class="small text-muted" id="collectInfo">Order —</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Amount</label>
+                        <input type="number" step="0.01" min="0" class="form-control" name="amount"
+                            id="amount" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Mode of Payment</label>
+                        <select class="form-select" name="payment_method" id="payment_method" required>
+                            <option value="" disabled selected>Select method</option>
+                            @foreach ($methods as $m)
+                                <option value="{{ $m }}">{{ $m }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">Received By</label>
+                        <input type="text" class="form-control" name="received_by" id="received_by"
+                            value="{{ auth('admins')->user()->name ?? '' }}" maxlength="100" required>
+                    </div>
+
+                    <div class="form-text">Confirm the amount and who received the payment.</div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="collectSubmit">Mark as Paid</button>
+                </div>
+            </form>
         </div>
-
-        <div class="mb-3">
-          <label class="form-label">Amount</label>
-          <input type="number" step="0.01" min="0" class="form-control" name="amount" id="amount" required>
-        </div>
-
-        <div class="mb-3">
-          <label class="form-label">Mode of Payment</label>
-          <select class="form-select" name="payment_method" id="payment_method" required>
-            <option value="" disabled selected>Select method</option>
-            @foreach ($methods as $m)
-              <option value="{{ $m }}">{{ $m }}</option>
-            @endforeach
-          </select>
-        </div>
-
-        <div class="mb-2">
-          <label class="form-label">Received By</label>
-          <input type="text" class="form-control" name="received_by" id="received_by"
-                 value="{{ auth('admins')->user()->name ?? '' }}" maxlength="100" required>
-        </div>
-
-        <div class="form-text">Confirm the amount and who received the payment.</div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="collectSubmit">Mark as Paid</button>
-      </div>
-    </form>
-  </div>
-</div>
-
+    </div>
 @endsection
 @section('scripts')
-  {{-- Include these if your layout doesn’t already --}}
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    {{-- Include these if your layout doesn’t already --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-  <script>
-    (function () {
-      const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+   <script>
+(function () {
+  const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-      // Open modal + prefill
-      $(document).on('click', '.btn-collect', function () {
-        const btn    = $(this);
-        const id     = btn.data('id');
-        const order  = btn.data('order');
-        const user   = btn.data('user');
-        const amount = btn.data('amount') || 0;
-        const method = btn.data('method') || '';
+  // Open modal + prefill
+  $(document).on('click', '.btn-collect', function () {
+    const btn    = $(this);
+    const id     = btn.data('id');
+    const order  = btn.data('order');
+    const user   = btn.data('user');
+    const amount = btn.data('amount') || 0;
+    const method = btn.data('method') || '';
+    const url    = btn.data('url');
 
-        $('#payment_id').val(id);
-        $('#amount').val(amount);
-        $('#payment_method').val(method);
-        $('#collectInfo').text(`Order #${order} • ${user}`);
-      });
+    $('#payment_id').val(id);
+    $('#amount').val(amount);
+    $('#payment_method').val(method);
+    $('#collectInfo').text(`Order #${order} • ${user}`);
+    // stash the final URL on the form for submit
+    $('#collectForm').data('post-url', url);
+  });
 
-      // Submit
-      $('#collectForm').on('submit', function (e) {
-        e.preventDefault();
-        const id  = $('#payment_id').val();
-        const url = "{{ route('payment.collection.collect', ['id' => '___ID___']) }}".replace('___ID___', id);
+  // Submit
+  $('#collectForm').on('submit', function (e) {
+    e.preventDefault();
 
-        const payload = {
-          amount: $('#amount').val(),
-          payment_method: $('#payment_method').val(),
-          received_by: $('#received_by').val(),
-        };
+    const url = $('#collectForm').data('post-url');
+    if (!url) {
+      Swal.fire({ icon: 'error', title: 'Oops', text: 'Missing payment URL.' });
+      return;
+    }
 
-        $('#collectSubmit').prop('disabled', true).text('Saving...');
+    const payload = {
+      amount: $('#amount').val(),
+      payment_method: $('#payment_method').val(),
+      received_by: $('#received_by').val(),
+    };
 
-        $.ajax({
-          method: 'POST',
-          url: url,
-          headers: {
-            'X-CSRF-TOKEN': token,
-            'Accept': 'application/json'   // ensures Laravel returns JSON on validation errors
-          },
-          data: payload,
-          success: function (res) {
-            $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
+    $('#collectSubmit').prop('disabled', true).text('Saving...');
 
-            const modalEl = document.getElementById('collectModal');
-            const modal   = bootstrap.Modal.getOrCreateInstance(modalEl);
-            modal.hide();
+    $.ajax({
+      method: 'POST',
+      url: url,
+      headers: {
+        'X-CSRF-TOKEN': token,
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      },
+      data: payload,
+      success: function (res) {
+        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
 
-            Swal.fire({
-              icon: 'success',
-              title: 'Done',
-              text: res.message || 'Payment marked as paid.',
-              timer: 1400,
-              showConfirmButton: false
-            });
+        const modalEl = document.getElementById('collectModal');
+        const modal   = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.hide();
 
-            // Refresh the list so the paid row disappears
-            window.location.reload();
-          },
-          error: function (xhr) {
-            $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
-
-            let msg = 'Failed to mark as paid.';
-            if (xhr?.responseJSON?.message) msg = xhr.responseJSON.message;
-            if (xhr?.responseJSON?.errors) {
-              const first = Object.values(xhr.responseJSON.errors)[0];
-              if (first && first[0]) msg = first[0];
-            }
-
-            Swal.fire({ icon: 'error', title: 'Oops', text: msg });
-          }
+        Swal.fire({
+          icon: 'success',
+          title: 'Done',
+          text: res.message || 'Payment marked as paid.',
+          timer: 1400,
+          showConfirmButton: false
         });
-      });
-    })();
-  </script>
+
+        // Reload so the paid row disappears
+        window.location.reload();
+      },
+      error: function (xhr) {
+        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
+
+        let msg = 'Failed to mark as paid.';
+        if (xhr?.status === 419) msg = 'Session expired. Please refresh and try again.';
+        if (xhr?.responseJSON?.message) msg = xhr.responseJSON.message;
+        if (xhr?.responseJSON?.errors) {
+          const first = Object.values(xhr.responseJSON.errors)[0];
+          if (first && first[0]) msg = first[0];
+        }
+
+        Swal.fire({ icon: 'error', title: 'Oops', text: msg });
+      }
+    });
+  });
+})();
+</script>
+
 @endsection
