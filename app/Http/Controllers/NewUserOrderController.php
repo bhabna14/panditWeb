@@ -56,6 +56,7 @@ public function saveNewUserOrder(Request $request)
         // Validate user details
         $validatedUserData = $request->validate([
             'name' => 'nullable',
+            'user_type' => 'nullable|string',
             'mobile_number' => 'required',
             'state' => 'required|string',
             'city' => 'required|string',
@@ -81,6 +82,7 @@ public function saveNewUserOrder(Request $request)
         // Create the user
         $user = User::create([
             'userid' => $user_id,
+            'user_type' => $validatedUserData['user_type'] ?? 'normal',
             'name' => $validatedUserData['name'],
             'mobile_number' => '+91' . $validatedUserData['mobile_number'],
         ]);
