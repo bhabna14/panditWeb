@@ -191,6 +191,21 @@
                         <span><i class="fa fa-phone me-2"></i><strong>Phone:</strong> {{ $user->mobile_number }}</span>
                         <span><i class="fa fa-envelope me-2"></i><strong>Email:</strong> {{ $user->email }}</span>
                         <span><i class="fa fa-venus-mars me-2"></i><strong>Gender:</strong> {{ $user->gender }}</span>
+                        <span><i class="fa fa-calendar-alt me-2"></i><strong>Joined:</strong>
+                            {{ $user->created_at ? \Carbon\Carbon::parse($user->created_at)->format('M j, Y') : 'NA' }}</span>
+                        <span>
+                            <i class="fa fa-calendar-check me-2"></i>
+                            <strong>First Subscription Start:</strong>
+                            {{
+                                $orders->count()
+                                    ? optional($orders->sortBy('start_date')->first())->start_date
+                                        ? \Carbon\Carbon::parse($orders->sortBy('start_date')->first()->start_date)->format('M j, Y')
+                                        : 'NA'
+                                    : 'NA'
+                            }}
+                        </span>
+
+
                     </div>
                 </div>
 

@@ -357,50 +357,51 @@ class FlowerOrderController extends Controller
         $notifications = Notification::where('is_read', false)->latest()->get();
         return view('admin.layouts.components.app-header', compact('notifications'));
     }
-public function showCustomerDetails($userid)
-{
-    // User by business key `userid`
-    $user = User::where('userid', $userid)->firstOrFail();
 
-    // Active addresses with locality relation
-    $addressdata = UserAddress::where('user_id', $userid)
-        ->where('status', 'active')
-        ->with('localityDetails')
-        ->get();
+    public function showCustomerDetails($userid)
+    {
+        // User by business key `userid`
+        $user = User::where('userid', $userid)->firstOrFail();
 
-    // Subscriptions + related data
-    $orders = Subscription::where('user_id', $userid)
-        ->with([
-            'flowerProducts',
-            'order.address',              // ensure order + nested address is loaded
-            'flowerPayments',
-        ])
-        ->orderBy('id', 'desc')
-        ->get();
+        // Active addresses with locality relation
+        $addressdata = UserAddress::where('user_id', $userid)
+            ->where('status', 'active')
+            ->with('localityDetails')
+            ->get();
 
-    // Flower requests + items + user + address (and attach any created order)
-    $pendingRequests = FlowerRequest::where('user_id', $userid)
-        ->with(['flowerProduct', 'user', 'address', 'flowerRequestItems'])
-        ->orderBy('id', 'desc')
-        ->get();
+        // Subscriptions + related data
+        $orders = Subscription::where('user_id', $userid)
+            ->with([
+                'flowerProducts',
+                'order.address',              // ensure order + nested address is loaded
+                'flowerPayments',
+            ])
+            ->orderBy('id', 'desc')
+            ->get();
 
-    foreach ($pendingRequests as $request) {
-        $request->setRelation(
-            'order',
-            Order::where('request_id', $request->request_id)->with('flowerPayments')->first()
+        // Flower requests + items + user + address (and attach any created order)
+        $pendingRequests = FlowerRequest::where('user_id', $userid)
+            ->with(['flowerProduct', 'user', 'address', 'flowerRequestItems'])
+            ->orderBy('id', 'desc')
+            ->get();
+
+        foreach ($pendingRequests as $request) {
+            $request->setRelation(
+                'order',
+                Order::where('request_id', $request->request_id)->with('flowerPayments')->first()
+            );
+        }
+
+        // Metrics
+        $totalOrders   = Subscription::where('user_id', $userid)->count();
+        $ongoingOrders = Subscription::where('user_id', $userid)->where('status', 'active')->count();
+        $totalSpend    = FlowerPayment::where('user_id', $userid)->sum('paid_amount');
+
+        return view(
+            'admin.flower-order.show-customer-details',
+            compact('user', 'addressdata', 'pendingRequests', 'orders', 'totalOrders', 'ongoingOrders', 'totalSpend')
         );
     }
-
-    // Metrics
-    $totalOrders   = Subscription::where('user_id', $userid)->count();
-    $ongoingOrders = Subscription::where('user_id', $userid)->where('status', 'active')->count();
-    $totalSpend    = FlowerPayment::where('user_id', $userid)->sum('paid_amount');
-
-    return view(
-        'admin.flower-order.show-customer-details',
-        compact('user', 'addressdata', 'pendingRequests', 'orders', 'totalOrders', 'ongoingOrders', 'totalSpend')
-    );
-}
 
     public function showorderdetails($id)
     {
