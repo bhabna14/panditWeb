@@ -167,6 +167,7 @@ class PaymentCollectionController extends Controller
     // }
   public function collect(Request $request, $id)
     {
+        dd("soumua");
         // keep methods consistent with your index() view
         $allowedMethods = ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'];
 
