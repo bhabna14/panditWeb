@@ -215,7 +215,7 @@
                     </div>
                     <div class="metric-card p-3 text-center">
                         <i class="fa fa-hourglass-half text-warning custom-size-icon"></i>
-                        <div class="metric-title">Ongoing Subscriptions</div>
+                        <div class="metric-title">Running</div>
                         <div class="metric-value">{{ $ongoingOrders }}</div>
                     </div>
                     <div class="metric-card p-3 text-center">
