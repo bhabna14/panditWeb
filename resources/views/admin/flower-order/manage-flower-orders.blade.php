@@ -328,7 +328,7 @@
                                         <th>Subscription Price</th>
                                         <th>Status</th>
                                         <th>Assigned Rider</th>
-                                        <th>Subscription</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
