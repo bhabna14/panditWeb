@@ -183,9 +183,6 @@
             <div class="text-muted small">Create a subscription for an existing user</div>
         </div>
         <ol class="breadcrumb mb-0 d-flex align-items-center gap-2">
-            <li class="breadcrumb-item">
-                <a href="{{ url('admin/demo-order-details') }}" class="btn btn-warning text-dark">New User</a>
-            </li>
             <li class="breadcrumb-item"><a href="javascript:void(0);">Dashboard</a></li>
         </ol>
     </div>
