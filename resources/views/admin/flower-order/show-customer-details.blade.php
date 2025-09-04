@@ -196,13 +196,11 @@
                         <span>
                             <i class="fa fa-calendar-check me-2"></i>
                             <strong>First Subscription Start:</strong>
-                            {{
-                                $orders->count()
-                                    ? optional($orders->sortBy('start_date')->first())->start_date
-                                        ? \Carbon\Carbon::parse($orders->sortBy('start_date')->first()->start_date)->format('M j, Y')
-                                        : 'NA'
-                                    : 'NA'
-                            }}
+                            {{ $orders->count()
+                                ? (optional($orders->sortBy('start_date')->first())->start_date
+                                    ? \Carbon\Carbon::parse($orders->sortBy('start_date')->first()->start_date)->format('M j, Y')
+                                    : 'NA')
+                                : 'NA' }}
                         </span>
 
 
@@ -237,7 +235,7 @@
                                 <span class="badge bg-dark ms-2">{{ $orders->count() }}</span>
                             </a>
                             <a class="nav-link" data-bs-toggle="tab" href="#requestorder" style="color: black">
-                                Request Orders
+                                Customize Orders
                                 <span class="badge bg-dark ms-2">{{ $pendingRequests->count() }}</span>
                             </a>
                             <a class="nav-link" data-bs-toggle="tab" href="#address" style="color: black">
@@ -268,6 +266,8 @@
                                             <th>Purchase Date</th>
                                             <th>Start Date</th>
                                             <th>Product Details</th>
+                                            <th>Payment Mode</th>
+                                            <th>Payment Date</th>
                                             <th>Total Price</th>
                                             <th>Status</th>
                                             <th>Actions</th>
@@ -284,6 +284,14 @@
                                                 $purchase = $order->created_at
                                                     ? \Carbon\Carbon::parse($order->created_at)
                                                     : null;
+
+                                                // Prefer the latest *paid* payment; if none, fall back to most recent payment record (any status).
+                                                $latestPaid = $order->latestPaidPayment ?? null;
+                                                if (!$latestPaid && isset($order->flowerPayments)) {
+                                                    $latestPaid = $order->flowerPayments
+                                                        ->sortByDesc('created_at')
+                                                        ->first();
+                                                }
                                             @endphp
                                             <tr>
                                                 <td class="fw-semibold">{{ $order->order_id }}</td>
@@ -299,7 +307,21 @@
                                                         </small>
                                                     @endif
                                                 </td>
+
+                                                {{-- NEW: Payment Mode --}}
+                                                <td>
+                                                    {{ $latestPaid && $latestPaid->payment_method
+                                                        ? ucwords(str_replace('_', ' ', $latestPaid->payment_method))
+                                                        : 'NA' }}
+                                                </td>
+
+                                                {{-- NEW: Payment Date (created_at) --}}
+                                                <td>
+                                                    {{ $latestPaid && $latestPaid->created_at ? $latestPaid->created_at->format('M j, Y') : 'NA' }}
+                                                </td>
+
                                                 <td>₹{{ number_format(optional($order->order)->total_price ?? 0, 2) }}</td>
+
                                                 <td>
                                                     @php
                                                         $status = strtolower($order->status ?? '');
@@ -314,6 +336,7 @@
                                                     <span
                                                         class="status-pill {{ $pill }}">{{ ucfirst($order->status ?? 'NA') }}</span>
                                                 </td>
+
                                                 <td>
                                                     @if (isset($order->id))
                                                         <a href="{{ route('admin.orders.show', $order->id) }}"
@@ -326,6 +349,7 @@
                                                 </td>
                                             </tr>
                                         @endforeach
+
                                     </tbody>
                                 </table>
                             </div>
@@ -421,7 +445,8 @@
                                         <div class="card addr-card h-100 shadow-sm">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between align-items-center mb-2">
-                                                    <h6 class="mb-0 fw-bold">{{ $address->address_type ?? 'Address' }}</h6>
+                                                    <h6 class="mb-0 fw-bold">{{ $address->address_type ?? 'Address' }}
+                                                    </h6>
                                                     @if ($address->default == 1)
                                                         <span class="badge bg-success">Default</span>
                                                     @endif

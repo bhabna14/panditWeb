@@ -99,5 +99,16 @@ public function scopeActiveOn($q, Carbon $date)
               ->orWhereDate('pause_start_date', '>', $date->toDateString());
         });
 }
+ public function latestPayment()
+    {
+        return $this->hasOne(FlowerPayment::class, 'order_id', 'order_id')->latestOfMany();
+    }
 
+    // Latest payment that is 'paid'
+    public function latestPaidPayment()
+    {
+        return $this->hasOne(FlowerPayment::class, 'order_id', 'order_id')
+                    ->where('payment_status', 'paid')
+                    ->latestOfMany();
+    }
 }
