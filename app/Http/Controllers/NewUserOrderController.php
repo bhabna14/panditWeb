@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\DB;
 class NewUserOrderController extends Controller
 {
 
-   public function newUserOrder()
+public function newUserOrder()
 {
     $flowers = FlowerProduct::where('status', 'active')
         ->where('category', 'Subscription')
