@@ -3,14 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use App\Models\FlowerPayment;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class PaymentCollectionController extends Controller
 {
@@ -25,13 +24,14 @@ class PaymentCollectionController extends Controller
             'max'    => $request->get('max'),
         ];
 
+        // Base query for pending payments
         $pendingBase = DB::table('flower_payments as fp')
             ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
             ->join('users as u', 'u.userid', '=', 'fp.user_id')
             ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
             ->where('fp.payment_status', 'pending')
             ->select([
-                'fp.id as payment_row_id',
+                'fp.id as payment_row_id',       // <-- PRIMARY KEY used by the collect route
                 'fp.payment_id',
                 'fp.order_id',
                 'fp.user_id',
@@ -39,12 +39,15 @@ class PaymentCollectionController extends Controller
                 'fp.payment_status',
                 'fp.payment_method',
                 'fp.created_at as pending_since',
+
                 's.subscription_id',
                 's.start_date',
                 's.end_date',
                 's.status as subscription_status',
+
                 'p.name as product_name',
                 'p.category as product_category',
+
                 'u.name as user_name',
                 'u.mobile_number',
             ]);
@@ -60,16 +63,17 @@ class PaymentCollectionController extends Controller
                    ->orWhere('p.category', 'like', "%{$q}%");
             });
         }
-        if ($filters['from']) $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
-        if ($filters['to'])   $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
-        if ($filters['method'] !== '') $pendingBase->where('fp.payment_method', $filters['method']);
-        if (is_numeric($filters['min'])) $pendingBase->where('fp.paid_amount', '>=', (float)$filters['min']);
-        if (is_numeric($filters['max'])) $pendingBase->where('fp.paid_amount', '<=', (float)$filters['max']);
+        if ($filters['from'])            $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
+        if ($filters['to'])              $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
+        if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
+        if (is_numeric($filters['min'])) $pendingBase->where('fp.paid_amount', '>=', (float) $filters['min']);
+        if (is_numeric($filters['max'])) $pendingBase->where('fp.paid_amount', '<=', (float) $filters['max']);
 
         $pendingPayments     = (clone $pendingBase)->orderByDesc('fp.id')->get();
-        $pendingTotalAmount  = (clone $pendingBase)->sum('fp.paid_amount');
+        $pendingTotalAmount  = (clone $pendingBase)->sum('fp.paid_amount'); // total pending (as modeled)
         $pendingCount        = (clone $pendingBase)->count();
 
+        // Expired subscriptions (last expired per user, and no live sub)
         $liveStatuses = ['active', 'paused', 'resume'];
 
         $subQuery = DB::table('subscriptions as s')
@@ -124,56 +128,12 @@ class PaymentCollectionController extends Controller
         ]);
     }
 
-    // public function collect(Request $request)
-    // {
-    //     // Validate fields from modal
-    //     $data = $request->validate([
-    //         'payment_row_id' => ['required', 'integer', 'exists:flower_payments,id'],
-    //         'amount'         => ['required', 'numeric', 'min:0'],
-    //         'payment_method' => ['required', Rule::in(['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'])],
-    //         'received_by'    => ['required', 'string', 'max:100'],
-    //     ]);
-
-    //     // Confirm row exists and is pending
-    //     $payment = DB::table('flower_payments')
-    //         ->where('id', $data['payment_row_id'])
-    //         ->first();
-
-    //     if (!$payment) {
-    //         return back()->with('error', 'Payment row not found.');
-    //     }
-    //     if (strtolower((string)$payment->payment_status) !== 'pending') {
-    //         return back()->with('error', 'Payment is not in pending state.');
-    //     }
-
-    //     // Update to PAID
-    //     $updated = DB::table('flower_payments')
-    //         ->where('id', $data['payment_row_id'])
-    //         ->update([
-    //             'paid_amount'    => $data['amount'],
-    //             'payment_method' => $data['payment_method'],
-    //             'payment_status' => 'paid',
-    //             'received_by'    => $data['received_by'],
-    //             'updated_at'     => now(),
-    //         ]);
-
-    //     if (!$updated) {
-    //         return back()->with('error', 'Update failed.');
-    //     }
-
-    //     return redirect()
-    //         ->route('payment.collection.index', [], 303)
-    //         ->with('success', 'Payment marked as paid successfully.');
-    // }
-   public function collect(Request $request, $id)
+    public function collect(Request $request, $id)
     {
-        // IMPORTANT: remove dd() so AJAX can proceed
-        // dd("soumua");
-
         $allowedMethods = ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'];
 
-        // Force JSON for AJAX callers
-        if (! $request->wantsJson()) {
+        // Make sure validation errors return JSON for the AJAX caller
+        if (!$request->wantsJson()) {
             $request->headers->set('Accept', 'application/json');
         }
 
@@ -183,15 +143,14 @@ class PaymentCollectionController extends Controller
             'received_by'    => ['required', 'string', 'max:100'],
         ]);
 
-        // Grab the pending payment row by PRIMARY KEY = $id
-        $payment = FlowerPayment::query()
-            ->whereKey($id)
-            ->where('payment_status', 'pending')
-            ->firstOrFail();
-
-        DB::transaction(function () use ($payment, $validated) {
-            // Optional: lock to prevent race conditions
-            $payment->lockForUpdate();
+        // Do everything atomically. Apply FOR UPDATE lock on the query (NOT on the model instance).
+        $payment = null;
+        DB::transaction(function () use ($id, $validated, &$payment) {
+            $payment = FlowerPayment::query()
+                ->whereKey($id)
+                ->where('payment_status', 'pending')
+                ->lockForUpdate()
+                ->firstOrFail();
 
             $payment->paid_amount    = $validated['amount'];
             $payment->payment_method = $validated['payment_method'];

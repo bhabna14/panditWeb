@@ -2,7 +2,11 @@
 
 @section('content')
     @php use Carbon\Carbon; @endphp
-    {{-- if not already included in your layout --}}
+
+    {{-- If your layout doesn’t already include a CSRF meta tag, add this: --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    {{-- SweetAlert CSS if your layout doesn’t already include it --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
@@ -45,7 +49,6 @@
             background: #f9fafb;
         }
 
-        /* Filter card */
         .pc-filter {
             border: 1px solid #e9ecf5;
             border-radius: 12px;
@@ -58,7 +61,6 @@
             border-radius: 10px;
         }
 
-        /* Table polish */
         .table thead th {
             background: linear-gradient(135deg, #fafbff 0%, #f3f6ff 100%);
             border-bottom: 1px solid #e5e7eb;
@@ -87,7 +89,6 @@
             color: #1e7e34;
             border: 1px solid #c3f0d2;
         }
-
 
         .badge-expired {
             color: #374151;
@@ -230,17 +231,15 @@
                                     <span class="badge badge-soft badge-pending">{{ ucfirst($row->payment_status) }}</span>
                                 </td>
                                 <td>
-                                    {{-- In your table row button --}}
+                                    {{-- IMPORTANT: data-id MUST be the PK (flower_payments.id) --}}
                                     <button type="button" class="btn btn-sm btn-success btn-collect"
-                                        data-id="{{ $row->payment_row_id }}" {{-- <- this MUST be the PK "id" of flower_payments --}}
-                                        data-order="{{ $row->order_id }}" data-user="{{ $row->user_name }}"
-                                        data-amount="{{ $row->amount ?? 0 }}"
+                                        data-id="{{ $row->payment_row_id }}" data-order="{{ $row->order_id }}"
+                                        data-user="{{ $row->user_name }}" data-amount="{{ $row->amount ?? 0 }}"
                                         data-method="{{ $row->payment_method ?? '' }}"
                                         data-url="{{ route('payment.collection.collect', $row->payment_row_id) }}"
                                         data-bs-toggle="modal" data-bs-target="#collectModal">
                                         Collect
                                     </button>
-
                                 </td>
                             </tr>
                         @empty
@@ -249,7 +248,6 @@
                             </tr>
                         @endforelse
                     </tbody>
-
                 </table>
             </div>
         </div>
@@ -285,7 +283,9 @@
                                 <td>{{ $row->mobile_number }}</td>
                                 <td>{{ $start->format('d M Y') }} — {{ $end->format('d M Y') }} <span
                                         class="text-muted small">({{ $durationDays }}d)</span></td>
-                                <td>{{ $row->product_category ?? '—' }} @if ($row->product_name)
+                                <td>
+                                    {{ $row->product_category ?? '—' }}
+                                    @if ($row->product_name)
                                         <span class="text-muted small">({{ $row->product_name }})</span>
                                     @endif
                                 </td>
@@ -302,6 +302,7 @@
         </div>
     </div>
 
+    {{-- Collect Modal --}}
     <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <form id="collectForm" class="modal-content">
@@ -349,96 +350,105 @@
         </div>
     </div>
 @endsection
+
 @section('scripts')
-    {{-- Include these if your layout doesn’t already --}}
+    {{-- Include these here only if your layout doesn’t already include them --}}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-   <script>
-(function () {
-  const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    <script>
+        (function() {
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const token = csrfMeta ? csrfMeta.getAttribute('content') : null;
 
-  // Open modal + prefill
-  $(document).on('click', '.btn-collect', function () {
-    const btn    = $(this);
-    const id     = btn.data('id');
-    const order  = btn.data('order');
-    const user   = btn.data('user');
-    const amount = btn.data('amount') || 0;
-    const method = btn.data('method') || '';
-    const url    = btn.data('url');
+            // Open modal + prefill
+            $(document).on('click', '.btn-collect', function() {
+                const btn = $(this);
+                const id = btn.data('id');
+                const order = btn.data('order');
+                const user = btn.data('user');
+                const amount = btn.data('amount') || 0;
+                const method = btn.data('method') || '';
+                const url = btn.data('url');
 
-    $('#payment_id').val(id);
-    $('#amount').val(amount);
-    $('#payment_method').val(method);
-    $('#collectInfo').text(`Order #${order} • ${user}`);
-    // stash the final URL on the form for submit
-    $('#collectForm').data('post-url', url);
-  });
+                $('#payment_id').val(id);
+                $('#amount').val(amount);
+                $('#payment_method').val(method);
+                $('#collectInfo').text(`Order #${order} • ${user}`);
+                $('#collectForm').data('post-url', url);
+            });
 
-  // Submit
-  $('#collectForm').on('submit', function (e) {
-    e.preventDefault();
+            // Submit
+            $('#collectForm').on('submit', function(e) {
+                e.preventDefault();
 
-    const url = $('#collectForm').data('post-url');
-    if (!url) {
-      Swal.fire({ icon: 'error', title: 'Oops', text: 'Missing payment URL.' });
-      return;
-    }
+                const url = $('#collectForm').data('post-url');
+                if (!url) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops',
+                        text: 'Missing payment URL.'
+                    });
+                    return;
+                }
 
-    const payload = {
-      amount: $('#amount').val(),
-      payment_method: $('#payment_method').val(),
-      received_by: $('#received_by').val(),
-    };
+                const payload = {
+                    amount: $('#amount').val(),
+                    payment_method: $('#payment_method').val(),
+                    received_by: $('#received_by').val(),
+                };
 
-    $('#collectSubmit').prop('disabled', true).text('Saving...');
+                $('#collectSubmit').prop('disabled', true).text('Saving...');
 
-    $.ajax({
-      method: 'POST',
-      url: url,
-      headers: {
-        'X-CSRF-TOKEN': token,
-        'X-Requested-With': 'XMLHttpRequest',
-        'Accept': 'application/json'
-      },
-      data: payload,
-      success: function (res) {
-        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
+                $.ajax({
+                    method: 'POST',
+                    url: url,
+                    headers: {
+                        'X-CSRF-TOKEN': token,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    data: payload,
+                    success: function(res) {
+                        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
 
-        const modalEl = document.getElementById('collectModal');
-        const modal   = bootstrap.Modal.getOrCreateInstance(modalEl);
-        modal.hide();
+                        const modalEl = document.getElementById('collectModal');
+                        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                        modal.hide();
 
-        Swal.fire({
-          icon: 'success',
-          title: 'Done',
-          text: res.message || 'Payment marked as paid.',
-          timer: 1400,
-          showConfirmButton: false
-        });
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Done',
+                            text: res.message || 'Payment marked as paid.',
+                            timer: 1400,
+                            showConfirmButton: false
+                        });
 
-        // Reload so the paid row disappears
-        window.location.reload();
-      },
-      error: function (xhr) {
-        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
+                        // Refresh the list so the paid row disappears
+                        window.location.reload();
+                    },
+                    error: function(xhr) {
+                        $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
 
-        let msg = 'Failed to mark as paid.';
-        if (xhr?.status === 419) msg = 'Session expired. Please refresh and try again.';
-        if (xhr?.responseJSON?.message) msg = xhr.responseJSON.message;
-        if (xhr?.responseJSON?.errors) {
-          const first = Object.values(xhr.responseJSON.errors)[0];
-          if (first && first[0]) msg = first[0];
-        }
+                        let msg = 'Failed to mark as paid.';
+                        if (xhr?.status === 419) msg =
+                            'Session expired. Please refresh and try again.';
+                        if (xhr?.responseJSON?.message) msg = xhr.responseJSON.message;
+                        if (xhr?.responseJSON?.errors) {
+                            const first = Object.values(xhr.responseJSON.errors)[0];
+                            if (first && first[0]) msg = first[0];
+                        }
 
-        Swal.fire({ icon: 'error', title: 'Oops', text: msg });
-      }
-    });
-  });
-})();
-</script>
-
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops',
+                            text: msg
+                        });
+                    }
+                });
+            });
+        })();
+    </script>
 @endsection
