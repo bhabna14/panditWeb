@@ -324,11 +324,10 @@
                                     <tr>
                                         <th>Customer Details</th>
                                         <th>Purchase Date</th>
-                                        <th>Duration</th>
+                                        <th>Subscription Period</th>
                                         <th>Price</th>
                                         <th>Status</th>
                                         <th>Assigned Rider</th>
-                                        <th>Referred By</th>
                                         <th>Subscription</th>
                                     </tr>
                                 </thead>
@@ -703,13 +702,6 @@
                             data-id="${r.id}" data-order-id="${r.order.id}" data-rider-id="${r.order?.rider?.rider_id || ''}">
                             <i class="fas fa-edit"></i>
                         </button>`;
-                        }
-                    },
-                    {
-                        data: 'order.referral_id',
-                        name: 'order.referral_id',
-                        render: function(id) {
-                            return id || 'N/A';
                         }
                     },
                     {
