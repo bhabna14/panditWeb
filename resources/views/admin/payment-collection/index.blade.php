@@ -1,4 +1,4 @@
-@extends('admin.layouts.app')
+@extends('admin.layouts.apps')
 
 @section('content')
     @php use Carbon\Carbon; @endphp
@@ -185,7 +185,6 @@
                             <th>Mobile</th>
                             <th>Duration</th>
                             <th>Type</th>
-                            <th>Pending Since</th>
                             <th>Amount (Due)</th>
                             <th>Status</th>
                             <th>Collect</th>
@@ -216,14 +215,6 @@
                                     {{ $row->product_category ?? '—' }}
                                     @if ($row->product_name)
                                         <span class="text-muted small">({{ $row->product_name }})</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($since)
-                                        <span
-                                            title="{{ $since->format('d M Y, h:i A') }}">{{ $since->diffForHumans() }}</span>
-                                    @else
-                                        —
                                     @endif
                                 </td>
                                 <td class="fw-bold amount-cell">₹ {{ number_format($row->amount ?? 0, 2) }}</td>
