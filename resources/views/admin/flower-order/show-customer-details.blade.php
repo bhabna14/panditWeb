@@ -217,15 +217,15 @@
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-3 profile-nav-line border-0 br-5 mb-0">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#order">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#order" style="color: black">
                                 Subscription Orders
                                 <span class="badge bg-dark ms-2">{{ $orders->count() }}</span>
                             </a>
-                            <a class="nav-link" data-bs-toggle="tab" href="#requestorder">
+                            <a class="nav-link" data-bs-toggle="tab" href="#requestorder" style="color: black">
                                 Request Orders
                                 <span class="badge bg-dark ms-2">{{ $pendingRequests->count() }}</span>
                             </a>
-                            <a class="nav-link" data-bs-toggle="tab" href="#address">
+                            <a class="nav-link" data-bs-toggle="tab" href="#address" style="color: black">
                                 Addresses
                                 <span class="badge bg-dark ms-2">{{ $addressdata->count() }}</span>
                             </a>
