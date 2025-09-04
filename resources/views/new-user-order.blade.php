@@ -317,6 +317,7 @@
                     <label for="status" class="form-label">Status</label>
                     <select name="status" id="status" class="form-control" required>
                         <option value="active" selected>Active</option>
+                        <option value="pending">Pending</option>
                         <option value="expired">Expired</option>
                     </select>
                 </div>
