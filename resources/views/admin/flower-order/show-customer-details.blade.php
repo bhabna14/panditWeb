@@ -116,7 +116,7 @@
         }
 
         .profile-nav-line .nav-link.active {
-            background: #727274;
+            background: #c7d2fe;
             color: #fff;
             border-color: #111827;
             box-shadow: 0 6px 16px rgba(17, 24, 39, .18);
