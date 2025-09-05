@@ -18,29 +18,6 @@
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
             <div class="row">
-
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h5 class="mb-2 tx-12">Active Subscription/Total Delivery</h5>
-                                        <h4 class="tx-20 font-weight-semibold mb-2">
-                                            {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
-                                    </div>
-                                </div>
-                                {{-- <div>
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-teal-500 to-blue-600 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-user tx-16 text-white"></i> <!-- Active Subscription Icon -->
-                                    </div>
-                                </div> --}}
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
