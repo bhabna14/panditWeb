@@ -417,7 +417,7 @@ class FlowerBookingController extends Controller
                         ->where('order_id', $sub->order_id)
                         ->where('status', 'pending')
                         ->orderBy('start_date')
-                        ->get();
+                        ->first();
                         
                     return $sub;
                 });
