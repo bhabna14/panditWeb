@@ -388,6 +388,15 @@ class ProductController extends Controller
         return view('admin.manage-product', compact('products'));
     }
 
+    public function toggleProduct($id)
+    {
+        $product = FlowerProduct::findOrFail($id);
+        $product->status = ($product->status === 'active') ? 'deactive' : 'active';
+        $product->save();
+
+        return redirect()->back()->with('success', 'Product status updated successfully.');
+    }
+
     // public function updateProduct(Request $request, $id)
     // {
     //     $product = FlowerProduct::findOrFail($id);
