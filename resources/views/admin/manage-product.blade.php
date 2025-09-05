@@ -8,83 +8,8 @@
 
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
+
     <style>
-        /* ===== Toggle Switch (no external libs needed) ===== */
-        .pf-switch {
-            position: relative;
-            display: inline-block;
-            width: 56px;
-            height: 30px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .pf-switch input {
-            display: none;
-        }
-
-        .pf-slider {
-            position: absolute;
-            inset: 0;
-            background: #9ca3af;
-            /* gray for off */
-            border-radius: 999px;
-            transition: background .2s ease;
-            box-shadow: inset 0 0 0 1px rgba(17, 24, 39, .08);
-        }
-
-        .pf-slider .pf-knob {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: #fff;
-            border-radius: 50%;
-            transition: transform .2s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
-        }
-
-        .pf-switch input:checked+.pf-slider {
-            background: #22c55e;
-            /* green for on */
-        }
-
-        .pf-switch input:checked+.pf-slider .pf-knob {
-            transform: translateX(26px);
-        }
-
-        /* ===== Status Badge ===== */
-        .pf-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 10px;
-            font-weight: 600;
-            border-radius: 999px;
-            border: 1px solid transparent;
-            font-size: .85rem;
-            line-height: 1;
-        }
-
-        .pf-badge--green {
-            color: #166534;
-            background: #ecfdf5;
-            border-color: #bbf7d0;
-        }
-
-        .pf-badge--gray {
-            color: #374151;
-            background: #f3f4f6;
-            border-color: #e5e7eb;
-        }
-
-        /* Subtle disabled state while saving */
-        .pf-switch--busy .pf-slider {
-            opacity: .7;
-            filter: grayscale(.1);
-            pointer-events: none;
-        }
-
         .modal-content {
             border-radius: 12px;
             overflow: hidden;
@@ -404,41 +329,14 @@
                                                 onclick="return confirm('Are you sure you want to delete this product?');">
                                                 <i class="fa fa-trash"></i>
                                             </a>
-                                            {{-- Make sure you have CSRF meta tag in your layout: <meta name="csrf-token" content="{{ csrf_token() }}"> --}}
-
-                                            <div class="d-flex align-items-center gap-2" data-product-toggle-wrapper>
-                                                {{-- Accessible toggle switch --}}
-                                                <label class="pf-switch mb-0" title="Click to toggle product status">
-                                                    <input type="checkbox" class="js-product-toggle"
-                                                        data-id="{{ $product->id }}" aria-label="Toggle product status"
-                                                        {{ $product->status === 'active' ? 'checked' : '' }}>
-                                                    <span class="pf-slider"><span class="pf-knob"></span></span>
-                                                </label>
-
-                                                {{-- Live status badge --}}
-                                                <span
-                                                    class="pf-badge {{ $product->status === 'active' ? 'pf-badge--green' : 'pf-badge--gray' }}"
-                                                    data-status-badge aria-live="polite">
-                                                    {{ $product->status === 'active' ? 'Active' : 'Inactive' }}
-                                                </span>
-
-                                                {{-- Noscript fallback: keeps your old form-based toggle working --}}
-                                                <noscript>
-                                                    <form
-                                                        action="{{ url('admin/toggle-product-status/' . $product->id) }}"
-                                                        method="POST" style="display:inline;">
-                                                        @csrf
-                                                        <button type="submit"
-                                                            class="btn btn-sm {{ $product->status === 'active' ? 'btn-success' : 'btn-secondary' }}"
-                                                            title="{{ $product->status === 'active' ? 'Deactivate' : 'Activate' }}">
-                                                            <i
-                                                                class="fa {{ $product->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
-                                                            {{ $product->status === 'active' ? 'Deactivate' : 'Activate' }}
-                                                        </button>
-                                                    </form>
-                                                </noscript>
-                                            </div>
-
+                                            <form action="{{ url('admin/toggle-product-status/' . $product->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="btn btn-sm {{ $product->status === 'active' ? 'btn-success' : 'btn-secondary' }}"
+                                                    title="{{ $product->status === 'active' ? 'Deactivate' : 'Activate' }}">
+                                                    <i class="fa {{ $product->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -477,81 +375,4 @@
             document.getElementById('Message').style.display = 'none';
         }, 3000);
     </script>
-    <script>
-(function () {
-    const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-
-    function setBadge(elBadge, status) {
-        elBadge.textContent = (status === 'active') ? 'Active' : 'Inactive';
-        elBadge.classList.toggle('pf-badge--green', status === 'active');
-        elBadge.classList.toggle('pf-badge--gray', status !== 'active');
-    }
-
-    async function toggleProductStatus(productId) {
-        const url = `{{ url('admin/toggle-product-status') }}/${productId}`;
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': csrf,
-                'Accept': 'application/json'
-            }
-        });
-
-        // If controller falls back to redirect HTML, try parsing JSON anyway
-        const contentType = res.headers.get('content-type') || '';
-        if (!res.ok) {
-            throw new Error('Server returned an error.');
-        }
-        if (!contentType.includes('application/json')) {
-            // Not JSON (maybe HTML due to middleware), fail soft
-            return { ok: true, status: null, message: 'Updated.' };
-        }
-        return await res.json();
-    }
-
-    document.addEventListener('change', async function (e) {
-        if (!e.target.matches('.js-product-toggle')) return;
-
-        const checkbox = e.target;
-        const wrapper  = checkbox.closest('[data-product-toggle-wrapper]');
-        const badge    = wrapper?.querySelector('[data-status-badge]');
-        const productId = checkbox.dataset.id;
-        const prevChecked = !checkbox.checked ? true : false; // store opposite to revert on failure
-        const prevState   = checkbox.checked ? 'active' : 'deactive';
-
-        // Busy UI
-        wrapper?.classList.add('pf-switch--busy');
-        checkbox.disabled = true;
-
-        try {
-            const data = await toggleProductStatus(productId);
-
-            // If backend returned a concrete status, prefer that; else infer from checkbox state
-            const newStatus = data.status ?? (checkbox.checked ? 'active' : 'deactive');
-            if (badge) setBadge(badge, newStatus);
-
-            // Optional: SweetAlert2 toast if available
-            if (window.Swal && data.message) {
-                Swal.fire({
-                    toast: true, position: 'top-end', timer: 1500, showConfirmButton: false,
-                    icon: 'success', title: data.message
-                });
-            }
-        } catch (err) {
-            // Revert checkbox state on failure
-            checkbox.checked = prevChecked;
-            if (badge) setBadge(badge, prevState);
-
-            if (window.Swal) {
-                Swal.fire({ icon: 'error', title: 'Oops', text: 'Could not update status. Please try again.' });
-            } else {
-                alert('Could not update status. Please try again.');
-            }
-        } finally {
-            wrapper?.classList.remove('pf-switch--busy');
-            checkbox.disabled = false;
-        }
-    });
-})();
-</script>
 @endsection
