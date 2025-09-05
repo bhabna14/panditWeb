@@ -266,6 +266,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
     Route::get('/add-product', [ProductController::class, 'addproduct']);
     Route::get('/manage-product',  [ProductController::class, 'manageproduct'])->name('manageproduct');
+    Route::get('/toggle-product-status/{id}',  [ProductController::class, 'togleProduct'])->name('togleProduct');
 
     Route::post('/create-product', [ProductController::class, 'createProduct'])->name('admin.products.store');
     Route::post('/purchaseSubscription', [ProductController::class, 'purchaseSubscription']);

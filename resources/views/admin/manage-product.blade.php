@@ -329,6 +329,15 @@
                                                 onclick="return confirm('Are you sure you want to delete this product?');">
                                                 <i class="fa fa-trash"></i>
                                             </a>
+                                            <form action="{{ url('admin/toggle-product-status/' . $product->id) }}" method="POST" style="display:inline;">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="btn btn-sm {{ $product->status === 'active' ? 'btn-success' : 'btn-secondary' }}"
+                                                    title="{{ $product->status === 'active' ? 'Deactivate' : 'Activate' }}">
+                                                    <i class="fa {{ $product->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach
