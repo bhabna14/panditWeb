@@ -393,44 +393,43 @@ class FlowerBookingController extends Controller
             $userId = $authUser->userid;
 
            // SUBSCRIPTIONS
-$subscriptionsOrder = Subscription::where('user_id', $userId)
-    ->with([
-        'order.flowerPayments',
-        'order.address.localityDetails',
-        'flowerProducts',
-        'pauseResumeLog',
-        'users',
-    ])
-    ->orderByDesc('created_at')
-    ->get()
-    ->map(function ($sub) {
-        // product image url
-        if ($sub->flowerProduct) {
-            $sub->flowerProduct->product_image_url = $sub->flowerProduct->product_image;
-        }
+            $subscriptionsOrder = Subscription::where('user_id', $userId)
+                    ->with([
+                        'order.flowerPayments',
+                        'order.address.localityDetails',
+                        'flowerProducts',
+                        'pauseResumeLog',
+                        'users',
+                    ])
+                    ->orderByDesc('created_at')
+                    ->get()
+                    ->map(function ($sub) {
+                // product image url
+                if ($sub->flowerProduct) {
+                    $sub->flowerProduct->product_image_url = $sub->flowerProduct->product_image;
+                }
 
-        // normalize order -> flower_payments
-        if ($sub->order) {
-            $payments = $sub->order->flowerPayments ?? collect();
-            $sub->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
-            unset($sub->order->flowerPayments);
-        }
+                // normalize order -> flower_payments
+                if ($sub->order) {
+                    $payments = $sub->order->flowerPayments ?? collect();
+                    $sub->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
+                    unset($sub->order->flowerPayments);
+                }
 
-        // attach only one pending renewal if this subscription is active
-        if ($sub->status === 'active') {
-            $pendingRenewal = Subscription::where('user_id', $sub->user_id)
-                ->where('order_id', $sub->order_id)
-                ->where('status', 'pending')
-                ->orderBy('start_date', 'asc')
-                ->first();
+                // attach only one pending renewal if this subscription is active
+                if ($sub->status === 'active') {
+                    $pendingRenewal = Subscription::where('user_id', $sub->user_id)
+                        ->where('status', 'pending')
+                        ->orderBy('start_date', 'asc')
+                        ->first();
 
-            $sub->pending_renewals = $pendingRenewal ?: (object)[];
-        } else {
-            $sub->pending_renewals = (object)[];
-        }
+                    $sub->pending_renewals = $pendingRenewal ?: (object)[];
+                } else {
+                    $sub->pending_renewals = (object)[];
+                }
 
-        return $sub;
-    });
+                return $sub;
+            });
 
             // ONE-OFF REQUESTS
             $requestedOrders = FlowerRequest::where('user_id', $userId)
