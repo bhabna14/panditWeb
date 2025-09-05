@@ -27,6 +27,11 @@ public function flowerDashboard()
 {
     $activeSubscriptions = Subscription::where('status', 'active')->count();
 
+    $tomorrow = Carbon::tomorrow()->toDateString();
+    $tomorrowActiveOrder = Subscription::where('status', 'pending')
+        ->whereDate('start_date', $tomorrow)
+        ->count();
+
      $totalDeliveriesTodayCount = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
         ->count();
 
@@ -211,6 +216,7 @@ public function flowerDashboard()
 
             return view('admin/flower-dashboard', compact(
                 'activeSubscriptions',
+                'tomorrowActiveOrder',
                 'totalDeliveriesTodayCount',
                 'totalIncomeToday',
                 'todayTotalExpenditure',

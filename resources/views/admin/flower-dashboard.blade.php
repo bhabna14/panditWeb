@@ -19,7 +19,7 @@
             <h6 class="card-title-custom mb-4" style="font-size: 14px">Todays Transaction</h6>
             <div class="row">
 
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
@@ -41,8 +41,24 @@
                     </a>
                 </div>
 
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h5 class="mb-2 tx-12">Active Subscription/Total Delivery</h5>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">
+                                            {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+
                 <!-- New Subscription -->
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
                         <div class="card sales-card " style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
@@ -53,18 +69,12 @@
                                             ₹{{ number_format($totalIncomeToday, 2) }}</h4>
                                     </div>
                                 </div>
-                                {{-- <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-blue-500 to-teal-500 text-center align-self-center overflow-hidden">
-                                        <i class="fas fa-rupee-sign tx-16 text-white"></i>
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </a>
                 </div>
 
-                <div class="col-xl-4 col-lg-12 col-md-12 col-xs-12">
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                         <div class="row">
                             <div class="col-8">
@@ -74,14 +84,24 @@
                                         ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
                                 </div>
                             </div>
-                            {{-- <div class="col-4">
-                                <div
-                                    class="circle-icon bg-gradient-to-r from-pink-500 to-purple-600 text-center align-self-center overflow-hidden">
-                                    <i class="fas fa-money-bill-wave tx-16 text-white"></i>
-                                </div>
-                            </div> --}}
                         </div>
                     </div>
+                </div>
+
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'tomorrowOrder']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h5 class="mb-2 tx-12">Tomorrow Active Order</h5>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">
+                                           {{ $tomorrowActiveOrder }}</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
                 </div>
 
             </div>
@@ -367,7 +387,7 @@
                         </div>
                     </a>
                 </div>
-                
+
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
