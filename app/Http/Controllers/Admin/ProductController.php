@@ -388,12 +388,18 @@ class ProductController extends Controller
         return view('admin.manage-product', compact('products'));
     }
 
-    public function toggleProduct($id)
+    public function toggleProduct(Request $request, $id)
     {
         $product = FlowerProduct::findOrFail($id);
-        $product->status = ($product->status === 'active') ? 'deactive' : 'active';
+
+        // Flip status
+        $newStatus = $product->status === 'active' ? 'deactive' : 'active';
+        $product->status = $newStatus;
         $product->save();
 
+        $message = $newStatus === 'active' ? 'Product activated.' : 'Product deactivated.';
+
+        // Fallback: normal redirect back with flash message
         return redirect()->back()->with('success', 'Product status updated successfully.');
     }
 
