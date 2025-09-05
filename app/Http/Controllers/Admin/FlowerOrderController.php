@@ -82,6 +82,13 @@ class FlowerOrderController extends Controller
                 ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd]);
         }
 
+        if ($filter === 'tomorrowOrder') {
+            $tomorrow = Carbon::tomorrow()->toDateString();
+        $query->where('status', 'pending')
+        ->whereDate('start_date', $tomorrow);
+
+        }
+
         if ($filter === 'todayrequest') {
             $tz         = config('app.timezone');
             $todayStart = Carbon::today($tz)->startOfDay();
