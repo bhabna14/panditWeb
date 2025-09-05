@@ -412,6 +412,13 @@ class FlowerBookingController extends Controller
                         $sub->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
                         unset($sub->order->flowerPayments);
                     }
+
+                    $sub->pending_renewals = Subscription::where('user_id', $sub->user_id)
+                        ->where('order_id', $sub->order_id)
+                        ->where('status', 'pending')
+                        ->orderBy('start_date')
+                        ->get();
+                        
                     return $sub;
                 });
 
@@ -442,6 +449,8 @@ class FlowerBookingController extends Controller
 
                     return $requestRow;
                 });
+
+
 
             return response()->json([
                 'success' => true,
