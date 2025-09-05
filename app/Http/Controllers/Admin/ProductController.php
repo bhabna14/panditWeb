@@ -371,7 +371,7 @@ class ProductController extends Controller
     public function manageproduct()
     {
         $products = FlowerProduct::query()
-            ->where('status', 'active')
+            ->where('status','!=', 'deleted')
             ->select([
                 'id','product_id','name','product_image','mrp','price','discount','stock',
                 'category','status','benefits',
