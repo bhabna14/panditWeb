@@ -1484,271 +1484,272 @@ class FlowerBookingController extends Controller
     //         ], 500);
     //     }
     // }
-public function pause(Request $request, $order_id)
-{
-    // 1) Validate input (inclusive window)
-    $request->validate([
-        'pause_start_date' => ['required', 'date'],
-        'pause_end_date'   => ['required', 'date'],
-        'edit'             => ['nullable', 'string'], // "yes" or "no"
-        'pause_log_id'     => ['nullable', 'integer'],
-    ]);
-
-    $pauseStartDate = Carbon::parse($request->pause_start_date)->startOfDay();
-    $pauseEndDate   = Carbon::parse($request->pause_end_date)->startOfDay();
-
-    if ($pauseEndDate->lt($pauseStartDate)) {
-        return response()->json([
-            'success' => 422,
-            'message' => 'Pause end date must be on/after the start date.',
-        ], 422);
-    }
-
-    // Parse edit flag
-    $editRaw  = strtolower((string) $request->input('edit', 'no'));
-    $isEdit   = in_array($editRaw, ['yes','y','true','1'], true);
-    $targetId = $request->input('pause_log_id'); // optional when edit=yes
-
-    // Inclusive day count
-    $plannedPausedDays = $pauseStartDate->diffInDays($pauseEndDate) + 1;
-    $today             = Carbon::today();
-
-    try {
-        return DB::transaction(function () use (
-            $order_id, $pauseStartDate, $pauseEndDate, $plannedPausedDays, $today, $isEdit, $targetId
-        ) {
-            // 2) Lock subscription row
-            $subscription = Subscription::where('order_id', $order_id)
-                ->whereIn('status', ['active', 'paused'])
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            // Save prior window
-            $priorStart = $subscription->pause_start_date ? Carbon::parse($subscription->pause_start_date)->startOfDay() : null;
-            $priorEnd   = $subscription->pause_end_date   ? Carbon::parse($subscription->pause_end_date)->startOfDay()   : null;
-            $wasPausedToday = $priorStart && $priorEnd ? $today->between($priorStart, $priorEnd, true) : false;
-
-            // ---------- Decide which paused-log row to EDIT ----------
-            $editPausedLog = null;
-            if ($isEdit) {
-                if ($targetId) {
-                    $candidate = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                        ->where('order_id', $order_id)
-                        ->where('id', $targetId)
-                        ->where('action', 'paused')
-                        ->lockForUpdate()
-                        ->first();
-
-                    if ($candidate) {
-                        $hasResumedAfter = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                            ->where('order_id', $order_id)
-                            ->where('action', 'resumed')
-                            ->where('id', '>', $candidate->id)
-                            ->exists();
-                        if (!$hasResumedAfter) $editPausedLog = $candidate;
-                    }
-                }
-
-                if (!$editPausedLog && $priorStart && $priorEnd) {
-                    $candidate = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                        ->where('order_id', $order_id)
-                        ->where('action', 'paused')
-                        ->whereDate('pause_start_date', $priorStart->toDateString())
-                        ->whereDate('pause_end_date',   $priorEnd->toDateString())
-                        ->latest('id')
-                        ->lockForUpdate()
-                        ->first();
-
-                    if ($candidate) {
-                        $hasResumedAfter = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                            ->where('order_id', $order_id)
-                            ->where('action', 'resumed')
-                            ->where('id', '>', $candidate->id)
-                            ->exists();
-                        if (!$hasResumedAfter) $editPausedLog = $candidate;
-                    }
-                }
-
-                if (!$editPausedLog) {
-                    $latestPaused = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                        ->where('order_id', $order_id)
-                        ->where('action', 'paused')
-                        ->latest('id')
-                        ->lockForUpdate()
-                        ->first();
-
-                    if ($latestPaused) {
-                        $hasResumedAfter = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                            ->where('order_id', $order_id)
-                            ->where('action', 'resumed')
-                            ->where('id', '>', $latestPaused->id)
-                            ->exists();
-                        if (!$hasResumedAfter) $editPausedLog = $latestPaused;
-                    }
-                }
-            }
-
-            // 4) Overlap guard ONLY when subscription is currently paused
-            if ($subscription->status === 'paused') {
-                $overlapQuery = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                    ->where('order_id', $order_id)
-                    ->where('action', 'paused')
-                    ->when($editPausedLog, function ($q) use ($editPausedLog) {
-                        $q->where('id', '!=', $editPausedLog->id);
-                    })
-                    ->where(function ($q) use ($pauseStartDate, $pauseEndDate) {
-                        $start = $pauseStartDate->toDateString();
-                        $end   = $pauseEndDate->toDateString();
-
-                        $q->whereBetween(DB::raw('DATE(pause_start_date)'), [$start, $end])
-                          ->orWhereBetween(DB::raw('DATE(pause_end_date)'),   [$start, $end])
-                          ->orWhere(function ($q2) use ($start, $end) {
-                              $q2->whereDate('pause_start_date', '<=', $start)
-                                 ->whereDate('pause_end_date',   '>=', $end);
-                          });
-                    });
-
-                if ($overlapQuery->exists()) {
-                    return response()->json([
-                        'success' => 422,
-                        'message' => 'This pause window overlaps with another pause request for the same subscription.',
-                    ], 422);
-                }
-            }
-
-            // 5) Determine base end date
-            $effectiveEnd = Carbon::parse($subscription->new_date ?: $subscription->end_date)->startOfDay();
-            $baseEnd = clone $effectiveEnd;
-
-            $prevPausedDays = 0;
-            if ($isEdit && $editPausedLog) {
-                $prevPausedDays = (int) ($editPausedLog->paused_days ?? 0);
-                if ($prevPausedDays > 0) {
-                    $baseEnd = (clone $effectiveEnd)->subDays($prevPausedDays);
-                }
-            }
-
-            // 6) Compute new end date
-            $newEndDate = (clone $baseEnd)->addDays($plannedPausedDays);
-
-            // 7) Upsert the pause log
-            if ($isEdit && $editPausedLog) {
-                $editPausedLog->update([
-                    'pause_start_date' => $pauseStartDate->toDateString(),
-                    'pause_end_date'   => $pauseEndDate->toDateString(),
-                    'paused_days'      => $plannedPausedDays,
-                    'new_end_date'     => $newEndDate->toDateString(),
-                ]);
-            } else {
-                SubscriptionPauseResumeLog::create([
-                    'subscription_id'  => $subscription->subscription_id,
-                    'order_id'         => $order_id,
-                    'action'           => 'paused',
-                    'pause_start_date' => $pauseStartDate->toDateString(),
-                    'pause_end_date'   => $pauseEndDate->toDateString(),
-                    'paused_days'      => $plannedPausedDays,
-                    'new_end_date'     => $newEndDate->toDateString(),
-                ]);
-            }
-
-            /**
-             * 7.5) ✅ NEW: If same user has a pending subscription,
-             *      extend its start & end by paused days
-             */
-            $pendingUpdated = false;
-            $pendingBefore  = null;
-            $pendingAfter   = null;
-
-            $pendingRenew = Subscription::where('user_id', $subscription->user_id)
-                ->where('status', 'pending')
-                ->lockForUpdate()
-                ->orderBy('start_date')
-                ->first();
-
-            if ($pendingRenew) {
-                $pendingBefore = [
-                    'start_date' => $pendingRenew->start_date,
-                    'end_date'   => $pendingRenew->end_date,
-                    'new_date'   => $pendingRenew->new_date,
-                ];
-
-                $pendingRenew->start_date = Carbon::parse($pendingRenew->start_date)
-                    ->addDays($plannedPausedDays)
-                    ->toDateString();
-
-                $pendingRenew->end_date = Carbon::parse($pendingRenew->end_date)
-                    ->addDays($plannedPausedDays)
-                    ->toDateString();
-
-                if (!empty($pendingRenew->new_date)) {
-                    $pendingRenew->new_date = Carbon::parse($pendingRenew->new_date)
-                        ->addDays($plannedPausedDays)
-                        ->toDateString();
-                }
-
-                $pendingRenew->save();
-                $pendingUpdated = true;
-
-                $pendingAfter = [
-                    'start_date' => $pendingRenew->start_date,
-                    'end_date'   => $pendingRenew->end_date,
-                    'new_date'   => $pendingRenew->new_date,
-                ];
-            }
-
-            // 8) Update subscription itself
-            $subscription->pause_start_date = $pauseStartDate->toDateString();
-            $subscription->pause_end_date   = $pauseEndDate->toDateString();
-            $subscription->new_date         = $newEndDate->toDateString();
-
-            $isPausedTodayByNew = $today->between($pauseStartDate, $pauseEndDate, true);
-            if ($isEdit) {
-                $subscription->status = $isPausedTodayByNew ? 'paused' : 'active';
-            } else {
-                $subscription->status = ($isPausedTodayByNew || $wasPausedToday) ? 'paused' : 'active';
-            }
-
-            $subscription->save();
-
-            return response()->json([
-                'success' => 200,
-                'message' => $isEdit ? 'Pause updated successfully.' : 'Pause created successfully.',
-                'data' => [
-                    'subscription_id'  => $subscription->subscription_id,
-                    'order_id'         => $order_id,
-                    'pause_start_date' => $pauseStartDate->toDateString(),
-                    'pause_end_date'   => $pauseEndDate->toDateString(),
-                    'paused_days'      => $plannedPausedDays,
-                    'new_end_date'     => $newEndDate->toDateString(),
-                    'status'           => $subscription->status,
-                    'is_edit'          => $isEdit,
-                    'pending_updated'  => $pendingUpdated,
-                    'pending_snapshot' => [
-                        'before' => $pendingBefore,
-                        'after'  => $pendingAfter,
-                    ],
-                ]
-            ], 200);
-        });
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        return response()->json([
-            'success' => 404,
-            'message' => 'Subscription not found or inactive.',
-            'error'   => $e->getMessage()
-        ], 404);
-    } catch (\Throwable $e) {
-        Log::error('Error pausing subscription', [
-            'order_id' => $order_id,
-            'error'    => $e->getMessage(),
+    
+    public function pause(Request $request, $order_id)
+    {
+        // 1) Validate input (inclusive window)
+        $request->validate([
+            'pause_start_date' => ['required', 'date'],
+            'pause_end_date'   => ['required', 'date'],
+            'edit'             => ['nullable', 'string'], // "yes" or "no"
+            'pause_log_id'     => ['nullable', 'integer'],
         ]);
 
-        return response()->json([
-            'success' => 500,
-            'message' => 'An error occurred while saving the pause.',
-            'error'   => $e->getMessage()
-        ], 500);
+        $pauseStartDate = Carbon::parse($request->pause_start_date)->startOfDay();
+        $pauseEndDate   = Carbon::parse($request->pause_end_date)->startOfDay();
+
+        if ($pauseEndDate->lt($pauseStartDate)) {
+            return response()->json([
+                'success' => 422,
+                'message' => 'Pause end date must be on/after the start date.',
+            ], 422);
+        }
+
+        // Parse edit flag
+        $editRaw  = strtolower((string) $request->input('edit', 'no'));
+        $isEdit   = in_array($editRaw, ['yes','y','true','1'], true);
+        $targetId = $request->input('pause_log_id'); // optional when edit=yes
+
+        // Inclusive day count
+        $plannedPausedDays = $pauseStartDate->diffInDays($pauseEndDate) + 1;
+        $today             = Carbon::today();
+
+        try {
+            return DB::transaction(function () use (
+                $order_id, $pauseStartDate, $pauseEndDate, $plannedPausedDays, $today, $isEdit, $targetId
+            ) {
+                // 2) Lock subscription row
+                $subscription = Subscription::where('order_id', $order_id)
+                    ->whereIn('status', ['active', 'paused'])
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                // Save prior window
+                $priorStart = $subscription->pause_start_date ? Carbon::parse($subscription->pause_start_date)->startOfDay() : null;
+                $priorEnd   = $subscription->pause_end_date   ? Carbon::parse($subscription->pause_end_date)->startOfDay()   : null;
+                $wasPausedToday = $priorStart && $priorEnd ? $today->between($priorStart, $priorEnd, true) : false;
+
+                // ---------- Decide which paused-log row to EDIT ----------
+                $editPausedLog = null;
+                if ($isEdit) {
+                    if ($targetId) {
+                        $candidate = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                            ->where('order_id', $order_id)
+                            ->where('id', $targetId)
+                            ->where('action', 'paused')
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($candidate) {
+                            $hasResumedAfter = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                                ->where('order_id', $order_id)
+                                ->where('action', 'resumed')
+                                ->where('id', '>', $candidate->id)
+                                ->exists();
+                            if (!$hasResumedAfter) $editPausedLog = $candidate;
+                        }
+                    }
+
+                    if (!$editPausedLog && $priorStart && $priorEnd) {
+                        $candidate = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                            ->where('order_id', $order_id)
+                            ->where('action', 'paused')
+                            ->whereDate('pause_start_date', $priorStart->toDateString())
+                            ->whereDate('pause_end_date',   $priorEnd->toDateString())
+                            ->latest('id')
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($candidate) {
+                            $hasResumedAfter = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                                ->where('order_id', $order_id)
+                                ->where('action', 'resumed')
+                                ->where('id', '>', $candidate->id)
+                                ->exists();
+                            if (!$hasResumedAfter) $editPausedLog = $candidate;
+                        }
+                    }
+
+                    if (!$editPausedLog) {
+                        $latestPaused = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                            ->where('order_id', $order_id)
+                            ->where('action', 'paused')
+                            ->latest('id')
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($latestPaused) {
+                            $hasResumedAfter = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                                ->where('order_id', $order_id)
+                                ->where('action', 'resumed')
+                                ->where('id', '>', $latestPaused->id)
+                                ->exists();
+                            if (!$hasResumedAfter) $editPausedLog = $latestPaused;
+                        }
+                    }
+                }
+
+                // 4) Overlap guard ONLY when subscription is currently paused
+                if ($subscription->status === 'paused') {
+                    $overlapQuery = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                        ->where('order_id', $order_id)
+                        ->where('action', 'paused')
+                        ->when($editPausedLog, function ($q) use ($editPausedLog) {
+                            $q->where('id', '!=', $editPausedLog->id);
+                        })
+                        ->where(function ($q) use ($pauseStartDate, $pauseEndDate) {
+                            $start = $pauseStartDate->toDateString();
+                            $end   = $pauseEndDate->toDateString();
+
+                            $q->whereBetween(DB::raw('DATE(pause_start_date)'), [$start, $end])
+                            ->orWhereBetween(DB::raw('DATE(pause_end_date)'),   [$start, $end])
+                            ->orWhere(function ($q2) use ($start, $end) {
+                                $q2->whereDate('pause_start_date', '<=', $start)
+                                    ->whereDate('pause_end_date',   '>=', $end);
+                            });
+                        });
+
+                    if ($overlapQuery->exists()) {
+                        return response()->json([
+                            'success' => 422,
+                            'message' => 'This pause window overlaps with another pause request for the same subscription.',
+                        ], 422);
+                    }
+                }
+
+                // 5) Determine base end date
+                $effectiveEnd = Carbon::parse($subscription->new_date ?: $subscription->end_date)->startOfDay();
+                $baseEnd = clone $effectiveEnd;
+
+                $prevPausedDays = 0;
+                if ($isEdit && $editPausedLog) {
+                    $prevPausedDays = (int) ($editPausedLog->paused_days ?? 0);
+                    if ($prevPausedDays > 0) {
+                        $baseEnd = (clone $effectiveEnd)->subDays($prevPausedDays);
+                    }
+                }
+
+                // 6) Compute new end date
+                $newEndDate = (clone $baseEnd)->addDays($plannedPausedDays);
+
+                // 7) Upsert the pause log
+                if ($isEdit && $editPausedLog) {
+                    $editPausedLog->update([
+                        'pause_start_date' => $pauseStartDate->toDateString(),
+                        'pause_end_date'   => $pauseEndDate->toDateString(),
+                        'paused_days'      => $plannedPausedDays,
+                        'new_end_date'     => $newEndDate->toDateString(),
+                    ]);
+                } else {
+                    SubscriptionPauseResumeLog::create([
+                        'subscription_id'  => $subscription->subscription_id,
+                        'order_id'         => $order_id,
+                        'action'           => 'paused',
+                        'pause_start_date' => $pauseStartDate->toDateString(),
+                        'pause_end_date'   => $pauseEndDate->toDateString(),
+                        'paused_days'      => $plannedPausedDays,
+                        'new_end_date'     => $newEndDate->toDateString(),
+                    ]);
+                }
+
+                /**
+                 * 7.5) ✅ NEW: If same user has a pending subscription,
+                 *      extend its start & end by paused days
+                 */
+                $pendingUpdated = false;
+                $pendingBefore  = null;
+                $pendingAfter   = null;
+
+                $pendingRenew = Subscription::where('user_id', $subscription->user_id)
+                    ->where('status', 'pending')
+                    ->lockForUpdate()
+                    ->orderBy('start_date')
+                    ->first();
+
+                if ($pendingRenew) {
+                    $pendingBefore = [
+                        'start_date' => $pendingRenew->start_date,
+                        'end_date'   => $pendingRenew->end_date,
+                        'new_date'   => $pendingRenew->new_date,
+                    ];
+
+                    $pendingRenew->start_date = Carbon::parse($pendingRenew->start_date)
+                        ->addDays($plannedPausedDays)
+                        ->toDateString();
+
+                    $pendingRenew->end_date = Carbon::parse($pendingRenew->end_date)
+                        ->addDays($plannedPausedDays)
+                        ->toDateString();
+
+                    if (!empty($pendingRenew->new_date)) {
+                        $pendingRenew->new_date = Carbon::parse($pendingRenew->new_date)
+                            ->addDays($plannedPausedDays)
+                            ->toDateString();
+                    }
+
+                    $pendingRenew->save();
+                    $pendingUpdated = true;
+
+                    $pendingAfter = [
+                        'start_date' => $pendingRenew->start_date,
+                        'end_date'   => $pendingRenew->end_date,
+                        'new_date'   => $pendingRenew->new_date,
+                    ];
+                }
+
+                // 8) Update subscription itself
+                $subscription->pause_start_date = $pauseStartDate->toDateString();
+                $subscription->pause_end_date   = $pauseEndDate->toDateString();
+                $subscription->new_date         = $newEndDate->toDateString();
+
+                $isPausedTodayByNew = $today->between($pauseStartDate, $pauseEndDate, true);
+                if ($isEdit) {
+                    $subscription->status = $isPausedTodayByNew ? 'paused' : 'active';
+                } else {
+                    $subscription->status = ($isPausedTodayByNew || $wasPausedToday) ? 'paused' : 'active';
+                }
+
+                $subscription->save();
+
+                return response()->json([
+                    'success' => 200,
+                    'message' => $isEdit ? 'Pause updated successfully.' : 'Pause created successfully.',
+                    'data' => [
+                        'subscription_id'  => $subscription->subscription_id,
+                        'order_id'         => $order_id,
+                        'pause_start_date' => $pauseStartDate->toDateString(),
+                        'pause_end_date'   => $pauseEndDate->toDateString(),
+                        'paused_days'      => $plannedPausedDays,
+                        'new_end_date'     => $newEndDate->toDateString(),
+                        'status'           => $subscription->status,
+                        'is_edit'          => $isEdit,
+                        'pending_updated'  => $pendingUpdated,
+                        'pending_snapshot' => [
+                            'before' => $pendingBefore,
+                            'after'  => $pendingAfter,
+                        ],
+                    ]
+                ], 200);
+            });
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => 404,
+                'message' => 'Subscription not found or inactive.',
+                'error'   => $e->getMessage()
+            ], 404);
+        } catch (\Throwable $e) {
+            Log::error('Error pausing subscription', [
+                'order_id' => $order_id,
+                'error'    => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => 500,
+                'message' => 'An error occurred while saving the pause.',
+                'error'   => $e->getMessage()
+            ], 500);
+        }
     }
-}
 
     public function resume(Request $request, $order_id)
     {
