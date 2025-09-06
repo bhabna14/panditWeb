@@ -74,7 +74,7 @@
                     <ul class="slide-menu">
                         <li><a class="sub-side-menu__item" href="{{ url('admin/add-product') }}">Add Product</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('manageproduct') }}">Manage Product</a></li>
-                                                <li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Create Order (New)</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Create Order (New)</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/existing-user') }}">Create Order (Existing)</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Customize Order</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.orders.index') }}">Manage Flower Subscription</a></li>
@@ -216,16 +216,11 @@
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription
-                                Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower
-                                Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower
-                                Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower Reports</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/reports/flower-estimates') }}">Flower Estimate</a></li>
-
                         <li><a class="sub-side-menu__item" href="{{ url('admin/reports/flower-compare') }}">Flower Compare</a></li>
-
                     </ul>
                 </li>
 
