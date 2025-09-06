@@ -1783,10 +1783,7 @@ class FlowerBookingController extends Controller
     //         ], 500);
     //     }
     // }
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Carbon\Carbon;
+
 
 public function pause(Request $request, $order_id)
 {
