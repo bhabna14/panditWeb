@@ -201,7 +201,7 @@ class OtpController extends Controller
         $phone = $request->phone;
         // 👉 If the number is the special one, use static OTP
         if ($phone === '917749968976') {
-            $otp = 000000; // static OTP
+            $otp = 123456; // static OTP
         } else {
             $otp = random_int(100000, 999999); // normal flow
         }
