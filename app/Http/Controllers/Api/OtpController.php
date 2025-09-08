@@ -332,6 +332,8 @@ class OtpController extends Controller
             ], 404);
         }
 
+        dd($request->phoneNumber, $request->otp);
+
         // 👉 Special case: fixed OTP for test number
         if ($request->phoneNumber === '919876543210' && $request->otp === '123456') {
             // bypass OTP check
