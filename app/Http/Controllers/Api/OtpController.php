@@ -191,7 +191,7 @@ class OtpController extends Controller
     //         ], 500);
     //     }
     // }
-
+        
     public function sendOtp(Request $request)
     {
         $request->validate([
@@ -201,12 +201,12 @@ class OtpController extends Controller
         $phone = $request->phone;
         $shortToken = Str::random(6);
 
-        // 👉 Special static number
-        if ($phone === '919876543210') {
-            $otp = 123456; // static
+        // 👉 Special static number (without country code)
+        if ($phone === '9876543210') {
+            $otp = 123456; // static OTP
             $skipWhatsApp = true;
         } else {
-            $otp = random_int(100000, 999999);
+            $otp = random_int(100000, 999999); // normal random OTP
             $skipWhatsApp = false;
         }
 
@@ -314,7 +314,6 @@ class OtpController extends Controller
             ], 500);
         }
     }
-
     public function verifyOtp(Request $request)
     {
         $request->validate([
@@ -333,9 +332,9 @@ class OtpController extends Controller
             ], 404);
         }
 
-        // 👉 Special case: auto-authentication
-        if ($request->phoneNumber === '919876543210' && $request->otp === '123456') {
-            // continue without OTP check
+        // 👉 Special case: auto-authentication for test number
+        if ($request->phoneNumber === '9876543210' && $request->otp === '123456') {
+            // skip OTP check
         } else {
             // Normal OTP match
             if ((string)$user->otp !== (string)$request->otp) {
@@ -350,7 +349,7 @@ class OtpController extends Controller
             $user->referral_code = $this->generateReferralCode();
         }
 
-        // Clear OTP for normal users (keep null always)
+        // Clear OTP after success
         $user->otp = null;
         $user->save();
 
