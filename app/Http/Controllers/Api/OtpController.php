@@ -334,7 +334,7 @@ class OtpController extends Controller
         }
 
         // 👉 Special case: auto-authentication
-        if ($request->phoneNumber === '7749968976' && $request->otp === '000000') {
+        if ($request->phoneNumber === '919876543210' && $request->otp === '123456') {
             // continue without OTP check
         } else {
             // Normal OTP match
