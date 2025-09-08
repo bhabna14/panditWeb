@@ -202,7 +202,7 @@ public function sendOtp(Request $request)
     $shortToken = Str::random(6); // max 15 characters
 
     // ✅ Special static OTP case
-    if ($phone === '7008515765') {
+    if ($phone === '917008515765') {
         $otp = 123456;
         $skipWhatsApp = true;
     } else {
@@ -340,7 +340,7 @@ public function verifyOtp(Request $request)
     }
 
     // ✅ Special static OTP case
-    if ($phone === '7008515765') {
+    if ($phone === '917008515765') {
         if ($request->otp !== '123456') {
             return response()->json(['message' => 'Invalid OTP.'], 401);
         }
