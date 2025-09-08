@@ -1870,173 +1870,171 @@ class FlowerBookingController extends Controller
         }
     }
 
+    public function deletePause(Request $request, $order_id)
+    {
+        $pauseLogId = $request->input('pause_log_id'); // optional
 
-public function deletePause(Request $request, $order_id)
-{
-    $pauseLogId = $request->input('pause_log_id'); // optional
-
-    try {
-        return DB::transaction(function () use ($order_id, $pauseLogId) {
-            // 1) Lock the current subscription (expected states)
-            $subscription = Subscription::where('order_id', $order_id)
-                ->whereIn('status', ['active', 'paused'])
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            // 2) Identify which paused log to delete (specific or latest)
-            $pausedLogQuery = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                ->where('order_id', $order_id)
-                ->where('action', 'paused');
-
-            if ($pauseLogId) {
-                $pausedLogQuery->where('id', $pauseLogId);
-            } else {
-                $pausedLogQuery->latest('id');
-            }
-
-            /** @var \App\Models\SubscriptionPauseResumeLog $pausedLog */
-            $pausedLog = $pausedLogQuery->lockForUpdate()->first();
-
-            if (!$pausedLog) {
-                return response()->json([
-                    'success' => 404,
-                    'message' => 'Pause request not found for this order/subscription.',
-                ], 404);
-            }
-
-            // 3) Block deletion if this pause has a subsequent 'resumed'
-            $hasResumedAfter = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
-                ->where('order_id', $order_id)
-                ->where('action', 'resumed')
-                ->where('id', '>', $pausedLog->id)
-                ->exists();
-
-            if ($hasResumedAfter) {
-                return response()->json([
-                    'success' => 422,
-                    'message' => 'This pause has already been resumed and cannot be deleted.',
-                ], 422);
-            }
-
-            // 4) Roll back the extension on the CURRENT subscription
-            $pausedDays   = (int) ($pausedLog->paused_days ?? 0);
-            $effectiveEnd = Carbon::parse($subscription->new_date ?: $subscription->end_date)->startOfDay();
-            $revertedEnd  = (clone $effectiveEnd)->subDays($pausedDays);
-            $origEnd      = Carbon::parse($subscription->end_date)->startOfDay();
-
-            $newDateToStore = $revertedEnd->equalTo($origEnd) ? null : $revertedEnd->toDateString();
-
-            // 5) Also roll back future PENDING/RENEW subscriptions for the SAME USER
-            //    (Shift back by pausedDays)
-            $rolledBackRows = [];
-            if ($pausedDays !== 0) {
-                $futureSubs = Subscription::where('user_id', $subscription->user_id)
-                    ->whereIn('status', 'pending')
+        try {
+            return DB::transaction(function () use ($order_id, $pauseLogId) {
+                // 1) Lock the current subscription (expected states)
+                $subscription = Subscription::where('order_id', $order_id)
+                    ->whereIn('status', ['active', 'paused'])
                     ->lockForUpdate()
-                    ->get();
+                    ->firstOrFail();
 
-                foreach ($futureSubs as $fs) {
-                    $before = [
-                        'subscription_id' => $fs->subscription_id,
-                        'order_id'        => $fs->order_id,
-                        'start_date'      => $fs->start_date,
-                        'end_date'        => $fs->end_date,
-                        'new_date'        => $fs->new_date,
-                        'status'          => $fs->status,
-                    ];
+                // 2) Identify which paused log to delete (specific or latest)
+                $pausedLogQuery = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                    ->where('order_id', $order_id)
+                    ->where('action', 'paused');
 
-                    $fs->start_date = Carbon::parse($fs->start_date)->startOfDay()->subDays($pausedDays)->toDateString();
-                    $fs->end_date   = Carbon::parse($fs->end_date)->startOfDay()->subDays($pausedDays)->toDateString();
-                    if (!empty($fs->new_date)) {
-                        $fs->new_date = Carbon::parse($fs->new_date)->startOfDay()->subDays($pausedDays)->toDateString();
-                    }
-                    $fs->save();
-
-                    $rolledBackRows[] = [
-                        'before' => $before,
-                        'after'  => [
-                            'start_date' => $fs->start_date,
-                            'end_date'   => $fs->end_date,
-                            'new_date'   => $fs->new_date,
-                            'status'     => $fs->status,
-                        ],
-                        'shift_reversed_days' => $pausedDays,
-                    ];
+                if ($pauseLogId) {
+                    $pausedLogQuery->where('id', $pauseLogId);
+                } else {
+                    $pausedLogQuery->latest('id');
                 }
-            }
 
-            // 6) If the subscription's current window matches this paused log, clear it
-            $subPauseStart = $subscription->pause_start_date ? Carbon::parse($subscription->pause_start_date)->toDateString() : null;
-            $subPauseEnd   = $subscription->pause_end_date ? Carbon::parse($subscription->pause_end_date)->toDateString() : null;
+                /** @var \App\Models\SubscriptionPauseResumeLog $pausedLog */
+                $pausedLog = $pausedLogQuery->lockForUpdate()->first();
 
-            $matchesCurrentWindow = (
-                $subPauseStart === ($pausedLog->pause_start_date ? Carbon::parse($pausedLog->pause_start_date)->toDateString() : null) &&
-                $subPauseEnd   === ($pausedLog->pause_end_date   ? Carbon::parse($pausedLog->pause_end_date)->toDateString()   : null)
-            );
+                if (!$pausedLog) {
+                    return response()->json([
+                        'success' => 404,
+                        'message' => 'Pause request not found for this order/subscription.',
+                    ], 404);
+                }
 
-            if ($matchesCurrentWindow) {
-                $subscription->pause_start_date = null;
-                $subscription->pause_end_date   = null;
-            }
+                // 3) Block deletion if this pause has a subsequent 'resumed'
+                $hasResumedAfter = SubscriptionPauseResumeLog::where('subscription_id', $subscription->subscription_id)
+                    ->where('order_id', $order_id)
+                    ->where('action', 'resumed')
+                    ->where('id', '>', $pausedLog->id)
+                    ->exists();
 
-            // 7) If we are currently inside this deleted window, flip back to active
-            $today = Carbon::today();
-            $inThisWindowToday = false;
-            if ($pausedLog->pause_start_date && $pausedLog->pause_end_date) {
-                $start = Carbon::parse($pausedLog->pause_start_date)->startOfDay();
-                $end   = Carbon::parse($pausedLog->pause_end_date)->startOfDay();
-                $inThisWindowToday = $today->between($start, $end, true);
-            }
+                if ($hasResumedAfter) {
+                    return response()->json([
+                        'success' => 422,
+                        'message' => 'This pause has already been resumed and cannot be deleted.',
+                    ], 422);
+                }
 
-            $subscription->new_date = $newDateToStore;
-            if ($inThisWindowToday || $subscription->status === 'paused') {
-                $subscription->status = 'active';
-            }
-            $subscription->save();
+                // 4) Roll back the extension on the CURRENT subscription
+                $pausedDays   = (int) ($pausedLog->paused_days ?? 0);
+                $effectiveEnd = Carbon::parse($subscription->new_date ?: $subscription->end_date)->startOfDay();
+                $revertedEnd  = (clone $effectiveEnd)->subDays($pausedDays);
+                $origEnd      = Carbon::parse($subscription->end_date)->startOfDay();
+                $newDateToStore = $revertedEnd->equalTo($origEnd) ? null : $revertedEnd->toDateString();
 
-            // 8) Delete the pause log itself
-            $deletedId = $pausedLog->id;
-            $pausedLog->delete();
+                // 5) Roll back future PENDING subscriptions for the SAME USER
+                //    (If you also want 'renew', change to ->whereIn('status', ['pending','renew']))
+                $rolledBackRows = [];
+                if ($pausedDays !== 0) {
+                    $futureSubs = Subscription::where('user_id', $subscription->user_id)
+                        ->where('status', 'pending') // <-- fixed (was whereIn with string)
+                        ->lockForUpdate()
+                        ->get();
 
-            Log::info('Deleted pause request with future pending/renew rollback', [
-                'order_id'         => $order_id,
-                'subscription_id'  => $subscription->subscription_id,
-                'deleted_log_id'   => $deletedId,
-                'new_date_after'   => $subscription->new_date,
-                'status_after'     => $subscription->status,
-                'rolled_back_rows' => $rolledBackRows,
-            ]);
+                    foreach ($futureSubs as $fs) {
+                        $before = [
+                            'subscription_id' => $fs->subscription_id,
+                            'order_id'        => $fs->order_id,
+                            'start_date'      => $fs->start_date,
+                            'end_date'        => $fs->end_date,
+                            'new_date'        => $fs->new_date,
+                            'status'          => $fs->status,
+                        ];
 
+                        $fs->start_date = Carbon::parse($fs->start_date)->startOfDay()->subDays($pausedDays)->toDateString();
+                        $fs->end_date   = Carbon::parse($fs->end_date)->startOfDay()->subDays($pausedDays)->toDateString();
+                        if (!empty($fs->new_date)) {
+                            $fs->new_date = Carbon::parse($fs->new_date)->startOfDay()->subDays($pausedDays)->toDateString();
+                        }
+                        $fs->save();
+
+                        $rolledBackRows[] = [
+                            'before' => $before,
+                            'after'  => [
+                                'start_date' => $fs->start_date,
+                                'end_date'   => $fs->end_date,
+                                'new_date'   => $fs->new_date,
+                                'status'     => $fs->status,
+                            ],
+                            'shift_reversed_days' => $pausedDays,
+                        ];
+                    }
+                }
+
+                // 6) If the subscription's current window matches this paused log, clear it
+                $subPauseStart = $subscription->pause_start_date ? Carbon::parse($subscription->pause_start_date)->toDateString() : null;
+                $subPauseEnd   = $subscription->pause_end_date ? Carbon::parse($subscription->pause_end_date)->toDateString() : null;
+
+                $matchesCurrentWindow = (
+                    $subPauseStart === ($pausedLog->pause_start_date ? Carbon::parse($pausedLog->pause_start_date)->toDateString() : null) &&
+                    $subPauseEnd   === ($pausedLog->pause_end_date   ? Carbon::parse($pausedLog->pause_end_date)->toDateString()   : null)
+                );
+
+                if ($matchesCurrentWindow) {
+                    $subscription->pause_start_date = null;
+                    $subscription->pause_end_date   = null;
+                }
+
+                // 7) If we are currently inside this deleted window, flip back to active
+                $today = Carbon::today();
+                $inThisWindowToday = false;
+                if ($pausedLog->pause_start_date && $pausedLog->pause_end_date) {
+                    $start = Carbon::parse($pausedLog->pause_start_date)->startOfDay();
+                    $end   = Carbon::parse($pausedLog->pause_end_date)->startOfDay();
+                    $inThisWindowToday = $today->between($start, $end, true);
+                }
+
+                $subscription->new_date = $newDateToStore;
+                if ($inThisWindowToday || $subscription->status === 'paused') {
+                    $subscription->status = 'active';
+                }
+                $subscription->save();
+
+                // 8) Delete the pause log itself
+                $deletedId = $pausedLog->id;
+                $pausedLog->delete();
+
+                Log::info('Deleted pause request with future pending rollback', [
+                    'order_id'         => $order_id,
+                    'subscription_id'  => $subscription->subscription_id,
+                    'deleted_log_id'   => $deletedId,
+                    'new_date_after'   => $subscription->new_date,
+                    'status_after'     => $subscription->status,
+                    'rolled_back_rows' => $rolledBackRows,
+                ]);
+
+                return response()->json([
+                    'success' => 200,
+                    'message' => 'Pause request deleted; subscription and pending orders rolled back.',
+                    'data' => [
+                        'subscription_id'   => $subscription->subscription_id,
+                        'order_id'          => $order_id,
+                        'new_effective_end' => $subscription->new_date ?: $subscription->end_date,
+                        'status'            => $subscription->status,
+                        'rolled_back'       => $rolledBackRows,
+                    ],
+                ], 200);
+            });
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
-                'success' => 200,
-                'message' => 'Pause request deleted; subscription and pending/renew orders rolled back.',
-                'data' => [
-                    'subscription_id'   => $subscription->subscription_id,
-                    'order_id'          => $order_id,
-                    'new_effective_end' => $subscription->new_date ?: $subscription->end_date,
-                    'status'            => $subscription->status,
-                    'rolled_back'       => $rolledBackRows,
-                ],
-            ], 200);
-        });
-    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-        return response()->json([
-            'success' => 404,
-            'message' => 'Subscription not found or not deletable.',
-            'error'   => $e->getMessage(),
-        ], 404);
-    } catch (\Throwable $e) {
-        Log::error('Error deleting pause request', [
-            'order_id' => $order_id,
-            'error'    => $e->getMessage(),
-        ]);
-        return response()->json([
-            'success' => 500,
-            'message' => 'An error occurred while deleting the pause request.',
-            'error'   => $e->getMessage(),
-        ], 500);
+                'success' => 404,
+                'message' => 'Subscription not found or not deletable.',
+                'error'   => $e->getMessage(),
+            ], 404);
+        } catch (\Throwable $e) {
+            Log::error('Error deleting pause request', [
+                'order_id' => $order_id,
+                'error'    => $e->getMessage(),
+            ]);
+            return response()->json([
+                'success' => 500,
+                'message' => 'An error occurred while deleting the pause request.',
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
     }
-}
 
     public function getApplication()
     {
