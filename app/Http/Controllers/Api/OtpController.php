@@ -202,7 +202,7 @@ class OtpController extends Controller
         $shortToken = Str::random(6);
 
         // 👉 Special static number (without country code)
-        if ($phone === '7749968976') {
+        if ($phone === '919876543210') {
             $otp = 123456; // static OTP
             $skipWhatsApp = true;
         } else {
@@ -333,7 +333,7 @@ class OtpController extends Controller
         }
 
         // 👉 Special case: auto-authentication for test number
-        if ($request->phoneNumber === '7749968976' && $request->otp === '123456') {
+        if ($request->phoneNumber === '919876543210' && $request->otp === '123456') {
             // skip OTP check
         } else {
             // Normal OTP match
