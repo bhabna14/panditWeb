@@ -192,200 +192,200 @@ class OtpController extends Controller
     //     }
     // }
 
-public function sendOtp(Request $request)
-{
-    $request->validate([
-        'phone' => 'required|string',
-    ]);
+    public function sendOtp(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string',
+        ]);
 
-    $phone = $request->phone;
-    $shortToken = Str::random(6); // max 15 characters
+        $phone = $request->phone;
+        $shortToken = Str::random(6); // max 15 characters
 
-    // ✅ Special static OTP case
-    if ($phone === '917008515765') {
-        $otp = 123456;
-        $skipWhatsApp = true;
-    } else {
-        $otp = random_int(100000, 999999); // normal flow
-        $skipWhatsApp = false;
-    }
-
-    // 🔍 Check if user exists
-    $pandit = User::where('mobile_number', $phone)->first();
-
-    if ($pandit) {
-        // Existing user → update OTP
-        $pandit->otp = $otp;
-
-        if (empty($pandit->referral_code)) {
-            $pandit->referral_code = $this->generateReferralCode();
+        // ✅ Special static OTP case
+        if ($phone === '917008515765') {
+            $otp = 123456;
+            $skipWhatsApp = true;
+        } else {
+            $otp = random_int(100000, 999999); // normal flow
+            $skipWhatsApp = false;
         }
 
-        $pandit->save();
-        $status = 'existing';
-    } else {
-        // New user → create
-        $pandit = User::create([
-            'mobile_number' => $phone,
-            'otp'           => $otp,
-            'userid'        => 'USER' . random_int(10000, 99999),
-            'referral_code' => $this->generateReferralCode(),
-        ]);
-        $status = 'new';
-    }
+        // 🔍 Check if user exists
+        $pandit = User::where('mobile_number', $phone)->first();
 
-    // ✅ If test number → skip MSG91 call
-    if ($skipWhatsApp) {
-        return response()->json([
-            'success'       => true,
-            'message'       => 'Static OTP generated (test mode).',
-            'user_status'   => $status,
-            'otp'           => $otp, // Exposed for testing only
-            'referral_code' => $pandit->referral_code,
-        ], 200);
-    }
+        if ($pandit) {
+            // Existing user → update OTP
+            $pandit->otp = $otp;
 
-    // ✅ Otherwise → send via MSG91 WhatsApp
-    $payload = [
-        "integrated_number" => env('MSG91_WA_NUMBER'),
-        "content_type" => "template",
-        "payload" => [
-            "messaging_product" => "whatsapp",
-            "to" => $phone,
-            "type" => "template",
-            "template" => [
-                "name" => env('MSG91_WA_TEMPLATE'),
-                "language" => [
-                    "code" => "en",
-                    "policy" => "deterministic"
-                ],
-                "namespace" => env('MSG91_WA_NAMESPACE'),
-                "components" => [
-                    [
-                        "type" => "body",
-                        "parameters" => [
-                            [
-                                "type" => "text",
-                                "text" => (string) $otp
-                            ]
-                        ]
+            if (empty($pandit->referral_code)) {
+                $pandit->referral_code = $this->generateReferralCode();
+            }
+
+            $pandit->save();
+            $status = 'existing';
+        } else {
+            // New user → create
+            $pandit = User::create([
+                'mobile_number' => $phone,
+                'otp'           => $otp,
+                'userid'        => 'USER' . random_int(10000, 99999),
+                'referral_code' => $this->generateReferralCode(),
+            ]);
+            $status = 'new';
+        }
+
+        // ✅ If test number → skip MSG91 call
+        if ($skipWhatsApp) {
+            return response()->json([
+                'success'       => true,
+                'message'       => 'Static OTP generated (test mode).',
+                'user_status'   => $status,
+                'otp'           => $otp, // Exposed for testing only
+                'referral_code' => $pandit->referral_code,
+            ], 200);
+        }
+
+        // ✅ Otherwise → send via MSG91 WhatsApp
+        $payload = [
+            "integrated_number" => env('MSG91_WA_NUMBER'),
+            "content_type" => "template",
+            "payload" => [
+                "messaging_product" => "whatsapp",
+                "to" => $phone,
+                "type" => "template",
+                "template" => [
+                    "name" => env('MSG91_WA_TEMPLATE'),
+                    "language" => [
+                        "code" => "en",
+                        "policy" => "deterministic"
                     ],
-                    [
-                        "type" => "button",
-                        "sub_type" => "url",
-                        "index" => 0,
-                        "parameters" => [
-                            [
-                                "type" => "text",
-                                "text" => $shortToken
+                    "namespace" => env('MSG91_WA_NAMESPACE'),
+                    "components" => [
+                        [
+                            "type" => "body",
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => (string) $otp
+                                ]
+                            ]
+                        ],
+                        [
+                            "type" => "button",
+                            "sub_type" => "url",
+                            "index" => 0,
+                            "parameters" => [
+                                [
+                                    "type" => "text",
+                                    "text" => $shortToken
+                                ]
                             ]
                         ]
                     ]
                 ]
             ]
-        ]
-    ];
+        ];
 
-    try {
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json',
-            'authkey'      => env('MSG91_AUTHKEY'),
-        ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+                'authkey'      => env('MSG91_AUTHKEY'),
+            ])->post('https://api.msg91.com/api/v5/whatsapp/whatsapp-outbound-message/', $payload);
 
-        $result = $response->json();
+            $result = $response->json();
 
-        if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+            if ($response->status() === 401 || ($result['status'] ?? '') === 'fail') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
+                    'error'   => $result
+                ], 401);
+            }
+
+            return response()->json([
+                'success'       => true,
+                'message'       => 'OTP sent successfully',
+                'user_status'   => $status,
+                'token'         => $shortToken,
+                'referral_code' => $pandit->referral_code,
+                'api_response'  => $result
+            ]);
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized: Check MSG91 credentials or template settings.',
-                'error'   => $result
-            ], 401);
+                'message' => 'Failed to send OTP',
+                'error'   => $e->getMessage()
+            ], 500);
         }
-
-        return response()->json([
-            'success'       => true,
-            'message'       => 'OTP sent successfully',
-            'user_status'   => $status,
-            'token'         => $shortToken,
-            'referral_code' => $pandit->referral_code,
-            'api_response'  => $result
+    }
+    public function verifyOtp(Request $request)
+    {
+        $request->validate([
+            'phoneNumber'  => 'required|string',
+            'otp'          => 'required|string',
+            'device_id'    => 'required|string',
+            'platform'     => 'required|string',
+            'device_model' => 'required|string',
         ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Failed to send OTP',
-            'error'   => $e->getMessage()
-        ], 500);
-    }
-}
-public function verifyOtp(Request $request)
-{
-    $request->validate([
-        'phoneNumber'  => 'required|string',
-        'otp'          => 'required|string',
-        'device_id'    => 'required|string',
-        'platform'     => 'required|string',
-        'device_model' => 'required|string',
-    ]);
 
-    $phone = $request->phoneNumber;
+        $phone = $request->phoneNumber;
 
-    // Find user by phone number
-    $user = User::where('mobile_number', $phone)->first();
+        // Find user by phone number
+        $user = User::where('mobile_number', $phone)->first();
 
-    if (!$user) {
-        return response()->json([
-            'message' => 'Mobile number not found. Please request OTP first.'
-        ], 404);
-    }
-
-    // ✅ Special static OTP case
-    if ($phone === '917008515765') {
-        if ($request->otp !== '123456') {
-            return response()->json(['message' => 'Invalid OTP.'], 401);
+        if (!$user) {
+            return response()->json([
+                'message' => 'Mobile number not found. Please request OTP first.'
+            ], 404);
         }
-    } else {
-        // Normal OTP check
-        if ((string)$user->otp !== (string)$request->otp) {
-            return response()->json(['message' => 'Invalid OTP.'], 401);
+
+        // ✅ Special static OTP case
+        if ($phone === '917008515765') {
+            if ($request->otp !== '123456') {
+                return response()->json(['message' => 'Invalid OTP.'], 401);
+            }
+        } else {
+            // Normal OTP check
+            if ((string)$user->otp !== (string)$request->otp) {
+                return response()->json(['message' => 'Invalid OTP.'], 401);
+            }
         }
+
+        // Ensure referral_code exists
+        if (empty($user->referral_code)) {
+            $user->referral_code = $this->generateReferralCode();
+        }
+
+        // Clear OTP for non-test users
+        if ($phone !== '7008515765') {
+            $user->otp = null;
+        }
+
+        $user->save();
+
+        // Store device info
+        UserDevice::updateOrCreate(
+            [
+                'device_id' => $request->device_id,
+                // If your UserDevice.user_id is a numeric FK to users.id, change this to $user->id
+                'user_id'   => $user->userid,
+            ],
+            [
+                'platform'     => $request->platform,
+                'device_model' => $request->device_model,
+            ]
+        );
+
+        // Generate Sanctum token
+        $token = $user->createToken('API Token')->plainTextToken;
+
+        return response()->json([
+            'message'    => 'User authenticated successfully.',
+            'token'      => $token,
+            'token_type' => 'Bearer',
+            'user'       => $user, // includes referral_code
+        ], 200);
     }
-
-    // Ensure referral_code exists
-    if (empty($user->referral_code)) {
-        $user->referral_code = $this->generateReferralCode();
-    }
-
-    // Clear OTP for non-test users
-    if ($phone !== '7008515765') {
-        $user->otp = null;
-    }
-
-    $user->save();
-
-    // Store device info
-    UserDevice::updateOrCreate(
-        [
-            'device_id' => $request->device_id,
-            // If your UserDevice.user_id is a numeric FK to users.id, change this to $user->id
-            'user_id'   => $user->userid,
-        ],
-        [
-            'platform'     => $request->platform,
-            'device_model' => $request->device_model,
-        ]
-    );
-
-    // Generate Sanctum token
-    $token = $user->createToken('API Token')->plainTextToken;
-
-    return response()->json([
-        'message'    => 'User authenticated successfully.',
-        'token'      => $token,
-        'token_type' => 'Bearer',
-        'user'       => $user, // includes referral_code
-    ], 200);
-}
 
     private function generateReferralCode(int $length = 7): string
     {
