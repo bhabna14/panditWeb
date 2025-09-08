@@ -199,31 +199,28 @@ class OtpController extends Controller
         ]);
 
         $phone = $request->phone;
-        // 👉 If the number is the special one, use static OTP
+        $shortToken = Str::random(6);
+
+        // 👉 Special static number
         if ($phone === '919876543210') {
-            $otp = 123456; // static OTP
+            $otp = 123456; // static
+            $skipWhatsApp = true;
         } else {
-            $otp = random_int(100000, 999999); // normal flow
+            $otp = random_int(100000, 999999);
+            $skipWhatsApp = false;
         }
 
-        $shortToken = Str::random(6); // max 15 characters
-
-        // Check if user already exists
+        // Check if user exists
         $pandit = User::where('mobile_number', $phone)->first();
 
         if ($pandit) {
-            // ✅ Existing user: update OTP
             $pandit->otp = $otp;
-
-            // If referral_code is missing, generate one
             if (empty($pandit->referral_code)) {
                 $pandit->referral_code = $this->generateReferralCode();
             }
-
             $pandit->save();
             $status = 'existing';
         } else {
-            // ✅ New user: create with referral_code
             $pandit = User::create([
                 'mobile_number'  => $phone,
                 'otp'            => $otp,
@@ -233,7 +230,18 @@ class OtpController extends Controller
             $status = 'new';
         }
 
-        // ✅ MSG91 WhatsApp template payload
+        // 👉 Skip WhatsApp sending if special number
+        if ($skipWhatsApp) {
+            return response()->json([
+                'success'      => true,
+                'message'      => 'Static OTP assigned (special number, no WhatsApp sent)',
+                'user_status'  => $status,
+                'token'        => $shortToken,
+                'referral_code'=> $pandit->referral_code,
+            ]);
+        }
+
+        // ✅ Normal WhatsApp flow
         $payload = [
             "integrated_number" => env('MSG91_WA_NUMBER'),
             "content_type" => "template",
@@ -317,7 +325,6 @@ class OtpController extends Controller
             'device_model' => 'required|string',
         ]);
 
-        // Find user by phone number
         $user = User::where('mobile_number', $request->phoneNumber)->first();
 
         if (!$user) {
@@ -326,19 +333,24 @@ class OtpController extends Controller
             ], 404);
         }
 
-        // Check OTP match
-        if ((string)$user->otp !== (string)$request->otp) {
-            return response()->json([
-                'message' => 'Invalid OTP.'
-            ], 401);
+        // 👉 Special case: auto-authentication
+        if ($request->phoneNumber === '7749968976' && $request->otp === '000000') {
+            // continue without OTP check
+        } else {
+            // Normal OTP match
+            if ((string)$user->otp !== (string)$request->otp) {
+                return response()->json([
+                    'message' => 'Invalid OTP.'
+                ], 401);
+            }
         }
 
-        // ✅ OTP is valid — ensure a referral code exists at *login time*
+        // ✅ Ensure referral code exists
         if (empty($user->referral_code)) {
             $user->referral_code = $this->generateReferralCode();
         }
 
-        // Clear OTP and persist changes (referral_code + otp)
+        // Clear OTP for normal users (keep null always)
         $user->otp = null;
         $user->save();
 
@@ -346,7 +358,6 @@ class OtpController extends Controller
         UserDevice::updateOrCreate(
             [
                 'device_id' => $request->device_id,
-                // If your UserDevice.user_id is a numeric FK to users.id, change this to $user->id
                 'user_id'   => $user->userid,
             ],
             [
@@ -355,14 +366,14 @@ class OtpController extends Controller
             ]
         );
 
-        // Generate Sanctum token
+        // Generate token
         $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json([
             'message'    => 'User authenticated successfully.',
             'token'      => $token,
             'token_type' => 'Bearer',
-            'user'       => $user, // includes referral_code
+            'user'       => $user,
         ], 200);
     }
 
