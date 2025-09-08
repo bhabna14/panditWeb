@@ -191,7 +191,7 @@ class OtpController extends Controller
     //         ], 500);
     //     }
     // }
-        
+    
     public function sendOtp(Request $request)
     {
         $request->validate([
@@ -314,6 +314,7 @@ class OtpController extends Controller
             ], 500);
         }
     }
+
     public function verifyOtp(Request $request)
     {
         $request->validate([
@@ -324,6 +325,7 @@ class OtpController extends Controller
             'device_model' => 'required|string',
         ]);
 
+        // Find user by phone number
         $user = User::where('mobile_number', $request->phoneNumber)->first();
 
         if (!$user) {
@@ -332,33 +334,27 @@ class OtpController extends Controller
             ], 404);
         }
 
-        // 👉 Special case: fixed OTP for test number
-        if ($request->phoneNumber === '9876543210' && $request->otp === '123456') {
-            // bypass OTP check
-        } else {
-            // Normal OTP check
-            if ((string)$user->otp !== (string)$request->otp) {
-                return response()->json([
-                    'message' => 'Invalid OTP.'
-                ], 401);
-            }
+        // Check OTP match
+        if ((string)$user->otp !== (string)$request->otp) {
+            return response()->json([
+                'message' => 'Invalid OTP.'
+            ], 401);
         }
 
-        // ✅ Ensure referral code exists
+        // ✅ OTP is valid — ensure a referral code exists at *login time*
         if (empty($user->referral_code)) {
             $user->referral_code = $this->generateReferralCode();
         }
 
-        // Clear OTP for normal users only
-        if ($request->phoneNumber !== '919876543210') {
-            $user->otp = null;
-        }
+        // Clear OTP and persist changes (referral_code + otp)
+        $user->otp = null;
         $user->save();
 
         // Store device info
         UserDevice::updateOrCreate(
             [
                 'device_id' => $request->device_id,
+                // If your UserDevice.user_id is a numeric FK to users.id, change this to $user->id
                 'user_id'   => $user->userid,
             ],
             [
@@ -367,14 +363,14 @@ class OtpController extends Controller
             ]
         );
 
-        // Generate token
+        // Generate Sanctum token
         $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json([
             'message'    => 'User authenticated successfully.',
             'token'      => $token,
             'token_type' => 'Bearer',
-            'user'       => $user,
+            'user'       => $user, // includes referral_code
         ], 200);
     }
 
