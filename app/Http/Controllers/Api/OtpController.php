@@ -201,12 +201,12 @@ class OtpController extends Controller
         $phone = $request->phone;
         $shortToken = Str::random(6);
 
-        // 👉 Special static number (without country code)
+        // 👉 Special static number
         if ($phone === '919876543210') {
-            $otp = 123456; // static OTP
+            $otp = 123456; // fixed OTP
             $skipWhatsApp = true;
         } else {
-            $otp = random_int(100000, 999999); // normal random OTP
+            $otp = random_int(100000, 999999);
             $skipWhatsApp = false;
         }
 
@@ -214,7 +214,7 @@ class OtpController extends Controller
         $pandit = User::where('mobile_number', $phone)->first();
 
         if ($pandit) {
-            $pandit->otp = $otp;
+            $pandit->otp = $skipWhatsApp ? null : $otp; // store OTP only for normal users
             if (empty($pandit->referral_code)) {
                 $pandit->referral_code = $this->generateReferralCode();
             }
@@ -223,7 +223,7 @@ class OtpController extends Controller
         } else {
             $pandit = User::create([
                 'mobile_number'  => $phone,
-                'otp'            => $otp,
+                'otp'            => $skipWhatsApp ? null : $otp,
                 'userid'         => 'USER' . random_int(10000, 99999),
                 'referral_code'  => $this->generateReferralCode(),
             ]);
@@ -234,7 +234,7 @@ class OtpController extends Controller
         if ($skipWhatsApp) {
             return response()->json([
                 'success'      => true,
-                'message'      => 'Static OTP assigned (special number, no WhatsApp sent)',
+                'message'      => 'Static OTP assigned (no WhatsApp sent)',
                 'user_status'  => $status,
                 'token'        => $shortToken,
                 'referral_code'=> $pandit->referral_code,
@@ -332,11 +332,11 @@ class OtpController extends Controller
             ], 404);
         }
 
-        // 👉 Special case: auto-authentication for test number
+        // 👉 Special case: fixed OTP for test number
         if ($request->phoneNumber === '919876543210' && $request->otp === '123456') {
-            // skip OTP check
+            // bypass OTP check
         } else {
-            // Normal OTP match
+            // Normal OTP check
             if ((string)$user->otp !== (string)$request->otp) {
                 return response()->json([
                     'message' => 'Invalid OTP.'
@@ -349,8 +349,10 @@ class OtpController extends Controller
             $user->referral_code = $this->generateReferralCode();
         }
 
-        // Clear OTP after success
-        $user->otp = null;
+        // Clear OTP for normal users only
+        if ($request->phoneNumber !== '919876543210') {
+            $user->otp = null;
+        }
         $user->save();
 
         // Store device info
