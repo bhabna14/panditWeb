@@ -132,9 +132,9 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="3" class="text-end">Totals</th>
+                                <th colspan="3" class="text-end"></th>
                                 <th></th>
-                                <th></th>
+                                <th>Totals</th>
                                 <th class="text-end amount"><strong>₹
                                         {{ number_format($dayEstimate['total_cost'], 2) }}</strong></th>
                             </tr>
@@ -197,9 +197,9 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="3" class="text-end">Month Totals</th>
+                                <th colspan="3" class="text-end"></th>
                                 <th></th>
-                                <th></th>
+                                <th>Month Totals</th>
                                 <th class="text-end amount"><strong>₹ {{ number_format($sumAmt, 2) }}</strong></th>
                             </tr>
                         </tfoot>
