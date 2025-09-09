@@ -110,7 +110,6 @@
                             <tr>
                                 <th style="width:36px;">#</th>
                                 <th>Item</th>
-                                <th>Unit</th>
                                 <th class="text-end">Qty</th>
                                 <th class="text-end">Unit Price</th>
                                 <th class="text-end">Subtotal</th>
@@ -122,8 +121,7 @@
                                 <tr>
                                     <td>{{ $i++ }}</td>
                                     <td>{{ $row['item_name'] }}</td>
-                                    <td><span class="chip">{{ $row['unit'] }}</span></td>
-                                    <td class="text-end amount">{{ number_format($row['qty'], 2) }}</td>
+                                    <td class="text-end amount">{{ number_format($row['qty'], 2) }}<span class="chip">{{ $row['unit'] }}</span></td>
                                     <td class="text-end amount">₹ {{ number_format($row['unit_price'], 2) }}</td>
                                     <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong>
                                     </td>
