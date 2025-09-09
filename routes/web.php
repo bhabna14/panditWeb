@@ -52,6 +52,7 @@ use App\Http\Controllers\Admin\ProductRequestController;
 use App\Http\Controllers\Admin\FlowerEstimateController;
 use App\Http\Controllers\Admin\FlowerEstimateCompareController;
 use App\Http\Controllers\Admin\PaymentCollectionController;
+use App\Http\Controllers\Admin\SubscriptionPackageEstimateController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -911,3 +912,11 @@ Route::prefix('admin')->middleware(['auth:admins'])->group(function () {
 // Route::post('/admin/payment-collection//collect', [PaymentCollectionController::class, 'collect'])
 //     ->name('payment.collection.collect')
 //     ->middleware(['auth']); 
+
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/reports/subscription-package-estimates', [SubscriptionPackageEstimateController::class, 'index'])
+        ->name('reports.subscription_package_estimates');
+
+    Route::get('/reports/subscription-package-estimates/export', [SubscriptionPackageEstimateController::class, 'exportCsv'])
+        ->name('reports.subscription_package_estimates.export');
+});
