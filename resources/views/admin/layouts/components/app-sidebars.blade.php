@@ -220,7 +220,7 @@
                         <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/reports/flower-estimates') }}">Flower Estimate</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/reports/flower-compare') }}">Flower Compare</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('reports.subscription_package_estimates') }}">Subscription Package Estimates</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ url('admin/reports/subscription-package-estimates') }}">Subscription Package Estimates</a></li>
                     </ul>
                 </li>
 
