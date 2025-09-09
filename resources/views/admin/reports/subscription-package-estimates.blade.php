@@ -130,7 +130,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="3" class="text-end"></th>
+                                <th colspan="2" class="text-end"></th>
                                 <th></th>
                                 <th>Totals</th>
                                 <th class="text-end amount"><strong>₹
