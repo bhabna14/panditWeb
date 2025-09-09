@@ -202,7 +202,7 @@ class OtpController extends Controller
         $shortToken = Str::random(6); // max 15 characters
 
         // ✅ Special static OTP case
-        if ($phone === '+917008515765') {
+        if ($phone === '+919876543210') {
             $otp = 123456;
             $skipWhatsApp = true;
         } else {
@@ -341,7 +341,7 @@ class OtpController extends Controller
         }
 
         // ✅ Special static OTP case
-        if ($phone === '+917008515765') {
+        if ($phone === '+919876543210') {
             if ($request->otp !== '123456') {
                 return response()->json(['message' => 'Invalid OTP.'], 401);
             }
