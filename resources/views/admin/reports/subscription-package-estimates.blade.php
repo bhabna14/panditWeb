@@ -94,8 +94,8 @@
             <div class="hstack">
                 <div><strong>Date:</strong> {{ $date->toFormattedDateString() }}</div>
                 <div class="chip">Items: {{ count($dayEstimate['lines']) }}</div>
-                <div class="chip">Total Qty: <span class="amount">{{ number_format($dayEstimate['total_qty'], 2) }}</span>
-                </div>
+                {{-- <div class="chip">Total Qty: <span class="amount">{{ number_format($dayEstimate['total_qty'], 2) }}</span>
+                </div> --}}
                 <div class="chip">Est. Value: <strong class="amount">₹
                         {{ number_format($dayEstimate['total_cost'], 2) }}</strong></div>
             </div>
@@ -151,8 +151,8 @@
             <div class="hstack">
                 <div><strong>Month:</strong> {{ $monthStart->format('F Y') }}</div>
                 <div class="chip">Distinct Items: {{ count($monthEstimate['by_item']) }}</div>
-                <div class="chip">Total Qty: <span
-                        class="amount">{{ number_format($monthEstimate['total_qty'], 2) }}</span></div>
+                {{-- <div class="chip">Total Qty: <span
+                        class="amount">{{ number_format($monthEstimate['total_qty'], 2) }}</span></div> --}}
                 <div class="chip">Est. Value: <strong class="amount">₹
                         {{ number_format($monthEstimate['total_cost'], 2) }}</strong></div>
             </div>
@@ -214,7 +214,7 @@
                                 <tr>
                                     <th>Date</th>
                                     <th class="text-end">Items</th>
-                                    <th class="text-end">Total Qty</th>
+                                    {{-- <th class="text-end">Total Qty</th> --}}
                                     <th class="text-end">Est. Value</th>
                                 </tr>
                             </thead>
@@ -223,7 +223,7 @@
                                     <tr>
                                         <td>{{ \Carbon\Carbon::parse($d)->format('D, d M Y') }}</td>
                                         <td class="text-end">{{ count($data['lines']) }}</td>
-                                        <td class="text-end amount">{{ number_format($data['total_qty'], 2) }}</td>
+                                        {{-- <td class="text-end amount">{{ number_format($data['total_qty'], 2) }}</td> --}}
                                         <td class="text-end amount">₹ {{ number_format($data['total_cost'], 2) }}</td>
                                     </tr>
                                 @endforeach
