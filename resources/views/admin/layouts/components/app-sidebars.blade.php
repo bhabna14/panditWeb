@@ -209,8 +209,7 @@
                     <a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);">
                         <svg class="side-menu__icon" xmlns="http://www.w3.org/2000/svg" width="24"
                             height="24" viewBox="0 0 24 24">
-                            <path
-                                d="M7 18c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H7zM6 6h12v2H6z" />
+                            <path d="M7 18c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2H7zM6 6h12v2H6z" />
                         </svg>
                         <span class="side-menu__label">FINANCE REPORT</span>
                         <i class="angle fas fa-chevron-right"></i>
@@ -221,6 +220,7 @@
                         <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/reports/flower-estimates') }}">Flower Estimate</a></li>
                         <li><a class="sub-side-menu__item" href="{{ url('admin/reports/flower-compare') }}">Flower Compare</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('reports.subscription_package_estimates') }}">Subscription Package Estimates</a></li>
                     </ul>
                 </li>
 
