@@ -922,8 +922,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->name('reports.subscription_package_estimates.export');
 });
 
-Route::middleware(['auth:admin'])
-->prefix('admin')
+Route::prefix('admin')
 ->name('admin.')
 ->group(function () {
 Route::get('/menu-management', [MenuManagementController::class, 'index'])->name('menu.management');
