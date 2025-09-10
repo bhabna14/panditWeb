@@ -53,6 +53,7 @@ use App\Http\Controllers\Admin\FlowerEstimateController;
 use App\Http\Controllers\Admin\FlowerEstimateCompareController;
 use App\Http\Controllers\Admin\PaymentCollectionController;
 use App\Http\Controllers\Admin\SubscriptionPackageEstimateController;
+use App\Http\Controllers\Admin\MenuManagementController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -919,4 +920,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::get('/reports/subscription-package-estimates/export', [SubscriptionPackageEstimateController::class, 'exportCsv'])
         ->name('reports.subscription_package_estimates.export');
+});
+
+Route::middleware(['auth:admin'])
+->prefix('admin')
+->name('admin.')
+->group(function () {
+Route::get('/menu-management', [MenuManagementController::class, 'index'])->name('menu.management');
+Route::post('/menu-management/save', [MenuManagementController::class, 'save'])->name('menu.management.save');
 });
