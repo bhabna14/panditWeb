@@ -25,7 +25,6 @@ class MenuItemSeeder extends Seeder
                 'parent_id' => $parent?->id,
                 'order'     => $order,
                 'icon'      => $icon,
-                'is_active' => true,            // ✅ matches migration/model
             ]);
         };
 
