@@ -277,5 +277,5 @@ Route::middleware('auth:sanctum')->get('/referrals/stats', [FlowerReferalControl
 Route::get('/refer/offers', [ReferController::class, 'manageReferOffer'])->name('api.refer.offers.manage');
 Route::middleware('auth:sanctum')->post('/refer/offer-claim/save', [ReferController::class, 'saveOfferClaim'])->name('api.refer.offerClaim.save');
 
- Route::post('/users-delet/{userid}', [UserProfileController::class, 'destroyById'])
+ Route::post('/users-delet', [UserProfileController::class, 'destroyById'])
         ->name('users.destroy');
