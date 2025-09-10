@@ -38,4 +38,10 @@ class Admin extends Authenticatable implements AuthenticatableContract
                 !empty($value) && Hash::needsRehash($value) ? Hash::make($value) : $value
         );
     }
+
+    public function menuItems(): BelongsToMany
+    {
+        return $this->belongsToMany(MenuItem::class, 'admin_menu_item')
+        ->withTimestamps();
+    }
 }

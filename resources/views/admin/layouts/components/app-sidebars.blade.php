@@ -176,10 +176,10 @@
                                 Rider</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.addOrderAssign') }}">Add Apartment
                                 Assign</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOrderAssign') }}">Manage
-                                Apartment Assign</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ route('admin.managelocality') }}">Manage
-                                Locality</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.manageOrderAssign') }}">Manage Apartment Assign</a></li>
+                            
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.managelocality') }}">Manage Locality</a></li>
+                            
                     </ul>
                 </li>
 
