@@ -11,11 +11,6 @@ class MenuItem extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'title',
         'route',
@@ -23,46 +18,28 @@ class MenuItem extends Model
         'type',
         'parent_id',
         'order',
-        'status',
+        'status',  // using string status (active/inactive)
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
-        'order'     => 'integer',
+        'order' => 'integer',
     ];
 
-    /**
-     * Direct children relationship.
-     */
     public function children()
     {
-        return $this->hasMany(self::class, 'parent_id')
-            ->orderBy('order');
+        return $this->hasMany(self::class, 'parent_id')->orderBy('order');
     }
 
-    /**
-     * Recursive children relationship (eager-loaded).
-     */
     public function childrenRecursive()
     {
         return $this->children()->with('childrenRecursive');
     }
 
-    /**
-     * Parent relationship.
-     */
     public function parent()
     {
         return $this->belongsTo(self::class, 'parent_id');
     }
 
-    /**
-     * Accessor for href attribute.
-     */
     public function getHrefAttribute(): string
     {
         if (blank($this->route)) {
@@ -78,45 +55,29 @@ class MenuItem extends Model
         try {
             return route($val);
         } catch (Throwable $e) {
-            // Fallback to raw path if no named route exists.
             return url($val);
         }
     }
 
-    /**
-     * Scope for root items (no parent).
-     */
     public function scopeRoots($query)
     {
         return $query->whereNull('parent_id');
     }
 
-    /**
-     * Build the tree for the admin panel, filtered by permissions.
-     *
-     * @param  \App\Models\Admin|null  $admin
-     * @return \Illuminate\Support\Collection
-     */
     public static function treeForAdmin(?\App\Models\Admin $admin)
     {
         $query = static::query()
-            ->where('status', 'active')
+            ->where('status', 'active')   // ✅ matches your schema
             ->orderBy('order');
 
-        // If no admin provided, return full tree (e.g., superadmin before assignment).
-        if (! $admin) {
+        if (!$admin) {
             return $query->with('childrenRecursive')->roots()->get();
         }
 
         $allowedIds = $admin->menuItems()->pluck('menu_items.id')->toArray();
 
-        // Fetch roots and eagerly load full recursive children.
-        $roots = $query
-            ->with('childrenRecursive')
-            ->roots()
-            ->get();
+        $roots = $query->with('childrenRecursive')->roots()->get();
 
-        // Filter down to allowed items while keeping parents if any child is allowed.
         $filterTree = function ($items) use (&$filterTree, $allowedIds) {
             return $items->map(function ($item) use ($filterTree, $allowedIds) {
                 $item->childrenRecursive = $filterTree($item->childrenRecursive);
@@ -124,9 +85,7 @@ class MenuItem extends Model
                 $isAllowed       = in_array($item->id, $allowedIds, true);
                 $hasVisibleChild = $item->childrenRecursive->isNotEmpty();
 
-                // Keep the item if allowed, it has visible children, or it's a category with any children.
                 $keep = $isAllowed || $hasVisibleChild || $item->type === 'category';
-
                 return $keep ? $item : null;
             })->filter()->values();
         };

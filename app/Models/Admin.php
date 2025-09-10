@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany; // ✅ correct import
+use App\Models\MenuItem;                                   // ✅ ensure model import
 
 class Admin extends Authenticatable implements AuthenticatableContract
 {
@@ -38,9 +40,11 @@ class Admin extends Authenticatable implements AuthenticatableContract
                 !empty($value) && Hash::needsRehash($value) ? Hash::make($value) : $value
         );
     }
-  public function menuItems(): BelongsToMany
+
+    /** Menus visible to this admin */
+    public function menuItems(): BelongsToMany
     {
         return $this->belongsToMany(MenuItem::class, 'admin_menu_item', 'admin_id', 'menu_item_id')
-            ->withTimestamps();
+                    ->withTimestamps();
     }
 }
