@@ -3,13 +3,10 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\MenuItem;
 
 class MenuItemSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     public function run(): void
     {
         // Helper to create items
@@ -28,11 +25,11 @@ class MenuItemSeeder extends Seeder
                 'parent_id' => $parent?->id,
                 'order'     => $order,
                 'icon'      => $icon,
-                'status'    => 'active',        // important: model filters by status='active'
+                'is_active' => true,            // ✅ matches migration/model
             ]);
         };
 
-        // Visual header (optional)
+        // Optional visual header/category
         $catMain = $add('Main', null, 'category', null, 1);
 
         // -------------------------
