@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
 use App\Models\Booking;
 use App\Models\Payment;
 use App\Models\Locality;
@@ -25,7 +27,7 @@ use Illuminate\Support\Facades\Validator;
 class UserProfileController extends Controller
 {
     //
-     public function getUserDetails()
+    public function getUserDetails()
     {
         // Get the authenticated user
         $user = Auth::guard('sanctum')->user();
@@ -132,179 +134,67 @@ class UserProfileController extends Controller
         ], 400);
     }
 
-// public function orderHistory(Request $request)
-// {
-//     // Get the authenticated user
-//     $user = Auth::guard('sanctum')->user();
+    public function orderHistory(Request $request)
+    {
+        // Get the authenticated user
+        $user = Auth::guard('sanctum')->user();
 
-//     // Fetch recent bookings for the user
-//     $bookings = Booking::with(['poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
-//                         ->where('user_id', $user->userid)
-//                         ->orderByDesc('created_at')
-//                         ->get();
+        // Fetch recent bookings for the user without loading ratings
+        $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address.localityDetails'])
+                            ->where('user_id', $user->userid)
+                            ->orderByDesc('created_at')
+                            ->get();
 
-//     // Append URLs for pooja_video, pooja_photo, profile_photo, and rating media files
-//     $bookings->each(function ($booking) {
-//         // Check if poojalist exists before accessing its properties
-//         if ($booking->poojalist) {
-//             // Append URLs for pooja_photo in poojalist
-//             if ($booking->poojalist->pooja_photo) {
-//                 $booking->poojalist->pooja_photo_url = asset('assets/img/' . $booking->poojalist->pooja_photo);
-//             }
-//         }
-
-//         // Append URL for profile_photo
-//         if ($booking->pandit && $booking->pandit->profile_photo) {
-//             $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
-//         }
-
-//         // Include ratings and their media file URLs as an object
-//         if ($booking->ratings) {
-//             $rating = $booking->ratings->first(); // Assuming only one rating per booking
-
-//             if ($rating) {
-//                 $rating->rating_date = $rating->created_at->format('Y-m-d');
-//                 $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
-//                 $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
-
-//                 // Append rating details as an object in the booking
-//                 $booking->rating_details = $rating->toArray();
-//             } else {
-//                 $booking->rating_details = null; // No ratings available
-//             }
-//         } else {
-//             $booking->rating_details = null; // No ratings relationship
-//         }
-
-//         // Remove the ratings relationship to avoid redundancy
-//         unset($booking->ratings);
-//     });
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Order history fetched successfully.',
-//         'bookings' => $bookings,
-//     ], 200);
-// } 
-
-public function orderHistory(Request $request)
-{
-    // Get the authenticated user
-    $user = Auth::guard('sanctum')->user();
-
-    // Fetch recent bookings for the user without loading ratings
-    $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address.localityDetails'])
-                        ->where('user_id', $user->userid)
-                        ->orderByDesc('created_at')
-                        ->get();
-
-    // Fetch and attach ratings to each booking
-    $bookings->each(function ($booking) {
-        // Append URLs for pooja_photo in poojalist
-        if ($booking->pooja && $booking->pooja->poojalist) {
-            if ($booking->pooja->poojalist->pooja_photo) {
-                $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
+        // Fetch and attach ratings to each booking
+        $bookings->each(function ($booking) {
+            // Append URLs for pooja_photo in poojalist
+            if ($booking->pooja && $booking->pooja->poojalist) {
+                if ($booking->pooja->poojalist->pooja_photo) {
+                    $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
+                }
             }
-        }
 
-        // Append URL for profile_photo
-        if ($booking->pandit && $booking->pandit->profile_photo) {
-            $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
-        }
+            // Append URL for profile_photo
+            if ($booking->pandit && $booking->pandit->profile_photo) {
+                $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
+            }
 
-        // Fetch the rating for the current booking
-        $rating = Rating::where('booking_id', $booking->booking_id)->first(); // Get the rating for the booking
+            // Fetch the rating for the current booking
+            $rating = Rating::where('booking_id', $booking->booking_id)->first(); // Get the rating for the booking
 
-        if ($rating) {
-            $rating->rating_date = $rating->created_at->format('Y-m-d');
-            $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
-            $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
+            if ($rating) {
+                $rating->rating_date = $rating->created_at->format('Y-m-d');
+                $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
+                $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
 
-            // Append rating details as an object in the booking
-            $booking->rating_details = $rating->toArray();
-        } else {
-            $booking->rating_details = null; // No ratings available
-        }
+                // Append rating details as an object in the booking
+                $booking->rating_details = $rating->toArray();
+            } else {
+                $booking->rating_details = null; // No ratings available
+            }
 
-        // Fetch the latest payment directly
-        $latestPayment = Payment::where('booking_id', $booking->booking_id)
-                                ->orderByDesc('created_at')
-                                ->first(); // Get the most recent payment
+            // Fetch the latest payment directly
+            $latestPayment = Payment::where('booking_id', $booking->booking_id)
+                                    ->orderByDesc('created_at')
+                                    ->first(); // Get the most recent payment
 
-        if ($latestPayment) {
-            $latestPayment->payment_date = $latestPayment->created_at->format('Y-m-d');
-            $latestPayment->payment_method_url = $latestPayment->payment_method_image ? asset('assets/img/' . $latestPayment->payment_method_image) : null;
+            if ($latestPayment) {
+                $latestPayment->payment_date = $latestPayment->created_at->format('Y-m-d');
+                $latestPayment->payment_method_url = $latestPayment->payment_method_image ? asset('assets/img/' . $latestPayment->payment_method_image) : null;
 
-            // Assign the latest payment to the payment attribute
-            $booking->payment = $latestPayment;
-        } else {
-            $booking->payment = null; // No payment details available
-        }
-    });
+                // Assign the latest payment to the payment attribute
+                $booking->payment = $latestPayment;
+            } else {
+                $booking->payment = null; // No payment details available
+            }
+        });
 
-    return response()->json([
-        'success' => true,
-        'message' => 'Order history fetched successfully.',
-        'bookings' => $bookings,
-    ], 200);
-}
-
-// public function orderHistory(Request $request)
-// {
-//     // Get the authenticated user
-//     $user = Auth::guard('sanctum')->user();
-
-//     // Fetch recent bookings for the user
-//     $bookings = Booking::with(['pooja.poojalist', 'pandit', 'address', 'ratings']) // Load relationships to get pooja details and ratings
-//                         ->where('user_id', $user->userid)
-//                         ->orderByDesc('created_at')
-//                         ->get();
-
-//     // Append URLs for pooja_video, pooja_photo, profile_photo, and rating media files
-//     $bookings->each(function ($booking) {
-//         // Append URLs for pooja_video
-//         if ($booking->pooja && $booking->pooja->pooja_video) {
-//             $booking->pooja->pooja_video_url = asset($booking->pooja->pooja_video);
-//         }
-
-//         // Append URLs for pooja_photo
-//         if ($booking->pooja->poojalist->pooja_photo) {
-//             $booking->pooja->poojalist->pooja_photo_url = asset('assets/img/' . $booking->pooja->poojalist->pooja_photo);
-//         }
-
-//         // Append URL for profile_photo
-//         if ($booking->pandit->profile_photo) {
-//             $booking->pandit->profile_photo_url = asset($booking->pandit->profile_photo);
-//         }
-
-//         // Include ratings and their media file URLs as an object
-//         if ($booking->ratings) {
-//             $rating = $booking->ratings->first(); // Assuming only one rating per booking
-
-//             if ($rating) {
-//                 $rating->rating_date = $rating->created_at->format('Y-m-d');
-//                 $rating->image_url = $rating->image_path ? asset(Storage::url($rating->image_path)) : null;
-//                 $rating->audio_url = $rating->audio_file ? asset(Storage::url($rating->audio_file)) : null;
-
-//                 // Append rating details as an object in the booking
-//                 $booking->rating_details = $rating->toArray();
-//             } else {
-//                 $booking->rating_details = null; // No ratings available
-//             }
-//         } else {
-//             $booking->rating_details = null; // No ratings relationship
-//         }
-
-//         // Remove the ratings relationship to avoid redundancy
-//         unset($booking->ratings);
-//     });
-
-//     return response()->json([
-//         'success' => true,
-//         'message' => 'Order history fetched successfully.',
-//         'bookings' => $bookings,
-//     ], 200);
-// }
+        return response()->json([
+            'success' => true,
+            'message' => 'Order history fetched successfully.',
+            'bookings' => $bookings,
+        ], 200);
+    }
 
     public function deletePhoto()
     {
@@ -341,16 +231,6 @@ public function orderHistory(Request $request)
             'success' => 200,
             'message' => 'No photo found for deletion'], 404);
     }
-
-    // public function getActiveLocalities()
-    // {
-    //     $localities = Locality::where('status', 'active')->get();
-
-    //     return response()->json([
-    //         'success' => 200,
-    //         'data' => $localities,
-    //     ], 200);
-    // }
     
     public function getActiveLocalities()
     {
@@ -425,55 +305,6 @@ public function orderHistory(Request $request)
         ], 200);
     }
     
-    // public function saveAddress(Request $request)
-    // {
-    //     try {
-    //         $user = Auth::guard('api')->user();
-    
-    //         if (!$user) {
-    //             return response()->json(['error' => 'Unauthorized'], 401);
-    //         }
-    
-    //         $userid = $user->userid;
-    
-    //         // Check if the user already has addresses
-    //         $hasAddresses = UserAddress::where('user_id', $userid)
-    //                                     ->where('status', 'active')
-    //                                     ->exists();
-    
-    //         // Create the new address
-    //         $addressdata = new UserAddress();
-    //         $addressdata->user_id = $userid;
-    //         $addressdata->country = 'India';
-    //         $addressdata->state = $request->state;
-    //         $addressdata->city = $request->city;
-    //         $addressdata->pincode = $request->pincode;
-    //         $addressdata->area = $request->area;
-    //         $addressdata->address_type = $request->address_type;
-    //         $addressdata->locality = $request->locality;
-    //         $addressdata->apartment_name = $request->apartment_name;
-    //         $addressdata->place_category = $request->place_category;
-    //         $addressdata->apartment_flat_plot = $request->apartment_flat_plot;
-    //         $addressdata->landmark = $request->landmark;
-    //         $addressdata->status = 'active';
-    
-    //         // Set as default if it's the first address
-    //         if (!$hasAddresses) {
-    //             $addressdata->default = 1;
-    //         }
-    
-    //         $addressdata->save();
-
-    //         return response()->json([
-    //             'success' => 200,
-    //             'message' => 'Address created successfully.'
-    //         ], 200);
-
-    //     } catch (\Exception $e) {
-    //         return response()->json(['error' => 500, 'message' => $e->getMessage()], 500);
-    //     }
-    // }
-    
     public function saveAddress(Request $request)
     {
         try {
@@ -533,25 +364,6 @@ public function orderHistory(Request $request)
             return response()->json(['error' => 500, 'message' => $e->getMessage()], 500);
         }
     }
-
-    // public function removeAddress($id)
-    // {
-    //     // Find the address by ID
-    //     $address = UserAddress::find($id);
-    //     if ($address) {
-    //         // Delete the address
-    //         $address->delete();
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Address removed successfully.'
-    //         ], 200);
-    //     } else {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Address not found.'
-    //         ], 404);
-    //     }
-    // }
 
     public function removeAddress($id)
     {
@@ -636,12 +448,6 @@ public function orderHistory(Request $request)
         $poojas = Poojalist::where('pooja_name', 'LIKE', '%' . $searchTerm . '%')
         ->where('status','active')->get();
     
-        // if ($pandits->isEmpty() && $poojas->isEmpty()) {
-        //     return response()->json([
-        //         'message' => 'No data found'
-        //     ], 404);
-        // }
-
         $data = [
             'pandits' => $pandits->isEmpty() ? [] : $pandits->map(function ($pandit) {
                 // Generate the URL for the profile photo
@@ -675,6 +481,54 @@ public function orderHistory(Request $request)
         $address->setAsDefault();
 
         return response()->json(['success' => 'Address set as default successfully.'], 200);
+    }
+
+    public function destroyById(Request $request, $userid)
+    {
+        try {
+            $authUser = Auth::guard('sanctum')->user();
+            if (!$authUser) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
+
+            // Only allow admins/superadmins
+            if (!in_array(strtolower((string)$authUser->user_type), ['admin', 'superadmin'], true)) {
+                return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+            }
+
+            // Prevent self-delete from this endpoint
+            if ((string)$authUser->userid === (string)$userid) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Use /api/profile to delete your own account.'
+                ], 422);
+            }
+
+            $user = User::where('userid', $userid)->first();
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            }
+
+            DB::transaction(function () use ($user) {
+                // 👉 delete related data first if needed (cascade or manual deletes)
+                // Example: $user->orders()->delete();
+                // Example: $user->subscriptions()->delete();
+
+                $user->delete();
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User and related data permanently deleted.'
+            ], 200);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Delete failed.',
+                'error'   => config('app.debug') ? $e->getMessage() : 'Server error'
+            ], 500);
+        }
     }
 
 }
