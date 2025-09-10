@@ -483,7 +483,7 @@ class UserProfileController extends Controller
         return response()->json(['success' => 'Address set as default successfully.'], 200);
     }
 
-    public function destroyById(Request $request, $userid)
+    public function destroyById()
     {
         try {
             $authUser = Auth::guard('sanctum')->user();
@@ -491,29 +491,14 @@ class UserProfileController extends Controller
                 return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
             }
 
-            // Only allow admins/superadmins
-            if (!in_array(strtolower((string)$authUser->user_type), ['admin', 'superadmin'], true)) {
-                return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
-            }
+            $user = User::where('userid', $authUser->userid)->first();
 
-            // Prevent self-delete from this endpoint
-            if ((string)$authUser->userid === (string)$userid) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Use /api/profile to delete your own account.'
-                ], 422);
-            }
-
-            $user = User::where('userid', $userid)->first();
             if (!$user) {
                 return response()->json(['success' => false, 'message' => 'User not found'], 404);
             }
 
             DB::transaction(function () use ($user) {
-                // 👉 delete related data first if needed (cascade or manual deletes)
-                // Example: $user->orders()->delete();
-                // Example: $user->subscriptions()->delete();
-
+              
                 $user->delete();
             });
 
