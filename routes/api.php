@@ -279,3 +279,5 @@ Route::middleware('auth:sanctum')->post('/refer/offer-claim/save', [ReferControl
 
  Route::post('/users-delet', [UserProfileController::class, 'destroyById'])
         ->name('users.destroy');
+
+Route::get('/say-yes', [UserProfileController::class, 'sayYes']);
