@@ -184,11 +184,10 @@ Route::controller(YoutubeUrlController::class)->group(function() {
 Route::get('/manage-youtube','manageYoutube')->name('api.manageYoutube');
 
 });
+
 Route::controller(CheckController::class)->group(function() {
     Route::get('/check-panditid', 'checkPanditProfile');
-
 });
-
 
 ///home page apis
 Route::controller(PujaController::class)->group(function() {
