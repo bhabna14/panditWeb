@@ -122,12 +122,12 @@
     :root {
         --sb-bg: hsl(216, 45%, 98%);
         --sb-bg-2: #f5f5f6;
-        --sb-border: #1c1e21;
-        --sb-text: #e5e7eb;
-        --sb-muted: #1d1d1d;
+        --sb-border: #f4f5f8;
+        --sb-text: #090909;
+        --sb-muted: #f6f2f2;
         --sb-accent: #5b8cff;
         --sb-active: #1d4ed8;
-        --sb-pill: #0c0c0c;
+        --sb-pill: #f9f6f6;
     }
 
     .app-sidebar {
