@@ -685,4 +685,46 @@
             $('#menuForm')?.addEventListener('submit', () => setDirty(false));
         });
     </script>
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // ---- SweetAlert: flash messages ----
+        document.addEventListener('DOMContentLoaded', () => {
+            const successMsg = @json(session('success'));
+            const errorMsg   = @json(session('error'));
+            const errorsBag  = @json($errors->any() ? $errors->all() : []);
+
+            if (successMsg) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: successMsg,
+                    timer: 1800,
+                    showConfirmButton: false
+                });
+            }
+
+            if (errorMsg) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: errorMsg,
+                });
+            }
+
+            if (errorsBag && errorsBag.length) {
+                // Build an HTML list for validation errors
+                const list = '<ul style="text-align:left;margin:0;padding-left:1.2rem;">'
+                    + errorsBag.map(e => `<li>${e}</li>`).join('')
+                    + '</ul>';
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Please fix the following',
+                    html: list
+                });
+            }
+        });
+    </script>
+
 @endsection
