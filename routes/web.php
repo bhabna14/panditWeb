@@ -266,7 +266,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::post('/subadmins/{id}/update', [SubadminController::class, 'update'])->name('subadmins.update');
     Route::delete('/subadmins/{id}/delete', [SubadminController::class, 'delete'])->name('subadmins.delete');
 
-    Route::get('/add-product', [ProductController::class, 'addproduct']);
+    Route::get('/add-product', [ProductController::class, 'addproduct'])->name('addproduct');
     Route::get('/manage-product',  [ProductController::class, 'manageproduct'])->name('manageproduct');
     Route::post('/toggle-product-status/{id}',  [ProductController::class, 'toggleProduct'])->name('toggleProduct');
 

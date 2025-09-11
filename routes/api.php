@@ -250,7 +250,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/rating/{id}', [RatingController::class, 'showRating']);
 });
 
-Route::middleware('auth:sanctum')->post('/purchase-subscription', [FlowerBookingController::class, 'purchaseSubscription']);
+// Route::middleware('auth:sanctum')->post('/purchase-subscription', [FlowerBookingController::class, 'purchaseSubscription']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    // 1) Create or update order & subscription
+    Route::post('/order-subscription', [FlowerBookingController::class, 'createOrUpdateOrderWithSubscription']);
+
+    // 2) Process Razorpay payment
+    Route::post('/process-payment', [FlowerBookingController::class, 'processPayment']);
+});
 Route::middleware('auth:sanctum')->post('/subscription/pause/{order_id}', [FlowerBookingController::class, 'pause'])->name('subscription.pause');
 Route::middleware('auth:sanctum')->post('/subscription/resume/{order_id}', [FlowerBookingController::class, 'resume'])->name('subscription.resume');
 Route::post('/subscriptions/delete-pause/{order_id}', [FlowerBookingController::class, 'deletePause'])->name('subscriptions.pause.delete');

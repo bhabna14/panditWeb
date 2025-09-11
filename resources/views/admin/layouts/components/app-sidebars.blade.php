@@ -55,7 +55,7 @@
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/manage-users') }}">Manage User</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('manageuser') }}">Manage User</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.address.categories') }}">Address
                                 Summary</a></li>
                     </ul>
@@ -72,11 +72,11 @@
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/add-product') }}">Add Product</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('addproduct') }}">Add Product</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('manageproduct') }}">Manage Product</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/new-user-order') }}">Create Order (New)</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/existing-user') }}">Create Order (Existing)</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/demo-customize-order') }}">Customize Order</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('newUserOrder') }}">Create Order (New)</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('existingUser') }}">Create Order (Existing)</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('demoCustomizeOrder') }}">Customize Order</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.orders.index') }}">Manage Flower Subscription</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('payment.collection.index') }}">Payment Collection</a></li>
                     </ul>
@@ -168,7 +168,7 @@
                         <i class="angle fas fa-chevron-right"></i>
                     </a>
                     <ul class="slide-menu">
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/manage-delivery-history') }}">Delivery
+                        <li><a class="sub-side-menu__item" href="{{ route('admin.managedeliveryhistory') }}">Delivery
                                 History</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('admin.addRiderDetails') }}">Add Rider</a>
                         </li>
@@ -218,9 +218,9 @@
                         <li><a class="sub-side-menu__item" href="{{ route('subscription.report') }}">Subscription Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('report.customize') }}">Customize Flower Reports</a></li>
                         <li><a class="sub-side-menu__item" href="{{ route('report.flower.pickup') }}">Pick-up Flower Reports</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/reports/flower-estimates') }}">Flower Estimate</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/reports/flower-compare') }}">Flower Compare</a></li>
-                        <li><a class="sub-side-menu__item" href="{{ url('admin/reports/subscription-package-estimates') }}">Subscription Package Estimates</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('reports.flower_estimates') }}">Flower Estimate</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('reports.flower_compare') }}">Flower Compare</a></li>
+                        <li><a class="sub-side-menu__item" href="{{ route('reports.subscription_package_estimates') }}">Subscription Package Estimates</a></li>
                     </ul>
                 </li>
 
