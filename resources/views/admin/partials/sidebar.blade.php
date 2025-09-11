@@ -339,14 +339,14 @@
         </div>
 
         <div class="main-sidemenu" id="sb-root" data-enhanced="0">
-            <div class="sb-search">
+            {{-- <div class="sb-search">
                 <input type="search" class="sb-input" id="sb-filter" placeholder="Search menu…">
             </div>
             <div class="sb-tools">
                 <button type="button" class="sb-btn" id="sb-expand">Expand</button>
                 <button type="button" class="sb-btn" id="sb-collapse">Collapse</button>
                 <button type="button" class="sb-btn" id="sb-compact">Compact</button>
-            </div>
+            </div> --}}
 
             <div class="slide-left disabled" id="slide-left">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24"
