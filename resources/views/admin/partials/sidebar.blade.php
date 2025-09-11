@@ -125,10 +125,10 @@
 
     .side-item-category {
         padding: 12px 14px 6px;
-        font-size: 11px;
+        font-size: 15px;
         letter-spacing: .06em;
         text-transform: uppercase;
-        color: #6b7280;
+        color: #0f0f0f;
     }
 
     .side-menu__item,
