@@ -124,10 +124,10 @@
         --sb-bg-2: #f5f5f6;
         --sb-border: #f4f5f8;
         --sb-text: #090909;
-        --sb-muted: #f6f2f2;
+        --sb-muted: #181717;
         --sb-accent: #5b8cff;
         --sb-active: #1d4ed8;
-        --sb-pill: #f9f6f6;
+        --sb-pill: #111111;
     }
 
     .app-sidebar {
