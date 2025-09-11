@@ -7,66 +7,85 @@ use Illuminate\Http\Request;
 use App\Models\Admin;
 use App\Models\MenuItem;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-use Throwable;
 
 class MenuManagementController extends Controller
 {
+    /**
+     * Show the menu management page.
+     */
     public function index(Request $request)
     {
-    $admins = Admin::orderBy('name')->get();
-    $adminId = (int) $request->query('admin_id', optional($admins->first())->id);
-    $selectedAdmin = $adminId ? Admin::find($adminId) : null;
+        $admins = Admin::orderBy('name')->get();
 
+        // Pick selected admin from query or fall back to first, if any
+        $adminId = (int) $request->query('admin_id', optional($admins->first())->id);
+        $selectedAdmin = $adminId ? Admin::find($adminId) : null;
 
-    $rootMenus = MenuItem::with('childrenRecursive')
-    ->whereNull('parent_id')
-    ->orderBy('order')
-    ->get();
+        // Root menus with full recursive children (you can filter by status if desired)
+        $rootMenus = MenuItem::with('childrenRecursive')
+            ->whereNull('parent_id')
+            ->orderBy('order')
+            ->get();
 
+        // Assigned menu IDs for selected admin
+        $assigned = $selectedAdmin
+            ? $selectedAdmin->menuItems()->pluck('menu_items.id')->toArray()
+            : [];
 
-    $assigned = $selectedAdmin
-    ? $selectedAdmin->menuItems()->pluck('menu_items.id')->toArray()
-    : [];
-
-
-    return view('admin.menu-management.index', compact('admins', 'selectedAdmin', 'rootMenus', 'assigned'));
+        return view('admin.menu-management.index', compact('admins', 'selectedAdmin', 'rootMenus', 'assigned'));
     }
 
+    /**
+     * Save assigned menu IDs for the selected admin.
+     */
     public function save(Request $request)
     {
-    $data = $request->validate([
-    'admin_id' => ['required', 'integer', 'exists:admins,id'],
-    'menu_ids' => ['array'],
-    'menu_ids.*'=> ['integer', 'exists:menu_items,id'],
-    ]);
+        $data = $request->validate([
+            'admin_id'   => ['required', 'integer', 'exists:admins,id'],
+            'menu_ids'   => ['array'],
+            'menu_ids.*' => ['integer', 'exists:menu_items,id'],
+        ]);
 
+        $admin = Admin::findOrFail($data['admin_id']);
 
-    $admin = Admin::findOrFail($data['admin_id']);
-    $selectedIds = collect($data['menu_ids'] ?? []);
+        // Normalize selected IDs (unique, ints, non-zero)
+        $selected = collect($data['menu_ids'] ?? [])
+            ->map(fn ($v) => (int) $v)
+            ->filter()
+            ->unique()
+            ->values();
 
+        // Keep only ACTIVE items (status='active')
+        $validIds = MenuItem::query()
+            ->whereIn('id', $selected)
+            ->where('status', 'active')
+            ->pluck('id')
+            ->all();
 
-    // Ensure all ancestors are selected so headings show up when children are selected
-    $allIds = $selectedIds->toArray();
-    if ($selectedIds->isNotEmpty()) {
-    $ancestors = MenuItem::whereIn('id', $selectedIds)->get();
-    $visited = collect();
-    $ancestors->each(function ($item) use (&$visited) {
-    $node = $item;
-    while ($node && $node->parent_id && !$visited->contains($node->parent_id)) {
-    $visited->push($node->parent_id);
-    $node = $node->parent;
-    }
-    });
-    $allIds = array_values(array_unique(array_merge($selectedIds->toArray(), $visited->toArray())));
-    }
+        // Build ancestor map for active items only
+        // If you want to allow inactive parents to be auto-added, remove the status filter here.
+        $parentMap = MenuItem::query()
+            ->where('status', 'active')
+            ->pluck('parent_id', 'id'); // [id => parent_id]
 
+        // Final set = selected + all ancestors
+        $final = collect($validIds)->flip(); // set-like
 
-    DB::transaction(function () use ($admin, $allIds) {
-    $admin->menuItems()->sync($allIds);
-    });
+        foreach ($validIds as $id) {
+            $pid = $parentMap[$id] ?? null;
+            while ($pid) {
+                $final[$pid] = true;
+                $pid = $parentMap[$pid] ?? null;
+            }
+        }
 
+        $finalIds = $final->keys()->values()->all();
 
-    return back()->with('success', 'Menu access updated for admin.');
+        DB::transaction(function () use ($admin, $finalIds) {
+            // Sync (clears when empty)
+            $admin->menuItems()->sync($finalIds);
+        });
+
+        return back()->with('success', 'Menu access updated for admin.');
     }
 }
