@@ -1,5 +1,6 @@
 @extends('admin.layouts.apps')
 
+
 @section('styles')
     <style>
         .card-soft { border:1px solid #edf1f7; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.04); }

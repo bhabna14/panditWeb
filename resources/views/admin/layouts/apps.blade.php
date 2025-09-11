@@ -31,7 +31,9 @@
 
                 @include('admin.layouts.components.app-header')
 
-                @include('admin.layouts.components.app-sidebars')
+                {{-- @include('admin.layouts.components.app-sidebars') --}}
+				@include('admin.partials.sidebar')
+
 
 			</div>
 
