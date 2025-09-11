@@ -13,7 +13,7 @@ class ViewServiceProvider extends ServiceProvider
     {
         // Share the assigned menu tree with the sidebar partial
         View::composer('admin.partials.sidebar', function ($view) {
-            $admin = Auth::guard('admin')->user();
+            $admin = Auth::guard('admins')->user();
             $menuRoots = MenuItem::treeForAdmin($admin);
             $view->with('menuRoots', $menuRoots);
         });
