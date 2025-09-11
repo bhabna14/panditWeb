@@ -127,7 +127,7 @@
         --sb-muted: #181717;
         --sb-accent: #5b8cff;
         --sb-active: #1d4ed8;
-        --sb-pill: #111111;
+        --sb-pill: #f2efef;
     }
 
     .app-sidebar {
