@@ -120,14 +120,14 @@
 <style>
     /* ======== Sidebar Enhanced Styles ======== */
     :root {
-        --sb-bg: #dee6f5;
-        --sb-bg-2: #d3d6db;
-        --sb-border: #22304b;
+        --sb-bg: hsl(216, 45%, 98%);
+        --sb-bg-2: #f5f5f6;
+        --sb-border: #1c1e21;
         --sb-text: #e5e7eb;
-        --sb-muted: #94a3b8;
+        --sb-muted: #1d1d1d;
         --sb-accent: #5b8cff;
         --sb-active: #1d4ed8;
-        --sb-pill: #0b1530;
+        --sb-pill: #0c0c0c;
     }
 
     .app-sidebar {
