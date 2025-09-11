@@ -120,8 +120,8 @@
 <style>
     /* ======== Sidebar Enhanced Styles ======== */
     :root {
-        --sb-bg: #0b1220;
-        --sb-bg-2: #0f172a;
+        --sb-bg: #dee6f5;
+        --sb-bg-2: #d3d6db;
         --sb-border: #22304b;
         --sb-text: #e5e7eb;
         --sb-muted: #94a3b8;
