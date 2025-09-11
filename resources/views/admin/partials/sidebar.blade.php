@@ -67,7 +67,7 @@
             $icon = $renderIcon($item);
 
             if ($isCategory) {
-                echo '<li class="side-item side-item-category">' . e($item->title) . '</li>';
+                echo '<li class="side-item side-item-category" style="color: black;font-size: 15px">' . e($item->title) . '</li>';
                 if ($hasChildren) {
                     echo $renderMenu($item->childrenRecursive);
                 }
