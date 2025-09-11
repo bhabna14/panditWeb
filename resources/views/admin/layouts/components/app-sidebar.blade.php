@@ -246,7 +246,7 @@
 										
 									</ul>
 								</li>
-
+{{-- 
 								<li class="slide">
 									<a class="side-menu__item" data-bs-toggle="slide" href="javascript:void(0);"><img src="{{asset('assets/img/brand/settings.png')}}" style="height: 23px;width: 23px" alt="logo"><span style="margin-left: 10px"  class="side-menu__label">Product Admin</span><i class="angle fe fe-chevron-right"></i></a>
 									<ul class="slide-menu">
@@ -254,7 +254,7 @@
 										
 									</ul>
 								</li>
-								
+								 --}}
 								@endif
 							</ul>
 							
