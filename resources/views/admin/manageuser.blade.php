@@ -212,7 +212,7 @@
 
                                     <a class="text-center action-icons"
                                         href="{{ route('showCustomerDetails', $user->userid) }}"
-                                        class="btn btn-outline-info btn-sm">
+                                        class="btn btn-info btn-sm">
                                         View Details
                                     </a>
                                     <a href="{{ url('admin/edit-user/' . $user->id) }}" class="edit" title="Edit">
