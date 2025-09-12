@@ -13,6 +13,7 @@ use Illuminate\Validation\Rule;
 
 class PaymentCollectionController extends Controller
 {
+
 public function index(Request $request)
 {
     $filters = [
@@ -24,12 +25,17 @@ public function index(Request $request)
         'max'    => $request->get('max'),
     ];
 
-    // Base query for pending payments (grouped by user)
+    // Base query for pending payments (grouped by user, with subscription check)
     $pendingBase = DB::table('flower_payments as fp')
-        ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
         ->join('users as u', 'u.userid', '=', 'fp.user_id')
+        ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
         ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
         ->where('fp.payment_status', 'pending')
+        ->whereExists(function ($q) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s2')
+              ->whereColumn('s2.user_id', 'fp.user_id');
+        })
         ->select([
             'fp.user_id',
             'u.name as user_name',
@@ -47,6 +53,7 @@ public function index(Request $request)
         ])
         ->groupBy('fp.user_id', 'u.name', 'u.mobile_number');
 
+    // Filters
     if ($filters['q'] !== '') {
         $q = $filters['q'];
         $pendingBase->where(function ($qq) use ($q) {
@@ -67,12 +74,17 @@ public function index(Request $request)
     $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->get();
     $pendingCount        = (clone $pendingBase)->count();
 
-    // FIX: compute total pending amount directly from all rows
+    // Total pending amount across all valid users
     $pendingTotalAmount  = DB::table('flower_payments as fp')
         ->where('fp.payment_status', 'pending')
+        ->whereExists(function ($q) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s2')
+              ->whereColumn('s2.user_id', 'fp.user_id');
+        })
         ->sum('fp.paid_amount');
 
-    // Expired subscriptions
+    // Expired subscriptions (unchanged)
     $liveStatuses = ['active', 'paused', 'resume'];
 
     $subQuery = DB::table('subscriptions as s')
