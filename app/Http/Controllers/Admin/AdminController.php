@@ -525,7 +525,7 @@ class AdminController extends Controller
     {
         return view('admin/add-career');
     }
-  
+
     public function manageuser()
     {
         $users = User::all(); // Fetch all users using Eloquent

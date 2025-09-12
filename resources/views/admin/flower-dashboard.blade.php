@@ -428,12 +428,6 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayPausedRequest }}</h4>
                                     </div>
                                 </div>
-                                {{-- <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -448,12 +442,6 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
                                     </div>
                                 </div>
-                                {{-- <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-orange-400 to-red-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -469,12 +457,6 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayPaused }}</h4>
                                     </div>
                                 </div>
-                                {{-- <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-green-400 to-red-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -490,17 +472,10 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayResumed }}</h4>
                                     </div>
                                 </div>
-                                {{-- <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-green-400 to-red-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-pause tx-16 text-white"></i> <!-- Paused Subscription Icon -->
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </a>
                 </div>
-
             </div>
         </div>
     </div>
