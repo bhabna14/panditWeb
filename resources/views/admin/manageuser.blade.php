@@ -164,7 +164,7 @@
 
     <!-- Users Table -->
     <div class="card custom-card mt-4">
-       
+
         <div class="card-body">
             <div class="table-responsive export-table">
                 <table id="file-datatable" class="table table-hover align-middle">
@@ -205,17 +205,16 @@
                                     @endif
                                 </td>
                                 <td class="text-center action-icons">
-                                    <a href="{{ url('admin/user-profile/' . $user->id) }}" class="view" title="View">
+
+                                    <a class="text-center action-icons"
+                                        href="{{ route('showCustomerDetails', $user->userid) }}"
+                                        class="btn btn-outline-info btn-sm">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="{{ url('admin/edit-user/' . $user->id) }}" class="edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="{{ url('admin/delete-user/' . $user->id) }}" class="delete"
-                                        onclick="return confirm('Are you sure you want to delete this user?');"
-                                        title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+
                                 </td>
                             </tr>
                         @endforeach
