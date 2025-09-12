@@ -112,9 +112,9 @@
 
 @section('content')
     <!-- Dashboard Stats -->
-    <div class="row g-3 mb-4 mt-3">
+    <div class="row g-3 mb-4 mt-3" style="border: 1px solid rgb(186, 185, 185);">
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center border" style="border: 1px solid rgb(186, 185, 185);">
+            <div class="stats-card d-flex justify-content-between align-items-center border" >
                 <div>
                     <div class="stats-title">Total Customers</div>
                     <div class="stats-value">{{ $totalCustomer }}</div>
