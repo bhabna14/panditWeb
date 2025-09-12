@@ -25,30 +25,7 @@ use Illuminate\Support\Str;
 
 class FlowerOrderController extends Controller
 {
-    protected function getDiscontinuedCustomersQuery()
-{
-    $twoMonthsAgo = Carbon::now()->subMonths(2);
-    $liveStatuses = ['active', 'paused', 'resume'];
-
-    return Subscription::query()
-        ->where('status', 'expired')
-        ->whereNotExists(function ($q) use ($liveStatuses) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s2')
-              ->whereColumn('s2.user_id', 'subscriptions.user_id')
-              ->whereIn('s2.status', $liveStatuses);
-        })
-        ->where(function ($q) use ($twoMonthsAgo) {
-            $q->whereNull('end_date')
-              ->orWhere('end_date', '<', $twoMonthsAgo);
-        })
-        ->whereIn('id', function ($sub) {
-            $sub->select(DB::raw('MAX(id)'))
-                ->from('subscriptions')
-                ->groupBy('user_id');
-        });
-}
-
+    
     public function showOrders(Request $request)
     {
         // TZ-safe "today"
@@ -171,10 +148,29 @@ class FlowerOrderController extends Controller
             ->orderByDesc('subscriptions.end_date');
         }
 
-        
- if ($request->query('filter') === 'discontinued') {
-        $query = $this->getDiscontinuedCustomersQuery();
-    }
+      if ($filter === 'discontinued') {
+    $twoMonthsAgo = Carbon::now()->subMonths(2);
+    $liveStatuses = ['active', 'paused', 'resume'];
+
+    return Subscription::query()
+        ->where('status', 'expired')
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
+              ->from('subscriptions as s2')
+              ->whereColumn('s2.user_id', 'subscriptions.user_id')
+              ->whereIn('s2.status', $liveStatuses);
+        })
+        ->where(function ($q) use ($twoMonthsAgo) {
+            $q->whereNull('end_date')
+              ->orWhere('end_date', '<', $twoMonthsAgo);
+        })
+        ->whereIn('id', function ($sub) {
+            $sub->select(DB::raw('MAX(id)'))
+                ->from('subscriptions')
+                ->groupBy('user_id');
+        });
+}
+
 
         if ($filter === 'paused') {
             $query->where('status', 'paused');
