@@ -210,11 +210,12 @@
 
                                 <td class="text-center action-icons">
 
-                                    <a class="text-center action-icons"
-                                        href="{{ route('showCustomerDetails', $user->userid) }}"
-                                        class="btn btn-info btn-sm">
+                                    <a class="btn btn-warning text-center action-icons"
+                                        href="{{ route('showCustomerDetails', $user->userid) }}">
+                                     
                                         View Details
                                     </a>
+
                                     <a href="{{ url('admin/edit-user/' . $user->id) }}" class="edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
