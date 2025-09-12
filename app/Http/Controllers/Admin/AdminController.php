@@ -526,9 +526,10 @@ class AdminController extends Controller
     {
         return view('admin/add-career');
     }
-  public function manageuser()
+    
+    public function manageuser()
     {
-$users = User::with('subscriptions')->get();
+        $users = User::with('subscriptions')->get();
 
         // ---- Total Customers ----
         $totalCustomer = User::count();

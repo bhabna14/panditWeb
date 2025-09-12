@@ -161,6 +161,7 @@ public function flowerDashboard()
                 // Count distinct users
                 ->distinct('user_id')
                 ->count('user_id');
+                
 
             $nonAssignedRidersCount = Subscription::where('status', 'active')
             ->whereHas('order', function ($q) {

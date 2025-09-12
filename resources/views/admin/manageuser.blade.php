@@ -136,17 +136,21 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center border">
-                <div>
-                    <div class="stats-title">Discontinued Customers</div>
-                    <div class="stats-value">{{ $discontinuedCustomer }}</div>
+            <a href="{{ route('admin.orders.index', ['filter' => 'discontinued']) }}" target="_blank">
+                <div class="stats-card d-flex justify-content-between align-items-center border">
+                    <div>
+                        <div class="stats-title">Discontinued Customers</div>
+                        <div class="stats-value">{{ $discontinuedCustomer }}</div>
+                    </div>
+                    <div class="stats-icon bg-paused">
+                        <i class="fas fa-user-slash"></i>
+                    </div>
                 </div>
-                <div class="stats-icon bg-paused">
-                    <i class="fas fa-user-slash"></i>
-                </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-3">
+        <a href="{{ route('payment.collection.index') }}" target="_blank">
+
             <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
                     <div class="stats-title">Payment Pending</div>
@@ -156,6 +160,7 @@
                     <i class="fas fa-wallet"></i>
                 </div>
             </div>
+        </a>
         </div>
     </div>
 

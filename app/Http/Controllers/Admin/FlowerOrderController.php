@@ -148,6 +148,36 @@ class FlowerOrderController extends Controller
             ->orderByDesc('subscriptions.end_date');
         }
 
+        
+
+        if ($filter === 'discontinued') {
+            $twoMonthsAgo = Carbon::now()->subMonths(2);
+
+            // live statuses we consider as valid subs
+            $liveStatuses = ['active', 'paused', 'resume'];
+
+            $discontinuedCustomer = Subscription::query()
+            ->where('status', 'expired')
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                  ->from('subscriptions as s2')
+                  ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                  ->whereIn('s2.status', $liveStatuses);
+            })
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                  ->from('subscriptions as s3')
+                  ->whereColumn('s3.order_id', 'subscriptions.order_id')
+                  ->whereIn('s3.status', $liveStatuses);
+            })
+            ->where(function ($q) use ($twoMonthsAgo) {
+                $q->whereNull('end_date')
+                  ->orWhere('end_date', '<', $twoMonthsAgo);
+            })
+            ->distinct('user_id');
+        }
+
+
         if ($filter === 'paused') {
             $query->where('status', 'paused');
         }
