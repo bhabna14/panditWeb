@@ -528,7 +528,7 @@ class AdminController extends Controller
     }
   public function manageuser()
     {
-        $users = User::all();
+$users = User::with('subscriptions')->get();
 
         // ---- Total Customers ----
         $totalCustomer = User::count();

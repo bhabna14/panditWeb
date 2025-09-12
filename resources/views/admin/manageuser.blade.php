@@ -147,7 +147,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center border" >
+            <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
                     <div class="stats-title">Payment Pending</div>
                     <div class="stats-value">{{ $paymentPending }}</div>
@@ -195,8 +195,13 @@
                                 <td>{{ $user->mobile_number }}</td>
                                 <td>{{ $user->created_at->format('d M, Y') }}</td>
                                 <td>
-
+                                    @if ($user->subscriptions->count() > 0)
+                                        <span class="badge bg-success">Yes</span>
+                                    @else
+                                        <span class="badge bg-danger">No</span>
+                                    @endif
                                 </td>
+
                                 <td class="text-center action-icons">
 
                                     <a class="text-center action-icons"
