@@ -63,10 +63,14 @@ class PaymentCollectionController extends Controller
     if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
     if (is_numeric($filters['min'])) $pendingBase->havingRaw('SUM(fp.paid_amount) >= ?', [(float) $filters['min']]);
     if (is_numeric($filters['max'])) $pendingBase->havingRaw('SUM(fp.paid_amount) <= ?', [(float) $filters['max']]);
-
+        
     $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->get();
-    $pendingTotalAmount  = (clone $pendingBase)->sum('total_amount');
     $pendingCount        = (clone $pendingBase)->count();
+
+    // FIX: compute total pending amount directly
+    $pendingTotalAmount  = DB::table('flower_payments as fp')
+        ->where('fp.payment_status', 'pending')
+        ->sum('fp.paid_amount');
 
     // Expired subscriptions (same as your code)
     $liveStatuses = ['active', 'paused', 'resume'];
