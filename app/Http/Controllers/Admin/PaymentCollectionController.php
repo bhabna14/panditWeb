@@ -34,8 +34,9 @@ public function index(Request $request)
         'fp.user_id',
         'u.name as user_name',
         'u.mobile_number',
-        DB::raw('MAX(fp.paid_amount) as due_amount'),   // ✅ latest row’s amount only
+        DB::raw('MAX(fp.paid_amount) as due_amount'),
         DB::raw('MAX(fp.id) as latest_payment_row_id'),
+        DB::raw('MAX(fp.order_id) as latest_order_id'),   // ✅ added
         DB::raw('MAX(fp.created_at) as latest_pending_since'),
         DB::raw('MAX(s.subscription_id) as subscription_id'),
         DB::raw('MAX(s.start_date) as start_date'),
@@ -45,6 +46,7 @@ public function index(Request $request)
         DB::raw('MAX(p.category) as product_category'),
         DB::raw('MAX(fp.payment_method) as payment_method'),
     ])
+
     ->groupBy('fp.user_id', 'u.name', 'u.mobile_number');
 
 

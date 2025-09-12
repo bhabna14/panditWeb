@@ -233,8 +233,9 @@
                                 <td>
                                     {{-- Collect will use latest payment row id --}}
                                     <button type="button" class="btn btn-sm btn-success btn-collect"
-                                        data-id="{{ $row->latest_payment_row_id }}" data-user="{{ $row->user_name }}"
-                                        data-amount="{{ $row->total_amount ?? 0 }}"
+                                        data-id="{{ $row->latest_payment_row_id }}"
+                                        data-order="{{ $row->latest_order_id }}" data-user="{{ $row->user_name }}"
+                                        data-amount="{{ $row->due_amount ?? 0 }}"
                                         data-method="{{ $row->payment_method ?? '' }}"
                                         data-url="{{ route('payment.collection.collect', $row->latest_payment_row_id) }}"
                                         data-bs-toggle="modal" data-bs-target="#collectModal">
@@ -242,6 +243,7 @@
                                     </button>
                                 </td>
                             </tr>
+
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center py-4">No pending payments 🎉</td>
