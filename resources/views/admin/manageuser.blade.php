@@ -136,12 +136,12 @@
             </div>
         </div>
         <div class="col-md-3">
-            <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank"
+            <a href="{{ route() }}" target="_blank"
                 class="text-decoration-none">
                 <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
                     <div>
-                        <div class="stats-title">Paused Subscriptions</div>
-                        <div class="stats-value">{{ $pausedSubscriptions ?? 0 }}</div>
+                        <div class="stats-title">Discontinued Customer</div>
+                        <div class="stats-value">{{ $discontinuedCustomer ?? 0 }}</div>
                     </div>
                     <div class="stats-icon bg-paused">
                         <i class="fas fa-pause-circle"></i>
@@ -198,11 +198,7 @@
                                 <td>{{ $user->mobile_number }}</td>
                                 <td>{{ $user->created_at->format('d M, Y') }}</td>
                                 <td>
-                                    @if ($user->orders()->count() > 0)
-                                        <span class="badge bg-success">Active</span>
-                                    @else
-                                        <span class="badge bg-secondary">No Subscription</span>
-                                    @endif
+                                   
                                 </td>
                                 <td class="text-center action-icons">
 

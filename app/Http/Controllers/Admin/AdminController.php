@@ -34,6 +34,7 @@ use App\Models\ProductSucription;
 use Illuminate\Http\Request;
 use App\Models\PanditEducation;
 use App\Models\UserAddress;
+use App\Models\FlowerPayment;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -525,12 +526,64 @@ class AdminController extends Controller
     {
         return view('admin/add-career');
     }
-
-    public function manageuser()
+  public function manageuser()
     {
-        $users = User::all(); // Fetch all users using Eloquent
-        
-        return view('admin/manageuser', compact('users'));
+        $users = User::all();
+
+        // ---- Total Customers ----
+        $totalCustomer = User::count();
+
+        // ---- Subscriptions Taken (Active or Paused) ----
+        $totalSubscriptionTaken = Subscription::query()
+            ->whereIn('status', ['active', 'paused'])
+            ->distinct('user_id')
+            ->count('user_id');
+
+        // ---- Discontinued Customers ----
+        $twoMonthsAgo = Carbon::now()->subMonths(2);
+
+        // live statuses we consider as valid subs
+        $liveStatuses = ['active', 'paused', 'resume'];
+
+        $discontinuedCustomer = Subscription::query()
+            ->where('status', 'expired')
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                  ->from('subscriptions as s2')
+                  ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                  ->whereIn('s2.status', $liveStatuses);
+            })
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                  ->from('subscriptions as s3')
+                  ->whereColumn('s3.order_id', 'subscriptions.order_id')
+                  ->whereIn('s3.status', $liveStatuses);
+            })
+            ->where(function ($q) use ($twoMonthsAgo) {
+                $q->whereNull('end_date')
+                  ->orWhere('end_date', '<', $twoMonthsAgo);
+            })
+            ->distinct('user_id')
+            ->count('user_id');
+
+        // ---- Payment Pending ----
+        $paymentPending = FlowerPayment::query()
+            ->where('payment_status', 'pending')
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                  ->from('subscriptions as s')
+                  ->whereColumn('s.user_id', 'flower_payments.user_id');
+            })
+            ->distinct('user_id')
+            ->count('user_id');
+
+        return view('admin.manageuser', compact(
+            'users',
+            'totalCustomer',
+            'totalSubscriptionTaken',
+            'discontinuedCustomer',
+            'paymentPending'
+        ));
     }
 
     public function userProfile($id)
