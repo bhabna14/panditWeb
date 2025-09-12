@@ -114,10 +114,10 @@
     <!-- Dashboard Stats -->
     <div class="row g-3 mb-4 mt-3">
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
+            <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
                     <div class="stats-title">Total Customers</div>
-                    <div class="stats-value">{{ $totalCustomer ?? 0 }}</div>
+                    <div class="stats-value">{{ $totalCustomer }}</div>
                 </div>
                 <div class="stats-icon bg-users">
                     <i class="fas fa-users"></i>
@@ -125,10 +125,10 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
+            <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
                     <div class="stats-title">Subscriptions Taken</div>
-                    <div class="stats-value">{{ $totalSubscriptionTaken ?? 0 }}</div>
+                    <div class="stats-value">{{ $totalSubscriptionTaken }}</div>
                 </div>
                 <div class="stats-icon bg-subscription">
                     <i class="fas fa-box-open"></i>
@@ -136,24 +136,21 @@
             </div>
         </div>
         <div class="col-md-3">
-            <a href="{{ route() }}" target="_blank"
-                class="text-decoration-none">
-                <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
-                    <div>
-                        <div class="stats-title">Discontinued Customer</div>
-                        <div class="stats-value">{{ $discontinuedCustomer ?? 0 }}</div>
-                    </div>
-                    <div class="stats-icon bg-paused">
-                        <i class="fas fa-pause-circle"></i>
-                    </div>
+            <div class="stats-card d-flex justify-content-between align-items-center border">
+                <div>
+                    <div class="stats-title">Discontinued Customers</div>
+                    <div class="stats-value">{{ $discontinuedCustomer }}</div>
                 </div>
-            </a>
+                <div class="stats-icon bg-paused">
+                    <i class="fas fa-user-slash"></i>
+                </div>
+            </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
+            <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
                     <div class="stats-title">Payment Pending</div>
-                    <div class="stats-value">{{ $paymentPending ?? 0 }}</div>
+                    <div class="stats-value">{{ $paymentPending }}</div>
                 </div>
                 <div class="stats-icon bg-pending">
                     <i class="fas fa-wallet"></i>
@@ -198,7 +195,7 @@
                                 <td>{{ $user->mobile_number }}</td>
                                 <td>{{ $user->created_at->format('d M, Y') }}</td>
                                 <td>
-                                   
+
                                 </td>
                                 <td class="text-center action-icons">
 
