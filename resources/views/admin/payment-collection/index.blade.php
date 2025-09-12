@@ -186,30 +186,33 @@
                             <th>Duration</th>
                             <th>Type</th>
                             <th>Amount (Due)</th>
-                            <th>Status</th>
+                            <th>Since</th>
                             <th>Collect</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($pendingPayments as $i => $row)
                             @php
-                                $start = Carbon::parse($row->start_date);
-                                $end = Carbon::parse($row->end_date);
-                                $durationDays = $start->diffInDays($end) + 1;
-                                $since = $row->pending_since ? Carbon::parse($row->pending_since) : null;
+                                $start = $row->start_date ? Carbon::parse($row->start_date) : null;
+                                $end = $row->end_date ? Carbon::parse($row->end_date) : null;
+                                $durationDays = $start && $end ? $start->diffInDays($end) + 1 : 0;
+                                $since = $row->latest_pending_since ? Carbon::parse($row->latest_pending_since) : null;
                             @endphp
 
-                            <tr data-row-id="{{ $row->payment_row_id }}">
+                            <tr data-row-id="{{ $row->latest_payment_row_id }}">
                                 <td class="text-muted">{{ $i + 1 }}</td>
                                 <td>
                                     <div class="fw-semibold">{{ $row->user_name }}</div>
-                                    <div class="text-muted small">Order #{{ $row->order_id }} • Sub
-                                        #{{ $row->subscription_id }}</div>
+                                    <div class="text-muted small">Sub #{{ $row->subscription_id }}</div>
                                 </td>
                                 <td>{{ $row->mobile_number }}</td>
                                 <td>
-                                    {{ $start->format('d M Y') }} — {{ $end->format('d M Y') }}
-                                    <span class="text-muted small">({{ $durationDays }}d)</span>
+                                    @if ($start && $end)
+                                        {{ $start->format('d M Y') }} — {{ $end->format('d M Y') }}
+                                        <span class="text-muted small">({{ $durationDays }}d)</span>
+                                    @else
+                                        —
+                                    @endif
                                 </td>
                                 <td>
                                     {{ $row->product_category ?? '—' }}
@@ -217,17 +220,23 @@
                                         <span class="text-muted small">({{ $row->product_name }})</span>
                                     @endif
                                 </td>
-                                <td class="fw-bold amount-cell">₹ {{ number_format($row->amount ?? 0, 2) }}</td>
-                                <td class="status-cell">
-                                    <span class="badge badge-soft badge-pending">{{ ucfirst($row->payment_status) }}</span>
+                                <td class="fw-bold amount-cell">₹ {{ number_format($row->total_amount ?? 0, 2) }}</td>
+                                <td>
+                                    @if ($since)
+                                        <span class="badge bg-warning text-dark">
+                                            {{ $since->diffForHumans() }}
+                                        </span>
+                                    @else
+                                        —
+                                    @endif
                                 </td>
                                 <td>
-                                    {{-- IMPORTANT: data-id MUST be the PK (flower_payments.id) --}}
+                                    {{-- Collect will use latest payment row id --}}
                                     <button type="button" class="btn btn-sm btn-success btn-collect"
-                                        data-id="{{ $row->payment_row_id }}" data-order="{{ $row->order_id }}"
-                                        data-user="{{ $row->user_name }}" data-amount="{{ $row->amount ?? 0 }}"
+                                        data-id="{{ $row->latest_payment_row_id }}" data-user="{{ $row->user_name }}"
+                                        data-amount="{{ $row->total_amount ?? 0 }}"
                                         data-method="{{ $row->payment_method ?? '' }}"
-                                        data-url="{{ route('payment.collection.collect', $row->payment_row_id) }}"
+                                        data-url="{{ route('payment.collection.collect', $row->latest_payment_row_id) }}"
                                         data-bs-toggle="modal" data-bs-target="#collectModal">
                                         Collect
                                     </button>
@@ -235,12 +244,13 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center py-4">No pending payments 🎉</td>
+                                <td colspan="8" class="text-center py-4">No pending payments 🎉</td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+
         </div>
 
         {{-- ==================== EXPIRED TAB ==================== --}}

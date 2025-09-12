@@ -13,7 +13,7 @@ use Illuminate\Validation\Rule;
 
 class PaymentCollectionController extends Controller
 {
-   public function index(Request $request)
+public function index(Request $request)
 {
     $filters = [
         'q'      => trim($request->get('q', '')),
@@ -63,16 +63,16 @@ class PaymentCollectionController extends Controller
     if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
     if (is_numeric($filters['min'])) $pendingBase->havingRaw('SUM(fp.paid_amount) >= ?', [(float) $filters['min']]);
     if (is_numeric($filters['max'])) $pendingBase->havingRaw('SUM(fp.paid_amount) <= ?', [(float) $filters['max']]);
-        
+
     $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->get();
     $pendingCount        = (clone $pendingBase)->count();
 
-    // FIX: compute total pending amount directly
+    // FIX: compute total pending amount directly from all rows
     $pendingTotalAmount  = DB::table('flower_payments as fp')
         ->where('fp.payment_status', 'pending')
         ->sum('fp.paid_amount');
 
-    // Expired subscriptions (same as your code)
+    // Expired subscriptions
     $liveStatuses = ['active', 'paused', 'resume'];
 
     $subQuery = DB::table('subscriptions as s')
