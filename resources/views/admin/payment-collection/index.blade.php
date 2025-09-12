@@ -220,7 +220,7 @@
                                         <span class="text-muted small">({{ $row->product_name }})</span>
                                     @endif
                                 </td>
-                                <td class="fw-bold amount-cell">₹ {{ number_format($row->total_amount ?? 0, 2) }}</td>
+                                <td class="fw-bold amount-cell">₹ {{ number_format($row->due_amount ?? 0, 2) }}</td>
                                 <td>
                                     @if ($since)
                                         <span class="badge bg-warning text-dark">

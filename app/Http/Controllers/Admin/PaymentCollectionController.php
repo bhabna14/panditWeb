@@ -25,27 +25,28 @@ public function index(Request $request)
     ];
 
     // ✅ Only users who have pending payments
-    $pendingBase = DB::table('flower_payments as fp')
-        ->join('users as u', 'u.userid', '=', 'fp.user_id')
-        ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-        ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
-        ->where('fp.payment_status', 'pending')
-        ->select([
-            'fp.user_id',
-            'u.name as user_name',
-            'u.mobile_number',
-            DB::raw('SUM(fp.paid_amount) as total_amount'),
-            DB::raw('MAX(fp.id) as latest_payment_row_id'),
-            DB::raw('MAX(fp.created_at) as latest_pending_since'),
-            DB::raw('MAX(s.subscription_id) as subscription_id'),
-            DB::raw('MAX(s.start_date) as start_date'),
-            DB::raw('MAX(s.end_date) as end_date'),
-            DB::raw('MAX(s.status) as subscription_status'),
-            DB::raw('MAX(p.name) as product_name'),
-            DB::raw('MAX(p.category) as product_category'),
-            DB::raw('MAX(fp.payment_method) as payment_method'),
-        ])
-        ->groupBy('fp.user_id', 'u.name', 'u.mobile_number');
+  $pendingBase = DB::table('flower_payments as fp')
+    ->join('users as u', 'u.userid', '=', 'fp.user_id')
+    ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
+    ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
+    ->where('fp.payment_status', 'pending')
+    ->select([
+        'fp.user_id',
+        'u.name as user_name',
+        'u.mobile_number',
+        DB::raw('MAX(fp.paid_amount) as due_amount'),   // ✅ latest row’s amount only
+        DB::raw('MAX(fp.id) as latest_payment_row_id'),
+        DB::raw('MAX(fp.created_at) as latest_pending_since'),
+        DB::raw('MAX(s.subscription_id) as subscription_id'),
+        DB::raw('MAX(s.start_date) as start_date'),
+        DB::raw('MAX(s.end_date) as end_date'),
+        DB::raw('MAX(s.status) as subscription_status'),
+        DB::raw('MAX(p.name) as product_name'),
+        DB::raw('MAX(p.category) as product_category'),
+        DB::raw('MAX(fp.payment_method) as payment_method'),
+    ])
+    ->groupBy('fp.user_id', 'u.name', 'u.mobile_number');
+
 
     // 🔍 Apply filters
     if ($filters['q'] !== '') {
@@ -66,9 +67,10 @@ public function index(Request $request)
     if (is_numeric($filters['max'])) $pendingBase->havingRaw('SUM(fp.paid_amount) <= ?', [(float) $filters['max']]);
 
     // 📊 Final results
-    $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->get();
-    $pendingCount        = $pendingPayments->count();
-    $pendingTotalAmount  = $pendingPayments->sum('total_amount'); // ✅ matches displayed rows
+$pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->get();
+$pendingCount        = $pendingPayments->count();
+$pendingTotalAmount  = $pendingPayments->sum('due_amount'); // ✅ matches displayed amounts
+
 
     // Expired subscriptions (unchanged)
     $liveStatuses = ['active', 'paused', 'resume'];
