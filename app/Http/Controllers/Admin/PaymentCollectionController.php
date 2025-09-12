@@ -70,19 +70,12 @@ public function index(Request $request)
     if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
     if (is_numeric($filters['min'])) $pendingBase->havingRaw('SUM(fp.paid_amount) >= ?', [(float) $filters['min']]);
     if (is_numeric($filters['max'])) $pendingBase->havingRaw('SUM(fp.paid_amount) <= ?', [(float) $filters['max']]);
+$pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->get();
+$pendingCount        = (clone $pendingBase)->count();
 
-    $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->get();
-    $pendingCount        = (clone $pendingBase)->count();
+// ✅ Now total matches exactly what’s displayed in the table
+$pendingTotalAmount  = $pendingPayments->sum('total_amount');
 
-    // Total pending amount across all valid users
-    $pendingTotalAmount  = DB::table('flower_payments as fp')
-        ->where('fp.payment_status', 'pending')
-        ->whereExists(function ($q) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s2')
-              ->whereColumn('s2.user_id', 'fp.user_id');
-        })
-        ->sum('fp.paid_amount');
 
     // Expired subscriptions (unchanged)
     $liveStatuses = ['active', 'paused', 'resume'];
