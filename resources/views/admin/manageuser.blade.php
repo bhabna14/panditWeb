@@ -210,9 +210,8 @@
 
                                 <td class="text-center action-icons">
 
-                                    <a class="btn btn-warning text-center action-icons"
+                                    <a class="btn btn-warning text-center"
                                         href="{{ route('showCustomerDetails', $user->userid) }}">
-                                     
                                         View Details
                                     </a>
 
