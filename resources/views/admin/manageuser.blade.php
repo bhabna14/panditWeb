@@ -113,7 +113,7 @@
 @section('content')
     <!-- Dashboard Stats -->
     <div class="row g-3 mb-4 mt-3">
-        <div class="col-md-3" style="border: 1px solid rgb(186, 185, 185);">
+        <div class="col-md-3">
             <div class="stats-card d-flex justify-content-between align-items-center border" >
                 <div>
                     <div class="stats-title">Total Customers</div>
@@ -125,7 +125,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center border" style="border: 1px solid rgb(186, 185, 185);">
+            <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
                     <div class="stats-title">Subscriptions Taken</div>
                     <div class="stats-value">{{ $totalSubscriptionTaken }}</div>
@@ -136,7 +136,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <a href="{{ route('admin.orders.index', ['filter' => 'discontinued']) }}" target="_blank"  style="border: 1px solid rgb(186, 185, 185);">
+            <a href="{{ route('admin.orders.index', ['filter' => 'discontinued']) }}" target="_blank">
                 <div class="stats-card d-flex justify-content-between align-items-center border">
                     <div>
                         <div class="stats-title">Discontinued Customers</div>
@@ -151,7 +151,7 @@
         <div class="col-md-3">
         <a href="{{ route('payment.collection.index') }}" target="_blank">
 
-            <div class="stats-card d-flex justify-content-between align-items-center border"  style="border: 1px solid rgb(186, 185, 185);">
+            <div class="stats-card d-flex justify-content-between align-items-center border">
                 <div>
                     <div class="stats-title">Payment Pending</div>
                     <div class="stats-value">{{ $paymentPending }}</div>
