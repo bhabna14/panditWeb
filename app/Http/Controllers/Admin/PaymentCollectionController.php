@@ -13,120 +13,115 @@ use Illuminate\Validation\Rule;
 
 class PaymentCollectionController extends Controller
 {
-    public function index(Request $request)
-    {
-        $filters = [
-            'q'      => trim($request->get('q', '')),
-            'from'   => $request->get('from'),
-            'to'     => $request->get('to'),
-            'method' => $request->get('method', ''),
-            'min'    => $request->get('min'),
-            'max'    => $request->get('max'),
-        ];
+   public function index(Request $request)
+{
+    $filters = [
+        'q'      => trim($request->get('q', '')),
+        'from'   => $request->get('from'),
+        'to'     => $request->get('to'),
+        'method' => $request->get('method', ''),
+        'min'    => $request->get('min'),
+        'max'    => $request->get('max'),
+    ];
 
-        // Base query for pending payments
-        $pendingBase = DB::table('flower_payments as fp')
-            ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-            ->join('users as u', 'u.userid', '=', 'fp.user_id')
-            ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
-            ->where('fp.payment_status', 'pending')
-            ->select([
-                'fp.id as payment_row_id',       // <-- PRIMARY KEY used by the collect route
-                'fp.payment_id',
-                'fp.order_id',
-                'fp.user_id',
-                'fp.paid_amount as amount',
-                'fp.payment_status',
-                'fp.payment_method',
-                'fp.created_at as pending_since',
+    // Base query for pending payments (grouped by user)
+    $pendingBase = DB::table('flower_payments as fp')
+        ->join('subscriptions as s', 's.order_id', '=', 'fp.order_id')
+        ->join('users as u', 'u.userid', '=', 'fp.user_id')
+        ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
+        ->where('fp.payment_status', 'pending')
+        ->select([
+            'fp.user_id',
+            'u.name as user_name',
+            'u.mobile_number',
+            DB::raw('SUM(fp.paid_amount) as total_amount'),
+            DB::raw('MAX(fp.id) as latest_payment_row_id'),
+            DB::raw('MAX(fp.created_at) as latest_pending_since'),
+            DB::raw('MAX(s.subscription_id) as subscription_id'),
+            DB::raw('MAX(s.start_date) as start_date'),
+            DB::raw('MAX(s.end_date) as end_date'),
+            DB::raw('MAX(s.status) as subscription_status'),
+            DB::raw('MAX(p.name) as product_name'),
+            DB::raw('MAX(p.category) as product_category'),
+            DB::raw('MAX(fp.payment_method) as payment_method'),
+        ])
+        ->groupBy('fp.user_id', 'u.name', 'u.mobile_number');
 
-                's.subscription_id',
-                's.start_date',
-                's.end_date',
-                's.status as subscription_status',
-
-                'p.name as product_name',
-                'p.category as product_category',
-
-                'u.name as user_name',
-                'u.mobile_number',
-            ]);
-
-        if ($filters['q'] !== '') {
-            $q = $filters['q'];
-            $pendingBase->where(function ($qq) use ($q) {
-                $qq->where('u.name', 'like', "%{$q}%")
-                   ->orWhere('u.mobile_number', 'like', "%{$q}%")
-                   ->orWhere('fp.order_id', 'like', "%{$q}%")
-                   ->orWhere('s.subscription_id', 'like', "%{$q}%")
-                   ->orWhere('p.name', 'like', "%{$q}%")
-                   ->orWhere('p.category', 'like', "%{$q}%");
-            });
-        }
-        if ($filters['from'])            $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
-        if ($filters['to'])              $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
-        if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
-        if (is_numeric($filters['min'])) $pendingBase->where('fp.paid_amount', '>=', (float) $filters['min']);
-        if (is_numeric($filters['max'])) $pendingBase->where('fp.paid_amount', '<=', (float) $filters['max']);
-
-        $pendingPayments     = (clone $pendingBase)->orderByDesc('fp.id')->get();
-        $pendingTotalAmount  = (clone $pendingBase)->sum('fp.paid_amount'); // total pending (as modeled)
-        $pendingCount        = (clone $pendingBase)->count();
-
-        // Expired subscriptions (last expired per user, and no live sub)
-        $liveStatuses = ['active', 'paused', 'resume'];
-
-        $subQuery = DB::table('subscriptions as s')
-            ->select('s.user_id', DB::raw('MAX(s.end_date) as latest_end_date'))
-            ->where('s.status', 'expired')
-            ->whereNotExists(function ($q) use ($liveStatuses) {
-                $q->select(DB::raw(1))
-                  ->from('subscriptions as sa')
-                  ->whereColumn('sa.user_id', 's.user_id')
-                  ->whereIn('sa.status', $liveStatuses);
-            })
-            ->groupBy('s.user_id');
-
-        $expiredBase = DB::table('subscriptions')
-            ->joinSub($subQuery, 'latest_expired', function ($join) {
-                $join->on('subscriptions.user_id', '=', 'latest_expired.user_id')
-                     ->on('subscriptions.end_date', '=', 'latest_expired.latest_end_date');
-            })
-            ->join('users as u', 'u.userid', '=', 'subscriptions.user_id')
-            ->leftJoin('flower_products as p', 'p.product_id', '=', 'subscriptions.product_id')
-            ->where('subscriptions.status', 'expired')
-            ->whereNotExists(function ($q) use ($liveStatuses) {
-                $q->select(DB::raw(1))
-                  ->from('subscriptions as so')
-                  ->whereColumn('so.order_id', 'subscriptions.order_id')
-                  ->whereIn('so.status', $liveStatuses);
-            })
-            ->select([
-                'subscriptions.subscription_id',
-                'subscriptions.order_id',
-                'subscriptions.user_id',
-                'subscriptions.start_date',
-                'subscriptions.end_date',
-                'subscriptions.status',
-                'u.name as user_name',
-                'u.mobile_number',
-                'p.name as product_name',
-                'p.category as product_category',
-            ]);
-
-        $expiredSubs  = (clone $expiredBase)->orderByDesc('subscriptions.end_date')->get();
-        $expiredCount = (clone $expiredBase)->count();
-
-        return view('admin.payment-collection.index', [
-            'pendingPayments'     => $pendingPayments,
-            'pendingTotalAmount'  => $pendingTotalAmount,
-            'pendingCount'        => $pendingCount,
-            'expiredSubs'         => $expiredSubs,
-            'expiredCount'        => $expiredCount,
-            'filters'             => $filters,
-            'methods'             => ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'],
-        ]);
+    if ($filters['q'] !== '') {
+        $q = $filters['q'];
+        $pendingBase->where(function ($qq) use ($q) {
+            $qq->where('u.name', 'like', "%{$q}%")
+                ->orWhere('u.mobile_number', 'like', "%{$q}%")
+                ->orWhere('fp.order_id', 'like', "%{$q}%")
+                ->orWhere('s.subscription_id', 'like', "%{$q}%")
+                ->orWhere('p.name', 'like', "%{$q}%")
+                ->orWhere('p.category', 'like', "%{$q}%");
+        });
     }
+    if ($filters['from'])            $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
+    if ($filters['to'])              $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
+    if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
+    if (is_numeric($filters['min'])) $pendingBase->havingRaw('SUM(fp.paid_amount) >= ?', [(float) $filters['min']]);
+    if (is_numeric($filters['max'])) $pendingBase->havingRaw('SUM(fp.paid_amount) <= ?', [(float) $filters['max']]);
+
+    $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->get();
+    $pendingTotalAmount  = (clone $pendingBase)->sum('total_amount');
+    $pendingCount        = (clone $pendingBase)->count();
+
+    // Expired subscriptions (same as your code)
+    $liveStatuses = ['active', 'paused', 'resume'];
+
+    $subQuery = DB::table('subscriptions as s')
+        ->select('s.user_id', DB::raw('MAX(s.end_date) as latest_end_date'))
+        ->where('s.status', 'expired')
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
+                ->from('subscriptions as sa')
+                ->whereColumn('sa.user_id', 's.user_id')
+                ->whereIn('sa.status', $liveStatuses);
+        })
+        ->groupBy('s.user_id');
+
+    $expiredBase = DB::table('subscriptions')
+        ->joinSub($subQuery, 'latest_expired', function ($join) {
+            $join->on('subscriptions.user_id', '=', 'latest_expired.user_id')
+                ->on('subscriptions.end_date', '=', 'latest_expired.latest_end_date');
+        })
+        ->join('users as u', 'u.userid', '=', 'subscriptions.user_id')
+        ->leftJoin('flower_products as p', 'p.product_id', '=', 'subscriptions.product_id')
+        ->where('subscriptions.status', 'expired')
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
+                ->from('subscriptions as so')
+                ->whereColumn('so.order_id', 'subscriptions.order_id')
+                ->whereIn('so.status', $liveStatuses);
+        })
+        ->select([
+            'subscriptions.subscription_id',
+            'subscriptions.order_id',
+            'subscriptions.user_id',
+            'subscriptions.start_date',
+            'subscriptions.end_date',
+            'subscriptions.status',
+            'u.name as user_name',
+            'u.mobile_number',
+            'p.name as product_name',
+            'p.category as product_category',
+        ]);
+
+    $expiredSubs  = (clone $expiredBase)->orderByDesc('subscriptions.end_date')->get();
+    $expiredCount = (clone $expiredBase)->count();
+
+    return view('admin.payment-collection.index', [
+        'pendingPayments'     => $pendingPayments,
+        'pendingTotalAmount'  => $pendingTotalAmount,
+        'pendingCount'        => $pendingCount,
+        'expiredSubs'         => $expiredSubs,
+        'expiredCount'        => $expiredCount,
+        'filters'             => $filters,
+        'methods'             => ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'],
+    ]);
+}
 
     public function collect(Request $request, $id)
     {
