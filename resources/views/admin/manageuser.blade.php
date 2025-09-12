@@ -147,7 +147,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center border">
+            <div class="stats-card d-flex justify-content-between align-items-center border" >
                 <div>
                     <div class="stats-title">Payment Pending</div>
                     <div class="stats-value">{{ $paymentPending }}</div>

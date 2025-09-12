@@ -574,7 +574,6 @@ class AdminController extends Controller
                   ->from('subscriptions as s')
                   ->whereColumn('s.user_id', 'flower_payments.user_id');
             })
-            ->distinct('user_id')
             ->count('user_id');
 
         return view('admin.manageuser', compact(
