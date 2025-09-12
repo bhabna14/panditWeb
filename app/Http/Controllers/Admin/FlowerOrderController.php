@@ -152,7 +152,7 @@ class FlowerOrderController extends Controller
       $twoMonthsAgo = Carbon::now()->subMonths(2);
 $liveStatuses = ['active', 'paused', 'resume'];
 
-$discontinuedQuery = Subscription::query()
+$query = Subscription::query()
     ->where('status', 'expired')
     ->whereNotExists(function ($q) use ($liveStatuses) {
         $q->select(DB::raw(1))
