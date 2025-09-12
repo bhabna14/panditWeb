@@ -114,7 +114,7 @@
     <!-- Dashboard Stats -->
     <div class="row g-3 mb-4 mt-3">
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center">
+            <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
                 <div>
                     <div class="stats-title">Total Customers</div>
                     <div class="stats-value">{{ $totalCustomer ?? 0 }}</div>
@@ -125,7 +125,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center">
+            <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
                 <div>
                     <div class="stats-title">Subscriptions Taken</div>
                     <div class="stats-value">{{ $totalSubscriptionTaken ?? 0 }}</div>
@@ -138,7 +138,7 @@
         <div class="col-md-3">
             <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank"
                 class="text-decoration-none">
-                <div class="stats-card d-flex justify-content-between align-items-center">
+                <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
                     <div>
                         <div class="stats-title">Paused Subscriptions</div>
                         <div class="stats-value">{{ $pausedSubscriptions ?? 0 }}</div>
@@ -150,7 +150,7 @@
             </a>
         </div>
         <div class="col-md-3">
-            <div class="stats-card d-flex justify-content-between align-items-center">
+            <div class="stats-card d-flex justify-content-between align-items-center" style="border: 1px solid rgb(186, 185, 185);">
                 <div>
                     <div class="stats-title">Payment Pending</div>
                     <div class="stats-value">{{ $paymentPending ?? 0 }}</div>
