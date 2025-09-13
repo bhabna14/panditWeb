@@ -46,7 +46,7 @@ class RiderLoginController extends Controller
     public function riderVerifyOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|digits_between:10,15',
+            'phoneNumber' => 'required|string|digits_between:10,15',
             'otp'   => 'required|digits:6',
         ]);
 
@@ -54,7 +54,7 @@ class RiderLoginController extends Controller
             return response()->json(['message' => $validator->errors()->first()], 422);
         }
 
-        $phone = $request->input('phone');
+        $phone = $request->input('phoneNumber');
         $otp   = $request->input('otp');
 
         // ✅ Check static OTP
