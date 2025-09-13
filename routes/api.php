@@ -43,6 +43,9 @@ use App\Http\Controllers\Notification\PushNotificationController;
 
 Route::post('/save-token', [PushNotificationController::class, 'saveToken']);
 
+    Route::post('/rider/send-otp', [RiderLoginController::class,'riderSendOtp']);
+    Route::post('/rider/verify-otp', [RiderLoginController::class, 'riderVerifyOtp']);
+    
 Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/details', [RiderLoginController::class, 'getRiderDetails']);
     Route::get('rider/get-assign-pickup', [OrderController::class, 'getAssignPickup']);
@@ -64,10 +67,10 @@ Route::middleware('auth:rider-api')->group(function () {
 
     Route::post('/rider/flower-pickup-request', [OrderController::class, 'savePickupRequest']);
 
-    Route::post('/rider/send-otp', [RiderLoginController::class,'riderSendOtp']);
-    Route::post('/rider/verify-otp', [RiderLoginController::class, 'riderVerifyOtp']);
 
 });
+
+
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
