@@ -82,27 +82,60 @@
                                 <!-- Delivery Date -->
                                 <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }} {{ $request->time }}</td>
 
-                                <!-- Items -->
-                                <!-- Items -->
+                                <!-- Items Column -->
                                 <td>
-                                    <ul class="ps-3 mb-0">
-                                        @foreach ($request->flowerRequestItems as $item)
-                                            @if ($item->type === 'garland')
-                                                <li>
-                                                    <strong>Garland:</strong> {{ $item->garland_name ?? 'N/A' }}
-                                                    (Qty: {{ $item->garland_quantity ?? 0 }})
-                                                    @if ($item->garland_size)
-                                                        - Size: {{ $item->garland_size }}
+                                    <button class="btn btn-sm btn-outline-primary w-100" data-bs-toggle="modal"
+                                        data-bs-target="#itemsModal{{ $request->id }}">
+                                        View Items
+                                    </button>
+
+                                    <!-- Items Modal -->
+                                    <div class="modal fade" id="itemsModal{{ $request->id }}" tabindex="-1"
+                                        aria-labelledby="itemsModalLabel{{ $request->id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-primary text-white">
+                                                    <h5 class="modal-title" id="itemsModalLabel{{ $request->id }}">
+                                                        Order Items - #{{ $request->request_id }}
+                                                    </h5>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    @if ($request->flowerRequestItems->count())
+                                                        <ul class="list-group">
+                                                            @foreach ($request->flowerRequestItems as $item)
+                                                                @if ($item->type === 'garland')
+                                                                    <li class="list-group-item">
+                                                                        <strong>Garland:</strong>
+                                                                        {{ $item->garland_name ?? 'N/A' }}<br>
+                                                                        <small>Quantity:
+                                                                            {{ $item->garland_quantity ?? 0 }}</small><br>
+                                                                        @if ($item->garland_size)
+                                                                            <small>Size: {{ $item->garland_size }}</small>
+                                                                        @endif
+                                                                    </li>
+                                                                @else
+                                                                    <li class="list-group-item">
+                                                                        <strong>Flower:</strong>
+                                                                        {{ $item->flower_name ?? 'N/A' }}<br>
+                                                                        <small>Quantity: {{ $item->flower_quantity ?? 0 }}
+                                                                            {{ $item->flower_unit ?? '' }}</small>
+                                                                    </li>
+                                                                @endif
+                                                            @endforeach
+                                                        </ul>
+                                                    @else
+                                                        <p class="text-muted">No items found.</p>
                                                     @endif
-                                                </li>
-                                            @else
-                                                <li>
-                                                    <strong>Flower:</strong> {{ $item->flower_name ?? 'N/A' }}
-                                                    - {{ $item->flower_quantity ?? 0 }} {{ $item->flower_unit ?? '' }}
-                                                </li>
-                                            @endif
-                                        @endforeach
-                                    </ul>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </td>
 
                                 <!-- Status -->
