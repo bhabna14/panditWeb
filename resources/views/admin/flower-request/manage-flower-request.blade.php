@@ -64,6 +64,7 @@
     @endif
 
     <!-- Orders Table -->
+    <!-- Orders Table -->
     <div class="card custom-card">
         <div class="card-body">
             <div class="table-responsive">
@@ -74,14 +75,12 @@
                             <th>Purchase Date</th>
                             <th>Delivery Date</th>
                             <th>Flower Items</th>
-                            <th>Suggestion</th>
                             <th>Status</th>
                             <th>Price</th>
                             <th>Actions</th>
                             <th>Rider</th>
                             <th>Address</th>
-                            <th>Cancelled By</th>
-                            <th>Cancel Reason</th>
+                            <th>Details</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,15 +107,6 @@
                                                 {{ $item->flower_unit }}</li>
                                         @endforeach
                                     </ul>
-                                </td>
-
-                                <!-- Suggestion -->
-                                <td>
-                                    @if ($request->suggestion)
-                                        <span class="badge bg-secondary">{{ $request->suggestion }}</span>
-                                    @else
-                                        <span class="text-muted">--</span>
-                                    @endif
                                 </td>
 
                                 <!-- Status -->
@@ -222,17 +212,47 @@
                                     <small><strong>Pin:</strong> {{ $request->address->pincode ?? '' }}</small>
                                 </td>
 
-                                <!-- Cancel Info -->
+                                <!-- Details (Suggestion + Cancellation) -->
                                 <td>
-                                    @if ($request->cancel_by)
-                                        <span class="badge bg-dark">{{ ucfirst($request->cancel_by) }}</span>
-                                    @else
-                                        <span class="text-muted">--</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if ($request->cancel_reason)
-                                        {{ $request->cancel_reason }}
+                                    @if ($request->suggestion || $request->status == 'cancelled')
+                                        <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal"
+                                            data-bs-target="#detailsModal{{ $request->id }}">
+                                            View Details
+                                        </button>
+
+                                        <!-- Modal -->
+                                        <div class="modal fade" id="detailsModal{{ $request->id }}" tabindex="-1"
+                                            aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-dark text-white">
+                                                        <h5 class="modal-title" id="detailsModalLabel{{ $request->id }}">
+                                                            Request Details
+                                                        </h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                            aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <!-- Suggestion -->
+                                                        <p><strong>Suggestion:</strong>
+                                                            {{ $request->suggestion ?? 'No suggestion provided' }}
+                                                        </p>
+
+                                                        <!-- Cancellation -->
+                                                        @if ($request->status == 'cancelled')
+                                                            <p><strong>Cancelled By:</strong>
+                                                                {{ ucfirst($request->cancel_by) ?? 'N/A' }}</p>
+                                                            <p><strong>Reason:</strong>
+                                                                {{ $request->cancel_reason ?? 'No reason given' }}</p>
+                                                        @endif
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary"
+                                                            data-bs-dismiss="modal">Close</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     @else
                                         <span class="text-muted">--</span>
                                     @endif
@@ -244,6 +264,7 @@
             </div>
         </div>
     </div>
+
 @endsection
 
 @section('scripts')
