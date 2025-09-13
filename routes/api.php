@@ -63,6 +63,10 @@ Route::middleware('auth:rider-api')->group(function () {
     ->middleware('auth:rider-api');
 
     Route::post('/rider/flower-pickup-request', [OrderController::class, 'savePickupRequest']);
+
+    Route::post('/rider/send-otp', [RiderLoginController::class,'riderSendOtp']);
+    Route::post('/rider/verify-otp', [RiderLoginController::class, 'riderVerifyOtp']);
+
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
