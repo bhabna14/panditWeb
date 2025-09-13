@@ -62,208 +62,200 @@
     @if ($errors->has('danger'))
         <div class="alert alert-danger" id="Message">{{ $errors->first('danger') }}</div>
     @endif
-
-    <!-- Orders Table -->
-    <!-- Orders Table -->
-    <div class="card custom-card">
-        <div class="card-body">
-            <div class="table-responsive">
-                <table id="file-datatable" class="table table-striped table-bordered align-middle">
-                    <thead class="table-light">
+<!-- Orders Table -->
+<div class="card custom-card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="file-datatable" class="table table-striped table-bordered align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Request ID / User</th>
+                        <th>Purchase Date</th>
+                        <th>Delivery Date</th>
+                        <th>Flower Items</th>
+                        <th>Suggestion</th>
+                        <th>Status</th>
+                        <th>Price</th>
+                        <th>Actions</th>
+                        <th>Rider</th>
+                        <th>Address</th>
+                        <th>Cancellation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($pendingRequests as $request)
                         <tr>
-                            <th>Request ID / User</th>
-                            <th>Purchase Date</th>
-                            <th>Delivery Date</th>
-                            <th>Flower Items</th>
-                            <th>Status</th>
-                            <th>Price</th>
-                            <th>Actions</th>
-                            <th>Rider</th>
-                            <th>Address</th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($pendingRequests as $request)
-                            <tr>
-                                <!-- Request ID + User -->
-                                <td>
-                                    <strong>#{{ $request->request_id }}</strong><br>
-                                    <small class="text-muted">Name:</small> {{ $request->user->name ?? 'N/A' }}<br>
-                                    <small class="text-muted">Phone:</small> {{ $request->user->mobile_number ?? 'N/A' }}
-                                </td>
+                            <!-- Request ID + User -->
+                            <td>
+                                <strong>#{{ $request->request_id }}</strong><br>
+                                <small class="text-muted">Name:</small> {{ $request->user->name ?? 'N/A' }}<br>
+                                <small class="text-muted">Phone:</small> {{ $request->user->mobile_number ?? 'N/A' }}
+                            </td>
 
-                                <!-- Purchase Date -->
-                                <td>{{ optional($request->created_at)->format('d-m-Y h:i A') ?? 'N/A' }}</td>
+                            <!-- Purchase Date -->
+                            <td>{{ optional($request->created_at)->format('d-m-Y h:i A') ?? 'N/A' }}</td>
 
-                                <!-- Delivery Date -->
-                                <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }} {{ $request->time }}</td>
+                            <!-- Delivery Date -->
+                            <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }} {{ $request->time }}</td>
 
-                                <!-- Flower Items -->
-                                <td>
-                                    <ul class="mb-0 ps-3">
-                                        @foreach ($request->flowerRequestItems as $item)
-                                            <li>{{ $item->flower_name }} - {{ $item->flower_quantity }}
-                                                {{ $item->flower_unit }}</li>
-                                        @endforeach
-                                    </ul>
-                                </td>
+                            <!-- Flower Items -->
+                            <td>
+                                <ul class="mb-0 ps-3">
+                                    @foreach ($request->flowerRequestItems as $item)
+                                        <li>{{ $item->flower_name }} - {{ $item->flower_quantity }} {{ $item->flower_unit }}</li>
+                                    @endforeach
+                                </ul>
+                            </td>
 
-                                <!-- Status -->
-                                <td>
-                                    @switch($request->status)
-                                        @case('pending')
-                                            <span class="badge bg-warning">Order Placed</span>
-                                            <div><small class="text-muted">Update the Price</small></div>
+                            <!-- Suggestion -->
+                            <td>
+                                @if ($request->suggestion)
+                                    <span class="badge bg-secondary">{{ $request->suggestion }}</span>
+                                @else
+                                    <span class="text-muted">--</span>
+                                @endif
+                            </td>
+
+                            <!-- Status -->
+                            <td>
+                                @switch($request->status)
+                                    @case('pending')
+                                        <span class="badge bg-warning">Order Placed</span>
+                                        <div><small class="text-muted">Update the Price</small></div>
                                         @break
-
-                                        @case('approved')
-                                            <span class="badge bg-info">Payment Pending</span>
+                                    @case('approved')
+                                        <span class="badge bg-info">Payment Pending</span>
                                         @break
-
-                                        @case('paid')
-                                            <span class="badge bg-success">Payment Completed</span>
+                                    @case('paid')
+                                        <span class="badge bg-success">Payment Completed</span>
                                         @break
-
-                                        @case('cancelled')
-                                            <span class="badge bg-danger">Cancelled</span>
+                                    @case('cancelled')
+                                        <span class="badge bg-danger">Cancelled</span>
                                         @break
+                                    @default
+                                        <span class="text-muted">Unknown</span>
+                                @endswitch
+                            </td>
 
-                                        @default
-                                            <span class="text-muted">Unknown</span>
-                                    @endswitch
-                                </td>
+                            <!-- Price -->
+                            <td>
+                                @if ($request->order && $request->order->total_price)
+                                    <div><strong>Total:</strong> ₹{{ $request->order->total_price }}</div>
+                                    <small>Flower: ₹{{ $request->order->requested_flower_price }}</small><br>
+                                    <small>Delivery: ₹{{ $request->order->delivery_charge }}</small>
+                                @else
+                                    <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST">
+                                        @csrf
+                                        <input type="number" name="requested_flower_price" class="form-control mb-2"
+                                            placeholder="Enter Price" required>
+                                        <input type="number" name="delivery_charge" class="form-control mb-2"
+                                            placeholder="Enter Delivery Charge" required>
+                                        <small class="form-text text-muted">Enter "0" if no delivery charge.</small>
+                                        <button type="submit" class="btn btn-sm btn-primary mt-2">Save</button>
+                                    </form>
+                                @endif
+                            </td>
 
-                                <!-- Price -->
-                                <td>
-                                    @if ($request->order && $request->order->total_price)
-                                        <div><strong>Total:</strong> ₹{{ $request->order->total_price }}</div>
-                                        <small>Flower: ₹{{ $request->order->requested_flower_price }}</small><br>
-                                        <small>Delivery: ₹{{ $request->order->delivery_charge }}</small>
+                            <!-- Actions -->
+                            <td>
+                                <form id="markPaymentForm_{{ $request->request_id }}"
+                                      action="{{ route('admin.markPayment', $request->request_id) }}"
+                                      method="POST">
+                                    @csrf
+                                    @if ($request->status == 'approved')
+                                        <button type="button" class="btn btn-success btn-sm"
+                                            onclick="confirmPayment('{{ $request->request_id }}')">Mark Paid</button>
+                                    @elseif($request->status == 'paid')
+                                        <button type="button" class="btn btn-success btn-sm" disabled>Paid</button>
                                     @else
-                                        <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST">
+                                        <button type="button" class="btn btn-secondary btn-sm" disabled>N/A</button>
+                                    @endif
+                                </form>
+                            </td>
+
+                            <!-- Rider -->
+                            <td>
+                                @if ($request->order && $request->order->total_price)
+                                    @if ($request->order->rider_id)
+                                        <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
+                                        @if ($request->status != 'paid')
+                                            <a href="#" class="btn btn-sm btn-outline-info mt-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#editRiderModal{{ $request->order->id }}">
+                                                Edit Rider
+                                            </a>
+                                        @endif
+                                    @else
+                                        <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
                                             @csrf
-                                            <input type="number" name="requested_flower_price" class="form-control mb-2"
-                                                placeholder="Enter Price" required>
-                                            <input type="number" name="delivery_charge" class="form-control mb-2"
-                                                placeholder="Enter Delivery Charge" required>
-                                            <small class="form-text text-muted">Enter "0" if no delivery charge.</small>
-                                            <button type="submit" class="btn btn-sm btn-primary mt-2">Save</button>
+                                            <select name="rider_id" class="form-select mb-2">
+                                                <option selected disabled>Choose Rider</option>
+                                                @foreach ($riders as $rider)
+                                                    <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-success">Assign</button>
                                         </form>
                                     @endif
-                                </td>
+                                @else
+                                    <span class="text-muted">Price not set</span>
+                                @endif
+                            </td>
 
-                                <!-- Actions -->
-                                <td>
-                                    <form id="markPaymentForm_{{ $request->request_id }}"
-                                        action="{{ route('admin.markPayment', $request->request_id) }}" method="POST">
-                                        @csrf
-                                        @if ($request->status == 'approved')
-                                            <button type="button" class="btn btn-success btn-sm"
-                                                onclick="confirmPayment('{{ $request->request_id }}')">Mark Paid</button>
-                                        @elseif($request->status == 'paid')
-                                            <button type="button" class="btn btn-success btn-sm" disabled>Paid</button>
-                                        @else
-                                            <button type="button" class="btn btn-secondary btn-sm" disabled>N/A</button>
-                                        @endif
-                                    </form>
-                                </td>
+                            <!-- Address -->
+                            <td>
+                                <strong>Address:</strong>
+                                {{ $request->address->apartment_flat_plot ?? '' }},
+                                {{ $request->address->apartment_name ?? '' }},
+                                {{ $request->address->locality_name ?? '' }}<br>
+                                <small><strong>Landmark:</strong> {{ $request->address->landmark ?? '' }}</small><br>
+                                <small><strong>City:</strong> {{ $request->address->city ?? '' }}</small><br>
+                                <small><strong>State:</strong> {{ $request->address->state ?? '' }}</small><br>
+                                <small><strong>Pin:</strong> {{ $request->address->pincode ?? '' }}</small>
+                            </td>
 
-                                <!-- Rider -->
-                                <td>
-                                    @if ($request->order && $request->order->total_price)
-                                        @if ($request->order->rider_id)
-                                            <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
-                                            @if ($request->status != 'paid')
-                                                <a href="#" class="btn btn-sm btn-outline-info mt-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#editRiderModal{{ $request->order->id }}">
-                                                    Edit Rider
-                                                </a>
-                                            @endif
-                                        @else
-                                            <form action="{{ route('admin.orders.assignRider', $request->order->id) }}"
-                                                method="POST">
-                                                @csrf
-                                                <select name="rider_id" class="form-select mb-2">
-                                                    <option selected disabled>Choose Rider</option>
-                                                    @foreach ($riders as $rider)
-                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                                <button type="submit" class="btn btn-sm btn-success">Assign</button>
-                                            </form>
-                                        @endif
-                                    @else
-                                        <span class="text-muted">Price not set</span>
-                                    @endif
-                                </td>
+                            <!-- Cancellation -->
+                            <td>
+                                @if ($request->status == 'cancelled')
+                                    <span class="badge bg-danger">Cancelled</span><br>
+                                    <button class="btn btn-sm btn-outline-danger mt-2" data-bs-toggle="modal"
+                                            data-bs-target="#cancelModal{{ $request->id }}">
+                                        View Details
+                                    </button>
 
-                                <!-- Address -->
-                                <td>
-                                    <strong>Address:</strong>
-                                    {{ $request->address->apartment_flat_plot ?? '' }},
-                                    {{ $request->address->apartment_name ?? '' }},
-                                    {{ $request->address->locality_name ?? '' }}<br>
-                                    <small><strong>Landmark:</strong> {{ $request->address->landmark ?? '' }}</small><br>
-                                    <small><strong>City:</strong> {{ $request->address->city ?? '' }}</small><br>
-                                    <small><strong>State:</strong> {{ $request->address->state ?? '' }}</small><br>
-                                    <small><strong>Pin:</strong> {{ $request->address->pincode ?? '' }}</small>
-                                </td>
-
-                                <!-- Details (Suggestion + Cancellation) -->
-                                <td>
-                                    @if ($request->suggestion || $request->status == 'cancelled')
-                                        <button class="btn btn-sm btn-outline-dark" data-bs-toggle="modal"
-                                            data-bs-target="#detailsModal{{ $request->id }}">
-                                            View Details
-                                        </button>
-
-                                        <!-- Modal -->
-                                        <div class="modal fade" id="detailsModal{{ $request->id }}" tabindex="-1"
-                                            aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog-centered">
-                                                <div class="modal-content">
-                                                    <div class="modal-header bg-dark text-white">
-                                                        <h5 class="modal-title" id="detailsModalLabel{{ $request->id }}">
-                                                            Request Details
-                                                        </h5>
-                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <!-- Suggestion -->
-                                                        <p><strong>Suggestion:</strong>
-                                                            {{ $request->suggestion ?? 'No suggestion provided' }}
-                                                        </p>
-
-                                                        <!-- Cancellation -->
-                                                        @if ($request->status == 'cancelled')
-                                                            <p><strong>Cancelled By:</strong>
-                                                                {{ ucfirst($request->cancel_by) ?? 'N/A' }}</p>
-                                                            <p><strong>Reason:</strong>
-                                                                {{ $request->cancel_reason ?? 'No reason given' }}</p>
-                                                        @endif
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary"
-                                                            data-bs-dismiss="modal">Close</button>
-                                                    </div>
+                                    <!-- Modal -->
+                                    <div class="modal fade" id="cancelModal{{ $request->id }}" tabindex="-1"
+                                         aria-labelledby="cancelModalLabel{{ $request->id }}" aria-hidden="true">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title" id="cancelModalLabel{{ $request->id }}">
+                                                        Cancellation Details
+                                                    </h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p><strong>Cancelled By:</strong> {{ ucfirst($request->cancel_by) ?? 'N/A' }}</p>
+                                                    <p><strong>Reason:</strong> {{ $request->cancel_reason ?? 'No reason given' }}</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                 </div>
                                             </div>
                                         </div>
-                                    @else
-                                        <span class="text-muted">--</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                                    </div>
+                                @else
+                                    <span class="text-muted">--</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
+</div>
+
 
 @endsection
 
