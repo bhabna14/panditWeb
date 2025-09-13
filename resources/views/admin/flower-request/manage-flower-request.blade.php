@@ -11,9 +11,12 @@
         .badge {
             font-size: 0.8rem;
         }
-        .table td, .table th {
+
+        .table td,
+        .table th {
             vertical-align: middle !important;
         }
+
         .action-btns .btn {
             margin: 2px 0;
         }
@@ -80,10 +83,24 @@
                                 <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }} {{ $request->time }}</td>
 
                                 <!-- Items -->
+                                <!-- Items -->
                                 <td>
                                     <ul class="ps-3 mb-0">
                                         @foreach ($request->flowerRequestItems as $item)
-                                            <li>{{ $item->flower_name }} - {{ $item->flower_quantity }} {{ $item->flower_unit }}</li>
+                                            @if ($item->type === 'garland')
+                                                <li>
+                                                    <strong>Garland:</strong> {{ $item->garland_name ?? 'N/A' }}
+                                                    (Qty: {{ $item->garland_quantity ?? 0 }})
+                                                    @if ($item->garland_size)
+                                                        - Size: {{ $item->garland_size }}
+                                                    @endif
+                                                </li>
+                                            @else
+                                                <li>
+                                                    <strong>Flower:</strong> {{ $item->flower_name ?? 'N/A' }}
+                                                    - {{ $item->flower_quantity ?? 0 }} {{ $item->flower_unit ?? '' }}
+                                                </li>
+                                            @endif
                                         @endforeach
                                     </ul>
                                 </td>
@@ -93,16 +110,20 @@
                                     @switch($request->status)
                                         @case('pending')
                                             <span class="badge bg-warning">Pending</span>
-                                            @break
+                                        @break
+
                                         @case('approved')
                                             <span class="badge bg-info">Approved</span>
-                                            @break
+                                        @break
+
                                         @case('paid')
                                             <span class="badge bg-success">Paid</span>
-                                            @break
+                                        @break
+
                                         @case('cancelled')
                                             <span class="badge bg-danger">Cancelled</span>
-                                            @break
+                                        @break
+
                                         @default
                                             <span class="badge bg-secondary">Unknown</span>
                                     @endswitch
@@ -132,17 +153,19 @@
                                         @if ($request->order->rider_id)
                                             <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
                                             <a href="#" class="btn btn-sm btn-outline-info mt-2"
-                                               data-bs-toggle="modal"
-                                               data-bs-target="#editRiderModal{{ $request->order->id }}">
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#editRiderModal{{ $request->order->id }}">
                                                 Edit Rider
                                             </a>
                                         @else
-                                            <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
+                                            <form action="{{ route('admin.orders.assignRider', $request->order->id) }}"
+                                                method="POST">
                                                 @csrf
                                                 <select name="rider_id" class="form-select mb-2">
                                                     <option disabled selected>Choose Rider</option>
                                                     @foreach ($riders as $rider)
-                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
+                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
                                                 <button type="submit" class="btn btn-sm btn-success w-100">Assign</button>
@@ -156,11 +179,11 @@
                                 <!-- Address -->
                                 <td>
                                     <small>{{ $request->address->apartment_flat_plot ?? '' }},
-                                    {{ $request->address->apartment_name ?? '' }},
-                                    {{ $request->address->locality_name ?? '' }}</small><br>
+                                        {{ $request->address->apartment_name ?? '' }},
+                                        {{ $request->address->locality_name ?? '' }}</small><br>
                                     <small class="text-muted">{{ $request->address->city ?? '' }},
-                                    {{ $request->address->state ?? '' }},
-                                    {{ $request->address->pincode ?? '' }}</small><br>
+                                        {{ $request->address->state ?? '' }},
+                                        {{ $request->address->pincode ?? '' }}</small><br>
                                     <small class="text-muted">Landmark: {{ $request->address->landmark ?? 'N/A' }}</small>
                                 </td>
 
@@ -185,39 +208,41 @@
                                 <!-- Actions -->
                                 <td class="action-btns">
                                     <form id="markPaymentForm_{{ $request->request_id }}"
-                                          action="{{ route('admin.markPayment', $request->request_id) }}"
-                                          method="POST">
+                                        action="{{ route('admin.markPayment', $request->request_id) }}" method="POST">
                                         @csrf
                                         @if ($request->status == 'approved')
                                             <button type="button" class="btn btn-success btn-sm w-100"
                                                 onclick="confirmPayment('{{ $request->request_id }}')">Mark Paid</button>
                                         @elseif($request->status == 'paid')
-                                            <button type="button" class="btn btn-success btn-sm w-100" disabled>Paid</button>
+                                            <button type="button" class="btn btn-success btn-sm w-100"
+                                                disabled>Paid</button>
                                         @endif
                                     </form>
 
                                     <!-- View Details -->
-                                    <button class="btn btn-outline-dark btn-sm w-100 mt-2"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#detailsModal{{ $request->id }}">
+                                    <button class="btn btn-outline-dark btn-sm w-100 mt-2" data-bs-toggle="modal"
+                                        data-bs-target="#detailsModal{{ $request->id }}">
                                         Details
                                     </button>
 
                                     <!-- Modal -->
                                     <div class="modal fade" id="detailsModal{{ $request->id }}" tabindex="-1"
-                                         aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
+                                        aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
                                                 <div class="modal-header bg-dark text-white">
                                                     <h5 class="modal-title">Request Details</h5>
-                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p><strong>Suggestion:</strong> {{ $request->suggestion ?? 'None' }}</p>
+                                                    <p><strong>Suggestion:</strong> {{ $request->suggestion ?? 'None' }}
+                                                    </p>
                                                     <p><strong>Status:</strong> {{ ucfirst($request->status) }}</p>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    <button type="button" class="btn btn-secondary"
+                                                        data-bs-dismiss="modal">Close</button>
                                                 </div>
                                             </div>
                                         </div>
