@@ -1,7 +1,6 @@
 @extends('admin.layouts.apps')
 
 @section('styles')
-    <!-- Data table css -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
@@ -12,12 +11,9 @@
         .badge {
             font-size: 0.8rem;
         }
-
-        .table td,
-        .table th {
+        .table td, .table th {
             vertical-align: middle !important;
         }
-
         .action-btns .btn {
             margin: 2px 0;
         }
@@ -62,6 +58,8 @@
                             <th>Price</th>
                             <th>Rider</th>
                             <th>Address</th>
+                            <th>Cancel By</th>
+                            <th>Cancel Reason</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -85,8 +83,7 @@
                                 <td>
                                     <ul class="ps-3 mb-0">
                                         @foreach ($request->flowerRequestItems as $item)
-                                            <li>{{ $item->flower_name }} - {{ $item->flower_quantity }}
-                                                {{ $item->flower_unit }}</li>
+                                            <li>{{ $item->flower_name }} - {{ $item->flower_quantity }} {{ $item->flower_unit }}</li>
                                         @endforeach
                                     </ul>
                                 </td>
@@ -96,20 +93,16 @@
                                     @switch($request->status)
                                         @case('pending')
                                             <span class="badge bg-warning">Pending</span>
-                                        @break
-
+                                            @break
                                         @case('approved')
                                             <span class="badge bg-info">Approved</span>
-                                        @break
-
+                                            @break
                                         @case('paid')
                                             <span class="badge bg-success">Paid</span>
-                                        @break
-
+                                            @break
                                         @case('cancelled')
                                             <span class="badge bg-danger">Cancelled</span>
-                                        @break
-
+                                            @break
                                         @default
                                             <span class="badge bg-secondary">Unknown</span>
                                     @endswitch
@@ -133,27 +126,23 @@
                                     @endif
                                 </td>
 
-                                <!-- Rider -->
+                                <!-- Rider (only when Paid) -->
                                 <td>
-                                    @if ($request->order && $request->order->total_price)
+                                    @if ($request->status == 'paid' && $request->order && $request->order->total_price)
                                         @if ($request->order->rider_id)
                                             <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
-                                            @if ($request->status != 'paid')
-                                                <a href="#" class="btn btn-sm btn-outline-info mt-2"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#editRiderModal{{ $request->order->id }}">
-                                                    Edit
-                                                </a>
-                                            @endif
+                                            <a href="#" class="btn btn-sm btn-outline-info mt-2"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#editRiderModal{{ $request->order->id }}">
+                                                Edit Rider
+                                            </a>
                                         @else
-                                            <form action="{{ route('admin.orders.assignRider', $request->order->id) }}"
-                                                method="POST">
+                                            <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
                                                 @csrf
                                                 <select name="rider_id" class="form-select mb-2">
                                                     <option disabled selected>Choose Rider</option>
                                                     @foreach ($riders as $rider)
-                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}
-                                                        </option>
+                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
                                                     @endforeach
                                                 </select>
                                                 <button type="submit" class="btn btn-sm btn-success w-100">Assign</button>
@@ -167,63 +156,72 @@
                                 <!-- Address -->
                                 <td>
                                     <small>{{ $request->address->apartment_flat_plot ?? '' }},
-                                        {{ $request->address->apartment_name ?? '' }},
-                                        {{ $request->address->locality_name ?? '' }}</small><br>
+                                    {{ $request->address->apartment_name ?? '' }},
+                                    {{ $request->address->locality_name ?? '' }}</small><br>
                                     <small class="text-muted">{{ $request->address->city ?? '' }},
-                                        {{ $request->address->state ?? '' }},
-                                        {{ $request->address->pincode ?? '' }}</small><br>
+                                    {{ $request->address->state ?? '' }},
+                                    {{ $request->address->pincode ?? '' }}</small><br>
                                     <small class="text-muted">Landmark: {{ $request->address->landmark ?? 'N/A' }}</small>
+                                </td>
+
+                                <!-- Cancel By -->
+                                <td>
+                                    @if ($request->cancel_by)
+                                        <span class="badge bg-dark">{{ ucfirst($request->cancel_by) }}</span>
+                                    @else
+                                        <span class="text-muted">--</span>
+                                    @endif
+                                </td>
+
+                                <!-- Cancel Reason -->
+                                <td>
+                                    @if ($request->cancel_reason)
+                                        {{ $request->cancel_reason }}
+                                    @else
+                                        <span class="text-muted">--</span>
+                                    @endif
                                 </td>
 
                                 <!-- Actions -->
                                 <td class="action-btns">
-                                    <!-- Payment -->
                                     <form id="markPaymentForm_{{ $request->request_id }}"
-                                        action="{{ route('admin.markPayment', $request->request_id) }}" method="POST">
+                                          action="{{ route('admin.markPayment', $request->request_id) }}"
+                                          method="POST">
                                         @csrf
                                         @if ($request->status == 'approved')
                                             <button type="button" class="btn btn-success btn-sm w-100"
                                                 onclick="confirmPayment('{{ $request->request_id }}')">Mark Paid</button>
                                         @elseif($request->status == 'paid')
-                                            <button type="button" class="btn btn-success btn-sm w-100"
-                                                disabled>Paid</button>
+                                            <button type="button" class="btn btn-success btn-sm w-100" disabled>Paid</button>
                                         @endif
                                     </form>
 
-                                    <!-- Details Modal -->
-                                    <button class="btn btn-outline-dark btn-sm w-100 mt-2" data-bs-toggle="modal"
-                                        data-bs-target="#detailsModal{{ $request->id }}">
+                                    <!-- View Details -->
+                                    <button class="btn btn-outline-dark btn-sm w-100 mt-2"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#detailsModal{{ $request->id }}">
                                         Details
                                     </button>
 
                                     <!-- Modal -->
                                     <div class="modal fade" id="detailsModal{{ $request->id }}" tabindex="-1"
-                                        aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
+                                         aria-labelledby="detailsModalLabel{{ $request->id }}" aria-hidden="true">
                                         <div class="modal-dialog modal-dialog-centered">
                                             <div class="modal-content">
                                                 <div class="modal-header bg-dark text-white">
                                                     <h5 class="modal-title">Request Details</h5>
-                                                    <button type="button" class="btn-close"
-                                                        data-bs-dismiss="modal"></button>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <p><strong>Suggestion:</strong> {{ $request->suggestion ?? 'None' }}
-                                                    </p>
-                                                    @if ($request->status == 'cancelled')
-                                                        <p><strong>Cancelled By:</strong>
-                                                            {{ ucfirst($request->cancel_by) ?? 'N/A' }}</p>
-                                                        <p><strong>Reason:</strong>
-                                                            {{ $request->cancel_reason ?? 'No reason given' }}</p>
-                                                    @endif
+                                                    <p><strong>Suggestion:</strong> {{ $request->suggestion ?? 'None' }}</p>
+                                                    <p><strong>Status:</strong> {{ ucfirst($request->status) }}</p>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Close</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
                                 </td>
                             </tr>
                         @endforeach
@@ -235,7 +233,6 @@
 @endsection
 
 @section('scripts')
-    <!-- DataTables -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
@@ -251,7 +248,6 @@
     <script src="{{ asset('assets/js/table-data.js') }}"></script>
 
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function confirmPayment(requestId) {
