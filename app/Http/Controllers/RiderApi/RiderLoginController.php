@@ -18,7 +18,7 @@ class RiderLoginController extends Controller
     public function riderSendOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'phone' => 'required|string|digits_between:10,15',
+            'phone' => 'required|string',
         ]);
 
         if ($validator->fails()) {
