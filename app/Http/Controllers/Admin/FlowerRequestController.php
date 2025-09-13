@@ -33,7 +33,7 @@ public function showRequests(Request $request)
 
     // Apply filter based on query param
     if ($filter === 'today') {
-        $query->whereDate('date', Carbon::today());
+        $query->whereDate('created_at', Carbon::today());
     } elseif ($filter === 'upcoming') {
         $query->whereBetween('date', [Carbon::today(), Carbon::today()->addDays(3)]);
     }
