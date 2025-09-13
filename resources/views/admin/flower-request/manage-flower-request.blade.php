@@ -9,292 +9,245 @@
 
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
-    <style>
 
+    <style>
+        .badge {
+            font-size: 0.8rem;
+        }
+
+        .table td,
+        .table th {
+            vertical-align: middle !important;
+        }
+
+        .card-stat {
+            border-radius: 10px;
+        }
     </style>
 @endsection
 
 @section('content')
 
-    <!-- breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Request Orders</span>
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-header d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h4 class="main-content-title">Manage Request Orders</h4>
         </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Manage Request Orders</li>
+        <div>
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="javascript:void(0);">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Request Orders</li>
             </ol>
         </div>
     </div>
-    <!-- /breadcrumb -->
+    <!-- /Breadcrumb -->
 
-    <div class="row">
-        <div class="col-lg-12 col-md-12">
-            <div class="card custom-card">
-                <div class="card-footer py-0">
-                    <div class="profile-tab tab-menu-heading border-bottom-0">
-                        <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
-                            <a class="nav-link mb-2 mt-2 " href="{{ route('admin.orders.index') }}"
-                                onclick="changeColor(this)">Subscription Orders</a>
-                            <a class="nav-link mb-2 mt-2 {{ Request::is('admin/manage-flower-request') ? 'active' : '' }}"
-                                href="{{ route('flower-request') }}" onclick="changeColor(this)">Request Orders</a>
-
-                        </nav>
-                    </div>
-                </div>
-            </div>
+    <!-- Nav Tabs -->
+    <div class="card custom-card mb-4">
+        <div class="card-footer py-2">
+            <nav class="nav nav-tabs card-header-tabs">
+                <a class="nav-link {{ Request::is('admin/orders') ? 'active' : '' }}"
+                    href="{{ route('admin.orders.index') }}">Subscription Orders</a>
+                <a class="nav-link {{ Request::is('admin/manage-flower-request') ? 'active' : '' }}"
+                    href="{{ route('flower-request') }}">Request Orders</a>
+            </nav>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-4">
-            <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}">
-                <div class="card bg-success text-dark mb-3">
-                    <div class="card-header">
-                        <i class="fas fa-check-circle"></i> Active Subscriptions
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title text-white">{{ $activeSubscriptions }}</h5>
-                        <p class="card-text text-white">Users with an active subscription</p>
-                    </div>
-                </div>
-            </a>
-        </div>
+    <!-- Alerts -->
+    @if (session()->has('success'))
+        <div class="alert alert-success" id="Message">{{ session()->get('success') }}</div>
+    @endif
 
+    @if ($errors->has('danger'))
+        <div class="alert alert-danger" id="Message">{{ $errors->first('danger') }}</div>
+    @endif
 
-        <div class="col-md-4">
-            <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}">
-                <div class="card bg-warning text-dark mb-3">
-                    <div class="card-header">
-                        <i class="fas fa-pause-circle"></i> Paused Subscriptions
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $pausedSubscriptions }}</h5>
-                        <p class="card-text">Users with a paused subscription</p>
-                    </div>
-                </div>
-            </a>
-        </div>
+    <!-- Orders Table -->
+    <div class="card custom-card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="file-datatable" class="table table-striped table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Request ID / User</th>
+                            <th>Purchase Date</th>
+                            <th>Delivery Date</th>
+                            <th>Flower Items</th>
+                            <th>Suggestion</th>
+                            <th>Status</th>
+                            <th>Price</th>
+                            <th>Actions</th>
+                            <th>Rider</th>
+                            <th>Address</th>
+                            <th>Cancelled By</th>
+                            <th>Cancel Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($pendingRequests as $request)
+                            <tr>
+                                <!-- Request ID + User -->
+                                <td>
+                                    <strong>#{{ $request->request_id }}</strong><br>
+                                    <small class="text-muted">Name:</small> {{ $request->user->name ?? 'N/A' }}<br>
+                                    <small class="text-muted">Phone:</small> {{ $request->user->mobile_number ?? 'N/A' }}
+                                </td>
 
-        <div class="col-md-4">
-            <a href="{{ route('flower-request', ['filter' => 'today']) }}">
-                <div class="card bg-info text-dark mb-3">
-                    <div class="card-header">
-                        <i class="fas fa-box"></i> Orders Requested Today
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $ordersRequestedToday }}</h5>
-                        <p class="card-text">Requested Orders placed today</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-    </div>
+                                <!-- Purchase Date -->
+                                <td>{{ optional($request->created_at)->format('d-m-Y h:i A') ?? 'N/A' }}</td>
 
+                                <!-- Delivery Date -->
+                                <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }} {{ $request->time }}</td>
 
-    <!-- Row -->
-    <div class="row row-sm">
-        <div class="col-lg-12">
-            <div class="card custom-card overflow-hidden">
-                <div class="card-body">
-                    <!-- <div>
-                                            <h6 class="main-content-label mb-1">File export Datatables</h6>
-                                            <p class="text-muted card-sub-title">Exporting data from a table can often be a key part of a complex application. The Buttons extension for DataTables provides three plug-ins that provide overlapping functionality for data export:</p>
-                                        </div> -->
-                    @if (session()->has('success'))
-                        <div class="alert alert-success" id="Message">
-                            {{ session()->get('success') }}
-                        </div>
-                    @endif
+                                <!-- Flower Items -->
+                                <td>
+                                    <ul class="mb-0 ps-3">
+                                        @foreach ($request->flowerRequestItems as $item)
+                                            <li>{{ $item->flower_name }} - {{ $item->flower_quantity }}
+                                                {{ $item->flower_unit }}</li>
+                                        @endforeach
+                                    </ul>
+                                </td>
 
-                    @if ($errors->has('danger'))
-                        <div class="alert alert-danger" id="Message">
-                            {{ $errors->first('danger') }}
-                        </div>
-                    @endif
-                    <div class="table-responsive  export-table">
-                        <table id="file-datatable" class="table table-bordered ">
-                            <thead>
-                                <tr>
-                                    <th>Request ID</th>
-                                    <th>Purchase Date</th>
-                                    <th>Delivery Date</th>
-                                    <th>Flower Items</th>
-                                    <th>Status</th>
-                                    <th>Price</th>
-                                    <th>Actions</th>
-                                    <th>Assigned Rider</th>
-                                    <th>Address</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($pendingRequests as $request)
-                                    <tr>
-                                        <td>{{ $request->request_id }} <br>
-                                            Name: {{ $request->user->name }} <br>
-                                            Number : {{ $request->user->mobile_number }}
-                                        </td>
-                                        <td>{{ $request->created_at ? \Carbon\Carbon::parse($request->created_at)->format('d-m-Y h:i A') : 'N/A' }}
-                                        </td>
+                                <!-- Suggestion -->
+                                <td>
+                                    @if ($request->suggestion)
+                                        <span class="badge bg-secondary">{{ $request->suggestion }}</span>
+                                    @else
+                                        <span class="text-muted">--</span>
+                                    @endif
+                                </td>
 
-                                        <td>{{ \Carbon\Carbon::parse($request->date)->format('d-m-Y') }}
-                                            {{ $request->time }}</td>
+                                <!-- Status -->
+                                <td>
+                                    @switch($request->status)
+                                        @case('pending')
+                                            <span class="badge bg-warning">Order Placed</span>
+                                            <div><small class="text-muted">Update the Price</small></div>
+                                        @break
 
-                                        <td>
-                                            <ul>
-                                                @foreach ($request->flowerRequestItems as $item)
-                                                    <li>
-                                                        {{ $item->flower_name }} - {{ $item->flower_quantity }}
-                                                        {{ $item->flower_unit }}
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </td>
-                                        <td>
-                                            @if ($request->status == 'pending')
-                                                <p>Order Placed <br> Update the Price</p>
-                                            @elseif($request->status == 'approved')
-                                                <p>Payment Pending</p>
-                                            @elseif($request->status == 'paid')
-                                                <p>Payment Completed</p>
+                                        @case('approved')
+                                            <span class="badge bg-info">Payment Pending</span>
+                                        @break
+
+                                        @case('paid')
+                                            <span class="badge bg-success">Payment Completed</span>
+                                        @break
+
+                                        @case('cancelled')
+                                            <span class="badge bg-danger">Cancelled</span>
+                                        @break
+
+                                        @default
+                                            <span class="text-muted">Unknown</span>
+                                    @endswitch
+                                </td>
+
+                                <!-- Price -->
+                                <td>
+                                    @if ($request->order && $request->order->total_price)
+                                        <div><strong>Total:</strong> ₹{{ $request->order->total_price }}</div>
+                                        <small>Flower: ₹{{ $request->order->requested_flower_price }}</small><br>
+                                        <small>Delivery: ₹{{ $request->order->delivery_charge }}</small>
+                                    @else
+                                        <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST">
+                                            @csrf
+                                            <input type="number" name="requested_flower_price" class="form-control mb-2"
+                                                placeholder="Enter Price" required>
+                                            <input type="number" name="delivery_charge" class="form-control mb-2"
+                                                placeholder="Enter Delivery Charge" required>
+                                            <small class="form-text text-muted">Enter "0" if no delivery charge.</small>
+                                            <button type="submit" class="btn btn-sm btn-primary mt-2">Save</button>
+                                        </form>
+                                    @endif
+                                </td>
+
+                                <!-- Actions -->
+                                <td>
+                                    <form id="markPaymentForm_{{ $request->request_id }}"
+                                        action="{{ route('admin.markPayment', $request->request_id) }}" method="POST">
+                                        @csrf
+                                        @if ($request->status == 'approved')
+                                            <button type="button" class="btn btn-success btn-sm"
+                                                onclick="confirmPayment('{{ $request->request_id }}')">Mark Paid</button>
+                                        @elseif($request->status == 'paid')
+                                            <button type="button" class="btn btn-success btn-sm" disabled>Paid</button>
+                                        @else
+                                            <button type="button" class="btn btn-secondary btn-sm" disabled>N/A</button>
+                                        @endif
+                                    </form>
+                                </td>
+
+                                <!-- Rider -->
+                                <td>
+                                    @if ($request->order && $request->order->total_price)
+                                        @if ($request->order->rider_id)
+                                            <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
+                                            @if ($request->status != 'paid')
+                                                <a href="#" class="btn btn-sm btn-outline-info mt-2"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#editRiderModal{{ $request->order->id }}">
+                                                    Edit Rider
+                                                </a>
                                             @endif
-                                        </td>
-                                        <td>
-                                            @if ($request->order && $request->order->total_price)
-                                                <span>Total Price : {{ $request->order->total_price }} <br>
-                                                    Price Of Flower : {{ $request->order->requested_flower_price }} <br>
-                                                    Delivery Charge : {{ $request->order->delivery_charge }} </span>
-                                            @else
-                                                <form action="{{ route('admin.saveOrder', $request->id) }}" method="POST"
-                                                    style="display: inline;">
-                                                    @csrf
-                                                    <input type="number" name="requested_flower_price" class="form-control"
-                                                        placeholder="Enter Price" required style="margin-bottom: 13px;">
-                                                    <input type="number" name="delivery_charge" class="form-control"
-                                                        placeholder="Enter Delivery Charge" required>
-                                                    <span class="form-text text-muted"
-                                                        style="font-size: 12px; margin-top: 5px;">
-                                                        If the delivery charge is 0, please enter "0" instead of leaving it
-                                                        blank.
-                                                    </span>
-                                                    <button type="submit" class="btn btn-primary mt-2">Save</button>
-                                                </form>
-                                            @endif
-                                        </td>
-
-                                        <td>
-                                            <form id="markPaymentForm_{{ $request->request_id }}"
-                                                action="{{ route('admin.markPayment', $request->request_id) }}"
-                                                method="POST" style="display: inline;">
-                                                @csrf
-                                                @if ($request->status == 'pending' || $request->status == 'paid')
-                                                    <button type="button" class="btn btn-success mt-2"
-                                                        disabled>Paid</button>
-                                                @elseif ($request->status == 'approved')
-                                                    <button type="button" class="btn btn-success mt-2"
-                                                        onclick="confirmPayment('{{ $request->request_id }}')">Paid</button>
-                                                @endif
-                                            </form>
-                                        </td>
-
-                                        <td>
-                                            @if ($request->order && $request->order->total_price)
-                                                @if ($request->order->rider_id)
-                                                    <span>{{ $request->order->rider->rider_name }}</span>
-                                                    @if ($request->status == 'paid')
-                                                    @else
-                                                        <a href="#" class="btn btn-sm btn-info" data-bs-toggle="modal"
-                                                            data-bs-target="#editRiderModal{{ $request->order->id }}">
-                                                            Edit Rider
-                                                        </a>
-                                                    @endif
-                                                @else
-                                                    <form
-                                                        action="{{ route('admin.orders.assignRider', $request->order->id) }}"
-                                                        method="POST">
-                                                        @csrf
-                                                        <select name="rider_id" class="form-control">
-                                                            <option selected>Choose Rider</option>
-                                                            @foreach ($riders as $rider)
-                                                                <option value="{{ $rider->rider_id }}"
-                                                                    {{ $request->order->rider_id == $rider->rider_id ? 'selected' : '' }}>
-                                                                    {{ $rider->rider_name }}
-                                                                </option>
-                                                            @endforeach
-                                                        </select>
-                                                        <button type="submit" class="btn btn-sm btn-success mt-2">Assign
-                                                            Rider</button>
-                                                    </form>
-                                                @endif
-                                            @else
-                                                <p>Need to Give the price</p>
-                                            @endif
-                                        </td>
-
-                                        <td>
-                                            <strong>Address:</strong>
-                                            {{ $request->address->apartment_flat_plot ?? '' }},{{ $order->address->apartment_name ?? '' }},
-                                            {{ $request->address->locality_name ?? '' }}<br>
-                                            <strong>Landmark:</strong> {{ $request->address->landmark ?? '' }}<br>
-                                            <strong>City:</strong> {{ $request->address->city ?? '' }}<br>
-                                            <strong>State:</strong> {{ $request->address->state ?? '' }}<br>
-                                            <strong>Pin Code:</strong> {{ $request->address->pincode ?? '' }}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-
-                        @foreach ($pendingRequests as $order)
-                            <div class="modal fade" id="editRiderModal{{ $order->id }}" tabindex="-1"
-                                aria-labelledby="editRiderModalLabel{{ $order->id }}" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="editRiderModalLabel{{ $order->id }}">
-                                                Change Rider for Order #{{ $order->order_id }}
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form action="{{ route('admin.orders.updateRider', $order->id) }}"
+                                        @else
+                                            <form action="{{ route('admin.orders.assignRider', $request->order->id) }}"
                                                 method="POST">
                                                 @csrf
-                                                <div class="mb-3">
-                                                    <label for="rider_id{{ $order->id }}" class="form-label">Select
-                                                        Rider</label>
-                                                    <select name="rider_id" id="rider_id{{ $order->id }}"
-                                                        class="form-control">
-                                                        @foreach ($riders as $rider)
-                                                            <option value="{{ $rider->rider_id }}"
-                                                                {{ $order->rider_id == $rider->rider_id ? 'selected' : '' }}>
-                                                                {{ $rider->rider_name }}
-                                                            </option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <button type="submit" class="btn btn-primary">Save Changes</button>
+                                                <select name="rider_id" class="form-select mb-2">
+                                                    <option selected disabled>Choose Rider</option>
+                                                    @foreach ($riders as $rider)
+                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-success">Assign</button>
                                             </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                                        @endif
+                                    @else
+                                        <span class="text-muted">Price not set</span>
+                                    @endif
+                                </td>
 
-                    </div>
-                </div>
+                                <!-- Address -->
+                                <td>
+                                    <strong>Address:</strong>
+                                    {{ $request->address->apartment_flat_plot ?? '' }},
+                                    {{ $request->address->apartment_name ?? '' }},
+                                    {{ $request->address->locality_name ?? '' }}<br>
+                                    <small><strong>Landmark:</strong> {{ $request->address->landmark ?? '' }}</small><br>
+                                    <small><strong>City:</strong> {{ $request->address->city ?? '' }}</small><br>
+                                    <small><strong>State:</strong> {{ $request->address->state ?? '' }}</small><br>
+                                    <small><strong>Pin:</strong> {{ $request->address->pincode ?? '' }}</small>
+                                </td>
+
+                                <!-- Cancel Info -->
+                                <td>
+                                    @if ($request->cancel_by)
+                                        <span class="badge bg-dark">{{ ucfirst($request->cancel_by) }}</span>
+                                    @else
+                                        <span class="text-muted">--</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($request->cancel_reason)
+                                        {{ $request->cancel_reason }}
+                                    @else
+                                        <span class="text-muted">--</span>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
 @endsection
 
 @section('scripts')
-    <!-- Internal Data tables -->
+    <!-- DataTables -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
@@ -309,54 +262,11 @@
     <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
     <script src="{{ asset('assets/js/table-data.js') }}"></script>
 
-    <!-- INTERNAL Select2 js -->
+    <!-- Select2 -->
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
-    <script>
-        $(document).ready(function() {
-            // Save Order Button Click
-            $('.save-order').on('click', function() {
-                let requestId = $(this).data('request-id');
-                let price = $(this).closest('tr').find('.price-input').val();
 
-                if (!price) {
-                    alert('Please enter a price');
-                    return;
-                }
-
-                $.ajax({
-                    url: '/api/save-order',
-                    type: 'POST',
-                    data: {
-                        request_id: requestId,
-                        price: price,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        alert('Order saved successfully');
-                        $('.payment[data-request-id="' + requestId + '"]').prop('disabled',
-                            false); // Enable Payment Button
-                    }
-                });
-            });
-
-            // Paid Button Click
-            $('.payment').on('click', function() {
-                let requestId = $(this).data('request-id');
-
-                $.ajax({
-                    url: '/api/mark-payment',
-                    type: 'POST',
-                    data: {
-                        request_id: requestId,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        alert('Payment marked as paid');
-                    }
-                });
-            });
-        });
-    </script>
+    <!-- SweetAlert for Payment Confirmation -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function confirmPayment(requestId) {
             Swal.fire({
@@ -374,5 +284,4 @@
             });
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

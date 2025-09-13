@@ -16,8 +16,8 @@ use App\Services\NotificationService;
 use Carbon\Carbon;
 class FlowerRequestController extends Controller
 {
-    //
- public function showRequests(Request $request)
+
+public function showRequests(Request $request)
 {
     $filter = $request->input('filter', 'today');
 
@@ -57,7 +57,7 @@ class FlowerRequestController extends Controller
         'filter'
     ));
 }
-    
+
 // public function saveOrder(Request $request, $id)
 // {
 //     try {
@@ -143,7 +143,6 @@ public function saveOrder(Request $request, $id)
     }
 }
 
-
 public function markPayment(Request $request, $id)
 {
     try {
@@ -172,4 +171,5 @@ public function markPayment(Request $request, $id)
         return redirect()->back()->with('error', 'Failed to mark payment as paid');
     }
 }
+
 }
