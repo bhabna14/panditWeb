@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Validator;
 
 class RiderLoginController extends Controller
 {
-    
+
     public function riderSendOtp(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -26,6 +26,12 @@ class RiderLoginController extends Controller
         }
 
         $phone = $request->input('phone');
+
+        // 🔹 Normalize phone → remove +91 / 91 prefix
+        $phone = preg_replace('/^\+?91/', '', $phone);
+
+        // 🔹 Ensure only digits, trim spaces
+        $phone = preg_replace('/\D/', '', $phone);
 
         // Store phone in session (optional, if you need it later)
         session(['otp_phone' => $phone]);
@@ -54,6 +60,13 @@ class RiderLoginController extends Controller
         }
 
         $phone = $request->input('phoneNumber');
+
+        // 🔹 Normalize phone → remove +91 / 91 prefix
+        $phone = preg_replace('/^\+?91/', '', $phone);
+
+        // 🔹 Ensure only digits
+        $phone = preg_replace('/\D/', '', $phone);
+
         $otp   = $request->input('otp');
 
         // ✅ Check static OTP
@@ -82,7 +95,7 @@ class RiderLoginController extends Controller
             'token_type' => 'Bearer',
         ], 200);
     }
-    
+
     public function getRiderDetails()
     {
         try {
