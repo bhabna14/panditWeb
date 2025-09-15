@@ -158,8 +158,6 @@ Route::controller(PoojaListController::class)->group(function() {
     Route::post('/update-pooja-items/{id}',  'updatePoojaitem');
     Route::delete('/delete-pooja-items/{id}', 'deletePoojaItem');
     Route::get('/manageunit',  'manageUnitApi');
-   
-
 });
 
 Route::controller(PoojaStatusController::class)->group(function() {
@@ -172,7 +170,6 @@ Route::controller(PoojaStatusController::class)->group(function() {
 Route::controller(BankController::class)->group(function() {
     Route::post('/pandit/savebankdetails', 'saveBankDetails');
     Route::get('/pandit/get-bank-details','getBankDetails');
-
 });
 
 Route::controller(AddressController::class)->group(function() {
