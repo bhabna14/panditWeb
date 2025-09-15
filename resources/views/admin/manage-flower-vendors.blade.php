@@ -166,7 +166,7 @@
     @endif
 
     {{-- ===== Stats row ===== --}}
-    <div class="row g-3 mb-3">
+    <div class="row g-3 mb-3 mt-4">
         <div class="col-md-4">
             <div class="metric-card p-3" data-filter="all" id="cardAll">
                 <div class="d-flex align-items-center gap-3">
