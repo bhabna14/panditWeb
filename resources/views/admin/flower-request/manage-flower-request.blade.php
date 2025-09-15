@@ -25,20 +25,66 @@
 
 @section('content')
 
-    <!-- Breadcrumb -->
-    <div class="breadcrumb-header d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h4 class="main-content-title">Manage Request Orders</h4>
+    <div class="row mb-4">
+
+        <div class="col-md-3">
+            <a href="{{ route('flower-request', ['filter' => 'all']) }}" class="text-decoration-none">
+                <div class="card text-white bg-primary h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3"><i class="fa fa-list fa-2x"></i></div>
+                        <div>
+                            <h5 class="card-title mb-1">Total Orders</h5>
+                            <h3 class="mb-0">{{ $totalCustomizeOrders ?? 0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
         </div>
-        <div>
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Request Orders</li>
-            </ol>
+
+        <div class="col-md-3">
+            <a href="{{ route('flower-request', ['filter' => 'today']) }}" class="text-decoration-none">
+                <div class="card text-white bg-success h-100 {{ $filter === 'today' ? '' : 'opacity-90' }}">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3"><i class="fa fa-calendar-day fa-2x"></i></div>
+                        <div>
+                            <h5 class="card-title mb-1">Today's Orders</h5>
+                            <h3 class="mb-0">{{ $todayCustomizeOrders ?? 0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
         </div>
+
+        <div class="col-md-3">
+            <a href="{{ route('flower-request', ['filter' => 'paid']) }}" class="text-decoration-none">
+                <div class="card text-white bg-info h-100 {{ $filter === 'paid' ? '' : 'opacity-90' }}">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3"><i class="fa fa-check-circle fa-2x"></i></div>
+                        <div>
+                            <h5 class="card-title mb-1">Paid Orders</h5>
+                            <h3 class="mb-0">{{ $paidCustomizeOrders ?? 0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a href="{{ route('flower-request', ['filter' => 'rejected']) }}" class="text-decoration-none">
+                <div class="card text-white bg-warning h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}">
+                    <div class="card-body d-flex align-items-center">
+                        <div class="me-3"><i class="fa fa-ban fa-2x"></i></div>
+                        <div>
+                            <h5 class="card-title mb-1">Rejected Orders</h5>
+                            <h3 class="mb-0">{{ $rejectCustomizeOrders ?? 0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
     </div>
 
-    <!-- Alerts -->
     @if (session()->has('success'))
         <div class="alert alert-success">{{ session()->get('success') }}</div>
     @endif
@@ -201,7 +247,8 @@
                                                         </option>
                                                     @endforeach
                                                 </select>
-                                                <button type="submit" class="btn btn-sm btn-success w-100">Assign</button>
+                                                <button type="submit"
+                                                    class="btn btn-sm btn-success w-100">Assign</button>
                                             </form>
                                         @endif
                                     @else

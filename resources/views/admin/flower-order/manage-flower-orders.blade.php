@@ -273,7 +273,7 @@
                         </div>
                     @endif
 
-                    <form id="filter-form" class="row g-2 align-items-end mt-4 mb-4">
+                    <form id="filter-form" class="row g-2 align-items-end mb-4">
                         <div class="col-md-3">
                             <label class="form-label">Customer Name</label>
                             <select class="form-select" name="customer_name" id="customer_name">
