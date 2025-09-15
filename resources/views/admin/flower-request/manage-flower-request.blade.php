@@ -29,9 +29,9 @@
 <div class="row mb-4 mt-4">
     <div class="col-md-3">
         <a href="{{ route('flower-request', ['filter' => 'all']) }}" class="text-decoration-none card-filter" data-filter="all">
-            <div class="card text-white bg-primary h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
+            <div class="card text-white h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
                 <div class="card-body d-flex align-items-center">
-                    <div class="me-3"><i class="fa fa-list fa-2x"></i></div>
+                    <div class="me-3"><i class="fa fa-list fa-2x bg-primary"></i></div>
                     <div>
                         <h5 class="card-title mb-1">Total Orders</h5>
                         <h3 class="mb-0" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</h3>
