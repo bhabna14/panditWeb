@@ -4,6 +4,15 @@
     <!-- SweetAlert -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
+        .nu-card {
+            border: 1px solid #e9ecf5;
+            border-radius: 16px;
+            box-shadow: 0 6px 18px rgba(25, 42, 70, 0.06);
+            background: #fff;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
         .section-card {
             border: 1px solid #eef1f4;
             border-radius: 14px;
@@ -100,7 +109,7 @@
         @csrf
 
         {{-- PICKUP INFO --}}
-        <div class="card section-card mb-3">
+        <div class="nu-card section-card mb-3">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h6 class="section-title">Pickup Information</h6>
             </div>
@@ -143,7 +152,7 @@
             $rowCount = max(count($oldFlowerIds), count($oldUnitIds), count($oldQtys));
         @endphp
 
-        <div class="card section-card mb-3">
+        <div class="nu-card section-card mb-3">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-12">
                 <h6 class="section-title m-0">Flower Items</h6>
                 <div class="d-flex align-items-center gap-12">
