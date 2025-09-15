@@ -113,11 +113,11 @@
         <a href="{{ route('flower-request', ['filter' => 'rejected']) }}" class="card-filter text-decoration-none" data-filter="rejected">
             <div class="card metric-card h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}" data-card="rejected">
                 <div class="card-body d-flex align-items-center">
-                    <div class="me-3">
-                        <i class="fa fa-ban icon"></i>
+                    <div class="me-3 ">
+                        <i class="fa fa-ban icon text-primary"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-1 label text-muted text-primary">Rejected Orders</h5>
+                        <h5 class="card-title mb-1 label text-muted">Rejected Orders</h5>
                         <h3 class="mb-0 text-primary" id="rejectedCount">{{ $rejectCustomizeOrders ?? 0 }}</h3>
                     </div>
                 </div>
