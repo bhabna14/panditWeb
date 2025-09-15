@@ -18,9 +18,7 @@ use Carbon\Carbon;
 
 class FlowerPickupController extends Controller
 {
-    //
-   
-    
+
     public function addflowerpickupdetails()
     {
       
