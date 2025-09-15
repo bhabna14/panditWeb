@@ -2,22 +2,78 @@
 
 @section('styles')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
+        /* ----- Layout & Cards ----- */
         .section-card {
-            border: 1px solid #eef1f4;
-            border-radius: 14px;
+            border: 1px solid #e7ebf0;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .section-card+.section-card {
+            margin-top: 1rem;
         }
 
         .section-card .card-header {
             background: #fbfcfe;
-            border-bottom: 1px solid #eef1f4;
+            border-bottom: 1px solid #e7ebf0;
+            padding: .9rem 1rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: .75rem;
+        }
+
+        .header-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .icon-info {
+            background: #e7f1ff;
+            color: #0d6efd;
+        }
+
+        .icon-flower {
+            background: #eaf7ef;
+            color: #198754;
+        }
+
+        .icon-bank {
+            background: #e6f7ff;
+            color: #0dcaf0;
+        }
+
+        .icon-doc {
+            background: #fff3cd;
+            color: #f59f00;
+        }
+
+        .icon-cta {
+            background: #f1f3f5;
+            color: #6c757d;
         }
 
         .section-title {
             font-weight: 600;
+            font-size: 1rem;
             margin: 0;
         }
 
+        .section-subtitle {
+            font-size: .9rem;
+            color: #6c757d;
+        }
+
+        /* ----- Helpers ----- */
         .required::after {
             content: " *";
             color: #dc3545;
@@ -32,26 +88,43 @@
             gap: 12px;
         }
 
+        /* ----- Sticky Actions ----- */
         .sticky-actions {
             position: sticky;
             bottom: 0;
             background: #fff;
             padding: 12px;
-            border-top: 1px solid #eef1f4;
+            border-top: 1px solid #e7ebf0;
             z-index: 2;
         }
 
-        .form-floating>label>small {
-            font-weight: 400;
-            color: #6c757d;
-        }
-
+        /* ----- Flowers Provided ----- */
         .flower-tools .form-control {
             min-width: 220px;
         }
 
         .flower-badge {
             font-size: .8rem;
+        }
+
+        .tool-chip {
+            border: 1px solid #e7ebf0;
+            border-radius: 999px;
+            padding: 4px 10px;
+            background: #fff;
+            font-size: .8rem;
+        }
+
+        /* ----- Payment mini-cards ----- */
+        .mini-card {
+            border: 1px dashed #ced4da;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fff;
+        }
+
+        .mini-card+.mini-card {
+            margin-top: .75rem;
         }
 
         .bank-chip {
@@ -62,40 +135,51 @@
             padding: 4px 10px;
         }
 
-        .bank-row {
-            background-color: rgba(239, 227, 180, 0.28);
+        .bank-row,
+        .upi-row {
+            background-color: #fbfcfe;
+            border: 1px solid #eef1f4;
             padding: 14px;
             border-radius: 12px;
             margin-bottom: 10px;
+        }
+
+        .remove-row-btn {
+            min-width: 110px;
+        }
+
+        /* ----- Inputs ----- */
+        .form-floating>label>small {
+            font-weight: 400;
+            color: #6c757d;
+        }
+
+        /* Make invalid feedback show with custom scripts too */
+        input:invalid,
+        select:invalid,
+        textarea:invalid {
+            /* optional visual hint */
         }
     </style>
 @endsection
 
 @section('content')
-    <!-- breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Add Vendor Details</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15">
-                    <a href="{{ route('admin.managevendor') }}" class="btn btn-info text-white">Manage Vendor</a>
-                </li>
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Add Vendor</li>
-            </ol>
-        </div>
-    </div>
 
     <form method="POST" action="{{ route('admin.saveVendorDetails') }}" enctype="multipart/form-data" novalidate>
         @csrf
 
-        {{-- VENDOR INFO --}}
-        <div class="card section-card mb-3">
-            <div class="card-header d-flex align-items-center justify-content-between">
-                <h6 class="section-title">Vendor Information</h6>
+        {{-- VENDOR INFORMATION --}}
+        <div class="card section-card mt-4">
+            <div class="card-header">
+                <div class="section-header">
+                    <span class="header-icon icon-info"><i class="fa fa-user"></i></span>
+                    <div>
+                        <h6 class="section-title">Vendor Information</h6>
+                        <div class="section-subtitle">Basic details about the vendor</div>
+                    </div>
+                </div>
             </div>
+
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-4">
@@ -178,18 +262,25 @@
         </div>
 
         {{-- FLOWERS PROVIDED --}}
-        <div class="card section-card mb-3">
+        <div class="card section-card">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-12">
-                <h6 class="section-title m-0">Flowers Provided</h6>
+                <div class="section-header">
+                    <span class="header-icon icon-flower"><i class="fa fa-seedling"></i></span>
+                    <div>
+                        <h6 class="section-title m-0">Flowers Provided</h6>
+                        <div class="section-subtitle">Select the flowers this vendor can supply</div>
+                    </div>
+                </div>
                 <div class="d-flex align-items-center gap-12 flower-tools">
                     <input type="text" id="flowerSearch" class="form-control" placeholder="Search flowers...">
                     <button type="button" class="btn btn-outline-primary" id="selectAllFlowers">Select all</button>
                     <button type="button" class="btn btn-outline-secondary" id="clearAllFlowers">Clear</button>
-                    <span class="badge bg-light text-dark flower-badge">
-                        Selected: <span id="selectedCount">0</span>
-                        &nbsp;|&nbsp; Total: <span id="totalCount">{{ isset($flowers) ? $flowers->count() : 0 }}</span>
-                        &nbsp;|&nbsp; Visible: <span
-                            id="visibleCount">{{ isset($flowers) ? $flowers->count() : 0 }}</span>
+                    <button type="button" class="btn btn-outline-dark" id="invertSelection">Invert</button>
+                    <span class="tool-chip">
+                        Selected: <strong id="selectedCount">0</strong>
+                        &nbsp;|&nbsp; Total: <strong id="totalCount">{{ isset($flowers) ? $flowers->count() : 0 }}</strong>
+                        &nbsp;|&nbsp; Visible: <strong
+                            id="visibleCount">{{ isset($flowers) ? $flowers->count() : 0 }}</strong>
                     </span>
                 </div>
             </div>
@@ -223,12 +314,18 @@
         </div>
 
         {{-- PAYMENT & BANK --}}
-        <div class="card section-card mb-3">
+        <div class="card section-card">
             <div class="card-header d-flex align-items-center justify-content-between">
-                <h6 class="section-title m-0">Payment & Bank</h6>
-                <span class="bank-chip">Only visible if Payment Type is <strong>Bank</strong> or
-                    <strong>UPI</strong></span>
+                <div class="section-header">
+                    <span class="header-icon icon-bank"><i class="fa fa-credit-card"></i></span>
+                    <div>
+                        <h6 class="section-title m-0">Payment & Bank</h6>
+                        <div class="section-subtitle">Provide details for the selected payment method</div>
+                    </div>
+                </div>
+                <span class="bank-chip">Visible when Payment Type is <strong>Bank</strong> or <strong>UPI</strong></span>
             </div>
+
             <div class="card-body">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-4">
@@ -252,64 +349,110 @@
                     $acctNos = old('account_no', ['']);
                     $ifscCodes = old('ifsc_code', ['']);
                     $upiIds = old('upi_id', ['']);
-                    $bankRows = max(count($bankNames), count($acctNos), count($ifscCodes), count($upiIds));
+                    $bankRows = max(count($bankNames), count($acctNos), count($ifscCodes));
+                    $upiRows = max(count($upiIds));
                 @endphp
 
+                {{-- BANK DETAILS WRAPPER --}}
                 <div id="bank-details-wrapper" class="mt-3" style="display:none;">
-                    <div id="bank-details-container">
-                        @for ($i = 0; $i < $bankRows; $i++)
-                            <div class="bank-row" data-bank-row>
-                                <div class="row g-3 align-items-end">
-                                    <div class="col-md-4">
-                                        <label class="form-label">Bank Name</label>
-                                        <input type="text" class="form-control" name="bank_name[]"
-                                            placeholder="Enter Bank Name" value="{{ $bankNames[$i] ?? '' }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Account Number</label>
-                                        <input type="text" class="form-control" name="account_no[]"
-                                            inputmode="numeric" pattern="[0-9]{9,18}" placeholder="9–18 digits"
-                                            maxlength="18" value="{{ $acctNos[$i] ?? '' }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">IFSC Code</label>
-                                        <input type="text" class="form-control" name="ifsc_code[]"
-                                            placeholder="e.g. HDFC0001234" maxlength="11"
-                                            oninput="this.value=this.value.toUpperCase()" pattern="^[A-Z]{4}0[A-Z0-9]{6}$"
-                                            value="{{ $ifscCodes[$i] ?? '' }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">UPI Number/ID</label>
-                                        <input type="text" class="form-control" name="upi_id[]"
-                                            placeholder="username@bank" value="{{ $upiIds[$i] ?? '' }}">
-                                        <div class="help-text">If using UPI, provide the UPI ID here.</div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <button type="button"
-                                            class="btn btn-outline-danger remove-bank-section">Remove</button>
+                    <div class="mini-card">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <strong>Bank Details</strong>
+                            <button type="button" class="btn btn-success btn-sm" id="add-bank-section">
+                                <i class="fa fa-plus me-1"></i> Add another
+                            </button>
+                        </div>
+
+                        <div id="bank-details-container">
+                            @for ($i = 0; $i < max(1, $bankRows); $i++)
+                                <div class="bank-row" data-bank-row>
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-4">
+                                            <label class="form-label">Bank Name</label>
+                                            <input type="text" class="form-control" name="bank_name[]"
+                                                placeholder="Enter Bank Name" value="{{ $bankNames[$i] ?? '' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Account Number</label>
+                                            <input type="text" class="form-control only-digits" name="account_no[]"
+                                                inputmode="numeric" pattern="[0-9]{9,18}" maxlength="18"
+                                                placeholder="9–18 digits" value="{{ $acctNos[$i] ?? '' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">IFSC Code</label>
+                                            <input type="text" class="form-control" name="ifsc_code[]"
+                                                placeholder="e.g. HDFC0001234" maxlength="11"
+                                                oninput="this.value=this.value.toUpperCase()"
+                                                pattern="^[A-Z]{4}0[A-Z0-9]{6}$" value="{{ $ifscCodes[$i] ?? '' }}">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <button type="button"
+                                                class="btn btn-outline-danger remove-row-btn remove-bank-section">
+                                                Remove
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @endfor
+                            @endfor
+                        </div>
                     </div>
+                </div>
 
-                    <button type="button" class="btn btn-success mt-2" id="add-bank-section">Add another</button>
+                {{-- UPI DETAILS WRAPPER --}}
+                <div id="upi-details-wrapper" class="mt-3" style="display:none;">
+                    <div class="mini-card">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <strong>UPI Details</strong>
+                            <button type="button" class="btn btn-success btn-sm" id="add-upi-section">
+                                <i class="fa fa-plus me-1"></i> Add another
+                            </button>
+                        </div>
+
+                        <div id="upi-details-container">
+                            @for ($i = 0; $i < max(1, $upiRows); $i++)
+                                <div class="upi-row" data-upi-row>
+                                    <div class="row g-3 align-items-end">
+                                        <div class="col-md-6">
+                                            <label class="form-label">UPI Number/ID</label>
+                                            <input type="text" class="form-control" name="upi_id[]"
+                                                placeholder="username@bank" value="{{ $upiIds[$i] ?? '' }}">
+                                            <div class="help-text">Provide the UPI ID used for payments</div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <button type="button"
+                                                class="btn btn-outline-danger remove-row-btn remove-upi-section">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endfor
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         {{-- DOCUMENTS --}}
-        <div class="card section-card mb-3">
+        <div class="card section-card">
             <div class="card-header">
-                <h6 class="section-title m-0">Documents</h6>
+                <div class="section-header">
+                    <span class="header-icon icon-doc"><i class="fa fa-file"></i></span>
+                    <div>
+                        <h6 class="section-title m-0">Documents</h6>
+                        <div class="section-subtitle">Upload any supporting vendor documents</div>
+                    </div>
+                </div>
             </div>
+
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label for="vendor_document" class="form-label">Vendor Document</label>
                         <input type="file" class="form-control @error('vendor_document') is-invalid @enderror"
                             id="vendor_document" name="vendor_document" accept=".pdf,.jpg,.jpeg,.png">
-                        <div class="help-text">Accepted: PDF, JPG, PNG. Max 5MB (enforce on server).</div>
+                        <div class="help-text">Accepted: PDF, JPG, PNG. Max 5MB (validated server-side).</div>
                         @error('vendor_document')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -321,7 +464,10 @@
         {{-- ACTIONS --}}
         <div class="card section-card">
             <div class="sticky-actions d-flex justify-content-between align-items-center">
-                <div class="text-muted">Review details before submitting.</div>
+                <div class="section-header">
+                    <span class="header-icon icon-cta"><i class="fa fa-info"></i></span>
+                    <div class="text-muted">Review details before submitting.</div>
+                </div>
                 <div class="d-flex gap-12">
                     <a href="{{ route('admin.managevendor') }}" class="btn btn-outline-secondary">Cancel</a>
                     <button type="reset" class="btn btn-light">Reset</button>
@@ -329,6 +475,7 @@
                 </div>
             </div>
         </div>
+
     </form>
 @endsection
 
@@ -361,6 +508,7 @@
             const grid = document.getElementById('flowersGrid');
             const selectAllBtn = document.getElementById('selectAllFlowers');
             const clearAllBtn = document.getElementById('clearAllFlowers');
+            const invertBtn = document.getElementById('invertSelection');
             const selectedCount = document.getElementById('selectedCount');
             const totalCount = document.getElementById('totalCount');
             const visibleCount = document.getElementById('visibleCount');
@@ -379,13 +527,13 @@
             function refreshCounts() {
                 const allCbs = Array.from(document.querySelectorAll('.flower-checkbox'));
                 const selected = allCbs.filter(cb => cb.checked).length;
-                selectedCount.textContent = selected.toString();
-                visibleCount.textContent = getVisibleCheckboxes().length.toString();
+                selectedCount.textContent = String(selected);
+                visibleCount.textContent = String(getVisibleCheckboxes().length);
             }
 
             function applyFilter(q) {
                 if (!grid) return;
-                const query = q.toLowerCase().trim();
+                const query = (q || '').toLowerCase().trim();
                 getItems().forEach(item => {
                     const label = item.querySelector('.form-check-label')?.innerText?.toLowerCase() ?? '';
                     item.style.display = label.includes(query) ? '' : 'none';
@@ -394,29 +542,27 @@
             }
 
             if (grid) {
-                // initial counts
                 refreshCounts();
-                // typing filter
-                if (searchInput) {
-                    searchInput.addEventListener('input', function() {
-                        applyFilter(this.value);
-                    });
-                }
-                // select all visible
-                if (selectAllBtn) {
-                    selectAllBtn.addEventListener('click', function() {
-                        getVisibleCheckboxes().forEach(cb => cb.checked = true);
-                        refreshCounts();
-                    });
-                }
-                // clear all
-                if (clearAllBtn) {
-                    clearAllBtn.addEventListener('click', function() {
-                        document.querySelectorAll('.flower-checkbox').forEach(cb => cb.checked = false);
-                        refreshCounts();
-                    });
-                }
-                // update counts on any change
+
+                searchInput?.addEventListener('input', function() {
+                    applyFilter(this.value);
+                });
+
+                selectAllBtn?.addEventListener('click', function() {
+                    getVisibleCheckboxes().forEach(cb => cb.checked = true);
+                    refreshCounts();
+                });
+
+                clearAllBtn?.addEventListener('click', function() {
+                    document.querySelectorAll('.flower-checkbox').forEach(cb => cb.checked = false);
+                    refreshCounts();
+                });
+
+                invertBtn?.addEventListener('click', function() {
+                    getVisibleCheckboxes().forEach(cb => cb.checked = !cb.checked);
+                    refreshCounts();
+                });
+
                 grid.addEventListener('change', e => {
                     if (e.target && e.target.classList.contains('flower-checkbox')) refreshCounts();
                 });
@@ -424,29 +570,48 @@
         });
     </script>
 
-    {{-- Payment: conditional bank/upi section + dynamic rows --}}
+    {{-- Payment: conditional BANK / UPI sections + dynamic rows + digit-only helpers --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const paymentType = document.getElementById('payment_type');
-            const wrapper = document.getElementById('bank-details-wrapper');
-            const container = document.getElementById('bank-details-container');
-            const addBtn = document.getElementById('add-bank-section');
 
-            function toggleBankSection() {
+            const bankWrap = document.getElementById('bank-details-wrapper');
+            const bankCont = document.getElementById('bank-details-container');
+            const addBankBtn = document.getElementById('add-bank-section');
+
+            const upiWrap = document.getElementById('upi-details-wrapper');
+            const upiCont = document.getElementById('upi-details-container');
+            const addUpiBtn = document.getElementById('add-upi-section');
+
+            function toggleSections() {
                 const val = paymentType?.value || '';
-                const show = (val === 'Bank' || val === 'UPI');
-                wrapper.style.display = show ? '' : 'none';
+                const showBank = (val === 'Bank');
+                const showUPI = (val === 'UPI');
+
+                bankWrap.style.display = showBank ? '' : 'none';
+                upiWrap.style.display = showUPI ? '' : 'none';
             }
 
             function bindRemoveButtons(scope = document) {
                 scope.querySelectorAll('.remove-bank-section').forEach(btn => {
                     btn.onclick = () => {
-                        const rows = container.querySelectorAll('[data-bank-row]');
+                        const rows = bankCont.querySelectorAll('[data-bank-row]');
                         if (rows.length > 1) {
                             btn.closest('[data-bank-row]').remove();
                         } else {
-                            // just clear inputs if only one row left
                             btn.closest('[data-bank-row]').querySelectorAll('input').forEach(i => i
+                                .value = '');
+                        }
+                    }
+                });
+
+                scope.querySelectorAll('.remove-upi-section').forEach(btn => {
+                    btn.onclick = () => {
+                        const rows = upiCont.querySelectorAll('[data-upi-row]');
+                        if (rows.length > 1) {
+                            btn.closest('[data-upi-row]').remove();
+                        } else {
+                            btn.closest('[data-upi-row]').querySelectorAll('input').forEach(i => i
                                 .value = '');
                         }
                     }
@@ -464,8 +629,8 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Account Number</label>
-                            <input type="text" class="form-control" name="account_no[]" inputmode="numeric"
-                                   pattern="[0-9]{9,18}" maxlength="18" placeholder="9–18 digits">
+                            <input type="text" class="form-control only-digits" name="account_no[]"
+                                   inputmode="numeric" pattern="[0-9]{9,18}" maxlength="18" placeholder="9–18 digits">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">IFSC Code</label>
@@ -474,26 +639,59 @@
                                    pattern="^[A-Z]{4}0[A-Z0-9]{6}$" placeholder="e.g. HDFC0001234">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">UPI Number/ID</label>
-                            <input type="text" class="form-control" name="upi_id[]" placeholder="username@bank">
-                            <div class="help-text">If using UPI, provide the UPI ID here.</div>
-                        </div>
-                        <div class="col-md-4">
-                            <button type="button" class="btn btn-outline-danger remove-bank-section">Remove</button>
+                            <button type="button" class="btn btn-outline-danger remove-row-btn remove-bank-section">Remove</button>
                         </div>
                     </div>
                 </div>`;
                 const node = tmpl.content.firstElementChild;
-                container.appendChild(node);
+                bankCont.appendChild(node);
+                bindRemoveButtons(node);
+                bindDigitOnly(node);
+            }
+
+            function addUpiRow() {
+                const tmpl = document.createElement('template');
+                tmpl.innerHTML = `
+                <div class="upi-row" data-upi-row>
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label class="form-label">UPI Number/ID</label>
+                            <input type="text" class="form-control" name="upi_id[]" placeholder="username@bank">
+                            <div class="help-text">Provide the UPI ID used for payments</div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-danger remove-row-btn remove-upi-section">Remove</button>
+                        </div>
+                    </div>
+                </div>`;
+                const node = tmpl.content.firstElementChild;
+                upiCont.appendChild(node);
                 bindRemoveButtons(node);
             }
 
-            // init
-            if (paymentType && wrapper && container) {
-                toggleBankSection();
-                paymentType.addEventListener('change', toggleBankSection);
-                bindRemoveButtons(container);
-                if (addBtn) addBtn.addEventListener('click', addBankRow);
+            // Allow only digits in inputs with .only-digits
+            function bindDigitOnly(scope = document) {
+                scope.querySelectorAll('.only-digits').forEach(inp => {
+                    inp.addEventListener('input', function() {
+                        this.value = this.value.replace(/\D+/g, '');
+                    });
+                });
+            }
+
+            // Restrict phone digits
+            const phone = document.getElementById('phone_no');
+            phone?.addEventListener('input', function() {
+                this.value = this.value.replace(/\D+/g, '');
+            });
+
+            // Init
+            if (paymentType && bankWrap && bankCont && upiWrap && upiCont) {
+                toggleSections();
+                paymentType.addEventListener('change', toggleSections);
+                bindRemoveButtons(document);
+                bindDigitOnly(document);
+                addBankBtn?.addEventListener('click', addBankRow);
+                addUpiBtn?.addEventListener('click', addUpiRow);
             }
         });
     </script>
