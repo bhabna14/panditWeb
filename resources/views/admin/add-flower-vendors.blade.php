@@ -278,7 +278,8 @@
                     <button type="button" class="btn btn-outline-dark" id="invertSelection">Invert</button>
                     <span class="tool-chip">
                         Selected: <strong id="selectedCount">0</strong>
-                        &nbsp;|&nbsp; Total: <strong id="totalCount">{{ isset($flowers) ? $flowers->count() : 0 }}</strong>
+                        &nbsp;|&nbsp; Total: <strong
+                            id="totalCount">{{ isset($flowers) ? $flowers->count() : 0 }}</strong>
                         &nbsp;|&nbsp; Visible: <strong
                             id="visibleCount">{{ isset($flowers) ? $flowers->count() : 0 }}</strong>
                     </span>
@@ -344,20 +345,30 @@
                     </div>
                 </div>
 
-                {{-- @php
-                    $bankNames = old('bank_name', ['']);
-                    $acctNos = old('account_no', ['']);
-                    $ifscCodes = old('ifsc_code', ['']);
-                    $upiIds = old('upi_id', ['']);
-                    $bankRows = max(count($bankNames), count($acctNos), count($ifscCodes));
-                    $upiRows = max(count($upiIds));
-                @endphp --}}
-@php
-    $bankNames = is_array(old('bank_name')) ? old('bank_name') : (old('bank_name') ? [old('bank_name')] : ['']);
-    $acctNos   = is_array(old('account_no')) ? old('account_no') : (old('account_no') ? [old('account_no')] : ['']);
-    $ifscCodes = is_array(old('ifsc_code')) ? old('ifsc_code') : (old('ifsc_code') ? [old('ifsc_code')] : ['']);
-    $upiIds    = is_array(old('upi_id')) ? old('upi_id') : (old('upi_id') ? [old('upi_id')] : ['']);
-@endphp
+                @php
+                    // Normalize old() values to arrays
+                    $bankNames = is_array(old('bank_name'))
+                        ? old('bank_name')
+                        : (old('bank_name')
+                            ? [old('bank_name')]
+                            : ['']);
+                    $acctNos = is_array(old('account_no'))
+                        ? old('account_no')
+                        : (old('account_no')
+                            ? [old('account_no')]
+                            : ['']);
+                    $ifscCodes = is_array(old('ifsc_code'))
+                        ? old('ifsc_code')
+                        : (old('ifsc_code')
+                            ? [old('ifsc_code')]
+                            : ['']);
+                    $upiIds = is_array(old('upi_id')) ? old('upi_id') : (old('upi_id') ? [old('upi_id')] : ['']);
+
+                    // Row counts (ensure at least 1 row renders)
+                    $bankRows = max(1, count($bankNames), count($acctNos), count($ifscCodes));
+                    $upiRows = max(1, count($upiIds));
+                @endphp
+
 
                 {{-- BANK DETAILS WRAPPER --}}
                 <div id="bank-details-wrapper" class="mt-3" style="display:none;">
@@ -370,7 +381,7 @@
                         </div>
 
                         <div id="bank-details-container">
-                            @for ($i = 0; $i < max(1, $bankRows); $i++)
+                            @for ($i = 0; $i < $bankRows; $i++)
                                 <div class="bank-row" data-bank-row>
                                     <div class="row g-3 align-items-end">
                                         <div class="col-md-4">
@@ -416,7 +427,7 @@
                         </div>
 
                         <div id="upi-details-container">
-                            @for ($i = 0; $i < max(1, $upiRows); $i++)
+                            @for ($i = 0; $i < $upiRows; $i++)
                                 <div class="upi-row" data-upi-row>
                                     <div class="row g-3 align-items-end">
                                         <div class="col-md-6">
