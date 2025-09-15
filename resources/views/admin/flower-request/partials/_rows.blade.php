@@ -90,10 +90,10 @@
         @if ($request->status == 'paid' && $request->order && $request->order->total_price)
             @if ($request->order->rider_id)
                 <span class="badge bg-primary">{{ $request->order->rider->rider_name }}</span>
-                <a href="#" class="btn btn-sm btn-outline-info mt-2" data-bs-toggle="modal"
+                {{-- <a href="#" class="btn btn-sm btn-outline-info mt-2" data-bs-toggle="modal"
                    data-bs-target="#editRiderModal{{ $request->order->id }}">
                     Edit Rider
-                </a>
+                </a> --}}
             @else
                 <form action="{{ route('admin.orders.assignRider', $request->order->id) }}" method="POST">
                     @csrf
