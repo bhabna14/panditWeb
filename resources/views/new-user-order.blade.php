@@ -89,7 +89,7 @@
 
 @section('content')
     <!-- Page header -->
-    <div class="nu-hero d-flex justify-content-between align-items-center">
+    <div class="nu-hero d-flex justify-content-between align-items-center mt-4">
         <div>
             <h4 class="nu-title">Subscription for New User</h4>
             <div class="nu-chip">
