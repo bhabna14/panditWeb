@@ -536,7 +536,7 @@ class AdminController extends Controller
 
         // ---- Subscriptions Taken (Active or Paused) ----
         $totalSubscriptionTaken = Subscription::query()
-            ->whereIn('status', ['active', 'paused'])
+            ->whereIn('status', ['active', 'paused','expired'])
             ->distinct('user_id')
             ->count('user_id');
 
