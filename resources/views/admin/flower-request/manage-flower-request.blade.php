@@ -31,7 +31,7 @@
         <a href="{{ route('flower-request', ['filter' => 'all']) }}" class="text-decoration-none card-filter" data-filter="all">
             <div class="card text-white h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
                 <div class="card-body d-flex align-items-center">
-                    <div class="me-3"><i class="fa fa-list fa-2x bg-primary"></i></div>
+                    <div class="me-3"><i class="fa fa-list fa-2x"></i></div>
                     <div>
                         <h5 class="card-title mb-1">Total Orders</h5>
                         <h3 class="mb-0" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</h3>
@@ -43,7 +43,7 @@
 
     <div class="col-md-3">
         <a href="{{ route('flower-request', ['filter' => 'today']) }}" class="text-decoration-none card-filter" data-filter="today">
-            <div class="card text-white bg-success h-100 {{ $filter === 'today' ? '' : 'opacity-90' }}" data-card="today">
+            <div class="card text-white h-100 {{ $filter === 'today' ? '' : 'opacity-90' }}" data-card="today">
                 <div class="card-body d-flex align-items-center">
                     <div class="me-3"><i class="fa fa-calendar-day fa-2x"></i></div>
                     <div>
@@ -57,7 +57,7 @@
 
     <div class="col-md-3">
         <a href="{{ route('flower-request', ['filter' => 'paid']) }}" class="text-decoration-none card-filter" data-filter="paid">
-            <div class="card text-white bg-info h-100 {{ $filter === 'paid' ? '' : 'opacity-90' }}" data-card="paid">
+            <div class="card text-white h-100 {{ $filter === 'paid' ? '' : 'opacity-90' }}" data-card="paid">
                 <div class="card-body d-flex align-items-center">
                     <div class="me-3"><i class="fa fa-check-circle fa-2x"></i></div>
                     <div>
@@ -71,7 +71,7 @@
 
     <div class="col-md-3">
         <a href="{{ route('flower-request', ['filter' => 'rejected']) }}" class="text-decoration-none card-filter" data-filter="rejected">
-            <div class="card text-white bg-warning h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}" data-card="rejected">
+            <div class="card text-white h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}" data-card="rejected">
                 <div class="card-body d-flex align-items-center">
                     <div class="me-3"><i class="fa fa-ban fa-2x"></i></div>
                     <div>
