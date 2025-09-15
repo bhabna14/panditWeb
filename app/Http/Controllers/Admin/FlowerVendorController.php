@@ -146,7 +146,11 @@ class FlowerVendorController extends Controller
         ->orderBy('name')
         ->get(['product_id', 'name', 'odia_name']);
 
-        return view('admin.manage-flower-vendors', compact('vendor_details', 'flowers'));
+    $totalVendors   = $vendor_details->count();
+    $activeVendors  = $vendor_details->where('status', 'active')->count();
+    $inactiveVendors= $vendor_details->where('status', 'inactive')->count();
+
+        return view('admin.manage-flower-vendors', compact('vendor_details', 'flowers','totalVendors','activeVendors','inactiveVendors'));
     }
 
     public function vendorAllDetails($id){
