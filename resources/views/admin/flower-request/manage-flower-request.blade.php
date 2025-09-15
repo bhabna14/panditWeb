@@ -63,11 +63,11 @@
             <div class="card metric-card h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
                 <div class="card-body d-flex align-items-center">
                     <div class="me-3">
-                        <i class="fa fa-list icon text-primary"></i>
+                        <i class="fa fa-list icon text-warning"></i>
                     </div>
                     <div>
                         <h5 class="card-title mb-1 label text-muted">Total Orders</h5>
-                        <h3 class="mb-0 text-primary" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</h3>
+                        <h3 class="mb-0 text-warning " id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</h3>
                     </div>
                 </div>
             </div>
@@ -114,11 +114,11 @@
             <div class="card metric-card h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}" data-card="rejected">
                 <div class="card-body d-flex align-items-center">
                     <div class="me-3">
-                        <i class="fa fa-ban icon text-warning"></i>
+                        <i class="fa fa-ban icon"></i>
                     </div>
                     <div>
-                        <h5 class="card-title mb-1 label text-muted">Rejected Orders</h5>
-                        <h3 class="mb-0 text-warning" id="rejectedCount">{{ $rejectCustomizeOrders ?? 0 }}</h3>
+                        <h5 class="card-title mb-1 label text-muted text-primary">Rejected Orders</h5>
+                        <h3 class="mb-0 text-primary" id="rejectedCount">{{ $rejectCustomizeOrders ?? 0 }}</h3>
                     </div>
                 </div>
             </div>
