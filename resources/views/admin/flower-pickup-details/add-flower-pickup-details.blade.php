@@ -232,7 +232,6 @@
                                 <label class="form-label required">Quantity</label>
                                 <input type="number" name="quantity[]" class="form-control" placeholder="e.g. 10"
                                     inputmode="decimal" min="0.01" step="0.01" required>
-                                <div class="help-text">Use whole numbers or decimals based on unit.</div>
                             </div>
                             <div class="col-md-1 d-grid">
                                 <button type="button" class="btn btn-outline-danger remove-row-btn">Remove</button>
