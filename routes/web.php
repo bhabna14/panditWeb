@@ -287,7 +287,8 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     });
 
     Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower-request');
-
+    Route::get('/manage-flower-request/data', [FlowerRequestController::class, 'ajaxData'])->name('flower-request.data');
+        
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
 

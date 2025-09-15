@@ -18,75 +18,120 @@ use Carbon\Carbon;
 class FlowerRequestController extends Controller
 {
 
-    public function showRequests(Request $request)
-    {
-        // Filters we support via cards / querystring
-        $filter = $request->query('filter', 'all');
+public function showRequests(Request $request)
+{
+    // First (initial) page render. Data is SSR.
+    $filter = $request->query('filter', 'all');
 
-        // Use app timezone for "today"
-        $tz    = config('app.timezone');
-        $today = Carbon::today($tz)->toDateString();
+    $tz    = config('app.timezone');
+    $today = Carbon::today($tz)->toDateString();
 
-        // Base query + eager loads
-        $query = FlowerRequest::with([
-            'order' => function ($q) {
-                $q->with('flowerPayments', 'delivery', 'rider');
-            },
-            'flowerProduct',
-            'user',
-            'address.localityDetails',
-            'flowerRequestItems',
-        ])->orderByDesc('id');
+    $query = FlowerRequest::with([
+        'order' => function ($q) {
+            $q->with('flowerPayments', 'delivery', 'rider');
+        },
+        'flowerProduct',
+        'user',
+        'address.localityDetails',
+        'flowerRequestItems',
+    ])->orderByDesc('id');
 
-        // Apply filter to the table dataset
-        switch ($filter) {
-            case 'today':
-                // Orders scheduled for delivery today
-                $query->whereDate('date', $today);
-                break;
-
-            case 'upcoming':
-                // Next 3 days (including today)
-                $query->whereBetween('date', [$today, Carbon::parse($today)->addDays(3)->toDateString()]);
-                break;
-
-            case 'paid':
-                $query->where('status', 'paid');
-                break;
-
-            case 'rejected':
-                // Some projects use "cancelled", some "rejected" — support both.
-                $query->whereIn('status', 'Rejected');
-                break;
-
-            case 'all':
-            default:
-                // no extra where
-                break;
-        }
-
-        $pendingRequests = $query->get();
-
-        // Dashboard counts (global, not tied to the current filter)
-        $totalCustomizeOrders   = FlowerRequest::count();
-        $todayCustomizeOrders   = FlowerRequest::whereDate('date', $today)->count();
-        $paidCustomizeOrders    = FlowerRequest::where('status', 'paid')->count();
-        $rejectCustomizeOrders  = FlowerRequest::whereIn('status', ['cancelled', 'rejected'])->count();
-
-        // Riders for assignment (active only)
-        $riders = RiderDetails::where('status', 'active')->get();
-
-        return view('admin.flower-request.manage-flower-request', compact(
-            'riders',
-            'pendingRequests',
-            'totalCustomizeOrders',
-            'todayCustomizeOrders',
-            'paidCustomizeOrders',
-            'rejectCustomizeOrders',
-            'filter'
-        ));
+    switch ($filter) {
+        case 'today':
+            $query->whereDate('date', $today);
+            break;
+        case 'upcoming':
+            $query->whereBetween('date', [$today, Carbon::parse($today)->addDays(3)->toDateString()]);
+            break;
+        case 'paid':
+            $query->where('status', 'paid');
+            break;
+        case 'rejected':
+            // Support both spellings in DB
+            $query->whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled']);
+            break;
+        case 'all':
+        default:
+            // no where
+            break;
     }
 
+    $pendingRequests       = $query->get();
+    $totalCustomizeOrders  = FlowerRequest::count();
+    $todayCustomizeOrders  = FlowerRequest::whereDate('date', $today)->count();
+    $paidCustomizeOrders   = FlowerRequest::where('status', 'paid')->count();
+    $rejectCustomizeOrders = FlowerRequest::whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled'])->count();
+    $riders                = RiderDetails::where('status', 'active')->get();
+
+    return view('admin.flower-request.manage-flower-request', compact(
+        'riders',
+        'pendingRequests',
+        'totalCustomizeOrders',
+        'todayCustomizeOrders',
+        'paidCustomizeOrders',
+        'rejectCustomizeOrders',
+        'filter'
+    ));
+}
+
+public function ajaxData(Request $request)
+{
+    // AJAX endpoint for filtering rows without refresh
+    $filter = $request->query('filter', 'all');
+
+    $tz    = config('app.timezone');
+    $today = Carbon::today($tz)->toDateString();
+
+    $query = FlowerRequest::with([
+        'order' => function ($q) {
+            $q->with('flowerPayments', 'delivery', 'rider');
+        },
+        'flowerProduct',
+        'user',
+        'address.localityDetails',
+        'flowerRequestItems',
+    ])->orderByDesc('id');
+
+    switch ($filter) {
+        case 'today':
+            $query->whereDate('date', $today);
+            break;
+        case 'upcoming':
+            $query->whereBetween('date', [$today, Carbon::parse($today)->addDays(3)->toDateString()]);
+            break;
+        case 'paid':
+            $query->where('status', 'paid');
+            break;
+        case 'rejected':
+            $query->whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled']);
+            break;
+        case 'all':
+        default:
+            // no where
+            break;
+    }
+
+    $pendingRequests       = $query->get();
+    $totalCustomizeOrders  = FlowerRequest::count();
+    $todayCustomizeOrders  = FlowerRequest::whereDate('date', $today)->count();
+    $paidCustomizeOrders   = FlowerRequest::where('status', 'paid')->count();
+    $rejectCustomizeOrders = FlowerRequest::whereIn('status', ['cancelled', 'rejected', 'Rejected', 'Cancelled'])->count();
+    $riders                = RiderDetails::where('status', 'active')->get();
+
+    // Render only the <tr> rows via a partial
+    $rowsHtml = view('admin.flower-request.partials._rows', compact('pendingRequests', 'riders'))->render();
+
+    return response()->json([
+        'rows_html' => $rowsHtml,
+        'counts' => [
+            'total'     => $totalCustomizeOrders,
+            'today'     => $todayCustomizeOrders,
+            'paid'      => $paidCustomizeOrders,
+            'rejected'  => $rejectCustomizeOrders,
+        ],
+        'active' => $filter,
+    ]);
+}
 
 public function saveOrder(Request $request, $id)
 {

@@ -25,65 +25,93 @@
 
 @section('content')
 
-    <div class="row mb-4">
-
-        <div class="col-md-3">
-            <a href="{{ route('flower-request', ['filter' => 'all']) }}" class="text-decoration-none">
-                <div class="card text-white bg-primary h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3"><i class="fa fa-list fa-2x"></i></div>
-                        <div>
-                            <h5 class="card-title mb-1">Total Orders</h5>
-                            <h3 class="mb-0">{{ $totalCustomizeOrders ?? 0 }}</h3>
-                        </div>
+    {{-- counters --}}
+<div class="row mb-4">
+    <div class="col-md-3">
+        <a href="{{ route('flower-request', ['filter' => 'all']) }}" class="text-decoration-none card-filter" data-filter="all">
+            <div class="card text-white bg-primary h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3"><i class="fa fa-list fa-2x"></i></div>
+                    <div>
+                        <h5 class="card-title mb-1">Total Orders</h5>
+                        <h3 class="mb-0" id="totalCount">{{ $totalCustomizeOrders ?? 0 }}</h3>
                     </div>
                 </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="{{ route('flower-request', ['filter' => 'today']) }}" class="text-decoration-none">
-                <div class="card text-white bg-success h-100 {{ $filter === 'today' ? '' : 'opacity-90' }}">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3"><i class="fa fa-calendar-day fa-2x"></i></div>
-                        <div>
-                            <h5 class="card-title mb-1">Today's Orders</h5>
-                            <h3 class="mb-0">{{ $todayCustomizeOrders ?? 0 }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="{{ route('flower-request', ['filter' => 'paid']) }}" class="text-decoration-none">
-                <div class="card text-white bg-info h-100 {{ $filter === 'paid' ? '' : 'opacity-90' }}">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3"><i class="fa fa-check-circle fa-2x"></i></div>
-                        <div>
-                            <h5 class="card-title mb-1">Paid Orders</h5>
-                            <h3 class="mb-0">{{ $paidCustomizeOrders ?? 0 }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-3">
-            <a href="{{ route('flower-request', ['filter' => 'rejected']) }}" class="text-decoration-none">
-                <div class="card text-white bg-warning h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}">
-                    <div class="card-body d-flex align-items-center">
-                        <div class="me-3"><i class="fa fa-ban fa-2x"></i></div>
-                        <div>
-                            <h5 class="card-title mb-1">Rejected Orders</h5>
-                            <h3 class="mb-0">{{ $rejectCustomizeOrders ?? 0 }}</h3>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        </div>
-
+            </div>
+        </a>
     </div>
+
+    <div class="col-md-3">
+        <a href="{{ route('flower-request', ['filter' => 'today']) }}" class="text-decoration-none card-filter" data-filter="today">
+            <div class="card text-white bg-success h-100 {{ $filter === 'today' ? '' : 'opacity-90' }}" data-card="today">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3"><i class="fa fa-calendar-day fa-2x"></i></div>
+                    <div>
+                        <h5 class="card-title mb-1">Today's Orders</h5>
+                        <h3 class="mb-0" id="todayCount">{{ $todayCustomizeOrders ?? 0 }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a href="{{ route('flower-request', ['filter' => 'paid']) }}" class="text-decoration-none card-filter" data-filter="paid">
+            <div class="card text-white bg-info h-100 {{ $filter === 'paid' ? '' : 'opacity-90' }}" data-card="paid">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3"><i class="fa fa-check-circle fa-2x"></i></div>
+                    <div>
+                        <h5 class="card-title mb-1">Paid Orders</h5>
+                        <h3 class="mb-0" id="paidCount">{{ $paidCustomizeOrders ?? 0 }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-3">
+        <a href="{{ route('flower-request', ['filter' => 'rejected']) }}" class="text-decoration-none card-filter" data-filter="rejected">
+            <div class="card text-white bg-warning h-100 {{ $filter === 'rejected' ? '' : 'opacity-90' }}" data-card="rejected">
+                <div class="card-body d-flex align-items-center">
+                    <div class="me-3"><i class="fa fa-ban fa-2x"></i></div>
+                    <div>
+                        <h5 class="card-title mb-1">Rejected Orders</h5>
+                        <h3 class="mb-0" id="rejectedCount">{{ $rejectCustomizeOrders ?? 0 }}</h3>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+{{-- table --}}
+<div class="card custom-card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="file-datatable" class="table table-hover table-bordered align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th># / User</th>
+                    <th>Purchase</th>
+                    <th>Delivery</th>
+                    <th>Items</th>
+                    <th>Status</th>
+                    <th>Price</th>
+                    <th>Rider</th>
+                    <th>Address</th>
+                    <th>Cancel By</th>
+                    <th>Cancel Reason</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="requestsBody">
+                    @include('admin.flower-request.partials._rows', ['pendingRequests' => $pendingRequests, 'riders' => $riders])
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{-- 
 
     @if (session()->has('success'))
         <div class="alert alert-success">{{ session()->get('success') }}</div>
@@ -334,41 +362,105 @@
                 </table>
             </div>
         </div>
-    </div>
+    </div> --}}
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/buttons.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/jszip.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/pdfmake/pdfmake.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/pdfmake/vfs_fonts.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/buttons.html5.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/js/buttons.colVis.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/dataTables.responsive.min.js') }}"></script>
-    <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('assets/js/table-data.js') }}"></script>
-
-    <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        function confirmPayment(requestId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Mark this payment as Paid?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, mark as Paid!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('markPaymentForm_' + requestId).submit();
-                }
-            });
+
+   <script>
+    // Re-init DataTable safely after we replace tbody
+    function reinitDataTable() {
+        if ($.fn.DataTable.isDataTable('#file-datatable')) {
+            $('#file-datatable').DataTable().destroy();
         }
-    </script>
+        $('#file-datatable').DataTable({
+            // If you rely on table-data.js defaults, keep this empty so it uses defaults.
+            // Or paste your preferred options here.
+        });
+    }
+
+    function setActiveCard(filter) {
+        // Add opacity to all, remove from active
+        $('[data-card]').addClass('opacity-90');
+        $('[data-card="'+filter+'"]').removeClass('opacity-90');
+    }
+
+    function updateCounts(counts) {
+        if (typeof counts !== 'object') return;
+        $('#totalCount').text(counts.total ?? 0);
+        $('#todayCount').text(counts.today ?? 0);
+        $('#paidCount').text(counts.paid ?? 0);
+        $('#rejectedCount').text(counts.rejected ?? 0);
+    }
+
+    function loadRequests(filter, pushUrl = true) {
+        const url = "{{ route('admin.flower-request.data') }}";
+        // Optional tiny loading state
+        const $tbody = $('#requestsBody');
+        const prevHtml = $tbody.html();
+        $tbody.html('<tr><td colspan="11" class="text-center py-5">Loading...</td></tr>');
+
+        $.get(url, { filter: filter })
+            .done(function(res) {
+                if (res && res.rows_html !== undefined) {
+                    $tbody.html(res.rows_html);
+                    reinitDataTable();
+                    updateCounts(res.counts || {});
+                    setActiveCard(res.active || filter);
+                    if (pushUrl) {
+                        const pageUrl = new URL(window.location);
+                        pageUrl.searchParams.set('filter', res.active || filter);
+                        window.history.pushState({ filter: res.active || filter }, '', pageUrl.toString());
+                    }
+                } else {
+                    $tbody.html('<tr><td colspan="11" class="text-center py-5 text-danger">Unexpected response</td></tr>');
+                }
+            })
+            .fail(function(xhr) {
+                $tbody.html(prevHtml);
+                Swal.fire('Error', 'Failed to load data. Please try again.', 'error');
+            });
+    }
+
+    $(document).on('click', '.card-filter', function(e) {
+        e.preventDefault();
+        const filter = $(this).data('filter') || 'all';
+        loadRequests(filter, true);
+    });
+
+    // Handle back/forward navigation to keep filter in sync
+    window.addEventListener('popstate', function(event) {
+        const params = new URLSearchParams(window.location.search);
+        const filter = params.get('filter') || 'all';
+        loadRequests(filter, false);
+    });
+
+    // If your DataTable is already initialized by table-data.js on load,
+    // ensure it gets created once:
+    $(document).ready(function(){
+        if (!$.fn.DataTable.isDataTable('#file-datatable')) {
+            $('#file-datatable').DataTable();
+        }
+    });
+
+    // Existing confirmPayment remains unchanged
+    function confirmPayment(requestId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Mark this payment as Paid?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, mark as Paid!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('markPaymentForm_' + requestId).submit();
+            }
+        });
+    }
+    window.confirmPayment = confirmPayment; // make accessible after AJAX swaps
+</script>
+
 @endsection
