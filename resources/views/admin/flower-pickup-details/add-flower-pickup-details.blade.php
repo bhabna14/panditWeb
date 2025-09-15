@@ -252,7 +252,7 @@
         </div>
 
         {{-- RIDER ASSIGNMENT --}}
-        <div class="card section-card mb-3">
+        <div class="nu-card section-card mb-3">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h6 class="section-title m-0">Assign Rider</h6>
             </div>
@@ -278,7 +278,7 @@
         </div>
 
         {{-- ACTIONS --}}
-        <div class="card section-card">
+        <div class="nu-card section-card">
             <div class="sticky-actions d-flex justify-content-between align-items-center">
                 <div class="text-muted">Review details before submitting.</div>
                 <div class="d-flex gap-12">
