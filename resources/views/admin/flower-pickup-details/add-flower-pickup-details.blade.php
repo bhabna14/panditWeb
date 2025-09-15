@@ -13,6 +13,32 @@
             margin-bottom: 18px;
         }
 
+        .nu-hero {
+            background: linear-gradient(135deg, #f3f4ff 0%, #e9fbff 100%);
+            border: 1px solid #e9ecf5;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+
+        .nu-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid #e9ecf5;
+            background: #fff;
+            font-weight: 600;
+            font-size: .9rem;
+        }
+
+        .nu-title {
+            margin: 0 0 6px;
+            font-weight: 700;
+        }
+
+
         .section-card {
             border: 1px solid #eef1f4;
             border-radius: 14px;
@@ -75,23 +101,25 @@
 @endsection
 
 @section('content')
-    <!-- breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Add Flower Pickup Details</span>
+
+
+    <div class="nu-hero d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="nu-title">Add Flower Pickup Details</h4>
+            <div class="nu-chip">
+                <span>Quick create • Clean layout</span>
+            </div>
         </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15">
-                    <a href="{{ route('admin.manageflowerpickupdetails') }}" class="btn btn-info text-white">
-                        Manage Flower Pickup Details
-                    </a>
-                </li>
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Add Flower Pickup Details</li>
-            </ol>
-        </div>
+        <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item tx-15">
+                <a href="{{ route('admin.manageflowerpickupdetails') }}" class="btn btn-info text-white">
+                    Manage Flower Pickup Details
+                </a>
+            </li>
+            <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
+        </ol>
     </div>
+
 
     {{-- Optional inline flash (SweetAlert also used below) --}}
     @if (session('success'))
