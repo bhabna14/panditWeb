@@ -1,7 +1,6 @@
 @extends('admin.layouts.apps')
 
 @section('styles')
-
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
     <!-- Data table css -->
@@ -17,459 +16,312 @@
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
     <style>
-        .btn {
-            text-align: center;
-            padding: 12px 20px;
+        /* Dashboard cards */
+        .stats-card {
+            border-radius: 14px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff, #f9f9f9);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .stats-title {
             font-size: 14px;
-            font-weight: 600;
-            border-radius: 8px;
-            border: none;
-            color: #ffffff;
-            text-decoration: none;
-            transition: all 0.3s ease;
+            color: #6c757d;
         }
 
-        /* View Button */
-        .btn-view {
-            background-color: #4CAF50;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        .stats-value {
+            font-size: 22px;
+            font-weight: 700;
         }
 
-        .btn-view:hover {
-            background-color: #45a049;
-        }
-
-        .btn-action {
-            background-color: #c80100;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .btn-action:hover {
-            background-color: #a00000;
-        }
-
-        .modal-content {
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .modal-footer {
-            border-top: none;
-        }
-
-        .modal-header {
-            background-color: #007bff;
+        .stats-icon {
+            font-size: 28px;
+            background: #007bff;
             color: #fff;
-            border-bottom: none;
-        }
-
-        .modal-body {
-            font-size: 16px;
-            line-height: 1.8;
-        }
-
-        .modal-body p {
-            margin-bottom: 10px;
-        }
-
-        .modal-footer {
-            border-top: none;
-        }
-
-        .btn-outline-primary {
-            border-color: #007bff;
-            color: #007bff;
-        }
-
-        .btn-outline-primary:hover {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        .order-id,
-        .customer-name,
-        .customer-number {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: block;
-        }
-
-        .order-details {
-            word-wrap: break-word;
-            max-width: 100%;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .table {
-            width: 100%;
-            table-layout: auto;
-        }
-
-        .order-details {
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        .order-details p {
-            margin: 0 0 6px;
-            font-size: 12px;
-            color: #333;
-        }
-
-        .order-details .text-muted {
-            color: #999;
-        }
-
-        .btn-view-customer {
-            display: inline-block;
-            background-color: #ffc107;
-            color: #fff;
-            text-decoration: none;
-            font-weight: 600;
-            border-radius: 5px;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .btn-view-customer:hover {
-            background-color: #ffca2c;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            color: #fff;
-        }
-
-        .product-details {
+            border-radius: 10px;
             padding: 10px;
-            font-size: 14px;
-            color: #333;
-            line-height: 1.5;
-            word-wrap: break-word;
         }
 
-        .product-details .product-name {
-            margin-bottom: 8px;
+        /* Table styling */
+        .table thead th {
+            background: #f8f9fa;
             font-weight: 600;
-            color: #0056b3;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 14px;
         }
 
-        .subscription-dates {
-            margin-bottom: 8px;
+        .order-details {
             font-size: 13px;
-            color: #000;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            line-height: 1.6;
         }
 
-        .no-subscription {
-            font-size: 13px;
-            color: #999;
-            white-space: nowrap;
+        /* Modal improvements */
+        .modal-header {
+            border-bottom: 0;
+        }
+
+        .modal-header.bg-primary,
+        .modal-header.bg-info,
+        .modal-header.bg-warning {
+            color: #fff;
         }
     </style>
 @endsection
 
 @section('content')
-    <!-- breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Manage Flower Order</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                {{-- <a href="{{url('admin/add-pandit')}}" class="breadcrumb-item tx-15 btn btn-warning">Add Pandit</a> --}}
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Manage Flower Order</li>
-            </ol>
-        </div>
-    </div>
-    <!-- /breadcrumb -->
+    <div class="container-fluid">
 
-    <div class="row">
-        <div class="col-lg-12 col-md-12">
-            <div class="card custom-card">
-                <div class="card-footer py-0">
-                    <div class="profile-tab tab-menu-heading border-bottom-0">
-                        <nav class="nav main-nav-line p-0 tabs-menu profile-nav-line border-0 br-5 mb-0 full-width-tabs">
-                            <a class="nav-link mb-2 mt-2 {{ Request::is('admin/flower-orders') ? 'active' : '' }}"
-                                href="{{ route('admin.orders.index') }}" onclick="changeColor(this)">Subscription Orders</a>
-                            <a class="nav-link mb-2 mt-2" href="{{ route('flower-request') }}"
-                                onclick="changeColor(this)">Request Orders</a>
-                        </nav>
-                    </div>
+        {{-- 📊 Dashboard Stats --}}
+        <div class="row g-3 mb-4 mt-3">
+            @php
+                $cards = [
+                    [
+                        'title' => 'Subscriptions Placed Today',
+                        'value' => $ordersRequestedToday,
+                        'filter' => 'renew',
+                        'icon' => 'fa-calendar-plus',
+                    ],
+                    [
+                        'title' => 'Active Subscriptions',
+                        'value' => $activeSubscriptions,
+                        'filter' => 'active',
+                        'icon' => 'fa-check-circle',
+                    ],
+                    [
+                        'title' => 'Paused Subscriptions',
+                        'value' => $pausedSubscriptions,
+                        'filter' => 'paused',
+                        'icon' => 'fa-pause-circle',
+                    ],
+                ];
+            @endphp
+
+            @foreach ($cards as $card)
+                <div class="col-md-4">
+                    <a href="{{ route('admin.orders.index', ['filter' => $card['filter']]) }}" class="text-decoration-none">
+                        <div class="stats-card d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="stats-title">{{ $card['title'] }}</div>
+                                <div class="stats-value">{{ $card['value'] }}</div>
+                            </div>
+                            <div class="stats-icon">
+                                <i class="fas {{ $card['icon'] }}"></i>
+                            </div>
+                        </div>
+                    </a>
                 </div>
+            @endforeach
+        </div>
+
+        {{-- ✅ Success/Error Alerts --}}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        @if ($errors->has('danger'))
+            <div class="alert alert-danger alert-dismissible fade show">{{ $errors->first('danger') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        {{-- 🔍 Filters --}}
+        <form id="filter-form" class="row g-3 align-items-end bg-light p-3 rounded mb-4">
+            <div class="col-md-3">
+                <label class="form-label">Customer Name</label>
+                <select class="form-select select2" name="customer_name" id="customer_name">
+                    <option value="">All</option>
+                    @foreach ($users as $user)
+                        <option value="{{ $user->name }}">{{ $user->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Mobile Number</label>
+                <select class="form-select select2" name="mobile_number" id="mobile_number">
+                    <option value="">All</option>
+                    @foreach ($users as $user)
+                        <option value="{{ $user->mobile_number }}">{{ $user->mobile_number }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Apartment Name</label>
+                <select class="form-select select2" name="apartment_name" id="apartment_name">
+                    <option value="">All</option>
+                    @foreach ($addresses as $addr)
+                        <option value="{{ $addr->apartment_name }}">{{ $addr->apartment_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Apartment Number</label>
+                <select class="form-select select2" name="apartment_flat_plot" id="apartment_flat_plot">
+                    <option value="">All</option>
+                    @foreach ($addresses as $addr)
+                        <option value="{{ $addr->apartment_flat_plot }}">{{ $addr->apartment_flat_plot }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="button" id="search-btn" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+
+        {{-- 📋 Subscriptions Table --}}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table id="subscriptions-table" class="table table-striped table-hover w-100">
+                    <thead>
+                        <tr>
+                            <th>Customer</th>
+                            <th>First Purchase</th>
+                            <th>Period</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Rider</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="edit-status-form" method="POST"
+                    action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title">Update Subscription Status</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="subscription_id" id="status-sub-id">
+                            <div class="mb-3">
+                                <label for="status-select">Status</label>
+                                <select class="form-select" name="status" id="status-select" required>
+                                    <option value="active">Active</option>
+                                    <option value="paused">Paused</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Update</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="edit-dates-form" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">Edit Subscription Dates</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="subscription_id" id="sub-id">
+                            <div class="mb-3">
+                                <label>Start Date</label>
+                                <input type="date" name="start_date" id="sub-start" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label>End Date</label>
+                                <input type="date" name="end_date" id="sub-end" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Save</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Global Edit Rider Modal -->
+        <div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="edit-rider-form" method="POST">
+                    @csrf @method('POST')
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title">Assign/Change Rider</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="subscription_id" id="rider-sub-id">
+                            <div class="mb-3">
+                                <label>Rider</label>
+                                <select name="rider_id" id="rider-select" class="form-control" required>
+                                    <option value="">Choose Rider</option>
+                                    @foreach ($riders as $rider)
+                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Save</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal fade" id="editPauseModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <form id="edit-pause-form" method="POST" action="">
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title">Edit Pause Dates</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input type="hidden" name="subscription_id" id="pause-sub-id">
+                            <div class="mb-3">
+                                <label for="pause-start">Pause Start Date</label>
+                                <input type="date" name="pause_start_date" id="pause-start" class="form-control"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="pause-end">Pause End Date</label>
+                                <input type="date" name="pause_end_date" id="pause-end" class="form-control"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">Update</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    <div class="row">
-
-        <div class="col-md-4">
-            <a href="{{ route('admin.orders.index', ['filter' => 'active']) }}">
-                <div class="card bg-success text-dark mb-3">
-                    <div class="card-header">
-                        <i class="fas fa-check-circle"></i> Active Subscriptions
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title text-white">{{ $activeSubscriptions }}</h5>
-                        <p class="card-text text-white">Users with an active subscription</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-
-        <div class="col-md-4">
-            <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}">
-                <div class="card bg-warning text-dark mb-3">
-                    <div class="card-header">
-                        <i class="fas fa-pause-circle"></i> Paused Subscriptions
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $pausedSubscriptions }}</h5>
-                        <p class="card-text">Users with a paused subscription</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-md-4">
-            <a href="{{ route('admin.orders.index', ['filter' => 'renew']) }}">
-                <div class="card bg-info text-dark mb-3">
-                    <div class="card-header">
-                        <i class="fas fa-box"></i>Subscription Placed today
-                    </div>
-                    <div class="card-body">
-                        <h5 class="card-title">{{ $ordersRequestedToday }}</h5>
-                        <p class="card-text">Subscription Placed today</p>
-                    </div>
-                </div>
-            </a>
-        </div>
     </div>
-
-    <!-- Row -->
-    <div class="row row-sm">
-        <div class="col-lg-12">
-            <div class="card custom-card overflow-hidden">
-                <div class="card-body">
-                    @if (session()->has('success'))
-                        <div class="alert alert-success" id="Message">
-                            {{ session()->get('success') }}
-                        </div>
-                    @endif
-
-                    @if ($errors->has('danger'))
-                        <div class="alert alert-danger" id="Message">
-                            {{ $errors->first('danger') }}
-                        </div>
-                    @endif
-
-                    <form id="filter-form" class="row g-2 align-items-end mt-4 mb-4">
-                        <div class="col-md-3">
-                            <label class="form-label">Customer Name</label>
-                            <select class="form-select" name="customer_name" id="customer_name">
-                                <option value="">All</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->name }}">{{ $user->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Mobile Number</label>
-                            <select class="form-select" name="mobile_number" id="mobile_number">
-                                <option value="">All</option>
-                                @foreach ($users as $user)
-                                    <option value="{{ $user->mobile_number }}">{{ $user->mobile_number }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Apartment Name</label>
-                            <select class="form-select" name="apartment_name" id="apartment_name">
-                                <option value="">All</option>
-                                @foreach ($addresses as $addr)
-                                    <option value="{{ $addr->apartment_name }}">{{ $addr->apartment_name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Apartment Number</label>
-                            <select class="form-select" name="apartment_flat_plot" id="apartment_flat_plot">
-                                <option value="">All</option>
-                                @foreach ($addresses as $addr)
-                                    <option value="{{ $addr->apartment_flat_plot }}">{{ $addr->apartment_flat_plot }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <button type="button" id="search-btn" class="btn btn-primary w-100">
-                                <i class="fas fa-search"></i> Search
-                            </button>
-                        </div>
-                    </form>
-
-                    <div class="table-responsive">
-                        <div class="table-responsive">
-                            <table id="file-datatable" class="table table-bordered w-100">
-                                <thead>
-                                    <tr>
-                                        <th>Customer Details</th>
-                                        <th>First Purchase Date</th>
-                                        <th>Subscription Period</th>
-                                        <th>Subscription Price</th>
-                                        <th>Status</th>
-                                        <th>Assigned Rider</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {{-- DataTables will load rows via AJAX --}}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="modal fade" id="editStatusModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="edit-status-form" method="POST"
-                                    action="{{ route('admin.subscriptions.updateStatus', ['id' => 0]) }}">
-                                    @csrf
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-info text-white">
-                                            <h5 class="modal-title">Update Subscription Status</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="subscription_id" id="status-sub-id">
-                                            <div class="mb-3">
-                                                <label for="status-select">Status</label>
-                                                <select class="form-select" name="status" id="status-select" required>
-                                                    <option value="active">Active</option>
-                                                    <option value="paused">Paused</option>
-                                                    <option value="pending">Pending</option>
-                                                    <option value="expired">Expired</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Update</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <div class="modal fade" id="editDatesModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="edit-dates-form" method="POST">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-primary text-white">
-                                            <h5 class="modal-title">Edit Subscription Dates</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="subscription_id" id="sub-id">
-                                            <div class="mb-3">
-                                                <label>Start Date</label>
-                                                <input type="date" name="start_date" id="sub-start"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label>End Date</label>
-                                                <input type="date" name="end_date" id="sub-end"
-                                                    class="form-control" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Save</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Global Edit Rider Modal -->
-                        <div class="modal fade" id="editRiderModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="edit-rider-form" method="POST">
-                                    @csrf @method('POST')
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-info text-white">
-                                            <h5 class="modal-title">Assign/Change Rider</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="subscription_id" id="rider-sub-id">
-                                            <div class="mb-3">
-                                                <label>Rider</label>
-                                                <select name="rider_id" id="rider-select" class="form-control" required>
-                                                    <option value="">Choose Rider</option>
-                                                    @foreach ($riders as $rider)
-                                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Save</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
-                        <div class="modal fade" id="editPauseModal" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <form id="edit-pause-form" method="POST" action="">
-                                    @csrf
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-warning text-dark">
-                                            <h5 class="modal-title">Edit Pause Dates</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="subscription_id" id="pause-sub-id">
-                                            <div class="mb-3">
-                                                <label for="pause-start">Pause Start Date</label>
-                                                <input type="date" name="pause_start_date" id="pause-start"
-                                                    class="form-control" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="pause-end">Pause End Date</label>
-                                                <input type="date" name="pause_end_date" id="pause-end"
-                                                    class="form-control" required>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-success">Update</button>
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Cancel</button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    </div>
+    </div>
     </div>
     <!-- End Row -->
 @endsection
