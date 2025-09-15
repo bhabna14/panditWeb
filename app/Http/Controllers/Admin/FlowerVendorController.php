@@ -148,7 +148,7 @@ class FlowerVendorController extends Controller
 
     $totalVendors   = $vendor_details->count();
     $activeVendors  = $vendor_details->where('status', 'active')->count();
-    $inactiveVendors= $vendor_details->where('status', 'inactive')->count();
+    $inactiveVendors= $vendor_details->where('status', 'deleted')->count();
 
         return view('admin.manage-flower-vendors', compact('vendor_details', 'flowers','totalVendors','activeVendors','inactiveVendors'));
     }
