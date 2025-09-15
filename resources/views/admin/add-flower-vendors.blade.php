@@ -344,14 +344,20 @@
                     </div>
                 </div>
 
-                @php
+                {{-- @php
                     $bankNames = old('bank_name', ['']);
                     $acctNos = old('account_no', ['']);
                     $ifscCodes = old('ifsc_code', ['']);
                     $upiIds = old('upi_id', ['']);
                     $bankRows = max(count($bankNames), count($acctNos), count($ifscCodes));
                     $upiRows = max(count($upiIds));
-                @endphp
+                @endphp --}}
+@php
+    $bankNames = is_array(old('bank_name')) ? old('bank_name') : (old('bank_name') ? [old('bank_name')] : ['']);
+    $acctNos   = is_array(old('account_no')) ? old('account_no') : (old('account_no') ? [old('account_no')] : ['']);
+    $ifscCodes = is_array(old('ifsc_code')) ? old('ifsc_code') : (old('ifsc_code') ? [old('ifsc_code')] : ['']);
+    $upiIds    = is_array(old('upi_id')) ? old('upi_id') : (old('upi_id') ? [old('upi_id')] : ['']);
+@endphp
 
                 {{-- BANK DETAILS WRAPPER --}}
                 <div id="bank-details-wrapper" class="mt-3" style="display:none;">
