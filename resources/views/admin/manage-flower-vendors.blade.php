@@ -241,7 +241,7 @@
                     <tbody>
                         @foreach ($vendor_details as $index => $vendor)
                             @php
-                                $status = strtolower($vendor->status ?? 'inactive');
+                                $status = strtolower($vendor->status ?? 'deleted');
                                 $banks = ($vendor->vendorBanks ?? collect())
                                     ->map(function ($b) {
                                         return [
@@ -338,7 +338,7 @@
     <div class="row g-3" id="cardsGrid">
         @foreach ($vendor_details as $vendor)
             @php
-                $status = strtolower($vendor->status ?? 'inactive');
+                $status = strtolower($vendor->status ?? 'deleted');
                 $banks = ($vendor->vendorBanks ?? collect())
                     ->map(function ($b) {
                         return [
@@ -548,7 +548,7 @@
             if (vendorTable) {
                 if (filter === 'active') {
                     vendorTable.column(STATUS_COL_INDEX).search('^Active$', true, false).draw();
-                } else if (filter === 'inactive') {
+                } else if (filter === 'deleted') {
                     vendorTable.column(STATUS_COL_INDEX).search('^Inactive$', true, false).draw();
                 } else {
                     vendorTable.column(STATUS_COL_INDEX).search('').draw();
@@ -557,7 +557,7 @@
 
             // cards filter
             document.querySelectorAll('#cardsGrid [data-status]').forEach(card => {
-                const st = card.getAttribute('data-status') || 'inactive';
+                const st = card.getAttribute('data-status') || 'deleted';
                 card.style.display = (filter === 'all' || filter === st) ? '' : 'none';
             });
         }
