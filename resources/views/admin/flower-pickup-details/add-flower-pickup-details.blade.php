@@ -195,7 +195,6 @@
                                         class="form-control @error('quantity.' . $i) is-invalid @enderror"
                                         placeholder="e.g. 10" value="{{ $oldQtys[$i] ?? '' }}" inputmode="decimal"
                                         min="0.01" step="0.01" required>
-                                    <div class="help-text">Use whole numbers or decimals based on unit.</div>
                                     @error('quantity.' . $i)
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
