@@ -103,7 +103,7 @@
 @section('content')
 
 
-    <div class="nu-hero d-flex justify-content-between align-items-center">
+    <div class="nu-hero d-flex justify-content-between align-items-center mt-4">
         <div>
             <h4 class="nu-title">Add Flower Pickup Details</h4>
             <div class="nu-chip">
