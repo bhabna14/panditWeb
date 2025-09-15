@@ -26,7 +26,7 @@
 @section('content')
 
     {{-- counters --}}
-<div class="row mb-4">
+<div class="row mb-4 mt-4">
     <div class="col-md-3">
         <a href="{{ route('flower-request', ['filter' => 'all']) }}" class="text-decoration-none card-filter" data-filter="all">
             <div class="card text-white bg-primary h-100 {{ $filter === 'all' ? '' : 'opacity-90' }}" data-card="all">
