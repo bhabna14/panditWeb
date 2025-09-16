@@ -173,6 +173,7 @@
             color: #999;
             white-space: nowrap;
         }
+
         .stats-card {
             border-radius: 14px;
             padding: 20px;
@@ -230,16 +231,31 @@
 @endsection
 
 @section('content')
-   <div class="row g-3 mb-4 mt-3">
+    <div class="row g-3 mb-4 mt-3">
         @php
             $cards = [
-                ['title' => 'Subscriptions Placed Today', 'value' => $ordersRequestedToday, 'filter' => 'renew', 'icon' => 'fa-calendar-plus'],
-                ['title' => 'Active Subscriptions', 'value' => $activeSubscriptions, 'filter' => 'active', 'icon' => 'fa-check-circle'],
-                ['title' => 'Paused Subscriptions', 'value' => $pausedSubscriptions, 'filter' => 'paused', 'icon' => 'fa-pause-circle'],
+                [
+                    'title' => 'Subscriptions Placed Today',
+                    'value' => $ordersRequestedToday,
+                    'filter' => 'renew',
+                    'icon' => 'fa-calendar-plus',
+                ],
+                [
+                    'title' => 'Active Subscriptions',
+                    'value' => $activeSubscriptions,
+                    'filter' => 'active',
+                    'icon' => 'fa-check-circle',
+                ],
+                [
+                    'title' => 'Paused Subscriptions',
+                    'value' => $pausedSubscriptions,
+                    'filter' => 'paused',
+                    'icon' => 'fa-pause-circle',
+                ],
             ];
         @endphp
 
-        @foreach($cards as $card)
+        @foreach ($cards as $card)
             <div class="col-md-4">
                 <a href="{{ route('admin.orders.index', ['filter' => $card['filter']]) }}" class="text-decoration-none">
                     <div class="stats-card d-flex justify-content-between align-items-center">

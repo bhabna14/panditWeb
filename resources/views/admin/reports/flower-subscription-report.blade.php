@@ -16,6 +16,21 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
+
+    <style>
+          .stats-card {
+            border-radius: 14px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff, #f9f9f9);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
+        }
+    </style>
 @endsection
 
 {{-- SECTION: Content --}}
@@ -35,7 +50,7 @@
     
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card border-success shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
+            <div class="stats-card border-success shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-success mb-1">Renew Customer Total Price</h6>
                     <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
@@ -43,7 +58,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card border-info shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
+            <div class="stats-card border-info shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-info mb-1">New User Subscription Total Price</h6>
                     <h4 class="fw-bold mb-0" id="newUserTotalPrice">₹0</h4>
