@@ -26,8 +26,8 @@
             background-color: transparent !important;
             border: 1px solid rgb(186, 185, 185) !important;
             transition: box-shadow .2s ease, transform .2s ease, opacity .2s ease;
-              border-radius: 14px;
-            padding: 20px;
+            border-radius: 18px;
+            padding: 16px;
             background: linear-gradient(135deg, #ffffff, #f9f9f9);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
         }
