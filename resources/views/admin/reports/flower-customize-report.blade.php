@@ -26,7 +26,7 @@
     
     <div class="row mb-4 mt-4">
         <div class="col-md-6">
-            <div class="stats-card border-success shadow-sm">
+            <div class="stats-card shadow-sm">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-success mb-1">Total Customize Total Price</h6>
                     <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="stats-card border-info shadow-sm">
+            <div class="stats-card shadow-sm">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-info mb-1">Today Customize Price</h6>
                     <h4 class="fw-bold mb-0" id="todayPrice">₹0</h4>
