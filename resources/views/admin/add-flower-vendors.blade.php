@@ -169,7 +169,7 @@
         @csrf
 
         {{-- VENDOR INFORMATION --}}
-        <div class="card section-card mt-4">
+        <div class="card section-card mt-4" style="border: 1px solid rgb(186, 185, 185);">
             <div class="card-header">
                 <div class="section-header">
                     <span class="header-icon icon-info"><i class="fa fa-user"></i></span>
@@ -262,7 +262,7 @@
         </div>
 
         {{-- FLOWERS PROVIDED --}}
-        <div class="card section-card">
+        <div class="card section-card" style="border: 1px solid rgb(186, 185, 185);">
             <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-12">
                 <div class="section-header">
                     <span class="header-icon icon-flower"><i class="fa fa-seedling"></i></span>
@@ -315,7 +315,7 @@
         </div>
 
         {{-- PAYMENT & BANK --}}
-        <div class="card section-card">
+        <div class="card section-card" style="border: 1px solid rgb(186, 185, 185);">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <div class="section-header">
                     <span class="header-icon icon-bank"><i class="fa fa-credit-card"></i></span>
@@ -452,7 +452,7 @@
         </div>
 
         {{-- DOCUMENTS --}}
-        <div class="card section-card">
+        <div class="card section-card" style="border: 1px solid rgb(186, 185, 185);">
             <div class="card-header">
                 <div class="section-header">
                     <span class="header-icon icon-doc"><i class="fa fa-file"></i></span>
@@ -479,7 +479,7 @@
         </div>
 
         {{-- ACTIONS --}}
-        <div class="card section-card">
+        <div class="card section-card" style="border: 1px solid rgb(186, 185, 185);">
             <div class="sticky-actions d-flex justify-content-between align-items-center">
                 <div class="section-header">
                     <span class="header-icon icon-cta"><i class="fa fa-info"></i></span>
