@@ -6,25 +6,29 @@
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <style>
+        .stats-card {
+            border-radius: 14px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffffff, #f9f9f9);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out;
+            border: 1px solid #e0e0e0;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-4px);
+        }
+    </style>
 @endsection
 
 @section('content')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Pick Up Report</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Report</a></li>
-            </ol>
-        </div>
-    </div>
-
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card border-success shadow-sm">
+            <div class="stats-card border-success shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-success mb-1">Total Price</h6>
                     <h4 class="fw-bold mb-0" id="totalPrice">₹{{ number_format((float)$total_price, 2) }}</h4>
@@ -32,7 +36,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card border-info shadow-sm">
+            <div class="stats-card border-info shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-info mb-1">Today's Price</h6>
                     <h4 class="fw-bold mb-0" id="todayPrice">₹{{ number_format((float)$today_price, 2) }}</h4>
