@@ -35,7 +35,7 @@
     
     <div class="row mb-4">
         <div class="col-md-6">
-            <div class="card border-success shadow-sm">
+            <div class="card border-success shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-success mb-1">Renew Customer Total Price</h6>
                     <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
@@ -43,7 +43,7 @@
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card border-info shadow-sm">
+            <div class="card border-info shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title text-info mb-1">New User Subscription Total Price</h6>
                     <h4 class="fw-bold mb-0" id="newUserTotalPrice">₹0</h4>

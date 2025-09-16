@@ -189,6 +189,7 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
+
 public function flowerPickUp(Request $request)
 {
     $fromDate = $request->input('from_date', Carbon::now()->startOfMonth()->toDateString());
