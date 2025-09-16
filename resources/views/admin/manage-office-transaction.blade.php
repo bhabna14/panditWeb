@@ -11,19 +11,7 @@
 @endsection
 
 @section('content')
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">MANAGE PAYMENT MODE</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.officeTransactionDetails') }}"
-                        class="btn btn-info text-white">Add Payment Mode</a></li>
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Payment</a></li>
-            </ol>
-        </div>
-    </div>
-
+    
     <div class="row row-sm">
         <div class="col-lg-12">
             <div class="card custom-card overflow-hidden">
