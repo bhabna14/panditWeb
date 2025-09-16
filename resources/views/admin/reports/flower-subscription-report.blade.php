@@ -93,7 +93,7 @@
 
   
     <!-- DataTable -->
-    <div class="table-responsive"  style="border: 1px solid rgb(186, 185, 185);">
+    <div class="table-responsive">
         <table id="file-datatable" class="table table-bordered w-100">
             <thead>
                 <tr>
