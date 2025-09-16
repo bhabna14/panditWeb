@@ -23,20 +23,11 @@
 @endsection
 
 @section('content')
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Customize Order Report</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Report</a></li>
-            </ol>
-        </div>
-    </div>
+    
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="stats-card border-success shadow-sm">
-                <div class="card-body text-center py-2">
+                <div class="card-body text-center">
                     <h6 class="card-title text-success mb-1">Total Customize Total Price</h6>
                     <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
                 </div>
