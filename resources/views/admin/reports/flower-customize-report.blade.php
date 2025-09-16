@@ -13,7 +13,7 @@
             background: linear-gradient(135deg, #ffffff, #f9f9f9);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             transition: transform 0.2s ease-in-out;
-            border: 1px solid #e0e0e0;
+            border: 1px solid rgb(186, 185, 185);
         }
 
         .stats-card:hover {
