@@ -35,19 +35,7 @@
 
 {{-- SECTION: Content --}}
 @section('content')
-    <!-- Breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Subscription Report</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb d-flex justify-content-between align-items-center">
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Report</a></li>
-            </ol>
-        </div>
-    </div>
-
-    
+  
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="stats-card border-success shadow-sm" style="border: 1px solid rgb(186, 185, 185);">
