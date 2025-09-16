@@ -69,7 +69,7 @@
     </div>
 
     <!-- Filter Row -->
-    <div class="row g-3 align-items-end mb-4" style="border: 1px solid rgb(186, 185, 185);">
+    <div class="row g-3 align-items-end mb-4">
         <!-- From Date -->
         <div class="col-md-4">
             <label for="from_date" class="form-label fw-semibold">From Date</label>
@@ -93,7 +93,7 @@
 
   
     <!-- DataTable -->
-    <div class="table-responsive">
+    <div class="table-responsive"  style="border: 1px solid rgb(186, 185, 185);">
         <table id="file-datatable" class="table table-bordered w-100">
             <thead>
                 <tr>
