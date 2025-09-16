@@ -24,7 +24,7 @@
 
 @section('content')
     
-    <div class="row mb-4">
+    <div class="row mb-4 mt-4">
         <div class="col-md-6">
             <div class="stats-card border-success shadow-sm">
                 <div class="card-body text-center py-2">
