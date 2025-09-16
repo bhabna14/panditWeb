@@ -168,7 +168,7 @@
     {{-- ===== Stats row ===== --}}
     <div class="row g-3 mb-3 mt-4">
         <div class="col-md-4">
-            <div class="metric-card p-3" data-filter="all" id="cardAll">
+            <div class="metric-card p-3" data-filter="all" id="cardAll" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="d-flex align-items-center gap-3">
                     <span class="icon icon-total"><i class="fa fa-users"></i></span>
                     <div>
@@ -179,7 +179,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="metric-card p-3" data-filter="active" id="cardActive">
+            <div class="metric-card p-3" data-filter="active" id="cardActive" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="d-flex align-items-center gap-3">
                     <span class="icon icon-active"><i class="fa fa-user-check"></i></span>
                     <div>
@@ -190,7 +190,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="metric-card p-3" data-filter="inactive" id="cardInactive">
+            <div class="metric-card p-3" data-filter="inactive" id="cardInactive" style="border: 1px solid rgb(186, 185, 185);">
                 <div class="d-flex align-items-center gap-3">
                     <span class="icon icon-inactive"><i class="fa fa-user-times"></i></span>
                     <div>

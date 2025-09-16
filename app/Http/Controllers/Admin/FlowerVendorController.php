@@ -146,14 +146,15 @@ class FlowerVendorController extends Controller
         ->orderBy('name')
         ->get(['product_id', 'name', 'odia_name']);
 
-    $totalVendors   = $vendor_details->count();
-    $activeVendors  = $vendor_details->where('status', 'active')->count();
-    $inactiveVendors= $vendor_details->where('status', 'deleted')->count();
+        $totalVendors   = $vendor_details->count();
+        $activeVendors  = $vendor_details->where('status', 'active')->count();
+        $inactiveVendors= $vendor_details->where('status', 'deleted')->count();
 
         return view('admin.manage-flower-vendors', compact('vendor_details', 'flowers','totalVendors','activeVendors','inactiveVendors'));
     }
 
-    public function vendorAllDetails($id){
+    public function vendorAllDetails($id)
+    {
         $pickupDetails = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
         ->where('vendor_id', $id)
         ->get()
