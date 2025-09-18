@@ -115,7 +115,7 @@ class FlowerOrderController extends Controller
             $query->where('status', 'active');
         }
 
-       if ($filter === 'expired') {
+  if ($filter === 'expired') {
     $liveStatuses = ['active', 'paused', 'resume'];
 
     $query->where('subscriptions.status', 'expired')
@@ -136,16 +136,14 @@ class FlowerOrderController extends Controller
               ->whereIn('s_order_live.status', $liveStatuses);
         })
 
-        // keep ONLY the latest expired row per user (by end_date)
-        ->whereNotExists(function ($q) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s_newer_expired')
-              ->whereColumn('s_newer_expired.user_id', 'subscriptions.user_id')
-              ->where('s_newer_expired.status', 'expired')
-              ->whereRaw('COALESCE(s_newer_expired.end_date, "1970-01-01") > COALESCE(subscriptions.end_date, "1970-01-01")');
+        // keep ONLY the latest expired row per user
+        ->whereIn('subscriptions.id', function ($q) {
+            $q->select(DB::raw('MAX(s4.id)'))
+              ->from('subscriptions as s4')
+              ->where('s4.status', 'expired')
+              ->groupBy('s4.user_id');
         })
 
-        // make sure only Subscription columns go out (helps DataTables)
         ->select('subscriptions.*')
         ->orderByDesc('subscriptions.end_date');
 }
