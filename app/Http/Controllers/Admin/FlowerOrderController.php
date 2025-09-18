@@ -114,32 +114,32 @@ class FlowerOrderController extends Controller
         if ($filter === 'active') {
             $query->where('status', 'active');
         }
-if ($filter === 'expired') {
-    $liveStatuses = ['active', 'paused', 'resume'];
+// if ($filter === 'expired') {
+//     $liveStatuses = ['active', 'paused', 'resume'];
 
-    // Subquery to get latest expired subscription id per user
-    $latestExpiredIds = DB::table('subscriptions as s1')
-        ->select(DB::raw('MAX(s1.id)'))
-        ->where('s1.status', 'expired')
-        ->whereNotExists(function ($q) use ($liveStatuses) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s2')
-              ->whereColumn('s2.user_id', 's1.user_id')
-              ->whereIn('s2.status', $liveStatuses);
-        })
-        ->whereNotExists(function ($q) use ($liveStatuses) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s3')
-              ->whereColumn('s3.order_id', 's1.order_id')
-              ->whereIn('s3.status', $liveStatuses);
-        })
-        ->groupBy('s1.user_id');
+//     // Subquery to get latest expired subscription id per user
+//     $latestExpiredIds = DB::table('subscriptions as s1')
+//         ->select(DB::raw('MAX(s1.id)'))
+//         ->where('s1.status', 'expired')
+//         ->whereNotExists(function ($q) use ($liveStatuses) {
+//             $q->select(DB::raw(1))
+//               ->from('subscriptions as s2')
+//               ->whereColumn('s2.user_id', 's1.user_id')
+//               ->whereIn('s2.status', $liveStatuses);
+//         })
+//         ->whereNotExists(function ($q) use ($liveStatuses) {
+//             $q->select(DB::raw(1))
+//               ->from('subscriptions as s3')
+//               ->whereColumn('s3.order_id', 's1.order_id')
+//               ->whereIn('s3.status', $liveStatuses);
+//         })
+//         ->groupBy('s1.user_id');
 
-    // Use those IDs in the main query
-    $query->whereIn('subscriptions.id', $latestExpiredIds)
-          ->select('subscriptions.*')
-          ->orderByDesc('subscriptions.end_date');
-}
+//     // Use those IDs in the main query
+//     $query->whereIn('subscriptions.id', $latestExpiredIds)
+//           ->select('subscriptions.*')
+//           ->orderByDesc('subscriptions.end_date');
+// }
 
 
 
