@@ -115,38 +115,29 @@ class FlowerOrderController extends Controller
             $query->where('status', 'active');
         }
 
-        if ($filter === 'expired') {
-            $liveStatuses = ['active', 'paused', 'resume'];
-            // Subquery: users who have no active/paused/resume AND we want their latest expired date
-            $subQuery = DB::table('subscriptions as s')
-                ->select('s.user_id', DB::raw('MAX(s.end_date) as latest_end_date'))
-                ->where('s.status', 'expired')
-                ->whereNotExists(function ($q) use ($liveStatuses) {
-                    $q->select(DB::raw(1))
-                    ->from('subscriptions as sa')
-                    ->whereColumn('sa.user_id', 's.user_id')
-                    ->whereIn('sa.status', $liveStatuses);
-                })
-                ->groupBy('s.user_id');
+      if ($filter === 'expired') {
+    $liveStatuses = ['active', 'paused', 'resume'];
 
-            // Join to bring back exactly one (latest) expired row per such user
-            $query->joinSub($subQuery, 'latest_expired', function ($join) {
-                    $join->on('subscriptions.user_id', '=', 'latest_expired.user_id')
-                        ->on('subscriptions.end_date', '=', 'latest_expired.latest_end_date');
-                })
-                ->where('subscriptions.status', 'expired')
+    $query->where('status', 'expired')
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
+                ->from('subscriptions as s2')
+                ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                ->whereIn('s2.status', $liveStatuses);
+        })
+        ->whereNotExists(function ($q) use ($liveStatuses) {
+            $q->select(DB::raw(1))
+                ->from('subscriptions as s3')
+                ->whereColumn('s3.order_id', 'subscriptions.order_id')
+                ->whereIn('s3.status', $liveStatuses);
+        })
+        ->whereIn('id', function ($sub) {
+            $sub->select(DB::raw('MAX(id)'))
+                ->from('subscriptions')
+                ->groupBy('user_id'); // ensures latest subscription row per user
+        });
+}
 
-                // Extra safety: don't show expired rows where same ORDER has a live status
-                ->whereNotExists(function ($q) use ($liveStatuses) {
-                    $q->select(DB::raw(1))
-                    ->from('subscriptions as so')
-                    ->whereColumn('so.order_id', 'subscriptions.order_id')
-                    ->whereIn('so.status', $liveStatuses);
-                })
-
-            ->select('subscriptions.*')
-            ->orderByDesc('subscriptions.end_date');
-        }
 
        if ($filter === 'discontinued') {
         $twoMonthsAgo = Carbon::now()->subMonths(2);
