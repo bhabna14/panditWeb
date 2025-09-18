@@ -116,26 +116,21 @@ class FlowerOrderController extends Controller
         }
 
         if ($filter === 'expired') {
-            $start = Carbon::now()->subMonthNoOverflow()->startOfMonth();
-            $end   = Carbon::now()->subMonthNoOverflow()->endOfMonth();
+        // Window: from the start of 2 months ago through the end of the current month
+        $windowStart = Carbon::now()->subMonthsNoOverflow(2)->startOfMonth();
+        $windowEnd   = Carbon::now()->endOfMonth();
 
-            // Derived table: latest end_date per user
-            $latestPerUser = Subscription::query()
-                ->select('user_id', DB::raw('MAX(end_date) as last_end_date'))
-                ->groupBy('user_id');
+        // Subquery: latest subscription row per user (by highest id)
+        $latestPerUserIds = DB::table('subscriptions as s1')
+            ->selectRaw('MAX(s1.id) as id')
+            ->groupBy('s1.user_id');
 
-            // Join back to pick exactly the "latest row" per user
-            $query = Subscription::query()
-                ->from('subscriptions as s')
-                ->joinSub($latestPerUser, 'latest', function ($join) {
-                    $join->on('s.user_id', '=', 'latest.user_id')
-                        ->on('s.end_date', '=', 'latest.last_end_date');
-                })
-                ->where('s.status', 'expired')
-                ->whereBetween('s.end_date', [$start, $end])
-                ->distinct()
-                ->pluck('s.user_id'); // or ->get() if you want the rows
-        }
+        // Keep only the latest row per user, status expired, and end_date in the window
+        $query->whereIn('id', $latestPerUserIds)
+            ->where('status', 'expired')
+            ->whereBetween('end_date', [$windowStart, $windowEnd]);
+    }
+
 
         if ($filter === 'discontinued') {
         $twoMonthsAgo = Carbon::now()->subMonths(2);
