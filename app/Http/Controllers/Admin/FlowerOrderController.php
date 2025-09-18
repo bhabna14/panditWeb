@@ -115,21 +115,35 @@ class FlowerOrderController extends Controller
             $query->where('status', 'active');
         }
 
+        // if ($filter === 'expired') {
+        // // Window: from the start of 2 months ago through the end of the current month
+        //     $windowStart = Carbon::now()->subMonthsNoOverflow(2)->startOfMonth();
+        //     $windowEnd   = Carbon::now()->endOfMonth();
+
+        //     // Subquery: latest subscription row per user (by highest id)
+        //     $latestPerUserIds = DB::table('subscriptions as s1')
+        //         ->selectRaw('MAX(s1.id) as id')
+        //         ->groupBy('s1.user_id');
+
+        //     // Keep only the latest row per user, status expired, and end_date in the window
+        //     $query->whereIn('id', $latestPerUserIds)
+        //         ->where('status', 'expired')
+        //     ->whereBetween('end_date', [$windowStart, $windowEnd]);
+        // }
+
         if ($filter === 'expired') {
-        // Window: from the start of 2 months ago through the end of the current month
-        $windowStart = Carbon::now()->subMonthsNoOverflow(2)->startOfMonth();
-        $windowEnd   = Carbon::now()->endOfMonth();
+            $monthStart = \Carbon\Carbon::now($tz)->startOfMonth();
+            $monthEnd   = \Carbon\Carbon::now($tz)->endOfMonth();
 
-        // Subquery: latest subscription row per user (by highest id)
-        $latestPerUserIds = DB::table('subscriptions as s1')
-            ->selectRaw('MAX(s1.id) as id')
-            ->groupBy('s1.user_id');
+            $latestPerUserIds = \DB::table('subscriptions as s1')
+                ->selectRaw('MAX(s1.id) as id')
+                ->groupBy('s1.user_id');
 
-        // Keep only the latest row per user, status expired, and end_date in the window
-        $query->whereIn('id', $latestPerUserIds)
-            ->where('status', 'expired')
-            ->whereBetween('end_date', [$windowStart, $windowEnd]);
-    }
+            $query->whereIn('id', $latestPerUserIds)
+                ->where('status', 'expired')
+                ->whereNotNull('end_date')
+                ->whereBetween('end_date', [$monthStart, $monthEnd]);
+        }
 
 
         if ($filter === 'discontinued') {
