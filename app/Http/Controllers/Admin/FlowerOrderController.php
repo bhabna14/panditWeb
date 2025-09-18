@@ -116,8 +116,25 @@ class FlowerOrderController extends Controller
         }
 
         if ($filter === 'expired') {
-            $query->where('status', 'expired')
-            ->distinct('user_id');
+            $start = Carbon::now()->subMonthNoOverflow()->startOfMonth();
+            $end   = Carbon::now()->subMonthNoOverflow()->endOfMonth();
+
+            // Derived table: latest end_date per user
+            $latestPerUser = Subscription::query()
+                ->select('user_id', DB::raw('MAX(end_date) as last_end_date'))
+                ->groupBy('user_id');
+
+            // Join back to pick exactly the "latest row" per user
+            $query = Subscription::query()
+                ->from('subscriptions as s')
+                ->joinSub($latestPerUser, 'latest', function ($join) {
+                    $join->on('s.user_id', '=', 'latest.user_id')
+                        ->on('s.end_date', '=', 'latest.last_end_date');
+                })
+                ->where('s.status', 'expired')
+                ->whereBetween('s.end_date', [$start, $end])
+                ->distinct()
+                ->pluck('s.user_id'); // or ->get() if you want the rows
         }
 
         if ($filter === 'discontinued') {
