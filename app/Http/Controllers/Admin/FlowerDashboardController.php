@@ -137,31 +137,21 @@ public function flowerDashboard()
                 ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd])
                 ->count();
 
-            $liveStatuses = ['active', 'paused', 'resume'];
 
-            $expiredSubscriptions = Subscription::query()
-                ->where('status', 'expired')
+            $tz         = config('app.timezone');
+            $monthStart = \Carbon\Carbon::now($tz)->startOfMonth();
+            $monthEnd   = \Carbon\Carbon::now($tz)->endOfMonth();
 
-                // Exclude users who have ANY active/paused/resume subscription
-                ->whereNotExists(function ($q) use ($liveStatuses) {
-                    $q->select(DB::raw(1))
-                    ->from('subscriptions as s2')
-                    ->whereColumn('s2.user_id', 'subscriptions.user_id')
-                    ->whereIn('s2.status', $liveStatuses);
-                })
+            $latestPerUserIds = \DB::table('subscriptions as s1')
+                ->selectRaw('MAX(s1.id) as id')
+                ->groupBy('s1.user_id');
 
-                // Extra safety: Exclude expired rows where the SAME order has an active/paused/resume
-                ->whereNotExists(function ($q) use ($liveStatuses) {
-                    $q->select(DB::raw(1))
-                    ->from('subscriptions as s3')
-                    ->whereColumn('s3.order_id', 'subscriptions.order_id')
-                    ->whereIn('s3.status', $liveStatuses);
-                })
-
-                // Count distinct users
-                ->distinct('user_id')
-                ->count('user_id');
-                
+            $expiredSubscriptions = \App\Models\Subscription::query()
+                ->whereIn('id', $latestPerUserIds)   // one latest row per user
+                ->where('status', 'expired')         // latest is expired
+                ->whereNotNull('end_date')           // safety
+                ->whereBetween('end_date', [$monthStart, $monthEnd]) // ended this month
+                ->count();
 
             $nonAssignedRidersCount = Subscription::where('status', 'active')
             ->whereHas('order', function ($q) {
