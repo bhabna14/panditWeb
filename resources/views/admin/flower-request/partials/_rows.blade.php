@@ -38,7 +38,7 @@
                                                 <small>Size: {{ $item->garland_size }} ft</small>
                                             @endif
                                             @if ($item->flower_count)
-                                                <small>Flower Count: {{ $item->flower_count }} ft</small>
+                                                <small>Flower Count: {{ $item->flower_count }}</small>
                                             @endif
                                         </li>
                                     @else
