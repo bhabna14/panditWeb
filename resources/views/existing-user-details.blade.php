@@ -276,6 +276,7 @@
                 <div class="col-md-3">
                     <label for="payment_method" class="form-label">Payment Mode</label>
                     <select name="payment_method" id="payment_method" class="form-control" required>
+                        <option value="">Select..</option>
                         <option value="cash">Cash</option>
                         <option value="upi">UPI</option>
                     </select>

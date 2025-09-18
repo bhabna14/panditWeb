@@ -133,6 +133,4 @@ public function handleUserData(Request $request)
     }
 }
 
-    
-    
 }
