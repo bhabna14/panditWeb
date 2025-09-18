@@ -37,6 +37,9 @@
                                             @if ($item->garland_size)
                                                 <small>Size: {{ $item->garland_size }} ft</small>
                                             @endif
+                                            @if ($item->flower_count)
+                                                <small>Flower Count: {{ $item->flower_count }} ft</small>
+                                            @endif
                                         </li>
                                     @else
                                         <li class="list-group-item">
