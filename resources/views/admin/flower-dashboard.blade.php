@@ -376,14 +376,6 @@
                                         <h4 class="tx-22 font-weight-semibold mb-2">{{ $expiredSubscriptions }}</h4>
                                     </div>
                                 </div>
-                                {{-- <div>
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-red-600 to-orange-500 text-center align-self-center overflow-hidden">
-                                        <img src="{{ asset('assets/img/s.png') }}" alt="Image">
-
-                                        <!-- Expired Subscription Icon -->
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </a>
