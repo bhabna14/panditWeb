@@ -909,7 +909,7 @@ Route::prefix('admin')->middleware(['auth:admins'])->group(function () {
 
 // Route::post('/admin/payment-collection//collect', [PaymentCollectionController::class, 'collect'])
 //     ->name('payment.collection.collect')
-//     ->middleware(['auth']); 
+//     ->middleware(['auth']);
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/subscription-package-estimates', [SubscriptionPackageEstimateController::class, 'index'])
