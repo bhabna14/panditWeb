@@ -35,7 +35,7 @@
                                             <strong>Garland:</strong> {{ $item->garland_name ?? 'N/A' }}<br>
                                             <small>Quantity: {{ $item->garland_quantity ?? 0 }}</small><br>
                                             @if ($item->garland_size)
-                                                <small>Size: {{ $item->garland_size }}</small>
+                                                <small>Size: {{ $item->garland_size }} ft</small>
                                             @endif
                                         </li>
                                     @else
