@@ -114,39 +114,33 @@ class FlowerOrderController extends Controller
         if ($filter === 'active') {
             $query->where('status', 'active');
         }
-
-  if ($filter === 'expired') {
+if ($filter === 'expired') {
     $liveStatuses = ['active', 'paused', 'resume'];
 
-    $query->where('subscriptions.status', 'expired')
-
-        // user has NO live subs
+    // Subquery to get latest expired subscription id per user
+    $latestExpiredIds = DB::table('subscriptions as s1')
+        ->select(DB::raw('MAX(s1.id)'))
+        ->where('s1.status', 'expired')
         ->whereNotExists(function ($q) use ($liveStatuses) {
             $q->select(DB::raw(1))
-              ->from('subscriptions as s_live')
-              ->whereColumn('s_live.user_id', 'subscriptions.user_id')
-              ->whereIn('s_live.status', $liveStatuses);
+              ->from('subscriptions as s2')
+              ->whereColumn('s2.user_id', 's1.user_id')
+              ->whereIn('s2.status', $liveStatuses);
         })
-
-        // exclude rows where the SAME order has a live status
         ->whereNotExists(function ($q) use ($liveStatuses) {
             $q->select(DB::raw(1))
-              ->from('subscriptions as s_order_live')
-              ->whereColumn('s_order_live.order_id', 'subscriptions.order_id')
-              ->whereIn('s_order_live.status', $liveStatuses);
+              ->from('subscriptions as s3')
+              ->whereColumn('s3.order_id', 's1.order_id')
+              ->whereIn('s3.status', $liveStatuses);
         })
+        ->groupBy('s1.user_id');
 
-        // keep ONLY the latest expired row per user
-        ->whereIn('subscriptions.id', function ($q) {
-            $q->select(DB::raw('MAX(s4.id)'))
-              ->from('subscriptions as s4')
-              ->where('s4.status', 'expired')
-              ->groupBy('s4.user_id');
-        })
-
-        ->select('subscriptions.*')
-        ->orderByDesc('subscriptions.end_date');
+    // Use those IDs in the main query
+    $query->whereIn('subscriptions.id', $latestExpiredIds)
+          ->select('subscriptions.*')
+          ->orderByDesc('subscriptions.end_date');
 }
+
 
 
        if ($filter === 'discontinued') {
