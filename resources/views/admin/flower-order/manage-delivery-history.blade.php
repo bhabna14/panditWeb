@@ -11,71 +11,181 @@
 
     <style>
         /* ====== Page tweaks ====== */
-        .filter-card { border: 1px solid #e7ebf0; border-radius: 14px }
-        .filter-card .card-body { padding: 1rem 1.25rem }
-        .quick-chip { border: 1px dashed #cfd8e3; border-radius: 9999px; padding: .35rem .75rem; font-size: .825rem; cursor: pointer; user-select: none }
-        .quick-chip:hover { background: #f8fafc }
-        .quick-chip.active { background: #0d6efd; color: #fff; border-color: #0d6efd }
-        .btn-reset { border-color: #e2e8f0 }
+        .filter-card {
+            border: 1px solid #e7ebf0;
+            border-radius: 14px
+        }
+
+        .filter-card .card-body {
+            padding: 1rem 1.25rem
+        }
+
+        .quick-chip {
+            border: 1px dashed #cfd8e3;
+            border-radius: 9999px;
+            padding: .35rem .75rem;
+            font-size: .825rem;
+            cursor: pointer;
+            user-select: none
+        }
+
+        .quick-chip:hover {
+            background: #f8fafc
+        }
+
+        .quick-chip.active {
+            background: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd
+        }
+
+        .btn-reset {
+            border-color: #e2e8f0
+        }
 
         /* Sticky table header */
-        table.dataTable thead th { position: sticky; top: 0; background: #fff; z-index: 2 }
+        table.dataTable thead th {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            z-index: 2
+        }
 
         /* Status badges */
-        .badge-status { font-weight: 600; font-size: .78rem }
+        .badge-status {
+            font-weight: 600;
+            font-size: .78rem
+        }
 
         /* Payment list */
-        .pay-list { list-style: none; padding-left: 0; margin-bottom: 0 }
-        .pay-list li { display: flex; justify-content: space-between; gap: .75rem }
+        .pay-list {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0
+        }
+
+        .pay-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: .75rem
+        }
+
+        .pay-total {
+            border-top: 1px dashed #e2e8f0;
+            margin-top: .25rem;
+            padding-top: .25rem;
+            font-weight: 600
+        }
 
         /* Address block */
-        .addr { white-space: normal; line-height: 1.25rem }
-        .addr small { color: #64748b }
+        .addr {
+            white-space: normal;
+            line-height: 1.25rem
+        }
+
+        .addr small {
+            color: #64748b
+        }
 
         /* Tiny utilities */
-        .text-xs { font-size: .75rem }
-        .text-xxs { font-size: .68rem }
-        .fw-600 { font-weight: 600 }
-        .nowrap { white-space: nowrap }
+        .text-xs {
+            font-size: .75rem
+        }
+
+        .text-xxs {
+            font-size: .68rem
+        }
+
+        .fw-600 {
+            font-weight: 600
+        }
+
+        .nowrap {
+            white-space: nowrap
+        }
+
+        .w-180 {
+            width: 180px
+        }
 
         /* Cards for summary metrics */
-        .metric-card{ background:#fff; border:1px solid #e7ebf0; border-radius:14px; transition:.2s }
-        .metric-card:hover{ box-shadow:0 12px 26px rgba(16,24,40,.06); transform:translateY(-2px) }
-        .metric-card .value{ font-size:1.25rem; font-weight:700 }
-        .metric-card .label{ font-size:.8rem; color:#64748b }
+        .metric-card {
+            background: #fff;
+            border: 1px solid #e7ebf0;
+            border-radius: 14px;
+            transition: .2s
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 12px 26px rgba(16, 24, 40, .06);
+            transform: translateY(-2px)
+        }
+
+        .metric-card .value {
+            font-size: 1.25rem;
+            font-weight: 700
+        }
+
+        .metric-card .label {
+            font-size: .8rem;
+            color: #64748b
+        }
 
         /* Location actions */
-        .loc-actions a { text-decoration:none }
-        .loc-actions .dot { display:inline-block; width:4px; height:4px; background:#cbd5e1; border-radius:50%; margin:0 .4rem }
+        .loc-actions a {
+            text-decoration: none
+        }
+
+        .loc-actions .dot {
+            display: inline-block;
+            width: 4px;
+            height: 4px;
+            background: #cbd5e1;
+            border-radius: 50%;
+            margin: 0 .4rem
+        }
     </style>
 @endsection
 
 @section('content')
     @php
-        // ===== Summary metrics precompute (using latestActivePayment only) =====
-        $totalRows = 0; $delivered = 0; $pending = 0; $inTransit = 0; $cancelled = 0; $uniqueRiders = [];
-        $sumPaidAll = 0.0; // Sum of latest active payment per order only
+        // ===== Summary metrics precompute (safe in view for convenience) =====
+        $totalRows = 0;
+        $delivered = 0;
+        $pending = 0;
+        $inTransit = 0;
+        $cancelled = 0;
+        $uniqueRiders = [];
+        $sumPaidAll = 0.0;
         foreach ($deliveryHistory as $h) {
             $totalRows++;
             $st = strtolower(trim($h->delivery_status ?? ''));
-            if (in_array($st, ['delivered','completed']))      $delivered++;
-            elseif (in_array($st, ['pending','awaiting']))      $pending++;
-            elseif (in_array($st, ['in_transit','out_for_delivery','dispatch','shipped'])) $inTransit++;
-            elseif (in_array($st, ['cancelled','canceled','failed'])) $cancelled++;
+            if (in_array($st, ['delivered', 'completed'])) {
+                $delivered++;
+            } elseif (in_array($st, ['pending', 'awaiting'])) {
+                $pending++;
+            } elseif (in_array($st, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])) {
+                $inTransit++;
+            } elseif (in_array($st, ['cancelled', 'canceled', 'failed'])) {
+                $cancelled++;
+            }
 
-            if (!empty(optional($h->rider)->rider_name)) { $uniqueRiders[optional($h->rider)->rider_name] = true; }
+            if (!empty(optional($h->rider)->rider_name)) {
+                $uniqueRiders[optional($h->rider)->rider_name] = true;
+            }
 
-            $order = optional($h->order);
-            $latestPay = optional($order)->latestActivePayment; // requires eager loaded relation
-            if ($latestPay && isset($latestPay->paid_amount)) {
-                $sumPaidAll += (float) $latestPay->paid_amount;
+            // Sum all payments tied to the order (if any)
+            if (!empty(optional($h->order)->flowerPayments)) {
+                foreach ($h->order->flowerPayments as $p) {
+                    $sumPaidAll += floatval($p->paid_amount ?? 0);
+                }
             }
         }
         $uniqueRiderCount = count($uniqueRiders);
     @endphp
 
     <!-- Flash messages -->
-    @if (session('success'))
+    @if (session()->has('success'))
         <div class="alert alert-success" id="Message">{{ session('success') }}</div>
     @endif
     @if ($errors->has('danger'))
@@ -104,7 +214,7 @@
         </div>
         <div class="col-12 col-md-3">
             <div class="metric-card p-3 h-100">
-                <div class="label">Total paid (latest active only)</div>
+                <div class="label">Total paid (all rows)</div>
                 <div class="value">₹ {{ number_format($sumPaidAll, 2) }}</div>
             </div>
         </div>
@@ -117,18 +227,23 @@
                 <div class="row g-3 align-items-end">
                     <div class="col-12 col-md-3">
                         <label for="from_date" class="form-label">From Date</label>
-                        <input type="date" id="from_date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+                        <input type="date" id="from_date" name="from_date" class="form-control"
+                            value="{{ request('from_date') }}">
                     </div>
                     <div class="col-12 col-md-3">
                         <label for="to_date" class="form-label">To Date</label>
-                        <input type="date" id="to_date" name="to_date" class="form-control" value="{{ request('to_date') }}">
+                        <input type="date" id="to_date" name="to_date" class="form-control"
+                            value="{{ request('to_date') }}">
                     </div>
                     <div class="col-12 col-md-3">
                         <label for="rider_id" class="form-label">Rider</label>
                         <select id="rider_id" name="rider_id" class="form-select">
                             <option value="">All Riders</option>
                             @foreach ($riders as $rider)
-                                <option value="{{ $rider->rider_id }}" {{ request('rider_id') == $rider->rider_id ? 'selected' : '' }}>{{ $rider->rider_name }}</option>
+                                <option value="{{ $rider->rider_id }}"
+                                    {{ request('rider_id') == $rider->rider_id ? 'selected' : '' }}>
+                                    {{ $rider->rider_name }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -159,7 +274,7 @@
                             <th data-priority="1">Order ID</th>
                             <th data-priority="2">User Number</th>
                             <th>Product</th>
-                            <th>Payment</th>
+                            <th>Payment Details</th>
                             <th style="min-width:260px">Address</th>
                             <th>Rider</th>
                             <th data-priority="3">Status</th>
@@ -170,70 +285,105 @@
                     <tbody>
                         @forelse ($deliveryHistory as $history)
                             @php
-                                $order   = optional($history->order);
-                                $user    = optional($order->user);
+                                $order = optional($history->order);
+                                $user = optional($order->user);
                                 $product = optional($order->flowerProduct);
-                                $addr    = optional($order->address);
+                                $addr = optional($order->address);
                                 $locName = optional(optional($addr)->localityDetails)->locality_name;
-                                $rider   = optional($history->rider);
-                                $lat     = $history->latitude; $lng = $history->longitude;
+                                $rider = optional($history->rider);
+                                $lat = $history->latitude;
+                                $lng = $history->longitude; // kept name but it's longitude
 
-                                $status   = trim($history->delivery_status ?? '');
-                                $statusLc = strtolower($status);
-                                $badge    = 'secondary';
-                                if (in_array($statusLc,['delivered','completed'])) $badge = 'success';
-                                elseif (in_array($statusLc,['in_transit','out_for_delivery','dispatch','shipped'])) $badge = 'info';
-                                elseif (in_array($statusLc,['pending','awaiting'])) $badge = 'warning';
-                                elseif (in_array($statusLc,['cancelled','canceled','failed'])) $badge = 'danger';
+$status = trim($history->delivery_status ?? '');
+$statusLc = strtolower($status);
+$badge = 'secondary';
+if (in_array($statusLc, ['delivered', 'completed'])) {
+    $badge = 'success';
+} elseif (
+    in_array($statusLc, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])
+) {
+    $badge = 'info';
+} elseif (in_array($statusLc, ['pending', 'awaiting'])) {
+    $badge = 'warning';
+} elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
+    $badge = 'danger';
+                                }
 
-                                // Latest active payment (single)
-                                $latestPay = optional($order)->latestActivePayment;
+                                // Per-order payment total (if multiple payments exist)
+                                $orderTotalPaid = 0.0;
+                                if (!empty($order->flowerPayments)) {
+                                    foreach ($order->flowerPayments as $pay) {
+                                        $orderTotalPaid += floatval($pay->paid_amount ?? 0);
+                                    }
+                                }
                             @endphp
                             <tr>
-                                <td class="nowrap fw-600">{{ $order->order_id ?? 'N/A' }}</td>
+                                <td class="nowrap fw-600">
+                                    {{ $order->order_id ?? 'N/A' }}
+                                </td>
                                 <td>{{ $user->mobile_number ?? 'N/A' }}</td>
                                 <td>
                                     <div class="fw-600">{{ $product->name ?? 'N/A' }}</div>
-                                    @if(!empty($product->category))
+                                    @if (!empty($product->category))
                                         <div class="text-xxs text-muted">{{ $product->category }}</div>
                                     @endif
                                 </td>
                                 <td>
+                                    @php
+                                        $latestPay = optional($order)->latestActivePayment;
+                                    @endphp
+
                                     @if ($latestPay)
                                         <ul class="pay-list">
                                             <li>
                                                 <span class="text-xs">Latest Active</span>
-                                                <span class="text-xs">₹ {{ number_format($latestPay->paid_amount ?? 0, 2) }}</span>
+                                                <span class="text-xs">₹
+                                                    {{ number_format($latestPay->paid_amount ?? 0, 2) }}</span>
                                             </li>
                                         </ul>
                                     @else
                                         <span class="text-muted text-xs">N/A</span>
                                     @endif
                                 </td>
+
                                 <td class="addr">
-                                    @if($addr)
-                                        <div class="fw-600">{{ $addr->apartment_flat_plot ?? '' }}{{ $addr->apartment_flat_plot && $locName ? ',' : '' }} {{ $locName ?? '' }}</div>
-                                        @if(!empty($addr->landmark))<div><small>Landmark:</small> {{ $addr->landmark }}</div>@endif
-                                        <div class="text-xs text-muted">{{ $addr->city ?? '' }}{{ !empty($addr->state) ? ', '.$addr->state : '' }}{{ !empty($addr->pincode) ? ' - '.$addr->pincode : '' }}</div>
+                                    @if ($addr)
+                                        <div class="fw-600">
+                                            {{ $addr->apartment_flat_plot ?? '' }}{{ $addr->apartment_flat_plot && $locName ? ',' : '' }}
+                                            {{ $locName ?? '' }}</div>
+                                        @if (!empty($addr->landmark))
+                                            <div><small>Landmark:</small> {{ $addr->landmark }}</div>
+                                        @endif
+                                        <div class="text-xs text-muted">{{ $addr->city ?? '' }}
+                                            {{ !empty($addr->state) ? ', ' . $addr->state : '' }}
+                                            {{ !empty($addr->pincode) ? ' - ' . $addr->pincode : '' }}</div>
                                     @else
                                         <span class="text-muted text-xs">N/A</span>
                                     @endif
                                 </td>
                                 <td>{{ $rider->rider_name ?? 'N/A' }}</td>
-                                <td><span class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span></td>
                                 <td>
-                                    @if(!empty($lat) && !empty($lng))
-                                        <div class="text-xs"><span class="fw-600">{{ $lat }}, {{ $lng }}</span></div>
+                                    <span class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span>
+                                </td>
+                                <td>
+                                    @if (!empty($lat) && !empty($lng))
+                                        <div class="text-xs">
+                                            <span class="fw-600">{{ $lat }}, {{ $lng }}</span>
+                                        </div>
                                         <div class="loc-actions text-xxs mt-1">
-                                            <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}" target="_blank" rel="noopener">Open in Maps</a>
+                                            <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}"
+                                                target="_blank" rel="noopener">Open in Maps</a>
                                             <span class="dot"></span>
-                                            <a href="#" class="copy-coords" data-coords="{{ $lat }}, {{ $lng }}">Copy</a>
+                                            <a href="#" class="copy-coords"
+                                                data-coords="{{ $lat }}, {{ $lng }}">Copy</a>
                                         </div>
                                     @else
                                         <span class="text-muted text-xs">N/A</span>
                                     @endif
                                 </td>
-                                <td data-order="{{ optional($history->created_at)->timestamp ?? 0 }}" class="nowrap">{{ optional($history->created_at)->format('d-m-Y H:i:s') ?? 'N/A' }}</td>
+                                <td data-order="{{ optional($history->created_at)->timestamp ?? 0 }}" class="nowrap">
+                                    {{ optional($history->created_at)->format('d-m-Y H:i:s') ?? 'N/A' }}
+                                </td>
                             </tr>
                         @empty
                             <tr>
@@ -270,28 +420,47 @@
     <script>
         (function() {
             // Select2 for rider filter
-            $('#rider_id').select2({ placeholder: 'All Riders', allowClear: true, width: '100%' });
+            $('#rider_id').select2({
+                placeholder: 'All Riders',
+                allowClear: true,
+                width: '100%'
+            });
 
             // Quick date ranges
-            function toISODate(d){ return d.toISOString().slice(0,10); }
-            function setRange(type){
+            function toISODate(d) {
+                return d.toISOString().slice(0, 10);
+            }
+
+            function setRange(type) {
                 const now = new Date();
-                let from = new Date(), to = new Date();
-                switch(type){
-                    case 'today': break;
-                    case 'yesterday': from.setDate(now.getDate()-1); to.setDate(now.getDate()-1); break;
-                    case 'this_week':
-                        const day = now.getDay();
-                        const diff = (day === 0 ? 6 : day-1);
-                        from.setDate(now.getDate()-diff);
+                let from = new Date(),
+                    to = new Date();
+                switch (type) {
+                    case 'today':
+                        // from and to = today
                         break;
-                    case 'this_month': from = new Date(now.getFullYear(), now.getMonth(), 1); to = new Date(now.getFullYear(), now.getMonth()+1, 0); break;
-                    case 'last_month': from = new Date(now.getFullYear(), now.getMonth()-1, 1); to = new Date(now.getFullYear(), now.getMonth(), 0); break;
+                    case 'yesterday':
+                        from.setDate(now.getDate() - 1);
+                        to.setDate(now.getDate() - 1);
+                        break;
+                    case 'this_week':
+                        const day = now.getDay(); // 0 (Sun) - 6 (Sat)
+                        const diff = (day === 0 ? 6 : day - 1); // make Monday start
+                        from.setDate(now.getDate() - diff);
+                        break;
+                    case 'this_month':
+                        from = new Date(now.getFullYear(), now.getMonth(), 1);
+                        to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+                        break;
+                    case 'last_month':
+                        from = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                        to = new Date(now.getFullYear(), now.getMonth(), 0);
+                        break;
                 }
                 $('#from_date').val(toISODate(from));
                 $('#to_date').val(toISODate(to));
             }
-            $('.quick-chip').on('click', function(){
+            $('.quick-chip').on('click', function() {
                 $('.quick-chip').removeClass('active');
                 $(this).addClass('active');
                 setRange($(this).data('range'));
@@ -299,7 +468,7 @@
             });
 
             // Reset filters
-            $('#resetFilters').on('click', function(){
+            $('#resetFilters').on('click', function() {
                 $('#from_date').val('');
                 $('#to_date').val('');
                 $('#rider_id').val('').trigger('change');
@@ -311,29 +480,57 @@
                 responsive: true,
                 stateSave: true,
                 pageLength: 25,
-                lengthMenu: [[10,25,50,100,-1],[10,25,50,100,'All']],
-                order: [[8, 'desc']],
-                dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
-                buttons: [
-                    { extend:'copyHtml5', title:'Delivery History' },
-                    { extend:'csvHtml5',  title:'delivery_history' },
-                    { extend:'excelHtml5',title:'delivery_history' },
-                    { extend:'pdfHtml5',  title:'Delivery History', orientation:'landscape', pageSize:'A4' },
-                    { extend:'print',     title:'Delivery History' },
-                    { extend:'colvis',    text:'Columns' }
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, 'All']
                 ],
-                columnDefs: [
-                    { targets: [3,4,7], responsivePriority: 10001 },
+                order: [
+                    [8, 'desc']
+                ], // Delivery Time column
+                dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
+                buttons: [{
+                        extend: 'copyHtml5',
+                        title: 'Delivery History'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        title: 'delivery_history'
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        title: 'delivery_history'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        title: 'Delivery History',
+                        orientation: 'landscape',
+                        pageSize: 'A4'
+                    },
+                    {
+                        extend: 'print',
+                        title: 'Delivery History'
+                    },
+                    {
+                        extend: 'colvis',
+                        text: 'Columns'
+                    }
+                ],
+                columnDefs: [{
+                        targets: [3, 4, 7],
+                        responsivePriority: 10001
+                    }, // let long columns drop first on small screens
                 ]
             });
 
             // Copy coordinates
-            $(document).on('click', '.copy-coords', function(e){
+            $(document).on('click', '.copy-coords', function(e) {
                 e.preventDefault();
                 const coords = $(this).data('coords');
                 navigator.clipboard.writeText(coords).then(() => {
-                    const btn = $(this); const old = btn.text();
-                    btn.text('Copied!'); setTimeout(()=>btn.text(old), 1200);
+                    const btn = $(this);
+                    const old = btn.text();
+                    btn.text('Copied!');
+                    setTimeout(() => btn.text(old), 1200);
                 });
             });
         })();
