@@ -48,7 +48,7 @@
         </ol>
     </div>
 
-    <form method="GET" action="{{ route('admin.reports.subscription_package_estimates') }}"
+    <form method="GET" action="{{ route('admin.subscriptionPackageEstimate') }}"
         class="card card-soft p-3 mb-3">
         <div class="row gy-2">
             <div class="col-md-3">
