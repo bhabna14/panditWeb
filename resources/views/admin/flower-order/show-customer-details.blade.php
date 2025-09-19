@@ -315,12 +315,12 @@
                                                 <td>
                                                     {{ $latestPaid && $latestPaid->payment_method
                                                         ? ucwords(str_replace('_', ' ', $latestPaid->payment_method))
-                                                        : 'NA' }}
+                                                        : 'Unpaid' }}
                                                 </td>
 
                                                 {{-- NEW: Payment Date (created_at) --}}
                                                 <td>
-                                                    {{ $latestPaid && $latestPaid->created_at ? $latestPaid->created_at->format('M j, Y') : 'NA' }}
+                                                    {{ $latestPaid && $latestPaid->created_at ? $latestPaid->created_at->format('M j, Y') : 'Unpaid' }}
                                                 </td>
 
                                                 <td>₹{{ number_format(optional($order->order)->total_price ?? 0, 2) }}</td>

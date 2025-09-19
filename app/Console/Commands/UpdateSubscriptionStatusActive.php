@@ -9,32 +9,53 @@ use Illuminate\Support\Facades\Log;
 
 class UpdateSubscriptionStatus extends Command
 {
+    protected $signature   = 'subscription:update-status-active';
+    protected $description = 'Activate pending subscriptions that start today AND have a paid flower payment';
 
-    protected $signature = 'subscription:update-status-active';
-    protected $description = 'Update subscription status to active if the start date is today';
-
-    public function handle()
+    public function handle(): int
     {
-        $today = Carbon::today();
-        Log::info('Running subscription:update-status-active for date: ' . $today);
+        $tz    = config('app.timezone', 'Asia/Kolkata');
+        $today = Carbon::today($tz)->toDateString();
 
-        $subscriptions = Subscription::whereDate('start_date', $today)
-        ->where('status', 'pending')
-        ->get();
+        Log::info('Running subscription:update-status-active', ['date' => $today]);
 
-        if ($subscriptions->isEmpty()) {
-            $this->info('No subscriptions found for today.');
-            Log::info('No subscriptions found with start_date = ' . $today . ' and status = pending');
+        $count = 0;
+
+        // Only subscriptions that:
+        // 1) start today
+        // 2) currently status = pending
+        // 3) have at least one paid flower payment
+        Subscription::query()
+            ->whereDate('start_date', $today)
+            ->where('status', 'pending')
+            ->whereHas('flowerPayments', function ($q) {
+                $q->where('payment_status', 'paid');
+            })
+            ->orderBy('id')                  // for stable chunking
+            ->chunkById(500, function ($subs) use (&$count) {
+                foreach ($subs as $subscription) {
+                    $subscription->status = 'active';
+                    $subscription->save();
+
+                    $count++;
+
+                    Log::info('Subscription activated', [
+                        'subscription_id' => $subscription->subscription_id,
+                        'id'              => $subscription->id,
+                        'order_id'        => $subscription->order_id,
+                        'user_id'         => $subscription->user_id,
+                    ]);
+                }
+            });
+
+        if ($count === 0) {
+            $this->info('No subscriptions to activate today (either none start today, are not pending, or no paid payment found).');
+            Log::info('No subscriptions activated.');
         } else {
-            foreach ($subscriptions as $subscription) {
-                $subscription->status = 'active';
-                $subscription->save();
-                $this->info("Subscription ID {$subscription->id} status updated to active.");
-                Log::info("Subscription ID {$subscription->id} updated to active.");
-            }
+            $this->info("Activated {$count} subscription(s).");
+            Log::info('subscription:update-status-active completed', ['activated' => $count]);
         }
 
-        $this->info('Subscription status update completed.');
-        Log::info('subscription:update-status-active completed.');
+        return self::SUCCESS;
     }
 }
