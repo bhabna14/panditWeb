@@ -294,19 +294,19 @@
                                 $lat = $history->latitude;
                                 $lng = $history->longitude; // kept name but it's longitude
 
-$status = trim($history->delivery_status ?? '');
-$statusLc = strtolower($status);
-$badge = 'secondary';
-if (in_array($statusLc, ['delivered', 'completed'])) {
-    $badge = 'success';
-} elseif (
-    in_array($statusLc, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])
-) {
-    $badge = 'info';
-} elseif (in_array($statusLc, ['pending', 'awaiting'])) {
-    $badge = 'warning';
-} elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
-    $badge = 'danger';
+                                    $status = trim($history->delivery_status ?? '');
+                                    $statusLc = strtolower($status);
+                                    $badge = 'secondary';
+                                    if (in_array($statusLc, ['delivered', 'completed'])) {
+                                        $badge = 'success';
+                                    } elseif (
+                                        in_array($statusLc, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])
+                                    ) {
+                                        $badge = 'info';
+                                    } elseif (in_array($statusLc, ['pending', 'awaiting'])) {
+                                        $badge = 'warning';
+                                    } elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
+                                        $badge = 'danger';
                                 }
 
                                 // Per-order payment total (if multiple payments exist)
@@ -329,22 +329,21 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                                     @endif
                                 </td>
                                 <td>
-                                    @php
-                                        $latestPay = optional($order)->latestActivePayment;
-                                    @endphp
+    @php
+        $latestPay = optional($order)->latestActivePayment;
+    @endphp
 
-                                    @if ($latestPay)
-                                        <ul class="pay-list">
-                                            <li>
-                                                <span class="text-xs">Latest Active</span>
-                                                <span class="text-xs">₹
-                                                    {{ number_format($latestPay->paid_amount ?? 0, 2) }}</span>
-                                            </li>
-                                        </ul>
-                                    @else
-                                        <span class="text-muted text-xs">N/A</span>
-                                    @endif
-                                </td>
+    @if ($latestPay)
+        <ul class="pay-list">
+            <li>
+                <span class="text-xs">Latest Active</span>
+                <span class="text-xs">₹ {{ number_format($latestPay->paid_amount ?? 0, 2) }}</span>
+            </li>
+        </ul>
+    @else
+        <span class="text-muted text-xs">N/A</span>
+    @endif
+</td>
 
                                 <td class="addr">
                                     @if ($addr)
