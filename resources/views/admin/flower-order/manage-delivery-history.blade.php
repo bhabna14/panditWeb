@@ -70,13 +70,6 @@
             gap: .75rem
         }
 
-        .pay-total {
-            border-top: 1px dashed #e2e8f0;
-            margin-top: .25rem;
-            padding-top: .25rem;
-            font-weight: 600
-        }
-
         /* Address block */
         .addr {
             white-space: normal;
@@ -102,10 +95,6 @@
 
         .nowrap {
             white-space: nowrap
-        }
-
-        .w-180 {
-            width: 180px
         }
 
         /* Cards for summary metrics */
@@ -149,14 +138,14 @@
 
 @section('content')
     @php
-        // ===== Summary metrics precompute (safe in view for convenience) =====
+        // ===== Summary metrics precompute (using latestActivePayment only) =====
         $totalRows = 0;
         $delivered = 0;
         $pending = 0;
         $inTransit = 0;
         $cancelled = 0;
         $uniqueRiders = [];
-        $sumPaidAll = 0.0;
+        $sumPaidAll = 0.0; // Sum of latest active payment per order only
         foreach ($deliveryHistory as $h) {
             $totalRows++;
             $st = strtolower(trim($h->delivery_status ?? ''));
@@ -174,18 +163,17 @@
                 $uniqueRiders[optional($h->rider)->rider_name] = true;
             }
 
-            // Sum all payments tied to the order (if any)
-            if (!empty(optional($h->order)->flowerPayments)) {
-                foreach ($h->order->flowerPayments as $p) {
-                    $sumPaidAll += floatval($p->paid_amount ?? 0);
-                }
+            $order = optional($h->order);
+            $latestPay = optional($order)->latestActivePayment; // requires eager loaded relation
+            if ($latestPay && isset($latestPay->paid_amount)) {
+                $sumPaidAll += (float) $latestPay->paid_amount;
             }
         }
         $uniqueRiderCount = count($uniqueRiders);
     @endphp
 
     <!-- Flash messages -->
-    @if (session()->has('success'))
+    @if (session('success'))
         <div class="alert alert-success" id="Message">{{ session('success') }}</div>
     @endif
     @if ($errors->has('danger'))
@@ -214,7 +202,7 @@
         </div>
         <div class="col-12 col-md-3">
             <div class="metric-card p-3 h-100">
-                <div class="label">Total paid (all rows)</div>
+                <div class="label">Total paid (latest active only)</div>
                 <div class="value">₹ {{ number_format($sumPaidAll, 2) }}</div>
             </div>
         </div>
@@ -242,8 +230,7 @@
                             @foreach ($riders as $rider)
                                 <option value="{{ $rider->rider_id }}"
                                     {{ request('rider_id') == $rider->rider_id ? 'selected' : '' }}>
-                                    {{ $rider->rider_name }}
-                                </option>
+                                    {{ $rider->rider_name }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -274,7 +261,7 @@
                             <th data-priority="1">Order ID</th>
                             <th data-priority="2">User Number</th>
                             <th>Product</th>
-                            <th>Payment Details</th>
+                            <th>Payment</th>
                             <th style="min-width:260px">Address</th>
                             <th>Rider</th>
                             <th data-priority="3">Status</th>
@@ -292,35 +279,28 @@
                                 $locName = optional(optional($addr)->localityDetails)->locality_name;
                                 $rider = optional($history->rider);
                                 $lat = $history->latitude;
-                                $lng = $history->longitude; // kept name but it's longitude
+                                $lng = $history->longitude;
 
-$status = trim($history->delivery_status ?? '');
-$statusLc = strtolower($status);
-$badge = 'secondary';
-if (in_array($statusLc, ['delivered', 'completed'])) {
-    $badge = 'success';
-} elseif (
-    in_array($statusLc, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])
-) {
-    $badge = 'info';
-} elseif (in_array($statusLc, ['pending', 'awaiting'])) {
-    $badge = 'warning';
-} elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
-    $badge = 'danger';
+                                $status = trim($history->delivery_status ?? '');
+                                $statusLc = strtolower($status);
+                                $badge = 'secondary';
+                                if (in_array($statusLc, ['delivered', 'completed'])) {
+                                    $badge = 'success';
+                                } elseif (
+                                    in_array($statusLc, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])
+                                ) {
+                                    $badge = 'info';
+                                } elseif (in_array($statusLc, ['pending', 'awaiting'])) {
+                                    $badge = 'warning';
+                                } elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
+                                    $badge = 'danger';
                                 }
 
-                                // Per-order payment total (if multiple payments exist)
-                                $orderTotalPaid = 0.0;
-                                if (!empty($order->flowerPayments)) {
-                                    foreach ($order->flowerPayments as $pay) {
-                                        $orderTotalPaid += floatval($pay->paid_amount ?? 0);
-                                    }
-                                }
+                                // Latest active payment (single)
+                                $latestPay = optional($order)->latestActivePayment;
                             @endphp
                             <tr>
-                                <td class="nowrap fw-600">
-                                    {{ $order->order_id ?? 'N/A' }}
-                                </td>
+                                <td class="nowrap fw-600">{{ $order->order_id ?? 'N/A' }}</td>
                                 <td>{{ $user->mobile_number ?? 'N/A' }}</td>
                                 <td>
                                     <div class="fw-600">{{ $product->name ?? 'N/A' }}</div>
@@ -329,10 +309,6 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                                     @endif
                                 </td>
                                 <td>
-                                    @php
-                                        $latestPay = optional($order)->latestActivePayment;
-                                    @endphp
-
                                     @if ($latestPay)
                                         <ul class="pay-list">
                                             <li>
@@ -345,7 +321,6 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                                         <span class="text-muted text-xs">N/A</span>
                                     @endif
                                 </td>
-
                                 <td class="addr">
                                     @if ($addr)
                                         <div class="fw-600">
@@ -354,22 +329,20 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                                         @if (!empty($addr->landmark))
                                             <div><small>Landmark:</small> {{ $addr->landmark }}</div>
                                         @endif
-                                        <div class="text-xs text-muted">{{ $addr->city ?? '' }}
-                                            {{ !empty($addr->state) ? ', ' . $addr->state : '' }}
-                                            {{ !empty($addr->pincode) ? ' - ' . $addr->pincode : '' }}</div>
+                                        <div class="text-xs text-muted">
+                                            {{ $addr->city ?? '' }}{{ !empty($addr->state) ? ', ' . $addr->state : '' }}{{ !empty($addr->pincode) ? ' - ' . $addr->pincode : '' }}
+                                        </div>
                                     @else
                                         <span class="text-muted text-xs">N/A</span>
                                     @endif
                                 </td>
                                 <td>{{ $rider->rider_name ?? 'N/A' }}</td>
-                                <td>
-                                    <span class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span>
+                                <td><span class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span>
                                 </td>
                                 <td>
                                     @if (!empty($lat) && !empty($lng))
-                                        <div class="text-xs">
-                                            <span class="fw-600">{{ $lat }}, {{ $lng }}</span>
-                                        </div>
+                                        <div class="text-xs"><span class="fw-600">{{ $lat }},
+                                                {{ $lng }}</span></div>
                                         <div class="loc-actions text-xxs mt-1">
                                             <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}"
                                                 target="_blank" rel="noopener">Open in Maps</a>
@@ -382,8 +355,7 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                                     @endif
                                 </td>
                                 <td data-order="{{ optional($history->created_at)->timestamp ?? 0 }}" class="nowrap">
-                                    {{ optional($history->created_at)->format('d-m-Y H:i:s') ?? 'N/A' }}
-                                </td>
+                                    {{ optional($history->created_at)->format('d-m-Y H:i:s') ?? 'N/A' }}</td>
                             </tr>
                         @empty
                             <tr>
@@ -437,15 +409,14 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                     to = new Date();
                 switch (type) {
                     case 'today':
-                        // from and to = today
                         break;
                     case 'yesterday':
                         from.setDate(now.getDate() - 1);
                         to.setDate(now.getDate() - 1);
                         break;
                     case 'this_week':
-                        const day = now.getDay(); // 0 (Sun) - 6 (Sat)
-                        const diff = (day === 0 ? 6 : day - 1); // make Monday start
+                        const day = now.getDay();
+                        const diff = (day === 0 ? 6 : day - 1);
                         from.setDate(now.getDate() - diff);
                         break;
                     case 'this_month':
@@ -486,7 +457,7 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                 ],
                 order: [
                     [8, 'desc']
-                ], // Delivery Time column
+                ],
                 dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
                 buttons: [{
                         extend: 'copyHtml5',
@@ -516,10 +487,9 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                     }
                 ],
                 columnDefs: [{
-                        targets: [3, 4, 7],
-                        responsivePriority: 10001
-                    }, // let long columns drop first on small screens
-                ]
+                    targets: [3, 4, 7],
+                    responsivePriority: 10001
+                }, ]
             });
 
             // Copy coordinates
