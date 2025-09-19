@@ -83,7 +83,7 @@
         </ol>
     </div>
 
-    <form method="GET" action="{{ route('flowerEstimate') }}" class="card card-soft p-3 mb-3">
+    <form method="GET" action="{{ route('admin.flowerEstimate') }}" class="card card-soft p-3 mb-3">
         <div class="row gy-2">
             <div class="col-md-3">
                 <label class="form-label">Day</label>
