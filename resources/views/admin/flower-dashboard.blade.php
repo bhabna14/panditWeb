@@ -73,7 +73,7 @@
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h5 class="mb-2 tx-12">Tomorrow Active Order</h5>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
-                                           {{ $tomorrowActiveOrder }}</h4>
+                                            {{ $tomorrowActiveOrder }}</h4>
                                     </div>
                                 </div>
                             </div>
@@ -343,6 +343,7 @@
                         </div>
                     </a>
                 </div>
+
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
@@ -364,7 +365,6 @@
                         </div>
                     </a>
                 </div>
-
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
@@ -391,12 +391,6 @@
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $nonAssignedRidersCount }}</h4>
                                     </div>
                                 </div>
-                                {{-- <div class="col-4">
-                                    <div
-                                        class="circle-icon bg-gradient-to-r from-red-400 to-teal-500 text-center align-self-center overflow-hidden">
-                                        <i class="fa fa-users text-white"></i>
-                                    </div>
-                                </div> --}}
                             </div>
                         </div>
                     </a>
@@ -468,6 +462,7 @@
                         </div>
                     </a>
                 </div>
+
             </div>
         </div>
     </div>
@@ -496,7 +491,9 @@
 
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
+
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
+
             <div class="row">
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
