@@ -329,24 +329,23 @@ if (in_array($statusLc, ['delivered', 'completed'])) {
                                     @endif
                                 </td>
                                 <td>
-                                    @if ($order && $order->flowerPayments && count($order->flowerPayments))
+                                    @php
+                                        $latestPay = optional($order)->latestActivePayment;
+                                    @endphp
+
+                                    @if ($latestPay)
                                         <ul class="pay-list">
-                                            @foreach ($order->flowerPayments as $payment)
-                                                <li>
-                                                    <span class="text-xs">Paid</span>
-                                                    <span class="text-xs">₹
-                                                        {{ number_format($payment->paid_amount, 2) }}</span>
-                                                </li>
-                                            @endforeach
-                                            <li class="pay-total">
-                                                <span>Total</span>
-                                                <span>₹ {{ number_format($orderTotalPaid, 2) }}</span>
+                                            <li>
+                                                <span class="text-xs">Latest Active</span>
+                                                <span class="text-xs">₹
+                                                    {{ number_format($latestPay->paid_amount ?? 0, 2) }}</span>
                                             </li>
                                         </ul>
                                     @else
                                         <span class="text-muted text-xs">N/A</span>
                                     @endif
                                 </td>
+
                                 <td class="addr">
                                     @if ($addr)
                                         <div class="fw-600">

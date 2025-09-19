@@ -78,5 +78,19 @@ public function deliveryCustomizeHistory()
 {
     return $this->hasOne(DeliveryCustomizeHistory::class, 'rider_id', 'rider_id');
 }
+// app/Models/Order.php
+
+public function latestActivePayment()
+{
+    // If you're on Laravel 9+, you can use latestOfMany():
+    // return $this->hasOne(FlowerPayment::class, 'order_id')
+    //             ->where('status', 'active')
+    //             ->latestOfMany('id');
+
+    // Works across versions: eager loads a single, most-recent active payment by id
+    return $this->hasOne(FlowerPayment::class, 'order_id')
+                ->where('status', 'active')
+                ->orderByDesc('id');
+}
 
 }

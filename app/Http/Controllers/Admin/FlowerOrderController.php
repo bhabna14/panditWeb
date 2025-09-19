@@ -557,57 +557,54 @@ class FlowerOrderController extends Controller
         return redirect()->back()->with('success', 'Rider updated successfully.');
     }
 
-    public function mngdeliveryhistory(Request $request)
-    {
-        try {
-            $filter = $request->input('filter', 'all');
+   // app/Http/Controllers/...Controller.php
 
-            // Build the query
-            $query = DeliveryHistory::with([
-                'order.user',
-                'order.flowerProduct',
-                'order.flowerPayments',
-                'order.address.localityDetails',
-                'rider'
-            ])->orderBy('created_at', 'desc');
+public function mngdeliveryhistory(Request $request)
+{
+    try {
+        $filter = $request->input('filter', 'all');
 
-            // Apply date filters
-            if ($request->has('from_date') && $request->has('to_date')) {
-                $query->whereBetween('created_at', [
-                    Carbon::parse($request->input('from_date')),
-                    Carbon::parse($request->input('to_date'))
-                ]);
-            }
+        $query = DeliveryHistory::with([
+            'order.user',
+            'order.flowerProduct',
+            // load only the latest active payment
+            'order.latestActivePayment',
+            'order.address.localityDetails',
+            'rider'
+        ])->orderBy('created_at', 'desc');
 
-            // Apply rider filter
-            if ($request->filled('rider_id')) {
-                $query->where('rider_id', $request->input('rider_id'));
-            }
-
-            // Apply predefined filter (e.g., today or monthly)
-            if ($filter == 'todaydelivery') {
-                $query->whereDate('created_at', Carbon::today());
-            } elseif ($filter == 'monthlydelivery') {
-                $query->whereBetween('created_at', [
-                    now()->startOfMonth(),
-                    now()->endOfMonth()
-                ]);
-            }
-
-            // Fetch results
-            $deliveryHistory = $query->get();
-
-            // Total deliveries for today
-            $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', Carbon::today())->count();
-
-            // Get active riders for dropdown
-            $riders = RiderDetails::where('status', 'active')->get();
-
-            return view('admin.flower-order.manage-delivery-history', compact('deliveryHistory', 'totalDeliveriesToday', 'riders'));
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
+        if ($request->has('from_date') && $request->has('to_date')) {
+            $query->whereBetween('created_at', [
+                \Carbon\Carbon::parse($request->input('from_date')),
+                \Carbon\Carbon::parse($request->input('to_date'))
+            ]);
         }
+
+        if ($request->filled('rider_id')) {
+            $query->where('rider_id', $request->input('rider_id'));
+        }
+
+        if ($filter === 'todaydelivery') {
+            $query->whereDate('created_at', \Carbon\Carbon::today());
+        } elseif ($filter === 'monthlydelivery') {
+            $query->whereBetween('created_at', [
+                now()->startOfMonth(),
+                now()->endOfMonth()
+            ]);
+        }
+
+        $deliveryHistory = $query->get();
+
+        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', \Carbon\Carbon::today())->count();
+        $riders = RiderDetails::where('status', 'active')->get();
+
+        return view('admin.flower-order.manage-delivery-history',
+            compact('deliveryHistory', 'totalDeliveriesToday', 'riders'));
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
     }
+}
+
 
     public function showRiderDetails($id)
     {
