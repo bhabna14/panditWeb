@@ -184,19 +184,6 @@
         $uniqueRiderCount = count($uniqueRiders);
     @endphp
 
-    <!-- Breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Delivery History</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="{{ route('admin.managedeliveryhistory') }}">Report</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Manage</li>
-            </ol>
-        </div>
-    </div>
-
     <!-- Flash messages -->
     @if (session()->has('success'))
         <div class="alert alert-success" id="Message">{{ session('success') }}</div>
@@ -206,7 +193,7 @@
     @endif
 
     <!-- Summary metrics -->
-    <div class="row g-3 mb-3">
+    <div class="row g-3 mb-3 mt-4">
         <div class="col-6 col-md-3">
             <div class="metric-card p-3 h-100">
                 <div class="label">Total records</div>
@@ -217,12 +204,6 @@
             <div class="metric-card p-3 h-100">
                 <div class="label">Delivered</div>
                 <div class="value text-success">{{ number_format($delivered) }}</div>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="metric-card p-3 h-100">
-                <div class="label">In transit / Out</div>
-                <div class="value text-info">{{ number_format($inTransit) }}</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
