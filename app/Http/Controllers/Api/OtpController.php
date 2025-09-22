@@ -516,8 +516,8 @@ class OtpController extends Controller
                 ], 500);
             }
 
-            $user = Auth::guard('sanctum')->user();
-
+        $user = Auth::guard('sanctum')->user();
+        dd($user);
             // Find User Device
             $device = UserDevice::where('user_id', $user->user_id)->first();
 
