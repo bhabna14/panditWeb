@@ -174,7 +174,7 @@
         </div>
         <div class="mt-2">
             @if($search || $platform || $date_range)
-                <a href="{{ route('admin.user_devices.index') }}" class="small text-decoration-none">
+                <a href="{{ route('admin.adminUserDevice') }}" class="small text-decoration-none">
                     <i class="bi bi-x-circle"></i> Clear filters
                 </a>
             @endif
