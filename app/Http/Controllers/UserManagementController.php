@@ -163,7 +163,7 @@ public function handleUserData(Request $request)
         $devicesQ = UserDevice::query()
             ->with(['user' => function ($q) {
                 // Assume users table has columns: userid (PK), name, mobile
-                $q->select('userid', 'name', 'mobile');
+                $q->select('userid', 'name', 'mobile_number ');
             }]);
 
         // Search across user name/mobile and device fields
@@ -175,7 +175,7 @@ public function handleUserData(Request $request)
                   ->orWhere('platform', 'like', "%{$search}%")
                   ->orWhereHas('user', function ($uq) use ($search) {
                       $uq->where('name', 'like', "%{$search}%")
-                         ->orWhere('mobile', 'like', "%{$search}%");
+                         ->orWhere('mobile_number', 'like', "%{$search}%");
                   });
             });
         }
