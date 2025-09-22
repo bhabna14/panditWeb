@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use App\Models\UserDevice;
 
 class OtpController extends Controller
@@ -498,14 +499,13 @@ class OtpController extends Controller
         return $code;
     }
 
-     public function updateDevice(Request $request)
+    public function updateDevice(Request $request)
     {
         try {
             // Validation
             $validator = Validator::make($request->all(), [
-                'user_id' => 'required|exists:user_devices,user_id',
                 'version' => 'required|string',
-                'last_login_time' => 'required|date'
+                'last_login_at' => 'required|date'
             ]);
 
             if ($validator->fails()) {
@@ -516,8 +516,10 @@ class OtpController extends Controller
                 ], 500);
             }
 
+            $user = Auth::guard('sanctum')->user();
+
             // Find User Device
-            $device = UserDevice::where('user_id', $request->user_id)->first();
+            $device = UserDevice::where('user_id', $user->user_id)->first();
 
             if (!$device) {
                 return response()->json([
@@ -528,7 +530,9 @@ class OtpController extends Controller
 
             // Update fields
             $device->version = $request->version;
-            $device->last_login_time = $request->last_login_time;
+            $device->device_model = $request->model;
+            $device->platform = $request->os_name;
+            $device->last_login_time = $request->last_login_at;
             $device->save();
 
             return response()->json([
