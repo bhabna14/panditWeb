@@ -498,4 +498,51 @@ class OtpController extends Controller
         return $code;
     }
 
+     public function updateDevice(Request $request)
+    {
+        try {
+            // Validation
+            $validator = Validator::make($request->all(), [
+                'user_id' => 'required|exists:user_devices,user_id',
+                'version' => 'required|string',
+                'last_login_time' => 'required|date'
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Validation failed',
+                    'errors'  => $validator->errors()
+                ], 500);
+            }
+
+            // Find User Device
+            $device = UserDevice::where('user_id', $request->user_id)->first();
+
+            if (!$device) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'User device not found'
+                ], 500);
+            }
+
+            // Update fields
+            $device->version = $request->version;
+            $device->last_login_time = $request->last_login_time;
+            $device->save();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Device updated successfully',
+                'data'    => $device
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 }

@@ -9,7 +9,7 @@ class UserDevice extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'device_id', 'platform','device_model'];
+    protected $fillable = ['user_id', 'device_id', 'platform','device_model','version','last_login_time'];
     
     public function user()
     {
