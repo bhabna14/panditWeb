@@ -46,93 +46,92 @@ class UserManagementController extends Controller
         return response()->json(['addresses' => $addresses]);
     }
 
-  
-public function handleUserData(Request $request)
-{
-    try {
-        DB::beginTransaction();
+    public function handleUserData(Request $request)
+    {
+        try {
+            DB::beginTransaction();
 
-        // Validate request data
-        $validated = $request->validate([
-            'userid' => 'required|string',
-            'address_id' => 'required|numeric',
-            'start_date' => 'nullable|date',
-            'duration' => 'nullable|integer|in:1,3,6',
-            'payment_method' => 'nullable|string',
-            'payment_status' => 'nullable|string',
-            'paid_amount' => 'nullable|numeric|min:0',
-            'status' => 'nullable|string',
-        ]);
-
-        $existingSubscription = Subscription::where('user_id', $validated['userid'])->first();
-
-        if ($existingSubscription) {
-            $order = Order::where('order_id', $existingSubscription->order_id)->first();
-            if ($order) {
-                $order->update([
-                    'user_id' => $validated['userid'],
-                    'quantity' => 1,
-                    'total_price' => $validated['paid_amount'] ?? 0,
-                    'address_id' => $validated['address_id'],
-                ]);
-                Log::info('Order updated successfully', ['order_id' => $order->order_id]);
-            } else {
-                return back()->with('error', 'Order ID not found for update.');
-            }
-        } else {
-            $orderId = 'ORD-' . strtoupper(Str::random(12));
-            $order = Order::create([
-                'user_id' => $validated['userid'],
-                'order_id' => $orderId,
-                'quantity' => 1,
-                'start_date' => $validated['start_date'] ?? now(),
-                'address_id' => $validated['address_id'],
-                'total_price' => $validated['paid_amount'] ?? 0,
+            // Validate request data
+            $validated = $request->validate([
+                'userid' => 'required|string',
+                'address_id' => 'required|numeric',
+                'start_date' => 'nullable|date',
+                'duration' => 'nullable|integer|in:1,3,6',
+                'payment_method' => 'nullable|string',
+                'payment_status' => 'nullable|string',
+                'paid_amount' => 'nullable|numeric|min:0',
+                'status' => 'nullable|string',
             ]);
-        }
 
-        // Calculate end date
-        $startDate = $validated['start_date'] ? Carbon::parse($validated['start_date']) : now();
-        $endDate = match ((int) $validated['duration']) {
-            1 => $startDate->copy()->addDays(29),
-            3 => $startDate->copy()->addDays(89),
-            6 => $startDate->copy()->addDays(179),
-            default => now(), // Provide a fallback value instead of throwing an exception
-        };
+            $existingSubscription = Subscription::where('user_id', $validated['userid'])->first();
+
+            if ($existingSubscription) {
+                $order = Order::where('order_id', $existingSubscription->order_id)->first();
+                if ($order) {
+                    $order->update([
+                        'user_id' => $validated['userid'],
+                        'quantity' => 1,
+                        'total_price' => $validated['paid_amount'] ?? 0,
+                        'address_id' => $validated['address_id'],
+                    ]);
+                    Log::info('Order updated successfully', ['order_id' => $order->order_id]);
+                } else {
+                    return back()->with('error', 'Order ID not found for update.');
+                }
+            } else {
+                $orderId = 'ORD-' . strtoupper(Str::random(12));
+                $order = Order::create([
+                    'user_id' => $validated['userid'],
+                    'order_id' => $orderId,
+                    'quantity' => 1,
+                    'start_date' => $validated['start_date'] ?? now(),
+                    'address_id' => $validated['address_id'],
+                    'total_price' => $validated['paid_amount'] ?? 0,
+                ]);
+            }
+
+            // Calculate end date
+            $startDate = $validated['start_date'] ? Carbon::parse($validated['start_date']) : now();
+            $endDate = match ((int) $validated['duration']) {
+                1 => $startDate->copy()->addDays(29),
+                3 => $startDate->copy()->addDays(89),
+                6 => $startDate->copy()->addDays(179),
+                default => now(), // Provide a fallback value instead of throwing an exception
+            };
+            
+            // Create subscription
+            Subscription::create([
+                'subscription_id' => 'SUB-' . strtoupper(Str::random(12)),
+                'user_id' => $validated['userid'],
+                'product_id' => $order->product_id ?? null,
+                'order_id' => $order->order_id,
+                'start_date' => $startDate,
+                'end_date' => $endDate,
+                'is_active' => true,
+                'status' => $validated['status'] ?? 'active',
+            ]);
+
         
-        // Create subscription
-        Subscription::create([
-            'subscription_id' => 'SUB-' . strtoupper(Str::random(12)),
-            'user_id' => $validated['userid'],
-            'product_id' => $order->product_id ?? null,
-            'order_id' => $order->order_id,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'is_active' => true,
-            'status' => $validated['status'] ?? 'active',
-        ]);
+            // Create payment record
+            FlowerPayment::create([
+                'order_id' => $order->order_id,
+                'payment_id' => null,
+                'user_id' => $validated['userid'],
+                'payment_method' => $validated['payment_method'],
+                'paid_amount' => $validated['paid_amount'] ?? 0,
+                'payment_status' => $validated['payment_status'] ?? 'pending',
+            ]);
 
-     
-        // Create payment record
-        FlowerPayment::create([
-            'order_id' => $order->order_id,
-            'payment_id' => null,
-            'user_id' => $validated['userid'],
-            'payment_method' => $validated['payment_method'],
-            'paid_amount' => $validated['paid_amount'] ?? 0,
-            'payment_status' => $validated['payment_status'] ?? 'pending',
-        ]);
-
-        DB::commit();
-        return back()->with('success', 'User data processed successfully!');
-    } catch (\Exception $e) {
-        DB::rollBack();
-        Log::error('Error processing user data', ['error' => $e->getMessage()]);
-        return back()->with('error', 'An error occurred: ' . $e->getMessage());
+            DB::commit();
+            return back()->with('success', 'User data processed successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error processing user data', ['error' => $e->getMessage()]);
+            return back()->with('error', 'An error occurred: ' . $e->getMessage());
+        }
     }
-}
 
-   public function index(Request $request)
+    public function index(Request $request)
     {
         $search    = trim($request->input('search', ''));
         $platform  = $request->input('platform', '');
@@ -151,7 +150,7 @@ public function handleUserData(Request $request)
             }
         }
 
-        // A distinct list of platforms for the filter dropdown
+        // Distinct platforms for dropdown
         $platforms = UserDevice::query()
             ->select('platform')
             ->whereNotNull('platform')
@@ -162,21 +161,21 @@ public function handleUserData(Request $request)
         // ------- Base query for table -------
         $devicesQ = UserDevice::query()
             ->with(['user' => function ($q) {
-                // Assume users table has columns: userid (PK), name, mobile
-                $q->select('userid', 'name', 'mobile_number ');
+                // FIX: removed trailing space from 'mobile_number '
+                $q->select('userid', 'name', 'mobile_number');
             }]);
 
         // Search across user name/mobile and device fields
         if ($search !== '') {
             $devicesQ->where(function ($q) use ($search) {
                 $q->where('device_id', 'like', "%{$search}%")
-                  ->orWhere('device_model', 'like', "%{$search}%")
-                  ->orWhere('version', 'like', "%{$search}%")
-                  ->orWhere('platform', 'like', "%{$search}%")
-                  ->orWhereHas('user', function ($uq) use ($search) {
-                      $uq->where('name', 'like', "%{$search}%")
-                         ->orWhere('mobile_number', 'like', "%{$search}%");
-                  });
+                ->orWhere('device_model', 'like', "%{$search}%")
+                ->orWhere('version', 'like', "%{$search}%")
+                ->orWhere('platform', 'like', "%{$search}%")
+                ->orWhereHas('user', function ($uq) use ($search) {
+                    $uq->where('name', 'like', "%{$search}%")
+                        ->orWhere('mobile_number', 'like', "%{$search}%");
+                });
             });
         }
 
@@ -196,7 +195,7 @@ public function handleUserData(Request $request)
         // ------- Metrics for cards -------
         $todayStart = Carbon::today()->startOfDay();
         $todayEnd   = Carbon::today()->endOfDay();
-        $weekStart  = Carbon::now()->startOfWeek(); // Monday start (adjust if needed)
+        $weekStart  = Carbon::now()->startOfWeek(); // Monday
 
         // Distinct users who logged in today
         $todayLogins = UserDevice::query()
@@ -216,7 +215,7 @@ public function handleUserData(Request $request)
             ->distinct('user_id')
             ->count('user_id');
 
-        // Platform breakdown (by latest activity per user to avoid overcounting)
+        // Platform breakdown (count distinct users per platform)
         $platformBreakdown = UserDevice::query()
             ->select('platform', DB::raw('COUNT(DISTINCT user_id) as users'))
             ->whereNotNull('platform')
@@ -224,7 +223,7 @@ public function handleUserData(Request $request)
             ->orderByDesc('users')
             ->get();
 
-        // Recent logins (for a small sidebar list)
+        // Recent logins
         $recentLogins = UserDevice::query()
             ->with(['user' => function ($q) { $q->select('userid', 'name'); }])
             ->orderByDesc('last_login_time')
@@ -232,17 +231,16 @@ public function handleUserData(Request $request)
             ->get();
 
         return view('admin.user-login-details', [
-            'devices'          => $devices,
-            'platforms'        => $platforms,
-            'search'           => $search,
-            'platform'         => $platform,
-            'date_range'       => $daterange,
-
-            'todayLogins'      => $todayLogins,
-            'uniqueDevices'    => $uniqueDevices,
-            'activeThisWeek'   => $activeThisWeek,
-            'platformBreakdown'=> $platformBreakdown,
-            'recentLogins'     => $recentLogins,
+            'devices'           => $devices,
+            'platforms'         => $platforms,
+            'search'            => $search,
+            'platform'          => $platform,
+            'date_range'        => $daterange,
+            'todayLogins'       => $todayLogins,
+            'uniqueDevices'     => $uniqueDevices,
+            'activeThisWeek'    => $activeThisWeek,
+            'platformBreakdown' => $platformBreakdown,
+            'recentLogins'      => $recentLogins,
         ]);
     }
 

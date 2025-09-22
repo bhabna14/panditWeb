@@ -21,6 +21,13 @@ class User extends Authenticatable
         'userid','name','user_type', 'mobile_number','referral_code','code_status', 'otp','email', 'order_id', 'expiry', 'hash', 'client_id', 'client_secret', 'otp_length', 'channel', 'userphoto',
     ];
 
+    
+    public function devices()
+    {
+        return $this->hasMany(UserDevice::class, 'user_id', 'userid');
+    }
+
+
     /**
      * The attributes that should be hidden for arrays.
      *
@@ -58,11 +65,6 @@ class User extends Authenticatable
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'user_id');
-    }
-
-    public function devices()
-    {
-        return $this->hasMany(UserDevice::class, 'user_id', 'userid');
     }
 
     public function orders()
