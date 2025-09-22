@@ -162,7 +162,6 @@ Route::get('/register', 'userregister')->name('user-register');
 
 // foolter routes
 
-
 Route::controller(FlowerUserBookingController::class)->group(function() {
         //flower routes
         Route::get('/flower', 'flower')->name('flower');
@@ -175,7 +174,7 @@ Route::controller(FlowerUserBookingController::class)->group(function() {
 Route::group(['middleware' => ['auth:users']], function () {
         Route::controller(userController::class)->group(function() {
         Route::get('/user-dashboard', 'userdashboard')->name('userdashboard');
-        
+
         Route::get('/manage-address', 'mngaddress')->name('mngaddress');
         Route::get('/address/set-default/{id}', 'setDefault')->name('setDefaultAddress');
         Route::get('/addaddress', 'addfrontaddress')->name('addfrontaddress');
@@ -190,7 +189,6 @@ Route::group(['middleware' => ['auth:users']], function () {
         // Route::post('submit-rating', 'submitRating')->name('submitRating');
         // Route::post('/submit-or-update-rating',  'submitOrUpdateRating')->name('submitOrUpdateRating');
         Route::post('/submitOrUpdateRating', 'submitOrUpdateRating')->name('submitOrUpdateRating');
-
 
         Route::get('/view-ordered-pooja-details/{id}', [UserController::class, 'viewdetails'])->name('viewdetails');
 
@@ -632,6 +630,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/existing-user', 'existingUser')->name('existingUser');
         Route::post('/save-demo-order-details', 'handleUserData')->name('saveDemoOrderDetails');
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
+        Route::get('/user-devices', 'index')->name('user_devices.index');
     });
 
     Route::controller(UserCustomizeOrderController::class)->group(function() {

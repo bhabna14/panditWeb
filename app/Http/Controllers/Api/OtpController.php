@@ -498,64 +498,65 @@ class OtpController extends Controller
         } while (User::where('referral_code', $code)->exists());
         return $code;
     }
-public function updateDevice(Request $request)
-{
-    try {
-        // Validation
-        $validator = Validator::make($request->all(), [
-            'version'        => 'required|string',
-            'last_login_at'  => 'required|date',
-            'model'          => 'nullable|string',
-            'os_name'        => 'nullable|string',
-        ]);
+    
+    public function updateDevice(Request $request)
+    {
+        try {
+            // Validation
+            $validator = Validator::make($request->all(), [
+                'version'        => 'required|string',
+                'last_login_at'  => 'required|date',
+                'model'          => 'nullable|string',
+                'os_name'        => 'nullable|string',
+            ]);
 
-        if ($validator->fails()) {
+            if ($validator->fails()) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Validation failed',
+                    'errors'  => $validator->errors()
+                ], 422); // use 422 for validation errors
+            }
+
+            // 🔑 Authenticated user
+            $user = Auth::guard('api')->user(); // change to 'rider-api' if this API is for riders
+
+            if (!$user) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'Unauthorized user'
+                ], 401);
+            }
+
+            // Find User Device
+            $device = UserDevice::where('user_id', $user->userid)->first();
+
+            if (!$device) {
+                return response()->json([
+                    'status'  => false,
+                    'message' => 'User device not found'
+                ], 404);
+            }
+
+            // Update fields
+            $device->version         = $request->version;
+            $device->device_model    = $request->model;
+            $device->platform        = $request->os_name;
+            $device->last_login_time = $request->last_login_at;
+            $device->save();
+
+            return response()->json([
+                'status'  => true,
+                'message' => 'Device updated successfully',
+                'data'    => $device
+            ], 200);
+
+        } catch (\Exception $e) {
             return response()->json([
                 'status'  => false,
-                'message' => 'Validation failed',
-                'errors'  => $validator->errors()
-            ], 422); // use 422 for validation errors
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
         }
-
-        // 🔑 Authenticated user
-        $user = Auth::guard('api')->user(); // change to 'rider-api' if this API is for riders
-
-        if (!$user) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'Unauthorized user'
-            ], 401);
-        }
-
-        // Find User Device
-        $device = UserDevice::where('user_id', $user->userid)->first();
-
-        if (!$device) {
-            return response()->json([
-                'status'  => false,
-                'message' => 'User device not found'
-            ], 404);
-        }
-
-        // Update fields
-        $device->version         = $request->version;
-        $device->device_model    = $request->model;
-        $device->platform        = $request->os_name;
-        $device->last_login_time = $request->last_login_at;
-        $device->save();
-
-        return response()->json([
-            'status'  => true,
-            'message' => 'Device updated successfully',
-            'data'    => $device
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'status'  => false,
-            'message' => 'Error: ' . $e->getMessage()
-        ], 500);
     }
-}
 
 }
