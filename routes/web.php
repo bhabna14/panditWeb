@@ -630,7 +630,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/existing-user', 'existingUser')->name('existingUser');
         Route::post('/save-demo-order-details', 'handleUserData')->name('saveDemoOrderDetails');
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
-        Route::get('/user-devices', 'index')->name('user_devices.index');
+        Route::get('/user-devices', 'index')->name('admin.adminUserDevice');
     });
 
     Route::controller(UserCustomizeOrderController::class)->group(function() {
