@@ -196,7 +196,6 @@
                                 <tr>
                                     <th>User</th>
                                     <th>Mobile</th>
-                                    <th>Device ID</th>
                                     <th>Platform</th>
                                     <th>Device Model</th>
                                     <th>Version</th>
@@ -226,7 +225,6 @@
                                             <div class="text-muted small">#{{ $d->user_id }}</div>
                                         </td>
                                         <td class="mono">{{ $d->user->mobile_number ?? '—' }}</td>
-                                        <td class="mono">{{ $d->device_id ?? '—' }}</td>
                                         <td>
                                             <span class="{{ $chipClass($d->platform) }}">
                                                 <i class="bi {{ $chipIcon($d->platform) }}"></i>
