@@ -56,7 +56,7 @@ class OfficeTransactionController extends Controller
         return view('admin.manage-office-transaction', compact('transactions', 'todayTotal', 'rangeTotal'));
     }
 
-     public function filterOfficeTransactions(Request $request)
+    public function filterOfficeTransactions(Request $request)
     {
         $request->validate([
             'from_date' => ['nullable', 'date'],
@@ -313,8 +313,8 @@ class OfficeTransactionController extends Controller
             $transaction->delete();
         }
 
-        return redirect()->route('manageOfficeFund')
-            ->with('success', 'Office transaction deleted successfully.');
+        return redirect()->route('manageOfficeFund')->with('success', 'Office transaction deleted successfully.');
+
     }
 
 }
