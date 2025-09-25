@@ -11,45 +11,56 @@
         .profile-hero {
             background: linear-gradient(135deg, #f3f4ff 0%, #e9fbff 100%);
             border: 1px solid #e9ecf5;
-            border-radius: 16px;
+            border-radius: 18px;
             padding: 18px;
-            box-shadow: 0 6px 18px rgba(25, 42, 70, 0.06);
+            box-shadow: 0 8px 22px rgba(25, 42, 70, 0.08);
+        }
+
+        .profile-image {
+            position: relative;
+            display: inline-block;
+            border-radius: 18px;
+            padding: 6px;
+            background: linear-gradient(135deg, #7c4dff, #00c2ff);
         }
 
         .profile-image img {
-            width: 96px;
-            height: 96px;
+            width: 104px;
+            height: 104px;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: 14px;
+            background: #fff;
             border: 4px solid #fff;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .08);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, .12);
         }
 
         .profile-online {
             width: 12px;
             height: 12px;
             position: absolute;
-            right: 6px;
-            bottom: 6px;
+            right: 10px;
+            bottom: 10px;
             border: 2px solid #fff;
+            border-radius: 50%;
         }
 
         .metric-card {
             border: 1px solid #eef1f7;
             border-radius: 14px;
             background: #fff;
-            box-shadow: 0 6px 20px rgba(75, 85, 99, .06);
+            box-shadow: 0 8px 24px rgba(75, 85, 99, .08);
             transition: transform .15s ease, box-shadow .2s ease;
+            min-width: 160px;
         }
 
         .metric-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 12px 28px rgba(75, 85, 99, .12);
+            box-shadow: 0 14px 30px rgba(75, 85, 99, .15);
         }
 
         .metric-title {
-            font-size: .85rem;
-            letter-spacing: .02em;
+            font-size: .8rem;
+            letter-spacing: .04em;
             color: #64748b;
             text-transform: uppercase;
         }
@@ -75,11 +86,11 @@
 
         /* ===== Status pills ===== */
         .status-pill {
-            padding: .35rem .6rem;
+            padding: .38rem .65rem;
             border-radius: 999px;
-            font-weight: 700;
+            font-weight: 800;
             font-size: .78rem;
-            color: #111827;
+            letter-spacing: .02em;
         }
 
         .status-running {
@@ -111,14 +122,15 @@
             border: 1px solid transparent;
             border-radius: 999px;
             margin-right: .5rem;
-            padding: .5rem .9rem;
-            font-weight: 600;
+            padding: .55rem .95rem;
+            font-weight: 700;
+            color: #111827;
         }
 
         .profile-nav-line .nav-link.active {
-            background: #c7d2fe;
-            color: #fff;
-            border-color: #111827;
+            background: linear-gradient(135deg, #7c4dff, #00c2ff);
+            color: #fff !important;
+            border-color: transparent;
             box-shadow: 0 6px 16px rgba(17, 24, 39, .18);
         }
 
@@ -126,24 +138,18 @@
         table.table th {
             white-space: nowrap;
             background: #f8fafc;
+            font-weight: 800;
         }
 
         table.table td {
             vertical-align: middle;
         }
 
-        /* Icons */
         .custom-size-icon {
             font-size: 26px;
             margin-bottom: 10px;
         }
 
-        .prof-details {
-            width: 220px;
-            margin-right: 15px;
-        }
-
-        /* Address cards */
         .addr-card {
             border: 1px solid #e5e7eb;
             border-radius: 14px;
@@ -174,13 +180,13 @@
         <div class="col-12">
             <div class="profile-hero d-md-flex align-items-center">
                 <div class="me-3 pos-relative">
-                    <span class="profile-image pos-relative">
+                    <span class="profile-image">
                         <a href="{{ asset($user->userphoto ? 'storage/' . $user->userphoto : 'front-assets/img/images.jfif') }}"
                             class="js-smartPhoto" data-caption="{{ $user->name }}">
-                            <img class="br-5" alt="{{ $user->name }}"
+                            <img alt="{{ $user->name }}"
                                 src="{{ asset($user->userphoto ? 'storage/' . $user->userphoto : 'front-assets/img/images.jfif') }}">
                         </a>
-                        <span class="bg-success text-white rounded-pill profile-online"></span>
+                        <span class="bg-success text-white profile-online"></span>
                     </span>
                 </div>
 
@@ -191,7 +197,7 @@
                         <span><i class="fa fa-phone me-2"></i><strong>Phone:</strong> {{ $user->mobile_number }}</span>
                         <span><i class="fa fa-envelope me-2"></i><strong>Email:</strong> {{ $user->email }}</span>
                         <span><i class="fa fa-venus-mars me-2"></i><strong>Gender:</strong> {{ $user->gender }}</span>
-                        <span><i class="fa fa-venus-mars me-2"></i><strong>DOB:</strong> {{ $user->dob }}</span>
+                        <span><i class="fa fa-birthday-cake me-2"></i><strong>DOB:</strong> {{ $user->dob }}</span>
                         <span><i class="fa fa-calendar-alt me-2"></i><strong>Joined:</strong>
                             {{ $user->created_at ? \Carbon\Carbon::parse($user->created_at)->format('M j, Y') : 'NA' }}</span>
                         <span>
@@ -234,15 +240,15 @@
                 <div class="card-footer py-0">
                     <div class="profile-tab tab-menu-heading border-bottom-0">
                         <nav class="nav main-nav-line p-3 profile-nav-line border-0 br-5 mb-0">
-                            <a class="nav-link active" data-bs-toggle="tab" href="#order" style="color: black">
+                            <a class="nav-link active" data-bs-toggle="tab" href="#order">
                                 Subscription Orders
                                 <span class="badge bg-dark ms-2">{{ $orders->count() }}</span>
                             </a>
-                            <a class="nav-link" data-bs-toggle="tab" href="#requestorder" style="color: black">
+                            <a class="nav-link" data-bs-toggle="tab" href="#requestorder">
                                 Customize Orders
                                 <span class="badge bg-dark ms-2">{{ $pendingRequests->count() }}</span>
                             </a>
-                            <a class="nav-link" data-bs-toggle="tab" href="#address" style="color: black">
+                            <a class="nav-link" data-bs-toggle="tab" href="#address">
                                 Addresses
                                 <span class="badge bg-dark ms-2">{{ $addressdata->count() }}</span>
                             </a>
@@ -290,7 +296,12 @@
                                                     : null;
 
                                                 // Prefer the latest *paid* payment; if none, fall back to most recent payment record (any status).
-                                                $latestPaid = $order->latestPaidPayment ?? null;
+                                                $latestPaid = $order->flowerPayments
+                                                    ? $order->flowerPayments
+                                                        ->where('payment_status', 'paid')
+                                                        ->sortByDesc('created_at')
+                                                        ->first()
+                                                    : null;
                                                 if (!$latestPaid && isset($order->flowerPayments)) {
                                                     $latestPaid = $order->flowerPayments
                                                         ->sortByDesc('created_at')
@@ -305,21 +316,16 @@
                                                     <div class="fw-semibold">
                                                         {{ optional($order->flowerProducts)->name ?? 'NA' }}</div>
                                                     @if ($start && $end)
-                                                        <small class="text-muted">
-                                                            ({{ $start->format('F j, Y') }} –
-                                                            {{ $end->format('F j, Y') }})
-                                                        </small>
+                                                        <small class="text-muted">({{ $start->format('F j, Y') }} –
+                                                            {{ $end->format('F j, Y') }})</small>
                                                     @endif
                                                 </td>
 
-                                                {{-- NEW: Payment Mode --}}
                                                 <td>
                                                     {{ $latestPaid && $latestPaid->payment_method
                                                         ? ucwords(str_replace('_', ' ', $latestPaid->payment_method))
                                                         : 'Unpaid' }}
                                                 </td>
-
-                                                {{-- NEW: Payment Date (created_at) --}}
                                                 <td>
                                                     {{ $latestPaid && $latestPaid->created_at ? $latestPaid->created_at->format('M j, Y') : 'Unpaid' }}
                                                 </td>
@@ -334,7 +340,7 @@
                                                             'paused' => 'status-paused',
                                                             'expired' => 'status-expired',
                                                             'pending' => 'status-pending',
-                                                            default => 'badge bg-secondary',
+                                                            default => 'status-pending',
                                                         };
                                                     @endphp
                                                     <span
@@ -360,7 +366,7 @@
                         </div>
                     </div>
 
-                    {{-- Request Orders --}}
+                    {{-- Customize Orders (with garland details + price breakdown) --}}
                     <div class="main-content-body tab-pane border-top-0" id="requestorder">
                         <div class="border-0 p-3">
                             <div class="table-responsive">
@@ -369,7 +375,10 @@
                                         <tr>
                                             <th>Request</th>
                                             <th>Delivery Date</th>
-                                            <th>Flower Items</th>
+                                            <th>Items (Flowers / Garlands)</th>
+                                            <th class="text-end">Requested Flower Price</th>
+                                            <th class="text-end">Delivery Charge</th>
+                                            <th class="text-end">Total Amount</th>
                                             <th>Status</th>
                                             <th>Actions</th>
                                         </tr>
@@ -388,6 +397,12 @@
                                                     'cancelled' => 'status-expired',
                                                     default => 'status-pending',
                                                 };
+
+                                                // If an order was attached in the controller, show its financials
+                                                $rqOrder = $rq->order ?? null;
+                                                $reqFlowerPrice = $rqOrder?->requested_flower_price ?? 0;
+                                                $deliveryCharge = $rqOrder?->delivery_charge ?? 0;
+                                                $totalAmount = $rqOrder?->total_price ?? 0;
                                             @endphp
                                             <tr>
                                                 <td>
@@ -396,25 +411,63 @@
                                                         {{ optional($rq->user)->name }} —
                                                         {{ optional($rq->user)->mobile_number }}
                                                     </small>
+                                                    @if ($rq->flowerProduct)
+                                                        <small class="text-muted d-block">Product:
+                                                            {{ $rq->flowerProduct->name }}</small>
+                                                    @endif
                                                 </td>
+
                                                 <td>{{ $rqDate }}</td>
+
                                                 <td>
-                                                    @if ($rq->flowerRequestItems && $rq->flowerRequestItems->count())
+                                                    @php
+                                                        $hasItems =
+                                                            $rq->flowerRequestItems && $rq->flowerRequestItems->count();
+                                                    @endphp
+                                                    @if ($hasItems)
                                                         <ul class="mb-0 ps-3">
                                                             @foreach ($rq->flowerRequestItems as $item)
-                                                                <li>{{ $item->flower_name }} —
-                                                                    {{ $item->flower_quantity }} {{ $item->flower_unit }}
-                                                                </li>
+                                                                @if (strtolower($item->type ?? '') === 'garland')
+                                                                    <li>
+                                                                        <strong>Garland:</strong>
+                                                                        {{ $item->garland_name ?? '—' }}
+                                                                        @if ($item->garland_size)
+                                                                            — Size: {{ $item->garland_size }}
+                                                                        @endif
+                                                                        @if ($item->garland_quantity)
+                                                                            — Qty: {{ $item->garland_quantity }}
+                                                                        @endif
+                                                                        @if ($item->flower_count)
+                                                                            — Flower Count: {{ $item->flower_count }}
+                                                                        @endif
+                                                                    </li>
+                                                                @else
+                                                                    <li>
+                                                                        <strong>Flower:</strong>
+                                                                        {{ $item->flower_name ?? '—' }}
+                                                                        @if ($item->flower_quantity || $item->flower_unit)
+                                                                            — {{ $item->flower_quantity ?? '' }}
+                                                                            {{ $item->flower_unit ?? '' }}
+                                                                        @endif
+                                                                        @if ($item->size)
+                                                                            — Size: {{ $item->size }}
+                                                                        @endif
+                                                                    </li>
+                                                                @endif
                                                             @endforeach
                                                         </ul>
                                                     @else
                                                         <span class="text-muted">No items</span>
                                                     @endif
                                                 </td>
+
+                                                <td class="text-end">₹{{ number_format($reqFlowerPrice, 2) }}</td>
+                                                <td class="text-end">₹{{ number_format($deliveryCharge, 2) }}</td>
+                                                <td class="text-end fw-bold">₹{{ number_format($totalAmount, 2) }}</td>
+
                                                 <td>
-                                                    <span class="status-pill {{ $rqPill }}">
-                                                        {{ ucfirst($rq->status ?? 'Pending') }}
-                                                    </span>
+                                                    <span
+                                                        class="status-pill {{ $rqPill }}">{{ ucfirst($rq->status ?? 'Pending') }}</span>
                                                     <div class="small text-muted mt-1">
                                                         @if ($rq->status == 'pending')
                                                             Order placed — update price
@@ -425,8 +478,8 @@
                                                         @endif
                                                     </div>
                                                 </td>
+
                                                 <td>
-                                                    {{-- Put your action buttons/links here if any --}}
                                                     <span class="badge-chip">
                                                         <i class="fa fa-info-circle"></i>
                                                         {{ strtoupper($rq->status ?? 'NA') }}
@@ -515,7 +568,7 @@
             });
         });
 
-        // Defensive DataTables init (if plugin is available globally)
+        // Initialize DataTables if present
         (function() {
             if (window.jQuery && $.fn.DataTable) {
                 $('#subsTable').DataTable({
