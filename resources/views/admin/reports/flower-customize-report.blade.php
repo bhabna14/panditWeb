@@ -21,7 +21,7 @@
             --text: #111827;
             --muted: #6B7280;
 
-            /* Primary & gradient (as per screenshot) */
+            /* Primary & gradient */
             --primary: #6F6BFE;
             --primary-600: #5F59F2;
             --grad-a: #6F6BFE;
@@ -142,7 +142,7 @@
             color: #374151;
         }
 
-        /* Exports + delete (red pills) */
+        /* Exports (red pills) */
         .btn-pill-red {
             background: var(--accent-red);
             color: #fff;
@@ -193,16 +193,48 @@
             text-decoration: none;
         }
 
-        /* Status badge (kept simple) */
+        /* ===== Status badge — deep solid colors ===== */
         .status-badge {
-            padding: .35rem .65rem;
+            padding: .38rem .68rem;
             border-radius: 999px;
-            font-weight: 700;
-            font-size: .8rem;
-            background: #E6F0FF;
-            color: #1D4ED8;
-            border: 1px solid #C9DAFF;
+            font-weight: 800;
+            font-size: .78rem;
+            color: #fff;
+            /* white text */
+            border: 1px solid transparent;
+            display: inline-block;
         }
+
+        .status-badge--success {
+            background: #0E9F6E;
+            border-color: #0A6B4B;
+        }
+
+        /* deep green */
+        .status-badge--warning {
+            background: #D97706;
+            border-color: #B65F04;
+        }
+
+        /* deep amber */
+        .status-badge--danger {
+            background: #DC2626;
+            border-color: #A51B1B;
+        }
+
+        /* deep red   */
+        .status-badge--info {
+            background: #1D4ED8;
+            border-color: #153AA3;
+        }
+
+        /* deep blue  */
+        .status-badge--neutral {
+            background: #334155;
+            border-color: #1F2937;
+        }
+
+        /* slate      */
     </style>
 @endsection
 
@@ -468,7 +500,6 @@
                         name: 'flower_items',
                         orderable: false,
                         render: function(data, type, row) {
-                            // If server also sends a category, show as pill like screenshot
                             const cat = row.category_name ?
                                 `<a href="javascript:void(0)" class="cat-pill">${row.category_name}</a>` :
                                 '';
@@ -500,7 +531,30 @@
                         data: 'status',
                         name: 'status',
                         className: 'text-center',
-                        render: s => `<span class="status-badge">${(s||'').toString()}</span>`
+                        render: function(s) {
+                            const t = (s || '').toString().trim().toLowerCase();
+                            let cls = 'status-badge--info'; // default deep blue
+
+                            if (['success', 'completed', 'complete', 'active', 'ok', 'paid',
+                                    'resume', 'delivered'
+                                ].includes(t)) {
+                                cls = 'status-badge--success';
+                            } else if (['pending', 'processing', 'in-progress', 'on hold', 'hold',
+                                    'awaiting'
+                                ].includes(t)) {
+                                cls = 'status-badge--warning';
+                            } else if (['cancel', 'cancelled', 'failed', 'rejected', 'expired',
+                                    'unpaid'
+                                ].includes(t)) {
+                                cls = 'status-badge--danger';
+                            } else if (['info', 'paused'].includes(t)) {
+                                cls = 'status-badge--info';
+                            } else if (['new', 'created', 'open'].includes(t)) {
+                                cls = 'status-badge--neutral';
+                            }
+
+                            return `<span class="status-badge ${cls}">${(s || '').toString()}</span>`;
+                        }
                     },
                     {
                         data: 'price',
