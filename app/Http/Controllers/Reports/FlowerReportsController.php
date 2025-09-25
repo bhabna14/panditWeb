@@ -21,7 +21,6 @@ use Carbon\Carbon;
 
 class FlowerReportsController extends Controller
 {
-
 public function subscriptionReport(Request $request)
 {
     if ($request->ajax()) {
@@ -31,11 +30,12 @@ public function subscriptionReport(Request $request)
             'flowerPayments',
             'users.addressDetails',
             'flowerProducts',
-        ])
-        ->orderBy('id', 'desc');
+            'latestPayment',       // fallback
+            'latestPaidPayment',   // preferred
+        ])->orderBy('id', 'desc');
 
         $from = $request->filled('from_date') ? Carbon::parse($request->from_date)->startOfDay() : Carbon::now()->startOfMonth();
-        $to   = $request->filled('to_date') ? Carbon::parse($request->to_date)->endOfDay() : Carbon::now()->endOfMonth();
+        $to   = $request->filled('to_date')   ? Carbon::parse($request->to_date)->endOfDay()   : Carbon::now()->endOfMonth();
 
         $query->whereBetween('start_date', [$from, $to]);
 
@@ -44,7 +44,7 @@ public function subscriptionReport(Request $request)
         // Total Price
         $totalPrice = $subscriptions->sum(fn($sub) => $sub->order->total_price ?? 0);
 
-        // Filtered New User Subscriptions (within date range)
+        // New User Subscriptions (within date range)
         $newUserPrice = Subscription::whereBetween('created_at', [$from, $to])
             ->whereIn('user_id', function ($subQuery) {
                 $subQuery->select('user_id')
@@ -56,13 +56,10 @@ public function subscriptionReport(Request $request)
             ->get()
             ->sum(fn($sub) => $sub->order->total_price ?? 0);
 
-        // Filtered Renewed Users (within date range)
+        // Renewed Users (within date range)
         $renewPrice = Subscription::whereBetween('created_at', [$from, $to])
-            ->whereIn('order_id', function ($query) {
-                $query->select('order_id')
-                    ->from('subscriptions')
-                    ->groupBy('order_id')
-                    ->havingRaw('COUNT(order_id) > 1');
+            ->whereIn('order_id', function ($q) {
+                $q->select('order_id')->from('subscriptions')->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
             })
             ->get()
             ->sum(fn($sub) => $sub->order->total_price ?? 0);
@@ -75,30 +72,37 @@ public function subscriptionReport(Request $request)
                     'userid' => $user->userid ?? null,
                     'name' => $user->name ?? 'N/A',
                     'mobile_number' => $user->mobile_number ?? 'N/A',
-                    'address_details' => $user->addressDetails ? [
+                    'address_details' => $user?->addressDetails ? [
                         'apartment_flat_plot' => $user->addressDetails->apartment_flat_plot ?? '',
-                        'apartment_name' => $user->addressDetails->apartment_name ?? '',
-                        'locality' => $user->addressDetails->locality ?? '',
-                        'landmark' => $user->addressDetails->landmark ?? '',
-                        'pincode' => $user->addressDetails->pincode ?? '',
-                        'city' => $user->addressDetails->city ?? '',
-                        'state' => $user->addressDetails->state ?? '',
+                        'apartment_name'      => $user->addressDetails->apartment_name ?? '',
+                        'locality'            => $user->addressDetails->locality ?? '',
+                        'landmark'            => $user->addressDetails->landmark ?? '',
+                        'pincode'             => $user->addressDetails->pincode ?? '',
+                        'city'                => $user->addressDetails->city ?? '',
+                        'state'               => $user->addressDetails->state ?? '',
                     ] : null
                 ];
             })
             ->addColumn('purchase_date', fn($row) => [
                 'start' => $row->start_date,
-                'end' => $row->end_date
+                'end'   => $row->end_date
             ])
-            ->addColumn('duration', fn($row) => Carbon::parse($row->start_date)->diffInDays($row->end_date))
+            // Inclusive duration (+1 day)
+            ->addColumn('duration', fn($row) => Carbon::parse($row->start_date)->diffInDays(Carbon::parse($row->end_date)) + 1)
             ->addColumn('price', fn($row) => $row->order->total_price ?? 0)
+            // NEW: Payment method (prefer latest paid, else latest)
+            ->addColumn('payment_method', function ($row) {
+                return $row->latestPaidPayment->payment_method
+                       ?? $row->latestPayment->payment_method
+                       ?? null;
+            })
             ->addColumn('status', fn($row) => ucfirst($row->status))
             ->make(true);
 
         $json = $dataTable->getData(true);
-        $json['total_price'] = $totalPrice;
-        $json['new_user_price'] = $newUserPrice;
-        $json['renew_user_price'] = $renewPrice;
+        $json['total_price']     = $totalPrice;
+        $json['new_user_price']  = $newUserPrice;
+        $json['renew_user_price']= $renewPrice;
 
         return response()->json($json);
     }
