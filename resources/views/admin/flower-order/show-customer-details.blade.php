@@ -380,7 +380,6 @@
                                             <th class="text-end">Delivery Charge</th>
                                             <th class="text-end">Total Amount</th>
                                             <th>Status</th>
-                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -479,12 +478,6 @@
                                                     </div>
                                                 </td>
 
-                                                <td>
-                                                    <span class="badge-chip">
-                                                        <i class="fa fa-info-circle"></i>
-                                                        {{ strtoupper($rq->status ?? 'NA') }}
-                                                    </span>
-                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
