@@ -12,93 +12,54 @@
 
     <style>
         :root {
-            /* Base */
+            /* Page */
             --bg-subtle: #F5F7FC;
+            /* page background */
             --surface: #FFFFFF;
+            /* cards/tables */
             --border: #E7EAF3;
-            --text: #0F172A;
-            --muted: #64748B;
+            --text: #111827;
+            --muted: #6B7280;
 
-            /* Brand + accents */
-            --indigo: #6F6BFE;
-            --indigo-600: #5F59F2;
-            --violet: #8151FB;
-            --cyan: #0EC5D7;
-            --pink: #FF6B9A;
+            /* Primary & gradient (as per screenshot) */
+            --primary: #6F6BFE;
+            --primary-600: #5F59F2;
+            --grad-a: #6F6BFE;
+            /* indigo */
+            --grad-b: #0EC5D7;
+            /* cyan */
 
-            /* Status */
-            --green-50: #E8F5EE;
-            --green-600: #167C45;
-            --green-200: #CDEBD7;
-            --amber-50: #FFF7E6;
-            --amber-700: #92400E;
-            --amber-200: #FFE3B3;
-            --red-50: #FDE8E8;
-            --red-600: #B91C1C;
-            --red-200: #FAC6C6;
-            --blue-50: #E6F0FF;
-            --blue-600: #1D4ED8;
-            --blue-200: #C9DAFF;
-            --gray-50: #F3F4F6;
-            --gray-600: #374151;
-            --gray-200: #E5E7EB;
+            /* Actions (red pills) */
+            --accent-red: #F24B5B;
+            --accent-red-2: #E34050;
 
             /* Shadows */
             --sh-sm: 0 2px 10px rgba(15, 23, 42, .06);
-            --sh-md: 0 12px 28px rgba(2, 6, 23, .10);
+            --sh-md: 0 10px 24px rgba(2, 6, 23, .08);
         }
 
         body {
             font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif !important;
             color: var(--text);
             background:
-                radial-gradient(800px 450px at 100% -10%, rgba(129, 81, 251, .10), transparent 60%),
-                radial-gradient(900px 500px at 0% 10%, rgba(14, 197, 215, .10), transparent 55%),
+                radial-gradient(900px 500px at 100% -10%, rgba(111, 107, 254, .08), transparent 60%),
+                radial-gradient(900px 500px at 0% 10%, rgba(14, 197, 215, .08), transparent 55%),
                 var(--bg-subtle);
         }
 
-        /* -------- Hero strip -------- */
-        .page-hero {
-            border-radius: 16px;
-            background: linear-gradient(135deg, var(--indigo) 0%, var(--violet) 45%, var(--cyan) 100%);
-            color: #fff;
-            padding: 16px 18px;
-            box-shadow: var(--sh-md);
-            border: 1px solid rgba(255, 255, 255, .25);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-        }
-
-        .page-hero h6 {
-            margin: 0;
-            font-weight: 800;
-            letter-spacing: .2px;
-        }
-
-        .pill-date {
-            background: rgba(255, 255, 255, .15);
-            border: 1px solid rgba(255, 255, 255, .25);
-            padding: .3rem .6rem;
-            border-radius: 999px;
-            font-weight: 700;
-        }
-
-        /* -------- KPI cards (glassy) -------- */
+        /* KPI cards */
         .stats-card {
             border-radius: 16px;
             padding: 18px 20px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .9), #fff);
-            backdrop-filter: blur(6px);
+            background: var(--surface);
             box-shadow: var(--sh-md);
             border: 1px solid var(--border);
             transition: transform .18s ease, box-shadow .18s ease;
         }
 
         .stats-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 18px 36px rgba(2, 6, 23, .12);
+            transform: translateY(-2px);
+            box-shadow: 0 18px 30px rgba(2, 6, 23, .10);
         }
 
         .stats-card .card-title {
@@ -111,11 +72,7 @@
             font-weight: 800 !important;
         }
 
-        .kpi-accent {
-            color: var(--cyan);
-        }
-
-        /* -------- Filter box -------- */
+        /* Filter box */
         .filter-wrap {
             border-radius: 16px;
             border: 1px solid var(--border);
@@ -132,50 +89,42 @@
         .form-control {
             border-radius: 12px;
             border-color: var(--border);
-            background: #fff;
-            transition: box-shadow .15s ease, border-color .15s ease;
         }
 
-        .form-control:focus {
-            border-color: var(--indigo);
-            box-shadow: 0 0 0 .2rem rgba(111, 107, 254, .15);
-        }
-
-        /* -------- Quick chips -------- */
+        /* Quick chips */
         .chip {
             display: inline-flex;
             align-items: center;
             gap: .35rem;
-            padding: .45rem .8rem;
+            padding: .45rem .75rem;
             border-radius: 999px;
             background: #fff;
             border: 1px dashed var(--border);
             color: #334155;
-            font-weight: 700;
+            font-weight: 600;
             font-size: .85rem;
             cursor: pointer;
             transition: all .15s ease;
         }
 
         .chip:hover {
-            border-color: var(--indigo);
-            color: var(--indigo);
+            border-color: var(--primary);
+            color: var(--primary);
         }
 
         .chip.active {
-            background: linear-gradient(90deg, var(--indigo), var(--cyan));
-            border-color: transparent;
+            border-color: var(--primary);
             color: #fff;
-            box-shadow: 0 6px 16px rgba(14, 197, 215, .25);
+            background: var(--primary);
         }
 
-        /* -------- Buttons -------- */
+        /* Gradient Search */
         .btn-grad {
             border: none;
             color: #fff;
-            font-weight: 800;
+            font-weight: 700;
             letter-spacing: .2px;
-            background-image: linear-gradient(90deg, var(--indigo), var(--cyan));
+            background-image: linear-gradient(90deg, var(--grad-a), var(--grad-b));
             border-radius: 999px;
             box-shadow: 0 6px 18px rgba(14, 197, 215, .25);
         }
@@ -186,49 +135,29 @@
 
         .btn-reset {
             color: #6b7280;
-            font-weight: 700;
+            font-weight: 600;
         }
 
         .btn-reset:hover {
             color: #374151;
         }
 
-        /* DataTables export buttons (colorful) */
-        .btn-pill {
+        /* Exports + delete (red pills) */
+        .btn-pill-red {
+            background: var(--accent-red);
+            color: #fff;
             border: none;
             border-radius: 999px;
             padding: .45rem .9rem;
-            font-weight: 800;
+            font-weight: 700;
+        }
+
+        .btn-pill-red:hover {
+            background: var(--accent-red-2);
             color: #fff;
         }
 
-        .btn-copy {
-            background: linear-gradient(90deg, #94a3b8, #64748b);
-        }
-
-        /* slate */
-        .btn-csv {
-            background: linear-gradient(90deg, #F59E0B, #F97316);
-        }
-
-        /* amber/orange */
-        .btn-excel {
-            background: linear-gradient(90deg, #22C55E, #16A34A);
-        }
-
-        /* green */
-        .btn-pdf {
-            background: linear-gradient(90deg, #EF4444, #DC2626);
-        }
-
-        /* red */
-        .btn-print {
-            background: linear-gradient(90deg, #4F46E5, #4338CA);
-        }
-
-        /* indigo */
-
-        /* -------- Table -------- */
+        /* Table */
         .export-table .dataTables_wrapper .dt-buttons .btn {
             margin-left: .4rem;
         }
@@ -241,20 +170,20 @@
             background: #F3F6FF !important;
             border-bottom: 1px solid var(--border) !important;
             color: #0F172A;
-            font-weight: 800;
+            font-weight: 700;
         }
 
         .table-hover tbody tr:hover {
             background: #F8FBFF;
         }
 
-        /* Category pill */
+        /* Category link pill */
         .cat-pill {
             background: #EEF2FF;
             color: #4F46E5;
             padding: .25rem .6rem;
             border-radius: 999px;
-            font-weight: 800;
+            font-weight: 700;
             text-decoration: none;
         }
 
@@ -264,61 +193,27 @@
             text-decoration: none;
         }
 
-        /* Status badges (auto-colored) */
+        /* Status badge (kept simple) */
         .status-badge {
-            padding: .38rem .68rem;
+            padding: .35rem .65rem;
             border-radius: 999px;
-            font-weight: 800;
-            font-size: .78rem;
-            border: 1px solid transparent;
-            display: inline-block;
-        }
-
-        .s-ok,
-        .s-active,
-        .s-completed {
-            background: var(--green-50);
-            color: var(--green-600);
-            border-color: var(--green-200);
-        }
-
-        .s-pending,
-        .s-processing {
-            background: var(--amber-50);
-            color: var(--amber-700);
-            border-color: var(--amber-200);
-        }
-
-        .s-cancelled,
-        .s-failed,
-        .s-rejected {
-            background: var(--red-50);
-            color: var(--red-600);
-            border-color: var(--red-200);
-        }
-
-        .s-default {
-            background: var(--blue-50);
-            color: var(--blue-600);
-            border-color: var(--blue-200);
+            font-weight: 700;
+            font-size: .8rem;
+            background: #E6F0FF;
+            color: #1D4ED8;
+            border: 1px solid #C9DAFF;
         }
     </style>
 @endsection
 
 @section('content')
-    <!-- Hero -->
-    <div class="page-hero mb-3">
-        <h6 class="fw-bold">Customize Orders Report</h6>
-        <span class="pill-date" id="todayStamp"></span>
-    </div>
-
-    <!-- KPIs -->
-    <div class="row mb-4 mt-2">
+    {{-- KPIs --}}
+    <div class="row mb-4 mt-3">
         <div class="col-md-6">
             <div class="stats-card">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title mb-1">Total Customize Total Price</h6>
-                    <h4 class="fw-bold mb-0"><span class="kpi-accent">₹</span><span id="totalPrice">0</span></h4>
+                    <h4 class="fw-bold mb-0" id="totalPrice">₹0</h4>
                 </div>
             </div>
         </div>
@@ -326,13 +221,13 @@
             <div class="stats-card">
                 <div class="card-body text-center py-2">
                     <h6 class="card-title mb-1">Today Customize Price</h6>
-                    <h4 class="fw-bold mb-0"><span class="kpi-accent">₹</span><span id="todayPrice">0</span></h4>
+                    <h4 class="fw-bold mb-0" id="todayPrice">₹0</h4>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filter -->
+    {{-- Filter --}}
     <div class="filter-wrap mb-3">
         <div class="row g-3 align-items-end">
             <div class="col-md-4">
@@ -344,7 +239,9 @@
                 <input type="date" id="to_date" class="form-control" placeholder="dd-mm-yyyy">
             </div>
             <div class="col-md-4 d-flex align-items-end gap-2">
-                <button id="searchBtn" class="btn btn-grad w-100"><i class="fas fa-search me-1"></i> Search</button>
+                <button id="searchBtn" class="btn btn-grad w-100">
+                    <i class="fas fa-search me-1"></i> Search
+                </button>
                 <button id="resetBtn" class="btn btn-reset">Reset</button>
             </div>
 
@@ -360,7 +257,7 @@
         </div>
     </div>
 
-    <!-- Table -->
+    {{-- Table --}}
     <div class="table-responsive export-table">
         <table id="file-datatable" class="table table-bordered table-hover align-middle w-100">
             <thead>
@@ -397,10 +294,6 @@
 
     <script>
         $(function() {
-            // Stamp hero date
-            const todayDisp = moment().format('DD MMM YYYY');
-            $('#todayStamp').text(todayDisp);
-
             // Quick range helpers
             const $from = $('#from_date');
             const $to = $('#to_date');
@@ -431,13 +324,14 @@
                             year: (moment().month() >= 3 ? y : y - 1),
                             month: 3,
                             day: 1
-                        }).startOf('day');
-                        const fyEnd = moment(fyStart).add(1, 'year').subtract(1, 'day').endOf('day');
+                        }).startOf('day'); // Apr 1
+                        const fyEnd = moment(fyStart).add(1, 'year').subtract(1, 'day').endOf('day'); // Mar 31
                         start = fyStart;
                         end = fyEnd;
                         break;
                     }
                 }
+
                 $from.val(start.format('YYYY-MM-DD'));
                 $to.val(end.format('YYYY-MM-DD'));
             }
@@ -456,18 +350,6 @@
                 table.ajax.reload();
             });
 
-            function statusClass(s) {
-                if (!s) return 's-default';
-                const t = s.toString().toLowerCase();
-                if (['ok', 'success', 'done', 'completed', 'active'].includes(t))
-            return 's-ok s-active s-completed';
-                if (['pending', 'process', 'processing', 'in-progress'].includes(t))
-            return 's-pending s-processing';
-                if (['cancel', 'cancelled', 'failed', 'rejected'].includes(t))
-                return 's-cancelled s-failed s-rejected';
-                return 's-default';
-            }
-
             // DataTable
             const table = $('#file-datatable').DataTable({
                 processing: true,
@@ -479,27 +361,27 @@
                 buttons: [{
                         extend: 'copyHtml5',
                         text: 'Copy',
-                        className: 'btn btn-pill btn-copy'
+                        className: 'btn btn-pill-red'
                     },
                     {
                         extend: 'csvHtml5',
                         text: 'CSV',
-                        className: 'btn btn-pill btn-csv'
+                        className: 'btn btn-pill-red'
                     },
                     {
                         extend: 'excelHtml5',
                         text: 'Excel',
-                        className: 'btn btn-pill btn-excel'
+                        className: 'btn btn-pill-red'
                     },
                     {
                         extend: 'pdfHtml5',
                         text: 'PDF',
-                        className: 'btn btn-pill btn-pdf'
+                        className: 'btn btn-pill-red'
                     },
                     {
                         extend: 'print',
                         text: 'Print',
-                        className: 'btn btn-pill btn-print'
+                        className: 'btn btn-pill-red'
                     }
                 ],
                 ajax: {
@@ -509,14 +391,14 @@
                         d.to_date = $to.val();
                     },
                     dataSrc: function(json) {
-                        $('#totalPrice').text(Number(json.total_price_sum ?? 0).toLocaleString(
-                        'en-IN', {
-                            maximumFractionDigits: 2
-                        }));
-                        $('#todayPrice').text(Number(json.today_price_sum ?? 0).toLocaleString(
-                        'en-IN', {
-                            maximumFractionDigits: 2
-                        }));
+                        $('#totalPrice').text('₹' + Number(json.total_price_sum ?? 0).toLocaleString(
+                            'en-IN', {
+                                maximumFractionDigits: 2
+                            }));
+                        $('#todayPrice').text('₹' + Number(json.today_price_sum ?? 0).toLocaleString(
+                            'en-IN', {
+                                maximumFractionDigits: 2
+                            }));
                         return json.data || [];
                     }
                 },
@@ -538,13 +420,13 @@
 
                             const modalId = `addr_${userId || Math.random().toString(36).slice(2)}`;
                             const viewBtn = userId ?
-                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-sm btn-outline-primary">View</a>` :
+                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm">View</a>` :
                                 '';
 
                             const addressHtml = `
                                 <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
                                   <div class="modal-dialog"><div class="modal-content">
-                                    <div class="modal-header text-white" style="background: var(--indigo);">
+                                    <div class="modal-header text-white" style="background: var(--primary);">
                                         <h5 class="modal-title">Address</h5>
                                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                     </div>
@@ -564,7 +446,9 @@
                                 <small class="text-muted">${user.mobile_number || ''}</small>
                                 <div class="mt-1 d-flex gap-2">
                                   ${viewBtn}
-                                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#${modalId}">Address</button>
+                                  <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#${modalId}">
+                                    Address
+                                  </button>
                                 </div>
                               </div>
                               ${addressHtml}
@@ -584,6 +468,7 @@
                         name: 'flower_items',
                         orderable: false,
                         render: function(data, type, row) {
+                            // If server also sends a category, show as pill like screenshot
                             const cat = row.category_name ?
                                 `<a href="javascript:void(0)" class="cat-pill">${row.category_name}</a>` :
                                 '';
@@ -591,12 +476,14 @@
                             return `
                               <div class="d-flex align-items-center gap-2">
                                 ${cat}
-                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#${modalId}">View Items</button>
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#${modalId}">
+                                    View Items
+                                </button>
                               </div>
                               <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered">
                                   <div class="modal-content">
-                                    <div class="modal-header text-white" style="background: var(--indigo);">
+                                    <div class="modal-header text-white" style="background: var(--primary);">
                                       <h5 class="modal-title">Flower Items</h5>
                                       <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                     </div>
@@ -613,10 +500,7 @@
                         data: 'status',
                         name: 'status',
                         className: 'text-center',
-                        render: function(s) {
-                            const cls = statusClass(s);
-                            return `<span class="status-badge ${cls}">${(s||'').toString()}</span>`;
-                        }
+                        render: s => `<span class="status-badge">${(s||'').toString()}</span>`
                     },
                     {
                         data: 'price',
