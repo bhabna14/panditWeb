@@ -6,6 +6,9 @@
     <!-- CSRF Token -->
     <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
+    <!-- Google Font: Inter (professional, legible) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <!-- DataTables & Bootstrap CSS -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
@@ -19,84 +22,197 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
 
     <style>
+        :root {
+            /* Professional palette */
+            --pf-bg: #0b1021;
+            /* page background */
+            --pf-surface: #ffffff;
+            /* cards/tables */
+            --pf-subtle: #f6f7fb;
+            /* subtle surfaces */
+            --pf-border: #e7e9f1;
+            /* borders */
+            --pf-text: #111827;
+            /* body text */
+            --pf-muted: #6b7280;
+            /* secondary text */
+
+            --pf-primary: #1f3a8a;
+            /* deep indigo */
+            --pf-primary-600: #2342a4;
+            /* hover */
+            --pf-accent: #0ea5e9;
+            /* cyan accent */
+
+            /* Semantic */
+            --pf-success-bg: #e8f5ee;
+            --pf-success-fg: #166534;
+
+            --pf-warning-bg: #fff7e6;
+            --pf-warning-fg: #92400e;
+
+            --pf-danger-bg: #fde8e8;
+            --pf-danger-fg: #b91c1c;
+
+            --pf-info-bg: #e6f0ff;
+            --pf-info-fg: #1d4ed8;
+
+            /* Elevation */
+            --pf-shadow-sm: 0 2px 10px rgba(15, 23, 42, .05);
+            --pf-shadow-md: 0 10px 24px rgba(2, 6, 23, .08);
+        }
+
+        /* Page */
+        body {
+            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif !important;
+            color: var(--pf-text);
+            background:
+                radial-gradient(1200px 600px at 10% -10%, rgba(14, 165, 233, .08), transparent 60%),
+                radial-gradient(1200px 600px at 110% 10%, rgba(31, 58, 138, .12), transparent 55%),
+                var(--pf-subtle);
+        }
+
         /* KPIs */
         .kpi-card {
-            border-radius: 14px;
-            padding: 16px 18px;
-            background: linear-gradient(135deg, #ffffff, #fafafa);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
-            border: 1px solid #eaeaea;
-            transition: transform .18s ease;
+            border-radius: 16px;
+            padding: 18px 20px;
+            background: linear-gradient(180deg, #fff, #fafbff);
+            box-shadow: var(--pf-shadow-md);
+            border: 1px solid var(--pf-border);
+            transition: transform .18s ease, box-shadow .18s ease;
             height: 100%;
         }
 
         .kpi-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-2px);
+            box-shadow: 0 16px 30px rgba(2, 6, 23, .10);
         }
 
         .kpi-label {
             font-size: .85rem;
-            opacity: .8;
-            margin-bottom: 4px;
+            color: var(--pf-muted);
+            margin-bottom: 6px;
         }
 
         .kpi-value {
             font-weight: 800;
-            font-size: 1.25rem;
+            font-size: 1.35rem;
             letter-spacing: .2px;
+            color: var(--pf-text);
+        }
+
+        .kpi-icon {
+            color: var(--pf-accent);
+            opacity: .9;
         }
 
         /* Filter bar */
         .filter-card {
-            border-radius: 14px;
-            border: 1px solid #ececec;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, .05);
+            border-radius: 16px;
+            border: 1px solid var(--pf-border);
+            box-shadow: var(--pf-shadow-sm);
+            background: var(--pf-surface);
         }
 
         .range-btns .btn {
             border-radius: 999px;
+            border-color: var(--pf-border);
+            color: var(--pf-primary);
+            background: #fff;
+        }
+
+        .range-btns .btn:hover {
+            border-color: var(--pf-primary);
         }
 
         .range-btns .btn.active {
-            background: #0d6efd;
+            background: var(--pf-primary);
+            border-color: var(--pf-primary);
             color: #fff;
         }
 
-        /* Table tweaks */
+        .btn-primary {
+            background: var(--pf-primary);
+            border-color: var(--pf-primary);
+        }
+
+        .btn-primary:hover {
+            background: var(--pf-primary-600);
+            border-color: var(--pf-primary-600);
+        }
+
+        /* Inputs */
+        .form-control {
+            border-radius: 10px;
+            border-color: var(--pf-border);
+        }
+
+        .form-label {
+            color: var(--pf-muted);
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table {
+            border-color: var(--pf-border) !important;
+        }
+
+        .table thead.table-light th {
+            background: #f3f6ff !important;
+            color: #0f172a !important;
+            border-bottom: 1px solid var(--pf-border) !important;
+            font-weight: 700;
+        }
+
         table.dataTable tbody td {
             vertical-align: middle;
         }
 
+        .table-hover tbody tr:hover {
+            background: #f8fbff;
+        }
+
+        /* Status badges */
         .status-badge {
-            padding: .35rem .6rem;
+            padding: .38rem .65rem;
             border-radius: 999px;
             font-size: .75rem;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: capitalize;
+            border: 1px solid transparent;
         }
 
         .status-active {
-            background: #e6f4ea;
-            color: #1e7e34;
+            background: var(--pf-success-bg);
+            color: var(--pf-success-fg);
+            border-color: #cdebd7;
         }
 
         .status-paused {
-            background: #fff3cd;
-            color: #856404;
+            background: var(--pf-warning-bg);
+            color: var(--pf-warning-fg);
+            border-color: #ffe3b3;
         }
 
         .status-expired {
-            background: #fde7e9;
-            color: #c21f3a;
+            background: var(--pf-danger-bg);
+            color: var(--pf-danger-fg);
+            border-color: #fac6c6;
         }
 
         .status-resume {
-            background: #e7f1ff;
-            color: #0d6efd;
+            background: var(--pf-info-bg);
+            color: var(--pf-info-fg);
+            border-color: #c9daff;
         }
 
+        /* Customer cell */
         .customer-meta small {
-            color: #6c757d;
+            color: var(--pf-muted);
+        }
+
+        .action-btns .btn {
+            border-radius: 10px;
         }
     </style>
 @endsection
@@ -111,10 +227,10 @@
                 <div class="kpi-card">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="kpi-label text-secondary">Total Subscription Revenue</div>
+                            <div class="kpi-label">Total Subscription Revenue</div>
                             <div class="kpi-value" id="totalPrice">₹0</div>
                         </div>
-                        <i class="bi bi-cash-coin fs-3 text-success"></i>
+                        <i class="bi bi-cash-coin fs-3 kpi-icon"></i>
                     </div>
                 </div>
             </div>
@@ -122,10 +238,10 @@
                 <div class="kpi-card">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="kpi-label text-secondary">Renew Customers Revenue</div>
+                            <div class="kpi-label">Renew Customers Revenue</div>
                             <div class="kpi-value" id="renewCustomerTotalPrice">₹0</div>
                         </div>
-                        <i class="bi bi-arrow-repeat fs-3 text-primary"></i>
+                        <i class="bi bi-arrow-repeat fs-3 kpi-icon"></i>
                     </div>
                 </div>
             </div>
@@ -133,10 +249,10 @@
                 <div class="kpi-card">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="kpi-label text-secondary">New Subscriptions Revenue</div>
+                            <div class="kpi-label">New Subscriptions Revenue</div>
                             <div class="kpi-value" id="newUserTotalPrice">₹0</div>
                         </div>
-                        <i class="bi bi-person-plus fs-3 text-info"></i>
+                        <i class="bi bi-person-plus fs-3 kpi-icon"></i>
                     </div>
                 </div>
             </div>
@@ -147,7 +263,7 @@
             <div class="card-body">
                 <div class="row g-3 align-items-end">
                     <div class="col-12 col-lg-6">
-                        <label class="form-label fw-semibold">Quick Range</label>
+                        <label class="form-label">Quick Range</label>
                         <div class="btn-group range-btns flex-wrap" role="group" aria-label="Quick Ranges">
                             <button type="button" class="btn btn-outline-primary btn-sm range-quick active"
                                 data-range="today">
@@ -171,11 +287,11 @@
                     <div class="col-12 col-lg-5">
                         <div class="row g-2">
                             <div class="col-6">
-                                <label for="from_date" class="form-label fw-semibold">From</label>
+                                <label for="from_date" class="form-label">From</label>
                                 <input type="date" id="from_date" name="from_date" class="form-control" disabled>
                             </div>
                             <div class="col-6">
-                                <label for="to_date" class="form-label fw-semibold">To</label>
+                                <label for="to_date" class="form-label">To</label>
                                 <input type="date" id="to_date" name="to_date" class="form-control" disabled>
                             </div>
                         </div>
@@ -191,7 +307,7 @@
         </div>
 
         {{-- Table --}}
-        <div class="card">
+        <div class="card" style="border-radius:16px; border:1px solid var(--pf-border); box-shadow: var(--pf-shadow-sm);">
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="file-datatable" class="table table-bordered table-hover w-100">
@@ -200,8 +316,8 @@
                                 <th style="min-width:280px">Customer</th>
                                 <th>Purchase Period</th>
                                 <th>Duration</th>
-                                <th>Price</th>
-                                <th>Status</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-center">Status</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -264,7 +380,6 @@
                         end = moment().endOf('year');
                         break;
                     case 'custom':
-                        // enable fields and keep values as-is or default to today
                         $from.prop('disabled', false);
                         $to.prop('disabled', false);
                         if (!$from.val()) $from.val(today.format('YYYY-MM-DD'));
@@ -278,32 +393,6 @@
 
             // Initialize with "Today"
             setQuickRange('today');
-
-            // Quick range buttons
-            $('.range-quick').on('click', function() {
-                $('.range-quick').removeClass('active');
-                $(this).addClass('active');
-                setQuickRange($(this).data('range'));
-                table.ajax.reload();
-                updateExportLink();
-            });
-
-            // Manual date change (only when custom)
-            $from.add($to).on('change', function() {
-                if ($('.range-quick.active').data('range') === 'custom') {
-                    table.ajax.reload();
-                    updateExportLink();
-                }
-            });
-
-            function updateExportLink() {
-                const params = new URLSearchParams({
-                    export: 'csv',
-                    from_date: $from.val() || '',
-                    to_date: $to.val() || ''
-                });
-                $('#exportCsv').attr('href', "{{ route('subscription.report') }}?" + params.toString());
-            }
 
             // ------ DataTable ------
             const table = $('#file-datatable').DataTable({
@@ -321,7 +410,6 @@
                         d.range = $('.range-quick.active').data('range'); // optional on server
                     },
                     dataSrc: function(json) {
-                        // KPI values (ensure numbers)
                         const total = parseFloat(json.total_price || 0);
                         const renewTotal = parseFloat(json.renew_user_price || 0);
                         const newUserTotal = parseFloat(json.new_user_price || 0);
@@ -358,7 +446,7 @@
                                 `addressModal${userId || Math.random().toString(36).slice(2)}`;
 
                             const viewBtn = userId ?
-                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-info btn-sm" title="View Customer">
+                                `<a href="/admin/show-customer/${userId}/details" class="btn btn-outline-primary btn-sm" title="View Customer">
                                         <i class="fas fa-eye"></i>
                                    </a>` :
                                 '';
@@ -367,9 +455,9 @@
                                 <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <div class="modal-header bg-primary text-white">
+                                            <div class="modal-header text-white" style="background: var(--pf-primary);">
                                                 <h5 class="modal-title"><i class="fas fa-home me-2"></i>Address Details</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body">
                                                 <p class="mb-1"><strong>Address:</strong> ${(address.apartment_flat_plot || '')}, ${(address.apartment_name || '')}, ${(address.locality || '')}</p>
@@ -390,9 +478,9 @@
                                 <div class="customer-meta" data-bs-toggle="tooltip" data-bs-html="true" title="${tooltip}">
                                     <div class="fw-semibold">${user.name || 'N/A'}</div>
                                     <small><i class="bi bi-telephone me-1"></i>${user.mobile_number || 'N/A'}</small>
-                                    <div class="mt-2 d-flex gap-2">
+                                    <div class="mt-2 d-flex gap-2 action-btns">
                                         ${viewBtn}
-                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Show Address">
+                                        <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#${modalId}" title="Show Address">
                                             <i class="fas fa-map-marker-alt"></i>
                                         </button>
                                     </div>
@@ -404,7 +492,6 @@
                     {
                         data: 'purchase_date',
                         render: function(data, type, row) {
-                            // support {start, end} OR simple date on server
                             const start = (row.purchase_date && row.purchase_date.start) ? row
                                 .purchase_date.start : (row.start_date || data?.start || data);
                             const end = (row.purchase_date && row.purchase_date.end) ? row
@@ -446,6 +533,23 @@
                 ]
             });
 
+            // Quick range buttons
+            $('.range-quick').on('click', function() {
+                $('.range-quick').removeClass('active');
+                $(this).addClass('active');
+                setQuickRange($(this).data('range'));
+                table.ajax.reload();
+                updateExportLink();
+            });
+
+            // Manual date change (only when custom)
+            $('#from_date, #to_date').on('change', function() {
+                if ($('.range-quick.active').data('range') === 'custom') {
+                    table.ajax.reload();
+                    updateExportLink();
+                }
+            });
+
             // Go / Refresh
             $('#searchBtn').on('click', function() {
                 table.ajax.reload();
@@ -455,23 +559,28 @@
                 table.ajax.reload(null, false);
             });
 
+            function updateExportLink() {
+                const params = new URLSearchParams({
+                    export: 'csv',
+                    from_date: $('#from_date').val() || '',
+                    to_date: $('#to_date').val() || ''
+                });
+                $('#exportCsv').attr('href', "{{ route('subscription.report') }}?" + params.toString());
+            }
+            updateExportLink();
+
             // Re-init tooltips after table draw
             $('#file-datatable').on('draw.dt', function() {
-                // Dispose any existing
                 $('[data-bs-toggle="tooltip"]').each(function() {
                     const t = bootstrap.Tooltip.getInstance(this);
                     if (t) t.dispose();
                 });
-                // Init new
                 $('[data-bs-toggle="tooltip"]').tooltip({
                     html: true,
                     boundary: 'window',
                     trigger: 'hover'
                 });
             });
-
-            // Initial export link
-            updateExportLink();
         });
     </script>
 @endsection
