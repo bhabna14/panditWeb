@@ -50,7 +50,7 @@
             background: #fff;
             box-shadow: 0 8px 24px rgba(75, 85, 99, .08);
             transition: transform .15s ease, box-shadow .2s ease;
-            min-width: 160px;
+            min-width: 140px;
         }
 
         .metric-card:hover {
