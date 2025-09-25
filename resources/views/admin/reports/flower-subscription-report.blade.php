@@ -178,11 +178,6 @@
 @section('content')
     <div class="container-fluid px-0">
 
-        {{-- Optional hero (mirrors screenshot style) --}}
-        <div class="page-hero mb-3 mt-4">
-            <h6 class="mb-0 fw-semibold">Subscription Report</h6>
-            <small class="opacity-75">Track revenue, durations and statuses with quick ranges</small>
-        </div>
 
         {{-- KPIs --}}
         <div class="row g-3 mt-2 mb-3">
