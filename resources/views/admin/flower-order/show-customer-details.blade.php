@@ -376,7 +376,7 @@
                                             <th>Request</th>
                                             <th>Delivery Date</th>
                                             <th>Items (Flowers / Garlands)</th>
-                                            <th class="text-end">Requested Flower Price</th>
+                                            <th class="text-end">Flower Price</th>
                                             <th class="text-end">Delivery Charge</th>
                                             <th class="text-end">Total Amount</th>
                                             <th>Status</th>
