@@ -10,6 +10,27 @@
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
 
     <style>
+        /* ====== Hero ====== */
+        .page-hero {
+            border-radius: 16px;
+            background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 55%, #22c55e 100%);
+            color: #fff;
+            padding: 16px 18px;
+            box-shadow: 0 14px 28px rgba(0, 0, 0, .14);
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .25rem .6rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .14);
+            border: 1px solid rgba(255, 255, 255, .28);
+            font-size: .8rem;
+            color: #fff;
+        }
+
         /* ====== Page tweaks ====== */
         .filter-card {
             border: 1px solid #e7ebf0;
@@ -51,33 +72,16 @@
             z-index: 2
         }
 
-        /* Status badges */
+        .table-hover tbody tr:hover {
+            background-color: #f7faff;
+        }
+
+        /* Badges & utilities */
         .badge-status {
             font-weight: 600;
             font-size: .78rem
         }
 
-        /* Payment list */
-        .pay-list {
-            list-style: none;
-            padding-left: 0;
-            margin-bottom: 0
-        }
-
-        .pay-list li {
-            display: flex;
-            justify-content: space-between;
-            gap: .75rem
-        }
-
-        .pay-total {
-            border-top: 1px dashed #e2e8f0;
-            margin-top: .25rem;
-            padding-top: .25rem;
-            font-weight: 600
-        }
-
-        /* Address block */
         .addr {
             white-space: normal;
             line-height: 1.25rem
@@ -87,7 +91,6 @@
             color: #64748b
         }
 
-        /* Tiny utilities */
         .text-xs {
             font-size: .75rem
         }
@@ -104,11 +107,7 @@
             white-space: nowrap
         }
 
-        .w-180 {
-            width: 180px
-        }
-
-        /* Cards for summary metrics */
+        /* Metric cards */
         .metric-card {
             background: #fff;
             border: 1px solid #e7ebf0;
@@ -130,59 +129,21 @@
             font-size: .8rem;
             color: #64748b
         }
-
-        /* Location actions */
-        .loc-actions a {
-            text-decoration: none
-        }
-
-        .loc-actions .dot {
-            display: inline-block;
-            width: 4px;
-            height: 4px;
-            background: #cbd5e1;
-            border-radius: 50%;
-            margin: 0 .4rem
-        }
     </style>
 @endsection
 
 @section('content')
-    @php
-        // ===== Summary metrics precompute (safe in view for convenience) =====
-        $totalRows = 0;
-        $delivered = 0;
-        $pending = 0;
-        $inTransit = 0;
-        $cancelled = 0;
-        $uniqueRiders = [];
-        $sumPaidAll = 0.0;
-        foreach ($deliveryHistory as $h) {
-            $totalRows++;
-            $st = strtolower(trim($h->delivery_status ?? ''));
-            if (in_array($st, ['delivered', 'completed'])) {
-                $delivered++;
-            } elseif (in_array($st, ['pending', 'awaiting'])) {
-                $pending++;
-            } elseif (in_array($st, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])) {
-                $inTransit++;
-            } elseif (in_array($st, ['cancelled', 'canceled', 'failed'])) {
-                $cancelled++;
-            }
-
-            if (!empty(optional($h->rider)->rider_name)) {
-                $uniqueRiders[optional($h->rider)->rider_name] = true;
-            }
-
-            // Sum all payments tied to the order (if any)
-            if (!empty(optional($h->order)->flowerPayments)) {
-                foreach ($h->order->flowerPayments as $p) {
-                    $sumPaidAll += floatval($p->paid_amount ?? 0);
-                }
-            }
-        }
-        $uniqueRiderCount = count($uniqueRiders);
-    @endphp
+    <!-- Hero -->
+    <div class="page-hero mb-3 mt-2 d-flex align-items-center justify-content-between">
+        <div>
+            <h5 class="mb-1">Manage Delivery History</h5>
+            <div class="opacity-90">Default view shows the last 7 days. Use filters to refine.</div>
+        </div>
+        <span class="pill">
+            <i class="bi bi-lightning-charge-fill"></i>
+            Updated • {{ now()->format('d M Y, h:i A') }}
+        </span>
+    </div>
 
     <!-- Flash messages -->
     @if (session()->has('success'))
@@ -193,29 +154,23 @@
     @endif
 
     <!-- Summary metrics -->
-    <div class="row g-3 mb-3 mt-4">
-        <div class="col-6 col-md-3">
+    <div class="row g-3 mb-3">
+        <div class="col-6 col-md-4">
             <div class="metric-card p-3 h-100">
-                <div class="label">Total records</div>
-                <div class="value">{{ number_format($totalRows) }}</div>
+                <div class="label">Total records (in range)</div>
+                <div class="value">{{ number_format($metrics['total'] ?? 0) }}</div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4">
             <div class="metric-card p-3 h-100">
                 <div class="label">Delivered</div>
-                <div class="value text-success">{{ number_format($delivered) }}</div>
+                <div class="value text-success">{{ number_format($metrics['delivered'] ?? 0) }}</div>
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4">
             <div class="metric-card p-3 h-100">
                 <div class="label">Unique riders</div>
-                <div class="value">{{ number_format($uniqueRiderCount) }}</div>
-            </div>
-        </div>
-        <div class="col-12 col-md-3">
-            <div class="metric-card p-3 h-100">
-                <div class="label">Total paid (all rows)</div>
-                <div class="value">₹ {{ number_format($sumPaidAll, 2) }}</div>
+                <div class="value">{{ number_format($metrics['unique_riders'] ?? 0) }}</div>
             </div>
         </div>
     </div>
@@ -228,12 +183,12 @@
                     <div class="col-12 col-md-3">
                         <label for="from_date" class="form-label">From Date</label>
                         <input type="date" id="from_date" name="from_date" class="form-control"
-                            value="{{ request('from_date') }}">
+                            value="{{ old('from_date', $from_date ?? request('from_date')) }}">
                     </div>
                     <div class="col-12 col-md-3">
                         <label for="to_date" class="form-label">To Date</label>
                         <input type="date" id="to_date" name="to_date" class="form-control"
-                            value="{{ request('to_date') }}">
+                            value="{{ old('to_date', $to_date ?? request('to_date')) }}">
                     </div>
                     <div class="col-12 col-md-3">
                         <label for="rider_id" class="form-label">Rider</label>
@@ -247,15 +202,17 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-12 col-md-3 d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Generate</button>
-                        <button type="button" class="btn btn-outline-secondary btn-reset" id="resetFilters">Reset</button>
+                    <div class="col-12 col-md-3 d-grid">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Apply</button>
+                        <button type="button" class="btn btn-outline-secondary btn-reset mt-2"
+                            id="resetFilters">Reset</button>
                     </div>
                 </div>
 
                 <div class="d-flex flex-wrap gap-2 mt-3">
                     <span class="quick-chip" data-range="today">Today</span>
                     <span class="quick-chip" data-range="yesterday">Yesterday</span>
+                    <span class="quick-chip" data-range="last_7_days">Last 7 Days</span>
                     <span class="quick-chip" data-range="this_week">This Week</span>
                     <span class="quick-chip" data-range="this_month">This Month</span>
                     <span class="quick-chip" data-range="last_month">Last Month</span>
@@ -274,7 +231,6 @@
                             <th data-priority="1">Order ID</th>
                             <th data-priority="2">User Number</th>
                             <th>Product</th>
-                            <th>Payment Details</th>
                             <th style="min-width:260px">Address</th>
                             <th>Rider</th>
                             <th data-priority="3">Status</th>
@@ -292,35 +248,25 @@
                                 $locName = optional(optional($addr)->localityDetails)->locality_name;
                                 $rider = optional($history->rider);
                                 $lat = $history->latitude;
-                                $lng = $history->longitude; // kept name but it's longitude
+                                $lng = $history->longitude;
 
-                                    $status = trim($history->delivery_status ?? '');
-                                    $statusLc = strtolower($status);
-                                    $badge = 'secondary';
-                                    if (in_array($statusLc, ['delivered', 'completed'])) {
-                                        $badge = 'success';
-                                    } elseif (
-                                        in_array($statusLc, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])
-                                    ) {
-                                        $badge = 'info';
-                                    } elseif (in_array($statusLc, ['pending', 'awaiting'])) {
-                                        $badge = 'warning';
-                                    } elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
-                                        $badge = 'danger';
-                                }
-
-                                // Per-order payment total (if multiple payments exist)
-                                $orderTotalPaid = 0.0;
-                                if (!empty($order->flowerPayments)) {
-                                    foreach ($order->flowerPayments as $pay) {
-                                        $orderTotalPaid += floatval($pay->paid_amount ?? 0);
-                                    }
+                                $status = trim($history->delivery_status ?? '');
+                                $statusLc = strtolower($status);
+                                $badge = 'secondary';
+                                if (in_array($statusLc, ['delivered', 'completed'])) {
+                                    $badge = 'success';
+                                } elseif (
+                                    in_array($statusLc, ['in_transit', 'out_for_delivery', 'dispatch', 'shipped'])
+                                ) {
+                                    $badge = 'info';
+                                } elseif (in_array($statusLc, ['pending', 'awaiting'])) {
+                                    $badge = 'warning';
+                                } elseif (in_array($statusLc, ['cancelled', 'canceled', 'failed'])) {
+                                    $badge = 'danger';
                                 }
                             @endphp
                             <tr>
-                                <td class="nowrap fw-600">
-                                    {{ $order->order_id ?? 'N/A' }}
-                                </td>
+                                <td class="nowrap fw-600">{{ $order->order_id ?? 'N/A' }}</td>
                                 <td>{{ $user->mobile_number ?? 'N/A' }}</td>
                                 <td>
                                     <div class="fw-600">{{ $product->name ?? 'N/A' }}</div>
@@ -328,53 +274,34 @@
                                         <div class="text-xxs text-muted">{{ $product->category }}</div>
                                     @endif
                                 </td>
-                                <td>
-                                    @if ($order && $order->flowerPayments && count($order->flowerPayments))
-                                        <ul class="pay-list">
-                                            @foreach ($order->flowerPayments as $payment)
-                                                <li>
-                                                    <span class="text-xs">Paid</span>
-                                                    <span class="text-xs">₹
-                                                        {{ number_format($payment->paid_amount, 2) }}</span>
-                                                </li>
-                                            @endforeach
-                                            <li class="pay-total">
-                                                <span>Total</span>
-                                                <span>₹ {{ number_format($orderTotalPaid, 2) }}</span>
-                                            </li>
-                                        </ul>
-                                    @else
-                                        <span class="text-muted text-xs">N/A</span>
-                                    @endif
-                                </td>
                                 <td class="addr">
                                     @if ($addr)
                                         <div class="fw-600">
                                             {{ $addr->apartment_flat_plot ?? '' }}{{ $addr->apartment_flat_plot && $locName ? ',' : '' }}
-                                            {{ $locName ?? '' }}</div>
+                                            {{ $locName ?? '' }}
+                                        </div>
                                         @if (!empty($addr->landmark))
                                             <div><small>Landmark:</small> {{ $addr->landmark }}</div>
                                         @endif
-                                        <div class="text-xs text-muted">{{ $addr->city ?? '' }}
-                                            {{ !empty($addr->state) ? ', ' . $addr->state : '' }}
-                                            {{ !empty($addr->pincode) ? ' - ' . $addr->pincode : '' }}</div>
+                                        <div class="text-xs text-muted">
+                                            {{ $addr->city ?? '' }}{{ !empty($addr->state) ? ', ' . $addr->state : '' }}
+                                            {{ !empty($addr->pincode) ? ' - ' . $addr->pincode : '' }}
+                                        </div>
                                     @else
                                         <span class="text-muted text-xs">N/A</span>
                                     @endif
                                 </td>
                                 <td>{{ $rider->rider_name ?? 'N/A' }}</td>
-                                <td>
-                                    <span class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span>
+                                <td><span class="badge bg-{{ $badge }} badge-status">{{ $status ?: 'N/A' }}</span>
                                 </td>
                                 <td>
                                     @if (!empty($lat) && !empty($lng))
-                                        <div class="text-xs">
-                                            <span class="fw-600">{{ $lat }}, {{ $lng }}</span>
-                                        </div>
-                                        <div class="loc-actions text-xxs mt-1">
+                                        <div class="text-xs"><span class="fw-600">{{ $lat }},
+                                                {{ $lng }}</span></div>
+                                        <div class="text-xxs mt-1">
                                             <a href="https://www.google.com/maps?q={{ $lat }},{{ $lng }}"
                                                 target="_blank" rel="noopener">Open in Maps</a>
-                                            <span class="dot"></span>
+                                            &nbsp;·&nbsp;
                                             <a href="#" class="copy-coords"
                                                 data-coords="{{ $lat }}, {{ $lng }}">Copy</a>
                                         </div>
@@ -388,7 +315,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="text-center py-4">
+                                <td colspan="8" class="text-center py-4">
                                     <div class="text-muted">No delivery history found for the selected filters.</div>
                                 </td>
                             </tr>
@@ -429,7 +356,8 @@
 
             // Quick date ranges
             function toISODate(d) {
-                return d.toISOString().slice(0, 10);
+                const tzOffset = d.getTimezoneOffset() * 60000;
+                return new Date(d.getTime() - tzOffset).toISOString().slice(0, 10);
             }
 
             function setRange(type) {
@@ -438,17 +366,21 @@
                     to = new Date();
                 switch (type) {
                     case 'today':
-                        // from and to = today
+                        // from = today 00:00, to = today 23:59
                         break;
                     case 'yesterday':
                         from.setDate(now.getDate() - 1);
                         to.setDate(now.getDate() - 1);
                         break;
-                    case 'this_week':
-                        const day = now.getDay(); // 0 (Sun) - 6 (Sat)
-                        const diff = (day === 0 ? 6 : day - 1); // make Monday start
+                    case 'last_7_days':
+                        from.setDate(now.getDate() - 6);
+                        break;
+                    case 'this_week': {
+                        const day = now.getDay(); // 0 Sun .. 6 Sat
+                        const diff = (day === 0 ? 6 : day - 1); // Monday-start
                         from.setDate(now.getDate() - diff);
                         break;
+                    }
                     case 'this_month':
                         from = new Date(now.getFullYear(), now.getMonth(), 1);
                         to = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -468,11 +400,34 @@
                 $('#filterForm').trigger('submit');
             });
 
+            // Mark "Last 7 Days" as active by default when inputs match controller default
+            @if (($from_date ?? null) && ($to_date ?? null))
+                (function markDefaultChip() {
+                    const f = $('#from_date').val();
+                    const t = $('#to_date').val();
+                    const now = new Date();
+                    const todayISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(
+                        0, 10);
+                    const sevenDaysAgo = new Date(now);
+                    sevenDaysAgo.setDate(now.getDate() - 6);
+                    const sevenISO = new Date(sevenDaysAgo.getTime() - sevenDaysAgo.getTimezoneOffset() * 60000)
+                        .toISOString().slice(0, 10);
+                    if (f === sevenISO && t === todayISO) {
+                        $('.quick-chip[data-range="last_7_days"]').addClass('active');
+                    }
+                })();
+            @endif
+
             // Reset filters
             $('#resetFilters').on('click', function() {
-                $('#from_date').val('');
-                $('#to_date').val('');
+                const now = new Date();
+                const seven = new Date();
+                seven.setDate(now.getDate() - 6);
+                $('#from_date').val(toISODate(seven));
+                $('#to_date').val(toISODate(now));
                 $('#rider_id').val('').trigger('change');
+                $('.quick-chip').removeClass('active');
+                $('.quick-chip[data-range="last_7_days"]').addClass('active');
                 $('#filterForm').trigger('submit');
             });
 
@@ -486,8 +441,8 @@
                     [10, 25, 50, 100, 'All']
                 ],
                 order: [
-                    [8, 'desc']
-                ], // Delivery Time column
+                    [7, 'desc']
+                ], // Delivery Time column (0-indexed)
                 dom: '<"row mb-2"<"col-md-6"l><"col-md-6 text-md-end"B>>frtip',
                 buttons: [{
                         extend: 'copyHtml5',
@@ -517,10 +472,13 @@
                     }
                 ],
                 columnDefs: [{
-                        targets: [3, 4, 7],
+                        targets: [3, 4, 6],
                         responsivePriority: 10001
-                    }, // let long columns drop first on small screens
-                ]
+                    } // let long columns drop first on small screens
+                ],
+                language: {
+                    info: "Showing _START_ to _END_ of _TOTAL_ deliveries"
+                }
             });
 
             // Copy coordinates

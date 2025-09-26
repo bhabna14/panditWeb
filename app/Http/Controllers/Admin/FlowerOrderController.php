@@ -617,58 +617,89 @@ public function showorderdetails($id)
         // Redirect back with a success message
         return redirect()->back()->with('success', 'Rider updated successfully.');
     }
+use Carbon\Carbon;
+use App\Models\DeliveryHistory;
+use App\Models\RiderDetails;
 
-    public function mngdeliveryhistory(Request $request)
-    {
-        try {
-            $filter = $request->input('filter', 'all');
+public function mngdeliveryhistory(Request $request)
+{
+    try {
+        $filter = $request->input('filter', 'all');
+        $tz     = config('app.timezone', 'Asia/Kolkata');
 
-            // Build the query
-            $query = DeliveryHistory::with([
-                'order.user',
-                'order.flowerProduct',
-                'order.flowerPayments',
-                'order.address.localityDetails',
-                'rider'
-            ])->orderBy('created_at', 'desc');
+        // ----- Resolve date range -----
+        // Priority: explicit from/to -> predefined filter -> default last 7 days (including today)
+        $from = null;
+        $to   = null;
 
-            // Apply date filters
-            if ($request->has('from_date') && $request->has('to_date')) {
-                $query->whereBetween('created_at', [
-                    Carbon::parse($request->input('from_date')),
-                    Carbon::parse($request->input('to_date'))
-                ]);
+        if ($request->filled('from_date') && $request->filled('to_date')) {
+            $from = Carbon::parse($request->input('from_date'), $tz)->startOfDay();
+            $to   = Carbon::parse($request->input('to_date'),   $tz)->endOfDay();
+        } else {
+            // Predefined filter short-hands (optional, kept for compatibility)
+            switch ($filter) {
+                case 'todaydelivery':
+                    $from = Carbon::now($tz)->startOfDay();
+                    $to   = Carbon::now($tz)->endOfDay();
+                    break;
+                case 'monthlydelivery':
+                    $from = Carbon::now($tz)->startOfMonth();
+                    $to   = Carbon::now($tz)->endOfMonth();
+                    break;
+                default:
+                    // DEFAULT: last 7 days including today
+                    $from = Carbon::now($tz)->subDays(6)->startOfDay();
+                    $to   = Carbon::now($tz)->endOfDay();
+                    break;
             }
-
-            // Apply rider filter
-            if ($request->filled('rider_id')) {
-                $query->where('rider_id', $request->input('rider_id'));
-            }
-
-            // Apply predefined filter (e.g., today or monthly)
-            if ($filter == 'todaydelivery') {
-                $query->whereDate('created_at', Carbon::today());
-            } elseif ($filter == 'monthlydelivery') {
-                $query->whereBetween('created_at', [
-                    now()->startOfMonth(),
-                    now()->endOfMonth()
-                ]);
-            }
-
-            // Fetch results
-            $deliveryHistory = $query->get();
-
-            // Total deliveries for today
-            $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', Carbon::today())->count();
-
-            // Get active riders for dropdown
-            $riders = RiderDetails::where('status', 'active')->get();
-
-            return view('admin.flower-order.manage-delivery-history', compact('deliveryHistory', 'totalDeliveriesToday', 'riders'));
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
         }
+
+        // ----- Base query -----
+        $query = DeliveryHistory::with([
+            'order.user',
+            'order.flowerProduct',
+            'order.flowerPayments',
+            'order.address.localityDetails',
+            'rider',
+        ])->whereBetween('created_at', [$from, $to])
+          ->orderBy('created_at', 'desc');
+
+        // Rider filter
+        if ($request->filled('rider_id')) {
+            $query->where('rider_id', $request->input('rider_id'));
+        }
+
+        $deliveryHistory = $query->get();
+
+        // Totals for today (useful KPI)
+        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', Carbon::now($tz)->toDateString())->count();
+
+        // Riders for dropdown
+        $riders = RiderDetails::where('status', 'active')->orderBy('rider_name')->get();
+
+        // Compute lightweight metrics for top tiles
+        $metrics = [
+            'total'   => $deliveryHistory->count(),
+            'delivered' => $deliveryHistory->filter(fn($h) => in_array(strtolower($h->delivery_status ?? ''), ['delivered', 'completed']))->count(),
+            'unique_riders' => $deliveryHistory->pluck('rider.rider_name')->filter()->unique()->count(),
+        ];
+
+        // Pass resolved dates back to the view for inputs to reflect
+        $from_date = $from->toDateString();
+        $to_date   = $to->toDateString();
+
+        return view('admin.flower-order.manage-delivery-history', compact(
+            'deliveryHistory',
+            'totalDeliveriesToday',
+            'riders',
+            'metrics',
+            'from_date',
+            'to_date'
+        ));
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => 'Failed to fetch delivery history: ' . $e->getMessage()]);
     }
+}
 
     public function showRiderDetails($id)
     {
