@@ -258,11 +258,11 @@
             <div class="col-lg-6">
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="label">Total Pickups</div>
+                        <div class="label">Pickups</div>
                         <div class="value">{{ number_format($summary['total_pickups'] ?? 0) }}</div>
                     </div>
                     <div class="stat-card">
-                        <div class="label">Total Items</div>
+                        <div class="label">Items</div>
                         <div class="value">{{ number_format($summary['total_items'] ?? 0) }}</div>
                     </div>
                     <div class="stat-card">
