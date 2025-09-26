@@ -459,6 +459,11 @@ class FlowerOrderController extends Controller
             )
         );
     }
+// app/Http/Controllers/Admin/YourController.php
+
+use App\Models\Subscription;
+use App\Models\DeliveryHistory;
+use Carbon\Carbon;
 
 public function showorderdetails($id)
 {
@@ -475,34 +480,53 @@ public function showorderdetails($id)
     $periodEndRaw = $order->new_date ?: $order->end_date;
     $periodEnd = $periodEndRaw ? Carbon::parse($periodEndRaw)->endOfDay() : null;
 
-    // Fetch delivery history within the window for this order
+    // Filter toggle: ?range=period (default) or ?range=all
+    $range = request()->string('range')->lower()->value();
+    if (!in_array($range, ['period', 'all'], true)) {
+        $range = 'period';
+    }
+
     $deliveriesQuery = DeliveryHistory::with('rider')
         ->where('order_id', $order->order_id)
         ->orderByDesc('created_at');
 
-    if ($periodStart && $periodEnd) {
-        $deliveriesQuery->whereBetween('created_at', [$periodStart, $periodEnd]);
-    } elseif ($periodStart) {
-        $deliveriesQuery->where('created_at', '>=', $periodStart);
-    } elseif ($periodEnd) {
-        $deliveriesQuery->where('created_at', '<=', $periodEnd);
+    if ($range === 'period') {
+        if ($periodStart && $periodEnd) {
+            $deliveriesQuery->whereBetween('created_at', [$periodStart, $periodEnd]);
+        } elseif ($periodStart) {
+            $deliveriesQuery->where('created_at', '>=', $periodStart);
+        } elseif ($periodEnd) {
+            $deliveriesQuery->where('created_at', '<=', $periodEnd);
+        }
     }
 
     $deliveries = $deliveriesQuery->get();
 
-    // A few quick aggregates for the UI
+    // Aggregates for UI
     $totalDeliveries = $deliveries->count();
     $lastStatus = optional($deliveries->first())->delivery_status;
 
+    // Group deliveries by date (Y-m-d) for date headers in the timeline
+    $groupedDeliveries = $deliveries->groupBy(function ($d) {
+        return Carbon::parse($d->created_at)->format('Y-m-d');
+    });
+
+    // Status counts
+    $statusCounts = $deliveries->groupBy('delivery_status')->map->count();
+
     return view('admin.flower-order.show-order-details', compact(
         'order',
-        'deliveries',
         'periodStart',
         'periodEnd',
+        'deliveries',
+        'groupedDeliveries',
         'totalDeliveries',
-        'lastStatus'
+        'lastStatus',
+        'statusCounts',
+        'range'
     ));
 }
+
     public function showActiveSubscriptions()
     {
         $activeSubscriptions = Order::whereNull('request_id')
