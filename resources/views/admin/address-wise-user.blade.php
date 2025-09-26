@@ -63,12 +63,12 @@
                             <tr>
                                 <td>{{ $i + 1 }}</td>
                                 <td class="fw-semibold">{{ $row['name'] }}</td>
-                                <td><span class="badge text-bg-light">{{ $row['mobile_number'] }}</span></td>
+                                <td><span class="fw-semibold">{{ $row['mobile_number'] }}</span></td>
                                 <td>{{ $row['apartment_name'] }}</td>
                                 <td>{{ $row['apartment_flat_plot'] }}</td>
                                 <td>
                                     @if(($row['rider_name'] ?? '—') !== '—')
-                                        <span class="badge text-bg-primary">{{ $row['rider_name'] }}</span>
+                                        <span class="fw-semibold">{{ $row['rider_name'] }}</span>
                                     @else
                                         <span class="badge text-bg-secondary">—</span>
                                     @endif
