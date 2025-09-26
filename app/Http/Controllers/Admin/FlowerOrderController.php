@@ -460,13 +460,49 @@ class FlowerOrderController extends Controller
         );
     }
 
-    public function showorderdetails($id)
-    {
-        $order = Subscription::with([ 'order', 'flowerPayments', 'users', 'flowerProducts', 'pauseResumeLogs'])->findOrFail($id);
-    
-        return view('admin.flower-order.show-order-details', compact('order'));
+public function showorderdetails($id)
+{
+    $order = Subscription::with([
+        'order',
+        'flowerPayments',
+        'users',
+        'flowerProducts',
+        'pauseResumeLogs',
+    ])->findOrFail($id);
+
+    // Compute subscription window: start_date → (new_date if present else end_date)
+    $periodStart = $order->start_date ? Carbon::parse($order->start_date)->startOfDay() : null;
+    $periodEndRaw = $order->new_date ?: $order->end_date;
+    $periodEnd = $periodEndRaw ? Carbon::parse($periodEndRaw)->endOfDay() : null;
+
+    // Fetch delivery history within the window for this order
+    $deliveriesQuery = DeliveryHistory::with('rider')
+        ->where('order_id', $order->order_id)
+        ->orderByDesc('created_at');
+
+    if ($periodStart && $periodEnd) {
+        $deliveriesQuery->whereBetween('created_at', [$periodStart, $periodEnd]);
+    } elseif ($periodStart) {
+        $deliveriesQuery->where('created_at', '>=', $periodStart);
+    } elseif ($periodEnd) {
+        $deliveriesQuery->where('created_at', '<=', $periodEnd);
     }
-    
+
+    $deliveries = $deliveriesQuery->get();
+
+    // A few quick aggregates for the UI
+    $totalDeliveries = $deliveries->count();
+    $lastStatus = optional($deliveries->first())->delivery_status;
+
+    return view('admin.flower-order.show-order-details', compact(
+        'order',
+        'deliveries',
+        'periodStart',
+        'periodEnd',
+        'totalDeliveries',
+        'lastStatus'
+    ));
+}
     public function showActiveSubscriptions()
     {
         $activeSubscriptions = Order::whereNull('request_id')

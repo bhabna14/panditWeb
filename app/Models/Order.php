@@ -93,4 +93,12 @@ public function latestActivePayment()
                 ->orderByDesc('id');
 }
 
+// app/Models/Order.php
+
+public function deliveryHistories()
+{
+    return $this->hasMany(DeliveryHistory::class, 'order_id', 'order_id');
+}
+
+
 }
