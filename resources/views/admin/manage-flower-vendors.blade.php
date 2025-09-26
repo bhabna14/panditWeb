@@ -190,7 +190,8 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="metric-card p-3" data-filter="inactive" id="cardInactive" style="border: 1px solid rgb(186, 185, 185);">
+            <div class="metric-card p-3" data-filter="inactive" id="cardInactive"
+                style="border: 1px solid rgb(186, 185, 185);">
                 <div class="d-flex align-items-center gap-3">
                     <span class="icon icon-inactive"><i class="fa fa-user-times"></i></span>
                     <div>
@@ -225,10 +226,8 @@
                             <th>Sl No.</th>
                             <th>Vendor Name</th>
                             <th>Phone</th>
-                            <th>Email</th>
                             <th>Category</th>
-                            <th>Payment Type</th>
-                             <th>Banks</th>
+                            <th>Banks</th>
                             <th>Flowers</th>
                             <th>Joined On</th>
                             <th>Document</th>
@@ -271,10 +270,8 @@
                                     </a>
                                 </td>
                                 <td>{{ $vendor->phone_no }}</td>
-                                <td>{{ $vendor->email_id }}</td>
                                 <td>{{ $vendor->vendor_category }}</td>
-                                <td>{{ $vendor->payment_type }}</td>
-                                  <td>
+                                <td>
                                     <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
                                         data-bs-target="#vendorBankModal" data-banks='@json($banks)'
                                         data-vendor="{{ $vendor->vendor_name }}">
@@ -303,7 +300,7 @@
                                 </td>
                                 <td>{{ $vendor->vendor_gst ?: '—' }}</td>
                                 <td>{{ $vendor->vendor_address ?: '—' }}</td>
-                              
+
                                 <td>
                                     <div class="d-flex gap-2">
                                         <a href="{{ route('admin.editVendorDetails', $vendor->vendor_id) }}"
