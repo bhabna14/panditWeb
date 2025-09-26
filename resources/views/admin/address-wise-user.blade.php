@@ -1,12 +1,13 @@
-@extends('admin.layouts.apps') @section('styles')
+@extends('admin.layouts.apps')
+
+@section('styles')
     {{-- Icons + DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.1.7/r-3.0.3/datatables.min.css" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-      crossorigin="anonymous">
+    {{-- Bootstrap CSS (make sure it’s loaded before components that depend on it) --}}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
     <style>
         .page-hero {
@@ -40,17 +41,27 @@
             bottom: 16px;
             z-index: 1080;
         }
+
+        /* If anything overlays the backdrop, bump modal z-index (optional) */
+        /* .modal-backdrop { z-index: 1050 !important; }
+            .modal { z-index: 1055 !important; } */
     </style>
-    @endsection @section('content')
+@endsection
+
+@section('content')
     <div class="container-fluid py-4">
         <div class="page-hero mb-4 d-flex align-items-center justify-content-between">
             <div>
                 <h4 class="mb-1">Apartment: <span class="fw-bold">{{ $apartment }}</span></h4>
                 <div class="opacity-90">Customers living in this apartment</div>
             </div>
-            <div class="d-flex gap-2"> <a href="{{ route('admin.address.categories') }}" class="btn btn-light"> <i
-                        class="bi bi-arrow-left"></i> Back </a> </div>
+            <div class="d-flex gap-2">
+                <a href="{{ route('admin.address.categories') }}" class="btn btn-light">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
+            </div>
         </div>
+
         <div class="card shadow-soft">
             <div class="card-body">
                 <div class="table-responsive">
@@ -81,11 +92,14 @@
                                             <span class="badge text-bg-secondary">—</span>
                                         @endif
                                     </td>
-                                    <td> <button class="btn btn-sm btn-outline-primary edit-btn"
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-primary edit-btn"
                                             data-address="{{ $row['address_id'] }}" data-user="{{ $row['user_id'] }}"
                                             data-name="{{ $row['name'] }}" data-apt="{{ $row['apartment_name'] }}"
-                                            data-flat="{{ $row['apartment_flat_plot'] }}"> <i
-                                                class="bi bi-pencil-square"></i> Edit </button> </td>
+                                            data-flat="{{ $row['apartment_flat_plot'] }}">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </button>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -103,32 +117,57 @@
                     </table>
                 </div>
             </div>
-        </div> {{-- Toast --}} <div class="toast align-items-center text-bg-success border-0 toast-fixed"
-            id="okToast" role="alert" aria-live="assertive" aria-atomic="true">
+        </div>
+
+        {{-- Toast --}}
+        <div class="toast align-items-center text-bg-success border-0 toast-fixed" id="okToast" role="alert"
+            aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body"> Updated successfully. </div> <button type="button"
-                    class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                <div class="toast-body">
+                    Updated successfully.
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+                    aria-label="Close"></button>
             </div>
         </div>
-    </div> {{-- Edit Modal --}} <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
-        aria-hidden="true">
+    </div>
+
+    {{-- Edit Modal --}}
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog">
-            <form id="editAddressForm"> @csrf <div class="modal-content">
+            <form id="editAddressForm">
+                @csrf
+                <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="editModalLabel">Edit Address</h5> <button type="button"
-                            class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <h5 class="modal-title" id="editModalLabel">Edit Address</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body"> <input type="hidden" name="address_id" id="editAddressId"> <input
-                            type="hidden" name="user_id" id="editUserId">
-                        <div class="mb-3"> <label class="form-label">Customer Name</label> <input type="text"
-                                class="form-control" id="editUserName" name="name" required> </div>
-                        <div class="mb-3"> <label class="form-label">Apartment Name</label> <input type="text"
-                                class="form-control" id="editApartmentName" name="apartment_name" required> </div>
-                        <div class="mb-3"> <label class="form-label">Flat/Plot</label> <input type="text"
-                                class="form-control" id="editFlatPlot" name="apartment_flat_plot" required> </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="address_id" id="editAddressId">
+                        <input type="hidden" name="user_id" id="editUserId">
+
+                        <div class="mb-3">
+                            <label class="form-label">Customer Name</label>
+                            <input type="text" class="form-control" id="editUserName" name="name" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Apartment Name</label>
+                            <input type="text" class="form-control" id="editApartmentName" name="apartment_name"
+                                required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Flat/Plot</label>
+                            <input type="text" class="form-control" id="editFlatPlot" name="apartment_flat_plot"
+                                required>
+                        </div>
                     </div>
-                    <div class="modal-footer"> <button class="btn btn-success w-100" type="submit"> <i
-                                class="bi bi-check-circle"></i> Update </button> </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-success w-100" type="submit">
+                            <i class="bi bi-check-circle"></i> Update
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>
@@ -168,7 +207,7 @@
                     {
                         extend: 'colvis',
                         text: 'Columns',
-                        columns: ':not(:first-child):not(:last-child)'
+                        columns: ':not(:first-child):not(:last-child)' // keep # and Action always visible
                     }
                 ],
                 language: {
@@ -196,8 +235,7 @@
                 const btn = e.target.closest('.edit-btn');
                 if (!btn) return;
 
-                // Prevent accidental submit if inside a form somewhere
-                e.preventDefault();
+                e.preventDefault(); // avoid accidental submits if nested in forms
 
                 // Fill fields from data-* attrs
                 document.getElementById('editAddressId').value = btn.dataset.address || '';
