@@ -42,9 +42,9 @@
             z-index: 1080;
         }
 
-        /* If anything overlays the backdrop, bump modal z-index (optional) */
+        /* If something in your layout stacks above the backdrop, keep these: */
         /* .modal-backdrop { z-index: 1050 !important; }
-            .modal { z-index: 1055 !important; } */
+               .modal { z-index: 1055 !important; } */
     </style>
 @endsection
 
@@ -93,7 +93,8 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-outline-primary edit-btn"
+                                        <button type="button" class="btn btn-sm btn-outline-primary edit-btn"
+                                            data-bs-toggle="modal" data-bs-target="#editModal"
                                             data-address="{{ $row['address_id'] }}" data-user="{{ $row['user_id'] }}"
                                             data-name="{{ $row['name'] }}" data-apt="{{ $row['apartment_name'] }}"
                                             data-flat="{{ $row['apartment_flat_plot'] }}">
@@ -123,16 +124,14 @@
         <div class="toast align-items-center text-bg-success border-0 toast-fixed" id="okToast" role="alert"
             aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
-                <div class="toast-body">
-                    Updated successfully.
-                </div>
+                <div class="toast-body">Updated successfully.</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
                     aria-label="Close"></button>
             </div>
         </div>
     </div>
 
-    {{-- Edit Modal --}}
+    {{-- Edit Modal (will be moved to <body> at runtime for safety) --}}
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <form id="editAddressForm">
@@ -180,7 +179,7 @@
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
 
-    {{-- DataTables + Buttons --}}
+    {{-- DataTables + Buttons (after Bootstrap) --}}
     <script src="https://cdn.datatables.net/v/bs5/dt-2.1.7/r-3.0.3/datatables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
@@ -207,7 +206,7 @@
                     {
                         extend: 'colvis',
                         text: 'Columns',
-                        columns: ':not(:first-child):not(:last-child)' // keep # and Action always visible
+                        columns: ':not(:first-child):not(:last-child)'
                     }
                 ],
                 language: {
@@ -221,39 +220,32 @@
             const form = document.getElementById('editAddressForm');
             const okToast = document.getElementById('okToast');
 
-            // --- Safety checks ---
-            if (!window.bootstrap || !bootstrap.Modal) {
-                console.error(
-                    'Bootstrap bundle not loaded (bootstrap.Modal missing). Check the <script> tag or CSP/SRI.');
-            }
-            if (!modalEl) {
-                console.error('#editModal not found in DOM.');
+            // --- Safety: ensure modal lives under <body> to avoid clipping/stacking issues
+            if (modalEl && modalEl.parentElement !== document.body) {
+                document.body.appendChild(modalEl);
             }
 
-            // --- Open modal via delegated click (works for responsive/child rows) ---
-            document.addEventListener('click', function(e) {
-                const btn = e.target.closest('.edit-btn');
-                if (!btn) return;
+            // --- Fill inputs right before the modal shows (Bootstrap-driven)
+            if (modalEl) {
+                modalEl.addEventListener('show.bs.modal', function(e) {
+                    const btn = e.relatedTarget; // the .edit-btn that triggered the modal
+                    if (!btn) return;
+                    const d = btn.dataset;
 
-                e.preventDefault(); // avoid accidental submits if nested in forms
-
-                // Fill fields from data-* attrs
-                document.getElementById('editAddressId').value = btn.dataset.address || '';
-                document.getElementById('editUserId').value = btn.dataset.user || '';
-                document.getElementById('editUserName').value = btn.dataset.name || '';
-                document.getElementById('editApartmentName').value = (btn.dataset.apt && btn.dataset.apt !==
-                    '—') ? btn.dataset.apt : '';
-                document.getElementById('editFlatPlot').value = (btn.dataset.flat && btn.dataset.flat !==
-                    '—') ? btn.dataset.flat : '';
-
-                // Create or get the modal instance and show it
-                const inst = bootstrap.Modal.getOrCreateInstance(modalEl, {
-                    backdrop: true,
-                    keyboard: true,
-                    focus: true
+                    document.getElementById('editAddressId').value = d.address || '';
+                    document.getElementById('editUserId').value = d.user || '';
+                    document.getElementById('editUserName').value = d.name || '';
+                    document.getElementById('editApartmentName').value = (d.apt && d.apt !== '—') ? d.apt :
+                        '';
+                    document.getElementById('editFlatPlot').value = (d.flat && d.flat !== '—') ? d.flat :
+                    '';
                 });
-                inst.show();
-            });
+
+                // Optional UX: focus first input once visible
+                modalEl.addEventListener('shown.bs.modal', function() {
+                    document.getElementById('editUserName')?.focus();
+                });
+            }
 
             // --- Submit update ---
             form.addEventListener('submit', function(ev) {
