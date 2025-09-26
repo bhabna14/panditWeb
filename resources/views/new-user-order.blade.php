@@ -1,15 +1,13 @@
 @extends('admin.layouts.apps')
 
 @section('styles')
-    <!-- Select2 -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-
     <style>
         /* ===== Polished section cards & headings ===== */
         .nu-card {
             border: 1px solid #e9ecf5;
             border-radius: 16px;
-            box-shadow: 0 6px 18px rgba(25, 42, 70, 0.06);
+            box-shadow: 0 6px 18px rgba(25, 42, 70, .06);
             background: #fff;
             padding: 18px;
             margin-bottom: 18px;
@@ -58,11 +56,6 @@
             color: #6b7280;
         }
 
-        .rdiobox,
-        .form-check {
-            cursor: pointer;
-        }
-
         .select2-container--default .select2-selection--single {
             height: 38px;
             border: 1px solid #ced4da;
@@ -78,7 +71,7 @@
             height: 36px;
         }
 
-        @media (max-width: 575.98px) {
+        @media (max-width:575.98px) {
             .nu-hero .d-flex {
                 flex-direction: column;
                 gap: 8px;
@@ -88,7 +81,6 @@
 @endsection
 
 @section('content')
-    <!-- Page header -->
     <div class="nu-hero d-flex justify-content-between align-items-center mt-4">
         <div>
             <h4 class="nu-title">Subscription for New User</h4>
@@ -120,10 +112,7 @@
 
         <!-- User Details -->
         <div class="nu-card">
-            <div class="section-title">
-                <span class="badge bg-primary rounded-pill">1</span>
-                User Details
-            </div>
+            <div class="section-title"><span class="badge bg-primary rounded-pill">1</span> User Details</div>
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="user_type" class="form-label">User Type</label>
@@ -147,10 +136,7 @@
 
         <!-- Address Details -->
         <div class="nu-card">
-            <div class="section-title">
-                <span class="badge bg-primary rounded-pill">2</span>
-                Address Details
-            </div>
+            <div class="section-title"><span class="badge bg-primary rounded-pill">2</span> Address Details</div>
 
             <div class="row g-3">
                 <div class="col-12">
@@ -233,10 +219,7 @@
 
         <!-- Product Details -->
         <div class="nu-card">
-            <div class="section-title">
-                <span class="badge bg-primary rounded-pill">3</span>
-                Product Details
-            </div>
+            <div class="section-title"><span class="badge bg-primary rounded-pill">3</span> Product Details</div>
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="product" class="form-label">Flower</label>
@@ -262,10 +245,7 @@
 
         <!-- Payment Details -->
         <div class="nu-card">
-            <div class="section-title">
-                <span class="badge bg-primary rounded-pill">4</span>
-                Payment Details
-            </div>
+            <div class="section-title"><span class="badge bg-primary rounded-pill">4</span> Payment Details</div>
             <div class="row g-3">
                 <div class="col-md-3">
                     <label for="duration" class="form-label">Duration</label>
@@ -308,15 +288,12 @@
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script>
-        // Apartments grouped by Locality.unique_code on the server
-        const apartmentsByLocality = @json($apartmentsByLocality);
-
         function setEndDateFromDuration() {
             const start = document.getElementById('start_date').value;
             const dur = parseInt(document.getElementById('duration').value || '0', 10);
             if (!start || !dur) return;
 
-            const d = new Date(start + 'T00:00:00'); // local midnight to avoid TZ drift
+            const d = new Date(start + 'T00:00:00');
             const target = new Date(d);
             target.setMonth(target.getMonth() + dur);
             target.setDate(target.getDate() - 1);
@@ -327,40 +304,48 @@
             document.getElementById('end_date').value = `${yyyy}-${mm}-${dd}`;
         }
 
-        function populateApartmentsFromLocality(selectEl) {
+        async function populateApartmentsFromLocality(selectEl) {
             const selectedOpt = selectEl.options[selectEl.selectedIndex];
             const localityKey = selectedOpt ? selectedOpt.getAttribute('data-locality-key') : null; // unique_code
             const pincode = selectedOpt ? selectedOpt.getAttribute('data-pincode') : '';
             const apartmentSelect = document.getElementById('apartment_name');
 
-            // Update pincode
             document.getElementById('pincode').value = pincode || '';
-
-            // Reset apartments
             apartmentSelect.innerHTML = '<option value="">Select Apartment</option>';
 
             if (!localityKey) {
-                $(apartmentSelect).val('').trigger('change.select2');
+                $(apartmentSelect).val('').trigger('change');
                 return;
             }
 
-            const list = apartmentsByLocality[localityKey] || [];
-            if (list.length === 0) {
-                apartmentSelect.innerHTML = '<option value="">No Apartments Available</option>';
-                $(apartmentSelect).val('').trigger('change.select2');
-                return;
-            }
+            try {
+                const res = await fetch(`{{ route('apartments.byLocality', ['uniqueCode' => '___CODE___']) }}`.replace(
+                    '___CODE___', encodeURIComponent(localityKey)));
+                const data = await res.json();
 
-            list.forEach(item => {
+                if (data.ok && Array.isArray(data.data)) {
+                    data.data.forEach(name => {
+                        const opt = document.createElement('option');
+                        opt.value = name;
+                        opt.text = name;
+                        apartmentSelect.appendChild(opt);
+                    });
+                } else {
+                    const opt = document.createElement('option');
+                    opt.value = '';
+                    opt.text = 'No Apartments Available';
+                    apartmentSelect.appendChild(opt);
+                }
+                $(apartmentSelect).trigger('change');
+            } catch (e) {
                 const opt = document.createElement('option');
-                opt.value = item.apartment_name;
-                opt.text = item.apartment_name;
+                opt.value = '';
+                opt.text = 'Failed to load apartments';
                 apartmentSelect.appendChild(opt);
-            });
-            $(apartmentSelect).trigger('change.select2');
+                $(apartmentSelect).trigger('change');
+            }
         }
 
-        // Init Select2 & listeners
         $(function() {
             $('.select2').select2({
                 width: '100%'
@@ -370,6 +355,11 @@
             localityEl.addEventListener('change', function() {
                 populateApartmentsFromLocality(this);
             });
+
+            // Auto-load on re-render (e.g., after validation errors)
+            if (localityEl.value) {
+                populateApartmentsFromLocality(localityEl);
+            }
 
             document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
             document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);

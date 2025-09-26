@@ -10,19 +10,14 @@ use App\Models\Subscription;
 use App\Models\FlowerPayment;
 use App\Models\FlowerProduct;
 use App\Models\Locality;
-use Illuminate\Support\Str;
-
 use App\Models\Apartment;
-
-use Carbon\Carbon; // Add this at the top of the controller
-use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
-
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class NewUserOrderController extends Controller
 {
-// Controller snippets
-  public function newUserOrder()
+    public function newUserOrder()
     {
         $flowers = FlowerProduct::where('status', 'active')
             ->where('category', 'Subscription')
@@ -34,22 +29,32 @@ class NewUserOrderController extends Controller
             ->orderBy('locality_name')
             ->get();
 
-        // IMPORTANT: Apartment.locality_id stores Locality.unique_code
-        $apartments = Apartment::where('status', 'active')
-            ->select('id','apartment_name','locality_id')
+        // View no longer needs apartments preloaded (AJAX will fetch), so no grouping required.
+        return view('new-user-order', compact('localities','flowers'));
+    }
+
+    /**
+     * AJAX: return apartments for a locality unique_code.
+     */
+    public function apartmentsByLocality(string $uniqueCode)
+    {
+        // If your table does NOT have a 'status' column, remove the where('status', 'active') line.
+        $apartments = Apartment::query()
+            ->where('locality_id', $uniqueCode) // locality_id stores Locality.unique_code
+            ->when(schemaHasColumn('flower__apartment', 'status'), fn($q) => $q->where('status','active'))
             ->orderBy('apartment_name')
-            ->get();
+            ->pluck('apartment_name');
 
-        // Group by the key we'll read from the <option> (unique_code)
-        $apartmentsByLocality = $apartments->groupBy('locality_id');
-
-        return view('new-user-order', compact('localities','flowers','apartmentsByLocality'));
+        return response()->json([
+            'ok' => true,
+            'data' => $apartments,
+        ]);
     }
 
     public function saveNewUserOrder(Request $request)
     {
         try {
-            \DB::beginTransaction();
+            DB::beginTransaction();
 
             $validated = $request->validate([
                 // user
@@ -71,7 +76,7 @@ class NewUserOrderController extends Controller
                 // product + subscription
                 'product_id'     => 'required',
                 'start_date'     => 'required|date',
-                'end_date'       => 'nullable|date', // we will compute if missing
+                'end_date'       => 'nullable|date', // will compute if missing
                 'duration'       => 'required|integer|in:1,3,6',
 
                 // payment
@@ -82,7 +87,7 @@ class NewUserOrderController extends Controller
                 'status'         => 'nullable|in:active,pending,expired',
             ]);
 
-            // Generate userid (string). If you actually use users.id as FK, switch below accordingly.
+            // Generate external-style user code. (If your FKs use users.id, switch to $user->id below.)
             $userCode = 'USER' . random_int(10000, 99999);
 
             $user = User::create([
@@ -92,10 +97,8 @@ class NewUserOrderController extends Controller
                 'mobile_number' => '+91' . $validated['mobile_number'],
             ]);
 
-            // Create address (uses Locality.unique_code in `locality`)
             $address = UserAddress::create([
-                // If your FK is integer users.id, change to: 'user_id' => $user->id,
-                'user_id'            => $user->userid,
+                'user_id'            => $user->userid, // change to $user->id if FK is integer
                 'state'              => $validated['state'],
                 'city'               => $validated['city'],
                 'pincode'            => $validated['pincode'],
@@ -109,38 +112,29 @@ class NewUserOrderController extends Controller
                 'status'             => 'active',
             ]);
 
-            // Dates
             $start = Carbon::parse($validated['start_date'])->startOfDay();
 
-            // Compute end date if not provided: add months (no overflow) then inclusive -1 day
-            if (!empty($validated['end_date'])) {
-                $end = Carbon::parse($validated['end_date'])->endOfDay();
-            } else {
-                $end = (clone $start)->addMonthsNoOverflow((int)$validated['duration'])->subDay()->endOfDay();
-            }
+            $end = !empty($validated['end_date'])
+                ? Carbon::parse($validated['end_date'])->endOfDay()
+                : (clone $start)->addMonthsNoOverflow((int)$validated['duration'])->subDay()->endOfDay();
 
-            // Order
             $orderId = 'ORD-' . strtoupper(Str::random(12));
 
             $order = Order::create([
-                // If your FK is integer users.id, change to: 'user_id' => $user->id,
-                'user_id'     => $user->userid,
+                'user_id'     => $user->userid, // change to $user->id if FK is integer
                 'order_id'    => $orderId,
                 'product_id'  => $validated['product_id'],
                 'quantity'    => 1,
                 'start_date'  => $start,
                 'address_id'  => $address->id,
                 'total_price' => $validated['paid_amount'],
-                // let timestamps default to now
             ]);
 
-            // Subscription
             $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
 
             Subscription::create([
                 'subscription_id' => $subscriptionId,
-                // If your FK is integer users.id, change to: 'user_id' => $user->id,
-                'user_id'     => $user->userid,
+                'user_id'     => $user->userid, // change to $user->id if FK is integer
                 'order_id'    => $order->order_id,
                 'product_id'  => $validated['product_id'],
                 'start_date'  => $start,
@@ -148,23 +142,35 @@ class NewUserOrderController extends Controller
                 'status'      => $validated['status'] ?? 'active',
             ]);
 
-            // Payment
             FlowerPayment::create([
                 'order_id'       => $order->order_id,
-                'payment_id'     => null, // not the string "NULL"
-                // If your FK is integer users.id, change to: 'user_id' => $user->id,
-                'user_id'        => $user->userid,
+                'payment_id'     => null,
+                'user_id'        => $user->userid, // change to $user->id if FK is integer
                 'payment_method' => $validated['payment_method'],
                 'paid_amount'    => $validated['paid_amount'],
                 'payment_status' => (float)$validated['paid_amount'] > 0 ? 'paid' : 'pending',
             ]);
 
-            \DB::commit();
+            DB::commit();
             return back()->with('success', 'New user added successfully!');
         } catch (\Throwable $e) {
-            \DB::rollBack();
+            DB::rollBack();
             // \Log::error('saveNewUserOrder failed', ['err' => $e->getMessage()]);
             return back()->with('error', 'Failed to save new user order');
+        }
+    }
+}
+
+/**
+ * Tiny helper to safely check if a column exists (used above).
+ * You can move this to a dedicated helper if you prefer.
+ */
+if (! function_exists('schemaHasColumn')) {
+    function schemaHasColumn(string $table, string $column): bool {
+        try {
+            return \Illuminate\Support\Facades\Schema::hasColumn($table, $column);
+        } catch (\Throwable $e) {
+            return false;
         }
     }
 }
