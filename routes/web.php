@@ -639,10 +639,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/get-user-addresses/{userId}','getUserAddresses');
     });
 
-    Route::controller(NewUserOrderController::class)->group(function() {
-        Route::get('/new-user-order', 'newUserOrder')->name('newUserOrder');
-        Route::post('/save-new-user-order', 'saveNewUserOrder')->name('saveNewUserOrder');
-    });
 });
 
 // user routes
@@ -923,4 +919,13 @@ Route::prefix('admin')
 ->group(function () {
 Route::get('/menu-management', [MenuManagementController::class, 'index'])->name('menu.management');
 Route::post('/menu-management/save', [MenuManagementController::class, 'save'])->name('menu.management.save');
+});
+
+Route::prefix('admin')->group(function () {
+    Route::get('/new-user-order', [NewUserOrderController::class, 'newUserOrder'])->name('newUserOrder');
+    Route::post('/new-user-order', [NewUserOrderController::class, 'saveNewUserOrder'])->name('saveNewUserOrder');
+
+    // AJAX endpoint to fetch apartments for a given locality unique_code
+    Route::get('/localities/{uniqueCode}/apartments', [NewUserOrderController::class, 'apartmentsByLocality'])
+        ->name('apartments.byLocality');
 });
