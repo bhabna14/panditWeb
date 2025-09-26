@@ -133,7 +133,7 @@
         }
 
         .stat-value {
-            font-size: 1.15rem;
+            font-size: .9rem;
             font-weight: 800;
             color: #111827;
         }
