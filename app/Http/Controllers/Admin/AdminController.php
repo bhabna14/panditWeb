@@ -601,7 +601,7 @@ class AdminController extends Controller
             'email'          => ['nullable', 'email', 'max:191', Rule::unique('users', 'email')->ignore($user->id)],
             'mobile_number'  => ['nullable', 'string', 'max:20'],
             'user_type'      => ['nullable', 'string', 'max:50'],
-            'userphoto'      => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'userphoto'      => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
 
         // Handle photo upload
