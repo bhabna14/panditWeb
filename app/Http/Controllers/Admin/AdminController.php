@@ -670,145 +670,109 @@ class AdminController extends Controller
         return view('admin.address-category-summary', compact('addressCounts', 'apartments'));
     }
 
-//  public function getAddressUsersByCategory(Request $request)
-// {
-//     $category = $request->input('category');
+    public function getAddressUsersByCategory(Request $request)
+    {
+        $category = $request->input('category');
 
-//     $addresses = \App\Models\UserAddress::with(['user.orders.rider'])
-//         ->where('place_category', $category)
-//         ->get();
+        $addresses = \App\Models\UserAddress::with(['user.orders.rider'])
+            ->where('place_category', $category)
+            ->get();
 
-//     $result = $addresses->map(function ($address) {
-//         $user = $address->user;
-//         $riderName = '—';
+        $grouped = [];
 
-//         if ($user && $user->orders->count()) {
-//             foreach ($user->orders as $order) {
-//                 if ($order->rider) {
-//                     $riderName = $order->rider->rider_name ?? '—';
-//                     break;
-//                 }
-//             }
-//         }
+        foreach ($addresses as $address) {
+            $user = $address->user;
+            $apartmentName = $address->apartment_name ?? '—';
+            $riderName = '—';
 
-//         return [
-//             'user_id' => $user?->userid,
-//             'address_id' => $address->id,
-//             'name' => $user?->name ?? '—',
-//             'mobile_number' => $user?->mobile_number ?? '—',
-//             'apartment_name' => $address->apartment_name ?? '—',
-//             'apartment_flat_plot' => $address->apartment_flat_plot ?? '—',
-//             'rider_name' => $riderName,
-//         ];
-//     });
-
-//     return response()->json($result);
-// }
-
-public function getAddressUsersByCategory(Request $request)
-{
-    $category = $request->input('category');
-
-    $addresses = \App\Models\UserAddress::with(['user.orders.rider'])
-        ->where('place_category', $category)
-        ->get();
-
-    $grouped = [];
-
-    foreach ($addresses as $address) {
-        $user = $address->user;
-        $apartmentName = $address->apartment_name ?? '—';
-        $riderName = '—';
-
-        if ($user && $user->orders->count()) {
-            foreach ($user->orders as $order) {
-                if ($order->rider) {
-                    $riderName = $order->rider->rider_name ?? '—';
-                    break;
+            if ($user && $user->orders->count()) {
+                foreach ($user->orders as $order) {
+                    if ($order->rider) {
+                        $riderName = $order->rider->rider_name ?? '—';
+                        break;
+                    }
                 }
             }
+
+            $entry = [
+                'user_id' => $user?->userid,
+                'address_id' => $address->id,
+                'name' => $user?->name ?? '—',
+                'mobile_number' => $user?->mobile_number ?? '—',
+                'apartment_name' => $apartmentName,
+                'apartment_flat_plot' => $address->apartment_flat_plot ?? '—',
+                'rider_name' => $riderName,
+            ];
+
+            $grouped[$apartmentName][] = $entry;
         }
 
-        $entry = [
-            'user_id' => $user?->userid,
-            'address_id' => $address->id,
-            'name' => $user?->name ?? '—',
-            'mobile_number' => $user?->mobile_number ?? '—',
-            'apartment_name' => $apartmentName,
-            'apartment_flat_plot' => $address->apartment_flat_plot ?? '—',
-            'rider_name' => $riderName,
-        ];
-
-        $grouped[$apartmentName][] = $entry;
+        return response()->json($grouped);
     }
 
-    return response()->json($grouped);
-}
+    public function viewApartmentUsers($apartment)
+    {
+        $users = \App\Models\UserAddress::with(['user.orders.rider'])
+            ->where('apartment_name', $apartment)
+            ->get();
 
-public function viewApartmentUsers($apartment)
-{
-    $users = \App\Models\UserAddress::with(['user.orders.rider'])
-        ->where('apartment_name', $apartment)
-        ->get();
+        $userData = $users->map(function ($address) {
+            $user = $address->user;
+            $riderName = '—';
 
-    $userData = $users->map(function ($address) {
-        $user = $address->user;
-        $riderName = '—';
-
-        if ($user && $user->orders->count()) {
-            foreach ($user->orders as $order) {
-                if ($order->rider) {
-                    $riderName = $order->rider->rider_name ?? '—';
-                    break;
+            if ($user && $user->orders->count()) {
+                foreach ($user->orders as $order) {
+                    if ($order->rider) {
+                        $riderName = $order->rider->rider_name ?? '—';
+                        break;
+                    }
                 }
             }
-        }
 
-        return [
-            'address_id' => $address->id,
-            'user_id' => $user?->userid,
-            'name' => $user?->name ?? '—',
-            'mobile_number' => $user?->mobile_number ?? '—',
-            'apartment_name' => $address->apartment_name ?? '—',
-            'apartment_flat_plot' => $address->apartment_flat_plot ?? '—',
-            'rider_name' => $riderName,
-        ];
-    });
+            return [
+                'address_id' => $address->id,
+                'user_id' => $user?->userid,
+                'name' => $user?->name ?? '—',
+                'mobile_number' => $user?->mobile_number ?? '—',
+                'apartment_name' => $address->apartment_name ?? '—',
+                'apartment_flat_plot' => $address->apartment_flat_plot ?? '—',
+                'rider_name' => $riderName,
+            ];
+        });
 
-    return view('admin.address-wise-user', [
-        'apartment' => $apartment,
-        'users' => $userData,
-    ]);
-}
-
-public function updateAddress(Request $request)
-{
-    $request->validate([
-        'address_id' => 'required|exists:user_addresses,id',
-        'user_id' => 'required|exists:users,userid',
-        'name' => 'required|string|max:255',
-        'apartment_name' => 'required|string|max:255',
-        'apartment_flat_plot' => 'required|string|max:255',
-    ]);
-
-    // Update user name
-    $user = \App\Models\User::where('userid', $request->user_id)->first();
-    if ($user) {
-        $user->update([
-            'name' => $request->name,
+        return view('admin.address-wise-user', [
+            'apartment' => $apartment,
+            'users' => $userData,
         ]);
     }
 
-    // Update address
-    $address = \App\Models\UserAddress::findOrFail($request->address_id);
-    $address->update([
-        'apartment_name' => $request->apartment_name,
-        'apartment_flat_plot' => $request->apartment_flat_plot,
-    ]);
+    public function updateAddress(Request $request)
+    {
+        $request->validate([
+            'address_id' => 'required|exists:user_addresses,id',
+            'user_id' => 'required|exists:users,userid',
+            'name' => 'required|string|max:255',
+            'apartment_name' => 'required|string|max:255',
+            'apartment_flat_plot' => 'required|string|max:255',
+        ]);
 
-    return response()->json(['message' => 'Customer and address updated successfully.']);
-}
+        // Update user name
+        $user = \App\Models\User::where('userid', $request->user_id)->first();
+        if ($user) {
+            $user->update([
+                'name' => $request->name,
+            ]);
+        }
 
+        // Update address
+        $address = \App\Models\UserAddress::findOrFail($request->address_id);
+        $address->update([
+            'apartment_name' => $request->apartment_name,
+            'apartment_flat_plot' => $request->apartment_flat_plot,
+        ]);
+
+        return response()->json(['message' => 'Customer and address updated successfully.']);
+    }
 
 
 }

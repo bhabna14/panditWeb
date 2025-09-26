@@ -1,159 +1,163 @@
 @extends('admin.layouts.apps')
 
+@section('styles')
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.1.7/datatables.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css"/>
+
+    <style>
+        .shadow-soft { box-shadow: 0 8px 20px rgba(0,0,0,.05); }
+    </style>
+@endsection
+
 @section('content')
-    <div class="container mt-5">
-        <h3>Users in Apartment: {{ $apartment }}</h3>
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h4 class="mb-0">Apartment: <span class="text-primary">{{ $apartment }}</span></h4>
+            <div class="text-muted">Customers living in this apartment</div>
+        </div>
+        <a href="{{ route('admin.address.categories') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
 
-        <div class="table-responsive mt-4">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Mobile Number</th>
-                        <th>Apartment Name</th>
-                        <th>Flat/Plot</th>
-                        <th>Rider Name</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($users as $index => $user)
-                        <tr data-row-id="{{ $user['address_id'] }}">
-                            <td>{{ $index + 1 }}</td>
-                            <td class="col-name">{{ $user['name'] }}</td>
-                            <td class="col-mobile">{{ $user['mobile_number'] }}</td>
-                            <td class="col-apartment">{{ $user['apartment_name'] }}</td>
-                            <td class="col-flat">{{ $user['apartment_flat_plot'] }}</td>
-                            <td class="col-rider">{{ $user['rider_name'] }}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary edit-btn" data-id="{{ $user['address_id'] }}"
-                                    data-userid="{{ $user['user_id'] }}" data-username="{{ $user['name'] }}"
-                                    data-name="{{ $user['apartment_name'] }}"
-                                    data-flat="{{ $user['apartment_flat_plot'] }}">
-                                    <i class="bi bi-pencil-square"></i>
-                                </button>
-
-                                <a href="{{ route('showCustomerDetails', $user['user_id']) }}"
-                                    class="btn btn-sm btn-outline-info ms-1" title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
+    <div class="card shadow-soft">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="usersTable" class="table table-bordered table-hover w-100">
+                    <thead class="table-light">
                         <tr>
-                            <td colspan="7" class="text-center">No users found in this apartment.</td>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Apartment</th>
+                            <th>Flat/Plot</th>
+                            <th>Rider</th>
+                            <th>Action</th>
                         </tr>
-                    @endforelse
-                </tbody>
-
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($users as $i => $row)
+                            <tr>
+                                <td>{{ $i + 1 }}</td>
+                                <td>{{ $row['name'] }}</td>
+                                <td>{{ $row['mobile_number'] }}</td>
+                                <td>{{ $row['apartment_name'] }}</td>
+                                <td>{{ $row['apartment_flat_plot'] }}</td>
+                                <td>{{ $row['rider_name'] }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary edit-btn"
+                                        data-address="{{ $row['address_id'] }}"
+                                        data-user="{{ $row['user_id'] }}"
+                                        data-name="{{ $row['name'] }}"
+                                        data-apt="{{ $row['apartment_name'] }}"
+                                        data-flat="{{ $row['apartment_flat_plot'] }}">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+</div>
 
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="editAddressForm">
-                @csrf
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editModalLabel">Edit Address</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="address_id" id="editAddressId">
-                        <input type="hidden" name="user_id" id="editUserId">
+{{-- Edit Modal --}}
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="editAddressForm">
+        @csrf
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Edit Address</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="address_id" id="editAddressId">
+                <input type="hidden" name="user_id" id="editUserId">
 
-                        <div class="mb-3">
-                            <label for="editUserName" class="form-label">Customer Name</label>
-                            <input type="text" class="form-control" id="editUserName" name="name">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="editApartmentName" class="form-label">Apartment Name</label>
-                            <input type="text" class="form-control" id="editApartmentName" name="apartment_name"
-                                required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="editFlatPlot" class="form-label">Flat/Plot</label>
-                            <input type="text" class="form-control" id="editFlatPlot" name="apartment_flat_plot"
-                                required>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="submit" class="btn btn-success">Update</button>
-                    </div>
+                <div class="mb-3">
+                    <label class="form-label">Customer Name</label>
+                    <input type="text" class="form-control" id="editUserName" name="name" required>
                 </div>
-            </form>
+
+                <div class="mb-3">
+                    <label class="form-label">Apartment Name</label>
+                    <input type="text" class="form-control" id="editApartmentName" name="apartment_name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Flat/Plot</label>
+                    <input type="text" class="form-control" id="editFlatPlot" name="apartment_flat_plot" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success w-100" type="submit">Update</button>
+            </div>
         </div>
-    </div>
+    </form>
+  </div>
+</div>
+@endsection
 
-    <!-- SweetAlert & AJAX -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+@section('scripts')
+    <script src="https://cdn.datatables.net/v/bs5/dt-2.1.7/datatables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const modal = new bootstrap.Modal(document.getElementById('editModal'));
-            const editForm = document.getElementById('editAddressForm');
-            let editingRow = null;
-
-            document.addEventListener('click', function(e) {
-                if (e.target.closest('.edit-btn')) {
-                    const btn = e.target.closest('.edit-btn');
-                    editingRow = btn.closest('tr');
-
-                    document.getElementById('editAddressId').value = btn.dataset.id;
-                    document.getElementById('editUserId').value = btn.dataset.userid;
-                    document.getElementById('editUserName').value = btn.dataset.username;
-                    document.getElementById('editApartmentName').value = btn.dataset.name;
-                    document.getElementById('editFlatPlot').value = btn.dataset.flat;
-
-                    modal.show();
-                }
-            });
-
-            editForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const formData = new FormData(editForm);
-
-                fetch("{{ route('admin.address.update') }}", {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': formData.get('_token'),
-                            'Accept': 'application/json',
-                        },
-                        body: formData
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        modal.hide();
-                        Swal.fire({
-                            title: 'Success!',
-                            text: data.message,
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        });
-
-                        // Update row data
-                        if (editingRow) {
-                            editingRow.querySelector('.col-apartment').innerText = document
-                                .getElementById('editApartmentName').value;
-                            editingRow.querySelector('.col-flat').innerText = document.getElementById(
-                                'editFlatPlot').value;
-
-                            const editBtn = editingRow.querySelector('.edit-btn');
-                            editBtn.dataset.name = document.getElementById('editApartmentName').value;
-                            editBtn.dataset.flat = document.getElementById('editFlatPlot').value;
-                        }
-
-                        editingRow = null;
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        Swal.fire('Error', 'Something went wrong.', 'error');
-                    });
-            });
+    document.addEventListener('DOMContentLoaded', function () {
+        // DataTable
+        new DataTable('#usersTable', {
+            order: [[1, 'asc']],
+            dom: 'Bfrtip',
+            buttons: [
+                { extend: 'excelHtml5', title: 'Apartment-{{ preg_replace("/[^A-Za-z0-9_-]/", "-", $apartment) }}' },
+                { extend: 'csvHtml5',   title: 'Apartment-{{ preg_replace("/[^A-Za-z0-9_-]/", "-", $apartment) }}' },
+            ]
         });
+
+        // Edit handlers
+        const modalEl = document.getElementById('editModal');
+        const form    = document.getElementById('editAddressForm');
+
+        document.querySelector('#usersTable tbody').addEventListener('click', function (e) {
+            const btn = e.target.closest('.edit-btn');
+            if (!btn) return;
+
+            document.getElementById('editAddressId').value  = btn.dataset.address;
+            document.getElementById('editUserId').value     = btn.dataset.user;
+            document.getElementById('editUserName').value   = btn.dataset.name;
+            document.getElementById('editApartmentName').value = btn.dataset.apt !== '—' ? btn.dataset.apt : '';
+            document.getElementById('editFlatPlot').value   = btn.dataset.flat !== '—' ? btn.dataset.flat : '';
+
+            new bootstrap.Modal(modalEl).show();
+        });
+
+        form.addEventListener('submit', function (ev) {
+            ev.preventDefault();
+
+            const payload = new FormData(form);
+
+            fetch(`{{ route('admin.address.update') }}`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') },
+                body: payload
+            })
+            .then(r => r.json())
+            .then(json => {
+                bootstrap.Modal.getInstance(modalEl).hide();
+                // Soft reload the table row values without full refresh:
+                // simplest: reload the page to reflect latest data
+                location.reload();
+            })
+            .catch(() => alert('Update failed. Please try again.'));
+        });
+    });
     </script>
 @endsection
