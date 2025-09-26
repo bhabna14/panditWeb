@@ -295,7 +295,7 @@
                                 <tr class="apartment-row">
                                     <td>${idx++}</td>
                                     <td class="fw-semibold">${safeApt}</td>
-                                    <td><span class="badge rounded-pill text-bg-primary">${users.length}</span></td>
+                                    <td><span class="fw-semibold">${users.length}</span></td>
                                     <td>
                                         <a class="btn btn-sm btn-outline-primary" href="${url}">
                                             <i class="bi bi-box-arrow-up-right"></i> View
