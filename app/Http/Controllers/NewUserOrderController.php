@@ -63,17 +63,6 @@ class NewUserOrderController extends Controller
                 'name'           => 'nullable|string|max:150',
                 'mobile_number'  => 'required|digits:10',
 
-                // address
-                'state'               => 'required|string|max:120',
-                'city'                => 'required|string|max:120',
-                'pincode'             => 'required|digits:6',
-                'locality'            => 'required|string', // Locality.unique_code
-                'apartment_name'      => 'nullable|string|max:180',
-                'place_category'      => 'required|in:Individual,Apartment,Business,Temple',
-                'apartment_flat_plot' => 'required|string|max:180',
-                'landmark'            => 'nullable|string|max:180',
-                'address_type'        => 'nullable|in:Home,Work,Other',
-
                 // product + subscription
                 'product_id'     => 'required',
                 'start_date'     => 'required|date',
