@@ -11,13 +11,13 @@ class Locality extends Model
 
     protected $fillable = ['locality_name', 'pincode','unique_code','status'];
 
-    /**
-     * One locality has many apartments.
-     * foreign key on Apartment: locality_id
-     * local key here: unique_code
-     */
-    public function apartments()
+    public function apartment()
+    {
+        return $this->hasMany(Apartment::class, 'locality_id', 'unique_code');
+    }
+     public function apartments()
     {
         return $this->hasMany(Apartment::class, 'locality_id', 'unique_code');
     }
 }
+
