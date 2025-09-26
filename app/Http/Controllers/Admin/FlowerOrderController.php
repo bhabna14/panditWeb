@@ -22,6 +22,8 @@ use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\Facades\DataTables; // ✅ Correct import
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+
 
 class FlowerOrderController extends Controller
 {
@@ -617,9 +619,6 @@ public function showorderdetails($id)
         // Redirect back with a success message
         return redirect()->back()->with('success', 'Rider updated successfully.');
     }
-use Carbon\Carbon;
-use App\Models\DeliveryHistory;
-use App\Models\RiderDetails;
 
 public function mngdeliveryhistory(Request $request)
 {
