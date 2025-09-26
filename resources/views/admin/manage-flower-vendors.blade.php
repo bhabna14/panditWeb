@@ -227,14 +227,13 @@
                             <th>Phone</th>
                             <th>Email</th>
                             <th>Category</th>
-                            <th>Status</th>
                             <th>Payment Type</th>
+                             <th>Banks</th>
+                            <th>Flowers</th>
                             <th>Joined On</th>
                             <th>Document</th>
                             <th>GST</th>
                             <th>Address</th>
-                            <th>Banks</th>
-                            <th>Flowers</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -274,14 +273,21 @@
                                 <td>{{ $vendor->phone_no }}</td>
                                 <td>{{ $vendor->email_id }}</td>
                                 <td>{{ $vendor->vendor_category }}</td>
-                                <td>
-                                    @if ($status === 'active')
-                                        <span class="badge bg-success">Active</span>
-                                    @else
-                                        <span class="badge bg-warning text-dark">Inactive</span>
-                                    @endif
-                                </td>
                                 <td>{{ $vendor->payment_type }}</td>
+                                  <td>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#vendorBankModal" data-banks='@json($banks)'
+                                        data-vendor="{{ $vendor->vendor_name }}">
+                                        View Banks
+                                    </button>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
+                                        data-bs-target="#flowerModal" data-flower-ids='@json($flowerIds)'
+                                        data-vendor="{{ $vendor->vendor_name }}">
+                                        View Flowers
+                                    </button>
+                                </td>
                                 <td>{{ \Carbon\Carbon::parse($vendor->date_of_joining)->format('d-m-Y') }}</td>
                                 <td>
                                     @if ($docUrl)
@@ -297,20 +303,7 @@
                                 </td>
                                 <td>{{ $vendor->vendor_gst ?: '—' }}</td>
                                 <td>{{ $vendor->vendor_address ?: '—' }}</td>
-                                <td>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#vendorBankModal" data-banks='@json($banks)'
-                                        data-vendor="{{ $vendor->vendor_name }}">
-                                        View Banks
-                                    </button>
-                                </td>
-                                <td>
-                                    <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal"
-                                        data-bs-target="#flowerModal" data-flower-ids='@json($flowerIds)'
-                                        data-vendor="{{ $vendor->vendor_name }}">
-                                        View Flowers
-                                    </button>
-                                </td>
+                              
                                 <td>
                                     <div class="d-flex gap-2">
                                         <a href="{{ route('admin.editVendorDetails', $vendor->vendor_id) }}"
