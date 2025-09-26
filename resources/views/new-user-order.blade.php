@@ -91,7 +91,7 @@
         </ol>
     </div>
 
-    <form action="{{ route('saveNewUserOrder') }}" method="post" enctype="multipart/form-data" novalidate>
+    <form action="{{ route('admin.saveNewUserOrder') }}" method="post" enctype="multipart/form-data" novalidate>
         @csrf
 
         <!-- User Details -->
@@ -128,8 +128,8 @@
                         @foreach (['Individual', 'Apartment', 'Business', 'Temple'] as $pc)
                             <div class="form-check">
                                 <input type="radio" class="form-check-input" id="pc_{{ $pc }}"
-                                    name="place_category" value="{{ $pc }}" {{ $pc === 'Individual' ? 'checked' : '' }}
-                                    required>
+                                    name="place_category" value="{{ $pc }}"
+                                    {{ $pc === 'Individual' ? 'checked' : '' }} required>
                                 <label class="form-check-label" for="pc_{{ $pc }}">{{ $pc }}</label>
                             </div>
                         @endforeach
@@ -290,8 +290,8 @@
 
         function showValidationErrors(errorsArray) {
             if (!errorsArray?.length) return;
-            const html = '<ul style="text-align:left;margin:0;padding-left:18px;">' + errorsArray.map(e => `<li>${e}</li>`)
-                .join('') + '</ul>';
+            const html = '<ul style="text-align:left;margin:0;padding-left:18px;">' +
+                errorsArray.map(e => `<li>${e}</li>`).join('') + '</ul>';
             Swal.fire({
                 icon: 'error',
                 title: 'Please fix the following',
@@ -301,20 +301,26 @@
         }
 
         $(function() {
+            // Select2
             $('.select2').select2({
                 width: '100%'
             });
 
-            const localityEl = document.getElementById('locality');
-            localityEl.addEventListener('change', function() {
+            // change handlers for locality → apartments + pincode
+            $('#locality').on('change select2:select', function() {
                 populateApartmentsFromLocality(this);
             });
 
-            if (localityEl.value) populateApartmentsFromLocality(localityEl);
+            // If pre-selected (eg after validation fail), populate now
+            if (document.getElementById('locality').value) {
+                populateApartmentsFromLocality(document.getElementById('locality'));
+            }
 
+            // Duration → end date auto-calc
             document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
             document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);
 
+            // phone mask
             const phoneEl = document.getElementById('mobile_number');
             phoneEl.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
@@ -357,47 +363,42 @@
 
         async function populateApartmentsFromLocality(selectEl) {
             const opt = selectEl.options[selectEl.selectedIndex];
-            const localityKey = opt ? opt.getAttribute('data-locality-key') : null; // e.g., "001"
+            const localityKey = opt ? opt.getAttribute('data-locality-key') : null; // e.g. "001"
             const pincode = opt ? opt.getAttribute('data-pincode') : '';
-            const apartmentSelect = document.getElementById('apartment_name');
+            const $apartmentSelect = $('#apartment_name');
 
             document.getElementById('pincode').value = pincode || '';
-            apartmentSelect.innerHTML = '<option value="">Select Apartment</option>';
+
+            // Clear and reset
+            $apartmentSelect.empty().append(new Option('Select Apartment', '', true, false)).trigger('change');
 
             if (!localityKey) {
-                $(apartmentSelect).val('').trigger('change');
                 return;
             }
 
             try {
-                const url = `{{ route('apartments.byLocality', ['uniqueCode' => '___CODE___']) }}`.replace(
-                    '___CODE___', encodeURIComponent(localityKey));
-                const res = await fetch(url);
+                const urlTemplate = @json(route('admin.apartments.byLocality', ['uniqueCode' => '___CODE___']));
+                const url = urlTemplate.replace('___CODE___', encodeURIComponent(localityKey));
+                const res = await fetch(url, {
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
                 if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
 
                 if (data.ok && Array.isArray(data.data) && data.data.length) {
                     data.data.forEach(name => {
                         const clean = String(name).trim();
-                        if (!clean || clean.toUpperCase() === 'NULL') return; // extra guard
-                        const opt = document.createElement('option');
-                        opt.value = clean;
-                        opt.text = clean;
-                        apartmentSelect.appendChild(opt);
+                        if (!clean || clean.toUpperCase() === 'NULL') return;
+                        $apartmentSelect.append(new Option(clean, clean, false, false));
                     });
                 } else {
-                    const opt = document.createElement('option');
-                    opt.value = '';
-                    opt.text = 'No Apartments Available';
-                    apartmentSelect.appendChild(opt);
+                    $apartmentSelect.append(new Option('No Apartments Available', '', false, false));
                 }
-                $(apartmentSelect).trigger('change');
+                $apartmentSelect.trigger('change'); // refresh Select2 UI
             } catch (e) {
-                const opt = document.createElement('option');
-                opt.value = '';
-                opt.text = 'Failed to load apartments';
-                apartmentSelect.appendChild(opt);
-                $(apartmentSelect).trigger('change');
+                $apartmentSelect.append(new Option('Failed to load apartments', '', false, false)).trigger('change');
                 showToast('error', 'Failed to load apartments');
             }
         }

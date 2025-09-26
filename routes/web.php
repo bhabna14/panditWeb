@@ -921,12 +921,16 @@ Route::get('/menu-management', [MenuManagementController::class, 'index'])->name
 Route::post('/menu-management/save', [MenuManagementController::class, 'save'])->name('menu.management.save');
 });
 
-Route::prefix('admin')->group(function () {
-    Route::get('/new-user-order', [NewUserOrderController::class, 'newUserOrder'])->name('newUserOrder');
-    Route::post('/new-user-order', [NewUserOrderController::class, 'saveNewUserOrder'])->name('saveNewUserOrder');
 
-    // AJAX endpoint: do NOT constrain to numeric, to allow "001"
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Page
+    Route::get('/new-user-order', [NewUserOrderController::class, 'newUserOrder'])->name('newUserOrder');
+
+    // AJAX: apartments by locality unique_code
     Route::get('/localities/{uniqueCode}/apartments', [NewUserOrderController::class, 'apartmentsByLocality'])
         ->where('uniqueCode', '.*')
         ->name('apartments.byLocality');
+
+    // Save
+    Route::post('/new-user-order/save', [NewUserOrderController::class, 'saveNewUserOrder'])->name('saveNewUserOrder');
 });

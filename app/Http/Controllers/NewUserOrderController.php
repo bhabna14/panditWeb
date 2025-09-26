@@ -37,7 +37,7 @@ class NewUserOrderController extends Controller
      */
     public function apartmentsByLocality(string $uniqueCode)
     {
-        // Filter out null, empty, and literal "NULL" names; order nicely
+        // locality_id column stores the Locality.unique_code
         $apartments = Apartment::query()
             ->where('locality_id', $uniqueCode)
             ->whereNotNull('apartment_name')
@@ -63,6 +63,17 @@ class NewUserOrderController extends Controller
                 'name'           => 'nullable|string|max:150',
                 'mobile_number'  => 'required|digits:10',
 
+                // address (these were used but not validated before)
+                'state'               => 'required|string|max:100',
+                'city'                => 'required|string|max:120',
+                'pincode'             => 'required|string|max:10',
+                'locality'            => 'required|string',     // unique_code
+                'apartment_name'      => 'nullable|string|max:150',
+                'place_category'      => 'required|in:Individual,Apartment,Business,Temple',
+                'apartment_flat_plot' => 'required|string|max:150',
+                'landmark'            => 'nullable|string|max:150',
+                'address_type'        => 'nullable|in:Home,Work,Other',
+
                 // product + subscription
                 'product_id'     => 'required',
                 'start_date'     => 'required|date',
@@ -87,7 +98,8 @@ class NewUserOrderController extends Controller
             ]);
 
             $address = UserAddress::create([
-                'user_id'             => $user->userid, // change to $user->id if your FK is integer
+                // NOTE: if your FK is integer id, change to $user->id
+                'user_id'             => $user->userid,
                 'state'               => $validated['state'],
                 'city'                => $validated['city'],
                 'pincode'             => $validated['pincode'],
@@ -109,7 +121,8 @@ class NewUserOrderController extends Controller
             $orderId = 'ORD-' . strtoupper(Str::random(12));
 
             $order = Order::create([
-                'user_id'     => $user->userid, // change to $user->id if FK is integer
+                // NOTE: if your FK is integer id, change to $user->id
+                'user_id'     => $user->userid,
                 'order_id'    => $orderId,
                 'product_id'  => $validated['product_id'],
                 'quantity'    => 1,
@@ -122,7 +135,8 @@ class NewUserOrderController extends Controller
 
             Subscription::create([
                 'subscription_id' => $subscriptionId,
-                'user_id'     => $user->userid, // change to $user->id if FK is integer
+                // NOTE: if your FK is integer id, change to $user->id
+                'user_id'     => $user->userid,
                 'order_id'    => $order->order_id,
                 'product_id'  => $validated['product_id'],
                 'start_date'  => $start,
@@ -133,7 +147,8 @@ class NewUserOrderController extends Controller
             FlowerPayment::create([
                 'order_id'       => $order->order_id,
                 'payment_id'     => null,
-                'user_id'        => $user->userid, // change to $user->id if FK is integer
+                // NOTE: if your FK is integer id, change to $user->id
+                'user_id'        => $user->userid,
                 'payment_method' => $validated['payment_method'],
                 'paid_amount'    => $validated['paid_amount'],
                 'payment_status' => (float)$validated['paid_amount'] > 0 ? 'paid' : 'pending',
@@ -143,6 +158,7 @@ class NewUserOrderController extends Controller
             return back()->with('success', 'New user added successfully!');
         } catch (\Throwable $e) {
             DB::rollBack();
+            // Optionally log: \Log::error($e);
             return back()->with('error', 'Failed to save new user order');
         }
     }

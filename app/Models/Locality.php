@@ -11,7 +11,12 @@ class Locality extends Model
 
     protected $fillable = ['locality_name', 'pincode','unique_code','status'];
 
-    public function apartment()
+    /**
+     * One locality has many apartments.
+     * foreign key on Apartment: locality_id
+     * local key here: unique_code
+     */
+    public function apartments()
     {
         return $this->hasMany(Apartment::class, 'locality_id', 'unique_code');
     }
