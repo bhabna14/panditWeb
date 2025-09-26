@@ -64,7 +64,6 @@
                                 <th>Apartment</th>
                                 <th>Flat/Plot</th>
                                 <th>Rider</th>
-                                <th style="width:120px">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -82,12 +81,7 @@
                                             <span class="badge text-bg-secondary">—</span>
                                         @endif
                                     </td>
-                                    <td> <button type="button" class="btn btn-sm btn-outline-primary edit-btn"
-                                            data-bs-toggle="modal" data-bs-target="#editModal"
-                                            data-address="{{ $row['address_id'] }}" data-user="{{ $row['user_id'] }}"
-                                            data-name="{{ $row['name'] }}" data-apt="{{ $row['apartment_name'] }}"
-                                            data-flat="{{ $row['apartment_flat_plot'] }}"> <i
-                                                class="bi bi-pencil-square"></i> Edit </button> </td>
+                                   
                                 </tr>
                             @endforeach
                         </tbody>
