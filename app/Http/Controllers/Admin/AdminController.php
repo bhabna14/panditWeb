@@ -527,49 +527,50 @@ class AdminController extends Controller
         return view('admin/add-career');
     }
 
-    public function manageuser()
+   public function manageuser()
     {
-        $users = User::with('subscriptions')->get();
+        // Eager-load subscriptions (as you already had)
+        $users = User::with('subscriptions')->latest('id')->get();
 
         // ---- Total Customers ----
         $totalCustomer = User::count();
 
         // ---- Subscriptions Taken (Active or Paused) ----
         $totalSubscriptionTaken = Subscription::query()
-            ->whereIn('status', ['active', 'paused','expired','dead'])
+            ->whereIn('status', ['active', 'paused', 'expired', 'dead'])
             ->distinct('user_id')
             ->count('user_id');
 
         $twoMonthsAgo = Carbon::now()->subMonths(2);
         $liveStatuses = ['active', 'paused', 'resume'];
+
         $discontinuedCustomer = Subscription::query()
-        ->where('status', 'expired')
-        ->whereNotExists(function ($q) use ($liveStatuses) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s2')
-              ->whereColumn('s2.user_id', 'subscriptions.user_id')
-              ->whereIn('s2.status', $liveStatuses);
-        })
-        ->whereNotExists(function ($q) use ($liveStatuses) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as s3')
-              ->whereColumn('s3.order_id', 'subscriptions.order_id')
-              ->whereIn('s3.status', $liveStatuses);
-        })
-        ->where(function ($q) use ($twoMonthsAgo) {
-            $q->whereNull('end_date')
-              ->orWhere('end_date', '<', $twoMonthsAgo);
-        })
-        ->whereIn('id', function ($sub) {
-            $sub->select(DB::raw('MAX(id)'))
-                ->from('subscriptions')
-                ->groupBy('user_id'); // same logic as list
-        })
-        ->distinct('user_id')
-        ->count('user_id');
+            ->where('status', 'expired')
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                  ->from('subscriptions as s2')
+                  ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                  ->whereIn('s2.status', $liveStatuses);
+            })
+            ->whereNotExists(function ($q) use ($liveStatuses) {
+                $q->select(DB::raw(1))
+                  ->from('subscriptions as s3')
+                  ->whereColumn('s3.order_id', 'subscriptions.order_id')
+                  ->whereIn('s3.status', $liveStatuses);
+            })
+            ->where(function ($q) use ($twoMonthsAgo) {
+                $q->whereNull('end_date')
+                  ->orWhere('end_date', '<', $twoMonthsAgo);
+            })
+            ->whereIn('id', function ($sub) {
+                $sub->select(DB::raw('MAX(id)'))
+                    ->from('subscriptions')
+                    ->groupBy('user_id');
+            })
+            ->distinct('user_id')
+            ->count('user_id');
 
-
-        // ---- Payment Pending ----
+        // ---- Payment Pending (distinct users) ----
         $paymentPending = FlowerPayment::query()
             ->where('payment_status', 'pending')
             ->whereExists(function ($q) {
@@ -577,6 +578,7 @@ class AdminController extends Controller
                   ->from('subscriptions as s')
                   ->whereColumn('s.user_id', 'flower_payments.user_id');
             })
+            ->distinct('user_id')
             ->count('user_id');
 
         return view('admin.manageuser', compact(
@@ -586,6 +588,33 @@ class AdminController extends Controller
             'discontinuedCustomer',
             'paymentPending'
         ));
+    }
+
+    public function updateUserData(Request $request, User $user)
+    {
+        // Validate (email unique except current user)
+        $validated = $request->validate([
+            'name'           => ['required', 'string', 'max:191'],
+            'email'          => ['nullable', 'email', 'max:191', Rule::unique('users', 'email')->ignore($user->id)],
+            'mobile_number'  => ['nullable', 'string', 'max:20'],
+            'user_type'      => ['nullable', 'string', 'max:50'],
+            'userphoto'      => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+        ]);
+
+        // Handle photo upload
+        if ($request->hasFile('userphoto')) {
+            // delete old if it’s on disk storage path
+            if ($user->userphoto && Storage::disk('public')->exists($user->userphoto)) {
+                Storage::disk('public')->delete($user->userphoto);
+            }
+            $path = $request->file('userphoto')->store('users', 'public'); // stores under storage/app/public/users
+            $validated['userphoto'] = $path;
+        }
+
+        $user->fill($validated);
+        $user->save();
+
+        return back()->with('success', 'User updated successfully.');
     }
 
     public function userProfile($id)

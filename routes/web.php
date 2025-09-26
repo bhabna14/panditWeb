@@ -407,6 +407,8 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/manage-pandits', 'managepandit')->name('managepandit');
         Route::get('/pandit-profile', 'panditprofile')->name('panditprofile');
         Route::get('/manage-users', 'manageuser')->name('manageuser');
+        Route::put('/admin/users/{user}', 'updateUserData')->name('admin.users.update');
+
         Route::get('/user-profile/{id}', 'userProfile')->name('userprofile');
         Route::post('admin/pandit/accept/{id}', 'acceptPandit')->name('acceptPandit');
         Route::post('admin/pandit/reject/{id}', 'rejectPandit')->name('rejectPandit');
