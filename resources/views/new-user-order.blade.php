@@ -2,6 +2,8 @@
 
 @section('styles')
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
+    {{-- SweetAlert2 --}}
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         /* ===== Polished section cards & headings ===== */
         .nu-card {
@@ -10,7 +12,7 @@
             box-shadow: 0 6px 18px rgba(25, 42, 70, .06);
             background: #fff;
             padding: 18px;
-            margin-bottom: 18px;
+            margin-bottom: 18px
         }
 
         .nu-hero {
@@ -18,7 +20,7 @@
             border: 1px solid #e9ecf5;
             border-radius: 16px;
             padding: 18px;
-            margin-bottom: 18px;
+            margin-bottom: 18px
         }
 
         .nu-chip {
@@ -30,12 +32,12 @@
             border: 1px solid #e9ecf5;
             background: #fff;
             font-weight: 600;
-            font-size: .9rem;
+            font-size: .9rem
         }
 
         .nu-title {
             margin: 0 0 6px;
-            font-weight: 700;
+            font-weight: 700
         }
 
         .section-title {
@@ -44,37 +46,37 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 14px;
+            margin-bottom: 14px
         }
 
         .section-title .badge {
             font-size: .75rem;
-            padding: .35rem .5rem;
+            padding: .35rem .5rem
         }
 
         .form-text.muted {
-            color: #6b7280;
+            color: #6b7280
         }
 
         .select2-container--default .select2-selection--single {
             height: 38px;
             border: 1px solid #ced4da;
-            border-radius: .375rem;
+            border-radius: .375rem
         }
 
         .select2-container--default .select2-selection--single .select2-selection__rendered {
             line-height: 36px;
-            padding-left: 10px;
+            padding-left: 10px
         }
 
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px;
+            height: 36px
         }
 
         @media (max-width:575.98px) {
             .nu-hero .d-flex {
                 flex-direction: column;
-                gap: 8px;
+                gap: 8px
             }
         }
     </style>
@@ -91,21 +93,7 @@
         </ol>
     </div>
 
-    @if ($errors->any())
-        <div class="alert alert-danger nu-card">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li class="mb-1">{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
-    @if (session()->has('success'))
-        <div class="alert alert-success nu-card" id="Message">
-            {{ session()->get('success') }}
-        </div>
-    @endif
+    {{-- We won’t render inline alert boxes anymore; SweetAlert2 will handle all messages --}}
 
     <form action="{{ route('saveNewUserOrder') }}" method="post" enctype="multipart/form-data" novalidate>
         @csrf
@@ -137,7 +125,6 @@
         <!-- Address Details -->
         <div class="nu-card">
             <div class="section-title"><span class="badge bg-primary rounded-pill">2</span> Address Details</div>
-
             <div class="row g-3">
                 <div class="col-12">
                     <label class="form-label d-block mb-1">Place Category</label>
@@ -287,7 +274,92 @@
 
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
+        // ------- helpers: SweetAlert toasts + modals -------
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3200,
+            timerProgressBar: true
+        });
+
+        function showToast(type, title, text = '') {
+            Toast.fire({
+                icon: type,
+                title: title,
+                text: text
+            });
+        }
+
+        function showValidationErrors(errorsArray) {
+            if (!errorsArray || !errorsArray.length) return;
+
+            const listHtml = '<ul style="text-align:left;margin:0;padding-left:18px;">' +
+                errorsArray.map(e => `<li>${e}</li>`).join('') + '</ul>';
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Please fix the following',
+                html: listHtml,
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // ------- page init -------
+        $(function() {
+            $('.select2').select2({
+                width: '100%'
+            });
+
+            const localityEl = document.getElementById('locality');
+            localityEl.addEventListener('change', function() {
+                populateApartmentsFromLocality(this);
+            });
+
+            if (localityEl.value) {
+                populateApartmentsFromLocality(localityEl);
+            }
+
+            document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
+            document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);
+
+            const phoneEl = document.getElementById('mobile_number');
+            phoneEl.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
+            });
+
+            // ---- Laravel flashes -> SweetAlert ----
+            @if ($errors->any())
+                showValidationErrors([
+                    @foreach ($errors->all() as $e)
+                        @json($e),
+                    @endforeach
+                ]);
+            @endif
+
+            @if (session('success'))
+                showToast('success', @json(session('success')));
+            @endif
+
+            @if (session('error'))
+                // If you also passed 'error_detail', you can append it
+                showToast('error', @json(session('error')));
+            @endif
+
+            @if (session('warning'))
+                showToast('warning', @json(session('warning')));
+            @endif
+
+            @if (session('info'))
+                showToast('info', @json(session('info')));
+            @endif
+        });
+
+        // ------- business logic helpers -------
         function setEndDateFromDuration() {
             const start = document.getElementById('start_date').value;
             const dur = parseInt(document.getElementById('duration').value || '0', 10);
@@ -306,7 +378,7 @@
 
         async function populateApartmentsFromLocality(selectEl) {
             const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            const localityKey = selectedOpt ? selectedOpt.getAttribute('data-locality-key') : null; // unique_code
+            const localityKey = selectedOpt ? selectedOpt.getAttribute('data-locality-key') : null;
             const pincode = selectedOpt ? selectedOpt.getAttribute('data-pincode') : '';
             const apartmentSelect = document.getElementById('apartment_name');
 
@@ -319,11 +391,13 @@
             }
 
             try {
-                const res = await fetch(`{{ route('apartments.byLocality', ['uniqueCode' => '___CODE___']) }}`.replace(
-                    '___CODE___', encodeURIComponent(localityKey)));
+                const url = `{{ route('apartments.byLocality', ['uniqueCode' => '___CODE___']) }}`.replace(
+                    '___CODE___', encodeURIComponent(localityKey));
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Network error');
                 const data = await res.json();
 
-                if (data.ok && Array.isArray(data.data)) {
+                if (data.ok && Array.isArray(data.data) && data.data.length) {
                     data.data.forEach(name => {
                         const opt = document.createElement('option');
                         opt.value = name;
@@ -343,34 +417,9 @@
                 opt.text = 'Failed to load apartments';
                 apartmentSelect.appendChild(opt);
                 $(apartmentSelect).trigger('change');
+
+                showToast('error', 'Failed to load apartments');
             }
         }
-
-        $(function() {
-            $('.select2').select2({
-                width: '100%'
-            });
-
-            const localityEl = document.getElementById('locality');
-            localityEl.addEventListener('change', function() {
-                populateApartmentsFromLocality(this);
-            });
-
-            // Auto-load on re-render (e.g., after validation errors)
-            if (localityEl.value) {
-                populateApartmentsFromLocality(localityEl);
-            }
-
-            document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
-            document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);
-
-            const phoneEl = document.getElementById('mobile_number');
-            phoneEl.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
-            });
-
-            const msg = document.getElementById('Message');
-            if (msg) setTimeout(() => msg.remove(), 3000);
-        });
     </script>
 @endsection
