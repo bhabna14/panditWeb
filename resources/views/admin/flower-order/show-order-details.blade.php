@@ -537,7 +537,7 @@
                                             @if ($d->rider)
                                                 <span class="chip">
                                                     <i class="bi bi-person-badge me-1"></i>
-                                                    Rider: {{ $d->rider->name ?? $d->rider->rider_id }}
+                                                    Rider: {{ $d->rider->rider_name ?? $d->rider->rider_id }}
                                                 </span>
                                             @endif
 
