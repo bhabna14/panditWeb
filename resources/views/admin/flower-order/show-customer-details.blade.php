@@ -240,19 +240,7 @@
 @endsection
 
 @section('content')
-    <!-- Breadcrumb -->
-    <div class="breadcrumb-header justify-content-between">
-        <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">PROFILE</span>
-        </div>
-        <div class="justify-content-center mt-2">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Pages</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Profile</li>
-            </ol>
-        </div>
-    </div>
-
+   
     <!-- Profile Header -->
     <div class="row">
         <div class="col-12">
