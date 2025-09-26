@@ -11,11 +11,11 @@ class Apartment extends Model
 
     protected $table = 'flower__apartment';
 
-    protected $fillable = ['locality_id','apartment_name','status'];
-
-    // Apartment.locality_id => Locality.unique_code
+    protected $fillable = ['locality_id','apartment_name'];
+    
     public function locality()
     {
-        return $this->belongsTo(Locality::class, 'locality_id', 'unique_code');
+        return $this->belongsTo(Locality::class, 'unique_code', 'locality_id');
     }
+    
 }
