@@ -21,158 +21,150 @@ use Illuminate\Support\Facades\DB;
 
 class NewUserOrderController extends Controller
 {
+// Controller snippets
+  public function newUserOrder()
+    {
+        $flowers = FlowerProduct::where('status', 'active')
+            ->where('category', 'Subscription')
+            ->orderBy('name')
+            ->get(['product_id','name']);
 
-public function newUserOrder()
-{
-    $flowers = FlowerProduct::where('status', 'active')
-        ->where('category', 'Subscription')
-        ->orderBy('name')
-        ->get();
+        $localities = Locality::where('status', 'active')
+            ->select('id','locality_name','unique_code','pincode')
+            ->orderBy('locality_name')
+            ->get();
 
-    // Include 'id' so we can use locality_id in the view
-    $localities = Locality::where('status', 'active')
-        ->select('id', 'locality_name', 'unique_code', 'pincode')
-        ->orderBy('locality_name')
-        ->get();
+        // IMPORTANT: Apartment.locality_id stores Locality.unique_code
+        $apartments = Apartment::where('status', 'active')
+            ->select('id','apartment_name','locality_id')
+            ->orderBy('apartment_name')
+            ->get();
 
-    $apartments = Apartment::where('status', 'active')
-        ->select('id', 'apartment_name', 'locality_id')
-        ->orderBy('apartment_name')
-        ->get();
+        // Group by the key we'll read from the <option> (unique_code)
+        $apartmentsByLocality = $apartments->groupBy('locality_id');
 
-    // Group by locality_id (matches the data-locality-id used in the view)
-    $apartmentsByLocality = $apartments->groupBy('locality_id');
-
-    return view('new-user-order', compact('localities', 'flowers', 'apartmentsByLocality'));
-}
-
-    
-public function saveNewUserOrder(Request $request)
-{
-    try {
-        // Start a database transaction
-        \DB::beginTransaction();
-
-        // Validate user details
-        $validatedUserData = $request->validate([
-            'name' => 'nullable',
-            'user_type' => 'nullable|string',
-            'mobile_number' => 'required',
-            'state' => 'required|string',
-            'city' => 'required|string',
-            'pincode' => 'required|digits:6',
-            'apartment_name' => 'nullable|string',
-            'address_type' => 'nullable|string',
-            'place_category' => 'nullable|string',
-            'duration' => 'nullable|numeric|in:1,3,6',
-            'locality' => 'required|string',
-            'apartment_flat_plot' => 'required|string',
-            'landmark' => 'nullable|string',
-            'product_id' => 'nullable',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'paid_amount' => 'nullable|numeric',
-            'payment_method' => 'nullable|string',
-            'status' => 'nullable|string',
-        ]);
-
-        // Generate unique user ID
-        $user_id = 'USER' . rand(10000, 99999);
-
-        // Create the user
-        $user = User::create([
-            'userid' => $user_id,
-            'user_type' => $validatedUserData['user_type'] ?? 'normal',
-            'name' => $validatedUserData['name'],
-            'mobile_number' => '+91' . $validatedUserData['mobile_number'],
-        ]);
-
-        // Create user address
-        $address = UserAddress::create([
-            'user_id' => $user->userid,
-            'state' => $validatedUserData['state'],
-            'city' => $validatedUserData['city'],
-            'pincode' => $validatedUserData['pincode'],
-            'locality' => $validatedUserData['locality'],
-            'apartment_name' => $validatedUserData['apartment_name'],
-            'place_category' => $validatedUserData['place_category'],
-            'apartment_flat_plot' => $validatedUserData['apartment_flat_plot'],
-            'landmark' => $validatedUserData['landmark'] ?? null,
-            'address_type' => $validatedUserData['address_type'],
-            'country' => 'India',
-            'status' => 'active',
-        ]);
-
-        // Generate unique order ID
-        $orderId = 'ORD-' . strtoupper(Str::random(12));
-
-        // Create order
-        $order = Order::create([
-            'user_id' => $user->userid,
-            'order_id' => $orderId,
-            'product_id' => $validatedUserData['product_id'],
-            'quantity' => '1',
-            'start_date' => $validatedUserData['start_date'],
-            'address_id' => $address->id,
-            'total_price' => $validatedUserData['paid_amount'],
-            'created_at' => $validatedUserData['start_date'],
-        ]);
-
-        // Generate unique subscription ID
-        $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
-
-        // Calculate subscription start and end dates
-        $startDate = $validatedUserData['start_date'] 
-            ? Carbon::parse($validatedUserData['start_date']) 
-            : Carbon::now(); // Convert to Carbon instance or default to now
-
-        $duration = $validatedUserData['duration'];
-
-        // Determine the end date based on duration
-        if ($duration == 1) {
-            $endDate = $startDate->addDays(29); // For 1 month, 30 days
-        } elseif ($duration == 3) {
-            $endDate = $startDate->addDays(89); // For 3 months, 90 days
-        } elseif ($duration == 6) {
-            $endDate = $startDate->addDays(179); // For 6 months, 180 days
-        } else {
-            $endDate = $startDate; // Default case (no duration provided)
-        }
-
-        // Create subscription
-        Subscription::create([
-            'subscription_id' => $subscriptionId,
-            'user_id' => $user->userid,
-            'order_id' => $order->order_id,
-            'product_id' => $validatedUserData['product_id'],
-            'start_date' => $validatedUserData['start_date'],
-            'end_date' => $validatedUserData['end_date'],
-            'status' => $validatedUserData['status'],
-        ]);
-
-        // Add flower payment
-        FlowerPayment::create([
-            'order_id' => $order->order_id,
-            'payment_id' => 'NULL',
-            'user_id' => $user->userid,
-            'payment_method' =>  $validatedUserData['payment_method'],
-            'paid_amount' => $validatedUserData['paid_amount'],
-            'payment_status' => 'paid',
-        ]);
-
-        // Commit the transaction
-        \DB::commit();
-
-        return redirect()->back()->with('success', 'New user add succesful!');
-
-    } catch (\Exception $e) {
-        // Rollback the transaction on error
-        \DB::rollBack();
-
-        return redirect()->back()->with('error', 'failed to save new user order');
-
+        return view('new-user-order', compact('localities','flowers','apartmentsByLocality'));
     }
-}
 
+    public function saveNewUserOrder(Request $request)
+    {
+        try {
+            \DB::beginTransaction();
 
+            $validated = $request->validate([
+                // user
+                'user_type'      => 'nullable|in:normal,vip',
+                'name'           => 'nullable|string|max:150',
+                'mobile_number'  => 'required|digits:10',
+
+                // address
+                'state'               => 'required|string|max:120',
+                'city'                => 'required|string|max:120',
+                'pincode'             => 'required|digits:6',
+                'locality'            => 'required|string', // Locality.unique_code
+                'apartment_name'      => 'nullable|string|max:180',
+                'place_category'      => 'required|in:Individual,Apartment,Business,Temple',
+                'apartment_flat_plot' => 'required|string|max:180',
+                'landmark'            => 'nullable|string|max:180',
+                'address_type'        => 'nullable|in:Home,Work,Other',
+
+                // product + subscription
+                'product_id'     => 'required',
+                'start_date'     => 'required|date',
+                'end_date'       => 'nullable|date', // we will compute if missing
+                'duration'       => 'required|integer|in:1,3,6',
+
+                // payment
+                'paid_amount'    => 'required|numeric|min:0',
+                'payment_method' => 'required|in:cash,upi',
+
+                // status
+                'status'         => 'nullable|in:active,pending,expired',
+            ]);
+
+            // Generate userid (string). If you actually use users.id as FK, switch below accordingly.
+            $userCode = 'USER' . random_int(10000, 99999);
+
+            $user = User::create([
+                'userid'        => $userCode,
+                'user_type'     => $validated['user_type'] ?? 'normal',
+                'name'          => $validated['name'] ?? null,
+                'mobile_number' => '+91' . $validated['mobile_number'],
+            ]);
+
+            // Create address (uses Locality.unique_code in `locality`)
+            $address = UserAddress::create([
+                // If your FK is integer users.id, change to: 'user_id' => $user->id,
+                'user_id'            => $user->userid,
+                'state'              => $validated['state'],
+                'city'               => $validated['city'],
+                'pincode'            => $validated['pincode'],
+                'locality'           => $validated['locality'], // unique_code
+                'apartment_name'     => $validated['apartment_name'] ?? null,
+                'place_category'     => $validated['place_category'],
+                'apartment_flat_plot'=> $validated['apartment_flat_plot'],
+                'landmark'           => $validated['landmark'] ?? null,
+                'address_type'       => $validated['address_type'] ?? 'Other',
+                'country'            => 'India',
+                'status'             => 'active',
+            ]);
+
+            // Dates
+            $start = Carbon::parse($validated['start_date'])->startOfDay();
+
+            // Compute end date if not provided: add months (no overflow) then inclusive -1 day
+            if (!empty($validated['end_date'])) {
+                $end = Carbon::parse($validated['end_date'])->endOfDay();
+            } else {
+                $end = (clone $start)->addMonthsNoOverflow((int)$validated['duration'])->subDay()->endOfDay();
+            }
+
+            // Order
+            $orderId = 'ORD-' . strtoupper(Str::random(12));
+
+            $order = Order::create([
+                // If your FK is integer users.id, change to: 'user_id' => $user->id,
+                'user_id'     => $user->userid,
+                'order_id'    => $orderId,
+                'product_id'  => $validated['product_id'],
+                'quantity'    => 1,
+                'start_date'  => $start,
+                'address_id'  => $address->id,
+                'total_price' => $validated['paid_amount'],
+                // let timestamps default to now
+            ]);
+
+            // Subscription
+            $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
+
+            Subscription::create([
+                'subscription_id' => $subscriptionId,
+                // If your FK is integer users.id, change to: 'user_id' => $user->id,
+                'user_id'     => $user->userid,
+                'order_id'    => $order->order_id,
+                'product_id'  => $validated['product_id'],
+                'start_date'  => $start,
+                'end_date'    => $end,
+                'status'      => $validated['status'] ?? 'active',
+            ]);
+
+            // Payment
+            FlowerPayment::create([
+                'order_id'       => $order->order_id,
+                'payment_id'     => null, // not the string "NULL"
+                // If your FK is integer users.id, change to: 'user_id' => $user->id,
+                'user_id'        => $user->userid,
+                'payment_method' => $validated['payment_method'],
+                'paid_amount'    => $validated['paid_amount'],
+                'payment_status' => (float)$validated['paid_amount'] > 0 ? 'paid' : 'pending',
+            ]);
+
+            \DB::commit();
+            return back()->with('success', 'New user added successfully!');
+        } catch (\Throwable $e) {
+            \DB::rollBack();
+            // \Log::error('saveNewUserOrder failed', ['err' => $e->getMessage()]);
+            return back()->with('error', 'Failed to save new user order');
+        }
+    }
 }

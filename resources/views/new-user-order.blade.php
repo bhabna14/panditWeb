@@ -92,9 +92,7 @@
     <div class="nu-hero d-flex justify-content-between align-items-center mt-4">
         <div>
             <h4 class="nu-title">Subscription for New User</h4>
-            <div class="nu-chip">
-                <span>Quick create • Clean layout</span>
-            </div>
+            <div class="nu-chip"><span>Quick create • Clean layout</span></div>
         </div>
         <ol class="breadcrumb mb-0">
             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
@@ -129,17 +127,15 @@
             <div class="row g-3">
                 <div class="col-md-4">
                     <label for="user_type" class="form-label">User Type</label>
-                    <select name="user_type" id="user_type" class="form-control" required>
-                        <option value="">Select user type</option>
-                        <option value="normal">Normal</option>
+                    <select name="user_type" id="user_type" class="form-control">
+                        <option value="normal" selected>Normal</option>
                         <option value="vip">VIP</option>
                     </select>
                     <div class="form-text muted">VIP users can be prioritized in service and support.</div>
                 </div>
                 <div class="col-md-4">
                     <label for="name" class="form-label">User Name</label>
-                    <input type="text" name="name" class="form-control" id="name" placeholder="Enter full name"
-                        required>
+                    <input type="text" name="name" class="form-control" id="name" placeholder="Enter full name">
                 </div>
                 <div class="col-md-4">
                     <label for="mobile_number" class="form-label">Phone Number</label>
@@ -160,26 +156,14 @@
                 <div class="col-12">
                     <label class="form-label d-block mb-1">Place Category</label>
                     <div class="d-flex flex-wrap gap-3">
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" id="individual" name="place_category"
-                                value="Individual" required>
-                            <label class="form-check-label" for="individual">Individual</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" id="apartment" name="place_category"
-                                value="Apartment">
-                            <label class="form-check-label" for="apartment">Apartment</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" id="business" name="place_category"
-                                value="Business">
-                            <label class="form-check-label" for="business">Business</label>
-                        </div>
-                        <div class="form-check">
-                            <input type="radio" class="form-check-input" id="temple" name="place_category"
-                                value="Temple">
-                            <label class="form-check-label" for="temple">Temple</label>
-                        </div>
+                        @foreach (['Individual', 'Apartment', 'Business', 'Temple'] as $pc)
+                            <div class="form-check">
+                                <input type="radio" class="form-check-input" id="pc_{{ $pc }}"
+                                    name="place_category" value="{{ $pc }}" {{ $pc === 'Individual' ? 'checked' : '' }}
+                                    required>
+                                <label class="form-check-label" for="pc_{{ $pc }}">{{ $pc }}</label>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
@@ -190,8 +174,7 @@
                 </div>
                 <div class="col-md-6">
                     <label for="landmark" class="form-label">Landmark</label>
-                    <input type="text" class="form-control" id="landmark" name="landmark"
-                        placeholder="Nearby landmark" required>
+                    <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Nearby landmark">
                 </div>
 
                 <div class="col-md-4">
@@ -199,7 +182,7 @@
                     <select class="form-control select2" id="locality" name="locality" required>
                         <option value="">Select Locality</option>
                         @foreach ($localities as $locality)
-                            <option value="{{ $locality->unique_code }}" data-locality-id="{{ $locality->id }}"
+                            <option value="{{ $locality->unique_code }}" data-locality-key="{{ $locality->unique_code }}"
                                 data-pincode="{{ $locality->pincode }}">
                                 {{ $locality->locality_name }}
                             </option>
@@ -223,8 +206,7 @@
 
                 <div class="col-md-6">
                     <label for="city" class="form-label">Town / City</label>
-                    <input type="text" class="form-control" id="city" name="city"
-                        placeholder="Enter town/city" required>
+                    <input type="text" class="form-control" id="city" name="city" required>
                 </div>
                 <div class="col-md-6">
                     <label for="state" class="form-label">State</label>
@@ -236,21 +218,14 @@
                 <div class="col-12">
                     <label class="form-label d-block mb-1">Address Type</label>
                     <div class="d-flex flex-wrap gap-3">
-                        <div class="form-check">
-                            <input name="address_type" id="addr_home" class="form-check-input" type="radio"
-                                value="Home">
-                            <label class="form-check-label" for="addr_home">Home</label>
-                        </div>
-                        <div class="form-check">
-                            <input name="address_type" id="addr_work" class="form-check-input" type="radio"
-                                value="Work">
-                            <label class="form-check-label" for="addr_work">Work</label>
-                        </div>
-                        <div class="form-check">
-                            <input name="address_type" id="addr_other" class="form-check-input" type="radio"
-                                value="Other" checked>
-                            <label class="form-check-label" for="addr_other">Other</label>
-                        </div>
+                        @foreach (['Home', 'Work', 'Other'] as $at)
+                            <div class="form-check">
+                                <input name="address_type" id="addr_{{ strtolower($at) }}" class="form-check-input"
+                                    type="radio" value="{{ $at }}" {{ $at === 'Other' ? 'checked' : '' }}>
+                                <label class="form-check-label"
+                                    for="addr_{{ strtolower($at) }}">{{ $at }}</label>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -278,7 +253,7 @@
                 </div>
                 <div class="col-md-4">
                     <label for="end_date" class="form-label">End Date</label>
-                    <input type="date" name="end_date" class="form-control" id="end_date" required>
+                    <input type="date" name="end_date" class="form-control" id="end_date">
                     <div class="form-text muted">Will auto-calculate when Duration is selected (you can still override).
                     </div>
                 </div>
@@ -315,7 +290,7 @@
                 </div>
                 <div class="col-md-3">
                     <label for="status" class="form-label">Status</label>
-                    <select name="status" id="status" class="form-control" required>
+                    <select name="status" id="status" class="form-control">
                         <option value="active" selected>Active</option>
                         <option value="pending">Pending</option>
                         <option value="expired">Expired</option>
@@ -325,9 +300,7 @@
         </div>
 
         <div class="nu-card d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">
-                Submit
-            </button>
+            <button type="submit" class="btn btn-primary">Submit</button>
         </div>
     </form>
 @endsection
@@ -335,26 +308,19 @@
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
     <script>
-        // Apartments grouped by locality_id from the controller
+        // Apartments grouped by Locality.unique_code on the server
         const apartmentsByLocality = @json($apartmentsByLocality);
 
-        // Helpers
         function setEndDateFromDuration() {
             const start = document.getElementById('start_date').value;
             const dur = parseInt(document.getElementById('duration').value || '0', 10);
             if (!start || !dur) return;
 
             const d = new Date(start + 'T00:00:00'); // local midnight to avoid TZ drift
-            const startDay = d.getDate();
             const target = new Date(d);
-
-            // Add months (handle month overflow)
             target.setMonth(target.getMonth() + dur);
-
-            // We want inclusive period: end = (start + months) - 1 day
             target.setDate(target.getDate() - 1);
 
-            // Format yyyy-mm-dd
             const yyyy = target.getFullYear();
             const mm = String(target.getMonth() + 1).padStart(2, '0');
             const dd = String(target.getDate()).padStart(2, '0');
@@ -363,7 +329,7 @@
 
         function populateApartmentsFromLocality(selectEl) {
             const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            const localityId = selectedOpt ? selectedOpt.getAttribute('data-locality-id') : null;
+            const localityKey = selectedOpt ? selectedOpt.getAttribute('data-locality-key') : null; // unique_code
             const pincode = selectedOpt ? selectedOpt.getAttribute('data-pincode') : '';
             const apartmentSelect = document.getElementById('apartment_name');
 
@@ -373,12 +339,12 @@
             // Reset apartments
             apartmentSelect.innerHTML = '<option value="">Select Apartment</option>';
 
-            if (!localityId) {
+            if (!localityKey) {
                 $(apartmentSelect).val('').trigger('change.select2');
                 return;
             }
 
-            const list = apartmentsByLocality[localityId] || [];
+            const list = apartmentsByLocality[localityKey] || [];
             if (list.length === 0) {
                 apartmentSelect.innerHTML = '<option value="">No Apartments Available</option>';
                 $(apartmentSelect).val('').trigger('change.select2');
@@ -394,29 +360,25 @@
             $(apartmentSelect).trigger('change.select2');
         }
 
-        // Init Select2
+        // Init Select2 & listeners
         $(function() {
             $('.select2').select2({
                 width: '100%'
             });
 
-            // Locality -> apartments + pincode
             const localityEl = document.getElementById('locality');
             localityEl.addEventListener('change', function() {
                 populateApartmentsFromLocality(this);
             });
 
-            // Duration & Start Date -> auto end date
             document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
             document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);
 
-            // Basic phone sanitation (numbers only)
             const phoneEl = document.getElementById('mobile_number');
             phoneEl.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
             });
 
-            // Auto-hide success message
             const msg = document.getElementById('Message');
             if (msg) setTimeout(() => msg.remove(), 3000);
         });
