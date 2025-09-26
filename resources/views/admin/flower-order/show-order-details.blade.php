@@ -128,8 +128,8 @@
 
         .stat-title {
             color: #6b7280;
-            font-weight: 600;
-            font-size: .9rem;
+            font-weight: 400;
+            font-size: .8rem;
         }
 
         .stat-value {
@@ -314,7 +314,7 @@
 
 @section('content')
     <!-- Hero -->
-    <div class="page-hero mb-3">
+    <div class="page-hero mb-3 mt-4">
         <div class="d-flex align-items-center justify-content-between">
             <div>
                 <h5 class="mb-1"><i class="bi bi-bookmark-star me-2"></i>Booking Details</h5>
