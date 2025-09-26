@@ -1,6 +1,7 @@
 @extends('admin.layouts.apps')
 
 @section('styles')
+    {{-- Icons + DataTables CSS --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-2.1.7/r-3.0.3/datatables.min.css"/>
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.bootstrap5.min.css"/>
@@ -149,6 +150,12 @@
 @endsection
 
 @section('scripts')
+    {{-- Bootstrap JS (required for Modal/Toast, etc.) --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+    {{-- DataTables + Buttons --}}
     <script src="https://cdn.datatables.net/v/bs5/dt-2.1.7/r-3.0.3/datatables.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.bootstrap5.min.js"></script>
@@ -177,24 +184,31 @@
             }
         });
 
-        // Edit modal handlers
+        // Elements
         const modalEl = document.getElementById('editModal');
         const form    = document.getElementById('editAddressForm');
         const okToast = document.getElementById('okToast');
 
-        document.querySelector('#usersTable tbody').addEventListener('click', function (e) {
+        // Delegate on the entire table (works with responsive child rows)
+        document.getElementById('usersTable').addEventListener('click', function (e) {
             const btn = e.target.closest('.edit-btn');
             if (!btn) return;
 
-            document.getElementById('editAddressId').value  = btn.dataset.address;
-            document.getElementById('editUserId').value     = btn.dataset.user;
-            document.getElementById('editUserName').value   = btn.dataset.name;
-            document.getElementById('editApartmentName').value = btn.dataset.apt !== '—' ? btn.dataset.apt : '';
-            document.getElementById('editFlatPlot').value   = btn.dataset.flat !== '—' ? btn.dataset.flat : '';
+            if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+                console.error('Bootstrap JS not loaded; cannot open modal.');
+                return;
+            }
+
+            document.getElementById('editAddressId').value  = btn.dataset.address || '';
+            document.getElementById('editUserId').value     = btn.dataset.user || '';
+            document.getElementById('editUserName').value   = btn.dataset.name || '';
+            document.getElementById('editApartmentName').value = (btn.dataset.apt && btn.dataset.apt !== '—') ? btn.dataset.apt : '';
+            document.getElementById('editFlatPlot').value   = (btn.dataset.flat && btn.dataset.flat !== '—') ? btn.dataset.flat : '';
 
             new bootstrap.Modal(modalEl).show();
         });
 
+        // Submit update
         form.addEventListener('submit', function (ev) {
             ev.preventDefault();
             const payload = new FormData(form);
@@ -206,8 +220,7 @@
             })
             .then(r => r.ok ? r.json() : Promise.reject())
             .then(() => {
-                bootstrap.Modal.getInstance(modalEl).hide();
-                // Show toast success and refresh rows (simplest: reload)
+                bootstrap.Modal.getInstance(modalEl)?.hide();
                 if (bootstrap?.Toast) new bootstrap.Toast(okToast).show();
                 setTimeout(() => location.reload(), 900);
             })

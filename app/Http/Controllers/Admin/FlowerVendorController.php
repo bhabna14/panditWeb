@@ -152,15 +152,69 @@ class FlowerVendorController extends Controller
 
         return view('admin.manage-flower-vendors', compact('vendor_details', 'flowers','totalVendors','activeVendors','inactiveVendors'));
     }
-
-    public function vendorAllDetails($id)
-    {
-        $pickupDetails = FlowerPickupDetails::with(['flowerPickupItems.flower', 'flowerPickupItems.unit', 'vendor', 'rider'])
+    
+public function vendorAllDetails($id)
+{
+    $pickups = \App\Models\FlowerPickupDetails::with([
+            'flowerPickupItems.flower',
+            'flowerPickupItems.unit',
+            'vendor',
+            'rider'
+        ])
         ->where('vendor_id', $id)
-        ->get()
-        ->groupBy('pickup_date');
-        return view('admin.vendor-all-details', compact('pickupDetails'));
-    }
+        ->orderByDesc('pickup_date')
+        ->orderByDesc('created_at')
+        ->get();
+
+    // Group by pickup_date (Y-m-d key for stable grouping)
+    $pickupDetails = $pickups->groupBy(function ($d) {
+        if (empty($d->pickup_date)) return 'Unknown';
+        try {
+            return \Carbon\Carbon::parse($d->pickup_date)->format('Y-m-d');
+        } catch (\Throwable $e) {
+            return (string) $d->pickup_date;
+        }
+    });
+
+    $vendor = optional($pickups->first())->vendor;
+
+    // Compute summary metrics
+    $totalPickups = $pickups->count();
+
+    $totalItems = $pickups->sum(function ($p) {
+        return optional($p->flowerPickupItems)->sum(function ($i) {
+            return (float)($i->quantity ?? 0);
+        });
+    });
+
+    $totalAmount = $pickups->sum(function ($p) {
+        // prefer total_price; otherwise sum items' price
+        if (!is_null($p->total_price) && $p->total_price !== '') {
+            return (float) $p->total_price;
+        }
+        return optional($p->flowerPickupItems)->sum(function ($i) {
+            return (float)($i->price ?? 0);
+        });
+    });
+
+    $paidCount   = $pickups->where('payment_status', 'Paid')->count();
+    $unpaidCount = $totalPickups - $paidCount;
+
+    $lastPickupDate = $pickups
+        ->filter(fn($p) => !empty($p->pickup_date))
+        ->max('pickup_date');
+
+    $summary = [
+        'total_pickups'   => $totalPickups,
+        'total_items'     => $totalItems,
+        'total_amount'    => $totalAmount,
+        'paid_count'      => $paidCount,
+        'unpaid_count'    => $unpaidCount,
+        'last_pickup_date'=> $lastPickupDate ? \Carbon\Carbon::parse($lastPickupDate)->format('d M Y') : '—',
+    ];
+
+    return view('admin.vendor-all-details', compact('pickupDetails', 'vendor', 'summary', 'pickups'));
+}
 
     public function deleteVendorDetails($id)
     {
