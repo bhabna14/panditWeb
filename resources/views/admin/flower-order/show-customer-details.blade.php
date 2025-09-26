@@ -242,7 +242,7 @@
 @section('content')
    
     <!-- Profile Header -->
-    <div class="row">
+    <div class="row mt-4 mb-3">
         <div class="col-12">
             <div class="profile-hero d-xl-flex align-items-center justify-content-between">
                 <div class="left">
