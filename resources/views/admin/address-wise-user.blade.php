@@ -99,7 +99,6 @@
                                 <th>Apartment</th>
                                 <th>Flat/Plot</th>
                                 <th>Rider</th>
-                                <th>Action</th>
                             </tr>
                         </tfoot>
                     </table>
@@ -112,29 +111,8 @@
                     class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
-    </div> {{-- Edit Modal (will be moved to <body> at runtime for safety) --}} <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="editAddressForm"> @csrf <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="editModalLabel">Edit Address</h5> <button type="button"
-                            class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body"> <input type="hidden" name="address_id" id="editAddressId"> <input
-                            type="hidden" name="user_id" id="editUserId">
-                        <div class="mb-3"> <label class="form-label">Customer Name</label> <input type="text"
-                                class="form-control" id="editUserName" name="name" required> </div>
-                        <div class="mb-3"> <label class="form-label">Apartment Name</label> <input type="text"
-                                class="form-control" id="editApartmentName" name="apartment_name" required> </div>
-                        <div class="mb-3"> <label class="form-label">Flat/Plot</label> <input type="text"
-                                class="form-control" id="editFlatPlot" name="apartment_flat_plot" required> </div>
-                    </div>
-                    <div class="modal-footer"> <button class="btn btn-success w-100" type="submit"> <i
-                                class="bi bi-check-circle"></i> Update </button> </div>
-                </div>
-            </form>
-        </div>
-    </div>
+    </div> {{-- Edit Modal (will be moved to <body> at runtime for safety) --}} 
+    
 @endsection
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
@@ -176,106 +154,6 @@
                 }
             });
 
-            const modalEl = document.getElementById('editModal');
-            const form = document.getElementById('editAddressForm');
-            const okToast = document.getElementById('okToast');
-
-            // Keep a reference to the button that opened the modal
-            let lastTriggerBtn = null;
-
-            // Ensure modal lives under <body> (avoids overflow/z-index issues)
-            if (modalEl && modalEl.parentElement !== document.body) {
-                document.body.appendChild(modalEl);
-            }
-
-            if (modalEl) {
-                modalEl.addEventListener('show.bs.modal', function(e) {
-                    const btn = e.relatedTarget;
-                    lastTriggerBtn = btn || null;
-                    if (!btn) return;
-                    const d = btn.dataset;
-
-                    document.getElementById('editAddressId').value = d.address || '';
-                    document.getElementById('editUserId').value = d.user || '';
-                    document.getElementById('editUserName').value = d.name || '';
-                    document.getElementById('editApartmentName').value = (d.apt && d.apt !== '—') ? d.apt :
-                        '';
-                    document.getElementById('editFlatPlot').value = (d.flat && d.flat !== '—') ? d.flat :
-                        '';
-                });
-
-                modalEl.addEventListener('shown.bs.modal', function() {
-                    document.getElementById('editUserName')?.focus();
-                });
-            }
-
-            // Helper: find the correct parent <tr> for DataTables (handles responsive child rows)
-            function getParentRowFromButton(btn) {
-                if (!btn) return null;
-                let tr = btn.closest('tr');
-                if (!tr) return null;
-                // If this is a responsive child row, the data row is the previous sibling
-                if (tr.classList.contains('child') && tr.previousElementSibling?.classList.contains('parent')) {
-                    tr = tr.previousElementSibling;
-                }
-                return tr;
-            }
-
-            // --- Submit update ---
-            form.addEventListener('submit', function(ev) {
-                ev.preventDefault();
-                const payload = new FormData(form);
-
-                fetch(`{{ route('admin.address.update') }}`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
-                                ?.getAttribute('content')
-                        },
-                        body: payload
-                    })
-                    .then(r => r.ok ? r.json() : r.json().then(j => Promise.reject(j)))
-                    .then((res) => {
-                        // Close modal
-                        const inst = bootstrap.Modal.getInstance(modalEl);
-                        inst && inst.hide();
-
-                        // Update UI in-place so changes are visible immediately
-                        const nameNew = res?.user?.name ?? document.getElementById('editUserName')
-                            .value;
-                        const aptNew = res?.address?.apartment_name ?? document.getElementById(
-                            'editApartmentName').value;
-                        const flatNew = res?.address?.apartment_flat_plot ?? document.getElementById(
-                            'editFlatPlot').value;
-
-                        // 1) Patch the Edit button's data-* so reopening shows new values
-                        if (lastTriggerBtn) {
-                            lastTriggerBtn.dataset.name = nameNew;
-                            lastTriggerBtn.dataset.apt = aptNew;
-                            lastTriggerBtn.dataset.flat = flatNew;
-                        }
-
-                        // 2) Patch the row cells visually (no reload)
-                        const tr = getParentRowFromButton(lastTriggerBtn);
-                        if (tr) {
-                            // columns: 0:#, 1:Name, 2:Mobile, 3:Apt, 4:Flat/Plot, 5:Rider, 6:Action
-                            const tds = tr.querySelectorAll('td');
-                            if (tds[1]) tds[1].textContent = nameNew;
-                            if (tds[3]) tds[3].textContent = aptNew || '—';
-                            if (tds[4]) tds[4].textContent = flatNew || '—';
-                        }
-
-                        // Optional: if you want DataTables to re-read the row for sorting/searching:
-                        // dt.row(tr).invalidate().draw(false);
-
-                        // Toast
-                        if (bootstrap?.Toast) new bootstrap.Toast(okToast).show();
-                    })
-                    .catch((err) => {
-                        console.error('Update failed:', err);
-                        alert(err?.message || 'Update failed. Please try again.');
-                    });
-            });
         });
     </script>
 @endsection

@@ -745,49 +745,4 @@ class AdminController extends Controller
             'users' => $userData,
         ]);
     }
-public function updateAddress(Request $request)
-{
-    $validated = $request->validate([
-        'address_id'          => 'required|exists:user_addresses,id',
-        // If your PK is users.userid keep as-is; if it's users.id change the rule and the query below.
-        'user_id'             => 'required|exists:users,userid',
-        'name'                => 'required|string|max:255',
-        'apartment_name'      => 'required|string|max:255',
-        'apartment_flat_plot' => 'required|string|max:255',
-    ]);
-
-    DB::beginTransaction();
-    try {
-        // Update user name
-        $user = \App\Models\User::where('userid', $validated['user_id'])->firstOrFail();
-        $user->update(['name' => $validated['name']]);
-
-        // Update address
-        $address = \App\Models\UserAddress::findOrFail($validated['address_id']);
-        $address->update([
-            'apartment_name'      => $validated['apartment_name'],
-            'apartment_flat_plot' => $validated['apartment_flat_plot'],
-        ]);
-
-        DB::commit();
-
-        return response()->json([
-            'ok'      => true,
-            'message' => 'Customer and address updated successfully.',
-            'user'    => [
-                'user_id' => $user->userid, // change to $user->id if your PK is id
-                'name'    => $user->name,
-            ],
-            'address' => [
-                'address_id'          => $address->id,
-                'apartment_name'      => $address->apartment_name,
-                'apartment_flat_plot' => $address->apartment_flat_plot,
-            ],
-        ]);
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        return response()->json(['ok' => false, 'message' => 'Update failed'], 500);
-    }
-}
-
 }
