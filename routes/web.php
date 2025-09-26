@@ -925,7 +925,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/new-user-order', [NewUserOrderController::class, 'newUserOrder'])->name('newUserOrder');
     Route::post('/new-user-order', [NewUserOrderController::class, 'saveNewUserOrder'])->name('saveNewUserOrder');
 
-    // AJAX endpoint to fetch apartments for a given locality unique_code
+    // AJAX endpoint: do NOT constrain to numeric, to allow "001"
     Route::get('/localities/{uniqueCode}/apartments', [NewUserOrderController::class, 'apartmentsByLocality'])
+        ->where('uniqueCode', '.*')
         ->name('apartments.byLocality');
 });

@@ -2,10 +2,8 @@
 
 @section('styles')
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-    {{-- SweetAlert2 --}}
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
-        /* ===== Polished section cards & headings ===== */
         .nu-card {
             border: 1px solid #e9ecf5;
             border-radius: 16px;
@@ -92,8 +90,6 @@
             <li class="breadcrumb-item tx-15"><a href="javascript:void(0);">Dashboard</a></li>
         </ol>
     </div>
-
-    {{-- We won’t render inline alert boxes anymore; SweetAlert2 will handle all messages --}}
 
     <form action="{{ route('saveNewUserOrder') }}" method="post" enctype="multipart/form-data" novalidate>
         @csrf
@@ -274,11 +270,9 @@
 
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-    {{-- SweetAlert2 --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // ------- helpers: SweetAlert toasts + modals -------
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -287,29 +281,25 @@
             timerProgressBar: true
         });
 
-        function showToast(type, title, text = '') {
+        function showToast(type, title) {
             Toast.fire({
                 icon: type,
-                title: title,
-                text: text
+                title
             });
         }
 
         function showValidationErrors(errorsArray) {
-            if (!errorsArray || !errorsArray.length) return;
-
-            const listHtml = '<ul style="text-align:left;margin:0;padding-left:18px;">' +
-                errorsArray.map(e => `<li>${e}</li>`).join('') + '</ul>';
-
+            if (!errorsArray?.length) return;
+            const html = '<ul style="text-align:left;margin:0;padding-left:18px;">' + errorsArray.map(e => `<li>${e}</li>`)
+                .join('') + '</ul>';
             Swal.fire({
                 icon: 'error',
                 title: 'Please fix the following',
-                html: listHtml,
+                html,
                 confirmButtonText: 'OK'
             });
         }
 
-        // ------- page init -------
         $(function() {
             $('.select2').select2({
                 width: '100%'
@@ -320,9 +310,7 @@
                 populateApartmentsFromLocality(this);
             });
 
-            if (localityEl.value) {
-                populateApartmentsFromLocality(localityEl);
-            }
+            if (localityEl.value) populateApartmentsFromLocality(localityEl);
 
             document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
             document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);
@@ -332,7 +320,6 @@
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
             });
 
-            // ---- Laravel flashes -> SweetAlert ----
             @if ($errors->any())
                 showValidationErrors([
                     @foreach ($errors->all() as $e)
@@ -340,36 +327,28 @@
                     @endforeach
                 ]);
             @endif
-
             @if (session('success'))
                 showToast('success', @json(session('success')));
             @endif
-
             @if (session('error'))
-                // If you also passed 'error_detail', you can append it
                 showToast('error', @json(session('error')));
             @endif
-
             @if (session('warning'))
                 showToast('warning', @json(session('warning')));
             @endif
-
             @if (session('info'))
                 showToast('info', @json(session('info')));
             @endif
         });
 
-        // ------- business logic helpers -------
         function setEndDateFromDuration() {
             const start = document.getElementById('start_date').value;
             const dur = parseInt(document.getElementById('duration').value || '0', 10);
             if (!start || !dur) return;
-
             const d = new Date(start + 'T00:00:00');
             const target = new Date(d);
             target.setMonth(target.getMonth() + dur);
             target.setDate(target.getDate() - 1);
-
             const yyyy = target.getFullYear();
             const mm = String(target.getMonth() + 1).padStart(2, '0');
             const dd = String(target.getDate()).padStart(2, '0');
@@ -377,9 +356,9 @@
         }
 
         async function populateApartmentsFromLocality(selectEl) {
-            const selectedOpt = selectEl.options[selectEl.selectedIndex];
-            const localityKey = selectedOpt ? selectedOpt.getAttribute('data-locality-key') : null;
-            const pincode = selectedOpt ? selectedOpt.getAttribute('data-pincode') : '';
+            const opt = selectEl.options[selectEl.selectedIndex];
+            const localityKey = opt ? opt.getAttribute('data-locality-key') : null; // e.g., "001"
+            const pincode = opt ? opt.getAttribute('data-pincode') : '';
             const apartmentSelect = document.getElementById('apartment_name');
 
             document.getElementById('pincode').value = pincode || '';
@@ -399,9 +378,11 @@
 
                 if (data.ok && Array.isArray(data.data) && data.data.length) {
                     data.data.forEach(name => {
+                        const clean = String(name).trim();
+                        if (!clean || clean.toUpperCase() === 'NULL') return; // extra guard
                         const opt = document.createElement('option');
-                        opt.value = name;
-                        opt.text = name;
+                        opt.value = clean;
+                        opt.text = clean;
                         apartmentSelect.appendChild(opt);
                     });
                 } else {
@@ -417,7 +398,6 @@
                 opt.text = 'Failed to load apartments';
                 apartmentSelect.appendChild(opt);
                 $(apartmentSelect).trigger('change');
-
                 showToast('error', 'Failed to load apartments');
             }
         }

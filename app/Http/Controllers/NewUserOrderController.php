@@ -29,7 +29,6 @@ class NewUserOrderController extends Controller
             ->orderBy('locality_name')
             ->get();
 
-        // View no longer needs apartments preloaded (AJAX will fetch), so no grouping required.
         return view('new-user-order', compact('localities','flowers'));
     }
 
@@ -38,128 +37,124 @@ class NewUserOrderController extends Controller
      */
     public function apartmentsByLocality(string $uniqueCode)
     {
-        // If your table does NOT have a 'status' column, remove the where('status', 'active') line.
+        // Filter out null, empty, and literal "NULL" names; order nicely
         $apartments = Apartment::query()
-            ->where('locality_id', $uniqueCode) // locality_id stores Locality.unique_code
+            ->where('locality_id', $uniqueCode)
+            ->whereNotNull('apartment_name')
+            ->whereRaw("TRIM(apartment_name) <> ''")
+            ->whereRaw("UPPER(TRIM(apartment_name)) <> 'NULL'")
             ->orderBy('apartment_name')
             ->pluck('apartment_name');
 
         return response()->json([
-            'ok' => true,
+            'ok'   => true,
             'data' => $apartments,
         ]);
     }
-// In your controller method
-public function saveNewUserOrder(Request $request)
-{
-    try {
-        \DB::beginTransaction();
 
-        $validated = $request->validate([
-            // user
-            'user_type'      => 'nullable|in:normal,vip',
-            'name'           => 'nullable|string|max:150',
-            'mobile_number'  => 'required|digits:10',
+    public function saveNewUserOrder(Request $request)
+    {
+        try {
+            DB::beginTransaction();
 
-            // product + subscription
-            'product_id'     => 'required',
-            'start_date'     => 'required|date',
-            'end_date'       => 'nullable|date',
-            'duration'       => 'required|integer|in:1,3,6',
+            $validated = $request->validate([
+                // user
+                'user_type'      => 'nullable|in:normal,vip',
+                'name'           => 'nullable|string|max:150',
+                'mobile_number'  => 'required|digits:10',
 
-            // payment
-            'paid_amount'    => 'required|numeric|min:0',
-            'payment_method' => 'required|in:cash,upi',
+                // address
+                'state'               => 'required|string|max:120',
+                'city'                => 'required|string|max:120',
+                'pincode'             => 'required|digits:6',
+                'locality'            => 'required|string', // Locality.unique_code
+                'apartment_name'      => 'nullable|string|max:180',
+                'place_category'      => 'required|in:Individual,Apartment,Business,Temple',
+                'apartment_flat_plot' => 'required|string|max:180',
+                'landmark'            => 'nullable|string|max:180',
+                'address_type'        => 'nullable|in:Home,Work,Other',
 
-            // status
-            'status'         => 'nullable|in:active,pending,expired',
+                // product + subscription
+                'product_id'     => 'required',
+                'start_date'     => 'required|date',
+                'end_date'       => 'nullable|date',
+                'duration'       => 'required|integer|in:1,3,6',
 
-            // address (add these if not already validated above)
-            'state'               => 'required|string|max:120',
-            'city'                => 'required|string|max:120',
-            'pincode'             => 'required|digits:6',
-            'locality'            => 'required|string',
-            'apartment_name'      => 'nullable|string|max:180',
-            'place_category'      => 'required|in:Individual,Apartment,Business,Temple',
-            'apartment_flat_plot' => 'required|string|max:180',
-            'landmark'            => 'nullable|string|max:180',
-            'address_type'        => 'nullable|in:Home,Work,Other',
-        ]);
+                // payment
+                'paid_amount'    => 'required|numeric|min:0',
+                'payment_method' => 'required|in:cash,upi',
 
-        $userCode = 'USER' . random_int(10000, 99999);
+                // status
+                'status'         => 'nullable|in:active,pending,expired',
+            ]);
 
-        $user = \App\Models\User::create([
-            'userid'        => $userCode,
-            'user_type'     => $validated['user_type'] ?? 'normal',
-            'name'          => $validated['name'] ?? null,
-            'mobile_number' => '+91' . $validated['mobile_number'],
-        ]);
+            $userCode = 'USER' . random_int(10000, 99999);
 
-        $address = \App\Models\UserAddress::create([
-            'user_id'            => $user->userid, // or $user->id if your FK is integer
-            'state'              => $validated['state'],
-            'city'               => $validated['city'],
-            'pincode'            => $validated['pincode'],
-            'locality'           => $validated['locality'],
-            'apartment_name'     => $validated['apartment_name'] ?? null,
-            'place_category'     => $validated['place_category'],
-            'apartment_flat_plot'=> $validated['apartment_flat_plot'],
-            'landmark'           => $validated['landmark'] ?? null,
-            'address_type'       => $validated['address_type'] ?? 'Other',
-            'country'            => 'India',
-            'status'             => 'active',
-        ]);
+            $user = User::create([
+                'userid'        => $userCode,
+                'user_type'     => $validated['user_type'] ?? 'normal',
+                'name'          => $validated['name'] ?? null,
+                'mobile_number' => '+91' . $validated['mobile_number'],
+            ]);
 
-        $start = \Carbon\Carbon::parse($validated['start_date'])->startOfDay();
-        $end = !empty($validated['end_date'])
-            ? \Carbon\Carbon::parse($validated['end_date'])->endOfDay()
-            : (clone $start)->addMonthsNoOverflow((int)$validated['duration'])->subDay()->endOfDay();
+            $address = UserAddress::create([
+                'user_id'             => $user->userid, // change to $user->id if your FK is integer
+                'state'               => $validated['state'],
+                'city'                => $validated['city'],
+                'pincode'             => $validated['pincode'],
+                'locality'            => $validated['locality'], // unique_code
+                'apartment_name'      => $validated['apartment_name'] ?? null,
+                'place_category'      => $validated['place_category'],
+                'apartment_flat_plot' => $validated['apartment_flat_plot'],
+                'landmark'            => $validated['landmark'] ?? null,
+                'address_type'        => $validated['address_type'] ?? 'Other',
+                'country'             => 'India',
+                'status'              => 'active',
+            ]);
 
-        $orderId = 'ORD-' . strtoupper(\Illuminate\Support\Str::random(12));
+            $start = Carbon::parse($validated['start_date'])->startOfDay();
+            $end = !empty($validated['end_date'])
+                ? Carbon::parse($validated['end_date'])->endOfDay()
+                : (clone $start)->addMonthsNoOverflow((int)$validated['duration'])->subDay()->endOfDay();
 
-        $order = \App\Models\Order::create([
-            'user_id'     => $user->userid,
-            'order_id'    => $orderId,
-            'product_id'  => $validated['product_id'],
-            'quantity'    => 1,
-            'start_date'  => $start,
-            'address_id'  => $address->id,
-            'total_price' => $validated['paid_amount'],
-        ]);
+            $orderId = 'ORD-' . strtoupper(Str::random(12));
 
-        $subscriptionId = 'SUB-' . strtoupper(\Illuminate\Support\Str::random(12));
+            $order = Order::create([
+                'user_id'     => $user->userid, // change to $user->id if FK is integer
+                'order_id'    => $orderId,
+                'product_id'  => $validated['product_id'],
+                'quantity'    => 1,
+                'start_date'  => $start,
+                'address_id'  => $address->id,
+                'total_price' => $validated['paid_amount'],
+            ]);
 
-        \App\Models\Subscription::create([
-            'subscription_id' => $subscriptionId,
-            'user_id'         => $user->userid,
-            'order_id'        => $order->order_id,
-            'product_id'      => $validated['product_id'],
-            'start_date'      => $start,
-            'end_date'        => $end,
-            'status'          => $validated['status'] ?? 'active',
-        ]);
+            $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
 
-        \App\Models\FlowerPayment::create([
-            'order_id'       => $order->order_id,
-            'payment_id'     => null,
-            'user_id'        => $user->userid,
-            'payment_method' => $validated['payment_method'],
-            'paid_amount'    => $validated['paid_amount'],
-            'payment_status' => (float)$validated['paid_amount'] > 0 ? 'paid' : 'pending',
-        ]);
+            Subscription::create([
+                'subscription_id' => $subscriptionId,
+                'user_id'     => $user->userid, // change to $user->id if FK is integer
+                'order_id'    => $order->order_id,
+                'product_id'  => $validated['product_id'],
+                'start_date'  => $start,
+                'end_date'    => $end,
+                'status'      => $validated['status'] ?? 'active',
+            ]);
 
-        \DB::commit();
+            FlowerPayment::create([
+                'order_id'       => $order->order_id,
+                'payment_id'     => null,
+                'user_id'        => $user->userid, // change to $user->id if FK is integer
+                'payment_method' => $validated['payment_method'],
+                'paid_amount'    => $validated['paid_amount'],
+                'payment_status' => (float)$validated['paid_amount'] > 0 ? 'paid' : 'pending',
+            ]);
 
-        // Flash a success toast
-        return back()->with('success', 'New user added successfully!');
-    } catch (\Throwable $e) {
-        \DB::rollBack();
-
-        // Flash an error toast and (optionally) include a developer-only detail field
-        return back()
-            ->with('error', 'Failed to save new user order.')
-            ->with('error_detail', $e->getMessage()); // remove on production if you prefer
+            DB::commit();
+            return back()->with('success', 'New user added successfully!');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return back()->with('error', 'Failed to save new user order');
+        }
     }
-}
-
 }
