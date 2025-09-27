@@ -530,7 +530,7 @@ class AdminController extends Controller
         return view('admin/add-career');
     }
 
-   public function manageuser()
+    public function manageuser()
     {
         // Eager-load subscriptions (as you already had)
         $users = User::with('subscriptions')->latest('id')->get();
@@ -634,29 +634,116 @@ class AdminController extends Controller
 
     public function showRiderDetails($riderId)
     {
-        // Fetch rider details
+        // Rider
         $rider = RiderDetails::where('rider_id', $riderId)->firstOrFail();
 
-        // Fetch all riders except the current one
-        $allRiders = RiderDetails::where('rider_id', '!=', $riderId)->get();
+        // All riders except current (for transfer dropdown)
+        $allRiders = RiderDetails::where('rider_id', '!=', $riderId)
+            ->orderBy('rider_name')
+            ->get(['rider_id', 'rider_name']);
 
-        // Fetch orders assigned to this rider where subscription is active
-        $orders = Order::where('rider_id', $riderId)
-            ->whereHas('subscription', function ($query) {
-                $query->where('status', 'active');
+        // Which subscription statuses count as "assigned / in service"
+        $liveStatuses = ['active', 'paused', 'resume'];
+
+        // All assigned orders for this rider with live subscriptions
+        // Eager-load relations used in the Blade
+        $orders = Order::query()
+            ->where('rider_id', $riderId)
+            ->whereHas('subscription', function ($q) use ($liveStatuses) {
+                $q->whereIn('status', $liveStatuses);
             })
-            ->with(['flowerProduct', 'user', 'subscription'])
+            ->with([
+                'flowerProduct:id,product_name',
+                'user:id,name,phone_number',
+                // If you have a delivery_address relation on Order, eager load it here:
+                'deliveryAddress',              // optional: comment out if not present
+                // Or if you keep addresses on user, eager load a preferred one:
+                'user.primaryAddress',          // optional: comment out if not present
+                'subscription:id,order_id,status',
+            ])
+            ->latest('created_at')
             ->get();
 
-        // Fetch today's delivery history for this rider
+        // Build a ready-to-use address string per order for the modal (no extra DB hits in the view)
+        $addressMap = [];
+        foreach ($orders as $o) {
+            $addressMap[$o->order_id] = $this->formatAddressForOrder($o);
+        }
+
+        // Today's delivery history
         $today = Carbon::today();
-
-        $deliveryHistory = DeliveryHistory::where('rider_id', $riderId)
+        $deliveryHistory = DeliveryHistory::query()
+            ->where('rider_id', $riderId)
             ->whereDate('created_at', $today)
-            ->with('order.user')
+            ->with([
+                'order:id,order_id,user_id',
+                'order.user:id,name,phone_number',
+            ])
+            ->latest()
             ->get();
 
-        return view('admin.delivery-assign', compact('rider', 'orders', 'allRiders', 'deliveryHistory'));
+        return view('admin.delivery-assign', [
+            'rider'           => $rider,
+            'orders'          => $orders,
+            'allRiders'       => $allRiders,
+            'deliveryHistory' => $deliveryHistory,
+            'addressMap'      => $addressMap,
+        ]);
+    }
+
+    private function formatAddressForOrder($order): string
+    {
+        // 1) If Order has a related deliveryAddress model
+        if (method_exists($order, 'deliveryAddress') && $order->relationLoaded('deliveryAddress') && $order->deliveryAddress) {
+            $a = $order->deliveryAddress;
+            return $this->joinAddressParts([
+                $a->name ?? null,
+                $a->phone ?? null,
+                $a->address_line1 ?? null,
+                $a->address_line2 ?? null,
+                $a->landmark ?? null,
+                $a->locality ?? null,
+                $a->city ?? null,
+                $a->state ?? null,
+                $a->pincode ?? null,
+            ]);
+        }
+
+        // 2) If addresses live on the User (e.g., primaryAddress relation)
+        if ($order->relationLoaded('user') && $order->user && method_exists($order->user, 'primaryAddress') && $order->user->relationLoaded('primaryAddress') && $order->user->primaryAddress) {
+            $a = $order->user->primaryAddress;
+            return $this->joinAddressParts([
+                $order->user->name ?? null,
+                $order->user->phone_number ?? null,
+                $a->address_line1 ?? null,
+                $a->address_line2 ?? null,
+                $a->landmark ?? null,
+                $a->locality ?? null,
+                $a->city ?? null,
+                $a->state ?? null,
+                $a->pincode ?? null,
+            ]);
+        }
+
+        // 3) If address is stored directly on orders table
+        return $this->joinAddressParts([
+            $order->recipient_name ?? $order->user->name ?? null,
+            $order->recipient_phone ?? $order->user->phone_number ?? null,
+            $order->address_line1 ?? null,
+            $order->address_line2 ?? null,
+            $order->landmark ?? null,
+            $order->locality ?? null,
+            $order->city ?? null,
+            $order->state ?? null,
+            $order->pincode ?? null,
+        ]);
+    }
+
+    private function joinAddressParts(array $parts): string
+    {
+        // Remove empties and join neatly
+        $parts = array_filter(array_map(fn ($x) => $x !== null ? trim($x) : null, $parts));
+        return implode(", ", $parts);
     }
 
     public function transferOrders(Request $request)

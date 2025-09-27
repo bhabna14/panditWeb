@@ -2,12 +2,9 @@
 
 @section('styles')
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet">
-
     <style>
-        /* Styling */
         .breadcrumb-header {
             background: #0056b3;
-            /* Deep Blue */
             padding: 15px;
             border-radius: 10px;
             color: #fff;
@@ -17,48 +14,61 @@
             background: #ffffff;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
         }
 
         .table thead {
             background: #003366;
-            /* Dark Navy */
-            color: white;
+            color: #fff;
         }
 
         .table tbody tr:hover {
             background: #f8f9fa;
-            /* Light Gray */
         }
 
         .badge-active {
             background-color: #007bff !important;
-            /* Professional Blue */
-            color: white;
+            color: #fff;
+        }
+
+        .badge-paused {
+            background-color: #ffc107 !important;
+            color: #000;
+        }
+
+        .badge-resume {
+            background-color: #17a2b8 !important;
+            color: #fff;
         }
 
         .badge-inactive {
             background-color: #6c757d !important;
-            /* Soft Gray */
-            color: white;
+            color: #fff;
         }
 
         .card {
             border: none;
-            background: #ffffff;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
         }
 
         .btn-manage {
             background: #007bff;
-            /* Primary Blue */
-            color: white;
+            color: #fff;
             border-radius: 5px;
         }
 
         .btn-manage:hover {
             background: #0056b3;
-            /* Deep Blue */
+        }
+
+        .chip {
+            display: inline-block;
+            border: 1px solid #e9ecf5;
+            border-radius: 999px;
+            padding: .35rem .7rem;
+            font-weight: 600;
+            background: #fff;
         }
     </style>
 @endsection
@@ -88,137 +98,242 @@
         </div>
     </div>
 
-    <!-- Rider Details Card -->
+    <!-- Rider Details -->
     <div class="row mt-4">
         <div class="col-12">
             <div class="card p-3 shadow-sm">
-                <h4 class="mb-1 text-primary">{{ $rider->rider_name }}</h4>
-                <p class="mb-0 text-muted"><i class="fas fa-phone"></i> {{ $rider->phone_number }}</p>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h4 class="mb-1 text-primary">{{ $rider->rider_name }}</h4>
+                        <p class="mb-0 text-muted"><i class="fas fa-phone"></i> {{ $rider->phone_number }}</p>
+                    </div>
+                    <div>
+                        <span class="chip">Assigned Orders: {{ $orders->count() }}</span>
+                        <span class="chip">Today’s Deliveries: {{ $deliveryHistory->count() }}</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
     @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
+        <div class="alert alert-success mt-3">{{ session('success') }}</div>
     @endif
-
-    <!-- Show Error Message -->
     @if (session('error'))
-        <div class="alert alert-danger">
-            {{ session('error') }}
-        </div>
+        <div class="alert alert-danger mt-3">{{ session('error') }}</div>
     @endif
 
-    <!-- Orders Table -->
+    <!-- Orders Currently Assigned -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card p-3 shadow-sm">
+                <h5 class="mb-3"><i class="fas fa-list"></i> Assigned Orders</h5>
+                @if ($orders->isEmpty())
+                    <div class="text-muted">No active/paused/resume orders assigned to this rider.</div>
+                @else
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Order ID</th>
+                                    <th>User</th>
+                                    <th>Phone</th>
+                                    <th>Product</th>
+                                    <th>Subscription</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($orders as $idx => $order)
+                                    <tr>
+                                        <td>{{ $idx + 1 }}</td>
+                                        <td>{{ $order->order_id }}</td>
+                                        <td>{{ $order->user->name ?? 'N/A' }}</td>
+                                        <td>{{ $order->user->phone_number ?? 'N/A' }}</td>
+                                        <td>{{ $order->flowerProduct->product_name ?? 'N/A' }}</td>
+                                        <td>
+                                            @php $st = $order->subscription->status ?? 'inactive'; @endphp
+                                            <span
+                                                class="badge
+                                                @if ($st === 'active') badge-active
+                                                @elseif($st === 'paused') badge-paused
+                                                @elseif($st === 'resume') badge-resume
+                                                @else badge-inactive @endif">
+                                                {{ ucfirst($st) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $order->created_at?->format('d M Y, h:i A') }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-primary view-address-btn"
+                                                data-bs-toggle="modal" data-bs-target="#addressModal"
+                                                data-order-id="{{ $order->order_id }}"
+                                                data-user="{{ $order->user->name ?? 'N/A' }}"
+                                                data-phone="{{ $order->user->phone_number ?? 'N/A' }}"
+                                                data-address="{{ $addressMap[$order->order_id] ?? 'Address not available' }}">
+                                                <i class="fas fa-map-marker-alt"></i> Address
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Delivery History -->
     <div class="row mt-4">
         <div class="col-12">
             @if ($deliveryHistory->isNotEmpty())
-                <div class="card mt-4 p-3 shadow-sm">
+                <div class="card p-3 shadow-sm">
                     <h5 class="mb-3"><i class="fas fa-calendar-day"></i> Today's Delivery History</h5>
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th><i class="fas fa-list-ol"></i> #</th>
-                                <th><i class="fas fa-hashtag"></i> Order ID</th>
-                                <th><i class="fas fa-user"></i> User</th>
-                                <th><i class="fas fa-shipping-fast"></i> Delivery Status</th>
-                                <th><i class="fas fa-clock"></i> Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($deliveryHistory as $index => $history)
+                    <div class="table-responsive">
+                        <table class="table table-striped align-middle">
+                            <thead>
                                 <tr>
-                                    <td>{{ $index + 1 }}</td>
-                                    <td>{{ $history->order->order_id ?? 'N/A' }}</td>
-                                    <td>{{ $history->order->user->name ?? 'N/A' }}</td>
-                                    <td>
-                                        <span
-                                            class="badge 
-                                @if ($history->delivery_status == 'delivered') badge-success
-                                @elseif($history->delivery_status == 'pending') badge-warning
-                                @else badge-secondary @endif">
-                                            {{ ucfirst($history->delivery_status) }}
-                                        </span>
-                                    </td>
-                                    <td>{{ $history->created_at->format('h:i A') }}</td>
+                                    <th>#</th>
+                                    <th>Order ID</th>
+                                    <th>User</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($deliveryHistory as $index => $history)
+                                    <tr>
+                                        <td>{{ $index + 1 }}</td>
+                                        <td>{{ $history->order->order_id ?? 'N/A' }}</td>
+                                        <td>{{ $history->order->user->name ?? 'N/A' }}</td>
+                                        <td>
+                                            <span
+                                                class="badge
+                                                @if ($history->delivery_status == 'delivered') bg-success
+                                                @elseif ($history->delivery_status == 'pending') bg-warning text-dark
+                                                @else bg-secondary @endif">
+                                                {{ ucfirst($history->delivery_status) }}
+                                            </span>
+                                        </td>
+                                        <td>{{ $history->created_at->format('h:i A') }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             @else
                 <div class="text-muted mt-3 text-center">
                     <i class="fas fa-info-circle"></i> No deliveries made today.
                 </div>
             @endif
-
         </div>
     </div>
 
-    <!-- Transfer Order Section -->
+    <!-- Transfer Order -->
     <div class="row mt-4">
         <div class="col-12">
             <div class="card p-3 shadow-sm">
-                <h5 class="text-primary"><i class="fas fa-exchange-alt"></i> Transfer Order to Another Rider</h5>
+                <h5 class="text-primary mb-3"><i class="fas fa-exchange-alt"></i> Transfer Order to Another Rider</h5>
                 <form action="{{ route('admin.transferOrder') }}" method="POST">
                     @csrf
-                    <div class="row">
-                        <!-- Order Selection -->
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label for="order_id">Select Order</label>
-                                <select class="form-control  select2" name="order_ids[]" multiple="multiple" required>
-                                    @foreach ($orders as $order)
-                                        <option value="{{ $order->order_id }}">{{ $order->order_id }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                    <div class="row g-3">
+                        <!-- Orders multi-select -->
+                        <div class="col-md-5">
+                            <label class="form-label">Select Order(s)</label>
+                            <select class="form-control select2" name="order_ids[]" multiple="multiple" required>
+                                @foreach ($orders as $order)
+                                    <option value="{{ $order->order_id }}">{{ $order->order_id }} —
+                                        {{ $order->user->name ?? 'N/A' }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <!-- Rider Selection -->
-                        <div class="col-md-4">
-                            <div class="form-group">
-
-                                <label for="new_rider_id">Select New Rider</label>
-                                <select class="form-control" name="new_rider_id" required>
-                                    <option value="">-- Select Rider --</option>
-                                    @foreach ($allRiders as $rider)
-                                        <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <!-- Rider select -->
+                        <div class="col-md-5">
+                            <label class="form-label">Select New Rider</label>
+                            <select class="form-control" name="new_rider_id" required>
+                                <option value="">-- Select Rider --</option>
+                                @foreach ($allRiders as $r)
+                                    <option value="{{ $r->rider_id }}">{{ $r->rider_name }}</option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <!-- Submit Button -->
-                        <div class="col-md-4 d-flex align-items-end ">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-warning w-100">
-                                    <i class="fas fa-exchange-alt"></i> Transfer Order
-                                </button>
-                            </div>
+                        <!-- Submit -->
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-warning w-100">
+                                <i class="fas fa-exchange-alt"></i> Transfer
+                            </button>
                         </div>
-
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Address Modal -->
+    <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="addressModalLabel"><i class="fas fa-map-marker-alt"></i> Delivery Address
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2"><strong>Order:</strong> <span id="am-order"></span></div>
+                    <div class="mb-2"><strong>User:</strong> <span id="am-user"></span></div>
+                    <div class="mb-2"><strong>Phone:</strong> <span id="am-phone"></span></div>
+                    <hr>
+                    <div><strong>Address:</strong></div>
+                    <div id="am-address" class="mt-1"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
 @endsection
 
 @section('scripts')
-    <script>
-        // Custom JavaScript if needed
+    {{-- jQuery (if not already included in layout) --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    {{-- Bootstrap JS (if not already in layout) --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous">
     </script>
 
-    <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js'></script>
-
-    <!-- Internal Select2 js-->
+    {{-- Select2 --}}
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
 
-    <!--Internal  Form-elements js-->
-    <script src="{{ asset('assets/js/advanced-form-elements.js') }}"></script>
-    <script src="{{ asset('assets/js/select2.js') }}"></script>
+    <script>
+        // Select2 init
+        $(function() {
+            $('.select2').select2({
+                width: '100%'
+            });
+        });
+
+        // Address modal population
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.view-address-btn');
+            if (!btn) return;
+
+            const orderId = btn.getAttribute('data-order-id') || 'N/A';
+            const user = btn.getAttribute('data-user') || 'N/A';
+            const phone = btn.getAttribute('data-phone') || 'N/A';
+            const address = btn.getAttribute('data-address') || 'Address not available';
+
+            document.getElementById('am-order').textContent = orderId;
+            document.getElementById('am-user').textContent = user;
+            document.getElementById('am-phone').textContent = phone;
+            document.getElementById('am-address').textContent = address;
+        }, false);
+    </script>
 @endsection
