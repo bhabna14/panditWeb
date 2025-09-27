@@ -24,17 +24,24 @@ public function index(Request $request)
         'max'    => $request->get('max'),
     ];
 
+    // Helpers for case-insensitive status checks
+    $ci = fn($col) => DB::raw("LOWER($col)");
+    $PENDING_VALUES = ['pending', 'unpaid', 'due']; // tolerate common labels
+    $PAID_VALUES    = ['paid'];
+
     // ====== PENDING (grouped per user) ======
     $pendingBase = DB::table('flower_payments as fp')
         ->join('users as u', 'u.userid', '=', 'fp.user_id')
         ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
         ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
-        ->where('fp.payment_status', 'pending')
+        ->whereIn($ci('fp.payment_status'), $PENDING_VALUES)
         ->select([
             'fp.user_id',
             'u.name as user_name',
             'u.mobile_number',
-            DB::raw('SUM(fp.paid_amount) as due_amount'),
+            // In your schema fp.paid_amount is the unit amount on the row.
+            // For pending, summing it gives the amount to collect.
+            DB::raw('COALESCE(SUM(fp.paid_amount),0) as due_amount'),
             DB::raw('MAX(fp.id) as latest_payment_row_id'),
             DB::raw('MAX(fp.order_id) as latest_order_id'),
             DB::raw('MAX(fp.created_at) as latest_pending_since'),
@@ -62,13 +69,13 @@ public function index(Request $request)
     if ($filters['from'])            $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
     if ($filters['to'])              $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
     if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
-    if (is_numeric($filters['min'])) $pendingBase->havingRaw('SUM(fp.paid_amount) >= ?', [(float) $filters['min']]);
-    if (is_numeric($filters['max'])) $pendingBase->havingRaw('SUM(fp.paid_amount) <= ?', [(float) $filters['max']]);
+    if (is_numeric($filters['min'])) $pendingBase->havingRaw('COALESCE(SUM(fp.paid_amount),0) >= ?', [(float) $filters['min']]);
+    if (is_numeric($filters['max'])) $pendingBase->havingRaw('COALESCE(SUM(fp.paid_amount),0) <= ?', [(float) $filters['max']]);
 
-    $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_payment_row_id')->paginate(25)->withQueryString();
+    // Order by the most recent pending activity for that user
+    $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_pending_since')->paginate(25)->withQueryString();
     $pendingCount        = (clone $pendingBase)->count();
     $pendingTotalAmount  = (clone $pendingBase)->get()->sum('due_amount');
-
 
     // ====== PAID (only payments with subscription status ACTIVE) ======
     $paidBase = DB::table('flower_payments as fp')
@@ -77,8 +84,8 @@ public function index(Request $request)
             $j->on('s.order_id', '=', 'fp.order_id');
         })
         ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
-        ->where('fp.payment_status', 'paid')
-        ->where('s.status', 'active') // <-- restrict to active subscriptions
+        ->whereIn($ci('fp.payment_status'), $PAID_VALUES)
+        ->where('s.status', 'active')
         ->select([
             'fp.id as payment_id',
             'fp.order_id',
@@ -115,7 +122,6 @@ public function index(Request $request)
     $paidPayments     = (clone $paidBase)->orderByDesc('fp.created_at')->paginate(25)->withQueryString();
     $paidCount        = (clone $paidBase)->count();
     $paidTotalAmount  = (clone $paidBase)->sum('fp.paid_amount');
-
 
     // ====== EXPIRED (unchanged) ======
     $liveStatuses = ['active', 'paused', 'resume'];
