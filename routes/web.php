@@ -924,7 +924,6 @@ Route::get('/menu-management', [MenuManagementController::class, 'index'])->name
 Route::post('/menu-management/save', [MenuManagementController::class, 'save'])->name('menu.management.save');
 });
 
-
 Route::prefix('admin')->name('admin.')->group(function () {
     // Page
     Route::get('/new-user-order', [NewUserOrderController::class, 'newUserOrder'])->name('newUserOrder');
@@ -939,12 +938,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 
-        // Admin Users management (Super Admin & Admin with limits)
-        Route::get('/manage-admin', [AdminUserController::class, 'index'])->name('users.index');
-        Route::get('/create-admin', [AdminUserController::class, 'create'])->name('users.create');
-        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+// Admin Users management (Super Admin & Admin with limits)
+Route::get('/manage-admin', [AdminUserController::class, 'index'])->name('users.index');
+Route::get('/create-admin', [AdminUserController::class, 'create'])->name('users.create');
+Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
 
-        Route::get('/users/{admin}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
-        Route::put('/users/{admin}', [AdminUserController::class, 'update'])->name('users.update');
+Route::get('/users/{admin}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+Route::put('/users/{admin}', [AdminUserController::class, 'update'])->name('users.update');
 
-        Route::delete('/users/{admin}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+Route::delete('/users/{admin}', [AdminUserController::class, 'destroy'])->name('users.destroy');

@@ -42,12 +42,12 @@
                             <div class="text-muted small">{{ $a->email }}</div>
                         </td>
                         <td>
-                            <span class="badge text-bg-{{ $a->role === 'superadmin' ? 'dark' : 'info' }}">
+                            <span class="badge text-bg-warning">
                                 {{ ucfirst($a->role) }}
                             </span>
                         </td>
                         <td>
-                            <span class="badge text-bg-{{ $a->status === 'active' ? 'success' : 'secondary' }}">
+                            <span class="badge text-bg-primary">
                                 {{ ucfirst($a->status) }}
                             </span>
                         </td>
