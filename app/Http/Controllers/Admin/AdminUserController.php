@@ -82,7 +82,7 @@ class AdminUserController extends Controller
         $admin->update($data);
 
         return redirect()
-            ->route('admin.manage-admin')
+            ->route('users.index')
             ->with('success', 'Admin user updated.');
     }
 
