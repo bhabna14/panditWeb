@@ -749,6 +749,7 @@ class AdminController extends Controller
         $parts = array_filter(array_map(fn ($x) => $x !== null ? trim($x) : null, $parts));
         return implode(', ', $parts);
     }
+    
     public function transferOrders(Request $request)
     {
         // Validate the request

@@ -71,6 +71,7 @@ use App\Http\Controllers\Pandit\PoojaDetailsController;
 use App\Http\Controllers\Pandit\PanditOtpController;
 use App\Http\Controllers\Pandit\PoojaStatusController;
 use App\Http\Controllers\Pandit\PoojaHistoryController;
+use App\Http\Controllers\Admin\AdminUserController;
 
 use App\Http\Controllers\Reports\FlowerReportsController;
 
@@ -936,3 +937,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Save
     Route::post('/new-user-order/save', [NewUserOrderController::class, 'saveNewUserOrder'])->name('saveNewUserOrder');
 });
+
+
+
+// Group under /admin and protect with the admin guard
+Route::prefix('admin')
+    ->name('admin.')
+    ->middleware(['auth:admin']) // ensure you have the admin guard configured
+    ->group(function () {
+
+        // Admin Users management (Super Admin & Admin with limits)
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+        Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+
+        Route::get('/users/{admin}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{admin}', [AdminUserController::class, 'update'])->name('users.update');
+
+        Route::delete('/users/{admin}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+    });
