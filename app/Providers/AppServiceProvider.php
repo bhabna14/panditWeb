@@ -1,46 +1,48 @@
 <?php
 
 namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+use App\Models\Admin;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         //
     }
 
     /**
      * Bootstrap any application services.
-     *
-     * @return void
      */
-   
-      public function boot(): void
+    public function boot(): void
     {
-
-        Blade::if('authguard', function ($guard = null) {
+        // Blade conditional: @authguard('admin') ... @endauthguard
+        Blade::if('authguard', function (string $guard = null) {
             return Auth::guard($guard)->check();
         });
-    
-        // Only superadmin can assign superadmin role
+
+        // Authorization gates
         Gate::define('assign-superadmin-role', function (Admin $user) {
             return $user->role === 'superadmin';
         });
 
-        // Only superadmin can delete another superadmin; admin can delete admins (not themselves)
         Gate::define('delete-admin', function (Admin $user, Admin $target) {
-            if ($user->id === $target->id) return false; // no self-delete
+            // Prevent deleting oneself
+            if ($user->id === $target->id) {
+                return false;
+            }
+            // Only superadmin may delete a superadmin
             if ($target->role === 'superadmin') {
                 return $user->role === 'superadmin';
             }
+            // Superadmin or admin can delete admins
             return in_array($user->role, ['superadmin', 'admin'], true);
         });
     }
