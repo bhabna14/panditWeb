@@ -158,7 +158,7 @@
             background: #6b7280;
         }
 
-        /* ====== Pagination: rounded, pill & icons ====== */
+        /* ====== Pagination: rounded & pill ====== */
         .pagination {
             --bs-pagination-padding-x: .85rem;
             --bs-pagination-padding-y: .5rem;
@@ -172,6 +172,9 @@
             background: #fff;
             color: #334155;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: .35rem;
         }
 
         .pagination .page-item.active .page-link {
@@ -181,19 +184,6 @@
 
         .pagination .page-item.disabled .page-link {
             opacity: .6;
-        }
-
-        .page-link .icon {
-            font-style: normal;
-        }
-
-        /* Make « and » look like icons while keeping text accessible */
-        .page-link[rel="prev"]::before {
-            content: "← ";
-        }
-
-        .page-link[rel="next"]::after {
-            content: " →";
         }
 
         /* Utility */
@@ -209,7 +199,7 @@
                 <h4 class="mb-1" id="pc-title">Payment Collection</h4>
             </div>
             <div class="d-flex flex-wrap gap-2" id="pc-chips">
-                {{-- Default (Pending) chips will be injected by JS; SSR fallback below --}}
+                {{-- SSR fallback (Pending) --}}
                 <div class="pc-chip pc-chip--green" title="Total pending amount">
                     <span>💰 Total Pending</span><span class="num">₹
                         {{ number_format($pendingTotalAmount ?? 0, 2) }}</span>
@@ -224,7 +214,7 @@
         </div>
     </div>
 
-    {{-- Hidden chip templates for each tab (JS swaps them into #pc-chips) --}}
+    {{-- Hidden chip templates (JS swaps these into #pc-chips) --}}
     <div class="d-none" id="chips-template-pending">
         <div class="pc-chip pc-chip--green" title="Total pending amount">
             <span>💰 Total Pending</span><span class="num">₹ {{ number_format($pendingTotalAmount ?? 0, 2) }}</span>
@@ -271,21 +261,15 @@
     <ul class="nav nav-tabs" id="paymentTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button"
-                role="tab" aria-controls="pending" aria-selected="true">
-                <span class="tab-dot"></span> Pending
-            </button>
+                role="tab" aria-controls="pending" aria-selected="true"><span class="tab-dot"></span> Pending</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button"
-                role="tab" aria-controls="paid" aria-selected="false">
-                <span class="tab-dot"></span> Paid
-            </button>
+                role="tab" aria-controls="paid" aria-selected="false"><span class="tab-dot"></span> Paid</button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button"
-                role="tab" aria-controls="expired" aria-selected="false">
-                <span class="tab-dot"></span> Expired
-            </button>
+                role="tab" aria-controls="expired" aria-selected="false"><span class="tab-dot"></span> Expired</button>
         </li>
     </ul>
 
@@ -378,9 +362,7 @@
                                         data-amount="{{ $row->due_amount ?? 0 }}"
                                         data-method="{{ $row->payment_method ?? '' }}"
                                         data-url="{{ route('payment.collection.collect', $row->latest_payment_row_id) }}"
-                                        data-bs-toggle="modal" data-bs-target="#collectModal">
-                                        Collect
-                                    </button>
+                                        data-bs-toggle="modal" data-bs-target="#collectModal">Collect</button>
                                 </td>
                             </tr>
                         @empty
@@ -391,7 +373,8 @@
                     </tbody>
                 </table>
             </div>
-            {{ $pendingPayments->links() }}
+            {{-- Use our custom view --}}
+            {{ $pendingPayments->links('vendor.pagination.bootstrap-5') }}
         </div>
 
         {{-- ======= PAID TAB (ACTIVE SUBSCRIPTIONS) ======= --}}
@@ -456,7 +439,7 @@
                     </tbody>
                 </table>
             </div>
-            {{ $paidPayments->links() }}
+            {{ $paidPayments->links('vendor.pagination.bootstrap-5') }}
         </div>
 
         {{-- ======= EXPIRED TAB ======= --}}
@@ -506,7 +489,7 @@
                     </tbody>
                 </table>
             </div>
-            {{ $expiredSubs->links() }}
+            {{ $expiredSubs->links('vendor.pagination.bootstrap-5') }}
         </div>
     </div>
 
@@ -565,15 +548,13 @@
             const csrfMeta = document.querySelector('meta[name="csrf-token"]');
             const token = csrfMeta ? csrfMeta.getAttribute('content') : null;
 
-            // ========= Dynamic chips for each tab =========
+            // ========= Dynamic chips per tab =========
             const chipsHost = document.getElementById('pc-chips');
             const tpl = {
                 pending: document.getElementById('chips-template-pending').innerHTML,
                 paid: document.getElementById('chips-template-paid').innerHTML,
                 expired: document.getElementById('chips-template-expired').innerHTML
             };
-
-            // Init: ensure correct chips if URL opened on a non-default tab (via anchor)
             const activateChips = (key) => {
                 chipsHost.innerHTML = tpl[key] || tpl.pending;
             };
@@ -583,14 +564,13 @@
             document.getElementById('paymentTabs').addEventListener('shown.bs.tab', function(e) {
                 const id = e.target.id.replace('-tab', ''); // pending | paid | expired
                 activateChips(id);
-                // smooth scroll to top of hero for context after switching tabs
                 document.querySelector('.pc-hero')?.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
                 });
             });
 
-            // ========= Collect modal (unchanged, with UX tweaks) =========
+            // ========= Collect Modal =========
             $(document).on('click', '.btn-collect', function() {
                 const btn = $(this);
                 const id = btn.data('id');
