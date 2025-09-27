@@ -102,7 +102,6 @@
             padding: .35rem .8rem
         }
 
-        /* Tabs */
         .nav-tabs {
             border-bottom: none;
             gap: 8px
@@ -158,7 +157,6 @@
             background: #6b7280
         }
 
-        /* Pagination */
         .pagination {
             --bs-pagination-padding-x: .85rem;
             --bs-pagination-padding-y: .5rem
@@ -200,8 +198,8 @@
             <div class="d-flex flex-wrap gap-2" id="pc-chips">
                 {{-- SSR fallback (Pending) --}}
                 <div class="pc-chip pc-chip--green" title="Total pending amount">
-                    <span>💰 Total Pending</span><span class="num">₹
-                        {{ number_format($pendingTotalAmount ?? 0, 2) }}</span>
+                    <span>💰 Total Pending</span>
+                    <span class="num">₹ {{ number_format($pendingTotalAmount ?? 0, 2) }}</span>
                 </div>
                 <div class="pc-chip pc-chip--amber" title="Number of pending payments">
                     <span>🕒 Pending</span><span class="num">{{ $pendingCount ?? 0 }}</span>
@@ -263,15 +261,15 @@
         {{-- ======= FILTERS (shared) ======= --}}
         <form class="pc-filter mb-3" method="GET" action="{{ route('payment.collection.index') }}">
             <div class="row g-2 align-items-end">
-                <div class="col-sm-3">
+                <div class="col-sm-2">
                     <label class="form-label mb-1">From</label>
                     <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="form-control">
                 </div>
-                <div class="col-sm-3">
+                <div class="col-sm-2">
                     <label class="form-label mb-1">To</label>
                     <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="form-control">
                 </div>
-                <div class="col-sm-3">
+                <div class="col-sm-2">
                     <label class="form-label mb-1">Method</label>
                     <select name="method" class="form-select">
                         <option value="">All</option>
@@ -281,7 +279,21 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-sm-3 d-flex gap-2">
+                <div class="col-sm-2">
+                    <label class="form-label mb-1">Search</label>
+                    <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" class="form-control"
+                        placeholder="Name, mobile, order...">
+                </div>
+                <div class="col-sm-2">
+                    <label class="form-label mb-1">Per Page</label>
+                    <select name="per_page" class="form-select">
+                        @foreach ([10, 25, 50, 100] as $pp)
+                            <option value="{{ $pp }}" {{ request('per_page', 10) == $pp ? 'selected' : '' }}>
+                                {{ $pp }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-2 d-flex gap-2">
                     <button class="btn btn-primary w-100" type="submit">Filter</button>
                     <a class="btn btn-outline-secondary w-100" href="{{ route('payment.collection.index') }}">Reset</a>
                 </div>
@@ -359,7 +371,7 @@
                     </tbody>
                 </table>
             </div>
-            {{ $pendingPayments->links('vendor.pagination.bootstrap-5') }}
+            {{ $pendingPayments->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
         </div>
 
         {{-- ======= PAID TAB ======= --}}
@@ -424,7 +436,7 @@
                     </tbody>
                 </table>
             </div>
-            {{ $paidPayments->links('vendor.pagination.bootstrap-5') }}
+            {{ $paidPayments->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
         </div>
 
         {{-- ======= EXPIRED TAB ======= --}}
@@ -474,7 +486,7 @@
                     </tbody>
                 </table>
             </div>
-            {{ $expiredSubs->links('vendor.pagination.bootstrap-5') }}
+            {{ $expiredSubs->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
         </div>
     </div>
 
