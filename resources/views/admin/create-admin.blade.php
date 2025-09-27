@@ -40,14 +40,9 @@
             <div class="col-md-4">
                 <label class="form-label">Role</label>
                 <select name="role" class="form-select" required>
-                    @if($canAssignSuper)
                         <option value="superadmin" @selected(old('role')==='superadmin')>Super Admin</option>
-                    @endif
                     <option value="admin" @selected(old('role','admin')==='admin')>Admin</option>
-                </select>
-                @unless($canAssignSuper)
                     <small class="text-muted">You can only create Admin accounts.</small>
-                @endunless
             </div>
 
             <div class="col-md-4">
