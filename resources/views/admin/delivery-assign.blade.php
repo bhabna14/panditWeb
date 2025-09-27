@@ -136,7 +136,6 @@
                                     <th>User</th>
                                     <th>Phone</th>
                                     <th>Product</th>
-                                    <th>Subscription</th>
                                     <th>Created</th>
                                     <th>Actions</th>
                                 </tr>
@@ -149,17 +148,7 @@
                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
                                         <td>{{ $order->user->mobile_number ?? 'N/A' }}</td>
                                         <td>{{ $order->flowerProduct->name ?? 'N/A' }}</td>
-                                        <td>
-                                            @php $st = $order->subscription->status ?? 'inactive'; @endphp
-                                            <span
-                                                class="badge
-                                                @if ($st === 'active') badge-active
-                                                @elseif($st === 'paused') badge-paused
-                                                @elseif($st === 'resume') badge-resume
-                                                @else badge-inactive @endif">
-                                                {{ ucfirst($st) }}
-                                            </span>
-                                        </td>
+                                       
                                         <td>{{ $order->created_at?->format('d M Y, h:i A') }}</td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-primary view-address-btn"
