@@ -653,7 +653,7 @@ class AdminController extends Controller
                 $q->whereIn('status', $liveStatuses);
             })
             ->with([
-                'flowerProduct:id,product_name',
+                'flowerProduct:id,name',
                 'user:id,name,phone_number',
                 // If you have a delivery_address relation on Order, eager load it here:
                 'deliveryAddress',              // optional: comment out if not present
