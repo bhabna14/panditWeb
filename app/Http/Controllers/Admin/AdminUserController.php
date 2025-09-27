@@ -51,7 +51,7 @@ class AdminUserController extends Controller
         ]);
 
         return redirect()
-            ->route('admin.create-admin')
+            ->route('create-admin')
             ->with('success', 'Admin user created.');
     }
 
