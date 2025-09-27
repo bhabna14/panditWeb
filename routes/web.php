@@ -943,7 +943,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // Group under /admin and protect with the admin guard
 Route::prefix('admin')
     ->name('admin.')
-    ->middleware(['auth:admin']) // ensure you have the admin guard configured
     ->group(function () {
 
         // Admin Users management (Super Admin & Admin with limits)
