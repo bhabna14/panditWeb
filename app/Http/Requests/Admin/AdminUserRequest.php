@@ -9,7 +9,7 @@ class AdminUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return auth('admin')->check();
+        return auth('admins')->check();
     }
 
     public function rules(): array
