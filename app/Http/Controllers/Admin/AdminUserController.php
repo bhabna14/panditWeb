@@ -10,11 +10,23 @@ use Illuminate\Support\Facades\Gate;
 
 class AdminUserController extends Controller
 {
-   
-
     public function index(Request $request)
     {
-        return view('admin.manage-admin');
+        $q = trim((string) $request->get('search', ''));
+
+        $admins = Admin::query()
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%")
+                        ->orWhere('role', 'like', "%{$q}%");
+                });
+            })
+            ->orderByDesc('id')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.manage-admin', compact('admins'));
     }
 
     public function create()
@@ -24,17 +36,18 @@ class AdminUserController extends Controller
 
     public function store(AdminUserRequest $request)
     {
-        // If current user is not superadmin, force role=admin
-        $role = Gate::allows('assign-superadmin-role')
-            ? $request->role
+        // Only superadmins can set role=superadmin; otherwise force 'admin'
+        $roleFromForm = $request->input('role', 'admin');
+        $role = Gate::allows('assign-superadmin-role') && $roleFromForm === 'superadmin'
+            ? 'superadmin'
             : 'admin';
 
         Admin::create([
-            'name'   => $request->name,
-            'email'  => $request->email,
-            'password' => $request->password, // auto-hashed in model mutator
-            'role'   => $role,
-            'status' => $request->status,
+            'name'     => $request->name,
+            'email'    => $request->email,
+            'password' => $request->password, // hashed by model mutator
+            'role'     => $role,
+            'status'   => $request->status,
         ]);
 
         return redirect()
@@ -45,19 +58,15 @@ class AdminUserController extends Controller
     public function edit(Admin $admin)
     {
         $canAssignSuper = Gate::allows('assign-superadmin-role');
-        return view('admin.users.edit', compact('admin','canAssignSuper'));
+        return view('admin.edit-admin', compact('admin','canAssignSuper'));
     }
 
     public function update(AdminUserRequest $request, Admin $admin)
     {
-        // Prevent non-superadmin from upgrading anyone to superadmin
-        $role = $admin->role; // default keep existing
-        if (Gate::allows('assign-superadmin-role')) {
-            $role = $request->role;
-        } else {
-            // If editor is only 'admin', ensure target remains 'admin'
-            $role = 'admin';
-        }
+        $roleFromForm = $request->input('role', $admin->role);
+        $role = Gate::allows('assign-superadmin-role') && $roleFromForm === 'superadmin'
+            ? 'superadmin'
+            : ($admin->role === 'superadmin' ? 'superadmin' : 'admin'); // preserve superadmin unless demoted by superadmin
 
         $data = [
             'name'   => $request->name,
@@ -66,21 +75,19 @@ class AdminUserController extends Controller
             'status' => $request->status,
         ];
 
-        // Update password only if supplied
         if ($request->filled('password')) {
-            $data['password'] = $request->password; // model mutator will hash
+            $data['password'] = $request->password; // hashed by model mutator
         }
 
         $admin->update($data);
 
         return redirect()
-            ->route('admin.users.index')
+            ->route('admin.manage-admin')
             ->with('success', 'Admin user updated.');
     }
 
     public function destroy(Admin $admin)
     {
-        // Prevent deleting oneself (optional, but recommended)
         if ($admin->id === auth('admin')->id()) {
             return back()->with('error','You cannot delete your own account.');
         }
@@ -92,7 +99,7 @@ class AdminUserController extends Controller
         $admin->delete();
 
         return redirect()
-            ->route('admin.users.index')
+            ->route('admin.manage-admin')
             ->with('success','Admin user deleted.');
     }
 }

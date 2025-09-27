@@ -4,7 +4,7 @@
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="mb-0">Admin Users</h3>
-        <a class="btn btn-primary" href="{{ route('admin.users.create') }}">
+        <a class="btn btn-primary" href="{{ route('users.create') }}">
             <i class="bi bi-plus-lg"></i> New
         </a>
     </div>
@@ -30,7 +30,7 @@
                     <th>Role</th>
                     <th>Status</th>
                     <th>Verified</th>
-                    <th style="width:140px;">Actions</th>
+                    <th style="width:160px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,9 +55,8 @@
                             {{ $a->email_verified_at ? $a->email_verified_at->format('Y-m-d H:i') : '—' }}
                         </td>
                         <td>
-                            <a href="{{ route('admin.users.edit',$a) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                            <form action="{{ route('admin.users.destroy',$a) }}" method="post" class="d-inline"
-                                  onsubmit="return confirm('Delete this admin?');">
+                            <a href="{{ route('users.edit',$a) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                            <form action="{{ route('users.destroy',$a) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this admin?');">
                                 @csrf @method('DELETE')
                                 <button class="btn btn-sm btn-outline-danger">Delete</button>
                             </form>
@@ -70,6 +69,8 @@
         </table>
     </div>
 
-    {{ $admins->links() }}
+    <div class="mt-3">
+        {{ $admins->links() }}
+    </div>
 </div>
 @endsection

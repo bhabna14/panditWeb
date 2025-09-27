@@ -32,19 +32,35 @@ class Admin extends Authenticatable implements AuthenticatableContract
         'email_verified_at' => 'datetime',
     ];
 
-    // Auto-hash on set (avoids double-hashing)
-    protected function password(): Attribute
-    {
-        return Attribute::make(
-            set: fn ($value) =>
-                !empty($value) && Hash::needsRehash($value) ? Hash::make($value) : $value
-        );
-    }
+    // protected function password(): Attribute
+    // {
+    //     return Attribute::make(
+    //         set: fn ($value) =>
+    //             !empty($value) && Hash::needsRehash($value) ? Hash::make($value) : $value
+    //     );
+    // }
 
     /** Menus visible to this admin */
     public function menuItems(): BelongsToMany
     {
         return $this->belongsToMany(MenuItem::class, 'admin_menu_item', 'admin_id', 'menu_item_id')
                     ->withTimestamps();
+    }
+
+    protected function password(): Attribute
+    {
+        return Attribute::make(
+            set: function ($value) {
+                if (empty($value)) {
+                    return $value;
+                }
+                $looksHashed = is_string($value) && (
+                    Str::startsWith($value, '$2y$') ||    // bcrypt
+                    Str::startsWith($value, '$argon2i$') ||
+                    Str::startsWith($value, '$argon2id$')
+                );
+                return $looksHashed ? $value : Hash::make($value);
+            }
+        );
     }
 }

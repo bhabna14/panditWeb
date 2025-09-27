@@ -40,9 +40,10 @@
             <div class="col-md-4">
                 <label class="form-label">Role</label>
                 <select name="role" class="form-select" required>
-                        <option value="superadmin" @selected(old('role')==='superadmin')>Super Admin</option>
                     <option value="admin" @selected(old('role','admin')==='admin')>Admin</option>
-                    <small class="text-muted">You can only create Admin accounts.</small>
+                    <option value="superadmin" @selected(old('role')==='superadmin')>Super Admin</option>
+                </select>
+                <small class="text-muted d-block mt-1">Only Super Admin can actually create Super Admins.</small>
             </div>
 
             <div class="col-md-4">
