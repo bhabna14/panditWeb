@@ -11,7 +11,7 @@
         }
 
         .table {
-            background: #ffffff;
+            background: #fff;
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 10px rgba(0, 0, 0, .1);
@@ -77,9 +77,7 @@
     <!-- Breadcrumb Header -->
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1 text-white">
-                🚴 Rider Order Assignment
-            </span>
+            <span class="main-content-title mg-b-0 mg-b-lg-1 text-white">🚴 Rider Order Assignment</span>
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb d-flex justify-content-between align-items-center">
@@ -88,11 +86,9 @@
                         <i class="fas fa-tasks"></i> Manage Delivery Assign
                     </a>
                 </li>
-                <li class="breadcrumb-item tx-15">
-                    <a href="javascript:void(0);"><i class="fas fa-home"></i> Dashboard</a>
+                <li class="breadcrumb-item tx-15"><a href="javascript:void(0);"><i class="fas fa-home"></i> Dashboard</a>
                 </li>
-                <li class="breadcrumb-item active tx-15" aria-current="page">
-                    <i class="fas fa-truck"></i> Delivery Assign
+                <li class="breadcrumb-item active tx-15" aria-current="page"><i class="fas fa-truck"></i> Delivery Assign
                 </li>
             </ol>
         </div>
@@ -151,8 +147,8 @@
                                         <td>{{ $idx + 1 }}</td>
                                         <td>{{ $order->order_id }}</td>
                                         <td>{{ $order->user->name ?? 'N/A' }}</td>
-                                        <td>{{ $order->user->phone_number ?? 'N/A' }}</td>
-                                        <td>{{ $order->flowerProduct->product_name ?? 'N/A' }}</td>
+                                        <td>{{ $order->user->mobile_number ?? 'N/A' }}</td>
+                                        <td>{{ $order->flowerProduct->name ?? 'N/A' }}</td>
                                         <td>
                                             @php $st = $order->subscription->status ?? 'inactive'; @endphp
                                             <span
@@ -170,7 +166,7 @@
                                                 data-bs-toggle="modal" data-bs-target="#addressModal"
                                                 data-order-id="{{ $order->order_id }}"
                                                 data-user="{{ $order->user->name ?? 'N/A' }}"
-                                                data-phone="{{ $order->user->phone_number ?? 'N/A' }}"
+                                                data-phone="{{ $order->user->mobile_number ?? 'N/A' }}"
                                                 data-address="{{ $addressMap[$order->order_id] ?? 'Address not available' }}">
                                                 <i class="fas fa-map-marker-alt"></i> Address
                                             </button>
@@ -240,18 +236,17 @@
                 <form action="{{ route('admin.transferOrder') }}" method="POST">
                     @csrf
                     <div class="row g-3">
-                        <!-- Orders multi-select -->
                         <div class="col-md-5">
                             <label class="form-label">Select Order(s)</label>
                             <select class="form-control select2" name="order_ids[]" multiple="multiple" required>
                                 @foreach ($orders as $order)
-                                    <option value="{{ $order->order_id }}">{{ $order->order_id }} —
-                                        {{ $order->user->name ?? 'N/A' }}</option>
+                                    <option value="{{ $order->order_id }}">
+                                        {{ $order->order_id }} — {{ $order->user->name ?? 'N/A' }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <!-- Rider select -->
                         <div class="col-md-5">
                             <label class="form-label">Select New Rider</label>
                             <select class="form-control" name="new_rider_id" required>
@@ -262,7 +257,6 @@
                             </select>
                         </div>
 
-                        <!-- Submit -->
                         <div class="col-md-2 d-flex align-items-end">
                             <button type="submit" class="btn btn-warning w-100">
                                 <i class="fas fa-exchange-alt"></i> Transfer
@@ -301,7 +295,7 @@
 @endsection
 
 @section('scripts')
-    {{-- jQuery (if not already included in layout) --}}
+    {{-- jQuery (if not already in layout) --}}
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 
     {{-- Bootstrap JS (if not already in layout) --}}
@@ -313,7 +307,6 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
 
     <script>
-        // Select2 init
         $(function() {
             $('.select2').select2({
                 width: '100%'
@@ -324,16 +317,11 @@
         document.addEventListener('click', function(e) {
             const btn = e.target.closest('.view-address-btn');
             if (!btn) return;
-
-            const orderId = btn.getAttribute('data-order-id') || 'N/A';
-            const user = btn.getAttribute('data-user') || 'N/A';
-            const phone = btn.getAttribute('data-phone') || 'N/A';
-            const address = btn.getAttribute('data-address') || 'Address not available';
-
-            document.getElementById('am-order').textContent = orderId;
-            document.getElementById('am-user').textContent = user;
-            document.getElementById('am-phone').textContent = phone;
-            document.getElementById('am-address').textContent = address;
+            document.getElementById('am-order').textContent = btn.getAttribute('data-order-id') || 'N/A';
+            document.getElementById('am-user').textContent = btn.getAttribute('data-user') || 'N/A';
+            document.getElementById('am-phone').textContent = btn.getAttribute('data-phone') || 'N/A';
+            document.getElementById('am-address').textContent = btn.getAttribute('data-address') ||
+                'Address not available';
         }, false);
     </script>
 @endsection
