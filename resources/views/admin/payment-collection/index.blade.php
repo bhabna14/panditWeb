@@ -384,7 +384,6 @@
                             <th>User</th>
                             <th>Mobile</th>
                             <th>Order</th>
-                            <th>Subscription</th>
                             <th>Type</th>
                             <th>Amount</th>
                             <th>Method</th>
@@ -405,7 +404,6 @@
                                 </td>
                                 <td>{{ $row->mobile_number }}</td>
                                 <td>#{{ $row->order_id }}</td>
-                                <td>#{{ $row->subscription_id }}</td>
                                 <td>
                                     {{ $row->product_category ?? '—' }}
                                     @if ($row->product_name)
