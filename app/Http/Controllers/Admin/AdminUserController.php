@@ -10,42 +10,16 @@ use Illuminate\Support\Facades\Gate;
 
 class AdminUserController extends Controller
 {
-    public function __construct()
-    {
-        // Block the whole section for non-admins
-        $this->middleware(function ($request, $next) {
-            if (Gate::denies('manage-admins')) {
-                abort(403, 'Unauthorized.');
-            }
-            return $next($request);
-        });
-    }
+   
 
     public function index(Request $request)
     {
-        $q = Admin::query()
-            ->when($request->filled('search'), function ($query) use ($request) {
-                $term = trim($request->get('search'));
-                $query->where(function ($w) use ($term) {
-                    $w->where('name','LIKE',"%{$term}%")
-                      ->orWhere('email','LIKE',"%{$term}%")
-                      ->orWhere('role','LIKE',"%{$term}%");
-                });
-            })
-            ->orderByDesc('id')
-            ->paginate(15)
-            ->withQueryString();
-
-        return view('admin.create-admin', [
-            'admins' => $q,
-            'canAssignSuper' => Gate::allows('assign-superadmin-role'),
-        ]);
+        return view('admin.manage-admin');
     }
 
     public function create()
     {
-        $canAssignSuper = Gate::allows('assign-superadmin-role');
-        return view('admin.users.create', compact('canAssignSuper'));
+        return view('admin.create-admin');
     }
 
     public function store(AdminUserRequest $request)
