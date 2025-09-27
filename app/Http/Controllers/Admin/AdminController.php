@@ -637,34 +637,36 @@ class AdminController extends Controller
         // Rider
         $rider = RiderDetails::where('rider_id', $riderId)->firstOrFail();
 
-        // All riders except current (for transfer dropdown)
+        // All riders except current
         $allRiders = RiderDetails::where('rider_id', '!=', $riderId)
             ->orderBy('rider_name')
             ->get(['rider_id', 'rider_name']);
 
-        // Which subscription statuses count as "assigned / in service"
+        // Which subscription statuses count as in-service
         $liveStatuses = ['active', 'paused', 'resume'];
 
-        // All assigned orders for this rider with live subscriptions
-        // Eager-load relations used in the Blade
+        // Assigned orders with live subscriptions
         $orders = Order::query()
             ->where('rider_id', $riderId)
             ->whereHas('subscription', function ($q) use ($liveStatuses) {
                 $q->whereIn('status', $liveStatuses);
             })
             ->with([
-                'flowerProduct:id,name',
-                'user:id,name,mobile_number',
-                // If you have a delivery_address relation on Order, eager load it here:
-                'deliveryAddress',              // optional: comment out if not present
-                // Or if you keep addresses on user, eager load a preferred one:
-                'user.primaryAddress',          // optional: comment out if not present
-                'subscription:id,order_id,status',
+                // product
+                'flowerProduct:product_id,name',
+                // user (owner key = users.userid)
+                'user:userid,name,mobile_number',
+                // order's chosen address
+                'address:id,address_line1,address_line2,landmark,locality,city,state,pincode,name,phone',
+                // user's default address
+                'user.addressDetails:id,user_id,address_line1,address_line2,landmark,locality,city,state,pincode,name,phone,default',
+                // subscription status
+                'subscription:order_id,status',
             ])
             ->latest('created_at')
             ->get();
 
-        // Build a ready-to-use address string per order for the modal (no extra DB hits in the view)
+        // Prebuild address strings for the modal
         $addressMap = [];
         foreach ($orders as $o) {
             $addressMap[$o->order_id] = $this->formatAddressForOrder($o);
@@ -676,8 +678,8 @@ class AdminController extends Controller
             ->where('rider_id', $riderId)
             ->whereDate('created_at', $today)
             ->with([
-                'order:id,order_id,user_id',
-                'order.user:id,name,phone_number',
+                'order:order_id,user_id',
+                'order.user:userid,name,mobile_number',
             ])
             ->latest()
             ->get();
@@ -693,9 +695,9 @@ class AdminController extends Controller
 
     private function formatAddressForOrder($order): string
     {
-        // 1) If Order has a related deliveryAddress model
-        if (method_exists($order, 'deliveryAddress') && $order->relationLoaded('deliveryAddress') && $order->deliveryAddress) {
-            $a = $order->deliveryAddress;
+        // 1) Address selected on the order
+        if ($order->relationLoaded('address') && $order->address) {
+            $a = $order->address;
             return $this->joinAddressParts([
                 $a->name ?? null,
                 $a->phone ?? null,
@@ -709,12 +711,12 @@ class AdminController extends Controller
             ]);
         }
 
-        // 2) If addresses live on the User (e.g., primaryAddress relation)
-        if ($order->relationLoaded('user') && $order->user && method_exists($order->user, 'primaryAddress') && $order->user->relationLoaded('primaryAddress') && $order->user->primaryAddress) {
-            $a = $order->user->primaryAddress;
+        // 2) User's default address (User::addressDetails)
+        if ($order->relationLoaded('user') && $order->user && $order->user->relationLoaded('addressDetails') && $order->user->addressDetails) {
+            $a = $order->user->addressDetails;
             return $this->joinAddressParts([
                 $order->user->name ?? null,
-                $order->user->phone_number ?? null,
+                $order->user->mobile_number ?? null,
                 $a->address_line1 ?? null,
                 $a->address_line2 ?? null,
                 $a->landmark ?? null,
@@ -725,10 +727,10 @@ class AdminController extends Controller
             ]);
         }
 
-        // 3) If address is stored directly on orders table
+        // 3) Fallback: if some address fields are stored directly on orders table
         return $this->joinAddressParts([
-            $order->recipient_name ?? $order->user->name ?? null,
-            $order->recipient_phone ?? $order->user->phone_number ?? null,
+            $order->recipient_name ?? ($order->user->name ?? null),
+            $order->recipient_phone ?? ($order->user->mobile_number ?? null),
             $order->address_line1 ?? null,
             $order->address_line2 ?? null,
             $order->landmark ?? null,
@@ -741,11 +743,10 @@ class AdminController extends Controller
 
     private function joinAddressParts(array $parts): string
     {
-        // Remove empties and join neatly
         $parts = array_filter(array_map(fn ($x) => $x !== null ? trim($x) : null, $parts));
-        return implode(", ", $parts);
+        return implode(', ', $parts);
     }
-
+    
     public function transferOrders(Request $request)
     {
         // Validate the request
