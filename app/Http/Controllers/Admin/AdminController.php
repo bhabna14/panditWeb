@@ -637,8 +637,8 @@ class AdminController extends Controller
         // Rider
         $rider = RiderDetails::where('rider_id', $riderId)->firstOrFail();
 
-        // All riders except current
-        $allRiders = RiderDetails::where('rider_id', '!=', $riderId)
+        // All riders except current (for transfer)
+        $allRiders = \App\Models\RiderDetails::where('rider_id', '!=', $riderId)
             ->orderBy('rider_name')
             ->get(['rider_id', 'rider_name']);
 
@@ -648,19 +648,19 @@ class AdminController extends Controller
         // Assigned orders with live subscriptions
         $orders = Order::query()
             ->where('rider_id', $riderId)
-            ->whereHas('subscription', function ($q) use ($liveStatuses) {
-                $q->whereIn('status', $liveStatuses);
-            })
+            ->whereHas('subscription', fn($q) => $q->whereIn('status', $liveStatuses))
             ->with([
-                // product
+                // product (needs product_id as key)
                 'flowerProduct:product_id,name',
-                // user (owner key = users.userid)
+                // user (key is users.userid)
                 'user:userid,name,mobile_number',
-                // order's chosen address
-                'address:id,address_line1,address_line2,landmark,locality,city,state,pincode,name,phone',
-                // user's default address
-                'user.addressDetails:id,user_id,address_line1,address_line2,landmark,locality,city,state,pincode,name,phone,default',
-                // subscription status
+                // order-chosen address + its locality
+                'address:id,user_id,area,city,state,pincode,country,locality,apartment_name,place_category,apartment_flat_plot,landmark,default',
+                'address.localityDetails:unique_code,locality_name,pincode',
+                // user's default address + locality
+                'user.addressDetails:id,user_id,area,city,state,pincode,country,locality,apartment_name,place_category,apartment_flat_plot,landmark,default',
+                'user.addressDetails.localityDetails:unique_code,locality_name,pincode',
+                // subscription
                 'subscription:order_id,status',
             ])
             ->latest('created_at')
@@ -693,52 +693,55 @@ class AdminController extends Controller
         ]);
     }
 
+    /**
+     * Build a single formatted address string for an Order.
+     * Priority: Order.address -> User.addressDetails -> fallback (minimal)
+     */
     private function formatAddressForOrder($order): string
     {
-        // 1) Address selected on the order
+        // 1) Address stored on the order
         if ($order->relationLoaded('address') && $order->address) {
             $a = $order->address;
+            $locName = $a->relationLoaded('localityDetails') && $a->localityDetails
+                ? $a->localityDetails->locality_name
+                : ($a->locality ?: null);
+
             return $this->joinAddressParts([
-                $a->name ?? null,
-                $a->phone ?? null,
-                $a->address_line1 ?? null,
-                $a->address_line2 ?? null,
+                // No name/phone on address model, use user's below in Blade
+                $a->apartment_flat_plot ?? null,
+                $a->apartment_name ?? null,
+                $a->area ?? null,
                 $a->landmark ?? null,
-                $a->locality ?? null,
+                $locName,
                 $a->city ?? null,
                 $a->state ?? null,
                 $a->pincode ?? null,
+                $a->country ?? null,
             ]);
         }
 
-        // 2) User's default address (User::addressDetails)
+        // 2) User's default address
         if ($order->relationLoaded('user') && $order->user && $order->user->relationLoaded('addressDetails') && $order->user->addressDetails) {
             $a = $order->user->addressDetails;
+            $locName = $a->relationLoaded('localityDetails') && $a->localityDetails
+                ? $a->localityDetails->locality_name
+                : ($a->locality ?: null);
+
             return $this->joinAddressParts([
-                $order->user->name ?? null,
-                $order->user->mobile_number ?? null,
-                $a->address_line1 ?? null,
-                $a->address_line2 ?? null,
+                $a->apartment_flat_plot ?? null,
+                $a->apartment_name ?? null,
+                $a->area ?? null,
                 $a->landmark ?? null,
-                $a->locality ?? null,
+                $locName,
                 $a->city ?? null,
                 $a->state ?? null,
                 $a->pincode ?? null,
+                $a->country ?? null,
             ]);
         }
 
-        // 3) Fallback: if some address fields are stored directly on orders table
-        return $this->joinAddressParts([
-            $order->recipient_name ?? ($order->user->name ?? null),
-            $order->recipient_phone ?? ($order->user->mobile_number ?? null),
-            $order->address_line1 ?? null,
-            $order->address_line2 ?? null,
-            $order->landmark ?? null,
-            $order->locality ?? null,
-            $order->city ?? null,
-            $order->state ?? null,
-            $order->pincode ?? null,
-        ]);
+        // 3) Minimal fallback (if nothing else exists)
+        return 'Address not available';
     }
 
     private function joinAddressParts(array $parts): string
@@ -746,7 +749,6 @@ class AdminController extends Controller
         $parts = array_filter(array_map(fn ($x) => $x !== null ? trim($x) : null, $parts));
         return implode(', ', $parts);
     }
-    
     public function transferOrders(Request $request)
     {
         // Validate the request
