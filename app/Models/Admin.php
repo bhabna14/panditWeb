@@ -7,8 +7,9 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany; // ✅ correct import
-use App\Models\MenuItem;                                   // ✅ ensure model import
+use Illuminate\Support\Str; // ✅ needed for Str::startsWith
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use App\Models\MenuItem;
 
 class Admin extends Authenticatable implements AuthenticatableContract
 {
@@ -32,14 +33,6 @@ class Admin extends Authenticatable implements AuthenticatableContract
         'email_verified_at' => 'datetime',
     ];
 
-    // protected function password(): Attribute
-    // {
-    //     return Attribute::make(
-    //         set: fn ($value) =>
-    //             !empty($value) && Hash::needsRehash($value) ? Hash::make($value) : $value
-    //     );
-    // }
-
     /** Menus visible to this admin */
     public function menuItems(): BelongsToMany
     {
@@ -47,6 +40,9 @@ class Admin extends Authenticatable implements AuthenticatableContract
                     ->withTimestamps();
     }
 
+    /**
+     * Hash password on set (avoids double-hashing if it already looks hashed).
+     */
     protected function password(): Attribute
     {
         return Attribute::make(
@@ -55,7 +51,7 @@ class Admin extends Authenticatable implements AuthenticatableContract
                     return $value;
                 }
                 $looksHashed = is_string($value) && (
-                    Str::startsWith($value, '$2y$') ||    // bcrypt
+                    Str::startsWith($value, '$2y$') ||     // bcrypt
                     Str::startsWith($value, '$argon2i$') ||
                     Str::startsWith($value, '$argon2id$')
                 );
