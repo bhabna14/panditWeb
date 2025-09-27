@@ -939,19 +939,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
 });
 
 
-
-// Group under /admin and protect with the admin guard
-Route::prefix('admin')
-    ->name('admin.')
-    ->group(function () {
-
         // Admin Users management (Super Admin & Admin with limits)
-        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
-        Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+        Route::get('/manage-admin', [AdminUserController::class, 'index'])->name('users.index');
+        Route::get('/create-admin', [AdminUserController::class, 'create'])->name('users.create');
         Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
 
         Route::get('/users/{admin}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{admin}', [AdminUserController::class, 'update'])->name('users.update');
 
         Route::delete('/users/{admin}', [AdminUserController::class, 'destroy'])->name('users.destroy');
-    });
