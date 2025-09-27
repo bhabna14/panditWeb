@@ -3,14 +3,10 @@
 @section('content')
     @php use Carbon\Carbon; @endphp
 
-    {{-- If your layout doesn’t already include a CSRF meta tag, add this: --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    {{-- SweetAlert CSS if your layout doesn’t already include it --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
-        /* Pretty header & chips */
         .pc-hero {
             background: linear-gradient(135deg, #f9f7ff 0%, #eef7ff 100%);
             border: 1px solid #e9ecf5;
@@ -49,10 +45,15 @@
             background: #f9fafb;
         }
 
+        .pc-chip--blue {
+            border-color: #cfe3ff;
+            background: #f0f7ff;
+        }
+
         .pc-filter {
             border: 1px solid #e9ecf5;
             border-radius: 12px;
-            background: #ffffff;
+            background: #fff;
             padding: 12px;
         }
 
@@ -68,7 +69,7 @@
         }
 
         .table tbody tr:hover {
-            background-color: #fcfcff;
+            background: #fcfcff;
         }
 
         .badge-soft {
@@ -78,22 +79,16 @@
             border-radius: 999px;
         }
 
-        .badge-pending {
-            color: #92400e;
-            background: #fff7ed;
-            border-color: #fed7aa;
+        .badge-expired {
+            color: #374151;
+            background: #f3f4f6;
+            border-color: #e5e7eb;
         }
 
         .badge-paid {
             background: #e6ffed;
             color: #1e7e34;
             border: 1px solid #c3f0d2;
-        }
-
-        .badge-expired {
-            color: #374151;
-            background: #f3f4f6;
-            border-color: #e5e7eb;
         }
 
         .btn-collect {
@@ -116,6 +111,14 @@
                     <span>🕒 Pending</span>
                     <span class="num">{{ $pendingCount ?? 0 }}</span>
                 </div>
+                <div class="pc-chip pc-chip--blue" title="Total paid (active subscriptions)">
+                    <span>✅ Paid Total</span>
+                    <span class="num">₹ {{ number_format($paidTotalAmount ?? 0, 2) }}</span>
+                </div>
+                <div class="pc-chip pc-chip--gray" title="Number of paid rows (active subscriptions)">
+                    <span>🧾 Paid</span>
+                    <span class="num">{{ $paidCount ?? 0 }}</span>
+                </div>
                 <div class="pc-chip pc-chip--gray" title="Number of expired subscriptions">
                     <span>📦 Expired</span>
                     <span class="num">{{ $expiredCount ?? 0 }}</span>
@@ -137,45 +140,49 @@
                 role="tab" aria-controls="pending" aria-selected="true">Pending</button>
         </li>
         <li class="nav-item" role="presentation">
+            <button class="nav-link" id="paid-tab" data-bs-toggle="tab" data-bs-target="#paid" type="button"
+                role="tab" aria-controls="paid" aria-selected="false">Paid</button>
+        </li>
+        <li class="nav-item" role="presentation">
             <button class="nav-link" id="expired-tab" data-bs-toggle="tab" data-bs-target="#expired" type="button"
                 role="tab" aria-controls="expired" aria-selected="false">Expired</button>
         </li>
     </ul>
 
     <div class="tab-content mt-3" id="paymentTabsContent">
+
+        {{-- ==================== FILTERS (shared) ==================== --}}
+        <form class="pc-filter mb-3" method="GET" action="{{ route('payment.collection.index') }}">
+            <div class="row g-2 align-items-end">
+                <div class="col-sm-3">
+                    <label class="form-label mb-1">From</label>
+                    <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="form-control">
+                </div>
+                <div class="col-sm-3">
+                    <label class="form-label mb-1">To</label>
+                    <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="form-control">
+                </div>
+                <div class="col-sm-3">
+                    <label class="form-label mb-1">Method</label>
+                    <select name="method" class="form-select">
+                        <option value="">All</option>
+                        @foreach ($methods as $m)
+                            <option value="{{ $m }}" {{ ($filters['method'] ?? '') === $m ? 'selected' : '' }}>
+                                {{ $m }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-sm-3 d-flex gap-2">
+                    <button class="btn btn-primary w-100" type="submit">Filter</button>
+                    <a class="btn btn-outline-secondary w-100" href="{{ route('payment.collection.index') }}">Reset</a>
+                </div>
+            </div>
+            {{-- Optional: hidden min/max fields if you regularly use them --}}
+            {{-- <input type="number" name="min" value="{{ $filters['min'] }}"> <input type="number" name="max" value="{{ $filters['max'] }}"> --}}
+        </form>
+
         {{-- ==================== PENDING TAB ==================== --}}
         <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
-
-            {{-- Filters --}}
-            <form class="pc-filter mb-3" method="GET" action="{{ route('payment.collection.index') }}">
-                <div class="row g-2 align-items-end">
-                    <div class="col-sm-3">
-                        <label class="form-label mb-1">From</label>
-                        <input type="date" name="from" value="{{ $filters['from'] ?? '' }}" class="form-control">
-                    </div>
-                    <div class="col-sm-3">
-                        <label class="form-label mb-1">To</label>
-                        <input type="date" name="to" value="{{ $filters['to'] ?? '' }}" class="form-control">
-                    </div>
-                    <div class="col-sm-3">
-                        <label class="form-label mb-1">Method</label>
-                        <select name="method" class="form-select">
-                            <option value="">All</option>
-                            @foreach ($methods as $m)
-                                <option value="{{ $m }}"
-                                    {{ ($filters['method'] ?? '') === $m ? 'selected' : '' }}>{{ $m }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-sm-1 d-flex gap-2">
-                        <button class="btn btn-primary w-100" type="submit">Filter</button>
-                    </div>
-                    <div class="col-sm-1 d-flex gap-2">
-                        <a class="btn btn-outline-secondary w-100" href="{{ route('payment.collection.index') }}">Reset</a>
-                    </div>
-                </div>
-            </form>
-
             <div class="table-responsive">
                 <table class="table table-bordered align-middle table-hover">
                     <thead>
@@ -198,9 +205,8 @@
                                 $durationDays = $start && $end ? $start->diffInDays($end) + 1 : 0;
                                 $since = $row->latest_pending_since ? Carbon::parse($row->latest_pending_since) : null;
                             @endphp
-
                             <tr data-row-id="{{ $row->latest_payment_row_id }}">
-                                <td class="text-muted">{{ $i + 1 }}</td>
+                                <td class="text-muted">{{ $pendingPayments->firstItem() + $i }}</td>
                                 <td>
                                     <div class="fw-semibold">{{ $row->user_name }}</div>
                                     <div class="text-muted small">Sub #{{ $row->subscription_id }}</div>
@@ -223,15 +229,12 @@
                                 <td class="fw-bold amount-cell">₹ {{ number_format($row->due_amount ?? 0, 2) }}</td>
                                 <td>
                                     @if ($since)
-                                        <span class="badge bg-warning text-dark">
-                                            {{ $since->diffForHumans() }}
-                                        </span>
+                                        <span class="badge bg-warning text-dark">{{ $since->diffForHumans() }}</span>
                                     @else
                                         —
                                     @endif
                                 </td>
                                 <td>
-                                    {{-- Collect will use latest payment row id --}}
                                     <button type="button" class="btn btn-sm btn-success btn-collect"
                                         data-id="{{ $row->latest_payment_row_id }}"
                                         data-order="{{ $row->latest_order_id }}" data-user="{{ $row->user_name }}"
@@ -243,7 +246,6 @@
                                     </button>
                                 </td>
                             </tr>
-
                         @empty
                             <tr>
                                 <td colspan="8" class="text-center py-4">No pending payments 🎉</td>
@@ -252,7 +254,72 @@
                     </tbody>
                 </table>
             </div>
+            {{ $pendingPayments->links() }}
+        </div>
 
+        {{-- ==================== PAID TAB (ACTIVE SUBSCRIPTIONS) ==================== --}}
+        <div class="tab-pane fade" id="paid" role="tabpanel" aria-labelledby="paid-tab">
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle table-hover">
+                    <thead>
+                        <tr class="text-nowrap">
+                            <th>#</th>
+                            <th>User</th>
+                            <th>Mobile</th>
+                            <th>Order</th>
+                            <th>Subscription</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Paid On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($paidPayments as $i => $row)
+                            @php
+                                $start = $row->start_date ? Carbon::parse($row->start_date) : null;
+                                $end = $row->end_date ? Carbon::parse($row->end_date) : null;
+                                $paidAt = $row->paid_at ? Carbon::parse($row->paid_at) : null;
+                            @endphp
+                            <tr>
+                                <td class="text-muted">{{ $paidPayments->firstItem() + $i }}</td>
+                                <td>
+                                    <div class="fw-semibold">{{ $row->user_name }}</div>
+                                </td>
+                                <td>{{ $row->mobile_number }}</td>
+                                <td>#{{ $row->order_id }}</td>
+                                <td>#{{ $row->subscription_id }}</td>
+                                <td>
+                                    {{ $row->product_category ?? '—' }}
+                                    @if ($row->product_name)
+                                        <span class="text-muted small">({{ $row->product_name }})</span>
+                                    @endif
+                                    <div class="text-muted small">
+                                        @if ($start && $end)
+                                            {{ $start->format('d M Y') }} — {{ $end->format('d M Y') }}
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="fw-bold">₹ {{ number_format($row->paid_amount ?? 0, 2) }}</td>
+                                <td>{{ $row->payment_method ?? '—' }}</td>
+                                <td>
+                                    @if ($paidAt)
+                                        <span
+                                            class="badge badge-soft badge-paid">{{ $paidAt->format('d M Y, h:i A') }}</span>
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="9" class="text-center py-4">No paid payments.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            {{ $paidPayments->links() }}
         </div>
 
         {{-- ==================== EXPIRED TAB ==================== --}}
@@ -277,7 +344,7 @@
                                 $durationDays = $start->diffInDays($end) + 1;
                             @endphp
                             <tr>
-                                <td class="text-muted">{{ $i + 1 }}</td>
+                                <td class="text-muted">{{ $expiredSubs->firstItem() + $i }}</td>
                                 <td>
                                     <div class="fw-semibold">{{ $row->user_name }}</div>
                                     <div class="text-muted small">Order #{{ $row->order_id }} • Sub
@@ -302,11 +369,14 @@
                     </tbody>
                 </table>
             </div>
+            {{ $expiredSubs->links() }}
         </div>
+
     </div>
 
-    {{-- Collect Modal --}}
-    <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true">
+    {{-- Collect Modal (unchanged) --}}
+    <div class="modal fade" id="collectModal" tabindex="-1" aria-labelledby="collectModalLabel" aria-hidden="true"
+        data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog">
             <form id="collectForm" class="modal-content">
                 <div class="modal-header">
@@ -355,7 +425,6 @@
 @endsection
 
 @section('scripts')
-    {{-- Include these here only if your layout doesn’t already include them --}}
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous">
     </script>
@@ -377,7 +446,7 @@
                 const url = btn.data('url');
 
                 $('#payment_id').val(id);
-                $('#amount').val(amount);
+                $('#amount').val(amount).attr('max', amount);
                 $('#payment_method').val(method);
                 $('#collectInfo').text(`Order #${order} • ${user}`);
                 $('#collectForm').data('post-url', url);
@@ -416,11 +485,9 @@
                     data: payload,
                     success: function(res) {
                         $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
-
                         const modalEl = document.getElementById('collectModal');
                         const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                         modal.hide();
-
                         Swal.fire({
                             icon: 'success',
                             title: 'Done',
@@ -428,13 +495,10 @@
                             timer: 1400,
                             showConfirmButton: false
                         });
-
-                        // Refresh the list so the paid row disappears
                         window.location.reload();
                     },
                     error: function(xhr) {
                         $('#collectSubmit').prop('disabled', false).text('Mark as Paid');
-
                         let msg = 'Failed to mark as paid.';
                         if (xhr?.status === 419) msg =
                             'Session expired. Please refresh and try again.';
@@ -443,7 +507,6 @@
                             const first = Object.values(xhr.responseJSON.errors)[0];
                             if (first && first[0]) msg = first[0];
                         }
-
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops',
