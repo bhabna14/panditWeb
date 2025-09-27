@@ -29,7 +29,6 @@
                     <th>Name / Email</th>
                     <th>Role</th>
                     <th>Status</th>
-                    <th>Verified</th>
                     <th style="width:160px;">Actions</th>
                 </tr>
             </thead>
@@ -42,18 +41,12 @@
                             <div class="text-muted small">{{ $a->email }}</div>
                         </td>
                         <td>
-                            <span class="badge text-bg-warning">
                                 {{ ucfirst($a->role) }}
-                            </span>
                         </td>
                         <td>
-                            <span class="badge text-bg-primary">
                                 {{ ucfirst($a->status) }}
-                            </span>
                         </td>
-                        <td class="small">
-                            {{ $a->email_verified_at ? $a->email_verified_at->format('Y-m-d H:i') : '—' }}
-                        </td>
+                     
                         <td>
                             <a href="{{ route('users.edit',$a) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                             <form action="{{ route('users.destroy',$a) }}" method="post" class="d-inline" onsubmit="return confirm('Delete this admin?');">
