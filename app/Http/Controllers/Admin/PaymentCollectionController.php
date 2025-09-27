@@ -13,177 +13,88 @@ use Illuminate\Validation\Rule;
 
 class PaymentCollectionController extends Controller
 {
-public function index(Request $request)
-{
-    $filters = [
-        'q'      => trim($request->get('q', '')),
-        'from'   => $request->get('from'),
-        'to'     => $request->get('to'),
-        'method' => $request->get('method', ''),
-        'min'    => $request->get('min'),
-        'max'    => $request->get('max'),
-    ];
 
-    // Helpers for case-insensitive status checks
-    $ci = fn($col) => DB::raw("LOWER($col)");
-    $PENDING_VALUES = ['pending', 'unpaid', 'due']; // tolerate common labels
-    $PAID_VALUES    = ['paid'];
+    public function index(Request $request)
+    {
+        $filters = [
+            'q'      => trim($request->get('q', '')),
+            'from'   => $request->get('from'),
+            'to'     => $request->get('to'),
+            'method' => $request->get('method', ''),
+            'min'    => $request->get('min'),
+            'max'    => $request->get('max'),
+        ];
 
-    // ====== PENDING (grouped per user) ======
-    $pendingBase = DB::table('flower_payments as fp')
-        ->join('users as u', 'u.userid', '=', 'fp.user_id')
-        ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
-        ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
-        ->whereIn($ci('fp.payment_status'), $PENDING_VALUES)
-        ->select([
-            'fp.user_id',
-            'u.name as user_name',
-            'u.mobile_number',
-            // In your schema fp.paid_amount is the unit amount on the row.
-            // For pending, summing it gives the amount to collect.
-            DB::raw('COALESCE(SUM(fp.paid_amount),0) as due_amount'),
-            DB::raw('MAX(fp.id) as latest_payment_row_id'),
-            DB::raw('MAX(fp.order_id) as latest_order_id'),
-            DB::raw('MAX(fp.created_at) as latest_pending_since'),
-            DB::raw('MAX(s.subscription_id) as subscription_id'),
-            DB::raw('MAX(s.start_date) as start_date'),
-            DB::raw('MAX(s.end_date) as end_date'),
-            DB::raw('MAX(s.status) as subscription_status'),
-            DB::raw('MAX(p.name) as product_name'),
-            DB::raw('MAX(p.category) as product_category'),
-            DB::raw('MAX(fp.payment_method) as payment_method'),
-        ])
-        ->groupBy('fp.user_id', 'u.name', 'u.mobile_number');
+        // Case-insensitive column helper
+        $ci = fn($col) => DB::raw("LOWER($col)");
 
-    if ($filters['q'] !== '') {
-        $q = $filters['q'];
-        $pendingBase->where(function ($qq) use ($q) {
-            $qq->where('u.name', 'like', "%{$q}%")
-               ->orWhere('u.mobile_number', 'like', "%{$q}%")
-               ->orWhere('fp.order_id', 'like', "%{$q}%")
-               ->orWhere('s.subscription_id', 'like', "%{$q}%")
-               ->orWhere('p.name', 'like', "%{$q}%")
-               ->orWhere('p.category', 'like', "%{$q}%");
-        });
-    }
-    if ($filters['from'])            $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
-    if ($filters['to'])              $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
-    if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
-    if (is_numeric($filters['min'])) $pendingBase->havingRaw('COALESCE(SUM(fp.paid_amount),0) >= ?', [(float) $filters['min']]);
-    if (is_numeric($filters['max'])) $pendingBase->havingRaw('COALESCE(SUM(fp.paid_amount),0) <= ?', [(float) $filters['max']]);
+        // Accept common “pending” labels, case-insensitively
+        $PENDING_VALUES = ['pending', 'unpaid', 'due'];
 
-    // Order by the most recent pending activity for that user
-    $pendingPayments     = (clone $pendingBase)->orderByDesc('latest_pending_since')->paginate(25)->withQueryString();
-    $pendingCount        = (clone $pendingBase)->count();
-    $pendingTotalAmount  = (clone $pendingBase)->get()->sum('due_amount');
+        // ====== PENDING (grouped per user) ======
+        $pendingBase = DB::table('flower_payments as fp')
+            ->join('users as u', 'u.userid', '=', 'fp.user_id')
+            ->leftJoin('subscriptions as s', 's.order_id', '=', 'fp.order_id')
+            ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
+            ->whereIn($ci('fp.payment_status'), $PENDING_VALUES)
+            ->select([
+                'fp.user_id',
+                'u.name as user_name',
+                'u.mobile_number',
 
-    // ====== PAID (only payments with subscription status ACTIVE) ======
-    $paidBase = DB::table('flower_payments as fp')
-        ->join('users as u', 'u.userid', '=', 'fp.user_id')
-        ->leftJoin('subscriptions as s', function ($j) {
-            $j->on('s.order_id', '=', 'fp.order_id');
-        })
-        ->leftJoin('flower_products as p', 'p.product_id', '=', 's.product_id')
-        ->whereIn($ci('fp.payment_status'), $PAID_VALUES)
-        ->where('s.status', 'active')
-        ->select([
-            'fp.id as payment_id',
-            'fp.order_id',
-            'fp.user_id',
-            'fp.paid_amount',
-            'fp.payment_method',
-            'fp.created_at as paid_at',
-            'u.name as user_name',
-            'u.mobile_number',
-            's.subscription_id',
-            's.start_date',
-            's.end_date',
-            'p.name as product_name',
-            'p.category as product_category',
+                // NOTE: in your schema, the due amount is stored in fp.paid_amount for pending rows.
+                DB::raw('COALESCE(SUM(fp.paid_amount),0) as due_amount'),
+
+                DB::raw('MAX(fp.id) as latest_payment_row_id'),
+                DB::raw('MAX(fp.order_id) as latest_order_id'),
+                DB::raw('MAX(fp.created_at) as latest_pending_since'),
+
+                DB::raw('MAX(s.subscription_id) as subscription_id'),
+                DB::raw('MAX(s.start_date) as start_date'),
+                DB::raw('MAX(s.end_date) as end_date'),
+                DB::raw('MAX(s.status) as subscription_status'),
+
+                DB::raw('MAX(p.name) as product_name'),
+                DB::raw('MAX(p.category) as product_category'),
+
+                DB::raw('MAX(fp.payment_method) as payment_method'),
+            ])
+            ->groupBy('fp.user_id', 'u.name', 'u.mobile_number');
+
+        if ($filters['q'] !== '') {
+            $q = $filters['q'];
+            $pendingBase->where(function ($qq) use ($q) {
+                $qq->where('u.name', 'like', "%{$q}%")
+                   ->orWhere('u.mobile_number', 'like', "%{$q}%")
+                   ->orWhere('fp.order_id', 'like', "%{$q}%")
+                   ->orWhere('s.subscription_id', 'like', "%{$q}%")
+                   ->orWhere('p.name', 'like', "%{$q}%")
+                   ->orWhere('p.category', 'like', "%{$q}%");
+            });
+        }
+        if ($filters['from'])            $pendingBase->whereDate('fp.created_at', '>=', $filters['from']);
+        if ($filters['to'])              $pendingBase->whereDate('fp.created_at', '<=', $filters['to']);
+        if ($filters['method'] !== '')   $pendingBase->where('fp.payment_method', $filters['method']);
+        if (is_numeric($filters['min'])) $pendingBase->havingRaw('COALESCE(SUM(fp.paid_amount),0) >= ?', [(float) $filters['min']]);
+        if (is_numeric($filters['max'])) $pendingBase->havingRaw('COALESCE(SUM(fp.paid_amount),0) <= ?', [(float) $filters['max']]);
+
+        // IMPORTANT: isolate pagination param to avoid empty page issue
+        $pendingPayments     = (clone $pendingBase)
+            ->orderByDesc('latest_pending_since')
+            ->paginate(25, ['*'], 'pending_page')
+            ->withQueryString();
+
+        $pendingCount        = (clone $pendingBase)->count();
+        $pendingTotalAmount  = (clone $pendingBase)->get()->sum('due_amount');
+
+        return view('admin.payment-pending.index', [
+            'pendingPayments'     => $pendingPayments,
+            'pendingTotalAmount'  => $pendingTotalAmount,
+            'pendingCount'        => $pendingCount,
+            'filters'             => $filters,
+            'methods'             => ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'],
         ]);
-
-    if ($filters['q'] !== '') {
-        $q = $filters['q'];
-        $paidBase->where(function ($qq) use ($q) {
-            $qq->where('u.name', 'like', "%{$q}%")
-               ->orWhere('u.mobile_number', 'like', "%{$q}%")
-               ->orWhere('fp.order_id', 'like', "%{$q}%")
-               ->orWhere('s.subscription_id', 'like', "%{$q}%")
-               ->orWhere('p.name', 'like', "%{$q}%")
-               ->orWhere('p.category', 'like', "%{$q}%");
-        });
     }
-    if ($filters['from'])            $paidBase->whereDate('fp.created_at', '>=', $filters['from']);
-    if ($filters['to'])              $paidBase->whereDate('fp.created_at', '<=', $filters['to']);
-    if ($filters['method'] !== '')   $paidBase->where('fp.payment_method', $filters['method']);
-    if (is_numeric($filters['min'])) $paidBase->where('fp.paid_amount', '>=', (float) $filters['min']);
-    if (is_numeric($filters['max'])) $paidBase->where('fp.paid_amount', '<=', (float) $filters['max']);
-
-    $paidPayments     = (clone $paidBase)->orderByDesc('fp.created_at')->paginate(25)->withQueryString();
-    $paidCount        = (clone $paidBase)->count();
-    $paidTotalAmount  = (clone $paidBase)->sum('fp.paid_amount');
-
-    // ====== EXPIRED (unchanged) ======
-    $liveStatuses = ['active', 'paused', 'resume'];
-
-    $subQuery = DB::table('subscriptions as s')
-        ->select('s.user_id', DB::raw('MAX(s.end_date) as latest_end_date'))
-        ->where('s.status', 'expired')
-        ->whereNotExists(function ($q) use ($liveStatuses) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as sa')
-              ->whereColumn('sa.user_id', 's.user_id')
-              ->whereIn('sa.status', $liveStatuses);
-        })
-        ->groupBy('s.user_id');
-
-    $expiredBase = DB::table('subscriptions')
-        ->joinSub($subQuery, 'latest_expired', function ($join) {
-            $join->on('subscriptions.user_id', '=', 'latest_expired.user_id')
-                 ->on('subscriptions.end_date', '=', 'latest_expired.latest_end_date');
-        })
-        ->join('users as u', 'u.userid', '=', 'subscriptions.user_id')
-        ->leftJoin('flower_products as p', 'p.product_id', '=', 'subscriptions.product_id')
-        ->where('subscriptions.status', 'expired')
-        ->whereNotExists(function ($q) use ($liveStatuses) {
-            $q->select(DB::raw(1))
-              ->from('subscriptions as so')
-              ->whereColumn('so.order_id', 'subscriptions.order_id')
-              ->whereIn('so.status', $liveStatuses);
-        })
-        ->select([
-            'subscriptions.subscription_id',
-            'subscriptions.order_id',
-            'subscriptions.user_id',
-            'subscriptions.start_date',
-            'subscriptions.end_date',
-            'subscriptions.status',
-            'u.name as user_name',
-            'u.mobile_number',
-            'p.name as product_name',
-            'p.category as product_category',
-        ]);
-
-    $expiredSubs  = (clone $expiredBase)->orderByDesc('subscriptions.end_date')->paginate(25)->withQueryString();
-    $expiredCount = (clone $expiredBase)->count();
-
-    return view('admin.payment-collection.index', [
-        // Pending
-        'pendingPayments'     => $pendingPayments,
-        'pendingTotalAmount'  => $pendingTotalAmount,
-        'pendingCount'        => $pendingCount,
-        // Paid
-        'paidPayments'        => $paidPayments,
-        'paidTotalAmount'     => $paidTotalAmount,
-        'paidCount'           => $paidCount,
-        // Expired
-        'expiredSubs'         => $expiredSubs,
-        'expiredCount'        => $expiredCount,
-        // UI
-        'filters'             => $filters,
-        'methods'             => ['Cash', 'UPI', 'Card', 'Bank Transfer', 'Other'],
-    ]);
-}
 
 public function collect(Request $request, $id)
 {
