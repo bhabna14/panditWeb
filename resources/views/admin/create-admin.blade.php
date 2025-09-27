@@ -56,7 +56,7 @@
 
         <div class="mt-3 d-flex gap-2">
             <button class="btn btn-primary">Create</button>
-            <a class="btn btn-outline-secondary" href="{{ route('admin.users.index') }}">Cancel</a>
+            <a class="btn btn-outline-secondary" href="{{ route('users.index') }}">Cancel</a>
         </div>
     </form>
 </div>
