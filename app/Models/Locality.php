@@ -15,9 +15,9 @@ class Locality extends Model
     {
         return $this->hasMany(Apartment::class, 'locality_id', 'unique_code');
     }
-     public function apartments()
+
+    public function apartments()
     {
         return $this->hasMany(Apartment::class, 'locality_id', 'unique_code');
     }
 }
-

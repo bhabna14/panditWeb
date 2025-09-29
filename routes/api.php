@@ -51,23 +51,11 @@ Route::middleware('auth:rider-api')->group(function () {
     Route::get('rider/get-assign-pickup', [OrderController::class, 'getAssignPickup']);
     Route::post('/rider/update-flower-prices/{pickup_id}', [OrderController::class, 'updateFlowerPrices']);
     Route::post('/start-delivery', [OrderController::class, 'startDelivery']);
-
-   // assign order to rider
-   Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignedOrders'])->name('rider.assignedOrders');
-   Route::post('/rider/deliver/{order_id}', [OrderController::class, 'markAsDelivered'])
-   ->middleware('auth:rider-api');
-
-   // Route for fetching today's requested orders
-    Route::get('/rider/requested-today-orders', [OrderController::class, 'getTodayRequestedOrders'])
-    ->middleware('auth:rider-api');
-
-    // Route for marking an order as delivered
-    Route::post('/rider/requested-deliver/{order_id}', [OrderController::class, 'markAsRequestedDelivered'])
-    ->middleware('auth:rider-api');
-
+    Route::get('rider/get-assign-orders', [OrderController::class, 'getAssignedOrders'])->name('rider.assignedOrders');
+    Route::post('/rider/deliver/{order_id}', [OrderController::class, 'markAsDelivered'])->middleware('auth:rider-api');
+    Route::get('/rider/requested-today-orders', [OrderController::class, 'getTodayRequestedOrders'])->middleware('auth:rider-api');
+    Route::post('/rider/requested-deliver/{order_id}', [OrderController::class, 'markAsRequestedDelivered'])->middleware('auth:rider-api');
     Route::post('/rider/flower-pickup-request', [OrderController::class, 'savePickupRequest']);
-
-
 });
 
 
@@ -81,7 +69,6 @@ Route::get('/current-orders', [ProductController::class, 'getCurrentOrders']);
 Route::get('/products', [ProductController::class, 'getActiveProducts']);
 
 Route::get('/package-items', [ProductController::class, 'packageItems']);
-
 
 Route::get('/flower-products', [ProductController::class, 'getFlowerProducts']);
 
@@ -101,7 +88,6 @@ Route::controller(AreaController::class)->group(function() {
     Route::get('/manage-poojaArea', 'manageArea');
     Route::post('/update-pooja-area/{id}', 'updatePoojaArea');
     Route::post('/delet-pooja-area/{id}','deletePoojaArea');
-
 });
 
 Route::controller(ProfileController::class)->group(function() {
@@ -111,8 +97,6 @@ Route::controller(ProfileController::class)->group(function() {
     Route::get('/show-profile-details', 'showProfileDetails');
     Route::middleware('auth:sanctum')->get('/edit-profile',  'editProfile');
     Route::middleware('auth:sanctum')->post('/update-photo','updatePhoto');
-
-
 });
 
 Route::controller(CareersController::class)->group(function() {
@@ -136,22 +120,15 @@ Route::controller(PoojaDetailsController::class)->group(function() {
     Route::get('/poojadetails','getPoojaDetails');
     Route::post('/save-pooja-details',  'savePoojadetails');
     Route::get('/managepoojadetails',  'managePoojaDetails');
-    // Route::post('/updatePoojadetails', 'updatePoojadetails');
     Route::get('/get-pooja-details/{id}','getSinglePoojadetails');
     Route::post('/update-pooja-details/{id}', 'updatePoojadetails');
     Route::post('/delete-pooja/{pooja_id}', 'deletePoojaDetails');
-
-
 });
 
 Route::controller(PoojaListController::class)->group(function() {
     Route::get('/all-pooja-list', 'AllPoojaList');
-   
     Route::middleware('auth:sanctum')->get('/pooja-item-list', 'poojaitemlist');
-    
     Route::get('/approved-pooja', 'approvedPoojaList');
-    
-    // did by bhabna
     Route::get('/list-pooja-item', 'listofitem');
     Route::get('/pooja-item-list/{pooja_id}', 'poojaitemlist');
     Route::post('/save-pooja-item-list', 'savePoojaItemList');
