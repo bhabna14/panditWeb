@@ -519,7 +519,7 @@ class UserProfileController extends Controller
      public function sayYes()
     {
         return response()->json([
-            'response' => 'yes'
+            'response' => 'no'
         ], 200);
     }
 
