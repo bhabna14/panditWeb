@@ -303,10 +303,10 @@ class FlowerBookingController extends Controller
     public function storerequest(Request $request)
     {
         try {
-            // ----------------------------
-            // 0) Normalize items input
-            // ----------------------------
+         
             $rawItems = $request->input('items');
+
+            // If items is a JSON string (common with form-data), try decoding
             if (is_string($rawItems)) {
                 $decoded = json_decode($rawItems, true);
                 if (json_last_error() === JSON_ERROR_NONE) {
@@ -315,26 +315,21 @@ class FlowerBookingController extends Controller
             }
 
             $normalizedItems = [];
+
             if (is_array($rawItems)) {
-                $normalizedItems = array_values(array_filter($rawItems, function ($row) {
-                    // drop completely empty rows
-                    if (!is_array($row)) return false;
-                    $type = $row['type'] ?? null;
-                    if ($type === 'flower') {
-                        return !empty($row['flower_name']) && !empty($row['flower_unit']) && isset($row['flower_quantity']);
-                    } elseif ($type === 'garland') {
-                        return !empty($row['garland_name']);
-                    }
-                    return false;
-                }));
+                // New format already (items[])
+                $normalizedItems = $rawItems;
             } else {
-                // OLD format support
+                // Try OLD format -> convert to new
                 $flowerNames     = $request->input('flower_name', []);
                 $flowerUnits     = $request->input('flower_unit', []);
                 $flowerQuantites = $request->input('flower_quantity', []);
+
+                // Only build if we actually have arrays with some elements
                 if (is_array($flowerNames) && count($flowerNames) > 0) {
                     foreach ($flowerNames as $i => $name) {
                         if ($name === null || $name === '') continue;
+
                         $normalizedItems[] = [
                             'type'             => 'flower',
                             'flower_name'      => $name,
@@ -344,33 +339,35 @@ class FlowerBookingController extends Controller
                     }
                 }
             }
+
+            // Merge back so validator sees a proper array
             $request->merge(['items' => $normalizedItems]);
 
-            // ----------------------------
-            // 1) Validate
-            // ----------------------------
+            // --------------------------------
+            // 2) Validate AFTER normalization
+            // --------------------------------
             $validator = Validator::make($request->all(), [
-                'product_id'   => ['required'],
-                'address_id'   => ['required','integer','exists:user_addresses,id'],
-                'description'  => ['nullable','string'],
-                'suggestion'   => ['nullable','string'],
-                'date'         => ['required','date'],
-                'time'         => ['required','string'],
+                // If your product_id can be a code like "FLOW1977637", do not force integer
+                'product_id'   => ['required'], // change to ['required','integer'] if it must be numeric
+                'address_id'   => ['required', 'integer'],
+                'description'  => ['nullable', 'string'],
+                'suggestion'   => ['nullable', 'string'],
+                'date'         => ['required', 'date'],
+                'time'         => ['required', 'string'],
 
-                'items'        => ['required','array','min:1'],
-                'items.*.type' => ['required','in:flower,garland'],
+                'items'        => ['required', 'array', 'min:1'],
+                'items.*.type' => ['required', 'in:flower,garland'],
 
-                'items.*.flower_name'     => ['required_if:items.*.type,flower','string'],
-                'items.*.flower_unit'     => ['required_if:items.*.type,flower','string'],
-                'items.*.flower_quantity' => ['required_if:items.*.type,flower','numeric','min:1'],
+                // Flower fields
+                'items.*.flower_name'     => ['required_if:items.*.type,flower', 'string'],
+                'items.*.flower_unit'     => ['required_if:items.*.type,flower', 'string'],
+                'items.*.flower_quantity' => ['required_if:items.*.type,flower', 'numeric', 'min:1'],
 
-                'items.*.garland_name'     => ['required_if:items.*.type,garland','string'],
-                'items.*.garland_quantity' => ['nullable','numeric','min:1'],
-                'items.*.flower_count'     => ['nullable','integer','min:1'],
-                'items.*.garland_size'     => ['nullable','string'],
-
-                // Optional client-provided idempotency key
-                'idempotency_key' => ['nullable','string','max:128'],
+                // Garland fields
+                'items.*.garland_name'     => ['required_if:items.*.type,garland', 'string'],
+                'items.*.garland_quantity' => ['nullable', 'numeric', 'min:1'],
+                'items.*.flower_count'     => ['nullable', 'integer', 'min:1'],
+                'items.*.garland_size'     => ['nullable', 'string'],
             ], [
                 'items.required' => 'Please add at least one item (flower or garland).',
             ]);
@@ -383,57 +380,16 @@ class FlowerBookingController extends Controller
                 ], 422);
             }
 
-            // ----------------------------
-            // 2) Prepare idempotency key
-            // ----------------------------
-            $user = Auth::guard('sanctum')->user();
-
-            $clientKey = $request->header('Idempotency-Key')
-                ?? $request->header('X-Idempotency-Key')
-                ?? $request->input('idempotency_key');
-
-            $payloadForKey = [
-                'user_id'   => $user?->userid,
-                'product_id'=> $request->product_id,
-                'address_id'=> $request->address_id,
-                'date'      => $request->date,
-                'time'      => $request->time,
-                'items'     => $request->input('items'),
-            ];
-            $autoKey = hash('sha256', json_encode($payloadForKey, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
-
-            $idempotencyKey = $clientKey ? trim($clientKey) : $autoKey;
-
-            // Quick return if already created
-            if ($existing = FlowerRequest::where('idempotency_key', $idempotencyKey)->with(['address.localityDetails','user','flowerRequestItems'])->first()) {
-                return response()->json([
-                    'status'  => 200,
-                    'message' => 'Flower request already created (idempotent replay).',
-                    'data'    => $existing,
-                    'duplicate' => true,
-                ], 200);
-            }
-
-            // ----------------------------
-            // 3) Create in a transaction
-            // ----------------------------
+            // ------------------------------------------------
+            // 3) Create request + items inside a transaction
+            // ------------------------------------------------
             DB::beginTransaction();
 
-            // Double-check inside TX (handles race)
-            if ($existing = FlowerRequest::where('idempotency_key', $idempotencyKey)->lockForUpdate()->first()) {
-                DB::rollBack();
-                return response()->json([
-                    'status'  => 200,
-                    'message' => 'Flower request already created (idempotent replay).',
-                    'data'    => $existing->load(['address.localityDetails','user','flowerRequestItems']),
-                    'duplicate' => true,
-                ], 200);
-            }
+            $user = Auth::guard('sanctum')->user();
 
             $publicRequestId = 'REQ-' . strtoupper(Str::random(12));
 
             $flowerRequest = FlowerRequest::create([
-                'idempotency_key' => $idempotencyKey,
                 'request_id'  => $publicRequestId,
                 'product_id'  => $request->product_id,
                 'user_id'     => $user->userid,
@@ -445,39 +401,43 @@ class FlowerBookingController extends Controller
                 'status'      => 'pending',
             ]);
 
-            // Items (FK should be the numeric ID, not the public request code)
             foreach ($request->input('items', []) as $item) {
                 $type = $item['type'];
+
                 $payload = [
-                    'flower_request_id' => $flowerRequest->id,
+                    'flower_request_id' => $flowerRequest->request_id,
                     'type'              => $type,
                 ];
+
                 if ($type === 'flower') {
                     $payload['flower_name']     = $item['flower_name'];
                     $payload['flower_unit']     = $item['flower_unit'];
-                    $payload['flower_quantity'] = is_numeric($item['flower_quantity'])
-                                                    ? (float) $item['flower_quantity'] : null;
+                    // cast to number if it came as string
+                    $payload['flower_quantity'] = is_numeric($item['flower_quantity']) ? (float)$item['flower_quantity'] : $item['flower_quantity'];
                 } else {
                     $payload['garland_name']     = $item['garland_name'];
-                    $payload['garland_quantity'] = isset($item['garland_quantity']) && is_numeric($item['garland_quantity'])
-                                                    ? (int) $item['garland_quantity'] : null;
-                    $payload['flower_count']     = isset($item['flower_count']) && is_numeric($item['flower_count'])
-                                                    ? (int) $item['flower_count'] : null;
-                    $payload['garland_size']     = $item['garland_size'] ?? null;
+                    $payload['garland_quantity'] = is_numeric($item['garland_quantity']) ? (int)$item['garland_quantity'] : $item['garland_quantity'];
+                    $payload['flower_count']     = is_numeric($item['flower_count']) ? (int)$item['flower_count'] : $item['flower_count'];
+                    $payload['garland_size']     = $item['garland_size'];
+                    // If your DB column is named 'size' instead of 'garland_size', also set:
+                    // $payload['size'] = $item['garland_size'];
                 }
+
                 FlowerRequestItem::create($payload);
             }
 
-            // ----------------------------
-            // 4) Notifications
-            // ----------------------------
+            // -----------------------------------
+            // 4) Notifications (same as before)
+            // -----------------------------------
             $deviceTokens = UserDevice::where('user_id', $user->userid)
                 ->whereNotNull('device_id')
                 ->pluck('device_id')
                 ->filter()
                 ->toArray();
 
-            if (!empty($deviceTokens)) {
+            if (empty($deviceTokens)) {
+                \Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+            } else {
                 $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
                 $notificationService->sendBulkNotifications(
                     $deviceTokens,
@@ -485,14 +445,20 @@ class FlowerBookingController extends Controller
                     'Your order has been placed. Price will be notified in few minutes.',
                     ['order_id' => $flowerRequest->id]
                 );
-            } else {
-                Log::warning('No device tokens found for user.', ['user_id' => $user->userid]);
+                \Log::info('Notifications sent successfully to all devices.', [
+                    'user_id' => $user->userid,
+                    'device_tokens' => $deviceTokens,
+                ]);
             }
 
-            // ----------------------------
+            // -----------------------------------
             // 5) Email
-            // ----------------------------
-            $flowerRequest->load(['address.localityDetails','user','flowerRequestItems']);
+            // -----------------------------------
+            $flowerRequest = $flowerRequest->load([
+                'address.localityDetails',
+                'user',
+                'flowerRequestItems',
+            ]);
 
             $emails = [
                 'soumyaranjan.puhan@33crores.com',
@@ -502,34 +468,32 @@ class FlowerBookingController extends Controller
                 'starleen@33crores.com',
             ];
 
-            Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
+            \Log::info('Attempting to send email to multiple recipients.', ['emails' => $emails]);
             try {
                 Mail::to($emails)->send(new FlowerRequestMail($flowerRequest));
-                Log::info('Email sent successfully to all recipients.');
-            } catch (\Throwable $e) {
-                Log::error('Failed to send email.', ['error' => $e->getMessage()]);
+                \Log::info('Email sent successfully to all recipients.');
+            } catch (\Exception $e) {
+                \Log::error('Failed to send email.', ['error' => $e->getMessage()]);
             }
 
-            // ----------------------------
+            // -----------------------------------
             // 6) WhatsApp (Twilio)
-            // ----------------------------
+            // -----------------------------------
             $adminNumber = '+919776888887';
             $twilioSid = env('TWILIO_ACCOUNT_SID');
             $twilioToken = env('TWILIO_AUTH_TOKEN');
             $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
 
-            $addr = $flowerRequest->address;
-            $addrLine = $addr
-                ? "{$addr->apartment_flat_plot}, {$addr->localityDetails->locality_name}, {$addr->city}, {$addr->state}, {$addr->pincode}"
-                : '-';
-
             $messageBody = "*New Flower Request Received*\n\n" .
                 "*Request ID:* {$flowerRequest->request_id}\n" .
                 "*User:* {$flowerRequest->user->mobile_number}\n" .
-                "*Address:* {$addrLine}\n" .
-                "*Landmark:* " . ($addr->landmark ?? '-') . "\n" .
-                "*Description:* " . ($flowerRequest->description ?? '-') . "\n" .
-                "*Suggestion:* " . ($flowerRequest->suggestion ?? '-') . "\n" .
+                "*Address:* {$flowerRequest->address->apartment_flat_plot}, " .
+                "{$flowerRequest->address->localityDetails->locality_name}, " .
+                "{$flowerRequest->address->city}, {$flowerRequest->address->state}, " .
+                "{$flowerRequest->address->pincode}\n" .
+                "*Landmark:* {$flowerRequest->address->landmark}\n" .
+                "*Description:* {$flowerRequest->description}\n" .
+                "*Suggestion:* {$flowerRequest->suggestion}\n" .
                 "*Date:* {$flowerRequest->date}\n" .
                 "*Time:* {$flowerRequest->time}\n\n" .
                 "*Items:*\n";
@@ -538,10 +502,7 @@ class FlowerBookingController extends Controller
                 if ($it->type === 'flower') {
                     $messageBody .= "- (Flower) {$it->flower_name}: {$it->flower_quantity} {$it->flower_unit}\n";
                 } else {
-                    $messageBody .= "- (Garland) {$it->garland_name}: " .
-                        (($it->garland_quantity ?? '-').' pcs') . ", " .
-                        (($it->flower_count ?? '-').' flowers') . ", size " .
-                        (($it->garland_size ?? '-')) . "\n";
+                    $messageBody .= "- (Garland) {$it->garland_name}: {$it->garland_quantity} pcs, {$it->flower_count} flowers, size {$it->garland_size}\n";
                 }
             }
 
@@ -549,11 +510,14 @@ class FlowerBookingController extends Controller
                 $twilioClient = new \Twilio\Rest\Client($twilioSid, $twilioToken);
                 $twilioClient->messages->create(
                     "whatsapp:{$adminNumber}",
-                    ['from' => $twilioWhatsAppNumber, 'body' => $messageBody]
+                    [
+                        'from' => $twilioWhatsAppNumber,
+                        'body' => $messageBody,
+                    ]
                 );
-                Log::info('WhatsApp notification sent successfully.');
-            } catch (\Throwable $e) {
-                Log::error('Failed to send WhatsApp notification.', ['error' => $e->getMessage()]);
+                \Log::info('WhatsApp notification sent successfully.');
+            } catch (\Exception $e) {
+                \Log::error('Failed to send WhatsApp notification.', ['error' => $e->getMessage()]);
             }
 
             DB::commit();
@@ -562,36 +526,12 @@ class FlowerBookingController extends Controller
                 'status'  => 200,
                 'message' => 'Flower request created successfully',
                 'data'    => $flowerRequest,
-                'duplicate' => false,
             ], 200);
 
-        } catch (\Illuminate\Database\QueryException $qe) {
+        } catch (\Exception $e) {
             DB::rollBack();
+            \Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
 
-            // Handle race: unique idempotency_key violation -> fetch existing and return
-            if (str_contains(strtolower($qe->getMessage()), 'idempotency_key') &&
-                str_contains(strtolower($qe->getMessage()), 'duplicate')) {
-
-                if ($existing = FlowerRequest::where('idempotency_key', $idempotencyKey)->with(['address.localityDetails','user','flowerRequestItems'])->first()) {
-                    return response()->json([
-                        'status'  => 200,
-                        'message' => 'Flower request already created (idempotent replay).',
-                        'data'    => $existing,
-                        'duplicate' => true,
-                    ], 200);
-                }
-            }
-
-            Log::error('DB error creating flower request.', ['error' => $qe->getMessage()]);
-            return response()->json([
-                'status'  => 500,
-                'message' => 'Failed to create flower request',
-                'error'   => $qe->getMessage(),
-            ], 500);
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            Log::error('Failed to create flower request.', ['error' => $e->getMessage()]);
             return response()->json([
                 'status'  => 500,
                 'message' => 'Failed to create flower request',
