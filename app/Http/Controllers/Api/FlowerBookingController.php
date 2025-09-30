@@ -11,6 +11,7 @@ use App\Models\FlowerProduct;
 use App\Models\FlowerRequest;
 use App\Models\SubscriptionPauseResumeLog;
 use App\Models\Notification;
+use Illuminate\Support\Facades\Cache;     // ✅ add this
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log; // Make sure to import the Log facade
 use App\Mail\FlowerRequestMail;
