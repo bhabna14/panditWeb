@@ -15,10 +15,23 @@ class OfficeTransactionController extends Controller
     /* =========================
      |  VIEWS
      |=========================*/
-    public function getOfficeTransaction()
-    {
-        return view('admin.office-transaction-details'); // your blade file
-    }
+   public function getOfficeTransaction()
+{
+    // Same dataset your manage page uses
+    $transactions = OfficeTransaction::where('status', 'active')
+        ->orderBy('date', 'desc')
+        ->get();
+
+    $rangeTotal = OfficeTransaction::where('status', 'active')->sum('amount');
+
+    $today = \Carbon\Carbon::today(config('app.timezone', 'Asia/Kolkata'));
+    $todayTotal = OfficeTransaction::where('status', 'active')
+        ->whereDate('date', $today->toDateString())
+        ->sum('amount');
+
+    // Pass everything the Blade needs
+    return view('admin.office-transaction-details', compact('transactions', 'todayTotal', 'rangeTotal'));
+}
 
     public function manageOfficeTransaction()
     {
