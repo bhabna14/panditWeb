@@ -831,19 +831,56 @@ Route::get('/admin/office-fund', function () {
     return view('admin.office-fund-received'); // your blade file
 })->name('admin.officeFundReceived');
 
-Route::controller(OfficeTransactionController::class)->group(function() {
-   Route::get('/admin/office-trasaction','getOfficeTransaction')->name('admin.officeTransactionDetails');
-   Route::post('/save-office-transaction',  'saveOfficeTransaction')->name('saveOfficeTransaction');
-   Route::get('/manage-office-transaction',  'manageOfficeTransaction')->name('manageOfficePayments');
-   Route::put('/office-transactions/{id}', 'update')->name('officeTransactions.update');
-   Route::delete('/office-transactions/{id}', 'destroy')->name('officeTransactions.destroy');
-   Route::get('/office-fund/total-by-category', 'fundTotalsByCategory')->name('officeFund.totalByCategory');
-   Route::get('/office-transactions/filter',  'filterOfficeTransactions')->name('officeTransactions.filter');
-   Route::post('/save-office-fund',  'saveOfficeFund')->name('saveOfficeFund');
-   Route::get('/manage-office-fund',  'manageOfficeFund')->name('manageOfficeFund');
-   Route::put('/office-fund/{id}', 'updateOfficeFund')->name('officeFund.update');
-   Route::delete('/office-fund/{id}', 'destroyOfficeFund')->name('officeFund.destroy');
-   Route::get('/office-fund/filter', 'filterOfficeFund')->name('officeFund.filter');
+Route::controller(OfficeTransactionController::class)->group(function () {
+
+    // Transaction create/view
+    Route::get('/admin/office-trasaction', 'getOfficeTransaction')
+        ->name('admin.officeTransactionDetails'); // (kept original slug to avoid breaking links)
+
+    Route::post('/save-office-transaction', 'saveOfficeTransaction')
+        ->name('saveOfficeTransaction');
+
+    // Manage Transactions (primary)
+    Route::get('/manage-office-transaction', 'manageOfficeTransaction')
+        ->name('manageOfficePayments');
+
+    // Optional: Admin-prefixed alias for the same manage page
+    Route::get('/admin/manage-office-transaction', 'manageOfficeTransaction')
+        ->name('admin.manageOfficePayments');
+
+    // Update / Delete
+    Route::put('/office-transactions/{id}', 'update')
+        ->name('officeTransactions.update');
+
+    Route::delete('/office-transactions/{id}', 'destroy')
+        ->name('officeTransactions.destroy');
+
+    // Transactions filter (single, non-duplicated)
+    Route::get('/office-transactions/filter', 'filterOfficeTransactions')
+        ->name('officeTransactions.filter');
+
+    // ===== Office Fund =====
+    Route::post('/save-office-fund', 'saveOfficeFund')
+        ->name('saveOfficeFund');
+
+    Route::get('/manage-office-fund', 'manageOfficeFund')
+        ->name('manageOfficeFund');
+
+    Route::put('/office-fund/{id}', 'updateOfficeFund')
+        ->name('officeFund.update');
+
+    Route::delete('/office-fund/{id}', 'destroyOfficeFund')
+        ->name('officeFund.destroy');
+
+    Route::get('/office-fund/filter', 'filterOfficeFund')
+        ->name('officeFund.filter');
+
+    Route::get('/office-fund/total-by-category', 'fundTotalsByCategory')
+        ->name('officeFund.totalByCategory');
+
+    // ===== Office Ledger (History) =====
+    Route::get('/admin/office-ledger/filter', 'filterOfficeLedger')
+        ->name('officeLedger.filter');
 });
 
 Route::controller(ReferController::class)->group(function() {
