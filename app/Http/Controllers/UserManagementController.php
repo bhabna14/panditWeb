@@ -245,20 +245,25 @@ public function index(Request $request)
         ->limit(10)
         ->get();
 
-    return view('admin.user-login-details', [
-        'devices'           => $devices,
-        'platforms'         => $platforms,
-        'search'            => $search,
-        'platform'          => $platform,
-        'date_range'        => $daterange,
-        'user_id'           => $userId,        // final (may be blank if invalid)
-        'selectedUser'      => $selectedUser,  // used for preselect label
-        'todayLogins'       => $todayLogins,
-        'uniqueDevices'     => $uniqueDevices,
-        'activeThisWeek'    => $activeThisWeek,
-        'platformBreakdown' => $platformBreakdown,
-        'recentLogins'      => $recentLogins,
-    ]);
+        $noDeviceForSelectedUser = ($userId !== '' && $devices->total() === 0);
+
+
+   return view('admin.user-login-details', [
+    'devices'           => $devices,
+    'platforms'         => $platforms,
+    'search'            => $search,
+    'platform'          => $platform,
+    'date_range'        => $daterange,
+    'user_id'           => $userId,
+    'selectedUser'      => $selectedUser,
+    'todayLogins'       => $todayLogins,
+    'uniqueDevices'     => $uniqueDevices,
+    'activeThisWeek'    => $activeThisWeek,
+    'platformBreakdown' => $platformBreakdown,
+    'recentLogins'      => $recentLogins,
+    'noDeviceForSelectedUser' => $noDeviceForSelectedUser, // ✅ NEW
+]);
+
 }
 
 

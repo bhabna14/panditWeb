@@ -374,35 +374,51 @@
                                         };
                                     @endphp
 
-                                    @forelse($devices as $d)
+                                    @if ($devices->count() > 0)
+                                        @foreach ($devices as $d)
+                                            <tr>
+                                                <td>
+                                                    <div class="fw-semibold">{{ $d->user->name ?? '—' }}</div>
+                                                    <div class="text-muted small">#{{ $d->user_id }}</div>
+                                                </td>
+                                                <td class="mono">{{ $d->user->mobile_number ?? '—' }}</td>
+                                                <td>
+                                                    <span class="{{ $chipClass($d->platform) }}">
+                                                        <i class="bi {{ $chipIcon($d->platform) }}"></i>
+                                                        {{ $d->platform ?? 'Unknown' }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ $d->device_model ?? '—' }}</td>
+                                                <td><span class="mono">{{ $d->version ?? '—' }}</span></td>
+                                                <td>
+                                                    @if ($d->last_login_time)
+                                                        <div class="mono">
+                                                            {{ \Carbon\Carbon::parse($d->last_login_time)->format('Y-m-d H:i') }}
+                                                        </div>
+                                                        <div class="text-muted small">
+                                                            {{ \Carbon\Carbon::parse($d->last_login_time)->diffForHumans() }}
+                                                        </div>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    @elseif (!empty($user_id) && $noDeviceForSelectedUser && $selectedUser)
+                                        {{-- ✅ Show a single row with the selected user’s details, even if they have no devices --}}
                                         <tr>
                                             <td>
-                                                <div class="fw-semibold">{{ $d->user->name ?? '—' }}</div>
-                                                <div class="text-muted small">#{{ $d->user_id }}</div>
+                                                <div class="fw-semibold">{{ $selectedUser->name ?? '—' }}</div>
+                                                <div class="text-muted small">#{{ $selectedUser->userid }}</div>
                                             </td>
-                                            <td class="mono">{{ $d->user->mobile_number ?? '—' }}</td>
-                                            <td>
-                                                <span class="{{ $chipClass($d->platform) }}">
-                                                    <i class="bi {{ $chipIcon($d->platform) }}"></i>
-                                                    {{ $d->platform ?? 'Unknown' }}
-                                                </span>
-                                            </td>
-                                            <td>{{ $d->device_model ?? '—' }}</td>
-                                            <td><span class="mono">{{ $d->version ?? '—' }}</span></td>
-                                            <td>
-                                                @if ($d->last_login_time)
-                                                    <div class="mono">
-                                                        {{ \Carbon\Carbon::parse($d->last_login_time)->format('Y-m-d H:i') }}
-                                                    </div>
-                                                    <div class="text-muted small">
-                                                        {{ \Carbon\Carbon::parse($d->last_login_time)->diffForHumans() }}
-                                                    </div>
-                                                @else
-                                                    <span class="text-muted">—</span>
-                                                @endif
-                                            </td>
+                                            <td class="mono">{{ $selectedUser->mobile_number ?? '—' }}</td>
+                                            <td><span class="chip chip-unknown"><i class="bi bi-question-circle"></i>
+                                                    —</span></td>
+                                            <td>—</td>
+                                            <td><span class="mono">—</span></td>
+                                            <td><span class="text-muted">—</span></td>
                                         </tr>
-                                    @empty
+                                    @else
                                         <tr>
                                             <td colspan="7">
                                                 <div class="empty-state">
@@ -412,8 +428,9 @@
                                                 </div>
                                             </td>
                                         </tr>
-                                    @endforelse
+                                    @endif
                                 </tbody>
+
                             </table>
                         </div>
 
@@ -463,41 +480,45 @@
         </div>
 
     </div>
-    @endsection
+@endsection
 
-  @section('scripts')
+@section('scripts')
     {{-- ✅ Add Select2 JS --}}
     <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
 
     <script>
-    $(function() {
-        // ✅ Initialize Select2 for user filter
-        $('#user_select').select2({
-            width: '100%',
-            placeholder: $('#user_select').data('placeholder') || 'Find user by name or mobile',
-            allowClear: true,
-            ajax: {
-                delay: 200,
-                url: @json(route('admin.users.search')),
-                dataType: 'json',
-                data: params => ({ q: params.term || '' }),
-                processResults: data => {
-                    // ✅ Hide the "NEW" option on this page
-                    const results = (data?.results || []).filter(r => String(r.id).toUpperCase() !== 'NEW');
-                    return { results };
-                }
-            },
-            minimumInputLength: 0,
-            // Optional: keep markup simple; Select2 will display `text`
-            templateResult: item => item.text || '',
-            templateSelection: item => item.text || ''
-        });
+        $(function() {
+            // ✅ Initialize Select2 for user filter
+            $('#user_select').select2({
+                width: '100%',
+                placeholder: $('#user_select').data('placeholder') || 'Find user by name or mobile',
+                allowClear: true,
+                ajax: {
+                    delay: 200,
+                    url: @json(route('admin.users.search')),
+                    dataType: 'json',
+                    data: params => ({
+                        q: params.term || ''
+                    }),
+                    processResults: data => {
+                        // ✅ Hide the "NEW" option on this page
+                        const results = (data?.results || []).filter(r => String(r.id).toUpperCase() !==
+                            'NEW');
+                        return {
+                            results
+                        };
+                    }
+                },
+                minimumInputLength: 0,
+                // Optional: keep markup simple; Select2 will display `text`
+                templateResult: item => item.text || '',
+                templateSelection: item => item.text || ''
+            });
 
-        // ✅ Ensure clearing wipes the value
-        $('#user_select').on('select2:clear', function() {
-            $(this).val('').trigger('change');
+            // ✅ Ensure clearing wipes the value
+            $('#user_select').on('select2:clear', function() {
+                $(this).val('').trigger('change');
+            });
         });
-    });
     </script>
 @endsection
-
