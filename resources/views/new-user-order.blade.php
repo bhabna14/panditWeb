@@ -372,7 +372,7 @@
             <div class="section-title"><span class="badge bg-primary rounded-pill">4</span> Payment Details</div>
             <div class="row g-3">
                 <div class="col-md-3">
-                    <label for="paid_amount" class="form-label">Paid Amount</label>
+                    <label for="paid_amount" class="form-label">Amount</label>
                     <input type="number" min="0" step="1" name="paid_amount" class="form-control"
                         id="paid_amount" placeholder="Enter amount">
                 </div>
@@ -439,13 +439,27 @@
         }
 
         function setEndDateFromDuration() {
-            const start = document.getElementById('start_date').value;
-            const dur = parseInt(document.getElementById('duration').value || '0', 10);
-            if (!start || !dur) return;
-            const d = new Date(start + 'T00:00:00');
+            const startStr = document.getElementById('start_date').value;
+            const dur = (document.getElementById('duration').value || '').trim();
+
+            if (!startStr || !dur) return;
+
+            // Map duration (months) to exact days
+            const daysMap = {
+                '1': 30,
+                '3': 90,
+                '6': 180
+            };
+            const totalDays = daysMap[dur];
+            if (!totalDays) return;
+
+            // Inclusive range: end = start + (days - 1)
+            const d = new Date(startStr + 'T00:00:00');
+            if (isNaN(d)) return;
+
             const target = new Date(d);
-            target.setMonth(target.getMonth() + dur);
-            target.setDate(target.getDate() - 1);
+            target.setDate(target.getDate() + (totalDays - 1));
+
             const yyyy = target.getFullYear();
             const mm = String(target.getMonth() + 1).padStart(2, '0');
             const dd = String(target.getDate()).padStart(2, '0');
