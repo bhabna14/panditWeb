@@ -128,6 +128,7 @@ class NewUserOrderController extends Controller
 
             // status
             'status'         => ['nullable', Rule::in(['active','pending','expired'])],
+            'payment_status'    =>  ['nullable', Rule::in(['paid','pending'])],
 
             // user mode
             'user_select'    => ['required'],
@@ -264,7 +265,7 @@ class NewUserOrderController extends Controller
                 'user_id'        => $user->userid,    // IMPORTANT
                 'payment_method' => $validated['payment_method'],
                 'paid_amount'    => $validated['paid_amount'],
-                'payment_status' => (float)$validated['paid_amount'] > 0 ? 'paid' : 'pending',
+                'payment_status' => $validated['payment_status'],
             ]);
 
             DB::commit();

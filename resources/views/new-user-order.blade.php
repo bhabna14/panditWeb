@@ -262,12 +262,12 @@
             </div>
             <div class="row g-3">
                 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="paid_amount" class="form-label">Paid Amount</label>
                     <input type="number" min="0" step="1" name="paid_amount" class="form-control"
                         id="paid_amount" placeholder="Enter amount">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="payment_method" class="form-label">Payment Mode</label>
                     <select name="payment_method" id="payment_method" class="form-control">
                         <option value="">Select payment method</option>
@@ -275,12 +275,19 @@
                         <option value="upi">UPI</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="status" class="form-label">Status</label>
                     <select name="status" id="status" class="form-control">
                         <option value="active" selected>Active</option>
                         <option value="pending">Pending</option>
                         <option value="expired">Expired</option>
+                    </select>
+                </div>
+                 <div class="col-md-3">
+                    <label for="payment_status" class="form-label">Payment Status</label>
+                    <select name="payment_status" id="payment_status" class="form-control">
+                        <option value="paid" selected>Paid</option>
+                        <option value="pending">Pending</option>
                     </select>
                 </div>
             </div>
