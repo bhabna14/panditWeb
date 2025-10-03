@@ -434,7 +434,8 @@
                         @forelse($recentLogins as $log)
                             <div class="d-flex justify-content-between border-bottom py-2">
                                 <div class="me-2">
-                                    <div class="fw-semibold small">{{ $log->user->name ?? 'User #' . $log->user_id }}</div>
+                                    <div class="fw-semibold small">{{ $log->user->name ?? 'User #' . $log->user_id }}
+                                    </div>
                                     <div class="text-muted small">
                                         <i class="bi bi-phone me-1"></i>{{ $log->device_model ?? '—' }}
                                         <span class="mx-1">•</span>
@@ -460,6 +461,10 @@
         </div>
 
     </div>
+    @endsection
+
+    @section('scripts')
+
     <script>
         $(function() {
             // User AJAX select (search by name or mobile)
@@ -469,18 +474,24 @@
                 allowClear: true,
                 ajax: {
                     delay: 200,
-                    url: @json(route('admin.users.search')), // <-- already exists in your app
+                    url: @json(route('admin.users.search')),
                     dataType: 'json',
                     data: params => ({
                         q: params.term || ''
                     }),
-                    processResults: data => data
+                    processResults: data => {
+                        // Filter out "NEW" here; this page is for filtering existing users only
+                        const results = (data?.results || []).filter(r => String(r.id).toUpperCase() !==
+                            'NEW');
+                        return {
+                            results
+                        };
+                    }
                 },
-                // Ensure we can clear selection (submits empty user_id)
                 minimumInputLength: 0
             });
 
-            // If cleared, make sure the value is empty before submit
+            // Ensure clearing removes value before submit
             $('#user_select').on('select2:clear', function() {
                 $(this).val('').trigger('change');
             });

@@ -133,52 +133,63 @@ class UserManagementController extends Controller
 
    public function index(Request $request)
 {
-    $search     = trim($request->input('search', ''));     // now ONLY device-side search
+    $search     = trim($request->input('search', '')); // device-only search
     $platform   = $request->input('platform', '');
-    $daterange  = $request->input('date_range', '');
-    $userId     = $request->input('user_id', '');          // NEW: explicit user filter (userid)
+    $daterange  = trim($request->input('date_range', ''));
+    $userId     = trim($request->input('user_id', '')); // explicit user filter (userid)
 
-    // ------- Filters (date range) -------
+    // ------- Date range parsing -------
     $dateStart = null;
     $dateEnd   = null;
-    if ($daterange && str_contains($daterange, 'to')) {
-        [$s, $e] = array_map('trim', explode('to', $daterange));
-        try {
-            $dateStart = Carbon::parse($s)->startOfDay();
-            $dateEnd   = Carbon::parse($e)->endOfDay();
-        } catch (\Throwable $th) {
-            $dateStart = $dateEnd = null;
+    if ($daterange !== '') {
+        // accept "YYYY-MM-DD to YYYY-MM-DD" or "YYYY-MM-DD - YYYY-MM-DD"
+        $sep = str_contains($daterange, ' to ') ? ' to ' : (str_contains($daterange, ' - ') ? ' - ' : 'to');
+        if (str_contains($daterange, $sep)) {
+            [$s, $e] = array_map('trim', explode($sep, $daterange));
+            try {
+                $dateStart = \Carbon\Carbon::parse($s)->startOfDay();
+                $dateEnd   = \Carbon\Carbon::parse($e)->endOfDay();
+            } catch (\Throwable $th) {
+                $dateStart = $dateEnd = null;
+            }
         }
     }
 
     // Distinct platforms for dropdown
-    $platforms = UserDevice::query()
+    $platforms = \App\Models\UserDevice::query()
         ->select('platform')
         ->whereNotNull('platform')
         ->distinct()
         ->orderBy('platform')
         ->pluck('platform');
 
-    // Preload user for preselect (if user_id present)
+    // Normalize/validate user filter
     $selectedUser = null;
-    if ($userId !== '') {
+    if ($userId !== '' && strtoupper($userId) !== 'NEW') {
         $selectedUser = \App\Models\User::where('userid', $userId)
-            ->select('userid','name','mobile_number')
+            ->select('userid', 'name', 'mobile_number')
             ->first();
+        if (!$selectedUser) {
+            // If user id invalid, ignore the filter instead of forcing empty results
+            $userId = '';
+        }
+    } else {
+        // Ignore "NEW" or empty
+        $userId = '';
     }
 
-    // ------- Base query for table -------
-    $devicesQ = UserDevice::query()
+    // ------- Base query -------
+    $devicesQ = \App\Models\UserDevice::query()
         ->with(['user' => function ($q) {
             $q->select('userid', 'name', 'mobile_number');
         }]);
 
-    // NEW: hard filter by selected user (independent of device search)
+    // Apply user filter only when valid
     if ($userId !== '') {
         $devicesQ->where('user_id', $userId);
     }
 
-    // Search ONLY device fields now (separated from user search)
+    // Device-only search
     if ($search !== '') {
         $devicesQ->where(function ($q) use ($search) {
             $q->where('device_id', 'like', "%{$search}%")
@@ -202,33 +213,33 @@ class UserManagementController extends Controller
         ->appends($request->query());
 
     // ------- Metrics (unchanged) -------
-    $todayStart = Carbon::today()->startOfDay();
-    $todayEnd   = Carbon::today()->endOfDay();
-    $weekStart  = Carbon::now()->startOfWeek(); // Monday
+    $todayStart = \Carbon\Carbon::today()->startOfDay();
+    $todayEnd   = \Carbon\Carbon::today()->endOfDay();
+    $weekStart  = \Carbon\Carbon::now()->startOfWeek(); // Monday
 
-    $todayLogins = UserDevice::query()
+    $todayLogins = \App\Models\UserDevice::query()
         ->whereBetween('last_login_time', [$todayStart, $todayEnd])
         ->distinct('user_id')
         ->count('user_id');
 
-    $uniqueDevices = UserDevice::query()
+    $uniqueDevices = \App\Models\UserDevice::query()
         ->whereNotNull('device_id')
         ->distinct('device_id')
         ->count('device_id');
 
-    $activeThisWeek = UserDevice::query()
+    $activeThisWeek = \App\Models\UserDevice::query()
         ->where('last_login_time', '>=', $weekStart)
         ->distinct('user_id')
         ->count('user_id');
 
-    $platformBreakdown = UserDevice::query()
-        ->select('platform', DB::raw('COUNT(DISTINCT user_id) as users'))
+    $platformBreakdown = \App\Models\UserDevice::query()
+        ->select('platform', \DB::raw('COUNT(DISTINCT user_id) as users'))
         ->whereNotNull('platform')
         ->groupBy('platform')
         ->orderByDesc('users')
         ->get();
 
-    $recentLogins = UserDevice::query()
+    $recentLogins = \App\Models\UserDevice::query()
         ->with(['user' => function ($q) { $q->select('userid', 'name'); }])
         ->orderByDesc('last_login_time')
         ->limit(10)
@@ -240,8 +251,8 @@ class UserManagementController extends Controller
         'search'            => $search,
         'platform'          => $platform,
         'date_range'        => $daterange,
-        'user_id'           => $userId,        // NEW
-        'selectedUser'      => $selectedUser,  // NEW (for preselect label)
+        'user_id'           => $userId,        // final (may be blank if invalid)
+        'selectedUser'      => $selectedUser,  // used for preselect label
         'todayLogins'       => $todayLogins,
         'uniqueDevices'     => $uniqueDevices,
         'activeThisWeek'    => $activeThisWeek,
