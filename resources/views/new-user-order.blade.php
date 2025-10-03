@@ -361,8 +361,7 @@
                 </div>
                 <div class="col-md-3">
                     <label for="end_date" class="form-label">End Date</label>
-                    <input type="date" name="end_date" class="form-control" id="end_date">
-                    <div class="form-text muted">Auto-calculates from Duration (you can override).</div>
+                    <input type="date" name="end_date" class="form-control" id="end_date" readonly>
                 </div>
             </div>
         </div>
