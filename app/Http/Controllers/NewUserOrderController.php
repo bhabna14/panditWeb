@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class NewUserOrderController extends Controller
 {
-   
+
     public function newUserOrder()
     {
         $flowers = FlowerProduct::where('status', 'active')
@@ -113,75 +113,129 @@ class NewUserOrderController extends Controller
 
     public function saveNewUserOrder(Request $request)
     {
+        // ---- Validation rules (branch by user/address modes) ----
+        $baseRules = [
+            // product + subscription
+            'product_id'     => ['required'],
+            'start_date'     => ['required','date'],
+            'end_date'       => ['nullable','date','after_or_equal:start_date'],
+            'duration'       => ['required','integer', Rule::in([1,3,6])],
+
+            // payment
+            'paid_amount'    => ['required','numeric','min:0'],
+            'payment_method' => ['required', Rule::in(['cash','upi'])],
+
+            // status
+            'status'         => ['nullable', Rule::in(['active','pending','expired'])],
+
+            // user mode
+            'user_select'    => ['required'],
+        ];
+
+        // If NEW user: need name + 10-digit mobile
+        if ($request->input('user_select') === 'NEW') {
+            $userRules = [
+                'name'          => ['required','string','max:150'],
+                'mobile_number' => ['required','digits:10', Rule::unique('users','mobile_number')],
+                'user_type'     => ['nullable', Rule::in(['normal','vip'])],
+            ];
+        } else {
+            // Existing user must be supplied; allow optional updates
+            $userRules = [
+                'existing_user_id' => ['required','exists:users,userid'],
+                'name'             => ['nullable','string','max:150'],
+                'mobile_number'    => ['nullable','digits:10', Rule::unique('users','mobile_number')->ignore($request->input('existing_user_id'), 'userid')],
+                'user_type'        => ['nullable', Rule::in(['normal','vip'])],
+            ];
+        }
+
+        // Address rules
+        if ($request->input('address_mode') === 'existing') {
+            $addressRules = [
+                'existing_address_id' => ['required','integer','exists:user_addresses,id'],
+            ];
+        } else {
+            $addressRules = [
+                'state'               => ['required','string','max:100'],
+                'city'                => ['required','string','max:120'],
+                'pincode'             => ['required','string','max:10'],
+                'locality'            => ['required','string'],     // unique_code
+                'apartment_name'      => ['nullable','string','max:150'],
+                'place_category'      => ['required', Rule::in(['Individual','Apartment','Business','Temple'])],
+                'apartment_flat_plot' => ['required','string','max:150'],
+                'landmark'            => ['nullable','string','max:150'],
+                'address_type'        => ['nullable', Rule::in(['Home','Work','Other'])],
+            ];
+        }
+
+        $validated = $request->validate($baseRules + $userRules + $addressRules);
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
+            // -------- Resolve/Create user --------
+            if ($request->input('user_select') === 'NEW') {
+                // Your custom userid and +91 formatting
+                $userCode = 'USER' . random_int(10000, 99999);
+                $user = User::create([
+                    'userid'        => $userCode,
+                    'user_type'     => $validated['user_type'] ?? 'normal',
+                    'name'          => $validated['name'],
+                    'mobile_number' => '+91' . $validated['mobile_number'],
+                ]);
+            } else {
+                // Existing
+                $user = User::where('userid', $validated['existing_user_id'])->firstOrFail();
 
-            $validated = $request->validate([
-                // user
-                'user_type'      => 'nullable|in:normal,vip',
-                'name'           => 'nullable|string|max:150',
-                'mobile_number'  => 'required|digits:10',
+                // Optional updates if provided
+                $updates = [];
+                if (!empty($validated['name'])) {
+                    $updates['name'] = $validated['name'];
+                }
+                if (!empty($validated['mobile_number'])) {
+                    $updates['mobile_number'] = '+91' . $validated['mobile_number'];
+                }
+                if (!empty($validated['user_type'])) {
+                    $updates['user_type'] = $validated['user_type'];
+                }
+                if (!empty($updates)) {
+                    $user->update($updates);
+                }
+            }
 
-                // address (these were used but not validated before)
-                'state'               => 'required|string|max:100',
-                'city'                => 'required|string|max:120',
-                'pincode'             => 'required|string|max:10',
-                'locality'            => 'required|string',     // unique_code
-                'apartment_name'      => 'nullable|string|max:150',
-                'place_category'      => 'required|in:Individual,Apartment,Business,Temple',
-                'apartment_flat_plot' => 'required|string|max:150',
-                'landmark'            => 'nullable|string|max:150',
-                'address_type'        => 'nullable|in:Home,Work,Other',
+            // -------- Resolve/Create address --------
+            if ($request->input('address_mode') === 'existing') {
+                $address = UserAddress::where('id', $validated['existing_address_id'])
+                    ->where('user_id', $user->userid)
+                    ->firstOrFail();
+            } else {
+                $address = UserAddress::create([
+                    'user_id'             => $user->userid, // IMPORTANT: you use 'userid' as FK
+                    'state'               => $validated['state'],
+                    'city'                => $validated['city'],
+                    'pincode'             => $validated['pincode'],
+                    'locality'            => $validated['locality'], // unique_code
+                    'apartment_name'      => $validated['apartment_name'] ?? null,
+                    'place_category'      => $validated['place_category'],
+                    'apartment_flat_plot' => $validated['apartment_flat_plot'],
+                    'landmark'            => $validated['landmark'] ?? null,
+                    'address_type'        => $validated['address_type'] ?? 'Other',
+                    'country'             => 'India',
+                    'default'             => 1,
+                ]);
+                // mark as default and unset others
+                $address->setAsDefault();
+            }
 
-                // product + subscription
-                'product_id'     => 'required',
-                'start_date'     => 'required|date',
-                'end_date'       => 'nullable|date',
-                'duration'       => 'required|integer|in:1,3,6',
-
-                // payment
-                'paid_amount'    => 'required|numeric|min:0',
-                'payment_method' => 'required|in:cash,upi',
-
-                // status
-                'status'         => 'nullable|in:active,pending,expired',
-            ]);
-
-            $userCode = 'USER' . random_int(10000, 99999);
-
-            $user = User::create([
-                'userid'        => $userCode,
-                'user_type'     => $validated['user_type'] ?? 'normal',
-                'name'          => $validated['name'] ?? null,
-                'mobile_number' => '+91' . $validated['mobile_number'],
-            ]);
-
-            $address = UserAddress::create([
-                // NOTE: if your FK is integer id, change to $user->id
-                'user_id'             => $user->userid,
-                'state'               => $validated['state'],
-                'city'                => $validated['city'],
-                'pincode'             => $validated['pincode'],
-                'locality'            => $validated['locality'], // unique_code
-                'apartment_name'      => $validated['apartment_name'] ?? null,
-                'place_category'      => $validated['place_category'],
-                'apartment_flat_plot' => $validated['apartment_flat_plot'],
-                'landmark'            => $validated['landmark'] ?? null,
-                'address_type'        => $validated['address_type'] ?? 'Other',
-                'country'             => 'India',
-                'status'              => 'active',
-            ]);
-
+            // -------- Dates --------
             $start = Carbon::parse($validated['start_date'])->startOfDay();
             $end = !empty($validated['end_date'])
                 ? Carbon::parse($validated['end_date'])->endOfDay()
                 : (clone $start)->addMonthsNoOverflow((int)$validated['duration'])->subDay()->endOfDay();
 
+            // -------- Order --------
             $orderId = 'ORD-' . strtoupper(Str::random(12));
-
             $order = Order::create([
-                // NOTE: if your FK is integer id, change to $user->id
-                'user_id'     => $user->userid,
+                'user_id'     => $user->userid,       // IMPORTANT: you use 'userid' as FK
                 'order_id'    => $orderId,
                 'product_id'  => $validated['product_id'],
                 'quantity'    => 1,
@@ -190,35 +244,37 @@ class NewUserOrderController extends Controller
                 'total_price' => $validated['paid_amount'],
             ]);
 
+            // -------- Subscription --------
             $subscriptionId = 'SUB-' . strtoupper(Str::random(12));
-
             Subscription::create([
                 'subscription_id' => $subscriptionId,
-                // NOTE: if your FK is integer id, change to $user->id
-                'user_id'     => $user->userid,
-                'order_id'    => $order->order_id,
-                'product_id'  => $validated['product_id'],
-                'start_date'  => $start,
-                'end_date'    => $end,
-                'status'      => $validated['status'] ?? 'active',
+                'user_id'         => $user->userid,   // IMPORTANT
+                'order_id'        => $order->order_id,
+                'product_id'      => $validated['product_id'],
+                'start_date'      => $start,
+                'end_date'        => $end,
+                'status'          => $validated['status'] ?? 'active',
             ]);
 
+            // -------- Payment --------
             FlowerPayment::create([
                 'order_id'       => $order->order_id,
                 'payment_id'     => null,
-                // NOTE: if your FK is integer id, change to $user->id
-                'user_id'        => $user->userid,
+                'user_id'        => $user->userid,    // IMPORTANT
                 'payment_method' => $validated['payment_method'],
                 'paid_amount'    => $validated['paid_amount'],
                 'payment_status' => (float)$validated['paid_amount'] > 0 ? 'paid' : 'pending',
             ]);
 
             DB::commit();
-            return back()->with('success', 'New user added successfully!');
+            return back()->with('success', $request->input('user_select') === 'NEW'
+                ? 'New user added successfully!'
+                : 'Order saved for existing user!');
         } catch (\Throwable $e) {
             DB::rollBack();
-            // Optionally log: \Log::error($e);
-            return back()->with('error', 'Failed to save new user order');
+            // \Log::error($e);
+            return back()->withInput()->with('error', 'Failed to save new user order');
         }
     }
+
 }
