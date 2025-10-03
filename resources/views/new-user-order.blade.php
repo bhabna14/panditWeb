@@ -82,7 +82,6 @@
             display: none !important
         }
 
-        /* Address cards */
         .addr-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -217,13 +216,13 @@
                 <div id="new_user_fields" class="col-12 hidden">
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="new_user_name" class="form-label">New User Name</label>
-                            <input type="text" class="form-control" id="new_user_name" name="new_user_name"
+                            <label for="name" class="form-label">New User Name</label>
+                            <input type="text" class="form-control" id="name" name="name"
                                 placeholder="Full name">
                         </div>
                         <div class="col-md-6">
-                            <label for="new_user_mobile" class="form-label">Phone Number</label>
-                            <input type="text" class="form-control" id="new_user_mobile" name="new_user_mobile"
+                            <label for="mobile_number" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="mobile_number" name="mobile_number"
                                 placeholder="10-digit phone" inputmode="numeric" pattern="[0-9]{10}">
                         </div>
                     </div>
@@ -244,9 +243,7 @@
                     <button class="btn btn-outline-primary btn-sm" type="button" id="btn_add_new_address">➕ Add new
                         address</button>
                 </div>
-                <div class="addr-grid" id="address_cards">
-                    {{-- Cards injected by JS --}}
-                </div>
+                <div class="addr-grid" id="address_cards"></div>
                 <input type="hidden" name="existing_address_id" id="existing_address_id" value="">
             </div>
 
@@ -282,9 +279,7 @@
                         <option value="">Select Locality</option>
                         @foreach ($localities as $locality)
                             <option value="{{ $locality->unique_code }}" data-locality-key="{{ $locality->unique_code }}"
-                                data-pincode="{{ $locality->pincode }}">
-                                {{ $locality->locality_name }}
-                            </option>
+                                data-pincode="{{ $locality->pincode }}">{{ $locality->locality_name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -440,10 +435,7 @@
         function setEndDateFromDuration() {
             const startStr = document.getElementById('start_date').value;
             const dur = (document.getElementById('duration').value || '').trim();
-
             if (!startStr || !dur) return;
-
-            // Map duration (months) to exact days
             const daysMap = {
                 '1': 30,
                 '3': 90,
@@ -451,14 +443,10 @@
             };
             const totalDays = daysMap[dur];
             if (!totalDays) return;
-
-            // Inclusive range: end = start + (days - 1)
             const d = new Date(startStr + 'T00:00:00');
             if (isNaN(d)) return;
-
             const target = new Date(d);
             target.setDate(target.getDate() + (totalDays - 1));
-
             const yyyy = target.getFullYear();
             const mm = String(target.getMonth() + 1).padStart(2, '0');
             const dd = String(target.getDate()).padStart(2, '0');
@@ -503,14 +491,11 @@
             }
         }
 
-        /* ------- NEW: Address cards ------- */
         function addressCardHtml(a) {
-            // a = {id,label,is_default?,type?}
             const parts = a.label ? a.label.split(',').map(s => s.trim()) : [];
             const type = a.type || '';
             const isDefault = !!a.is_default;
             const id = a.id;
-
             return `
             <div class="addr-card" data-id="${id}" role="button" tabindex="0" aria-label="Select address">
                 <div class="addr-check">✓</div>
@@ -542,11 +527,10 @@
             document.getElementById('address_mode').value = show ? 'existing' : 'new';
         }
 
-        // User mode
         function switchToNewUser() {
             $('#existing_user_id').val('');
             $('#new_user_fields').removeClass('hidden');
-            showExistingAddressBlock(false); // show form by default for new user
+            showExistingAddressBlock(false);
         }
 
         function switchToExistingUser(userid) {
@@ -574,9 +558,7 @@
             grid.innerHTML = '';
 
             if (ok && data.length) {
-                // Map labels into nicer structure (optional type detection)
-                data.forEach((a, idx) => {
-                    // try to guess "type" and default flag from the label suffix
+                data.forEach(a => {
                     const isDefault = (a.label || '').includes('(Default)');
                     const cleanLabel = (a.label || '').replace('(Default)', '').trim();
                     grid.insertAdjacentHTML('beforeend', addressCardHtml({
@@ -589,18 +571,15 @@
                 grid.insertAdjacentHTML('beforeend', addNewAddressCardHtml());
                 showExistingAddressBlock(true);
 
-                // Select first by default
                 const firstId = data[0]?.id;
                 if (firstId) {
                     document.getElementById('existing_address_id').value = firstId;
                     setSelectedAddressCard(firstId);
                 }
 
-                // Click handlers
                 grid.querySelectorAll('.addr-card').forEach(card => {
                     card.addEventListener('click', () => {
                         if (card.id === 'addr_add_card') {
-                            // Switch to new address form
                             showExistingAddressBlock(false);
                             return;
                         }
@@ -609,25 +588,19 @@
                         setSelectedAddressCard(id);
                     });
                     card.addEventListener('keypress', (e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                            card.click();
-                        }
+                        if (e.key === 'Enter' || e.key === ' ') card.click();
                     });
                 });
-
             } else {
-                // No saved addresses → show form
                 showExistingAddressBlock(false);
             }
         }
 
         $(function() {
-            // Select2
             $('.select2').select2({
                 width: '100%'
             });
 
-            // USER SELECT2 (remote)
             $('#user_select').select2({
                 width: '100%',
                 placeholder: 'Search by mobile or name',
@@ -643,7 +616,6 @@
                 minimumInputLength: 0
             });
 
-            // user picked
             $('#user_select').on('select2:select', function(e) {
                 const sel = e.params.data;
                 if (!sel) return;
@@ -654,34 +626,27 @@
                 }
             });
 
-            // “Add new address” (from existing block)
             $('#btn_add_new_address').on('click', () => showExistingAddressBlock(false));
-
-            // “Use existing addresses” (from form)
             $('#btn_use_existing_addresses').on('click', () => {
                 const uid = $('#existing_user_id').val();
                 if (uid) loadUserAddresses(uid);
             });
 
-            // Locality → apartments + pincode
             $('#locality').on('change select2:select', function() {
                 populateApartmentsFromLocality(this);
             });
-            if (document.getElementById('locality').value) {
-                populateApartmentsFromLocality(document.getElementById('locality'));
-            }
+            if (document.getElementById('locality').value) populateApartmentsFromLocality(document.getElementById(
+                'locality'));
 
-            // Duration → end date
             document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
             document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);
 
-            // New user phone mask
-            const mask10 = el => el && el.addEventListener('input', function() {
+            // Phone mask for NEW user (now targets #mobile_number)
+            const phoneEl = document.getElementById('mobile_number');
+            if (phoneEl) phoneEl.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
             });
-            mask10(document.getElementById('new_user_mobile'));
 
-            // Session toasts & errors
             @if ($errors->any())
                 showValidationErrors([
                     @foreach ($errors->all() as $e)
