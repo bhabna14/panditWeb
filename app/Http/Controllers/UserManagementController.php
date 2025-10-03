@@ -131,117 +131,124 @@ class UserManagementController extends Controller
         }
     }
 
-    public function index(Request $request)
-    {
-        $search    = trim($request->input('search', ''));
-        $platform  = $request->input('platform', '');
-        $daterange = $request->input('date_range', ''); // e.g. "2025-09-01 to 2025-09-22"
+   public function index(Request $request)
+{
+    $search     = trim($request->input('search', ''));     // now ONLY device-side search
+    $platform   = $request->input('platform', '');
+    $daterange  = $request->input('date_range', '');
+    $userId     = $request->input('user_id', '');          // NEW: explicit user filter (userid)
 
-        // ------- Filters (date range) -------
-        $dateStart = null;
-        $dateEnd   = null;
-        if ($daterange && str_contains($daterange, 'to')) {
-            [$s, $e] = array_map('trim', explode('to', $daterange));
-            try {
-                $dateStart = Carbon::parse($s)->startOfDay();
-                $dateEnd   = Carbon::parse($e)->endOfDay();
-            } catch (\Throwable $th) {
-                $dateStart = $dateEnd = null;
-            }
+    // ------- Filters (date range) -------
+    $dateStart = null;
+    $dateEnd   = null;
+    if ($daterange && str_contains($daterange, 'to')) {
+        [$s, $e] = array_map('trim', explode('to', $daterange));
+        try {
+            $dateStart = Carbon::parse($s)->startOfDay();
+            $dateEnd   = Carbon::parse($e)->endOfDay();
+        } catch (\Throwable $th) {
+            $dateStart = $dateEnd = null;
         }
-
-        // Distinct platforms for dropdown
-        $platforms = UserDevice::query()
-            ->select('platform')
-            ->whereNotNull('platform')
-            ->distinct()
-            ->orderBy('platform')
-            ->pluck('platform');
-
-        // ------- Base query for table -------
-        $devicesQ = UserDevice::query()
-            ->with(['user' => function ($q) {
-                // FIX: removed trailing space from 'mobile_number '
-                $q->select('userid', 'name', 'mobile_number');
-            }]);
-
-        // Search across user name/mobile and device fields
-        if ($search !== '') {
-            $devicesQ->where(function ($q) use ($search) {
-                $q->where('device_id', 'like', "%{$search}%")
-                ->orWhere('device_model', 'like', "%{$search}%")
-                ->orWhere('version', 'like', "%{$search}%")
-                ->orWhere('platform', 'like', "%{$search}%")
-                ->orWhereHas('user', function ($uq) use ($search) {
-                    $uq->where('name', 'like', "%{$search}%")
-                        ->orWhere('mobile_number', 'like', "%{$search}%");
-                });
-            });
-        }
-
-        if ($platform !== '') {
-            $devicesQ->where('platform', $platform);
-        }
-
-        if ($dateStart && $dateEnd) {
-            $devicesQ->whereBetween('last_login_time', [$dateStart, $dateEnd]);
-        }
-
-        $devices = $devicesQ
-            ->orderByDesc('last_login_time')
-            ->paginate(25)
-            ->appends($request->query());
-
-        // ------- Metrics for cards -------
-        $todayStart = Carbon::today()->startOfDay();
-        $todayEnd   = Carbon::today()->endOfDay();
-        $weekStart  = Carbon::now()->startOfWeek(); // Monday
-
-        // Distinct users who logged in today
-        $todayLogins = UserDevice::query()
-            ->whereBetween('last_login_time', [$todayStart, $todayEnd])
-            ->distinct('user_id')
-            ->count('user_id');
-
-        // Distinct devices overall
-        $uniqueDevices = UserDevice::query()
-            ->whereNotNull('device_id')
-            ->distinct('device_id')
-            ->count('device_id');
-
-        // Distinct users active this week
-        $activeThisWeek = UserDevice::query()
-            ->where('last_login_time', '>=', $weekStart)
-            ->distinct('user_id')
-            ->count('user_id');
-
-        // Platform breakdown (count distinct users per platform)
-        $platformBreakdown = UserDevice::query()
-            ->select('platform', DB::raw('COUNT(DISTINCT user_id) as users'))
-            ->whereNotNull('platform')
-            ->groupBy('platform')
-            ->orderByDesc('users')
-            ->get();
-
-        // Recent logins
-        $recentLogins = UserDevice::query()
-            ->with(['user' => function ($q) { $q->select('userid', 'name'); }])
-            ->orderByDesc('last_login_time')
-            ->limit(10)
-            ->get();
-
-        return view('admin.user-login-details', [
-            'devices'           => $devices,
-            'platforms'         => $platforms,
-            'search'            => $search,
-            'platform'          => $platform,
-            'date_range'        => $daterange,
-            'todayLogins'       => $todayLogins,
-            'uniqueDevices'     => $uniqueDevices,
-            'activeThisWeek'    => $activeThisWeek,
-            'platformBreakdown' => $platformBreakdown,
-            'recentLogins'      => $recentLogins,
-        ]);
     }
+
+    // Distinct platforms for dropdown
+    $platforms = UserDevice::query()
+        ->select('platform')
+        ->whereNotNull('platform')
+        ->distinct()
+        ->orderBy('platform')
+        ->pluck('platform');
+
+    // Preload user for preselect (if user_id present)
+    $selectedUser = null;
+    if ($userId !== '') {
+        $selectedUser = \App\Models\User::where('userid', $userId)
+            ->select('userid','name','mobile_number')
+            ->first();
+    }
+
+    // ------- Base query for table -------
+    $devicesQ = UserDevice::query()
+        ->with(['user' => function ($q) {
+            $q->select('userid', 'name', 'mobile_number');
+        }]);
+
+    // NEW: hard filter by selected user (independent of device search)
+    if ($userId !== '') {
+        $devicesQ->where('user_id', $userId);
+    }
+
+    // Search ONLY device fields now (separated from user search)
+    if ($search !== '') {
+        $devicesQ->where(function ($q) use ($search) {
+            $q->where('device_id', 'like', "%{$search}%")
+              ->orWhere('device_model', 'like', "%{$search}%")
+              ->orWhere('version', 'like', "%{$search}%")
+              ->orWhere('platform', 'like', "%{$search}%");
+        });
+    }
+
+    if ($platform !== '') {
+        $devicesQ->where('platform', $platform);
+    }
+
+    if ($dateStart && $dateEnd) {
+        $devicesQ->whereBetween('last_login_time', [$dateStart, $dateEnd]);
+    }
+
+    $devices = $devicesQ
+        ->orderByDesc('last_login_time')
+        ->paginate(25)
+        ->appends($request->query());
+
+    // ------- Metrics (unchanged) -------
+    $todayStart = Carbon::today()->startOfDay();
+    $todayEnd   = Carbon::today()->endOfDay();
+    $weekStart  = Carbon::now()->startOfWeek(); // Monday
+
+    $todayLogins = UserDevice::query()
+        ->whereBetween('last_login_time', [$todayStart, $todayEnd])
+        ->distinct('user_id')
+        ->count('user_id');
+
+    $uniqueDevices = UserDevice::query()
+        ->whereNotNull('device_id')
+        ->distinct('device_id')
+        ->count('device_id');
+
+    $activeThisWeek = UserDevice::query()
+        ->where('last_login_time', '>=', $weekStart)
+        ->distinct('user_id')
+        ->count('user_id');
+
+    $platformBreakdown = UserDevice::query()
+        ->select('platform', DB::raw('COUNT(DISTINCT user_id) as users'))
+        ->whereNotNull('platform')
+        ->groupBy('platform')
+        ->orderByDesc('users')
+        ->get();
+
+    $recentLogins = UserDevice::query()
+        ->with(['user' => function ($q) { $q->select('userid', 'name'); }])
+        ->orderByDesc('last_login_time')
+        ->limit(10)
+        ->get();
+
+    return view('admin.user-login-details', [
+        'devices'           => $devices,
+        'platforms'         => $platforms,
+        'search'            => $search,
+        'platform'          => $platform,
+        'date_range'        => $daterange,
+        'user_id'           => $userId,        // NEW
+        'selectedUser'      => $selectedUser,  // NEW (for preselect label)
+        'todayLogins'       => $todayLogins,
+        'uniqueDevices'     => $uniqueDevices,
+        'activeThisWeek'    => $activeThisWeek,
+        'platformBreakdown' => $platformBreakdown,
+        'recentLogins'      => $recentLogins,
+    ]);
+}
+
 
 }
