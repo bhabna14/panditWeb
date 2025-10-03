@@ -438,29 +438,29 @@ class FlowerBookingController extends Controller
 
             // 4) Acquire a short lock to prevent double-submits creating duplicates
             $lock = Cache::lock($idempotencyKey, 10); // 10 seconds
-            if (!$lock->get()) {
-                // Another identical request is in-flight or just completed
-                // Try to return the existing order if it exists
-                $existing = \App\Models\FlowerRequest::query()
-                    ->where('user_id', $user->userid)
-                    ->where('request_hash', $requestHash)
-                    ->with(['address.localityDetails','user','flowerRequestItems'])
-                    ->latest('id')
-                    ->first();
+            // if (!$lock->get()) {
+            //     // Another identical request is in-flight or just completed
+            //     // Try to return the existing order if it exists
+            //     $existing = \App\Models\FlowerRequest::query()
+            //         ->where('user_id', $user->userid)
+            //         ->where('request_hash', $requestHash)
+            //         ->with(['address.localityDetails','user','flowerRequestItems'])
+            //         ->latest('id')
+            //         ->first();
 
-                if ($existing) {
-                    return response()->json([
-                        'status'  => 200,
-                        'message' => 'Flower request already created',
-                        'data'    => $existing,
-                    ], 200);
-                }
+            //     if ($existing) {
+            //         return response()->json([
+            //             'status'  => 200,
+            //             'message' => 'Flower request already created',
+            //             'data'    => $existing,
+            //         ], 200);
+            //     }
 
-                return response()->json([
-                    'status'  => 409,
-                    'message' => 'A similar request is being processed. Please try again in a moment.',
-                ], 409);
-            }
+            //     return response()->json([
+            //         'status'  => 409,
+            //         'message' => 'A similar request is being processed. Please try again in a moment.',
+            //     ], 409);
+            // }
 
             // 5) Create inside a single DB transaction
             try {

@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 
 class NewUserOrderController extends Controller
 {
+   
     public function newUserOrder()
     {
         $flowers = FlowerProduct::where('status', 'active')
@@ -32,9 +33,67 @@ class NewUserOrderController extends Controller
         return view('new-user-order', compact('localities','flowers'));
     }
 
-    /**
-     * AJAX: return apartments for a locality unique_code.
-     */
+    public function searchUsers(Request $request)
+    {
+        $q = trim((string)$request->get('q', ''));
+        $users = User::query()
+            ->when($q !== '', function ($qq) use ($q) {
+                $qq->where(function ($w) use ($q) {
+                    $w->where('mobile_number', 'like', "%{$q}%")
+                      ->orWhere('name', 'like', "%{$q}%");
+                });
+            })
+            ->orderByRaw("CASE WHEN mobile_number LIKE ? THEN 0 ELSE 1 END", ["%{$q}%"])
+            ->orderBy('name')
+            ->limit(20)
+            ->get(['userid', 'name', 'mobile_number']);
+
+        // First option is "New user…"
+        $results = [
+            ['id' => 'NEW', 'text' => '➕ New user…']
+        ];
+
+        foreach ($users as $u) {
+            $label = trim(($u->mobile_number ?: '—') . ' — ' . ($u->name ?: 'Unnamed'));
+            $results[] = ['id' => (string)$u->userid, 'text' => $label];
+        }
+
+        return response()->json(['results' => $results]);
+    }
+
+    public function userAddresses($userid)
+    {
+        $user = User::where('userid', $userid)->first();
+        if (!$user) {
+            return response()->json(['ok' => false, 'data' => []], 404);
+        }
+
+        $addrs = UserAddress::where('user_id', $user->userid)
+            ->orderByDesc('default')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $data = [];
+        foreach ($addrs as $a) {
+            $bits = array_filter([
+                $a->place_category,
+                $a->apartment_name,
+                $a->apartment_flat_plot,
+                $a->area,
+                $a->city,
+                $a->state,
+                $a->pincode
+            ], fn($x) => filled($x));
+
+            $data[] = [
+                'id'   => $a->id,
+                'label'=> implode(', ', $bits) . ($a->default ? ' (Default)' : '')
+            ];
+        }
+
+        return response()->json(['ok' => true, 'data' => $data]);
+    }
+
     public function apartmentsByLocality(string $uniqueCode)
     {
         // locality_id column stores the Locality.unique_code

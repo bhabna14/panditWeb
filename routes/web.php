@@ -962,15 +962,10 @@ Route::post('/menu-management/save', [MenuManagementController::class, 'save'])-
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Page
     Route::get('/new-user-order', [NewUserOrderController::class, 'newUserOrder'])->name('newUserOrder');
-
-    // AJAX: apartments by locality unique_code
-    Route::get('/localities/{uniqueCode}/apartments', [NewUserOrderController::class, 'apartmentsByLocality'])
-        ->where('uniqueCode', '.*')
-        ->name('apartments.byLocality');
-
-    // Save
+    Route::get('/users/search', [NewUserOrderController::class, 'searchUsers'])->name('users.search');
+    Route::get('/users/{userid}/addresses', [NewUserOrderController::class, 'userAddresses'])->name('users.addresses');
+    Route::get('/localities/{uniqueCode}/apartments', [NewUserOrderController::class, 'apartmentsByLocality'])->where('uniqueCode', '.*')->name('apartments.byLocality');
     Route::post('/new-user-order/save', [NewUserOrderController::class, 'saveNewUserOrder'])->name('saveNewUserOrder');
 });
 

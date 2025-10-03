@@ -237,7 +237,6 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     // 1) Create or update order & subscription
     Route::post('/order-subscription', [FlowerBookingController::class, 'createOrUpdateOrderWithSubscription']);
-
     // 2) Process Razorpay payment
     Route::post('/process-payment', [FlowerBookingController::class, 'processPayment']);
 });
