@@ -137,8 +137,8 @@ class NewUserOrderController extends Controller
         // If NEW user: need name + 10-digit mobile
         if ($request->input('user_select') === 'NEW') {
             $userRules = [
-                'name'          => ['required','string','max:150'],
-                'mobile_number' => ['required','digits:10', Rule::unique('users','mobile_number')],
+                'name'          => ['nullable','string','max:150'],
+                'mobile_number' => ['nullable','digits:10', Rule::unique('users','mobile_number')],
                 'user_type'     => ['nullable', Rule::in(['normal','vip'])],
             ];
         } else {
