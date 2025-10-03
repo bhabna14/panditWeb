@@ -131,7 +131,7 @@ class UserManagementController extends Controller
         }
     }
 
-   public function index(Request $request)
+public function index(Request $request)
 {
     $search     = trim($request->input('search', '')); // device-only search
     $platform   = $request->input('platform', '');

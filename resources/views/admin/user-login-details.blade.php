@@ -463,38 +463,39 @@
     </div>
     @endsection
 
-    @section('scripts')
+  @section('scripts')
+    {{-- ✅ Add Select2 JS --}}
+    <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
 
     <script>
-        $(function() {
-            // User AJAX select (search by name or mobile)
-            $('#user_select').select2({
-                width: '100%',
-                placeholder: $('#user_select').data('placeholder') || 'Find user by name or mobile',
-                allowClear: true,
-                ajax: {
-                    delay: 200,
-                    url: @json(route('admin.users.search')),
-                    dataType: 'json',
-                    data: params => ({
-                        q: params.term || ''
-                    }),
-                    processResults: data => {
-                        // Filter out "NEW" here; this page is for filtering existing users only
-                        const results = (data?.results || []).filter(r => String(r.id).toUpperCase() !==
-                            'NEW');
-                        return {
-                            results
-                        };
-                    }
-                },
-                minimumInputLength: 0
-            });
-
-            // Ensure clearing removes value before submit
-            $('#user_select').on('select2:clear', function() {
-                $(this).val('').trigger('change');
-            });
+    $(function() {
+        // ✅ Initialize Select2 for user filter
+        $('#user_select').select2({
+            width: '100%',
+            placeholder: $('#user_select').data('placeholder') || 'Find user by name or mobile',
+            allowClear: true,
+            ajax: {
+                delay: 200,
+                url: @json(route('admin.users.search')),
+                dataType: 'json',
+                data: params => ({ q: params.term || '' }),
+                processResults: data => {
+                    // ✅ Hide the "NEW" option on this page
+                    const results = (data?.results || []).filter(r => String(r.id).toUpperCase() !== 'NEW');
+                    return { results };
+                }
+            },
+            minimumInputLength: 0,
+            // Optional: keep markup simple; Select2 will display `text`
+            templateResult: item => item.text || '',
+            templateSelection: item => item.text || ''
         });
+
+        // ✅ Ensure clearing wipes the value
+        $('#user_select').on('select2:clear', function() {
+            $(this).val('').trigger('change');
+        });
+    });
     </script>
 @endsection
+
