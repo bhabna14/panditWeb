@@ -236,7 +236,7 @@
             </div>
             <div class="row g-3">
               <div class="col-md-4">
-                    <label for="duration" class="form-label">Duration</label>
+                    <label for="duration" class="form-label">Subscription Duration</label>
                     <select name="duration" id="duration" class="form-control">
                         <option value="1">1 month</option>
                         <option value="3">3 months</option>
