@@ -339,7 +339,15 @@
         <div class="nu-card">
             <div class="section-title"><span class="badge bg-primary rounded-pill">3</span> Product Details</div>
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label for="product" class="form-label">Select Product</label>
+                    <select name="product_id" id="product" class="form-control select2" required>
+                        @foreach ($flowers as $flower)
+                            <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-3">
                     <label for="duration" class="form-label">Subscription Duration</label>
                     <select name="duration" id="duration" class="form-control">
                         <option value="1">1 month</option>
@@ -347,11 +355,11 @@
                         <option value="6">6 months</option>
                     </select>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="start_date" class="form-label">Start Date</label>
                     <input type="date" name="start_date" class="form-control" id="start_date">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label for="end_date" class="form-label">End Date</label>
                     <input type="date" name="end_date" class="form-control" id="end_date">
                     <div class="form-text muted">Auto-calculates from Duration (you can override).</div>
@@ -374,6 +382,7 @@
                         <option value="">Select payment method</option>
                         <option value="cash">Cash</option>
                         <option value="upi">UPI</option>
+                        <option value="Razorpay">Razorpay</option>
                     </select>
                 </div>
                 <div class="col-md-3">

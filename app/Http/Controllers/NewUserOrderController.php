@@ -124,7 +124,7 @@ class NewUserOrderController extends Controller
 
             // payment
             'paid_amount'    => ['required','numeric','min:0'],
-            'payment_method' => ['required', Rule::in(['cash','upi'])],
+            'payment_method' => ['required', Rule::in(['cash','upi','Razorpay'])],
 
             // status
             'status'         => ['nullable', Rule::in(['active','pending','expired'])],
