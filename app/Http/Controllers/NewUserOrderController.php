@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Models\UserAddress;
 use App\Models\Order;
@@ -11,9 +15,6 @@ use App\Models\FlowerPayment;
 use App\Models\FlowerProduct;
 use App\Models\Locality;
 use App\Models\Apartment;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class NewUserOrderController extends Controller
 {
