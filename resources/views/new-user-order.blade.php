@@ -79,7 +79,112 @@
         }
 
         .hidden {
-            display: none !important;
+            display: none !important
+        }
+
+        /* Address cards */
+        .addr-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px
+        }
+
+        @media (max-width:1200px) {
+            .addr-grid {
+                grid-template-columns: repeat(2, 1fr)
+            }
+        }
+
+        @media (max-width:576px) {
+            .addr-grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        .addr-card {
+            position: relative;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            transition: box-shadow .2s, border-color .2s, transform .05s ease-in-out;
+            background: #fff;
+            min-height: 110px
+        }
+
+        .addr-card:hover {
+            box-shadow: 0 8px 18px rgba(0, 0, 0, .06)
+        }
+
+        .addr-card.selected {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, .15)
+        }
+
+        .addr-card .addr-check {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 14px;
+            color: #fff;
+            background: #fff
+        }
+
+        .addr-card.selected .addr-check {
+            border-color: #4f46e5;
+            background: #4f46e5
+        }
+
+        .addr-card .addr-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .72rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #f1f5ff;
+            color: #4f46e5;
+            margin-bottom: 8px
+        }
+
+        .addr-card .addr-type {
+            font-size: .78rem;
+            color: #64748b;
+            margin-top: 6px
+        }
+
+        .addr-card .addr-default {
+            font-size: .72rem;
+            color: #059669;
+            margin-left: 8px
+        }
+
+        .addr-add {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #4f46e5;
+            background: #f8fafc;
+            border-style: dashed
+        }
+
+        .addr-add:hover {
+            border-color: #4f46e5
+        }
+
+        .addr-text {
+            font-size: .92rem;
+            line-height: 1.3
         }
     </style>
 @endsection
@@ -100,10 +205,7 @@
 
         {{-- USER PICKER --}}
         <div class="nu-card">
-            <div class="section-title">
-                <span class="badge bg-primary rounded-pill">1</span> User
-            </div>
-
+            <div class="section-title"><span class="badge bg-primary rounded-pill">1</span> User</div>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label for="user_select" class="form-label">Search User (mobile or name)</label>
@@ -131,25 +233,24 @@
 
         {{-- ADDRESS --}}
         <div class="nu-card">
-            <div class="section-title">
-                <span class="badge bg-primary rounded-pill">2</span> Address
-            </div>
+            <div class="section-title"><span class="badge bg-primary rounded-pill">2</span> Address</div>
 
             <input type="hidden" name="address_mode" id="address_mode" value="new">
 
-            <div id="existing_address_block" class="row g-3 hidden">
-                <div class="col-md-8">
-                    <label for="existing_address_id" class="form-label">Saved Addresses</label>
-                    <select class="form-control" id="existing_address_id" name="existing_address_id"></select>
-                    <div class="form-text muted">Pick an existing address or add a new one.</div>
+            {{-- Existing address card grid --}}
+            <div id="existing_address_block" class="hidden">
+                <div class="mb-2 d-flex align-items-center justify-content-between">
+                    <div class="form-text muted">Tap an address to use it, or add a new one.</div>
+                    <button class="btn btn-outline-primary btn-sm" type="button" id="btn_add_new_address">➕ Add new
+                        address</button>
                 </div>
-                <div class="col-md-4 d-flex align-items-end">
-                    <button class="btn btn-outline-primary" type="button" id="btn_add_new_address">➕ Add new
-                        address…</button>
+                <div class="addr-grid" id="address_cards">
+                    {{-- Cards injected by JS --}}
                 </div>
+                <input type="hidden" name="existing_address_id" id="existing_address_id" value="">
             </div>
 
-            {{-- Address form (shown when user has no address, or when adding a new one) --}}
+            {{-- New address form --}}
             <div id="address_form_block" class="row g-3">
                 <div class="col-12">
                     <label class="form-label d-block mb-1">Place Category</label>
@@ -226,16 +327,19 @@
                         @endforeach
                     </div>
                 </div>
+
+                <div class="col-12 d-flex justify-content-end">
+                    <button class="btn btn-outline-secondary" type="button" id="btn_use_existing_addresses">⬅︎ Use
+                        existing addresses</button>
+                </div>
             </div>
         </div>
 
         {{-- PRODUCT --}}
         <div class="nu-card">
-            <div class="section-title">
-                <span class="badge bg-primary rounded-pill">3</span> Product Details
-            </div>
+            <div class="section-title"><span class="badge bg-primary rounded-pill">3</span> Product Details</div>
             <div class="row g-3">
-              <div class="col-md-4">
+                <div class="col-md-4">
                     <label for="duration" class="form-label">Subscription Duration</label>
                     <select name="duration" id="duration" class="form-control">
                         <option value="1">1 month</option>
@@ -257,11 +361,8 @@
 
         {{-- PAYMENT --}}
         <div class="nu-card">
-            <div class="section-title">
-                <span class="badge bg-primary rounded-pill">4</span> Payment Details
-            </div>
+            <div class="section-title"><span class="badge bg-primary rounded-pill">4</span> Payment Details</div>
             <div class="row g-3">
-                
                 <div class="col-md-3">
                     <label for="paid_amount" class="form-label">Paid Amount</label>
                     <input type="number" min="0" step="1" name="paid_amount" class="form-control"
@@ -283,7 +384,7 @@
                         <option value="expired">Expired</option>
                     </select>
                 </div>
-                 <div class="col-md-3">
+                <div class="col-md-3">
                     <label for="payment_status" class="form-label">Payment Status</label>
                     <select name="payment_status" id="payment_status" class="form-control">
                         <option value="paid" selected>Paid</option>
@@ -380,13 +481,50 @@
             }
         }
 
-        // --- NEW: user & address logic ---
+        /* ------- NEW: Address cards ------- */
+        function addressCardHtml(a) {
+            // a = {id,label,is_default?,type?}
+            const parts = a.label ? a.label.split(',').map(s => s.trim()) : [];
+            const type = a.type || '';
+            const isDefault = !!a.is_default;
+            const id = a.id;
+
+            return `
+            <div class="addr-card" data-id="${id}" role="button" tabindex="0" aria-label="Select address">
+                <div class="addr-check">✓</div>
+                <div class="addr-badge">${type || 'Address'}</div>
+                <div class="addr-text">${parts.join(', ') || '—'}</div>
+                <div class="addr-type">${type || ''}${isDefault ? '<span class="addr-default">• Default</span>' : ''}</div>
+            </div>`;
+        }
+
+        function addNewAddressCardHtml() {
+            return `
+            <div class="addr-card addr-add" id="addr_add_card" role="button" tabindex="0" aria-label="Add new address">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span><strong>Add new address</strong></span>
+            </div>`;
+        }
+
+        function setSelectedAddressCard(id) {
+            document.querySelectorAll('.addr-card').forEach(el => {
+                el.classList.toggle('selected', String(el.dataset.id) === String(id));
+            });
+        }
+
+        function showExistingAddressBlock(show) {
+            document.getElementById('existing_address_block').classList.toggle('hidden', !show);
+            document.getElementById('address_form_block').classList.toggle('hidden', show);
+            document.getElementById('address_mode').value = show ? 'existing' : 'new';
+        }
+
+        // User mode
         function switchToNewUser() {
             $('#existing_user_id').val('');
             $('#new_user_fields').removeClass('hidden');
-            $('#existing_address_block').addClass('hidden');
-            $('#address_form_block').removeClass('hidden');
-            $('#address_mode').val('new');
+            showExistingAddressBlock(false); // show form by default for new user
         }
 
         function switchToExistingUser(userid) {
@@ -396,7 +534,6 @@
         }
 
         async function loadUserAddresses(userid) {
-            // Load existing addresses
             const url = @json(route('admin.users.addresses', ['userid' => '___ID___'])).replace('___ID___', encodeURIComponent(userid));
             const res = await fetch(url, {
                 headers: {
@@ -411,27 +548,59 @@
                 data = json.data || [];
             }
 
-            const $sel = $('#existing_address_id');
-            $sel.empty();
+            const grid = document.getElementById('address_cards');
+            grid.innerHTML = '';
 
             if (ok && data.length) {
-                // Fill addresses and show existing block
-                data.forEach(a => $sel.append(new Option(a.label, a.id, false, false)));
-                // add "Add new address…" option
-                $sel.append(new Option('➕ Add new address…', 'ADD_NEW', false, false));
-                $('#existing_address_block').removeClass('hidden');
-                $('#address_form_block').addClass('hidden');
-                $('#address_mode').val('existing');
+                // Map labels into nicer structure (optional type detection)
+                data.forEach((a, idx) => {
+                    // try to guess "type" and default flag from the label suffix
+                    const isDefault = (a.label || '').includes('(Default)');
+                    const cleanLabel = (a.label || '').replace('(Default)', '').trim();
+                    grid.insertAdjacentHTML('beforeend', addressCardHtml({
+                        id: a.id,
+                        label: cleanLabel,
+                        is_default: isDefault,
+                        type: 'Saved'
+                    }));
+                });
+                grid.insertAdjacentHTML('beforeend', addNewAddressCardHtml());
+                showExistingAddressBlock(true);
+
+                // Select first by default
+                const firstId = data[0]?.id;
+                if (firstId) {
+                    document.getElementById('existing_address_id').value = firstId;
+                    setSelectedAddressCard(firstId);
+                }
+
+                // Click handlers
+                grid.querySelectorAll('.addr-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        if (card.id === 'addr_add_card') {
+                            // Switch to new address form
+                            showExistingAddressBlock(false);
+                            return;
+                        }
+                        const id = card.dataset.id;
+                        document.getElementById('existing_address_id').value = id;
+                        setSelectedAddressCard(id);
+                    });
+                    card.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            card.click();
+                        }
+                    });
+                });
+
             } else {
-                // No addresses → show address form
-                $('#existing_address_block').addClass('hidden');
-                $('#address_form_block').removeClass('hidden');
-                $('#address_mode').val('new');
+                // No saved addresses → show form
+                showExistingAddressBlock(false);
             }
         }
 
         $(function() {
-            // Select2 base
+            // Select2
             $('.select2').select2({
                 width: '100%'
             });
@@ -452,7 +621,7 @@
                 minimumInputLength: 0
             });
 
-            // When user picked
+            // user picked
             $('#user_select').on('select2:select', function(e) {
                 const sel = e.params.data;
                 if (!sel) return;
@@ -463,22 +632,16 @@
                 }
             });
 
-            // Existing address select change (detect "Add new address…")
-            $('#existing_address_id').on('change', function() {
-                if (this.value === 'ADD_NEW') {
-                    $('#address_form_block').removeClass('hidden');
-                    $('#address_mode').val('new');
-                } else {
-                    $('#address_form_block').addClass('hidden');
-                    $('#address_mode').val('existing');
-                }
+            // “Add new address” (from existing block)
+            $('#btn_add_new_address').on('click', () => showExistingAddressBlock(false));
+
+            // “Use existing addresses” (from form)
+            $('#btn_use_existing_addresses').on('click', () => {
+                const uid = $('#existing_user_id').val();
+                if (uid) loadUserAddresses(uid);
             });
 
-            $('#btn_add_new_address').on('click', function() {
-                $('#existing_address_id').val('ADD_NEW').trigger('change');
-            });
-
-            // Locality change → load apartments, set pincode
+            // Locality → apartments + pincode
             $('#locality').on('change select2:select', function() {
                 populateApartmentsFromLocality(this);
             });
@@ -486,18 +649,17 @@
                 populateApartmentsFromLocality(document.getElementById('locality'));
             }
 
-            // Duration auto end date
+            // Duration → end date
             document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
             document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);
 
-            // Phone masks (new user)
-            const mask10 = el => el.addEventListener('input', function() {
+            // New user phone mask
+            const mask10 = el => el && el.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
             });
-            const newMobile = document.getElementById('new_user_mobile');
-            if (newMobile) mask10(newMobile);
+            mask10(document.getElementById('new_user_mobile'));
 
-            // Toast for sessions + errors
+            // Session toasts & errors
             @if ($errors->any())
                 showValidationErrors([
                     @foreach ($errors->all() as $e)
