@@ -235,13 +235,12 @@
                 <span class="badge bg-primary rounded-pill">3</span> Product Details
             </div>
             <div class="row g-3">
-                <div class="col-md-4">
-                    <label for="product" class="form-label">Flower</label>
-                    <select name="product_id" id="product" class="form-control select2">
-                        <option value="">Select Flower</option>
-                        @foreach ($flowers as $flower)
-                            <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
-                        @endforeach
+              <div class="col-md-4">
+                    <label for="duration" class="form-label">Duration</label>
+                    <select name="duration" id="duration" class="form-control">
+                        <option value="1">1 month</option>
+                        <option value="3">3 months</option>
+                        <option value="6">6 months</option>
                     </select>
                 </div>
                 <div class="col-md-4">
@@ -262,20 +261,13 @@
                 <span class="badge bg-primary rounded-pill">4</span> Payment Details
             </div>
             <div class="row g-3">
-                <div class="col-md-3">
-                    <label for="duration" class="form-label">Duration</label>
-                    <select name="duration" id="duration" class="form-control">
-                        <option value="1">1 month</option>
-                        <option value="3">3 months</option>
-                        <option value="6">6 months</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
+                
+                <div class="col-md-4">
                     <label for="paid_amount" class="form-label">Paid Amount</label>
                     <input type="number" min="0" step="1" name="paid_amount" class="form-control"
                         id="paid_amount" placeholder="Enter amount">
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="payment_method" class="form-label">Payment Mode</label>
                     <select name="payment_method" id="payment_method" class="form-control">
                         <option value="">Select payment method</option>
@@ -283,7 +275,7 @@
                         <option value="upi">UPI</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <label for="status" class="form-label">Status</label>
                     <select name="status" id="status" class="form-control">
                         <option value="active" selected>Active</option>
