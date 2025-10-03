@@ -66,7 +66,7 @@ class AdminController extends Controller
 
             session(['admin_role' => $admin->role]); // Store role in session
             
-            return redirect()->intended('/admin/dashboard');
+            return redirect()->intended('/admin/flower-dashboard');
 
         } else {
             return redirect()->back()->withInput()->withErrors(['login_error' => 'Invalid email or password']);
