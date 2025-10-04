@@ -136,7 +136,7 @@
                                     <th>User</th>
                                     <th>Phone</th>
                                     <th>Product</th>
-                                    <th>Created</th>
+                                    <th>Delivery Time</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -149,7 +149,7 @@
                                         <td>{{ $order->user->mobile_number ?? 'N/A' }}</td>
                                         <td>{{ $order->flowerProduct->name ?? 'N/A' }}</td>
                 
-                                        <td>{{ $order->created_at?->format('d M Y, h:i A') }}</td>
+                                        <td>{{ $order->delivery_time }}</td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-primary view-address-btn"
                                                 data-bs-toggle="modal" data-bs-target="#addressModal"

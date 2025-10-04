@@ -235,7 +235,8 @@ public function flowerDashboard()
                 'totalRefer'
             ));
 }
- public function showTodayDeliveries()
+
+public function showTodayDeliveries()
     {
         $today = Carbon::today();
 

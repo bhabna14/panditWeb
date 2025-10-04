@@ -184,7 +184,7 @@
                                         <div class="d-flex flex-column align-items-center">
                                             <span class="badge bg-success"><i class="bi bi-check2-circle"></i> Delivered</span>
                                             <small class="text-muted mt-1">
-                                                {{ $todayDelivery->created_at->timezone(config('app.timezone'))->format('h:i A') }}
+                                                {{ $todayDelivery->delivery_time ?? '—' }}
                                                 @if ($todayDelivery->rider?->rider_name)
                                                     · {{ $todayDelivery->rider->rider_name }}
                                                 @endif
@@ -206,7 +206,7 @@
                                                     <div class="modal-body">
                                                         <ul class="list-group">
                                                             <li class="list-group-item"><strong>Status:</strong> {{ ucfirst($todayDelivery->delivery_status) }}</li>
-                                                            <li class="list-group-item"><strong>Delivered At:</strong> {{ $todayDelivery->created_at->timezone(config('app.timezone'))->format('d M Y, h:i A') }}</li>
+                                                            <li class="list-group-item"><strong>Delivered At:</strong> {{ $todayDelivery->delivery_time }}</li>
                                                             <li class="list-group-item"><strong>Rider:</strong> {{ $todayDelivery->rider->rider_name ?? '—' }}</li>
                                                             @if (!empty($todayDelivery->notes))
                                                                 <li class="list-group-item"><strong>Notes:</strong> {{ $todayDelivery->notes }}</li>
