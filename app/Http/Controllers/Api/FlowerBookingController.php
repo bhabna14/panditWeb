@@ -617,48 +617,57 @@ class FlowerBookingController extends Controller
             ], 500);
         }
     }
+    
+public function ordersList(Request $request)
+{
+    try {
+        $authUser = Auth::guard('sanctum')->user();
+        if (!$authUser) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
 
-    public function ordersList(Request $request)
-    {
-        try {
-            $authUser = Auth::guard('sanctum')->user();
-            if (!$authUser) {
-                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
-            }
+        $userId = $authUser->userid;
 
-            $userId = $authUser->userid;
-
-           // SUBSCRIPTIONS
-            $subscriptionsOrder = Subscription::where('user_id', $userId)
-                    ->with([
-                        'order.flowerPayments',
-                        'order.address.localityDetails',
-                        'flowerProducts',
-                        'pauseResumeLog',
-                        'users',
-                    ])
-                    ->orderByDesc('created_at')
-                    ->get()
-                    ->map(function ($sub) {
-                // product image url
+        // ===== SUBSCRIPTIONS =====
+        $subscriptionsOrder = Subscription::where('user_id', $userId)
+            ->with([
+                'order.flowerPayments',
+                'order.address.localityDetails',
+                'flowerProducts',
+                'pauseResumeLog',
+                'users',
+            ])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($sub) {
+                // Product image URL
                 if ($sub->flowerProduct) {
                     $sub->flowerProduct->product_image_url = $sub->flowerProduct->product_image;
                 }
 
-                // normalize order -> flower_payments
+                // Normalize order -> flower_payments (select only one latest payment)
                 if ($sub->order) {
                     $payments = $sub->order->flowerPayments ?? collect();
-                    $sub->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
+
+                    // Find the latest "paid" record first
+                    $latestPaid = $payments->where('payment_status', 'paid')->sortByDesc('id')->first();
+
+                    // If no paid record, find latest "pending"
+                    $latestPending = $payments->where('payment_status', 'pending')->sortByDesc('id')->first();
+
+                    // Prefer latestPaid if exists, else latestPending
+                    $selectedPayment = $latestPaid ?? $latestPending ?? null;
+
+                    $sub->order->flower_payments = $selectedPayment ? (object)$selectedPayment : (object)[];
                     unset($sub->order->flowerPayments);
                 }
 
-                // attach only one pending renewal if this subscription is active
+                // Pending renewals
                 if ($sub->status === 'active') {
                     $pendingRenewal = Subscription::where('user_id', $sub->user_id)
                         ->where('status', 'pending')
                         ->orderBy('start_date', 'asc')
                         ->first();
-
                     $sub->pending_renewals = $pendingRenewal ?: (object)[];
                 } else {
                     $sub->pending_renewals = (object)[];
@@ -667,57 +676,60 @@ class FlowerBookingController extends Controller
                 return $sub;
             });
 
-            // ONE-OFF REQUESTS
-            $requestedOrders = FlowerRequest::where('user_id', $userId)
-                ->with([
-                    'order.flowerPayments',
-                    'flowerProduct',
-                    'user',
-                    'address.localityDetails',
-                    // NOTE: no custom select here — avoids selecting a non-existent 'size' column
-                    'flowerRequestItems',
-                ])
-                ->orderByDesc('id')
-                ->get()
-                ->map(function ($requestRow) {
-                    // normalize order -> flower_payments
-                    if ($requestRow->order) {
-                        $payments = $requestRow->order->flowerPayments ?? collect();
-                        $requestRow->order->flower_payments = $payments->isEmpty() ? (object)[] : $payments;
-                        unset($requestRow->order->flowerPayments);
-                    }
+        // ===== ONE-OFF REQUESTS =====
+        $requestedOrders = FlowerRequest::where('user_id', $userId)
+            ->with([
+                'order.flowerPayments',
+                'flowerProduct',
+                'user',
+                'address.localityDetails',
+                'flowerRequestItems',
+            ])
+            ->orderByDesc('id')
+            ->get()
+            ->map(function ($requestRow) {
+                // Normalize order -> flower_payments (same logic)
+                if ($requestRow->order) {
+                    $payments = $requestRow->order->flowerPayments ?? collect();
 
-                    // product image url
-                    if ($requestRow->flowerProduct) {
-                        $requestRow->flowerProduct->product_image_url = $requestRow->flowerProduct->product_image;
-                    }
+                    $latestPaid = $payments->where('payment_status', 'paid')->sortByDesc('id')->first();
+                    $latestPending = $payments->where('payment_status', 'pending')->sortByDesc('id')->first();
 
-                    return $requestRow;
-                });
+                    $selectedPayment = $latestPaid ?? $latestPending ?? null;
 
+                    $requestRow->order->flower_payments = $selectedPayment ? (object)$selectedPayment : (object)[];
+                    unset($requestRow->order->flowerPayments);
+                }
 
+                // Product image URL
+                if ($requestRow->flowerProduct) {
+                    $requestRow->flowerProduct->product_image_url = $requestRow->flowerProduct->product_image;
+                }
 
-            return response()->json([
-                'success' => true,
-                'data' => [
-                    'subscriptions_order' => $subscriptionsOrder,
-                    'requested_orders'    => $requestedOrders,
-                ],
-            ], 200);
+                return $requestRow;
+            });
 
-        } catch (\Throwable $e) {
-            Log::error('Failed to fetch orders list', [
-                'message' => $e->getMessage(),
-                'trace'   => $e->getTraceAsString(),
-            ]);
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'subscriptions_order' => $subscriptionsOrder,
+                'requested_orders'    => $requestedOrders,
+            ],
+        ], 200);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to retrieve orders list.',
-                'error'   => app()->environment('local') ? $e->getMessage() : null,
-            ], 500);
-        }
+    } catch (\Throwable $e) {
+        Log::error('Failed to fetch orders list', [
+            'message' => $e->getMessage(),
+            'trace'   => $e->getTraceAsString(),
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to retrieve orders list.',
+            'error'   => app()->environment('local') ? $e->getMessage() : null,
+        ], 500);
     }
+}
 
     public function markPaymentApi(Request $request, $id)
     {
@@ -2370,6 +2382,7 @@ class FlowerBookingController extends Controller
         }
     }
 
+    
     public function cancelSubscription(Request $request, $id)
     {
         try {
@@ -2396,5 +2409,6 @@ class FlowerBookingController extends Controller
             ], 500);
         }
     }
+
 
 }
