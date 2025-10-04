@@ -235,36 +235,70 @@ public function flowerDashboard()
                 'totalRefer'
             ));
 }
+public function showActiveSubscriptions()
+    {
+        $today = Carbon::today();
 
-public function showTodayDeliveries()
-{
-    $today = Carbon::today();
+        // Eager load to avoid N+1
+        $activeSubscriptions = Subscription::with([
+                // user (assuming relation name is 'users' based on your previous code)
+                'users:id,userid,name,mobile_number',
 
-    $deliveries = DeliveryHistory::with(['order.user', 'rider'])
-        ->whereDate('created_at', $today)
-        ->where('delivery_status', 'delivered')
-        ->get();
+                // order + address + locality
+                'order:id,order_id,user_id,address_id,total_price,created_at',
+                'order.address:id,user_id,country,state,city,pincode,area,locality,apartment_name,apartment_flat_plot,landmark,address_type',
+                'order.address.localityDetails:id,locality_name,unique_code,pincode',
 
-    $totalIncome = 0;
+                // product
+                'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration'
+            ])
+            ->where('status', 'active')
+            ->orderBy('start_date', 'asc')
+            ->get()
+            ->map(function ($sub) use ($today) {
+                // Safe math on dates
+                $start  = $sub->start_date ? Carbon::parse($sub->start_date) : null;
+                $end    = $sub->end_date ? Carbon::parse($sub->end_date) : null;
 
-    foreach ($deliveries as $delivery) {
-        $order = $delivery->order;
-        if (!$order) continue;
+                $days_total = ($start && $end) ? $start->diffInDays($end) + 1 : null;
+                $days_left  = $end ? max(0, $today->diffInDays($end, false)) : null;
 
-        // Get subscription by order_id
-        $subscription = Subscription::where('order_id', $order->order_id)->first();
-        if (!$subscription || !$subscription->start_date || !$subscription->end_date) continue;
+                // Per-day price (fallback to product per_day_price if available)
+                $per_day = null;
+                if ($sub->order && $sub->order->total_price && $days_total && $days_total > 0) {
+                    $per_day = round($sub->order->total_price / $days_total, 2);
+                } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price) {
+                    $per_day = (float) $sub->flowerProducts->per_day_price;
+                }
 
-        $start = Carbon::parse($subscription->start_date);
-        $end = Carbon::parse($subscription->end_date);
-        $days = $start->diffInDays($end) + 1;
+                // Attach computed props for easy use in blade
+                $sub->computed = (object) [
+                    'days_total' => $days_total,
+                    'days_left'  => $days_left,
+                    'per_day'    => $per_day,
+                ];
 
-        if ($days > 0 && $order->total_price > 0) {
-            $totalIncome += $order->total_price / $days;
-        }
+                // Convenience: a compact address line
+                $addr = $sub->order?->address;
+                $sub->computed->address_line = $addr
+                    ? trim(implode(', ', array_filter([
+                        $addr->apartment_name,
+                        $addr->apartment_flat_plot,
+                        $addr->area,
+                        $addr->city,
+                        $addr->state,
+                        $addr->pincode
+                      ])))
+                    : null;
+
+                // Product image URL shortcut
+                if ($sub->flowerProducts) {
+                    $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
+                }
+
+                return $sub;
+            });
+
+        return view('admin.active-subscriptions', compact('activeSubscriptions', 'today'));
     }
-
-    return view('admin.today-delivery-data', compact('deliveries', 'totalIncome'));
-}
-
 }
