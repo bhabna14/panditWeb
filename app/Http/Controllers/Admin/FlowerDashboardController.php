@@ -299,6 +299,6 @@ public function showTodayDeliveries()
                 return $sub;
             });
 
-        return view('admin.active-subscriptions', compact('activeSubscriptions', 'today'));
+        return view('admin.today-delivery-data', compact('activeSubscriptions', 'today'));
     }
 }
