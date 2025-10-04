@@ -700,7 +700,8 @@
                                 paused: 'bg-warning',
                                 expired: 'bg-primary',
                                 dead: 'bg-danger',
-                                pending: 'bg-danger'
+                                pending: 'bg-danger',
+                                cancelled: 'bg-danger'
                             };
                             return `<span class="badge ${classes[s] || ''}">${s.toUpperCase()}</span>
                         <button class="btn btn-sm btn-outline-info edit-status-btn mt-1"
@@ -733,6 +734,7 @@
                             if (r.status === 'paused')
                                 btn +=
                                 ` <a href="/admin/subscription/resume-page/${r.id}" class="btn btn-sm btn-warning"><i class="fas fa-play"></i></a>`;
+                                
                             return btn;
                         }
                     }

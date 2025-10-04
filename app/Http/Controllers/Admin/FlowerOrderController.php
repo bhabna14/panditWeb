@@ -174,8 +174,7 @@ class FlowerOrderController extends Controller
                     ->from('subscriptions')
                     ->groupBy('user_id'); // ensures one latest row per user
             });
-         }
-
+        }
 
         if ($filter === 'paused') {
             $query->where('status', 'paused');

@@ -2390,7 +2390,7 @@ public function ordersList(Request $request)
             $subscription = Subscription::findOrFail($id);
 
             // Update status
-            $subscription->status = 'cancelled_by_user';
+            $subscription->status = 'cancelled';
             $subscription->is_active = false; // Optional flag
             $subscription->save();
 
