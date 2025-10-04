@@ -379,67 +379,73 @@ class OrderController extends Controller
         }
     }
 
-    public function markAsRequestedDelivered(Request $request, $order_id)
-    {
-        try {
-            // Authenticate the rider
-            $rider = Auth::guard('rider-api')->user();
-
-            if (!$rider) {
-                return response()->json([
-                    'status' => 401,
-                    'message' => 'Unauthorized',
-                ], 401);
-            }
-
-            // Validate the request for longitude and latitude
-            $validated = $request->validate([
-                'longitude' => 'required|numeric',
-                'latitude' => 'required|numeric',
-            ]);
-
-            // Check if the requested order is assigned to the rider and has a flower request
-            $order = Order::where('order_id', $order_id)
-                        ->where('rider_id', $rider->rider_id)
-                        ->whereNotNull('request_id')
-                        ->whereHas('flowerRequest', function ($query) {
-                            $query->whereNotNull('date');
-                        })
-                        ->first();
-
-            if (!$order) {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Order not found, not assigned to this rider, or does not have a valid request',
-                ], 404);
-            }
-
-            // Save delivery history for requested order
-            $deliveryHistory = DeliveryCustomizeHistory::create([
-                'order_id' => $order->order_id,
-                'rider_id' => $rider->rider_id,
-                'delivery_status' => 'delivered',
-                'longitude' => $validated['longitude'],
-                'latitude' => $validated['latitude'],
-            ]);
-
-            // Update the order's status to delivered
-            $order->update(['status' => 'delivered']);
-
+   
+public function markAsRequestedDelivered(Request $request, $order_id)
+{
+    try {
+        // Rider auth
+        $rider = Auth::guard('rider-api')->user();
+        if (!$rider) {
             return response()->json([
-                'status' => 200,
-                'message' => 'Requested order marked as delivered successfully',
-                'data' => $deliveryHistory,
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred while marking the requested order as delivered.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'status' => 401,
+                'message' => 'Unauthorized',
+            ], 401);
         }
+
+        // Validate coords
+        $validated = $request->validate([
+            'longitude' => 'required|numeric',
+            'latitude'  => 'required|numeric',
+        ]);
+
+        // Verify order belongs to rider and is for a requested delivery (has request_id & date)
+        $order = Order::where('order_id', $order_id)
+            ->where('rider_id', $rider->rider_id)
+            ->whereNotNull('request_id')
+            ->whereHas('flowerRequest', function ($q) {
+                $q->whereNotNull('date');
+            })
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'status'  => 404,
+                'message' => 'Order not found, not assigned to this rider, or does not have a valid request',
+            ], 404);
+        }
+
+        // Use current server time for delivery_time
+        // If you want to force a specific timezone (e.g., IST), use: Carbon::now('Asia/Kolkata')
+        $deliveryTimestamp = Carbon::now(); // or Carbon::now(config('app.timezone'))
+
+        // Create delivery history
+        $deliveryHistory = DeliveryCustomizeHistory::create([
+            'order_id'        => $order->order_id,
+            'rider_id'        => $rider->rider_id,
+            'delivery_status' => 'delivered',
+            'delivery_time'   => $deliveryTimestamp,
+            'longitude'       => $validated['longitude'],
+            'latitude'        => $validated['latitude'],
+        ]);
+
+        // Update order status
+        $order->update(['status' => 'delivered']);
+
+        return response()->json([
+            'status'  => 200,
+            'message' => 'Requested order marked as delivered successfully',
+            'data'    => $deliveryHistory,
+        ], 200);
+
+    } catch (\Throwable $e) {
+        Log::error('markAsRequestedDelivered error', ['err' => $e->getMessage()]);
+        return response()->json([
+            'status'  => 500,
+            'message' => 'An error occurred while marking the requested order as delivered.',
+            'error'   => app()->environment('local') ? $e->getMessage() : null,
+        ], 500);
     }
+}
 
 public function savePickupRequest(Request $request)
 {

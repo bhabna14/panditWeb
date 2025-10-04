@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class DeliveryHistory extends Model
 {
     use HasFactory;
-   
+
     protected $table = 'delivery_history';
-   
+
     protected $fillable = [
         'order_id',
         'rider_id',
         'delivery_status',
+        'delivery_time',
         'longitude',
         'latitude',
     ];
