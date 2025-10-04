@@ -202,7 +202,7 @@
                                                 {{ ucfirst($history->delivery_status) }}
                                             </span>
                                         </td>
-                                        <td>{{ $history->created_at->format('h:i A') }}</td>
+                                        <td>{{ $history->delivery_time }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

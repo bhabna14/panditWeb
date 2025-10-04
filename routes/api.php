@@ -58,8 +58,6 @@ Route::middleware('auth:rider-api')->group(function () {
     Route::post('/rider/flower-pickup-request', [OrderController::class, 'savePickupRequest']);
 });
 
-
-
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -195,7 +193,6 @@ Route::post('/send-otp-ios', [OtpController::class, 'sendOtpIos'])->name('api.se
 Route::post('/verify-otpless-ios', [OtpController::class, 'verifyOtpIos'])->name('api.verify-otp-ios');
 
 Route::middleware('auth:sanctum')->get('/order-history', [UserProfileController::class, 'orderHistory']);
-
 //Booking confirm
 Route::middleware('auth:sanctum')->post('/booking/confirm', [BookingController::class, 'confirmBooking']);
 Route::middleware('auth:sanctum')->post('/process-payment/{booking_id}', [BookingController::class, 'processPayment']);
