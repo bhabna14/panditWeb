@@ -181,6 +181,7 @@
                             <th>End</th>
                             <th>Days Left</th>
                             <th>₹/Day</th>
+                            <th>Today Delivery</th> {{-- NEW COLUMN --}}
                             <th>Address</th>
                         </tr>
                     </thead>
@@ -196,9 +197,12 @@
                                 $perDay =
                                     $sub->computed->per_day !== null ? number_format($sub->computed->per_day, 2) : '—';
 
-                                $searchBlob = strtolower(
-                                    implode(
-                                        ' ',
+                                // today's delivery (thanks to constrained eager-load)
+$todayDelivery = $sub->computed->todays_delivery ?? null;
+
+$searchBlob = strtolower(
+    implode(
+        ' ',
                                         array_filter([
                                             $user?->name,
                                             $user?->mobile_number,
@@ -222,11 +226,7 @@
                                     </div>
                                 </td>
                                 <td>{{ $user->mobile_number ?? '—' }}</td>
-                                <td>
-                                    <span class="badge-soft">
-                                        {{ ucfirst($sub->status) }}
-                                    </span>
-                                </td>
+                                <td><span class="badge-soft">{{ ucfirst($sub->status) }}</span></td>
                                 <td>
                                     <div class="product-mini">
                                         @if ($prod?->product_image_url)
@@ -254,12 +254,65 @@
                                     @endif
                                 </td>
                                 <td>₹{{ $perDay }}</td>
+
+                                {{-- NEW CELL: Today Delivery --}}
+                                <td>
+                                    @if ($todayDelivery)
+                                        <div class="d-flex flex-column align-items-center">
+                                            <span class="badge bg-success"><i class="bi bi-check2-circle"></i>
+                                                Delivered</span>
+                                            <small class="text-muted mt-1">
+                                                {{ $todayDelivery->created_at->timezone(config('app.timezone'))->format('h:i A') }}
+                                                @if ($todayDelivery->rider?->rider_name)
+                                                    · {{ $todayDelivery->rider->rider_name }}
+                                                @endif
+                                            </small>
+
+                                            <button class="btn btn-sm btn-outline-primary mt-1" data-bs-toggle="modal"
+                                                data-bs-target="#delv{{ $i }}">
+                                                Details
+                                            </button>
+                                        </div>
+
+                                        <!-- Delivery Detail Modal -->
+                                        <div class="modal fade" id="delv{{ $i }}" tabindex="-1"
+                                            aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-primary">
+                                                        <h5 class="modal-title text-white">Today's Delivery</h5>
+                                                        <button type="button" class="btn-close btn-close-white"
+                                                            data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <ul class="list-group">
+                                                            <li class="list-group-item"><strong>Status:</strong>
+                                                                {{ ucfirst($todayDelivery->delivery_status) }}</li>
+                                                            <li class="list-group-item"><strong>Delivered At:</strong>
+                                                                {{ $todayDelivery->created_at->timezone(config('app.timezone'))->format('d M Y, h:i A') }}
+                                                            </li>
+                                                            <li class="list-group-item"><strong>Rider:</strong>
+                                                                {{ $todayDelivery->rider->rider_name ?? '—' }}</li>
+                                                            @if (!empty($todayDelivery->notes))
+                                                                <li class="list-group-item"><strong>Notes:</strong>
+                                                                    {{ $todayDelivery->notes }}</li>
+                                                            @endif
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <span class="badge bg-warning text-dark"><i class="bi bi-clock-history"></i> Pending
+                                            / Not Delivered</span>
+                                    @endif
+                                </td>
+
+                                {{-- Address --}}
                                 <td>
                                     @if ($addr)
                                         <button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-                                            data-bs-target="#addr{{ $i }}">
-                                            View
-                                        </button>
+                                            data-bs-target="#addr{{ $i }}">View</button>
 
                                         <!-- Address Modal -->
                                         <div class="modal fade" id="addr{{ $i }}" tabindex="-1"

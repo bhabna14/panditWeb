@@ -235,13 +235,12 @@ public function flowerDashboard()
                 'totalRefer'
             ));
 }
-public function showTodayDeliveries()
+ public function showTodayDeliveries()
     {
         $today = Carbon::today();
 
-        // Eager load to avoid N+1
         $activeSubscriptions = Subscription::with([
-                // user (assuming relation name is 'users' based on your previous code)
+                // user (adjust relation name if yours differs)
                 'users:id,userid,name,mobile_number',
 
                 // order + address + locality
@@ -250,20 +249,28 @@ public function showTodayDeliveries()
                 'order.address.localityDetails:id,locality_name,unique_code,pincode',
 
                 // product
-                'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration'
+                'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration',
+
+                // today's delivered histories + rider (IMPORTANT: adjust relation names if your app differs)
+                'order.deliveryHistories' => function ($q) use ($today) {
+                    $q->whereDate('created_at', $today)
+                      ->where('delivery_status', 'delivered')
+                      ->latest('created_at');
+                },
+                'order.deliveryHistories.rider:id,rider_name'
             ])
             ->where('status', 'active')
             ->orderBy('start_date', 'asc')
             ->get()
             ->map(function ($sub) use ($today) {
-                // Safe math on dates
+                // dates
                 $start  = $sub->start_date ? Carbon::parse($sub->start_date) : null;
                 $end    = $sub->end_date ? Carbon::parse($sub->end_date) : null;
 
                 $days_total = ($start && $end) ? $start->diffInDays($end) + 1 : null;
                 $days_left  = $end ? max(0, $today->diffInDays($end, false)) : null;
 
-                // Per-day price (fallback to product per_day_price if available)
+                // per-day price
                 $per_day = null;
                 if ($sub->order && $sub->order->total_price && $days_total && $days_total > 0) {
                     $per_day = round($sub->order->total_price / $days_total, 2);
@@ -271,14 +278,14 @@ public function showTodayDeliveries()
                     $per_day = (float) $sub->flowerProducts->per_day_price;
                 }
 
-                // Attach computed props for easy use in blade
+                // attach computed
                 $sub->computed = (object) [
                     'days_total' => $days_total,
                     'days_left'  => $days_left,
                     'per_day'    => $per_day,
                 ];
 
-                // Convenience: a compact address line
+                // address line
                 $addr = $sub->order?->address;
                 $sub->computed->address_line = $addr
                     ? trim(implode(', ', array_filter([
@@ -291,10 +298,13 @@ public function showTodayDeliveries()
                       ])))
                     : null;
 
-                // Product image URL shortcut
+                // product image url
                 if ($sub->flowerProducts) {
                     $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
                 }
+
+                // pick the latest delivered record for TODAY (if any)
+                $sub->computed->todays_delivery = $sub->order?->deliveryHistories?->first(); // thanks to latest() above
 
                 return $sub;
             });
