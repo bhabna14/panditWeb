@@ -219,12 +219,10 @@ Route::delete('/user/address/{id}', [UserProfileController::class, 'removeAddres
 
 Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::class, 'getUserDetails']);
 
-
 Route::middleware('auth:sanctum')->get('/user/details', [UserProfileController::class, 'getUserDetails']);
 Route::post('/search', [UserProfileController::class, 'combinedSearch']);
 
 Route::middleware('auth:sanctum')->post('/addresses/{id}/set-default', [UserProfileController::class, 'setDefault'])->name('addresses.setDefault');
-
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/submit-rating', [RatingController::class, 'submitRating']);
@@ -244,6 +242,7 @@ Route::middleware('auth:sanctum')->post('/subscription/pause/{order_id}', [Flowe
 Route::middleware('auth:sanctum')->post('/subscription/resume/{order_id}', [FlowerBookingController::class, 'resume'])->name('subscription.resume');
 Route::post('/subscriptions/delete-pause/{order_id}', [FlowerBookingController::class, 'deletePause'])->name('subscriptions.pause.delete');
 Route::middleware('auth:sanctum')->post('/make-payment/{id}', [FlowerBookingController::class, 'markPaymentApi']);
+Route::post('/subscriptions/cancel/{id}', [FlowerBookingController::class, 'cancelSubscription'])->name('subscriptions.cancel');
 
 Route::middleware('auth:sanctum')->post('/flower-requests', [FlowerBookingController::class, 'storerequest']);
 Route::middleware('auth:sanctum')->get('/orders-list', [FlowerBookingController::class, 'ordersList']);
@@ -253,19 +252,11 @@ Route::middleware('auth:sanctum')->post('/product-subscription', [ProductApiCont
 Route::middleware('auth:sanctum')->post('/product-requests', [ProductApiController::class, 'productRequest']);
 Route::middleware('auth:sanctum')->post('/make-request-payment/{id}', [ProductApiController::class, 'makeRequestPayment']);
 Route::middleware('auth:sanctum')->get('/product-orders-list', [ProductApiController::class, 'ProductOrdersList']);
-
 Route::get('/fcm-bulk-notifications', [FCMNotificationController::class, 'getAllNotifications']);
-
 Route::get('/manage-promotion', [PromotionControllerApi::class, 'managePromotion']);
-
 Route::middleware('auth:sanctum')->post('/referrals/claim', [FlowerReferalController::class, 'claim']);
 Route::middleware('auth:sanctum')->get('/referrals/stats', [FlowerReferalController::class, 'stats']);
-
-
 Route::get('/refer/offers', [ReferController::class, 'manageReferOffer'])->name('api.refer.offers.manage');
 Route::middleware('auth:sanctum')->post('/refer/offer-claim/save', [ReferController::class, 'saveOfferClaim'])->name('api.refer.offerClaim.save');
-
- Route::post('/users-delet', [UserProfileController::class, 'destroyById'])
-        ->name('users.destroy');
-
+Route::post('/users-delet', [UserProfileController::class, 'destroyById'])->name('users.destroy');
 Route::get('/say-yes', [UserProfileController::class, 'sayYes']);

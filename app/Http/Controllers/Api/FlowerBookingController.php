@@ -2370,4 +2370,31 @@ class FlowerBookingController extends Controller
         }
     }
 
+    public function cancelSubscription(Request $request, $id)
+    {
+        try {
+            // Find subscription by primary auto-increment ID
+            $subscription = Subscription::findOrFail($id);
+
+            // Update status
+            $subscription->status = 'cancelled_by_user';
+            $subscription->is_active = false; // Optional flag
+            $subscription->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Subscription cancelled successfully',
+                'data'    => $subscription
+            ], 200);
+
+        } catch (Exception $e) {
+            Log::error('Cancel subscription failed: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to cancel subscription'
+            ], 500);
+        }
+    }
+
 }
