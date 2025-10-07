@@ -307,55 +307,35 @@ public function showTodayDeliveries()
 
     return view('admin.today-delivery-data', compact('activeSubscriptions', 'today', 'riders'));
 }
-  public function assignRider(Request $request, $orderId)
-    {
-        try {
-            // Validate
-            $validated = $request->validate([
-                'rider_id' => 'required|exists:flower__rider_details,rider_id',
-            ]);
+  // app/Http/Controllers/FlowerDashboardController.php
 
-            // Find order by business key "order_id"
-            $order = Order::where('order_id', $orderId)->first();
+public function assignRider(Request $request, $order) // <-- was $orderId
+{
+    $request->validate([
+        'rider_id' => 'required|exists:flower__rider_details,rider_id',
+    ]);
 
-            if (!$order) {
-                return response()->json([
-                    'status'  => 'error',
-                    'message' => 'Order not found.',
-                ], 404);
-            }
+    // $order here is actually the "order_id" string from the URL
+    $orderModel = \App\Models\Order::where('order_id', $order)->first();
 
-            // Assign & save
-            $order->rider_id = $validated['rider_id'];
-            $order->save();
-
-            // Refresh rider relation to fetch rider_name
-            $order->load('rider:rider_id,rider_name');
-
-            return response()->json([
-                'status'     => 'ok',
-                'message'    => 'Rider assigned successfully.',
-                'rider_name' => optional($order->rider)->rider_name,
-                'rider_id'   => $order->rider_id,
-            ], 200);
-
-        } catch (\Illuminate\Validation\ValidationException $ve) {
-            // Validation errors => 422
-            return response()->json([
-                'status'  => 'fail',
-                'message' => 'Validation failed.',
-                'errors'  => $ve->errors(),
-            ], 422);
-        } catch (Throwable $e) {
-            Log::error('assignRider error', [
-                'order_id' => $orderId,
-                'error'    => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Something went wrong while assigning the rider.',
-            ], 500);
-        }
+    if (!$orderModel) {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Order not found.',
+        ], 404);
     }
+
+    $orderModel->rider_id = $request->input('rider_id');
+    $orderModel->save();
+
+    $orderModel->load('rider:rider_id,rider_name');
+
+    return response()->json([
+        'status'     => 'ok',
+        'message'    => 'Rider assigned successfully.',
+        'rider_name' => optional($orderModel->rider)->rider_name,
+        'rider_id'   => $orderModel->rider_id,
+    ], 200);
+}
+
 }

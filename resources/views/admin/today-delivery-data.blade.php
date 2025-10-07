@@ -501,8 +501,10 @@
                 }
 
                 try {
-                    const url = `{{ route('orders.assignRider', ['orderId' => '___OID___']) }}`.replace(
-                        '___OID___', encodeURIComponent(orderId));
+                    const url = `{{ route('orders.assignRider', ['order' => '___OID___']) }}`.replace(
+                        '___OID___', encodeURIComponent(orderId)
+                    );
+
 
                     const res = await fetch(url, {
                         method: 'POST',
