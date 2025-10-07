@@ -720,7 +720,7 @@
 
             async function poll() {
                 try {
-                    const url = `{{ route('admin.flowerDashboard.liveMetrics') }}`;
+                    const url = `{{ route('flowerDashboard.liveMetrics') }}`;
                     const res = await fetch(url, {
                         headers: {
                             'Accept': 'application/json'
