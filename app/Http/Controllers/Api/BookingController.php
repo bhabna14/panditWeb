@@ -26,7 +26,6 @@ use DB;
 
 class BookingController extends Controller
 {
-    // old method withour booking_date validation
     // public function confirmBooking(Request $request)
     // {
     //     // dd("hi");
@@ -77,7 +76,6 @@ class BookingController extends Controller
     //         ], 500);
     //     }
     // }
-
 
     public function confirmBooking(Request $request)
     {
@@ -218,8 +216,6 @@ class BookingController extends Controller
         }
     }
     
-    
-    
     private function convertDurationToMinutes($durationString)
     {
         $totalMinutes = 0;
@@ -243,9 +239,6 @@ class BookingController extends Controller
     
         return $totalMinutes;
     }
-    
-    
-
 
     // public function processPayment(Request $request, $booking_id)
     // {
@@ -296,7 +289,6 @@ class BookingController extends Controller
     //         return response()->json(['error' => 'Failed to save payment details. Please try again.'], 500);
     //     }
     // }
-
 
     public function processPayment(Request $request, $booking_id)
     {
@@ -402,7 +394,6 @@ class BookingController extends Controller
         }
     }
 
-
     // process for remaining payment
     public function processRemainingPayment(Request $request, $booking_id)
     {
@@ -456,12 +447,6 @@ class BookingController extends Controller
             ], 500);
         }
     }
-    
-    
-
-    
-
-
 
     public function cancelBooking(Request $request, $booking_id)
     {
@@ -565,10 +550,5 @@ class BookingController extends Controller
             return response()->json(['error' => 'Failed to cancel booking. Please try again.'], 500);
         }
     }
-    
-    
 
-
-    
-    
 }

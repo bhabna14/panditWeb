@@ -236,80 +236,99 @@ public function flowerDashboard()
             ));
 }
 
+
 public function showTodayDeliveries()
-    {
-        $today = Carbon::today();
+{
+    $today = Carbon::today();
 
-        $activeSubscriptions = Subscription::with([
-                // user (adjust relation name if yours differs)
-                'users:id,userid,name,mobile_number',
+    $activeSubscriptions = Subscription::with([
+            'users:id,userid,name,mobile_number',
+            'order:id,order_id,user_id,address_id,total_price,created_at,rider_id', // include rider_id
+            'order.address:id,user_id,country,state,city,pincode,area,locality,apartment_name,apartment_flat_plot,landmark,address_type',
+            'order.address.localityDetails:id,locality_name,unique_code,pincode',
+            'order.rider:id,rider_id,rider_name', // 👈 add this
+            'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration',
+            'order.deliveryHistories' => function ($q) use ($today) {
+                $q->whereDate('created_at', $today)
+                  ->where('delivery_status', 'delivered')
+                  ->latest('created_at');
+            },
+            'order.deliveryHistories.rider:id,rider_name'
+        ])
+        ->where('status', 'active')
+        ->orderBy('start_date', 'asc')
+        ->get()
+        ->map(function ($sub) use ($today) {
+            $start  = $sub->start_date ? Carbon::parse($sub->start_date) : null;
+            $end    = $sub->end_date ? Carbon::parse($sub->end_date) : null;
 
-                // order + address + locality
-                'order:id,order_id,user_id,address_id,total_price,created_at',
-                'order.address:id,user_id,country,state,city,pincode,area,locality,apartment_name,apartment_flat_plot,landmark,address_type',
-                'order.address.localityDetails:id,locality_name,unique_code,pincode',
+            $days_total = ($start && $end) ? $start->diffInDays($end) + 1 : null;
+            $days_left  = $end ? max(0, $today->diffInDays($end, false)) : null;
 
-                // product
-                'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration',
+            $per_day = null;
+            if ($sub->order && $sub->order->total_price && $days_total && $days_total > 0) {
+                $per_day = round($sub->order->total_price / $days_total, 2);
+            } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price) {
+                $per_day = (float) $sub->flowerProducts->per_day_price;
+            }
 
-                // today's delivered histories + rider (IMPORTANT: adjust relation names if your app differs)
-                'order.deliveryHistories' => function ($q) use ($today) {
-                    $q->whereDate('created_at', $today)
-                      ->where('delivery_status', 'delivered')
-                      ->latest('created_at');
-                },
-                'order.deliveryHistories.rider:id,rider_name'
-            ])
-            ->where('status', 'active')
-            ->orderBy('start_date', 'asc')
-            ->get()
-            ->map(function ($sub) use ($today) {
-                // dates
-                $start  = $sub->start_date ? Carbon::parse($sub->start_date) : null;
-                $end    = $sub->end_date ? Carbon::parse($sub->end_date) : null;
+            $sub->computed = (object) [
+                'days_total' => $days_total,
+                'days_left'  => $days_left,
+                'per_day'    => $per_day,
+            ];
 
-                $days_total = ($start && $end) ? $start->diffInDays($end) + 1 : null;
-                $days_left  = $end ? max(0, $today->diffInDays($end, false)) : null;
+            $addr = $sub->order?->address;
+            $sub->computed->address_line = $addr
+                ? trim(implode(', ', array_filter([
+                    $addr->apartment_name,
+                    $addr->apartment_flat_plot,
+                    $addr->area,
+                    $addr->city,
+                    $addr->state,
+                    $addr->pincode
+                ])))
+                : null;
 
-                // per-day price
-                $per_day = null;
-                if ($sub->order && $sub->order->total_price && $days_total && $days_total > 0) {
-                    $per_day = round($sub->order->total_price / $days_total, 2);
-                } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price) {
-                    $per_day = (float) $sub->flowerProducts->per_day_price;
-                }
+            if ($sub->flowerProducts) {
+                $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
+            }
 
-                // attach computed
-                $sub->computed = (object) [
-                    'days_total' => $days_total,
-                    'days_left'  => $days_left,
-                    'per_day'    => $per_day,
-                ];
+            $sub->computed->todays_delivery = $sub->order?->deliveryHistories?->first();
 
-                // address line
-                $addr = $sub->order?->address;
-                $sub->computed->address_line = $addr
-                    ? trim(implode(', ', array_filter([
-                        $addr->apartment_name,
-                        $addr->apartment_flat_plot,
-                        $addr->area,
-                        $addr->city,
-                        $addr->state,
-                        $addr->pincode
-                      ])))
-                    : null;
+            return $sub;
+        });
 
-                // product image url
-                if ($sub->flowerProducts) {
-                    $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
-                }
+    // 👇 all riders for dropdowns
+    $riders = RiderDetails::select('rider_id','rider_name')
+                ->orderBy('rider_name','asc')
+                ->get();
 
-                // pick the latest delivered record for TODAY (if any)
-                $sub->computed->todays_delivery = $sub->order?->deliveryHistories?->first(); // thanks to latest() above
+    return view('admin.today-delivery-data', compact('activeSubscriptions', 'today', 'riders'));
+}
 
-                return $sub;
-            });
+public function assignRider(Request $request, $orderId)
+{
+    $validated = $request->validate([
+        'rider_id' => 'required|exists:flower__rider_details,rider_id',
+    ]);
 
-        return view('admin.today-delivery-data', compact('activeSubscriptions', 'today'));
+    $order = Order::where('order_id', $orderId)->firstOrFail();
+    $order->rider_id = $validated['rider_id'];
+    $order->save();
+
+    // If the request expects JSON (AJAX), return JSON
+    if ($request->wantsJson()) {
+        return response()->json([
+            'status'     => 'ok',
+            'message'    => 'Rider assigned successfully.',
+            'rider_name' => optional($order->rider)->rider_name,
+            'rider_id'   => $order->rider_id,
+        ]);
     }
+
+    // Fallback for normal form posts
+    return back()->with('success', 'Rider assigned successfully.');
+}
+
 }
