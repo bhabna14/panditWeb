@@ -306,29 +306,55 @@ public function showTodayDeliveries()
 
     return view('admin.today-delivery-data', compact('activeSubscriptions', 'today', 'riders'));
 }
+  public function assignRider(Request $request, $orderId)
+    {
+        try {
+            // Validate
+            $validated = $request->validate([
+                'rider_id' => 'required|exists:flower__rider_details,rider_id',
+            ]);
 
-public function assignRider(Request $request, $orderId)
-{
-    $validated = $request->validate([
-        'rider_id' => 'required|exists:flower__rider_details,rider_id',
-    ]);
+            // Find order by business key "order_id"
+            $order = Order::where('order_id', $orderId)->first();
 
-    $order = Order::where('order_id', $orderId)->firstOrFail();
-    $order->rider_id = $validated['rider_id'];
-    $order->save();
+            if (!$order) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Order not found.',
+                ], 404);
+            }
 
-    // If the request expects JSON (AJAX), return JSON
-    if ($request->wantsJson()) {
-        return response()->json([
-            'status'     => 'ok',
-            'message'    => 'Rider assigned successfully.',
-            'rider_name' => optional($order->rider)->rider_name,
-            'rider_id'   => $order->rider_id,
-        ]);
+            // Assign & save
+            $order->rider_id = $validated['rider_id'];
+            $order->save();
+
+            // Refresh rider relation to fetch rider_name
+            $order->load('rider:rider_id,rider_name');
+
+            return response()->json([
+                'status'     => 'ok',
+                'message'    => 'Rider assigned successfully.',
+                'rider_name' => optional($order->rider)->rider_name,
+                'rider_id'   => $order->rider_id,
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            // Validation errors => 422
+            return response()->json([
+                'status'  => 'fail',
+                'message' => 'Validation failed.',
+                'errors'  => $ve->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            Log::error('assignRider error', [
+                'order_id' => $orderId,
+                'error'    => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Something went wrong while assigning the rider.',
+            ], 500);
+        }
     }
-
-    // Fallback for normal form posts
-    return back()->with('success', 'Rider assigned successfully.');
-}
-
 }

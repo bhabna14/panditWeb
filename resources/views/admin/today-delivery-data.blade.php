@@ -2,6 +2,8 @@
 
 @section('styles')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
     <style>
         :root {
             --ink: #0f172a;
@@ -440,8 +442,30 @@
 
     @section('scripts')
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
         <script>
-            // CSRF token for fetch
+            // simple client-side search (keep yours if already present)
+            const q = document.getElementById('quickSearch');
+            if (q) {
+                q.addEventListener('input', filterRows);
+
+                function filterRows() {
+                    const term = q.value.trim().toLowerCase();
+                    const rows = document.querySelectorAll('#subsTable tbody tr');
+                    rows.forEach(r => {
+                        const hay = r.getAttribute('data-search') || '';
+                        r.style.display = hay.includes(term) ? '' : 'none';
+                    });
+                }
+            }
+
+            // Enable Bootstrap tooltips
+            document.addEventListener('DOMContentLoaded', () => {
+                const triggers = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                [...triggers].forEach(el => new bootstrap.Tooltip(el));
+            });
+
+            // CSRF for fetch
             const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             // Handle all per-row assign forms
@@ -459,29 +483,57 @@
                 const riderId = formData.get('rider_id');
 
                 if (!riderId) {
-                    alert('Please select a rider.');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Select a rider',
+                        text: 'Please choose a rider before saving.'
+                    });
                     return;
                 }
 
+                // Disable Save button while processing
+                const saveBtn = form.querySelector('button[type="submit"]');
+                const prevHtml = saveBtn ? saveBtn.innerHTML : '';
+                if (saveBtn) {
+                    saveBtn.disabled = true;
+                    saveBtn.innerHTML =
+                        '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
+                }
+
                 try {
-                    const res = await fetch(`{{ route('orders.assignRider', ['order' => '___OID___']) }}`.replace(
-                        '___OID___', orderId), {
+                    const url = `{{ route('orders.assignRider', ['orderId' => '___OID___']) }}`.replace(
+                        '___OID___', encodeURIComponent(orderId));
+
+                    const res = await fetch(url, {
                         method: 'POST',
                         headers: {
                             'X-CSRF-TOKEN': CSRF_TOKEN,
+                            'X-Requested-With': 'XMLHttpRequest',
                             'Accept': 'application/json',
                         },
                         body: formData
                     });
 
+                    const data = await res.json().catch(() => ({}));
+
                     if (!res.ok) {
-                        const err = await res.json().catch(() => ({}));
-                        throw new Error(err.message || 'Failed to assign rider.');
+                        // Validation errors
+                        if (res.status === 422 && data.errors) {
+                            const firstField = Object.keys(data.errors)[0];
+                            const firstMsg = data.errors[firstField][0] || 'Validation error.';
+                            throw new Error(firstMsg);
+                        }
+
+                        // Not found
+                        if (res.status === 404) {
+                            throw new Error(data.message || 'Order not found.');
+                        }
+
+                        // Other errors
+                        throw new Error(data.message || 'Failed to assign rider.');
                     }
 
-                    const data = await res.json();
-
-                    // Update label
+                    // Success
                     const label = document.getElementById(labelId);
                     if (label) label.textContent = data.rider_name || 'Unassigned';
 
@@ -492,8 +544,25 @@
                         modal.hide();
                     }
 
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Updated',
+                        text: data.message || 'Rider assigned successfully.',
+                        timer: 1400,
+                        showConfirmButton: false
+                    });
+
                 } catch (e) {
-                    alert(e.message || 'Something went wrong while assigning the rider.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Could not assign rider',
+                        text: e.message || 'Unexpected error occurred.',
+                    });
+                } finally {
+                    if (saveBtn) {
+                        saveBtn.disabled = false;
+                        saveBtn.innerHTML = prevHtml;
+                    }
                 }
             });
         </script>
