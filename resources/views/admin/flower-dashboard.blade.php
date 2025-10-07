@@ -6,103 +6,185 @@
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
-<style>
-    /* =============================================
-       Metric cards with overlay background blink
-       + focus glow when value goes up
-       ============================================= */
-    .metric-card,
-    .card.sales-card {
-        transition: transform .2s ease, box-shadow .35s ease;
-        will-change: transform, box-shadow;
-        background-clip: padding-box;
-        border-radius: .75rem;
-        position: relative;
-        overflow: hidden;
-    }
-    .card.sales-card:not(.metric-card) { background-color: #fff; }
+    <style>
+        /* =============================================
+           Metric cards with overlay background blink
+           + focus glow when value goes up
+           ============================================= */
+        .metric-card,
+        .card.sales-card {
+            transition: transform .2s ease, box-shadow .35s ease;
+            will-change: transform, box-shadow;
+            background-clip: padding-box;
+            border-radius: .75rem;
+            position: relative;
+            overflow: hidden;
+        }
 
-    /* ---- Overlay tints (we animate this only) ---- */
-    .metric-card {
-        --metric-base: rgba(0,0,0,0.03);
-        --metric-peak: rgba(0,0,0,0.12);
-        --glow: 0,0,0;            /* fallback glow color (r,g,b) */
-    }
-    .metric--cyan    { --metric-base: rgba(6,182,212,0.14);  --metric-peak: rgba(6,182,212,0.36); --glow: 6,182,212; }
-    .metric--amber   { --metric-base: rgba(245,158,11,0.16); --metric-peak: rgba(245,158,11,0.38); --glow: 245,158,11; }
-    .metric--fuchsia { --metric-base: rgba(217,70,239,0.14); --metric-peak: rgba(217,70,239,0.34); --glow: 217,70,239; }
-    .metric--emerald { --metric-base: rgba(16,185,129,0.14); --metric-peak: rgba(16,185,129,0.34); --glow: 16,185,129; }
+        .card.sales-card:not(.metric-card) {
+            background-color: #fff;
+        }
 
-    /* Paintable overlay: keeps borders intact */
-    .metric-card::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background-color: var(--metric-base) !important;
-        transition: background-color .35s ease;
-        z-index: 0;
-    }
-    .metric-card > * { position: relative; z-index: 1; }
+        /* ---- Overlay tints (we animate this only) ---- */
+        .metric-card {
+            --metric-base: rgba(0, 0, 0, 0.03);
+            --metric-peak: rgba(0, 0, 0, 0.12);
+            --glow: 0, 0, 0;
+            /* fallback glow color (r,g,b) */
+        }
 
-    /* Blink the overlay only (background tint pulse) */
-    .metric-card.is-blinking::before {
-        animation: metricBlink 1.2s ease-in-out 0s 6;
-    }
-    @keyframes metricBlink {
-        0%   { background-color: var(--metric-base); }
-        50%  { background-color: var(--metric-peak); box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
-        100% { background-color: var(--metric-base); }
-    }
+        .metric--cyan {
+            --metric-base: rgba(6, 182, 212, 0.14);
+            --metric-peak: rgba(6, 182, 212, 0.36);
+            --glow: 6, 182, 212;
+        }
 
-    /* Focus “hot” state when value increases */
-    .metric-card.is-hot {
-        transform: translateZ(0) scale(1.015);
-        box-shadow:
-            0 0 0 2px rgba(var(--glow), .18),
-            0 4px 22px rgba(var(--glow), .22),
-            0 8px 28px rgba(2,6,23,.08);
-    }
-    .metric-card.is-hot::after {
-        content: "";
-        position: absolute;
-        inset: -2px;
-        border-radius: inherit;
-        pointer-events: none;
-        box-shadow: 0 0 0 3px rgba(var(--glow), .22) inset;
-        z-index: 1;
-        animation: hotRing .9s ease-in-out 0s 4;
-    }
-    @keyframes hotRing {
-        0%,100% { opacity: .55; }
-        50%     { opacity: .15; }
-    }
+        .metric--amber {
+            --metric-base: rgba(245, 158, 11, 0.16);
+            --metric-peak: rgba(245, 158, 11, 0.38);
+            --glow: 245, 158, 11;
+        }
 
-    /* Subtle attention wiggle (optional but fun) */
-    .metric-card.hot-wiggle { animation: wiggle .7s ease-in-out 0s 1; }
-    @keyframes wiggle {
-        0%   { transform: scale(1.02) translateX(0); }
-        25%  { transform: scale(1.02) translateX(2px); }
-        50%  { transform: scale(1.02) translateX(-2px); }
-        75%  { transform: scale(1.02) translateX(1px); }
-        100% { transform: scale(1.015) translateX(0); }
-    }
+        .metric--fuchsia {
+            --metric-base: rgba(217, 70, 239, 0.14);
+            --metric-peak: rgba(217, 70, 239, 0.34);
+            --glow: 217, 70, 239;
+        }
 
-    /* Reduced motion: no animations, stronger tint briefly */
-    @media (prefers-reduced-motion: reduce) {
-        .metric-card.is-blinking::before { animation: none; background-color: var(--metric-peak) !important; }
-        .metric-card.is-hot,
-        .metric-card.hot-wiggle { animation: none; transform: none; }
-    }
+        .metric--emerald {
+            --metric-base: rgba(16, 185, 129, 0.14);
+            --metric-peak: rgba(16, 185, 129, 0.34);
+            --glow: 16, 185, 129;
+        }
 
-    /* Tiny floating pill to unlock audio (optional) */
-    #sound-unlock {
-        position: fixed; right: 16px; bottom: 16px; z-index: 9999;
-        background: #111827; color: #fff; padding: 8px 12px; border-radius: 999px;
-        box-shadow: 0 6px 20px rgba(0,0,0,.22); font-size: 12px; cursor: pointer; opacity: .9;
-    }
-    #sound-unlock.hidden { display: none; }
-</style>
+        /* Paintable overlay: keeps borders intact */
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-color: var(--metric-base) !important;
+            transition: background-color .35s ease;
+            z-index: 0;
+        }
 
+        .metric-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Blink the overlay only (background tint pulse) */
+        .metric-card.is-blinking::before {
+            animation: metricBlink 1.2s ease-in-out 0s 6;
+        }
+
+        @keyframes metricBlink {
+            0% {
+                background-color: var(--metric-base);
+            }
+
+            50% {
+                background-color: var(--metric-peak);
+                box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+            }
+
+            100% {
+                background-color: var(--metric-base);
+            }
+        }
+
+        /* Focus “hot” state when value increases */
+        .metric-card.is-hot {
+            transform: translateZ(0) scale(1.015);
+            box-shadow:
+                0 0 0 2px rgba(var(--glow), .18),
+                0 4px 22px rgba(var(--glow), .22),
+                0 8px 28px rgba(2, 6, 23, .08);
+        }
+
+        .metric-card.is-hot::after {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: inherit;
+            pointer-events: none;
+            box-shadow: 0 0 0 3px rgba(var(--glow), .22) inset;
+            z-index: 1;
+            animation: hotRing .9s ease-in-out 0s 4;
+        }
+
+        @keyframes hotRing {
+
+            0%,
+            100% {
+                opacity: .55;
+            }
+
+            50% {
+                opacity: .15;
+            }
+        }
+
+        /* Subtle attention wiggle (optional but fun) */
+        .metric-card.hot-wiggle {
+            animation: wiggle .7s ease-in-out 0s 1;
+        }
+
+        @keyframes wiggle {
+            0% {
+                transform: scale(1.02) translateX(0);
+            }
+
+            25% {
+                transform: scale(1.02) translateX(2px);
+            }
+
+            50% {
+                transform: scale(1.02) translateX(-2px);
+            }
+
+            75% {
+                transform: scale(1.02) translateX(1px);
+            }
+
+            100% {
+                transform: scale(1.015) translateX(0);
+            }
+        }
+
+        /* Reduced motion: no animations, stronger tint briefly */
+        @media (prefers-reduced-motion: reduce) {
+            .metric-card.is-blinking::before {
+                animation: none;
+                background-color: var(--metric-peak) !important;
+            }
+
+            .metric-card.is-hot,
+            .metric-card.hot-wiggle {
+                animation: none;
+                transform: none;
+            }
+        }
+
+        /* Tiny floating pill to unlock audio (optional) */
+        #sound-unlock {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 9999;
+            background: #111827;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
+            font-size: 12px;
+            cursor: pointer;
+            opacity: .9;
+        }
+
+        #sound-unlock.hidden {
+            display: none;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -184,15 +266,19 @@
             <div class="row">
                 @foreach ($ridersData as $data)
                     <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12 mb-4">
-                        <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank" class="text-decoration-none">
-                            <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,.1); border: 1px solid rgb(186,185,185);">
+                        <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank"
+                            class="text-decoration-none">
+                            <div class="sales-card"
+                                style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,.1); border: 1px solid rgb(186,185,185);">
                                 <div class="row">
                                     <div class="col-8">
                                         <div class="ps-4 pt-4 pe-3 pb-4">
                                             <h6 class="mb-2 text-dark">{{ $data['rider']->rider_name }}</h6>
                                             <div class="d-flex flex-column">
-                                                <h4 class="tx-12 font-weight-semibold text-dark mb-2">Delivery Assigned: {{ $data['totalAssignedOrders'] }}</h4>
-                                                <h4 class="tx-12 font-weight-semibold text-dark mb-0">Delivered: {{ $data['totalDeliveredToday'] }}</h4>
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-2">Delivery Assigned:
+                                                    {{ $data['totalAssignedOrders'] }}</h4>
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-0">Delivered:
+                                                    {{ $data['totalDeliveredToday'] }}</h4>
                                             </div>
                                         </div>
                                     </div>
@@ -213,7 +299,8 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-primary text-white" style="border: 1px solid rgb(186,185,185);">
+                        <div class="card sales-card bg-gradient-primary text-white"
+                            style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -228,12 +315,14 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card text-white metric-card metric--emerald" style="border: 1px solid rgb(186,185,185);">
+                        <div class="card sales-card text-white metric-card metric--emerald"
+                            style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Total Delivery Today</h6>
-                                        <h4 id="totalDeliveriesTodayCount" data-initial="{{ $totalDeliveriesToday }}" class="tx-20 font-weight-semibold mb-2">
+                                        <h4 id="totalDeliveriesTodayCount" data-initial="{{ $totalDeliveriesToday }}"
+                                            class="tx-20 font-weight-semibold mb-2">
                                             {{ $totalDeliveriesToday }}
                                         </h4>
                                     </div>
@@ -244,8 +333,10 @@
                 </div>
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}" target="_blank">
-                        <div class="card sales-card bg-gradient-success text-white" style="border: 1px solid rgb(186,185,185);">
+                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
+                        target="_blank">
+                        <div class="card sales-card bg-gradient-success text-white"
+                            style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -260,7 +351,8 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-secondary text-white" style="border: 1px solid rgb(186,185,185);">
+                        <div class="card sales-card bg-gradient-secondary text-white"
+                            style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -281,14 +373,17 @@
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
             <div class="row">
+                <!-- New Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
-                        <div class="card sales-card metric-card metric--amber" style="border: 1px solid rgb(186,185,185);">
+                        <div class="card sales-card metric-card metric--amber"
+                            style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">New Subscription</h6>
-                                        <h4 id="newUserSubscriptionCount" data-initial="{{ $newUserSubscription }}" class="tx-20 font-weight-semibold mb-2">
+                                        <h4 id="newUserSubscriptionCount" data-initial="{{ $newUserSubscription }}"
+                                            class="tx-20 font-weight-semibold mb-2" aria-live="polite">
                                             {{ $newUserSubscription }}
                                         </h4>
                                     </div>
@@ -298,14 +393,17 @@
                     </a>
                 </div>
 
+                <!-- Renewed Subscription -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card metric-card metric--fuchsia" style="border: 1px solid rgb(186,185,185);">
+                        <div class="card sales-card metric-card metric--fuchsia"
+                            style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Renewed Subscription</h6>
-                                        <h4 id="renewSubscriptionCount" data-initial="{{ $renewSubscription }}" class="tx-20 font-weight-semibold mb-2">
+                                        <h4 id="renewSubscriptionCount" data-initial="{{ $renewSubscription }}"
+                                            class="tx-20 font-weight-semibold mb-2" aria-live="polite">
                                             {{ $renewSubscription }}
                                         </h4>
                                     </div>
@@ -315,7 +413,7 @@
                     </a>
                 </div>
 
-                <!-- Customize Order (WATCH, main one) -->
+                <!-- Customize Order (Today) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
                         <div class="card sales-card metric-card metric--cyan" style="border: 1px solid rgb(186,185,185);">
@@ -323,7 +421,8 @@
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Customize Order</h6>
-                                        <h4 id="ordersRequestedTodayCount" data-initial="{{ $ordersRequestedToday }}" class="tx-20 font-weight-semibold mb-2">
+                                        <h4 id="ordersRequestedTodayCount" data-initial="{{ $ordersRequestedToday }}"
+                                            class="tx-20 font-weight-semibold mb-2" aria-live="polite">
                                             {{ $ordersRequestedToday }}
                                         </h4>
                                     </div>
@@ -450,7 +549,8 @@
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}" target="_blank">
+                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
+                        target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
@@ -465,7 +565,8 @@
                 </div>
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}" target="_blank">
+                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
+                        target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
@@ -521,23 +622,40 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
-    <script>feather.replace();</script>
+    <script>
+        feather.replace();
+    </script>
 
     <script>
         // Hide welcome sections if present
-        setTimeout(() => { const el = document.getElementById('welcomeSection'); if (el) el.style.display = 'none'; }, 5000);
-        setTimeout(() => { const el = document.getElementById('welcomeSections'); if (el) el.style.display = 'none'; }, 5000);
+        setTimeout(() => {
+            const el = document.getElementById('welcomeSection');
+            if (el) el.style.display = 'none';
+        }, 5000);
+        setTimeout(() => {
+            const el = document.getElementById('welcomeSections');
+            if (el) el.style.display = 'none';
+        }, 5000);
 
         // Live time
         function updateDateTime() {
-            const now  = new Date();
+            const now = new Date();
             const date1 = document.getElementById('todayDate');
             const time1 = document.getElementById('liveTime');
             const date2 = document.getElementById('current-date');
             const time2 = document.getElementById('current-time');
-            if (date1) date1.textContent = now.toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'});
+            if (date1) date1.textContent = now.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             if (time1) time1.textContent = now.toLocaleTimeString();
-            if (date2) date2.textContent = now.toLocaleDateString(undefined, {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+            if (date2) date2.textContent = now.toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             if (time2) time2.textContent = now.toLocaleTimeString();
         }
         updateDateTime();
@@ -545,162 +663,216 @@
     </script>
 
     <!-- Live metrics poll + overlay blink -->
-  <script>
-(function() {
-    // Which metrics to watch (already present in your markup)
-    const watchers = [
-        { key: 'ordersRequestedToday', elId: 'ordersRequestedTodayCount' }, // Customize Order  -> metric--cyan
-        { key: 'newUserSubscription',  elId: 'newUserSubscriptionCount'  }, // New Subscription -> metric--amber
-        { key: 'renewSubscription',    elId: 'renewSubscriptionCount'    }, // Renewed          -> metric--fuchsia
-        { key: 'totalDeliveriesToday', elId: 'totalDeliveriesTodayCount' }  // Delivered today  -> metric--emerald
-    ];
+    <script>
+        (function() {
+            // Which metrics to watch (already present in your markup)
+            const watchers = [{
+                    key: 'ordersRequestedToday',
+                    elId: 'ordersRequestedTodayCount'
+                }, // Customize Order  -> metric--cyan
+                {
+                    key: 'newUserSubscription',
+                    elId: 'newUserSubscriptionCount'
+                }, // New Subscription -> metric--amber
+                {
+                    key: 'renewSubscription',
+                    elId: 'renewSubscriptionCount'
+                }, // Renewed          -> metric--fuchsia
+                {
+                    key: 'totalDeliveriesToday',
+                    elId: 'totalDeliveriesTodayCount'
+                } // Delivered today  -> metric--emerald
+            ];
 
-    // Cache elements and previous values
-    const els = {};
-    const prev = {};
-    watchers.forEach(w => {
-        els[w.key] = document.getElementById(w.elId);
-        if (els[w.key]) {
-            const initAttr = parseInt(els[w.key].getAttribute('data-initial'), 10);
-            const parsed   = Number.isFinite(initAttr) ? initAttr : (parseInt(els[w.key].textContent,10) || 0);
-            prev[w.key]    = parsed;
-        }
-    });
-
-    function findMetricCard(el) {
-        return el ? (el.closest('.metric-card') || el.closest('.card')) : null;
-    }
-
-    // Overlay blink (background-tint only)
-    function blink(el) {
-        const card = findMetricCard(el);
-        if (!card) return;
-
-        card.classList.remove('is-blinking');
-        void card.offsetWidth;            // restart animation
-        card.classList.add('is-blinking');
-
-        const endOnce = () => {
-            card.classList.remove('is-blinking');
-            card.removeEventListener('animationend', endOnce);
-        };
-        card.addEventListener('animationend', endOnce);
-        setTimeout(() => card.classList.remove('is-blinking'), 8000);
-    }
-
-    // Focus highlight (glow + pop + subtle wiggle)
-    function heatUp(el) {
-        const card = findMetricCard(el);
-        if (!card) return;
-
-        // Apply hot styles
-        card.classList.add('is-hot');
-        card.classList.add('hot-wiggle');
-
-        // Auto clear after a while
-        clearTimeout(card._hotTimer);
-        card._hotTimer = setTimeout(() => {
-            card.classList.remove('is-hot');
-            card.classList.remove('hot-wiggle');
-        }, 6500);
-    }
-
-    // ===== Optional: sound cue queue (kept minimal) =====
-    let audioEnabled = false, audioCtx = null, beepQueue = [];
-    function ensureAudio(){
-        try {
-            if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume().then(() => { audioEnabled = true; flush(); });
-            } else { audioEnabled = true; flush(); }
-        } catch(e){}
-    }
-    function flush(){ while(audioEnabled && beepQueue.length){ const [ms,f]=beepQueue.shift(); _beep(ms,f); } }
-    function _beep(ms=230,f=880){
-        try{
-            const o=audioCtx.createOscillator(), g=audioCtx.createGain();
-            o.type='sine'; o.frequency.value=f; g.gain.value=.0001;
-            o.connect(g).connect(audioCtx.destination); o.start();
-            g.gain.exponentialRampToValueAtTime(.06,audioCtx.currentTime+.02);
-            g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+(ms/1000));
-            setTimeout(()=>o.stop(), ms+60);
-        }catch(e){}
-    }
-    function beep(ms=230,f=880){ if(!audioEnabled){ beepQueue.push([ms,f]); return; } _beep(ms,f); }
-    (function setupUnlock(){
-        const pill=document.getElementById('sound-unlock'); if(!pill) return;
-        const hide=()=>pill.classList.add('hidden');
-        pill.classList.remove('hidden');
-        const unlock=()=>{ ensureAudio(); hide();
-            window.removeEventListener('click',unlock,true);
-            window.removeEventListener('keydown',unlock,true);
-            pill.removeEventListener('click',unlock,true);
-        };
-        window.addEventListener('click',unlock,true);
-        window.addEventListener('keydown',unlock,true);
-        pill.addEventListener('click',unlock,true);
-    })();
-
-    // Initial kick (if numbers are already > 0)
-    function initialKick() {
-        watchers.forEach(w => {
-            const el = els[w.key]; if (!el) return;
-            const val = prev[w.key] ?? 0;
-            if (val > 0) {
-                blink(el);
-                heatUp(el);
-                if (w.key === 'ordersRequestedToday') { beep(260,1200); setTimeout(()=>beep(220,900),160); }
-                else { beep(200,880); }
-            }
-        });
-    }
-
-    // === Poll loop (server endpoint unchanged) ===
-    async function poll() {
-        try {
-            const res = await fetch(`{{ route('admin.flowerDashboard.liveMetrics') }}`, {
-                headers: { 'Accept':'application/json' }, cache: 'no-store'
-            });
-            if (!res.ok) throw new Error('Bad response');
-            const json = await res.json();
-            if (!json || !json.ok || !json.data) return;
-
-            const data = json.data;
+            // Cache elements and previous values
+            const els = {};
+            const prev = {};
             watchers.forEach(w => {
-                const el = els[w.key];
-                if (!el) return;
-
-                const newVal = parseInt(data[w.key], 10) || 0;
-                const oldVal = prev[w.key] ?? 0;
-
-                if (newVal !== oldVal) {
-                    el.textContent = newVal;
-
-                    // 🔥 When value increases, blink + heat + beep
-                    if (newVal > oldVal) {
-                        blink(el);
-                        heatUp(el);
-
-                        // Louder cue for Customize Order, softer for others
-                        if (w.key === 'ordersRequestedToday') { beep(260,1200); setTimeout(()=>beep(220,900),160); }
-                        else { beep(200,880); }
-                    }
-                    prev[w.key] = newVal;
+                els[w.key] = document.getElementById(w.elId);
+                if (els[w.key]) {
+                    const initAttr = parseInt(els[w.key].getAttribute('data-initial'), 10);
+                    const parsed = Number.isFinite(initAttr) ? initAttr : (parseInt(els[w.key].textContent,
+                        10) || 0);
+                    prev[w.key] = parsed;
                 }
             });
-        } catch(e) { /* swallow */ }
-    }
 
-    document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') poll();
-    });
+            function findMetricCard(el) {
+                return el ? (el.closest('.metric-card') || el.closest('.card')) : null;
+            }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        initialKick();
-        poll();
-        setInterval(poll, 5000);
-    });
-})();
-</script>
+            // Overlay blink (background-tint only)
+            function blink(el) {
+                const card = findMetricCard(el);
+                if (!card) return;
 
+                card.classList.remove('is-blinking');
+                void card.offsetWidth; // restart animation
+                card.classList.add('is-blinking');
+
+                const endOnce = () => {
+                    card.classList.remove('is-blinking');
+                    card.removeEventListener('animationend', endOnce);
+                };
+                card.addEventListener('animationend', endOnce);
+                setTimeout(() => card.classList.remove('is-blinking'), 8000);
+            }
+
+            // Focus highlight (glow + pop + subtle wiggle)
+            function heatUp(el) {
+                const card = findMetricCard(el);
+                if (!card) return;
+
+                // Apply hot styles
+                card.classList.add('is-hot');
+                card.classList.add('hot-wiggle');
+
+                // Auto clear after a while
+                clearTimeout(card._hotTimer);
+                card._hotTimer = setTimeout(() => {
+                    card.classList.remove('is-hot');
+                    card.classList.remove('hot-wiggle');
+                }, 6500);
+            }
+
+            // ===== Optional: sound cue queue (kept minimal) =====
+            let audioEnabled = false,
+                audioCtx = null,
+                beepQueue = [];
+
+            function ensureAudio() {
+                try {
+                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        audioCtx.resume().then(() => {
+                            audioEnabled = true;
+                            flush();
+                        });
+                    } else {
+                        audioEnabled = true;
+                        flush();
+                    }
+                } catch (e) {}
+            }
+
+            function flush() {
+                while (audioEnabled && beepQueue.length) {
+                    const [ms, f] = beepQueue.shift();
+                    _beep(ms, f);
+                }
+            }
+
+            function _beep(ms = 230, f = 880) {
+                try {
+                    const o = audioCtx.createOscillator(),
+                        g = audioCtx.createGain();
+                    o.type = 'sine';
+                    o.frequency.value = f;
+                    g.gain.value = .0001;
+                    o.connect(g).connect(audioCtx.destination);
+                    o.start();
+                    g.gain.exponentialRampToValueAtTime(.06, audioCtx.currentTime + .02);
+                    g.gain.exponentialRampToValueAtTime(.0001, audioCtx.currentTime + (ms / 1000));
+                    setTimeout(() => o.stop(), ms + 60);
+                } catch (e) {}
+            }
+
+            function beep(ms = 230, f = 880) {
+                if (!audioEnabled) {
+                    beepQueue.push([ms, f]);
+                    return;
+                }
+                _beep(ms, f);
+            }
+            (function setupUnlock() {
+                const pill = document.getElementById('sound-unlock');
+                if (!pill) return;
+                const hide = () => pill.classList.add('hidden');
+                pill.classList.remove('hidden');
+                const unlock = () => {
+                    ensureAudio();
+                    hide();
+                    window.removeEventListener('click', unlock, true);
+                    window.removeEventListener('keydown', unlock, true);
+                    pill.removeEventListener('click', unlock, true);
+                };
+                window.addEventListener('click', unlock, true);
+                window.addEventListener('keydown', unlock, true);
+                pill.addEventListener('click', unlock, true);
+            })();
+
+            // Initial kick (if numbers are already > 0)
+            function initialKick() {
+                watchers.forEach(w => {
+                    const el = els[w.key];
+                    if (!el) return;
+                    const val = prev[w.key] ?? 0;
+                    if (val > 0) {
+                        blink(el);
+                        heatUp(el);
+                        if (w.key === 'ordersRequestedToday') {
+                            beep(260, 1200);
+                            setTimeout(() => beep(220, 900), 160);
+                        } else {
+                            beep(200, 880);
+                        }
+                    }
+                });
+            }
+
+            // === Poll loop (server endpoint unchanged) ===
+            async function poll() {
+                try {
+                    const res = await fetch(`{{ route('admin.flowerDashboard.liveMetrics') }}`, {
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        cache: 'no-store'
+                    });
+                    if (!res.ok) throw new Error('Bad response');
+                    const json = await res.json();
+                    if (!json || !json.ok || !json.data) return;
+
+                    const data = json.data;
+                    watchers.forEach(w => {
+                        const el = els[w.key];
+                        if (!el) return;
+
+                        const newVal = parseInt(data[w.key], 10) || 0;
+                        const oldVal = prev[w.key] ?? 0;
+
+                        if (newVal !== oldVal) {
+                            el.textContent = newVal;
+
+                            // 🔥 When value increases, blink + heat + beep
+                            if (newVal > oldVal) {
+                                blink(el);
+                                heatUp(el);
+
+                                // Louder cue for Customize Order, softer for others
+                                if (w.key === 'ordersRequestedToday') {
+                                    beep(260, 1200);
+                                    setTimeout(() => beep(220, 900), 160);
+                                } else {
+                                    beep(200, 880);
+                                }
+                            }
+                            prev[w.key] = newVal;
+                        }
+                    });
+                } catch (e) {
+                    /* swallow */ }
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') poll();
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                initialKick();
+                poll();
+                setInterval(poll, 5000);
+            });
+        })();
+    </script>
 @endsection
