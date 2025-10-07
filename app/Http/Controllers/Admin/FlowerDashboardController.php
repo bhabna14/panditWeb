@@ -24,217 +24,221 @@ use Throwable;
 
 class FlowerDashboardController extends Controller
 {
+   public function liveTodayMetrics(): JsonResponse
+    {
+        $tz       = config('app.timezone');
+        $today    = Carbon::today($tz);
+        $todayStr = $today->toDateString();
+
+        // ✅ Use "date" column for customize orders happening today
+        $ordersRequestedToday = FlowerRequest::whereDate('date', $todayStr)->count();
+
+        // Your existing “new” and “renewed” logic
+        $newUserSubscription = Subscription::where('status', 'pending')
+            ->whereDate('created_at', $today)
+            ->groupBy('user_id')
+            ->selectRaw('MIN(order_id) as order_id, user_id')
+            ->get()
+            ->filter(fn ($sub) => Subscription::where('user_id', $sub->user_id)->count() === 1)
+            ->count();
+
+        $renewSubscription = Subscription::whereDate('created_at', $today)
+            ->whereIn('order_id', function ($q) {
+                $q->select('order_id')->from('subscriptions')
+                  ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
+            })
+            ->count();
+
+        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', $todayStr)
+            ->where('delivery_status', 'delivered')->count();
+
+        return response()->json([
+            'ok' => true,
+            'data' => [
+                'ordersRequestedToday' => (int) $ordersRequestedToday,
+                'newUserSubscription'  => (int) $newUserSubscription,
+                'renewSubscription'    => (int) $renewSubscription,
+                'totalDeliveriesToday' => (int) $totalDeliveriesToday,
+            ],
+            'ts' => now($tz)->toIso8601String(),
+        ]);
+    }
+
     public function flowerDashboard()
     {
+        $tz = config('app.timezone');
+
         $activeSubscriptions = Subscription::where('status', 'active')->count();
 
-        $tomorrow = Carbon::tomorrow()->toDateString();
+        $tomorrow = Carbon::tomorrow($tz)->toDateString();
         $tomorrowActiveOrder = Subscription::where('status', 'pending')
             ->whereDate('start_date', $tomorrow)
             ->count();
 
-        $totalDeliveriesTodayCount = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
-            ->count();
+        $totalDeliveriesTodayCount = DeliveryHistory::whereDate('created_at', Carbon::today($tz)->toDateString())
+            ->where('delivery_status', 'delivered')->count();
 
-
-        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())
+        $todayDeliveredRows = DeliveryHistory::with(['order'])
+            ->whereDate('created_at', Carbon::today($tz)->toDateString())
             ->where('delivery_status', 'delivered')
             ->get();
 
         $totalIncomeToday = 0;
-
-        foreach ($totalDeliveriesToday as $delivery) {
+        foreach ($todayDeliveredRows as $delivery) {
             $order = $delivery->order;
             if (!$order) continue;
 
+            // If you want: use COALESCE(new_date, end_date) for accuracy (requires relation)
             $subscription = Subscription::where('order_id', $order->order_id)->first();
             if (!$subscription || !$subscription->start_date || !$subscription->end_date) continue;
 
             $start = Carbon::parse($subscription->start_date);
-            $end = Carbon::parse($subscription->end_date);
-            $days = $start->diffInDays($end) + 1;
+            $end   = Carbon::parse($subscription->end_date);
+            $days  = $start->diffInDays($end) + 1;
 
             if ($days > 0 && $order->total_price > 0) {
                 $totalIncomeToday += $order->total_price / $days;
             }
         }
 
-        $todayTotalExpenditure = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
-            ->sum('total_price');
+        $todayTotalExpenditure = FlowerPickupDetails::whereDate('pickup_date', Carbon::today($tz))->sum('total_price');
 
-            $riders = RiderDetails::where('status','active')->get();
-
-            $ridersData = $riders->map(function ($rider) {
-                // Total assigned orders to this rider
-                $totalAssignedOrders = Order::where('rider_id', $rider->rider_id) // Filter by rider_id
-                ->whereHas('subscription', function ($query) {
-                    $query->where('status', 'active'); // Check subscription status
-                })
+        $riders = RiderDetails::where('status', 'active')->get();
+        $ridersData = $riders->map(function ($rider) use ($tz) {
+            $totalAssignedOrders = Order::where('rider_id', $rider->rider_id)
+                ->whereHas('subscription', fn($q) => $q->where('status', 'active'))
                 ->count();
 
-                // Total delivered orders today by this rider
-                $totalDeliveredToday = DeliveryHistory::whereDate('created_at', Carbon::today())
-                    ->where('rider_id', $rider->rider_id)
-                    ->where('delivery_status', 'delivered')
-                    ->count();
-
-                return [
-                    'rider' => $rider,
-                    'totalAssignedOrders' => $totalAssignedOrders,
-                    'totalDeliveredToday' => $totalDeliveredToday,
-                ];
-            });
-
-            $totalRiders = RiderDetails::where('status','active')->count();
-
-            $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', now()->toDateString())->where('delivery_status', 'delivered')
-                ->count();
-
-            $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now()->year)
-                ->whereMonth('created_at', now()->month)
+            $totalDeliveredToday = DeliveryHistory::whereDate('created_at', Carbon::today($tz))
+                ->where('rider_id', $rider->rider_id)
                 ->where('delivery_status', 'delivered')
                 ->count();
 
-            $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
+            return [
+                'rider' => $rider,
+                'totalAssignedOrders' => $totalAssignedOrders,
+                'totalDeliveredToday' => $totalDeliveredToday,
+            ];
+        });
 
-            $newUserSubscription = Subscription::where('status', 'pending')
-                ->whereDate('created_at',  Carbon::today())
-                ->groupBy('user_id')
-                ->selectRaw('MIN(order_id) as order_id, user_id')
-                ->get()
-                ->filter(function ($subscription) {
-                    return Subscription::where('user_id', $subscription->user_id)->count() === 1;
-                })
-                ->count();
+        $totalRiders = RiderDetails::where('status', 'active')->count();
 
-            $renewSubscription = Subscription::whereDate('created_at', Carbon::today()) // Check rows created today
-                ->whereIn('order_id', function ($query) {
-                $query->select('order_id')
-                ->from('subscriptions')
-                ->groupBy('order_id')
-                ->havingRaw('COUNT(order_id) > 1'); // Find duplicate order IDs
-            })
+        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', Carbon::today($tz)->toDateString())
+            ->where('delivery_status', 'delivered')->count();
+
+        $totalDeliveriesThisMonth = DeliveryHistory::whereYear('created_at', now($tz)->year)
+            ->whereMonth('created_at', now($tz)->month)
+            ->where('delivery_status', 'delivered')->count();
+
+        $totalDeliveries = DeliveryHistory::where('delivery_status', 'delivered')->count();
+
+        $newUserSubscription = Subscription::where('status', 'pending')
+            ->whereDate('created_at', Carbon::today($tz))
+            ->groupBy('user_id')
+            ->selectRaw('MIN(order_id) as order_id, user_id')
+            ->get()
+            ->filter(fn ($subscription) => Subscription::where('user_id', $subscription->user_id)->count() === 1)
             ->count();
 
-            $todayEndSubscription = Subscription::where(function ($query) {
-                $query->where(function ($subQuery) {
-                        $subQuery->whereNotNull('new_date') // Check if new_date is available
-                                ->whereDate('new_date', Carbon::today()); // Count using new_date if available
+        $renewSubscription = Subscription::whereDate('created_at', Carbon::today($tz))
+            ->whereIn('order_id', function ($query) {
+                $query->select('order_id')->from('subscriptions')
+                      ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
+            })->count();
+
+        $todayEndSubscription = Subscription::where(function ($query) use ($tz) {
+                $query->where(function ($subQuery) use ($tz) {
+                        $subQuery->whereNotNull('new_date')
+                                ->whereDate('new_date', Carbon::today($tz));
                     })
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->whereNull('new_date') // Check if new_date is not available
-                                ->whereDate('end_date', Carbon::today()); // Count using end_date
+                    ->orWhere(function ($subQuery) use ($tz) {
+                        $subQuery->whereNull('new_date')
+                                ->whereDate('end_date', Carbon::today($tz));
                     });
-                })
-                ->where('status', 'active') // Status must be active
-                ->count();
+            })
+            ->where('status', 'active')->count();
 
-                $tz         = config('app.timezone');
-                $winStart   = Carbon::today($tz)->startOfDay();
-                $winEnd     = (clone $winStart)->addDays(4)->endOfDay();
+        $winStart = Carbon::today($tz)->startOfDay();
+        $winEnd   = (clone $winStart)->addDays(4)->endOfDay();
 
-                // END date logic: use new_date if present else end_date
-                $subscriptionEndFiveDays = Subscription::where('status', 'active')
-                    ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd])
-                    ->count();
+        $subscriptionEndFiveDays = Subscription::where('status', 'active')
+            ->whereRaw('COALESCE(new_date, end_date) BETWEEN ? AND ?', [$winStart, $winEnd])
+            ->count();
 
+        $monthStart = Carbon::now($tz)->startOfMonth();
+        $monthEnd   = Carbon::now($tz)->endOfMonth();
 
-                $tz         = config('app.timezone');
-                $monthStart = \Carbon\Carbon::now($tz)->startOfMonth();
-                $monthEnd   = \Carbon\Carbon::now($tz)->endOfMonth();
+        $latestPerUserIds = \DB::table('subscriptions as s1')
+            ->selectRaw('MAX(s1.id) as id')
+            ->groupBy('s1.user_id');
 
-                $latestPerUserIds = \DB::table('subscriptions as s1')
-                    ->selectRaw('MAX(s1.id) as id')
-                    ->groupBy('s1.user_id');
+        $expiredSubscriptions = Subscription::query()
+            ->whereIn('id', $latestPerUserIds)
+            ->where('status', 'expired')
+            ->whereNotNull('end_date')
+            ->whereBetween('end_date', [$monthStart, $monthEnd])
+            ->count();
 
-                $expiredSubscriptions = \App\Models\Subscription::query()
-                    ->whereIn('id', $latestPerUserIds)   // one latest row per user
-                    ->where('status', 'expired')         // latest is expired
-                    ->whereNotNull('end_date')           // safety
-                    ->whereBetween('end_date', [$monthStart, $monthEnd]) // ended this month
-                    ->count();
+        $nonAssignedRidersCount = Subscription::where('status', 'active')
+            ->whereHas('order', fn($q) => $q->whereNull('rider_id')->orWhere('rider_id', ''))
+            ->count();
 
-                $nonAssignedRidersCount = Subscription::where('status', 'active')
-                ->whereHas('order', function ($q) {
-                    $q->whereNull('rider_id')->orWhere('rider_id', '');
-                })
-                ->count();
+        // ✅ Use "date" for today’s customize orders on the main page too
+        $ordersRequestedToday = FlowerRequest::whereDate('date', Carbon::today($tz))->count();
 
-                $ordersRequestedToday = FlowerRequest::whereDate('created_at', Carbon::today())->count();
+        $pausedSubscriptions = Subscription::where('status', 'paused')->count();
 
-                $pausedSubscriptions = Subscription::where('status', 'paused')->count();
+        $nextDayPaused = Subscription::where('status', 'active')
+            ->whereDate('pause_start_date', $tomorrow)->count();
 
-                $tomorrow = Carbon::tomorrow()->toDateString();
+        $nextDayResumed = Subscription::where('status', 'active')
+            ->whereDate('pause_end_date', $tomorrow)->count();
 
-                $nextDayPaused = Subscription::where('status', 'active')
-                ->whereDate('pause_start_date', $tomorrow)
-                ->count();
+        $todayPausedRequest = SubscriptionPauseResumeLog::whereDate('created_at', Carbon::today($tz))
+            ->where('action', 'paused')->count();
 
-                $nextDayResumed = Subscription::where('status', 'active')
-                ->whereDate('pause_end_date', $tomorrow)
-                ->count();
+        $today = Carbon::today($tz);
+        $threeDaysLater = Carbon::today($tz)->addDays(3);
 
-                $todayPausedRequest = SubscriptionPauseResumeLog::whereDate('created_at', Carbon::today())
-                ->where('action', 'paused') // Optional: only count pause actions
-                ->count();
+        $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$today, $threeDaysLater])->count();
 
-                $today = Carbon::today();
-                $threeDaysLater = Carbon::today()->addDays(3);
+        $visitPlaceCountToday = MarketingVisitPlace::whereDate('created_at', Carbon::today($tz))->count();
 
-                $upcomingCustomizeOrders = FlowerRequest::whereBetween('date', [$today, $threeDaysLater])
-                ->count();
+        $todayStr = Carbon::today($tz)->toDateString();
+        $todayClaimed = ReferOfferClaim::where('status', 'claimed')->whereDate('date_time', $todayStr)->count();
+        $todayApproved = ReferOfferClaim::where('status', 'approved')->whereDate('updated_at', $todayStr)->count();
+        $todayRefer = FLowerReferal::whereDate('created_at', $todayStr)->count();
+        $totalRefer = FLowerReferal::count();
 
-                $visitPlaceCountToday = MarketingVisitPlace::whereDate('created_at', Carbon::today())->count();
-
-                $tz       = config('app.timezone');
-                $todayStr = Carbon::today($tz)->toDateString();
-
-                // Today Claimed = claims made today (by their claim timestamp if present, else created_at)
-                $todayClaimed = ReferOfferClaim::where('status', 'claimed')
-                    ->whereDate('date_time', $todayStr)
-                    ->count();
-
-                // Today Approved = claims approved today (status=approved and updated today)
-                $todayApproved = ReferOfferClaim::where('status', 'approved')
-                    ->whereDate('updated_at', $todayStr)
-                    ->count();
-
-                // Today Refer = referral rows created today
-                $todayRefer = FLowerReferal::whereDate('created_at', $todayStr)->count();
-
-                // Total Refer = all referral rows
-                $totalRefer = FLowerReferal::count();
-
-
-                return view('admin/flower-dashboard', compact(
-                    'activeSubscriptions',
-                    'tomorrowActiveOrder',
-                    'totalDeliveriesTodayCount',
-                    'totalIncomeToday',
-                    'todayTotalExpenditure',
-                    'ridersData',
-                    'totalRiders',
-                    'totalDeliveriesToday',
-                    'totalDeliveriesThisMonth',
-                    'totalDeliveries',
-                    'newUserSubscription',
-                    'renewSubscription',
-                    'ordersRequestedToday',
-                    'todayEndSubscription',
-                    'subscriptionEndFiveDays',
-                    'expiredSubscriptions',
-                    'nonAssignedRidersCount',
-                    'todayPausedRequest',
-                    'pausedSubscriptions',
-                    'nextDayPaused',
-                    'nextDayResumed',
-                    'upcomingCustomizeOrders',
-                    'visitPlaceCountToday',
-                    'todayClaimed',
-                    'todayApproved',
-                    'todayRefer',
-                    'totalRefer'
-                ));
+        return view('admin/flower-dashboard', compact(
+            'activeSubscriptions',
+            'tomorrowActiveOrder',
+            'totalDeliveriesTodayCount',
+            'totalIncomeToday',
+            'todayTotalExpenditure',
+            'ridersData',
+            'totalRiders',
+            'totalDeliveriesToday',
+            'totalDeliveriesThisMonth',
+            'totalDeliveries',
+            'newUserSubscription',
+            'renewSubscription',
+            'ordersRequestedToday',
+            'todayEndSubscription',
+            'subscriptionEndFiveDays',
+            'expiredSubscriptions',
+            'nonAssignedRidersCount',
+            'todayPausedRequest',
+            'pausedSubscriptions',
+            'nextDayPaused',
+            'nextDayResumed',
+            'upcomingCustomizeOrders',
+            'visitPlaceCountToday',
+            'todayClaimed',
+            'todayApproved',
+            'todayRefer',
+            'totalRefer'
+        ));
     }
 
     public function showTodayDeliveries()
@@ -353,48 +357,4 @@ class FlowerDashboardController extends Controller
         }
     }
 
-    public function liveTodayMetrics(): JsonResponse
-    {
-        $tz       = config('app.timezone');
-        $today    = Carbon::today($tz);
-        $todayStr = $today->toDateString();
-
-        // Customize Orders today
-        $ordersRequestedToday = FlowerRequest::whereDate('created_at', $today)->count();
-
-        // New subscriptions today (NEW users only)
-        $newUserSubscription = Subscription::where('status', 'pending')
-            ->whereDate('created_at', $today)
-            ->groupBy('user_id')
-            ->selectRaw('MIN(order_id) as order_id, user_id')
-            ->get()
-            ->filter(fn ($sub) => Subscription::where('user_id', $sub->user_id)->count() === 1)
-            ->count();
-
-        // Renewed subscriptions today (per your existing logic)
-        $renewSubscription = Subscription::whereDate('created_at', $today)
-            ->whereIn('order_id', function ($q) {
-                $q->select('order_id')
-                  ->from('subscriptions')
-                  ->groupBy('order_id')
-                  ->havingRaw('COUNT(order_id) > 1');
-            })
-            ->count();
-
-        // Total deliveries today
-        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', $todayStr)
-            ->where('delivery_status', 'delivered')
-            ->count();
-
-        return response()->json([
-            'ok'   => true,
-            'data' => [
-                'ordersRequestedToday' => (int) $ordersRequestedToday,
-                'newUserSubscription'  => (int) $newUserSubscription,
-                'renewSubscription'    => (int) $renewSubscription,
-                'totalDeliveriesToday' => (int) $totalDeliveriesToday,
-            ],
-            'ts' => now($tz)->toIso8601String(),
-        ]);
-    }
 }

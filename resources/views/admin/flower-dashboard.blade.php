@@ -1,33 +1,38 @@
 @extends('admin.layouts.apps')
-
 @section('styles')
     <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
     <!-- Feather Icons -->
     <link href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css" rel="stylesheet">
 
-    <!-- INTERNAL Data table css -->
+    <!-- INTERNAL DataTable css -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
-    <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
-    <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet">
+
+    <!-- Dashboard custom css -->
+    <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
 
     <style>
-        /* ========= Colorful pulse glows ========= */
+        /* ========= Colorful pulse glows (single, consolidated) ========= */
         .pulse-glow--cyan {
             animation: pulseGlowCyan 1.2s ease-in-out 0s 6;
+            border-color: rgba(6, 182, 212, .4) !important;
         }
 
         .pulse-glow--emerald {
             animation: pulseGlowEmerald 1.2s ease-in-out 0s 6;
+            border-color: rgba(16, 185, 129, .4) !important;
         }
 
         .pulse-glow--fuchsia {
             animation: pulseGlowFuchsia 1.2s ease-in-out 0s 6;
+            border-color: rgba(217, 70, 239, .4) !important;
         }
 
         .pulse-glow--amber {
             animation: pulseGlowAmber 1.2s ease-in-out 0s 6;
+            border-color: rgba(245, 158, 11, .4) !important;
         }
 
         @keyframes pulseGlowCyan {
@@ -36,7 +41,7 @@
             }
 
             50% {
-                box-shadow: 0 0 32px rgba(6, 182, 212, 0.7);
+                box-shadow: 0 0 32px rgba(6, 182, 212, .7);
             }
 
             100% {
@@ -50,7 +55,7 @@
             }
 
             50% {
-                box-shadow: 0 0 32px rgba(16, 185, 129, 0.7);
+                box-shadow: 0 0 32px rgba(16, 185, 129, .7);
             }
 
             100% {
@@ -64,7 +69,7 @@
             }
 
             50% {
-                box-shadow: 0 0 32px rgba(217, 70, 239, 0.7);
+                box-shadow: 0 0 32px rgba(217, 70, 239, .7);
             }
 
             100% {
@@ -78,7 +83,7 @@
             }
 
             50% {
-                box-shadow: 0 0 32px rgba(245, 158, 11, 0.7);
+                box-shadow: 0 0 32px rgba(245, 158, 11, .7);
             }
 
             100% {
@@ -86,21 +91,24 @@
             }
         }
 
-        /* optional: subtle border color shift during glow */
-        .pulse-glow--cyan {
-            border-color: rgba(6, 182, 212, 0.4) !important;
+        /* Tiny floating pill to unlock audio (auto-hides on first click/keypress) */
+        #sound-unlock {
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 9999;
+            background: #111827;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
+            font-size: 12px;
+            cursor: pointer;
+            opacity: .9;
         }
 
-        .pulse-glow--emerald {
-            border-color: rgba(16, 185, 129, 0.4) !important;
-        }
-
-        .pulse-glow--fuchsia {
-            border-color: rgba(217, 70, 239, 0.4) !important;
-        }
-
-        .pulse-glow--amber {
-            border-color: rgba(245, 158, 11, 0.4) !important;
+        #sound-unlock.hidden {
+            display: none;
         }
     </style>
 @endsection
@@ -602,21 +610,30 @@
             </div>
         </div>
     </div>
+    {{-- Add the unlock pill --}}
+    <div id="sound-unlock" class="hidden">🔔 Enable sound</div>
 @endsection
 
 @section('scripts')
-    <!-- INTERNAL Select2 js -->
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
+    <script>
+        feather.replace();
+    </script>
 
     <script>
-        // Hide the section(s) after 5 seconds if they exist
-        setTimeout(() => (document.getElementById('welcomeSection') || {}).style && (document.getElementById(
-            'welcomeSection').style.display = 'none'), 5000);
-        setTimeout(() => (document.getElementById('welcomeSections') || {}).style && (document.getElementById(
-            'welcomeSections').style.display = 'none'), 5000);
+        // Hide welcome sections if present
+        setTimeout(() => {
+            const el = document.getElementById('welcomeSection');
+            if (el) el.style.display = 'none';
+        }, 5000);
+        setTimeout(() => {
+            const el = document.getElementById('welcomeSections');
+            if (el) el.style.display = 'none';
+        }, 5000);
 
-        // Single DateTime updater (merged duplicates)
+        // Single DateTime updater
         function updateDateTime() {
             const now = new Date();
             const dateFmt = {
@@ -643,12 +660,7 @@
         setInterval(updateDateTime, 1000);
     </script>
 
-    <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
-    <script>
-        feather.replace();
-    </script>
-
-    <!-- Live metrics poll + colorful glow + beep -->
+    <!-- Live metrics poll + colorful glow + robust sound unlock -->
     <script>
         (function() {
             // Map element IDs -> server key + color class
@@ -688,7 +700,6 @@
                 return el ? (el.closest('.watch-card') || el.closest('.card')) : null;
             }
 
-            // Colorful glow
             function glow(el, color) {
                 const card = findCard(el);
                 if (!card) return;
@@ -697,22 +708,63 @@
                 setTimeout(() => card.classList.remove(cls), 6000);
             }
 
-            // Soft pleasant beep (no asset)
-            function beep(ms = 230, freq = 880) {
+            // ---- Sound unlock (one global AudioContext reused) ----
+            let audioEnabled = false;
+            let audioCtx = null;
+
+            function ensureAudio() {
                 try {
-                    const ctx = new(window.AudioContext || window.webkitAudioContext)();
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
+                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        audioCtx.resume().then(() => {
+                            audioEnabled = true;
+                        });
+                    } else {
+                        audioEnabled = true;
+                    }
+                } catch (e) {
+                    /* ignore */ }
+            }
+
+            function setupUnlockUI() {
+                const pill = document.getElementById('sound-unlock');
+                const maybeHide = () => pill && pill.classList.add('hidden');
+
+                // If audio already allowed, keep hidden
+                if (audioEnabled) {
+                    maybeHide();
+                    return;
+                }
+
+                // Show pill until first user interaction
+                if (pill) pill.classList.remove('hidden');
+
+                const unlock = () => {
+                    ensureAudio();
+                    maybeHide();
+                    window.removeEventListener('click', unlock, true);
+                    window.removeEventListener('keydown', unlock, true);
+                    pill && pill.removeEventListener('click', unlock, true);
+                };
+                window.addEventListener('click', unlock, true);
+                window.addEventListener('keydown', unlock, true);
+                pill && pill.addEventListener('click', unlock, true);
+            }
+
+            function beep(ms = 230, freq = 880) {
+                if (!audioEnabled) return; // avoid errors before unlock
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
                     osc.type = 'sine';
                     osc.frequency.value = freq;
                     gain.gain.value = 0.0001;
-                    osc.connect(gain).connect(ctx.destination);
+                    osc.connect(gain).connect(audioCtx.destination);
                     osc.start();
-                    gain.gain.exponentialRampToValueAtTime(0.06, ctx.currentTime + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (ms / 1000));
+                    gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms / 1000));
                     setTimeout(() => {
                         osc.stop();
-                        ctx.close();
                     }, ms + 50);
                 } catch (e) {
                     /* ignore */ }
@@ -720,7 +772,8 @@
 
             async function poll() {
                 try {
-                    const url = `{{ route('flowerDashboard.liveMetrics') }}`;
+                    // ✅ Correct route name (admin.)
+                    const url = `{{ route('admin.flowerDashboard.liveMetrics') }}`;
                     const res = await fetch(url, {
                         headers: {
                             'Accept': 'application/json'
@@ -730,8 +783,8 @@
                     if (!res.ok) throw new Error('Bad response');
                     const json = await res.json();
                     if (!json || !json.ok || !json.data) return;
-                    const data = json.data;
 
+                    const data = json.data;
                     watchers.forEach(w => {
                         const el = els[w.key];
                         if (!el) return;
@@ -742,12 +795,10 @@
                         if (newVal !== oldVal) {
                             el.textContent = newVal;
 
-                            // Only ring/flash on increases
+                            // Highlight + sound on increases
                             if (newVal > oldVal) {
                                 glow(el, w.color);
-
                                 if (w.key === 'ordersRequestedToday') {
-                                    // Make Customize Orders more noticeable
                                     beep(260, 1200);
                                     setTimeout(() => beep(220, 900), 160);
                                 } else {
@@ -758,19 +809,18 @@
                         }
                     });
                 } catch (e) {
-                    // optional console.warn(e);
+                    // console.warn('liveMetrics poll err', e);
                 }
             }
 
             document.addEventListener('visibilitychange', () => {
-                // Optional: when user returns to the tab, refresh once
                 if (document.visibilityState === 'visible') poll();
             });
 
-            // Start
             document.addEventListener('DOMContentLoaded', () => {
-                poll(); // sync immediately
-                setInterval(poll, 15000); // every 15s; adjust if you want
+                setupUnlockUI(); // show 🔔 pill until user interacts
+                poll(); // initial sync
+                setInterval(poll, 15000); // every 15s
             });
         })();
     </script>
