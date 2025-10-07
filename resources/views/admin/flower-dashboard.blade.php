@@ -1,16 +1,10 @@
 @extends('admin.layouts.apps')
 @section('styles')
-    <!-- INTERNAL Select2 css -->
     <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
-    <!-- Feather Icons -->
     <link href="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.css" rel="stylesheet">
-
-    <!-- INTERNAL DataTable css -->
     <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/css/buttons.bootstrap5.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/plugins/datatable/responsive.bootstrap5.css') }}" rel="stylesheet" />
-
-    <!-- Dashboard custom css -->
     <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
 
     <style>
@@ -21,45 +15,44 @@
             will-change: background-color, transform, box-shadow;
         }
 
-        /* ========= PER-CARD BASE BACKGROUND (always visible, no blink) ========= */
+        /* Base background tint per watch-card (always visible) */
         .watch-card[data-color="cyan"]    { background-color: rgba(6, 182, 212, 0.10); }   /* teal/cyan */
-        .watch-card[data-color="emerald"] { background-color: rgba(16, 185, 129, 0.10); }  /* green */
-        .watch-card[data-color="fuchsia"] { background-color: rgba(217, 70, 239, 0.10); }  /* magenta */
-        .watch-card[data-color="amber"]   { background-color: rgba(245, 158, 11, 0.12); }  /* orange */
+        .watch-card[data-color="amber"]   { background-color: rgba(245, 158, 11, 0.12); }
+        .watch-card[data-color="fuchsia"] { background-color: rgba(217, 70, 239, 0.10); }
+        .watch-card[data-color="emerald"] { background-color: rgba(16, 185, 129, 0.10); }
 
-        /* If you also want non-watch cards to remain white: */
+        /* Non-watch cards stay white */
         .card.sales-card:not(.watch-card) { background-color: #ffffff; }
 
-        /* ========= BACKGROUND BLINK (no border blink) ========= */
+        /* ======= BACKGROUND BLINK (no border blink) ======= */
         .pulse-glow--cyan    { animation: bgBlinkCyan    1.2s ease-in-out 0s 6; }
-        .pulse-glow--emerald { animation: bgBlinkEmerald 1.2s ease-in-out 0s 6; }
-        .pulse-glow--fuchsia { animation: bgBlinkFuchsia 1.2s ease-in-out 0s 6; }
         .pulse-glow--amber   { animation: bgBlinkAmber   1.2s ease-in-out 0s 6; }
+        .pulse-glow--fuchsia { animation: bgBlinkFuchsia 1.2s ease-in-out 0s 6; }
+        .pulse-glow--emerald { animation: bgBlinkEmerald 1.2s ease-in-out 0s 6; }
 
-        /* Each blink transitions from base tint -> stronger tint -> back,
-           plus a tiny scale and soft shadow for attention */
+        /* Blink from base tint -> stronger tint -> back, with a soft lift */
         @keyframes bgBlinkCyan {
             0%   { background-color: rgba(6, 182, 212, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: rgba(6, 182, 212, 0.28); transform: scale(1.01); box-shadow: 0 10px 24px rgba(6,182,212,0.22); }
+            50%  { background-color: rgba(6, 182, 212, 0.32); transform: scale(1.01); box-shadow: 0 10px 24px rgba(6,182,212,0.22); }
             100% { background-color: rgba(6, 182, 212, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-        }
-        @keyframes bgBlinkEmerald {
-            0%   { background-color: rgba(16, 185, 129, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: rgba(16, 185, 129, 0.28); transform: scale(1.01); box-shadow: 0 10px 24px rgba(16,185,129,0.22); }
-            100% { background-color: rgba(16, 185, 129, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-        }
-        @keyframes bgBlinkFuchsia {
-            0%   { background-color: rgba(217, 70, 239, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: rgba(217, 70, 239, 0.28); transform: scale(1.01); box-shadow: 0 10px 24px rgba(217,70,239,0.22); }
-            100% { background-color: rgba(217, 70, 239, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
         }
         @keyframes bgBlinkAmber {
             0%   { background-color: rgba(245, 158, 11, 0.12); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: rgba(245, 158, 11, 0.30); transform: scale(1.01); box-shadow: 0 10px 24px rgba(245,158,11,0.22); }
+            50%  { background-color: rgba(245, 158, 11, 0.34); transform: scale(1.01); box-shadow: 0 10px 24px rgba(245,158,11,0.22); }
             100% { background-color: rgba(245, 158, 11, 0.12); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
         }
+        @keyframes bgBlinkFuchsia {
+            0%   { background-color: rgba(217, 70, 239, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50%  { background-color: rgba(217, 70, 239, 0.30); transform: scale(1.01); box-shadow: 0 10px 24px rgba(217,70,239,0.22); }
+            100% { background-color: rgba(217, 70, 239, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+        }
+        @keyframes bgBlinkEmerald {
+            0%   { background-color: rgba(16, 185, 129, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50%  { background-color: rgba(16, 185, 129, 0.30); transform: scale(1.01); box-shadow: 0 10px 24px rgba(16,185,129,0.22); }
+            100% { background-color: rgba(16, 185, 129, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+        }
 
-        /* Tiny floating pill to unlock audio (unchanged) */
+        /* Tiny floating pill to unlock audio (keep if you use sound) */
         #sound-unlock {
             position: fixed; right: 16px; bottom: 16px; z-index: 9999;
             background: #111827; color: #fff; padding: 8px 12px; border-radius: 999px;
@@ -68,7 +61,6 @@
         #sound-unlock.hidden { display: none; }
     </style>
 @endsection
-
 
 @section('content')
     <div class="row card sales-card mt-2">
@@ -320,6 +312,7 @@
                         </div>
                     </a>
                 </div>
+
 
                 <!-- Customize Order (Upcoming 3 Days) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
