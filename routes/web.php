@@ -980,27 +980,17 @@ Route::put('/users/{admin}', [AdminUserController::class, 'update'])->name('user
 
 Route::delete('/users/{admin}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 
+
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Page
     Route::get('/manage-flower-pickup-details', [FlowerPickupController::class, 'manageflowerpickupdetails'])
         ->name('manageflowerpickupdetails');
 
-    // (Optional back-compat)
     Route::get('/flower-pickup-details', [FlowerPickupController::class, 'manageflowerpickupdetails']);
 
-    // DataTables JSON
     Route::get('/flower-pickup-details/data', [FlowerPickupController::class, 'ajaxFlowerPickupDetails'])
         ->name('flower-pickup-details.data');
 
-    // Items for modal
     Route::get('/flower-pickup-details/{id}/items', [FlowerPickupController::class, 'getFlowerPickupItems'])
         ->whereNumber('id')
         ->name('flower-pickup-details.items');
-
-    // Health check (optional)
-    Route::get('/flower-pickup-details/ping', function () {
-        return response()->json([
-            'draw' => 1, 'recordsTotal' => 0, 'recordsFiltered' => 0, 'data' => [],
-        ]);
-    });
 });

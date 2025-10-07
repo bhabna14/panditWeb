@@ -60,14 +60,18 @@ class FlowerPickupController extends Controller
 
         return redirect()->back()->with('error', 'Pickup request not found.');
     }
-    
-    public function manageflowerpickupdetails(Request $request)
+     public function manageflowerpickupdetails(Request $request)
     {
-        $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())->sum('total_price');
+        // Use your real table name via the model (double underscore is fine)
+        $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
+            ->sum('total_price');
 
         return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('totalExpensesday'));
     }
 
+    /**
+     * DataTables server-side JSON
+     */
     public function ajaxFlowerPickupDetails(Request $request)
     {
         try {
@@ -78,113 +82,105 @@ class FlowerPickupController extends Controller
             $filter = (string) $request->input('filter', 'all');
             $order  = $request->input('order', []);
 
-            // Map of DataTables columns -> DB fields (safe list)
-            $columns = [
-                0 => 'fpd.id',                    // #
-                1 => 'fpd.pick_up_id',           // Pickup Id  (⚠ If your column is `pickup_id`, change here & in select)
-                2 => 'vendors.vendor_name',      // Vendor
-                3 => 'riders.rider_name',        // Rider
-                4 => 'fpd.id',                   // Flower Details (button)
-                5 => 'fpd.pickup_date',          // PickUp Date
-                6 => 'fpd.total_price',          // Total Price
-                7 => 'fpd.payment_status',       // Payment Status
-                8 => 'fpd.status',               // Status
-                9 => 'fpd.id',                   // Actions
-            ];
-
-            // Base query
+            // Build base query using Eloquent + relations (avoids hard-coded table names)
             $base = FlowerPickupDetails::query()
-                ->from('flower_pickup_details as fpd')
-                ->leftJoin('vendors', 'vendors.id', '=', 'fpd.vendor_id')
-                ->leftJoin('rider_details as riders', 'riders.id', '=', 'fpd.rider_id');
+                ->with([
+                    // select only what we need, and match your custom PKs
+                    'vendor:vendor_id,vendor_name',
+                    'rider:rider_id,rider_name',
+                ]);
 
-            // Filters
+            // Filters on the details table
             switch ($filter) {
                 case 'todayexpenses':
-                    $base->whereDate('fpd.pickup_date', Carbon::today());
+                    $base->whereDate('pickup_date', Carbon::today());
                     break;
                 case 'todaypaidpickup':
-                    $base->whereDate('fpd.pickup_date', Carbon::today())
-                         ->where('fpd.payment_status', 'Paid');
+                    $base->whereDate('pickup_date', Carbon::today())
+                         ->where('payment_status', 'Paid');
                     break;
                 case 'todaypendingpickup':
-                    $base->whereDate('fpd.pickup_date', Carbon::today())
-                         ->where('fpd.payment_status', 'pending');
+                    $base->whereDate('pickup_date', Carbon::today())
+                         ->where('payment_status', 'pending');
                     break;
                 case 'monthlyexpenses':
-                    $base->whereMonth('fpd.pickup_date', Carbon::now()->month)
-                         ->whereYear('fpd.pickup_date', Carbon::now()->year);
+                    $base->whereMonth('pickup_date', Carbon::now()->month)
+                         ->whereYear('pickup_date', Carbon::now()->year);
                     break;
                 case 'monthlypaidpickup':
-                    $base->whereMonth('fpd.pickup_date', Carbon::now()->month)
-                         ->whereYear('fpd.pickup_date', Carbon::now()->year)
-                         ->where('fpd.payment_status', 'Paid');
+                    $base->whereMonth('pickup_date', Carbon::now()->month)
+                         ->whereYear('pickup_date', Carbon::now()->year)
+                         ->where('payment_status', 'Paid');
                     break;
                 case 'monthlypendingpickup':
-                    $base->whereMonth('fpd.pickup_date', Carbon::now()->month)
-                         ->whereYear('fpd.pickup_date', Carbon::now()->year)
-                         ->where('fpd.payment_status', 'pending');
+                    $base->whereMonth('pickup_date', Carbon::now()->month)
+                         ->whereYear('pickup_date', Carbon::now()->year)
+                         ->where('payment_status', 'pending');
                     break;
                 default:
                     // 'all' -> no extra filter
                     break;
             }
 
-            // Total (before search). Distinct avoids overcount on joins.
-            $recordsTotal = (clone $base)->distinct('fpd.id')->count('fpd.id');
+            // Total before search
+            $recordsTotal = (clone $base)->count('id');
 
-            // Search (escape wildcards)
+            // Search across pick_up_id, payment_status, status + related vendor/rider names
             if ($search !== '') {
                 $like = '%' . strtr($search, ['%' => '\%', '_' => '\_']) . '%';
+
                 $base->where(function ($q) use ($like) {
-                    $q->orWhere('fpd.pick_up_id', 'like', $like)
-                      ->orWhere('vendors.vendor_name', 'like', $like)
-                      ->orWhere('riders.rider_name', 'like', $like)
-                      ->orWhere('fpd.payment_status', 'like', $like)
-                      ->orWhere('fpd.status', 'like', $like);
+                    $q->where('pick_up_id', 'like', $like)
+                      ->orWhere('payment_status', 'like', $like)
+                      ->orWhere('status', 'like', $like)
+                      ->orWhereHas('vendor', function ($vq) use ($like) {
+                          $vq->where('vendor_name', 'like', $like);
+                      })
+                      ->orWhereHas('rider', function ($rq) use ($like) {
+                          $rq->where('rider_name', 'like', $like);
+                      });
                 });
             }
 
-            // Filtered count
-            $recordsFiltered = (clone $base)->distinct('fpd.id')->count('fpd.id');
+            // Filtered count after search
+            $recordsFiltered = (clone $base)->count('id');
 
-            // Ordering (safe)
-            $orderBy = 'fpd.pickup_date';
+            // Safe ordering: allow only fields that live on the details table
+            $safeOrderMap = [
+                1 => 'pick_up_id',
+                5 => 'pickup_date',
+                6 => 'total_price',
+                7 => 'payment_status',
+                8 => 'status',
+            ];
+            $orderBy = 'pickup_date';
             $dir     = 'desc';
             if (!empty($order[0])) {
-                $colIdx = (int) ($order[0]['column'] ?? 5);
-                $tmpCol = $columns[$colIdx] ?? 'fpd.pickup_date';
-                $dirCandidate = strtolower($order[0]['dir'] ?? 'desc');
-                $dir = in_array($dirCandidate, ['asc', 'desc'], true) ? $dirCandidate : 'desc';
-
-                // Only allow known columns
-                if (in_array($tmpCol, $columns, true)) {
-                    $orderBy = $tmpCol;
+                $colIdx = (int)($order[0]['column'] ?? 5);
+                $dirRaw = strtolower($order[0]['dir'] ?? 'desc');
+                $dir    = in_array($dirRaw, ['asc', 'desc'], true) ? $dirRaw : 'desc';
+                if (isset($safeOrderMap[$colIdx])) {
+                    $orderBy = $safeOrderMap[$colIdx];
                 }
             }
 
-            // Data rows
+            // Fetch paginated rows
             $rows = (clone $base)
-                ->select([
-                    'fpd.id',
-                    'fpd.pick_up_id', // ⚠ If your column is `pickup_id`, change to 'fpd.pickup_id'
-                    'vendors.vendor_name as vendor_name',
-                    'riders.rider_name as rider_name',
-                    'fpd.pickup_date',
-                    'fpd.total_price',
-                    'fpd.payment_status',
-                    'fpd.status',
-                ])
                 ->orderBy($orderBy, $dir)
                 ->skip($start)
                 ->take($length)
-                ->get();
+                ->get([
+                    'id',
+                    'pick_up_id',
+                    'vendor_id',
+                    'rider_id',
+                    'pickup_date',
+                    'total_price',
+                    'payment_status',
+                    'status',
+                ]);
 
-            // If you actually have 'pickup_id' (without underscore), flip both occurrences above and here.
-            // Example:
-            // ->select(['fpd.pickup_id as pick_up_id', ...])
-            // and in the search/order map use 'fpd.pickup_id'.
-
+            // Transform for DataTables
             $data = $rows->map(function ($r, $i) use ($start) {
                 $idx   = $start + $i + 1;
                 $date  = $r->pickup_date ? Carbon::parse($r->pickup_date)->format('d-m-Y') : 'N/A';
@@ -223,18 +219,18 @@ class FlowerPickupController extends Controller
                     </button>';
 
                 return [
-                    $idx,
-                    e($r->pick_up_id ?? 'N/A'),
-                    e($r->vendor_name ?? 'N/A'),
-                    e($r->rider_name ?? 'N/A'),
-                    $viewBtn,
-                    $date,
-                    $price,
-                    $payBadge,
-                    $statusBadge,
-                    '<div class="d-flex align-items-center gap-2">' . $actions . '</div>',
+                    $idx,                                   // #
+                    e($r->pick_up_id ?? 'N/A'),            // Pickup Id
+                    e(optional($r->vendor)->vendor_name ?? 'N/A'), // Vendor
+                    e(optional($r->rider)->rider_name ?? 'N/A'),   // Rider
+                    $viewBtn,                              // Flower Details
+                    $date,                                 // PickUp Date
+                    $price,                                // Total Price
+                    $payBadge,                             // Payment Status
+                    $statusBadge,                          // Status
+                    '<div class="d-flex align-items-center gap-2">'.$actions.'</div>', // Actions
                 ];
-            })->values()->toArray(); // ✅ ensure array
+            })->values()->toArray();
 
             return response()->json([
                 'draw'            => $draw,
@@ -244,7 +240,6 @@ class FlowerPickupController extends Controller
             ], 200, ['Content-Type' => 'application/json']);
 
         } catch (Throwable $e) {
-            // ✅ This now works because Log facade is imported
             Log::error('DT ajaxFlowerPickupDetails failed', [
                 'msg'  => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -259,12 +254,16 @@ class FlowerPickupController extends Controller
     }
 
     /**
-     * Items for the details modal
+     * Items list for the modal.
+     * Your items are linked by pick_up_id (NOT the numeric id),
+     * so we fetch the detail first, then query items by its pick_up_id.
      */
     public function getFlowerPickupItems(int $id)
     {
-        $items = FlowerPickupItem::with(['flower:id,name', 'unit:id,unit_name'])
-            ->where('flower_pickup_details_id', $id)
+        $detail = FlowerPickupDetails::findOrFail($id);
+
+        $items = FlowerPickupItems::with(['flower:product_id,name', 'unit:id,unit_name'])
+            ->where('pick_up_id', $detail->pick_up_id)
             ->get()
             ->map(function ($it) {
                 return [
