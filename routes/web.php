@@ -252,7 +252,7 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
         Route::post('/orders/{order}/assign-rider', 'assignRider')
             ->name('orders.assignRider');
          Route::get('/flower-dashboard/live-metrics',  'liveTodayMetrics')
-        ->name('flowerDashboard.liveMetrics'); 
+        ->name('admin.flowerDashboard.liveMetrics'); 
             });
 
 
