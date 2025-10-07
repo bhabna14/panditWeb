@@ -9,8 +9,8 @@
 
     <style>
         /* =============================================
-               Metric cards with native background blink
-               ============================================= */
+           Metric cards with native background blink
+           ============================================= */
         .metric-card,
         .card.sales-card {
             transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease;
@@ -19,96 +19,44 @@
         }
 
         /* Default fallback (non metric-card stay white) */
-        .card.sales-card:not(.metric-card) {
-            background-color: #fff;
-        }
+        .card.sales-card:not(.metric-card) { background-color: #fff; }
 
         /* ---- Color presets via CSS variables ---- */
         .metric-card {
             /* base = idle tint; peak = blink tint */
-            --metric-base: rgba(0, 0, 0, 0.03);
-            --metric-peak: rgba(0, 0, 0, 0.12);
+            --metric-base: rgba(0,0,0,0.03);
+            --metric-peak: rgba(0,0,0,0.12);
             background-color: var(--metric-base);
         }
-
-        .metric--cyan {
-            --metric-base: rgba(6, 182, 212, 0.12);
-            --metric-peak: rgba(6, 182, 212, 0.34);
-        }
-
-        .metric--amber {
-            --metric-base: rgba(245, 158, 11, 0.14);
-            --metric-peak: rgba(245, 158, 11, 0.36);
-        }
-
-        .metric--fuchsia {
-            --metric-base: rgba(217, 70, 239, 0.12);
-            --metric-peak: rgba(217, 70, 239, 0.32);
-        }
-
-        .metric--emerald {
-            --metric-base: rgba(16, 185, 129, 0.12);
-            --metric-peak: rgba(16, 185, 129, 0.32);
-        }
+        .metric--cyan    { --metric-base: rgba(6,182,212,0.12);  --metric-peak: rgba(6,182,212,0.34); }
+        .metric--amber   { --metric-base: rgba(245,158,11,0.14); --metric-peak: rgba(245,158,11,0.36); }
+        .metric--fuchsia { --metric-base: rgba(217,70,239,0.12); --metric-peak: rgba(217,70,239,0.32); }
+        .metric--emerald { --metric-base: rgba(16,185,129,0.12); --metric-peak: rgba(16,185,129,0.32); }
 
         /* ---- Blink animation toggled via .is-blinking ---- */
         .metric-card.is-blinking {
             animation: metricBlink 1.2s ease-in-out 0s 6;
         }
-
         @keyframes metricBlink {
-            0% {
-                background-color: var(--metric-base);
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
-
-            50% {
-                background-color: var(--metric-peak);
-                transform: scale(1.01);
-                box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
-            }
-
-            100% {
-                background-color: var(--metric-base);
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
+            0%   { background-color: var(--metric-base);   transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50%  { background-color: var(--metric-peak);   transform: scale(1.01); box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
+            100% { background-color: var(--metric-base);   transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
         }
 
         /* Accessibility: respect reduced motion */
         @media (prefers-reduced-motion: reduce) {
-
             .metric-card,
-            .card.sales-card {
-                transition: background-color .2s ease;
-            }
-
-            .metric-card.is-blinking {
-                animation: none;
-                background-color: var(--metric-peak);
-            }
+            .card.sales-card { transition: background-color .2s ease; }
+            .metric-card.is-blinking { animation: none; background-color: var(--metric-peak); }
         }
 
         /* Tiny floating pill to unlock audio */
         #sound-unlock {
-            position: fixed;
-            right: 16px;
-            bottom: 16px;
-            z-index: 9999;
-            background: #111827;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 999px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
-            font-size: 12px;
-            cursor: pointer;
-            opacity: .9;
+            position: fixed; right: 16px; bottom: 16px; z-index: 9999;
+            background: #111827; color: #fff; padding: 8px 12px; border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0,0,0,.22); font-size: 12px; cursor: pointer; opacity: .9;
         }
-
-        #sound-unlock.hidden {
-            display: none;
-        }
+        #sound-unlock.hidden { display: none; }
     </style>
 @endsection
 
@@ -347,7 +295,7 @@
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
                         <div class="card sales-card metric-card metric--cyan"
-                            style="border: 1px solid rgb(186, 185, 185);">
+                             style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -617,40 +565,23 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
-    <script>
-        feather.replace();
-    </script>
+    <script>feather.replace();</script>
 
     <script>
         // Hide welcome sections if present
-        setTimeout(() => {
-            const el = document.getElementById('welcomeSection');
-            if (el) el.style.display = 'none';
-        }, 5000);
-        setTimeout(() => {
-            const el = document.getElementById('welcomeSections');
-            if (el) el.style.display = 'none';
-        }, 5000);
+        setTimeout(() => { const el = document.getElementById('welcomeSection'); if (el) el.style.display = 'none'; }, 5000);
+        setTimeout(() => { const el = document.getElementById('welcomeSections'); if (el) el.style.display = 'none'; }, 5000);
 
         // Single DateTime updater
         function updateDateTime() {
-            const now = new Date();
+            const now  = new Date();
             const date1 = document.getElementById('todayDate');
             const time1 = document.getElementById('liveTime');
             const date2 = document.getElementById('current-date');
             const time2 = document.getElementById('current-time');
-            if (date1) date1.textContent = now.toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            if (date1) date1.textContent = now.toLocaleDateString(undefined, {year:'numeric',month:'long',day:'numeric'});
             if (time1) time1.textContent = now.toLocaleTimeString();
-            if (date2) date2.textContent = now.toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            if (date2) date2.textContent = now.toLocaleDateString(undefined, {weekday:'long',year:'numeric',month:'long',day:'numeric'});
             if (time2) time2.textContent = now.toLocaleTimeString();
         }
         updateDateTime();
@@ -661,22 +592,11 @@
     <script>
         (function() {
             // Map element IDs -> server key (we choose colors via class on the card now)
-            const watchers = [{
-                    key: 'ordersRequestedToday',
-                    elId: 'ordersRequestedTodayCount'
-                }, // metric--cyan card
-                {
-                    key: 'newUserSubscription',
-                    elId: 'newUserSubscriptionCount'
-                }, // metric--amber
-                {
-                    key: 'renewSubscription',
-                    elId: 'renewSubscriptionCount'
-                }, // metric--fuchsia
-                {
-                    key: 'totalDeliveriesToday',
-                    elId: 'totalDeliveriesTodayCount'
-                } // metric--emerald
+            const watchers = [
+                { key: 'ordersRequestedToday', elId: 'ordersRequestedTodayCount' }, // metric--cyan card
+                { key: 'newUserSubscription',  elId: 'newUserSubscriptionCount'  }, // metric--amber
+                { key: 'renewSubscription',    elId: 'renewSubscriptionCount'    }, // metric--fuchsia
+                { key: 'totalDeliveriesToday', elId: 'totalDeliveriesTodayCount' }  // metric--emerald
             ];
 
             const els = {};
@@ -685,9 +605,8 @@
                 els[w.key] = document.getElementById(w.elId);
                 if (els[w.key]) {
                     const initAttr = parseInt(els[w.key].getAttribute('data-initial'), 10);
-                    const parsed = Number.isFinite(initAttr) ? initAttr : (parseInt(els[w.key].textContent,
-                        10) || 0);
-                    prev[w.key] = parsed;
+                    const parsed   = Number.isFinite(initAttr) ? initAttr : (parseInt(els[w.key].textContent,10) || 0);
+                    prev[w.key]    = parsed;
                 }
             });
 
@@ -720,63 +639,39 @@
             let audioEnabled = false;
             let audioCtx = null;
             const beepQueue = [];
-
             function ensureAudio() {
                 try {
-                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                     if (audioCtx && audioCtx.state === 'suspended') {
-                        audioCtx.resume().then(() => {
-                            audioEnabled = true;
-                            flushBeepQueue();
-                        });
+                        audioCtx.resume().then(() => { audioEnabled = true; flushBeepQueue(); });
                     } else {
-                        audioEnabled = true;
-                        flushBeepQueue();
+                        audioEnabled = true; flushBeepQueue();
                     }
-                } catch (e) {}
+                } catch(e) {}
             }
-
-            function flushBeepQueue() {
-                while (audioEnabled && beepQueue.length) {
-                    const [ms, f] = beepQueue.shift();
-                    _beep(ms, f);
-                }
-            }
-
-            function _beep(ms = 230, freq = 880) {
+            function flushBeepQueue() { while (audioEnabled && beepQueue.length) { const [ms,f] = beepQueue.shift(); _beep(ms,f);} }
+            function _beep(ms=230, freq=880) {
                 try {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
+                    osc.type = 'sine'; osc.frequency.value = freq;
                     gain.gain.value = 0.0001;
                     osc.connect(gain).connect(audioCtx.destination);
                     osc.start();
                     gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms / 1000));
-                    setTimeout(() => osc.stop(), ms + 60);
-                } catch (e) {}
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms/1000));
+                    setTimeout(()=>osc.stop(), ms+60);
+                } catch(e) {}
             }
-
-            function beep(ms = 230, freq = 880) {
-                if (!audioEnabled) {
-                    beepQueue.push([ms, freq]);
-                    return;
-                }
-                _beep(ms, freq);
-            }
+            function beep(ms=230, freq=880) { if (!audioEnabled) { beepQueue.push([ms,freq]); return; } _beep(ms,freq); }
 
             function setupUnlockUI() {
                 const pill = document.getElementById('sound-unlock');
                 const maybeHide = () => pill && pill.classList.add('hidden');
-                if (audioEnabled) {
-                    maybeHide();
-                    return;
-                }
+                if (audioEnabled) { maybeHide(); return; }
                 if (pill) pill.classList.remove('hidden');
                 const unlock = () => {
-                    ensureAudio();
-                    maybeHide();
+                    ensureAudio(); maybeHide();
                     window.removeEventListener('click', unlock, true);
                     window.removeEventListener('keydown', unlock, true);
                     pill && pill.removeEventListener('click', unlock, true);
@@ -795,8 +690,7 @@
                     if (val > 0) {
                         glow(el);
                         if (w.key === 'ordersRequestedToday') {
-                            beep(260, 1200);
-                            setTimeout(() => beep(220, 900), 160);
+                            beep(260, 1200); setTimeout(()=>beep(220, 900), 160);
                         } else {
                             beep(200, 880);
                         }
@@ -807,12 +701,7 @@
             async function poll() {
                 try {
                     const url = `{{ route('admin.flowerDashboard.liveMetrics') }}`;
-                    const res = await fetch(url, {
-                        headers: {
-                            'Accept': 'application/json'
-                        },
-                        cache: 'no-store'
-                    });
+                    const res = await fetch(url, { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
                     if (!res.ok) throw new Error('Bad response');
                     const json = await res.json();
                     if (!json || !json.ok || !json.data) return;
@@ -828,8 +717,7 @@
                             if (newVal > oldVal) {
                                 glow(el);
                                 if (w.key === 'ordersRequestedToday') {
-                                    beep(260, 1200);
-                                    setTimeout(() => beep(220, 900), 160);
+                                    beep(260, 1200); setTimeout(()=>beep(220, 900), 160);
                                 } else {
                                     beep(200, 880);
                                 }
@@ -837,8 +725,7 @@
                             prev[w.key] = newVal;
                         }
                     });
-                } catch (e) {
-                    /* optional console.warn(e) */ }
+                } catch (e) { /* optional console.warn(e) */ }
             }
 
             document.addEventListener('visibilitychange', () => {
