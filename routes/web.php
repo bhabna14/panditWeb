@@ -249,8 +249,9 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::controller(FlowerDashboardController::class)->group(function () {
         Route::get('/flower-dashboard', 'flowerDashboard')->name('flowerDashboard');
         Route::get('/total-deliveries', 'showTodayDeliveries')->name('admin.totalDeliveries');
-        Route::post('/orders/{order}/assign-rider','assignRider')->name('orders.assignRider');
-    });
+  Route::post('/orders/{order}/assign-rider', 'assignRider')
+            ->name('orders.assignRider');
+            });
     
 
     Route::get('/manage-subadmins',  [SubadminController::class, 'managesubadmin'])->name('managesubadmin');

@@ -237,105 +237,119 @@ public function flowerDashboard()
             ));
 }
 
+  public function showTodayDeliveries()
+    {
+        $today = Carbon::today();
 
-public function showTodayDeliveries()
-{
-    $today = Carbon::today();
+        $activeSubscriptions = Subscription::with([
+                'users:id,userid,name,mobile_number',
+                'order:id,order_id,user_id,address_id,total_price,created_at,rider_id',
+                'order.address:id,user_id,country,state,city,pincode,area,locality,apartment_name,apartment_flat_plot,landmark,address_type',
+                'order.address.localityDetails:id,locality_name,unique_code,pincode',
+                'order.rider:id,rider_id,rider_name',
+                'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration',
+                'order.deliveryHistories' => function ($q) use ($today) {
+                    $q->whereDate('created_at', $today)
+                      ->where('delivery_status', 'delivered')
+                      ->latest('created_at');
+                },
+                'order.deliveryHistories.rider:id,rider_name'
+            ])
+            ->where('status', 'active')
+            ->orderBy('start_date', 'asc')
+            ->get()
+            ->map(function ($sub) use ($today) {
+                $start  = $sub->start_date ? Carbon::parse($sub->start_date) : null;
+                $end    = $sub->end_date ? Carbon::parse($sub->end_date) : null;
 
-    $activeSubscriptions = Subscription::with([
-            'users:id,userid,name,mobile_number',
-            'order:id,order_id,user_id,address_id,total_price,created_at,rider_id', // include rider_id
-            'order.address:id,user_id,country,state,city,pincode,area,locality,apartment_name,apartment_flat_plot,landmark,address_type',
-            'order.address.localityDetails:id,locality_name,unique_code,pincode',
-            'order.rider:id,rider_id,rider_name', // 👈 add this
-            'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration',
-            'order.deliveryHistories' => function ($q) use ($today) {
-                $q->whereDate('created_at', $today)
-                  ->where('delivery_status', 'delivered')
-                  ->latest('created_at');
-            },
-            'order.deliveryHistories.rider:id,rider_name'
-        ])
-        ->where('status', 'active')
-        ->orderBy('start_date', 'asc')
-        ->get()
-        ->map(function ($sub) use ($today) {
-            $start  = $sub->start_date ? Carbon::parse($sub->start_date) : null;
-            $end    = $sub->end_date ? Carbon::parse($sub->end_date) : null;
+                $days_total = ($start && $end) ? $start->diffInDays($end) + 1 : null;
+                $days_left  = $end ? max(0, $today->diffInDays($end, false)) : null;
 
-            $days_total = ($start && $end) ? $start->diffInDays($end) + 1 : null;
-            $days_left  = $end ? max(0, $today->diffInDays($end, false)) : null;
+                $per_day = null;
+                if ($sub->order && $sub->order->total_price && $days_total && $days_total > 0) {
+                    $per_day = round($sub->order->total_price / $days_total, 2);
+                } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price) {
+                    $per_day = (float) $sub->flowerProducts->per_day_price;
+                }
 
-            $per_day = null;
-            if ($sub->order && $sub->order->total_price && $days_total && $days_total > 0) {
-                $per_day = round($sub->order->total_price / $days_total, 2);
-            } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price) {
-                $per_day = (float) $sub->flowerProducts->per_day_price;
-            }
+                $sub->computed = (object) [
+                    'days_total' => $days_total,
+                    'days_left'  => $days_left,
+                    'per_day'    => $per_day,
+                ];
 
-            $sub->computed = (object) [
-                'days_total' => $days_total,
-                'days_left'  => $days_left,
-                'per_day'    => $per_day,
-            ];
+                $addr = $sub->order?->address;
+                $sub->computed->address_line = $addr
+                    ? trim(implode(', ', array_filter([
+                        $addr->apartment_name,
+                        $addr->apartment_flat_plot,
+                        $addr->area,
+                        $addr->city,
+                        $addr->state,
+                        $addr->pincode
+                    ])))
+                    : null;
 
-            $addr = $sub->order?->address;
-            $sub->computed->address_line = $addr
-                ? trim(implode(', ', array_filter([
-                    $addr->apartment_name,
-                    $addr->apartment_flat_plot,
-                    $addr->area,
-                    $addr->city,
-                    $addr->state,
-                    $addr->pincode
-                ])))
-                : null;
+                if ($sub->flowerProducts) {
+                    $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
+                }
 
-            if ($sub->flowerProducts) {
-                $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
-            }
+                $sub->computed->todays_delivery = $sub->order?->deliveryHistories?->first();
+                return $sub;
+            });
 
-            $sub->computed->todays_delivery = $sub->order?->deliveryHistories?->first();
+        $riders = RiderDetails::select('rider_id','rider_name')
+            ->orderBy('rider_name','asc')
+            ->get();
 
-            return $sub;
-        });
-
-    // 👇 all riders for dropdowns
-    $riders = RiderDetails::select('rider_id','rider_name')
-                ->orderBy('rider_name','asc')
-                ->get();
-
-    return view('admin.today-delivery-data', compact('activeSubscriptions', 'today', 'riders'));
-}
-  // app/Http/Controllers/FlowerDashboardController.php
-
-public function assignRider(Request $request, $order) // <-- was $orderId
-{
-    $request->validate([
-        'rider_id' => 'required|exists:flower__rider_details,rider_id',
-    ]);
-
-    // $order here is actually the "order_id" string from the URL
-    $orderModel = \App\Models\Order::where('order_id', $order)->first();
-
-    if (!$orderModel) {
-        return response()->json([
-            'status'  => 'error',
-            'message' => 'Order not found.',
-        ], 404);
+        return view('admin.today-delivery-data', compact('activeSubscriptions', 'today', 'riders'));
     }
 
-    $orderModel->rider_id = $request->input('rider_id');
-    $orderModel->save();
+    public function assignRider(Request $request, $order) // {order} from route
+    {
+        try {
+            $validated = $request->validate([
+                'rider_id' => 'required|exists:flower__rider_details,rider_id',
+            ]);
 
-    $orderModel->load('rider:rider_id,rider_name');
+            // business key "order_id"
+            $orderModel = Order::where('order_id', $order)->first();
 
-    return response()->json([
-        'status'     => 'ok',
-        'message'    => 'Rider assigned successfully.',
-        'rider_name' => optional($orderModel->rider)->rider_name,
-        'rider_id'   => $orderModel->rider_id,
-    ], 200);
-}
+            if (!$orderModel) {
+                return response()->json([
+                    'status'  => 'error',
+                    'message' => 'Order not found.',
+                ], 404);
+            }
 
+            $orderModel->rider_id = $validated['rider_id'];
+            $orderModel->save();
+
+            $orderModel->load('rider:rider_id,rider_name');
+
+            return response()->json([
+                'status'     => 'ok',
+                'message'    => 'Rider assigned successfully.',
+                'rider_name' => optional($orderModel->rider)->rider_name,
+                'rider_id'   => $orderModel->rider_id,
+            ], 200);
+
+        } catch (\Illuminate\Validation\ValidationException $ve) {
+            return response()->json([
+                'status'  => 'fail',
+                'message' => 'Validation failed.',
+                'errors'  => $ve->errors(),
+            ], 422);
+        } catch (Throwable $e) {
+            Log::error('assignRider failed', [
+                'order_id' => $order,
+                'err'      => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Something went wrong while assigning the rider.',
+            ], 500);
+        }
+    }
 }

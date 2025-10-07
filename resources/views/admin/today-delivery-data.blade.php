@@ -2,6 +2,7 @@
 
 @section('styles')
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
     <style>
@@ -442,69 +443,59 @@
 
     @section('scripts')
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
-            // simple client-side search (keep yours if already present)
+            // Quick search
             const q = document.getElementById('quickSearch');
             if (q) {
-                q.addEventListener('input', filterRows);
-
-                function filterRows() {
+                q.addEventListener('input', () => {
                     const term = q.value.trim().toLowerCase();
-                    const rows = document.querySelectorAll('#subsTable tbody tr');
-                    rows.forEach(r => {
+                    document.querySelectorAll('#subsTable tbody tr').forEach(r => {
                         const hay = r.getAttribute('data-search') || '';
                         r.style.display = hay.includes(term) ? '' : 'none';
                     });
-                }
+                });
             }
 
-            // Enable Bootstrap tooltips
+            // Bootstrp tooltips
             document.addEventListener('DOMContentLoaded', () => {
-                const triggers = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-                [...triggers].forEach(el => new bootstrap.Tooltip(el));
+                document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
             });
 
-            // CSRF for fetch
+            // CSRF
             const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-            // Handle all per-row assign forms
+            // Per-row assign form (AJAX)
             document.addEventListener('submit', async (ev) => {
                 const form = ev.target.closest('.assign-rider-form');
                 if (!form) return;
-
                 ev.preventDefault();
 
-                const orderId = form.getAttribute('data-order-id');
+                const orderId = form.getAttribute('data-order-id'); // this is order.order_id
                 const labelId = form.getAttribute('data-label-id');
                 const dismissId = form.getAttribute('data-bs-dismiss-target');
 
                 const formData = new FormData(form);
-                const riderId = formData.get('rider_id');
-
-                if (!riderId) {
-                    Swal.fire({
+                if (!formData.get('rider_id')) {
+                    return Swal.fire({
                         icon: 'warning',
                         title: 'Select a rider',
                         text: 'Please choose a rider before saving.'
                     });
-                    return;
                 }
 
-                // Disable Save button while processing
-                const saveBtn = form.querySelector('button[type="submit"]');
-                const prevHtml = saveBtn ? saveBtn.innerHTML : '';
-                if (saveBtn) {
-                    saveBtn.disabled = true;
-                    saveBtn.innerHTML =
+                const btn = form.querySelector('button[type="submit"]');
+                const prev = btn ? btn.innerHTML : '';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML =
                         '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Saving...';
                 }
 
                 try {
-                    const url = `{{ route('orders.assignRider', ['order' => '___OID___']) }}`.replace(
-                        '___OID___', encodeURIComponent(orderId)
-                    );
-
+                    // IMPORTANT: param name must be 'order' to match the route
+                    const url = `{{ route('orders.assignRider', ['order' => '___OID___']) }}`.replace('___OID___',
+                        encodeURIComponent(orderId));
 
                     const res = await fetch(url, {
                         method: 'POST',
@@ -519,32 +510,20 @@
                     const data = await res.json().catch(() => ({}));
 
                     if (!res.ok) {
-                        // Validation errors
                         if (res.status === 422 && data.errors) {
-                            const firstField = Object.keys(data.errors)[0];
-                            const firstMsg = data.errors[firstField][0] || 'Validation error.';
-                            throw new Error(firstMsg);
+                            const first = Object.values(data.errors)[0]?.[0] || 'Validation error.';
+                            throw new Error(first);
                         }
-
-                        // Not found
-                        if (res.status === 404) {
-                            throw new Error(data.message || 'Order not found.');
-                        }
-
-                        // Other errors
                         throw new Error(data.message || 'Failed to assign rider.');
                     }
 
-                    // Success
+                    // Update label
                     const label = document.getElementById(labelId);
                     if (label) label.textContent = data.rider_name || 'Unassigned';
 
                     // Close modal
                     const modalEl = document.querySelector(dismissId);
-                    if (modalEl) {
-                        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                        modal.hide();
-                    }
+                    if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
 
                     Swal.fire({
                         icon: 'success',
@@ -554,18 +533,38 @@
                         showConfirmButton: false
                     });
 
-                } catch (e) {
+                } catch (err) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Could not assign rider',
-                        text: e.message || 'Unexpected error occurred.',
+                        text: err.message || 'Unexpected error occurred.'
                     });
                 } finally {
-                    if (saveBtn) {
-                        saveBtn.disabled = false;
-                        saveBtn.innerHTML = prevHtml;
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = prev;
                     }
                 }
             });
         </script>
+
+        {{-- Optional: show flash messages (non-AJAX fallbacks) --}}
+        @if (session('success'))
+            <script>
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success',
+                    text: @json(session('success'))
+                });
+            </script>
+        @endif
+        @if ($errors->any())
+            <script>
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    html: `{!! implode('<br>', $errors->all()) !!}`
+                });
+            </script>
+        @endif
     @endsection
