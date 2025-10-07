@@ -9,103 +9,47 @@
     <!-- Dashboard custom css -->
     <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
     <style>
-        /* ========= Colorful pulse glows (single, consolidated) ========= */
-        .pulse-glow--cyan {
-            animation: pulseGlowCyan 1.2s ease-in-out 0s 6;
-            border-color: rgba(6, 182, 212, .4) !important;
-        }
+    /* ========= Colorful pulse glows (border + bg) ========= */
+    .pulse-glow--cyan     { animation: pulseGlowCyan 1.2s ease-in-out 0s 6;     border-color: rgba(6, 182, 212, .45) !important; }
+    .pulse-glow--emerald  { animation: pulseGlowEmerald 1.2s ease-in-out 0s 6;  border-color: rgba(16, 185, 129, .45) !important; }
+    .pulse-glow--fuchsia  { animation: pulseGlowFuchsia 1.2s ease-in-out 0s 6;  border-color: rgba(217, 70, 239, .45) !important; }
+    .pulse-glow--amber    { animation: pulseGlowAmber 1.2s ease-in-out 0s 6;    border-color: rgba(245, 158, 11, .45) !important; }
 
-        .pulse-glow--emerald {
-            animation: pulseGlowEmerald 1.2s ease-in-out 0s 6;
-            border-color: rgba(16, 185, 129, .4) !important;
-        }
+    @keyframes pulseGlowCyan   { 0%{box-shadow:0 0 0 rgba(6,182,212,0)} 50%{box-shadow:0 0 34px rgba(6,182,212,.75)} 100%{box-shadow:0 0 0 rgba(6,182,212,0)} }
+    @keyframes pulseGlowEmerald{ 0%{box-shadow:0 0 0 rgba(16,185,129,0)} 50%{box-shadow:0 0 34px rgba(16,185,129,.75)} 100%{box-shadow:0 0 0 rgba(16,185,129,0)} }
+    @keyframes pulseGlowFuchsia{ 0%{box-shadow:0 0 0 rgba(217,70,239,0)} 50%{box-shadow:0 0 34px rgba(217,70,239,.75)} 100%{box-shadow:0 0 0 rgba(217,70,239,0)} }
+    @keyframes pulseGlowAmber  { 0%{box-shadow:0 0 0 rgba(245,158,11,0)} 50%{box-shadow:0 0 34px rgba(245,158,11,.75)} 100%{box-shadow:0 0 0 rgba(245,158,11,0)} }
 
-        .pulse-glow--fuchsia {
-            animation: pulseGlowFuchsia 1.2s ease-in-out 0s 6;
-            border-color: rgba(217, 70, 239, .4) !important;
-        }
+    /* ========= NEW: background blink (soft wash) ========= */
+    .pulse-bg--cyan    { animation: pulseBgCyan 1.2s ease-in-out 0s 6; }
+    .pulse-bg--emerald { animation: pulseBgEmerald 1.2s ease-in-out 0s 6; }
+    .pulse-bg--fuchsia { animation: pulseBgFuchsia 1.2s ease-in-out 0s 6; }
+    .pulse-bg--amber   { animation: pulseBgAmber 1.2s ease-in-out 0s 6; }
 
-        .pulse-glow--amber {
-            animation: pulseGlowAmber 1.2s ease-in-out 0s 6;
-            border-color: rgba(245, 158, 11, .4) !important;
-        }
+    @keyframes pulseBgCyan    { 0%,100%{background-color:transparent} 50%{background-color:rgba(6,182,212,.12)} }
+    @keyframes pulseBgEmerald { 0%,100%{background-color:transparent} 50%{background-color:rgba(16,185,129,.12)} }
+    @keyframes pulseBgFuchsia { 0%,100%{background-color:transparent} 50%{background-color:rgba(217,70,239,.12)} }
+    @keyframes pulseBgAmber   { 0%,100%{background-color:transparent} 50%{background-color:rgba(245,158,11,.12)} }
 
-        @keyframes pulseGlowCyan {
-            0% {
-                box-shadow: 0 0 0 rgba(6, 182, 212, 0);
-            }
+    /* Ensure cards can show the bg animation nicely */
+    .sales-card,
+    .card.sales-card {
+        position: relative;
+        border-radius: 15px;
+        transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease, border-color .35s ease;
+        will-change: background-color, transform, box-shadow, border-color;
+        background-clip: padding-box;
+    }
 
-            50% {
-                box-shadow: 0 0 32px rgba(6, 182, 212, .7);
-            }
+    /* --- Sound unlock pill (unchanged) --- */
+    #sound-unlock {
+        position: fixed; right: 16px; bottom: 16px; z-index: 9999;
+        background: #111827; color: #fff; padding: 8px 12px; border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(0,0,0,.22); font-size: 12px; cursor: pointer; opacity: .9;
+    }
+    #sound-unlock.hidden { display: none; }
+</style>
 
-            100% {
-                box-shadow: 0 0 0 rgba(6, 182, 212, 0);
-            }
-        }
-
-        @keyframes pulseGlowEmerald {
-            0% {
-                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
-            }
-
-            50% {
-                box-shadow: 0 0 32px rgba(16, 185, 129, .7);
-            }
-
-            100% {
-                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
-            }
-        }
-
-        @keyframes pulseGlowFuchsia {
-            0% {
-                box-shadow: 0 0 0 rgba(217, 70, 239, 0);
-            }
-
-            50% {
-                box-shadow: 0 0 32px rgba(217, 70, 239, .7);
-            }
-
-            100% {
-                box-shadow: 0 0 0 rgba(217, 70, 239, 0);
-            }
-        }
-
-        @keyframes pulseGlowAmber {
-            0% {
-                box-shadow: 0 0 0 rgba(245, 158, 11, 0);
-            }
-
-            50% {
-                box-shadow: 0 0 32px rgba(245, 158, 11, .7);
-            }
-
-            100% {
-                box-shadow: 0 0 0 rgba(245, 158, 11, 0);
-            }
-        }
-
-        /* Tiny floating pill to unlock audio (auto-hides on first click/keypress) */
-        #sound-unlock {
-            position: fixed;
-            right: 16px;
-            bottom: 16px;
-            z-index: 9999;
-            background: #111827;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 999px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
-            font-size: 12px;
-            cursor: pointer;
-            opacity: .9;
-        }
-
-        #sound-unlock.hidden {
-            display: none;
-        }
-    </style>
     @endsection @section('content')
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
