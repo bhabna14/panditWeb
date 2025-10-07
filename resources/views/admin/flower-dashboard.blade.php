@@ -617,24 +617,41 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons@4.28.0/dist/feather.min.js"></script>
-    <script> feather.replace(); </script>
+    <script>
+        feather.replace();
+    </script>
 
     <script>
         // Hide welcome sections if present
-        setTimeout(() => { const el = document.getElementById('welcomeSection');  if (el) el.style.display = 'none'; }, 5000);
-        setTimeout(() => { const el = document.getElementById('welcomeSections'); if (el) el.style.display = 'none'; }, 5000);
+        setTimeout(() => {
+            const el = document.getElementById('welcomeSection');
+            if (el) el.style.display = 'none';
+        }, 5000);
+        setTimeout(() => {
+            const el = document.getElementById('welcomeSections');
+            if (el) el.style.display = 'none';
+        }, 5000);
 
         // Single DateTime updater
         function updateDateTime() {
-            const now   = new Date();
+            const now = new Date();
             const date1 = document.getElementById('todayDate');
             const time1 = document.getElementById('liveTime');
             const date2 = document.getElementById('current-date');
             const time2 = document.getElementById('current-time');
 
-            if (date1) date1.textContent = now.toLocaleDateString(undefined, {year:'numeric', month:'long', day:'numeric'});
+            if (date1) date1.textContent = now.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             if (time1) time1.textContent = now.toLocaleTimeString();
-            if (date2) date2.textContent = now.toLocaleDateString(undefined, {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+            if (date2) date2.textContent = now.toLocaleDateString(undefined, {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
             if (time2) time2.textContent = now.toLocaleTimeString();
         }
         updateDateTime();
@@ -643,168 +660,203 @@
 
     <!-- Live metrics poll + colorful glow + initial fire + robust sound unlock -->
     <script>
-    (function() {
-        // Map element IDs -> server key + glow color
-        const watchers = [
-            { key: 'ordersRequestedToday', elId: 'ordersRequestedTodayCount', color: 'cyan'    }, // main
-            { key: 'newUserSubscription',  elId: 'newUserSubscriptionCount',  color: 'amber'   },
-            { key: 'renewSubscription',    elId: 'renewSubscriptionCount',    color: 'fuchsia' },
-            { key: 'totalDeliveriesToday', elId: 'totalDeliveriesTodayCount', color: 'emerald' },
-        ];
+        (function() {
+            // Map element IDs -> server key + glow color
+            const watchers = [{
+                    key: 'ordersRequestedToday',
+                    elId: 'ordersRequestedTodayCount',
+                    color: 'cyan'
+                }, // main
+                {
+                    key: 'newUserSubscription',
+                    elId: 'newUserSubscriptionCount',
+                    color: 'amber'
+                },
+                {
+                    key: 'renewSubscription',
+                    elId: 'renewSubscriptionCount',
+                    color: 'fuchsia'
+                },
+                {
+                    key: 'totalDeliveriesToday',
+                    elId: 'totalDeliveriesTodayCount',
+                    color: 'emerald'
+                },
+            ];
 
-        const els  = {};
-        const prev = {};
-        watchers.forEach(w => {
-            els[w.key] = document.getElementById(w.elId);
-            if (els[w.key]) {
-                const initAttr = parseInt(els[w.key].getAttribute('data-initial'), 10);
-                const parsed   = Number.isFinite(initAttr) ? initAttr : (parseInt(els[w.key].textContent, 10) || 0);
-                prev[w.key]    = parsed;
-            }
-        });
-
-        function findCard(el) {
-            return el ? (el.closest('.watch-card') || el.closest('.card')) : null;
-        }
-        function glow(el, color) {
-            const card = findCard(el);
-            if (!card) return;
-            const cls = `pulse-glow--${color}`;
-            card.classList.add(cls);
-            setTimeout(() => card.classList.remove(cls), 6000);
-        }
-
-        // ---- Sound unlock (one global AudioContext reused) + QUEUE ----
-        let audioEnabled = false;
-        let audioCtx = null;
-        const beepQueue = []; // store [ms, freq] until unlocked
-
-        function ensureAudio() {
-            try {
-                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                if (audioCtx && audioCtx.state === 'suspended') {
-                    audioCtx.resume().then(() => {
-                        audioEnabled = true;
-                        flushBeepQueue();
-                    });
-                } else {
-                    audioEnabled = true;
-                    flushBeepQueue();
-                }
-            } catch (e) { /* ignore */ }
-        }
-        function flushBeepQueue() {
-            while (audioEnabled && beepQueue.length) {
-                const [ms, freq] = beepQueue.shift();
-                _beep(ms, freq);
-            }
-        }
-        function _beep(ms=230, freq=880) {
-            try {
-                const osc  = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sine';
-                osc.frequency.value = freq;
-                gain.gain.value = 0.0001;
-                osc.connect(gain).connect(audioCtx.destination);
-                osc.start();
-                gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms/1000));
-                setTimeout(() => { osc.stop(); }, ms + 60);
-            } catch(e) { /* ignore */ }
-        }
-        function beep(ms=230, freq=880) {
-            if (!audioEnabled) { beepQueue.push([ms, freq]); return; }
-            _beep(ms, freq);
-        }
-
-        function setupUnlockUI() {
-            const pill = document.getElementById('sound-unlock');
-            const maybeHide = () => pill && pill.classList.add('hidden');
-
-            // if audio enabled already, hide pill
-            if (audioEnabled) { maybeHide(); return; }
-
-            if (pill) pill.classList.remove('hidden');
-
-            const unlock = () => {
-                ensureAudio();
-                maybeHide();
-                window.removeEventListener('click', unlock, true);
-                window.removeEventListener('keydown', unlock, true);
-                pill && pill.removeEventListener('click', unlock, true);
-            };
-            window.addEventListener('click', unlock, true);
-            window.addEventListener('keydown', unlock, true);
-            pill && pill.addEventListener('click', unlock, true);
-        }
-
-        // ---- Initial glow/sound if values already > 0 on page load ----
-        function initialKick() {
+            const els = {};
+            const prev = {};
             watchers.forEach(w => {
-                const el = els[w.key];
-                if (!el) return;
-                const val = prev[w.key] ?? 0;
-                if (val > 0) {
-                    glow(el, w.color);
-                    // More attention for Customize Orders
-                    if (w.key === 'ordersRequestedToday') {
-                        beep(260, 1200);
-                        setTimeout(() => beep(220, 900), 160);
-                    } else {
-                        beep(200, 880);
-                    }
+                els[w.key] = document.getElementById(w.elId);
+                if (els[w.key]) {
+                    const initAttr = parseInt(els[w.key].getAttribute('data-initial'), 10);
+                    const parsed = Number.isFinite(initAttr) ? initAttr : (parseInt(els[w.key].textContent,
+                        10) || 0);
+                    prev[w.key] = parsed;
                 }
             });
-        }
 
-        async function poll() {
-            try {
-                const url = `{{ route('admin.flowerDashboard.liveMetrics') }}`;
-                const res = await fetch(url, { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
-                if (!res.ok) throw new Error('Bad response');
-                const json = await res.json();
-                if (!json || !json.ok || !json.data) return;
+            function findCard(el) {
+                return el ? (el.closest('.watch-card') || el.closest('.card')) : null;
+            }
 
-                const data = json.data;
+            function glow(el, color) {
+                const card = findCard(el);
+                if (!card) return;
+                const cls = `pulse-glow--${color}`;
+                card.classList.add(cls);
+                setTimeout(() => card.classList.remove(cls), 6000);
+            }
+
+            // ---- Sound unlock (one global AudioContext reused) + QUEUE ----
+            let audioEnabled = false;
+            let audioCtx = null;
+            const beepQueue = []; // store [ms, freq] until unlocked
+
+            function ensureAudio() {
+                try {
+                    if (!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        audioCtx.resume().then(() => {
+                            audioEnabled = true;
+                            flushBeepQueue();
+                        });
+                    } else {
+                        audioEnabled = true;
+                        flushBeepQueue();
+                    }
+                } catch (e) {
+                    /* ignore */ }
+            }
+
+            function flushBeepQueue() {
+                while (audioEnabled && beepQueue.length) {
+                    const [ms, freq] = beepQueue.shift();
+                    _beep(ms, freq);
+                }
+            }
+
+            function _beep(ms = 230, freq = 880) {
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.value = 0.0001;
+                    osc.connect(gain).connect(audioCtx.destination);
+                    osc.start();
+                    gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms / 1000));
+                    setTimeout(() => {
+                        osc.stop();
+                    }, ms + 60);
+                } catch (e) {
+                    /* ignore */ }
+            }
+
+            function beep(ms = 230, freq = 880) {
+                if (!audioEnabled) {
+                    beepQueue.push([ms, freq]);
+                    return;
+                }
+                _beep(ms, freq);
+            }
+
+            function setupUnlockUI() {
+                const pill = document.getElementById('sound-unlock');
+                const maybeHide = () => pill && pill.classList.add('hidden');
+
+                // if audio enabled already, hide pill
+                if (audioEnabled) {
+                    maybeHide();
+                    return;
+                }
+
+                if (pill) pill.classList.remove('hidden');
+
+                const unlock = () => {
+                    ensureAudio();
+                    maybeHide();
+                    window.removeEventListener('click', unlock, true);
+                    window.removeEventListener('keydown', unlock, true);
+                    pill && pill.removeEventListener('click', unlock, true);
+                };
+                window.addEventListener('click', unlock, true);
+                window.addEventListener('keydown', unlock, true);
+                pill && pill.addEventListener('click', unlock, true);
+            }
+
+            // ---- Initial glow/sound if values already > 0 on page load ----
+            function initialKick() {
                 watchers.forEach(w => {
                     const el = els[w.key];
                     if (!el) return;
-
-                    const newVal = parseInt(data[w.key], 10) || 0;
-                    const oldVal = prev[w.key] ?? 0;
-
-                    if (newVal !== oldVal) {
-                        el.textContent = newVal;
-
-                        // Highlight + sound on increases
-                        if (newVal > oldVal) {
-                            glow(el, w.color);
-                            if (w.key === 'ordersRequestedToday') {
-                                beep(260, 1200);
-                                setTimeout(() => beep(220, 900), 160);
-                            } else {
-                                beep(200, 880);
-                            }
+                    const val = prev[w.key] ?? 0;
+                    if (val > 0) {
+                        glow(el, w.color);
+                        // More attention for Customize Orders
+                        if (w.key === 'ordersRequestedToday') {
+                            beep(260, 1200);
+                            setTimeout(() => beep(220, 900), 160);
+                        } else {
+                            beep(200, 880);
                         }
-                        prev[w.key] = newVal;
                     }
                 });
-            } catch (e) {
-                // optional console.warn(e);
             }
-        }
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible') poll();
-        });
+            async function poll() {
+                try {
+                    const url = `{{ route('admin.flowerDashboard.liveMetrics') }}`;
+                    const res = await fetch(url, {
+                        headers: {
+                            'Accept': 'application/json'
+                        },
+                        cache: 'no-store'
+                    });
+                    if (!res.ok) throw new Error('Bad response');
+                    const json = await res.json();
+                    if (!json || !json.ok || !json.data) return;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            setupUnlockUI(); // show 🔔 pill until user interacts
-            initialKick();   // <<< glow + (queued) sound if counts already > 0
-            poll();          // initial sync
-            setInterval(poll, 5000); // poll every 5s
-        });
-    })();
+                    const data = json.data;
+                    watchers.forEach(w => {
+                        const el = els[w.key];
+                        if (!el) return;
+
+                        const newVal = parseInt(data[w.key], 10) || 0;
+                        const oldVal = prev[w.key] ?? 0;
+
+                        if (newVal !== oldVal) {
+                            el.textContent = newVal;
+
+                            // Highlight + sound on increases
+                            if (newVal > oldVal) {
+                                glow(el, w.color);
+                                if (w.key === 'ordersRequestedToday') {
+                                    beep(260, 1200);
+                                    setTimeout(() => beep(220, 900), 160);
+                                } else {
+                                    beep(200, 880);
+                                }
+                            }
+                            prev[w.key] = newVal;
+                        }
+                    });
+                } catch (e) {
+                    // optional console.warn(e);
+                }
+            }
+
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') poll();
+            });
+
+            document.addEventListener('DOMContentLoaded', () => {
+                setupUnlockUI(); // show 🔔 pill until user interacts
+                initialKick(); // <<< glow + (queued) sound if counts already > 0
+                poll(); // initial sync
+                setInterval(poll, 5000); // poll every 5s
+            });
+        })();
     </script>
 @endsection
