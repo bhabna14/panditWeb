@@ -14,84 +14,113 @@
     <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
 
     <style>
-        /* ========= Colorful pulse glows (single, consolidated) ========= */
+        /* Smooth baseline for cards that may animate */
+        .watch-card,
+        .card.sales-card {
+            transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease;
+            will-change: background-color, transform, box-shadow;
+            /* keep your existing border; we won't animate it */
+        }
+
+        /* ========= BACKGROUND BLINK (no border blink) ========= */
         .pulse-glow--cyan {
-            animation: pulseGlowCyan 1.2s ease-in-out 0s 6;
-            border-color: rgba(6, 182, 212, .4) !important;
+            animation: bgBlinkCyan 1.2s ease-in-out 0s 6;
         }
 
         .pulse-glow--emerald {
-            animation: pulseGlowEmerald 1.2s ease-in-out 0s 6;
-            border-color: rgba(16, 185, 129, .4) !important;
+            animation: bgBlinkEmerald 1.2s ease-in-out 0s 6;
         }
 
         .pulse-glow--fuchsia {
-            animation: pulseGlowFuchsia 1.2s ease-in-out 0s 6;
-            border-color: rgba(217, 70, 239, .4) !important;
+            animation: bgBlinkFuchsia 1.2s ease-in-out 0s 6;
         }
 
         .pulse-glow--amber {
-            animation: pulseGlowAmber 1.2s ease-in-out 0s 6;
-            border-color: rgba(245, 158, 11, .4) !important;
+            animation: bgBlinkAmber 1.2s ease-in-out 0s 6;
         }
 
-        @keyframes pulseGlowCyan {
+        /* Each blink gently changes background + adds a soft lift at 50% */
+        @keyframes bgBlinkCyan {
             0% {
-                box-shadow: 0 0 0 rgba(6, 182, 212, 0);
+                background-color: #ffffff;
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
             }
 
             50% {
-                box-shadow: 0 0 32px rgba(6, 182, 212, .7);
+                background-color: rgba(6, 182, 212, 0.18);
+                transform: scale(1.01);
+                box-shadow: 0 10px 24px rgba(6, 182, 212, 0.18);
             }
 
             100% {
-                box-shadow: 0 0 0 rgba(6, 182, 212, 0);
+                background-color: #ffffff;
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
             }
         }
 
-        @keyframes pulseGlowEmerald {
+        @keyframes bgBlinkEmerald {
             0% {
-                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+                background-color: #ffffff;
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
             }
 
             50% {
-                box-shadow: 0 0 32px rgba(16, 185, 129, .7);
+                background-color: rgba(16, 185, 129, 0.18);
+                transform: scale(1.01);
+                box-shadow: 0 10px 24px rgba(16, 185, 129, 0.18);
             }
 
             100% {
-                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+                background-color: #ffffff;
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
             }
         }
 
-        @keyframes pulseGlowFuchsia {
+        @keyframes bgBlinkFuchsia {
             0% {
-                box-shadow: 0 0 0 rgba(217, 70, 239, 0);
+                background-color: #ffffff;
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
             }
 
             50% {
-                box-shadow: 0 0 32px rgba(217, 70, 239, .7);
+                background-color: rgba(217, 70, 239, 0.18);
+                transform: scale(1.01);
+                box-shadow: 0 10px 24px rgba(217, 70, 239, 0.18);
             }
 
             100% {
-                box-shadow: 0 0 0 rgba(217, 70, 239, 0);
+                background-color: #ffffff;
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
             }
         }
 
-        @keyframes pulseGlowAmber {
+        @keyframes bgBlinkAmber {
             0% {
-                box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+                background-color: #ffffff;
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
             }
 
             50% {
-                box-shadow: 0 0 32px rgba(245, 158, 11, .7);
+                background-color: rgba(245, 158, 11, 0.20);
+                transform: scale(1.01);
+                box-shadow: 0 10px 24px rgba(245, 158, 11, 0.20);
             }
 
             100% {
-                box-shadow: 0 0 0 rgba(245, 158, 11, 0);
+                background-color: #ffffff;
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
             }
         }
 
-        /* Tiny floating pill to unlock audio (auto-hides on first click/keypress) */
+        /* Tiny floating pill to unlock audio (unchanged) */
         #sound-unlock {
             position: fixed;
             right: 16px;
@@ -112,6 +141,7 @@
         }
     </style>
 @endsection
+
 
 @section('content')
     <div class="row card sales-card mt-2">
@@ -726,7 +756,8 @@
                         flushBeepQueue();
                     }
                 } catch (e) {
-                    /* ignore */ }
+                    /* ignore */
+                }
             }
 
             function flushBeepQueue() {
@@ -751,7 +782,8 @@
                         osc.stop();
                     }, ms + 60);
                 } catch (e) {
-                    /* ignore */ }
+                    /* ignore */
+                }
             }
 
             function beep(ms = 230, freq = 880) {
