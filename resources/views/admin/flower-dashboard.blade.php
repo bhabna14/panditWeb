@@ -9,7 +9,7 @@
     <!-- Dashboard custom css -->
     <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
     <style>
-        /* ========= Colorful pulse glows (border + bg) ========= */
+        /* ========= Colorful pulse glows (border halo) ========= */
         .pulse-glow--cyan {
             animation: pulseGlowCyan 1.2s ease-in-out 0s 6;
             border-color: rgba(6, 182, 212, .45) !important;
@@ -86,72 +86,56 @@
             }
         }
 
-        /* ========= NEW: background blink (soft wash) ========= */
-        .pulse-bg--cyan {
-            animation: pulseBgCyan 1.2s ease-in-out 0s 6;
+        /* ========= NEW: background blink using a pseudo-element =========
+       This wins against gradients and !important backgrounds */
+        .pulse-bg--cyan::after {
+            --tint: rgba(6, 182, 212, .16);
+            animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
-        .pulse-bg--emerald {
-            animation: pulseBgEmerald 1.2s ease-in-out 0s 6;
+        .pulse-bg--emerald::after {
+            --tint: rgba(16, 185, 129, .16);
+            animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
-        .pulse-bg--fuchsia {
-            animation: pulseBgFuchsia 1.2s ease-in-out 0s 6;
+        .pulse-bg--fuchsia::after {
+            --tint: rgba(217, 70, 239, .16);
+            animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
-        .pulse-bg--amber {
-            animation: pulseBgAmber 1.2s ease-in-out 0s 6;
+        .pulse-bg--amber::after {
+            --tint: rgba(245, 158, 11, .16);
+            animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
-        @keyframes pulseBgCyan {
+        /* pseudo-element layer under content */
+        .pulse-bg--cyan::after,
+        .pulse-bg--emerald::after,
+        .pulse-bg--fuchsia::after,
+        .pulse-bg--amber::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 0;
+            /* sit beneath content */
+            background: transparent;
+        }
+
+        @keyframes pulseBg {
 
             0%,
             100% {
-                background-color: transparent
+                background: transparent;
             }
 
             50% {
-                background-color: rgba(6, 182, 212, .12)
+                background: var(--tint);
             }
         }
 
-        @keyframes pulseBgEmerald {
-
-            0%,
-            100% {
-                background-color: transparent
-            }
-
-            50% {
-                background-color: rgba(16, 185, 129, .12)
-            }
-        }
-
-        @keyframes pulseBgFuchsia {
-
-            0%,
-            100% {
-                background-color: transparent
-            }
-
-            50% {
-                background-color: rgba(217, 70, 239, .12)
-            }
-        }
-
-        @keyframes pulseBgAmber {
-
-            0%,
-            100% {
-                background-color: transparent
-            }
-
-            50% {
-                background-color: rgba(245, 158, 11, .12)
-            }
-        }
-
-        /* Ensure cards can show the bg animation nicely */
+        /* Ensure cards can show bg layer without covering text */
         .sales-card,
         .card.sales-card {
             position: relative;
@@ -159,9 +143,18 @@
             transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease, border-color .35s ease;
             will-change: background-color, transform, box-shadow, border-color;
             background-clip: padding-box;
+            overflow: hidden;
+            /* keep the tint rounded */
         }
 
-        /* --- Sound unlock pill (unchanged) --- */
+        /* elevate direct children above ::after */
+        .sales-card>*,
+        .card.sales-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Sound unlock pill --- */
         #sound-unlock {
             position: fixed;
             right: 16px;
@@ -650,12 +643,12 @@
     <!-- Live metrics poll + colorful glow + initial fire + robust sound unlock -->
     <script>
         (function() {
-            // Map element IDs -> server key + glow color
+            // map watched metrics to DOM ids + color
             const watchers = [{
                     key: 'ordersRequestedToday',
                     elId: 'ordersRequestedTodayCount',
                     color: 'cyan'
-                }, // main (Customize Order - TODAY)
+                }, // main - coming orders
                 {
                     key: 'newUserSubscription',
                     elId: 'newUserSubscriptionCount',
@@ -673,8 +666,8 @@
                 },
             ];
 
-            const els = {};
-            const prev = {};
+            const els = {},
+                prev = {};
             watchers.forEach(w => {
                 els[w.key] = document.getElementById(w.elId);
                 if (els[w.key]) {
@@ -689,27 +682,22 @@
                 return el ? (el.closest('.watch-card') || el.closest('.card')) : null;
             }
 
-            // === NEW: apply BOTH border glow and background blink ===
+            // apply BOTH: border glow + background tint (via ::after)
             function glow(el, color) {
                 const card = findCard(el);
                 if (!card) return;
                 const borderCls = `pulse-glow--${color}`;
                 const bgCls = `pulse-bg--${color}`;
-
-                card.classList.add(borderCls);
-                card.classList.add(bgCls);
-                setTimeout(() => {
-                    card.classList.remove(borderCls);
-                    card.classList.remove(bgCls);
-                }, 6000); // same as animation duration (1.2s * 5 loops ≈ 6s)
+                card.classList.add(borderCls, bgCls);
+                setTimeout(() => card.classList.remove(borderCls, bgCls), 6000); // 1.2s * 5 loops ≈ 6s
             }
 
-            // ---- Sound unlock (global) + QUEUE + THROTTLE ----
-            let audioEnabled = false;
-            let audioCtx = null;
-            const beepQueue = []; // store [ms, freq] until unlocked
-            let lastBeepAt = 0; // throttle across quick bursts
-            const BEEP_COOLDOWN_MS = 3500; // don't play more than once every 3.5s
+            // ---- audio (unlock + queue + throttle) ----
+            let audioEnabled = false,
+                audioCtx = null;
+            const beepQueue = [];
+            let lastBeepAt = 0;
+            const BEEP_COOLDOWN_MS = 3500;
 
             function ensureAudio() {
                 try {
@@ -723,32 +711,28 @@
                         audioEnabled = true;
                         flushBeepQueue();
                     }
-                } catch (e) {
-                    /* ignore */ }
+                } catch (e) {}
             }
 
             function flushBeepQueue() {
                 while (audioEnabled && beepQueue.length) {
-                    const [ms, freq] = beepQueue.shift();
-                    _beep(ms, freq);
+                    const [ms, f] = beepQueue.shift();
+                    _beep(ms, f);
                 }
             }
 
             function _beep(ms = 230, freq = 880) {
                 try {
                     const now = Date.now();
-                    if (now - lastBeepAt < BEEP_COOLDOWN_MS) return; // throttle
+                    if (now - lastBeepAt < BEEP_COOLDOWN_MS) return;
                     lastBeepAt = now;
-
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
+                    const osc = audioCtx.createOscillator(),
+                        gain = audioCtx.createGain();
                     osc.type = 'sine';
                     osc.frequency.value = freq;
                     gain.gain.value = 0.0001;
                     osc.connect(gain).connect(audioCtx.destination);
                     osc.start();
-
-                    // soft attack + quick decay
                     gain.gain.exponentialRampToValueAtTime(0.07, audioCtx.currentTime + 0.02);
                     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms / 1000));
                     setTimeout(() => {
@@ -756,31 +740,28 @@
                             osc.stop();
                         } catch (e) {}
                     }, ms + 60);
-                } catch (e) {
-                    /* ignore */ }
+                } catch (e) {}
             }
 
-            function beep(ms = 230, freq = 880) {
+            function beep(ms = 230, f = 880) {
                 if (!audioEnabled) {
-                    beepQueue.push([ms, freq]);
+                    beepQueue.push([ms, f]);
                     return;
                 }
-                _beep(ms, freq);
+                _beep(ms, f);
             }
 
             function setupUnlockUI() {
                 const pill = document.getElementById('sound-unlock');
-                const maybeHide = () => pill && pill.classList.add('hidden');
-
+                const hide = () => pill && pill.classList.add('hidden');
                 if (audioEnabled) {
-                    maybeHide();
+                    hide();
                     return;
                 }
                 if (pill) pill.classList.remove('hidden');
-
                 const unlock = () => {
                     ensureAudio();
-                    maybeHide();
+                    hide();
                     window.removeEventListener('click', unlock, true);
                     window.removeEventListener('keydown', unlock, true);
                     pill && pill.removeEventListener('click', unlock, true);
@@ -790,7 +771,7 @@
                 pill && pill.addEventListener('click', unlock, true);
             }
 
-            // ---- Initial glow/sound if values already > 0 on page load ----
+            // initial highlight if already >0
             function initialKick() {
                 watchers.forEach(w => {
                     const el = els[w.key];
@@ -799,7 +780,6 @@
                     if (val > 0) {
                         glow(el, w.color);
                         if (w.key === 'ordersRequestedToday') {
-                            // Distinct two-tone chime for “coming order”
                             beep(260, 1200);
                             setTimeout(() => beep(220, 900), 160);
                         } else {
@@ -821,25 +801,19 @@
                     if (!res.ok) throw new Error('Bad response');
                     const json = await res.json();
                     if (!json || !json.ok || !json.data) return;
-
                     const data = json.data;
 
                     watchers.forEach(w => {
                         const el = els[w.key];
                         if (!el) return;
-
                         const newVal = parseInt(data[w.key], 10) || 0;
                         const oldVal = prev[w.key] ?? 0;
 
                         if (newVal !== oldVal) {
                             el.textContent = newVal;
-
-                            // Highlight + sound on increases
                             if (newVal > oldVal) {
                                 glow(el, w.color);
-
                                 if (w.key === 'ordersRequestedToday') {
-                                    // Stronger, more noticeable 2-tone for “coming order”
                                     beep(300, 1250);
                                     setTimeout(() => beep(240, 920), 170);
                                 } else {
@@ -850,18 +824,16 @@
                         }
                     });
                 } catch (e) {
-                    // optional console.warn(e);
-                }
+                    /* optional console.warn(e) */ }
             }
 
-            // Keep your date/time updater (unchanged)
+            // keep your datetime updater if you use it elsewhere
             function updateDateTime() {
                 const now = new Date();
                 const date1 = document.getElementById('todayDate');
                 const time1 = document.getElementById('liveTime');
                 const date2 = document.getElementById('current-date');
                 const time2 = document.getElementById('current-time');
-
                 if (date1) date1.textContent = now.toLocaleDateString(undefined, {
                     year: 'numeric',
                     month: 'long',
@@ -880,15 +852,13 @@
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') poll();
             });
-
             document.addEventListener('DOMContentLoaded', () => {
-                setupUnlockUI(); // show 🔔 pill until user interacts
+                setupUnlockUI();
                 updateDateTime();
                 setInterval(updateDateTime, 1000);
-
-                initialKick(); // glow + (queued) sound if counts already > 0
-                poll(); // initial sync
-                setInterval(poll, 5000); // poll every 5s
+                initialKick();
+                poll();
+                setInterval(poll, 5000);
             });
         })();
     </script>
