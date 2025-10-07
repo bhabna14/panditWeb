@@ -25,44 +25,44 @@ use Throwable;
 class FlowerDashboardController extends Controller
 {
    public function liveTodayMetrics(): JsonResponse
-    {
-        $tz       = config('app.timezone');
-        $today    = Carbon::today($tz);
-        $todayStr = $today->toDateString();
+{
+    $tz       = config('app.timezone');
+    $today    = Carbon::today($tz);
+    $todayStr = $today->toDateString();
 
-        // ✅ Use "date" column for customize orders happening today
-        $ordersRequestedToday = FlowerRequest::whereDate('date', $todayStr)->count();
+    // Use 'date' for customize orders scheduled today
+    $ordersRequestedToday = FlowerRequest::whereDate('date', $todayStr)->count();
 
-        // Your existing “new” and “renewed” logic
-        $newUserSubscription = Subscription::where('status', 'pending')
-            ->whereDate('created_at', $today)
-            ->groupBy('user_id')
-            ->selectRaw('MIN(order_id) as order_id, user_id')
-            ->get()
-            ->filter(fn ($sub) => Subscription::where('user_id', $sub->user_id)->count() === 1)
-            ->count();
+    $newUserSubscription = Subscription::where('status', 'pending')
+        ->whereDate('created_at', $today)
+        ->groupBy('user_id')
+        ->selectRaw('MIN(order_id) as order_id, user_id')
+        ->get()
+        ->filter(fn ($sub) => Subscription::where('user_id', $sub->user_id)->count() === 1)
+        ->count();
 
-        $renewSubscription = Subscription::whereDate('created_at', $today)
-            ->whereIn('order_id', function ($q) {
-                $q->select('order_id')->from('subscriptions')
-                  ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
-            })
-            ->count();
+    $renewSubscription = Subscription::whereDate('created_at', $today)
+        ->whereIn('order_id', function ($q) {
+            $q->select('order_id')->from('subscriptions')
+              ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
+        })
+        ->count();
 
-        $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', $todayStr)
-            ->where('delivery_status', 'delivered')->count();
+    $totalDeliveriesToday = DeliveryHistory::whereDate('created_at', $todayStr)
+        ->where('delivery_status', 'delivered')->count();
 
-        return response()->json([
-            'ok' => true,
-            'data' => [
-                'ordersRequestedToday' => (int) $ordersRequestedToday,
-                'newUserSubscription'  => (int) $newUserSubscription,
-                'renewSubscription'    => (int) $renewSubscription,
-                'totalDeliveriesToday' => (int) $totalDeliveriesToday,
-            ],
-            'ts' => now($tz)->toIso8601String(),
-        ]);
-    }
+    return response()->json([
+        'ok' => true,
+        'data' => [
+            'ordersRequestedToday' => (int)$ordersRequestedToday,
+            'newUserSubscription'  => (int)$newUserSubscription,
+            'renewSubscription'    => (int)$renewSubscription,
+            'totalDeliveriesToday' => (int)$totalDeliveriesToday,
+        ],
+        'ts' => now($tz)->toIso8601String(),
+    ]);
+}
+
 
     public function flowerDashboard()
     {
