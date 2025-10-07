@@ -19,126 +19,53 @@
         .card.sales-card {
             transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease;
             will-change: background-color, transform, box-shadow;
-            /* keep your existing border; we won't animate it */
         }
+
+        /* ========= PER-CARD BASE BACKGROUND (always visible, no blink) ========= */
+        .watch-card[data-color="cyan"]    { background-color: rgba(6, 182, 212, 0.10); }   /* teal/cyan */
+        .watch-card[data-color="emerald"] { background-color: rgba(16, 185, 129, 0.10); }  /* green */
+        .watch-card[data-color="fuchsia"] { background-color: rgba(217, 70, 239, 0.10); }  /* magenta */
+        .watch-card[data-color="amber"]   { background-color: rgba(245, 158, 11, 0.12); }  /* orange */
+
+        /* If you also want non-watch cards to remain white: */
+        .card.sales-card:not(.watch-card) { background-color: #ffffff; }
 
         /* ========= BACKGROUND BLINK (no border blink) ========= */
-        .pulse-glow--cyan {
-            animation: bgBlinkCyan 1.2s ease-in-out 0s 6;
-        }
+        .pulse-glow--cyan    { animation: bgBlinkCyan    1.2s ease-in-out 0s 6; }
+        .pulse-glow--emerald { animation: bgBlinkEmerald 1.2s ease-in-out 0s 6; }
+        .pulse-glow--fuchsia { animation: bgBlinkFuchsia 1.2s ease-in-out 0s 6; }
+        .pulse-glow--amber   { animation: bgBlinkAmber   1.2s ease-in-out 0s 6; }
 
-        .pulse-glow--emerald {
-            animation: bgBlinkEmerald 1.2s ease-in-out 0s 6;
-        }
-
-        .pulse-glow--fuchsia {
-            animation: bgBlinkFuchsia 1.2s ease-in-out 0s 6;
-        }
-
-        .pulse-glow--amber {
-            animation: bgBlinkAmber 1.2s ease-in-out 0s 6;
-        }
-
-        /* Each blink gently changes background + adds a soft lift at 50% */
+        /* Each blink transitions from base tint -> stronger tint -> back,
+           plus a tiny scale and soft shadow for attention */
         @keyframes bgBlinkCyan {
-            0% {
-                background-color: #ffffff;
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
-
-            50% {
-                background-color: rgba(6, 182, 212, 0.18);
-                transform: scale(1.01);
-                box-shadow: 0 10px 24px rgba(6, 182, 212, 0.18);
-            }
-
-            100% {
-                background-color: #ffffff;
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
+            0%   { background-color: rgba(6, 182, 212, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50%  { background-color: rgba(6, 182, 212, 0.28); transform: scale(1.01); box-shadow: 0 10px 24px rgba(6,182,212,0.22); }
+            100% { background-color: rgba(6, 182, 212, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
         }
-
         @keyframes bgBlinkEmerald {
-            0% {
-                background-color: #ffffff;
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
-
-            50% {
-                background-color: rgba(16, 185, 129, 0.18);
-                transform: scale(1.01);
-                box-shadow: 0 10px 24px rgba(16, 185, 129, 0.18);
-            }
-
-            100% {
-                background-color: #ffffff;
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
+            0%   { background-color: rgba(16, 185, 129, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50%  { background-color: rgba(16, 185, 129, 0.28); transform: scale(1.01); box-shadow: 0 10px 24px rgba(16,185,129,0.22); }
+            100% { background-color: rgba(16, 185, 129, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
         }
-
         @keyframes bgBlinkFuchsia {
-            0% {
-                background-color: #ffffff;
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
-
-            50% {
-                background-color: rgba(217, 70, 239, 0.18);
-                transform: scale(1.01);
-                box-shadow: 0 10px 24px rgba(217, 70, 239, 0.18);
-            }
-
-            100% {
-                background-color: #ffffff;
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
+            0%   { background-color: rgba(217, 70, 239, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50%  { background-color: rgba(217, 70, 239, 0.28); transform: scale(1.01); box-shadow: 0 10px 24px rgba(217,70,239,0.22); }
+            100% { background-color: rgba(217, 70, 239, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
         }
-
         @keyframes bgBlinkAmber {
-            0% {
-                background-color: #ffffff;
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
-
-            50% {
-                background-color: rgba(245, 158, 11, 0.20);
-                transform: scale(1.01);
-                box-shadow: 0 10px 24px rgba(245, 158, 11, 0.20);
-            }
-
-            100% {
-                background-color: #ffffff;
-                transform: none;
-                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-            }
+            0%   { background-color: rgba(245, 158, 11, 0.12); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+            50%  { background-color: rgba(245, 158, 11, 0.30); transform: scale(1.01); box-shadow: 0 10px 24px rgba(245,158,11,0.22); }
+            100% { background-color: rgba(245, 158, 11, 0.12); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
         }
 
         /* Tiny floating pill to unlock audio (unchanged) */
         #sound-unlock {
-            position: fixed;
-            right: 16px;
-            bottom: 16px;
-            z-index: 9999;
-            background: #111827;
-            color: #fff;
-            padding: 8px 12px;
-            border-radius: 999px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
-            font-size: 12px;
-            cursor: pointer;
-            opacity: .9;
+            position: fixed; right: 16px; bottom: 16px; z-index: 9999;
+            background: #111827; color: #fff; padding: 8px 12px; border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0,0,0,.22); font-size: 12px; cursor: pointer; opacity: .9;
         }
-
-        #sound-unlock.hidden {
-            display: none;
-        }
+        #sound-unlock.hidden { display: none; }
     </style>
 @endsection
 
