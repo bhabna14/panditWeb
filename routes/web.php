@@ -383,9 +383,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
         Route::put('/flower-pickup/update/{id}', 'update')->name('flower-pickup.update');
 
-        Route::get('/flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
-        Route::get('/flower-pickup-details/data','ajaxFlowerPickupDetails')->name('admin.flower-pickup-details.data');
-        Route::get('/flower-pickup-details/{id}/items', 'getFlowerPickupItems')->whereNumber('id')->name('admin.flower-pickup-details.items');
     });
 
    Route::controller(RiderController::class)->group(function() {
@@ -982,3 +979,14 @@ Route::get('/users/{admin}/edit', [AdminUserController::class, 'edit'])->name('u
 Route::put('/users/{admin}', [AdminUserController::class, 'update'])->name('users.update');
 
 Route::delete('/users/{admin}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+
+
+Route::get('/admin/flower-pickup-details', [FlowerPickupController::class, 'manageflowerpickupdetails'])
+    ->name('admin.manageflowerpickupdetails');
+
+Route::get('/admin/flower-pickup-details/data', [FlowerPickupController::class, 'ajaxFlowerPickupDetails'])
+    ->name('admin.flower-pickup-details.data');
+
+Route::get('/admin/flower-pickup-details/{id}/items', [FlowerPickupController::class, 'getFlowerPickupItems'])
+    ->whereNumber('id')
+    ->name('admin.flower-pickup-details.items');
