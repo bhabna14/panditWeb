@@ -63,8 +63,7 @@ class FlowerPickupController extends Controller
     
     public function manageflowerpickupdetails(Request $request)
     {
-        $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
-            ->sum('total_price');
+        $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())->sum('total_price');
 
         return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('totalExpensesday'));
     }
@@ -75,28 +74,31 @@ class FlowerPickupController extends Controller
             $draw   = (int) $request->input('draw', 1);
             $start  = (int) $request->input('start', 0);
             $length = (int) $request->input('length', 25);
-            $search = trim($request->input('search.value', ''));
-            $filter = $request->input('filter', 'all');
+            $search = trim((string) $request->input('search.value', ''));
+            $filter = (string) $request->input('filter', 'all');
             $order  = $request->input('order', []);
 
+            // Map of DataTables columns -> DB fields (safe list)
             $columns = [
-                0 => 'fpd.id',
-                1 => 'fpd.pick_up_id',
-                2 => 'vendors.vendor_name',
-                3 => 'riders.rider_name',
-                4 => 'fpd.id',
-                5 => 'fpd.pickup_date',
-                6 => 'fpd.total_price',
-                7 => 'fpd.payment_status',
-                8 => 'fpd.status',
-                9 => 'fpd.id',
+                0 => 'fpd.id',                    // #
+                1 => 'fpd.pick_up_id',           // Pickup Id  (⚠ If your column is `pickup_id`, change here & in select)
+                2 => 'vendors.vendor_name',      // Vendor
+                3 => 'riders.rider_name',        // Rider
+                4 => 'fpd.id',                   // Flower Details (button)
+                5 => 'fpd.pickup_date',          // PickUp Date
+                6 => 'fpd.total_price',          // Total Price
+                7 => 'fpd.payment_status',       // Payment Status
+                8 => 'fpd.status',               // Status
+                9 => 'fpd.id',                   // Actions
             ];
 
+            // Base query
             $base = FlowerPickupDetails::query()
                 ->from('flower_pickup_details as fpd')
                 ->leftJoin('vendors', 'vendors.id', '=', 'fpd.vendor_id')
                 ->leftJoin('rider_details as riders', 'riders.id', '=', 'fpd.rider_id');
 
+            // Filters
             switch ($filter) {
                 case 'todayexpenses':
                     $base->whereDate('fpd.pickup_date', Carbon::today());
@@ -110,27 +112,31 @@ class FlowerPickupController extends Controller
                          ->where('fpd.payment_status', 'pending');
                     break;
                 case 'monthlyexpenses':
-                    $base->whereMonth('fpd.pickup_date', Carbon::now()->month);
+                    $base->whereMonth('fpd.pickup_date', Carbon::now()->month)
+                         ->whereYear('fpd.pickup_date', Carbon::now()->year);
                     break;
                 case 'monthlypaidpickup':
                     $base->whereMonth('fpd.pickup_date', Carbon::now()->month)
+                         ->whereYear('fpd.pickup_date', Carbon::now()->year)
                          ->where('fpd.payment_status', 'Paid');
                     break;
                 case 'monthlypendingpickup':
                     $base->whereMonth('fpd.pickup_date', Carbon::now()->month)
+                         ->whereYear('fpd.pickup_date', Carbon::now()->year)
                          ->where('fpd.payment_status', 'pending');
                     break;
-                case 'all':
                 default:
+                    // 'all' -> no extra filter
                     break;
             }
 
-            // totals before/after search
-            $recordsTotal = (clone $base)->count('fpd.id');
+            // Total (before search). Distinct avoids overcount on joins.
+            $recordsTotal = (clone $base)->distinct('fpd.id')->count('fpd.id');
 
+            // Search (escape wildcards)
             if ($search !== '') {
-                $base->where(function ($q) use ($search) {
-                    $like = '%' . str_replace(['%', '_'], ['\%', '\_'], $search) . '%';
+                $like = '%' . strtr($search, ['%' => '\%', '_' => '\_']) . '%';
+                $base->where(function ($q) use ($like) {
                     $q->orWhere('fpd.pick_up_id', 'like', $like)
                       ->orWhere('vendors.vendor_name', 'like', $like)
                       ->orWhere('riders.rider_name', 'like', $like)
@@ -139,26 +145,31 @@ class FlowerPickupController extends Controller
                 });
             }
 
-            $recordsFiltered = (clone $base)->count('fpd.id');
+            // Filtered count
+            $recordsFiltered = (clone $base)->distinct('fpd.id')->count('fpd.id');
 
+            // Ordering (safe)
             $orderBy = 'fpd.pickup_date';
             $dir     = 'desc';
             if (!empty($order[0])) {
                 $colIdx = (int) ($order[0]['column'] ?? 5);
                 $tmpCol = $columns[$colIdx] ?? 'fpd.pickup_date';
+                $dirCandidate = strtolower($order[0]['dir'] ?? 'desc');
+                $dir = in_array($dirCandidate, ['asc', 'desc'], true) ? $dirCandidate : 'desc';
+
+                // Only allow known columns
                 if (in_array($tmpCol, $columns, true)) {
                     $orderBy = $tmpCol;
                 }
-                $dirCandidate = strtolower($order[0]['dir'] ?? 'desc');
-                $dir = in_array($dirCandidate, ['asc', 'desc'], true) ? $dirCandidate : 'desc';
             }
 
+            // Data rows
             $rows = (clone $base)
                 ->select([
                     'fpd.id',
-                    'fpd.pick_up_id',
-                    'vendors.vendor_name',
-                    'riders.rider_name',
+                    'fpd.pick_up_id', // ⚠ If your column is `pickup_id`, change to 'fpd.pickup_id'
+                    'vendors.vendor_name as vendor_name',
+                    'riders.rider_name as rider_name',
                     'fpd.pickup_date',
                     'fpd.total_price',
                     'fpd.payment_status',
@@ -169,35 +180,44 @@ class FlowerPickupController extends Controller
                 ->take($length)
                 ->get();
 
+            // If you actually have 'pickup_id' (without underscore), flip both occurrences above and here.
+            // Example:
+            // ->select(['fpd.pickup_id as pick_up_id', ...])
+            // and in the search/order map use 'fpd.pickup_id'.
+
             $data = $rows->map(function ($r, $i) use ($start) {
                 $idx   = $start + $i + 1;
                 $date  = $r->pickup_date ? Carbon::parse($r->pickup_date)->format('d-m-Y') : 'N/A';
-                $price = $r->total_price !== null
+
+                $price = ($r->total_price !== null && $r->total_price !== '')
                     ? '₹' . number_format((float) $r->total_price, 2)
                     : '<span class="text-warning">Pending</span>';
 
-                $payBadge = $r->payment_status === 'Paid'
+                $payBadge = ($r->payment_status === 'Paid')
                     ? '<span class="badge bg-success" style="font-size:12px;width:70px;padding:10px">Paid</span>'
                     : '<span class="badge bg-danger" style="font-size:12px;width:70px;padding:10px">Unpaid</span>';
 
-                $statusBadge = match ($r->status) {
-                    'pending'   => '<span class="badge bg-danger" style="font-size:12px;width:100px;padding:10px"><i class="fas fa-hourglass-half"></i> Pending</span>',
-                    'Completed' => '<span class="badge bg-success" style="font-size:12px;width:100px;padding:10px"><i class="fas fa-check-circle"></i> Completed</span>',
-                    default     => '<span class="badge bg-secondary"><i class="fas fa-question-circle"></i> '.e($r->status ?? 'N/A').'</span>',
-                };
+                if ($r->status === 'pending') {
+                    $statusBadge = '<span class="badge bg-danger" style="font-size:12px;width:100px;padding:10px"><i class="fas fa-hourglass-half"></i> Pending</span>';
+                } elseif ($r->status === 'Completed') {
+                    $statusBadge = '<span class="badge bg-success" style="font-size:12px;width:100px;padding:10px"><i class="fas fa-check-circle"></i> Completed</span>';
+                } else {
+                    $statusText  = e($r->status ?: 'N/A');
+                    $statusBadge = '<span class="badge bg-secondary"><i class="fas fa-question-circle"></i> ' . $statusText . '</span>';
+                }
 
-                $viewBtn = '<button type="button" class="btn btn-primary btn-view-items" data-id="'.$r->id.'" data-bs-toggle="modal" data-bs-target="#flowerDetailsModal">
+                $viewBtn = '<button type="button" class="btn btn-primary btn-view-items" data-id="' . e($r->id) . '" data-bs-toggle="modal" data-bs-target="#flowerDetailsModal">
                                 <i class="fas fa-eye"></i> View
                             </button>';
 
                 $actions = '
-                    <a href="'.route('flower-pickup.edit', $r->id).'" class="btn btn-primary d-flex align-items-center justify-content-center" style="width:40px;padding:10px;font-size:12px;">
+                    <a href="' . e(route('flower-pickup.edit', $r->id)) . '" class="btn btn-primary d-flex align-items-center justify-content-center" style="width:40px;padding:10px;font-size:12px;">
                         <i class="fas fa-edit me-1"></i>
                     </a>
                     <button class="btn btn-secondary d-flex align-items-center justify-content-center btn-open-payment"
                             style="width:40px;padding:10px;font-size:12px;"
-                            data-id="'.$r->id.'"
-                            data-action="'.e(route('update.payment', $r->id)).'"
+                            data-id="' . e($r->id) . '"
+                            data-action="' . e(route('update.payment', $r->id)) . '"
                             data-bs-toggle="modal" data-bs-target="#paymentModal">
                         <i class="fas fa-credit-card me-1"></i>
                     </button>';
@@ -212,9 +232,9 @@ class FlowerPickupController extends Controller
                     $price,
                     $payBadge,
                     $statusBadge,
-                    '<div class="d-flex align-items-center gap-2">'.$actions.'</div>',
+                    '<div class="d-flex align-items-center gap-2">' . $actions . '</div>',
                 ];
-            });
+            })->values()->toArray(); // ✅ ensure array
 
             return response()->json([
                 'draw'            => $draw,
@@ -222,12 +242,25 @@ class FlowerPickupController extends Controller
                 'recordsFiltered' => $recordsFiltered,
                 'data'            => $data,
             ], 200, ['Content-Type' => 'application/json']);
-        } catch (\Throwable $e) {
-            Log::error('DT ajaxFlowerPickupDetails failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+
+        } catch (Throwable $e) {
+            // ✅ This now works because Log facade is imported
+            Log::error('DT ajaxFlowerPickupDetails failed', [
+                'msg'  => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            if (config('app.debug')) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
             return response()->json(['error' => 'Server error'], 500);
         }
     }
 
+    /**
+     * Items for the details modal
+     */
     public function getFlowerPickupItems(int $id)
     {
         $items = FlowerPickupItem::with(['flower:id,name', 'unit:id,unit_name'])
@@ -240,11 +273,12 @@ class FlowerPickupController extends Controller
                     'unit'     => $it->unit->unit_name ?? 'N/A',
                     'price'    => $it->price ?? 'N/A',
                 ];
-            });
+            })
+            ->values()
+            ->toArray();
 
         return response()->json(['items' => $items], 200, ['Content-Type' => 'application/json']);
     }
-
     public function edit($id)
     {
         $detail = FlowerPickupDetails::with(['flowerPickupItems', 'vendor', 'rider'])->findOrFail($id);
