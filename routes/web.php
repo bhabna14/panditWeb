@@ -375,7 +375,6 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/add-flower-pickup-request', 'addflowerpickuprequest')->name('admin.addflowerpickuprequest');
         Route::post('/flower-pickup-request/approve/{id}',  'approveRequest')->name('flower-pickup-request.approve');
 
-        Route::get('/manage-flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
         Route::post('/save-flower-pickup-assign-rider', 'saveFlowerPickupAssignRider')->name('admin.saveFlowerPickupAssignRider');
        
@@ -383,8 +382,11 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
 
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
         Route::put('/flower-pickup/update/{id}', 'update')->name('flower-pickup.update');
-    });
 
+        Route::get('/flower-pickup-details', 'manageflowerpickupdetails')->name('admin.manageflowerpickupdetails');
+        Route::get('/flower-pickup-details/data','ajaxFlowerPickupDetails')->name('admin.flower-pickup-details.data');
+        Route::get('/flower-pickup-details/{id}/items', 'getFlowerPickupItems')->whereNumber('id')->name('admin.flower-pickup-details.items');
+    });
 
    Route::controller(RiderController::class)->group(function() {
         Route::get('/add-rider-details', 'addRiderDetails')->name('admin.addRiderDetails');
