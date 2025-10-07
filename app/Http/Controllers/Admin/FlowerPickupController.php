@@ -146,23 +146,27 @@ class FlowerPickupController extends Controller
             $recordsFiltered = (clone $base)->count('id');
 
             // Safe ordering: allow only fields that live on the details table
-            $safeOrderMap = [
-                1 => 'pick_up_id',
-                5 => 'pickup_date',
-                6 => 'total_price',
-                7 => 'payment_status',
-                8 => 'status',
-            ];
-            $orderBy = 'pickup_date';
-            $dir     = 'desc';
-            if (!empty($order[0])) {
-                $colIdx = (int)($order[0]['column'] ?? 5);
-                $dirRaw = strtolower($order[0]['dir'] ?? 'desc');
-                $dir    = in_array($dirRaw, ['asc', 'desc'], true) ? $dirRaw : 'desc';
-                if (isset($safeOrderMap[$colIdx])) {
-                    $orderBy = $safeOrderMap[$colIdx];
-                }
-            }
+          // Safe ordering map (unchanged)
+$safeOrderMap = [
+    1 => 'pick_up_id',
+    5 => 'pickup_date',
+    6 => 'total_price',
+    7 => 'payment_status',
+    8 => 'status',
+];
+
+// ✅ Default sort by numeric primary key
+$orderBy = 'id';
+$dir     = 'desc';
+
+if (!empty($order[0])) {
+    $colIdx = (int)($order[0]['column'] ?? 5);
+    $dirRaw = strtolower($order[0]['dir'] ?? 'desc');
+    $dir    = in_array($dirRaw, ['asc', 'desc'], true) ? $dirRaw : 'desc';
+    if (isset($safeOrderMap[$colIdx])) {
+        $orderBy = $safeOrderMap[$colIdx];
+    }
+}
 
             // Fetch paginated rows
             $rows = (clone $base)
