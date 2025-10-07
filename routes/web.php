@@ -981,12 +981,20 @@ Route::put('/users/{admin}', [AdminUserController::class, 'update'])->name('user
 Route::delete('/users/{admin}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 
 
-Route::get('/admin/flower-pickup-details', [FlowerPickupController::class, 'manageflowerpickupdetails'])
-    ->name('admin.manageflowerpickupdetails');
+Route::prefix('admin')->name('admin.')->group(function () {
+    // Page
+    Route::get('/manage-flower-pickup-details', [FlowerPickupDetailsController::class, 'manageflowerpickupdetails'])
+        ->name('manageflowerpickupdetails');
 
-Route::get('/admin/flower-pickup-details/data', [FlowerPickupController::class, 'ajaxFlowerPickupDetails'])
-    ->name('admin.flower-pickup-details.data');
+    // (Optional back-compat path)
+    Route::get('/flower-pickup-details', [FlowerPickupDetailsController::class, 'manageflowerpickupdetails']);
 
-Route::get('/admin/flower-pickup-details/{id}/items', [FlowerPickupController::class, 'getFlowerPickupItems'])
-    ->whereNumber('id')
-    ->name('admin.flower-pickup-details.items');
+    // DataTables JSON
+    Route::get('/flower-pickup-details/data', [FlowerPickupDetailsController::class, 'ajaxFlowerPickupDetails'])
+        ->name('flower-pickup-details.data');
+
+    // Items for modal
+    Route::get('/flower-pickup-details/{id}/items', [FlowerPickupDetailsController::class, 'getFlowerPickupItems'])
+        ->whereNumber('id')
+        ->name('flower-pickup-details.items');
+});

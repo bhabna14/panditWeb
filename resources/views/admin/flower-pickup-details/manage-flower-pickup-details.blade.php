@@ -153,7 +153,7 @@
 @endsection
 
 @section('scripts')
-    <!-- Internal Data tables -->
+    <!-- DataTables (one set only) -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
@@ -165,27 +165,47 @@
     <script src="{{ asset('assets/plugins/datatable/js/buttons.print.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.responsive.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/responsive.bootstrap5.min.js') }}"></script>
-    <script src="{{ asset('assets/js/table-data.js') }}"></script>
+
+    {{-- IMPORTANT: remove generic initializers that may re-init the same table --}}
+    {{-- <script src="{{ asset('assets/js/table-data.js') }}"></script> --}}
 
     <script>
         (function() {
-            const tableEl = $('#file-datatable');
+            const tableSel = '#file-datatable';
             const filterEl = $('#filter');
 
-            const dt = tableEl.DataTable({
+            // mark XHR globally (prevents auth redirects -> HTML)
+            $.ajaxSetup({
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            // Avoid TN/3: destroy if already initialized (e.g. after PJAX or partial reload)
+            if ($.fn.DataTable.isDataTable(tableSel)) {
+                $(tableSel).DataTable().clear().destroy();
+                $(tableSel).empty(); // optional, clears cloned headers
+            }
+
+            const dt = $(tableSel).DataTable({
                 serverSide: true,
                 processing: true,
                 responsive: true,
                 deferRender: true,
+                retrieve: true, // return existing instance if called again
                 pageLength: 25,
                 lengthMenu: [10, 25, 50, 100],
                 order: [
                     [5, 'desc']
-                ], // pickup_date desc
+                ], // pickup_date
                 ajax: {
                     url: "{{ route('admin.flower-pickup-details.data') }}",
                     data: function(d) {
                         d.filter = filterEl.val();
+                    },
+                    error: function(xhr) {
+                        console.error('DataTables AJAX error', xhr.status, xhr.responseText);
+                        alert('Failed to load data (see console/network for details).');
                     }
                 },
                 columns: [{
@@ -249,17 +269,21 @@
             });
 
             // Lazy-load items into modal
-            tableEl.on('click', '.btn-view-items', function() {
+            $(tableSel).on('click', '.btn-view-items', function() {
                 const id = $(this).data('id');
                 const list = $('#flowerItemsList').empty().append(
                     '<li class="list-group-item text-muted">Loading...</li>');
-                fetch("{{ url('/admin/flower-pickup-details') }}/" + id + "/items")
+                fetch("{{ url('/admin/flower-pickup-details') }}/" + id + "/items", {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
                     .then(r => r.json())
                     .then(({
                         items
                     }) => {
                         list.empty();
-                        if (!items || items.length === 0) {
+                        if (!items || !items.length) {
                             list.append('<li class="list-group-item text-muted">No items.</li>');
                             return;
                         }
@@ -274,13 +298,12 @@
                             if (idx !== items.length - 1) list.append('<hr>');
                         });
                     })
-                    .catch(() => {
-                        list.html('<li class="list-group-item text-danger">Failed to load items.</li>');
-                    });
+                    .catch(() => list.html(
+                        '<li class="list-group-item text-danger">Failed to load items.</li>'));
             });
 
             // Open payment modal, set action + hidden id
-            tableEl.on('click', '.btn-open-payment', function() {
+            $(tableSel).on('click', '.btn-open-payment', function() {
                 const id = $(this).data('id');
                 const action = $(this).data('action');
                 $('#paymentForm').attr('action', action);
@@ -288,17 +311,21 @@
                 $('#paymentFeedback').removeClass('text-success text-danger').text('');
             });
 
-            // Optional: submit payment via AJAX (keeps table fresh & fast)
+            // Submit payment via AJAX (with CSRF)
             $('#paymentForm').on('submit', function(e) {
                 e.preventDefault();
                 const $form = $(this);
                 const formData = new FormData(this);
+                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
                 $('#paymentFeedback').removeClass('text-success text-danger').text('Saving...');
 
                 fetch($form.attr('action'), {
                         method: 'POST',
                         headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            ...(csrf ? {
+                                'X-CSRF-TOKEN': csrf
+                            } : {})
                         },
                         body: formData
                     })
@@ -311,10 +338,10 @@
                     })
                     .then(() => {
                         $('#paymentFeedback').addClass('text-success').text('Saved.');
-                        dt.ajax.reload(null, false); // redraw current page
+                        dt.ajax.reload(null, false); // refresh current page
                         setTimeout(() => $('#paymentModal').modal('hide'), 500);
                     })
-                    .catch((err) => {
+                    .catch(() => {
                         $('#paymentFeedback').addClass('text-danger').text('Failed to save payment.');
                     });
             });
