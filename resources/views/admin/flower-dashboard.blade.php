@@ -11,22 +11,22 @@
     <style>
         /* ========= Colorful pulse glows (border halo) ========= */
         .pulse-glow--cyan {
-            animation: pulseGlowCyan 1.2s ease-in-out;
+            animation: pulseGlowCyan 1.2s ease-in-out 0s 6;
             border-color: rgba(6, 182, 212, .45) !important;
         }
 
         .pulse-glow--emerald {
-            animation: pulseGlowEmerald 1.2s ease-in-out;
+            animation: pulseGlowEmerald 1.2s ease-in-out 0s 6;
             border-color: rgba(16, 185, 129, .45) !important;
         }
 
         .pulse-glow--fuchsia {
-            animation: pulseGlowFuchsia 1.2s ease-in-out;
+            animation: pulseGlowFuchsia 1.2s ease-in-out 0s 6;
             border-color: rgba(217, 70, 239, .45) !important;
         }
 
         .pulse-glow--amber {
-            animation: pulseGlowAmber 1.2s ease-in-out;
+            animation: pulseGlowAmber 1.2s ease-in-out 0s 6;
             border-color: rgba(245, 158, 11, .45) !important;
         }
 
@@ -86,27 +86,29 @@
             }
         }
 
-        /* ========= Background blink via pseudo-element (beats gradients/!important) ========= */
+        /* ========= NEW: background blink using a pseudo-element =========
+               This wins against gradients and !important backgrounds */
         .pulse-bg--cyan::after {
             --tint: rgba(6, 182, 212, .16);
-            animation: pulseBg 1.2s ease-in-out;
+            animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
         .pulse-bg--emerald::after {
             --tint: rgba(16, 185, 129, .16);
-            animation: pulseBg 1.2s ease-in-out;
+            animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
         .pulse-bg--fuchsia::after {
             --tint: rgba(217, 70, 239, .16);
-            animation: pulseBg 1.2s ease-in-out;
+            animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
         .pulse-bg--amber::after {
             --tint: rgba(245, 158, 11, .16);
-            animation: pulseBg 1.2s ease-in-out;
+            animation: pulseBg 1.2s ease-in-out 0s 6;
         }
 
+        /* pseudo-element layer under content */
         .pulse-bg--cyan::after,
         .pulse-bg--emerald::after,
         .pulse-bg--fuchsia::after,
@@ -117,7 +119,7 @@
             border-radius: inherit;
             pointer-events: none;
             z-index: 0;
-            /* below content */
+            /* sit beneath content */
             background: transparent;
         }
 
@@ -125,15 +127,15 @@
 
             0%,
             100% {
-                background: transparent
+                background: transparent;
             }
 
             50% {
-                background: var(--tint)
+                background: var(--tint);
             }
         }
 
-        /* Cards prepared for overlay */
+        /* Ensure cards can show bg layer without covering text */
         .sales-card,
         .card.sales-card {
             position: relative;
@@ -142,16 +144,17 @@
             will-change: background-color, transform, box-shadow, border-color;
             background-clip: padding-box;
             overflow: hidden;
-            /* keep rounded overlay */
+            /* keep the tint rounded */
         }
 
+        /* elevate direct children above ::after */
         .sales-card>*,
         .card.sales-card>* {
             position: relative;
             z-index: 1;
         }
 
-        /* Sound unlock pill */
+        /* --- Sound unlock pill --- */
         #sound-unlock {
             position: fixed;
             right: 16px;
@@ -171,7 +174,7 @@
             display: none;
         }
 
-        /* Infinite loop when day-mode is active */
+        /* run animations infinitely while active-for-a-day */
         .pulse-day {
             animation-iteration-count: infinite !important;
         }
@@ -688,12 +691,8 @@
                 return el ? (el.closest('.watch-card') || el.closest('.card')) : null;
             }
 
-            // --- blink-until-midnight helpers (local time) ---
-            function endOfTodayTs() {
-                const d = new Date();
-                d.setHours(23, 59, 59, 999);
-                return d.getTime();
-            }
+            // --- persistence helpers for "blink all day" ---
+            const DAY_MS = 24 * 60 * 60 * 1000;
 
             function keyFor(wkey) {
                 return `pf_blink_until_${wkey}`;
@@ -732,13 +731,13 @@
                 card.classList.add(borderCls, bgCls);
 
                 if (persistMs > 0) {
-                    // run infinitely (CSS .pulse-day), stop at timeout
+                    // run forever (CSS .pulse-day forces infinite iteration)
                     card.classList.add('pulse-day');
                     setTimeout(() => {
                         stopGlow(card, borderCls, bgCls, /*removePulseDay=*/ true);
                     }, persistMs);
                 } else {
-                    // short cue (~6s); do NOT kill day-mode if already applied
+                    // quick cue ~6s; DO NOT remove pulse-day if present
                     setTimeout(() => {
                         stopGlow(card, borderCls, bgCls, /*removePulseDay=*/ false);
                     }, 6000);
@@ -746,7 +745,7 @@
             }
 
             function stopGlow(card, borderCls, bgCls, removePulseDay) {
-                // if day-mode active, keep classes; otherwise remove
+                // If we’re in day-mode, keep classes; otherwise allow quick cleanup
                 if (!card.classList.contains('pulse-day')) {
                     card.classList.remove(borderCls, bgCls);
                 }
@@ -834,7 +833,7 @@
                 pill && pill.addEventListener('click', unlock, true);
             }
 
-            // re-apply midnight blink if active; only show quick cue if not in day-mode
+            // initial: re-apply 24h blink if active; only do quick cue if NOT in day-mode
             function initialKick() {
                 watchers.forEach(w => {
                     const el = els[w.key];
@@ -889,16 +888,15 @@
 
                             if (newVal > oldVal) {
                                 if (w.key === 'ordersRequestedToday') {
-                                    // blink for the rest of the day (until local midnight)
-                                    const untilTs = endOfTodayTs();
+                                    const untilTs = Date.now() + DAY_MS;
                                     setBlinkUntil(w.key, untilTs);
                                     glow(el, w.color, {
-                                        persistMs: untilTs - Date.now()
-                                    });
+                                        persistMs: DAY_MS
+                                    }); // 24h continuous blink
                                     beep(300, 1250);
                                     setTimeout(() => beep(240, 920), 170);
                                 } else {
-                                    glow(el, w.color); // short cue
+                                    glow(el, w.color); // quick cue for others
                                     beep(200, 880);
                                 }
                             }
