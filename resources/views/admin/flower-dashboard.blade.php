@@ -8,57 +8,107 @@
     <link href="{{ asset('assets/css/flower-dashboard.css') }}" rel="stylesheet" />
 
     <style>
-        /* Smooth baseline for cards that may animate */
-        .watch-card,
+        /* =============================================
+               Metric cards with native background blink
+               ============================================= */
+        .metric-card,
         .card.sales-card {
             transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease;
             will-change: background-color, transform, box-shadow;
+            background-clip: padding-box;
         }
 
-        /* Base background tint per watch-card (always visible) */
-        .watch-card[data-color="cyan"]    { background-color: rgba(6, 182, 212, 0.10); }   /* teal/cyan */
-        .watch-card[data-color="amber"]   { background-color: rgba(245, 158, 11, 0.12); }
-        .watch-card[data-color="fuchsia"] { background-color: rgba(217, 70, 239, 0.10); }
-        .watch-card[data-color="emerald"] { background-color: rgba(16, 185, 129, 0.10); }
-
-        /* Non-watch cards stay white */
-        .card.sales-card:not(.watch-card) { background-color: #ffffff; }
-
-        /* ======= BACKGROUND BLINK (no border blink) ======= */
-        .pulse-glow--cyan    { animation: bgBlinkCyan    1.2s ease-in-out 0s 6; }
-        .pulse-glow--amber   { animation: bgBlinkAmber   1.2s ease-in-out 0s 6; }
-        .pulse-glow--fuchsia { animation: bgBlinkFuchsia 1.2s ease-in-out 0s 6; }
-        .pulse-glow--emerald { animation: bgBlinkEmerald 1.2s ease-in-out 0s 6; }
-
-        /* Blink from base tint -> stronger tint -> back, with a soft lift */
-        @keyframes bgBlinkCyan {
-            0%   { background-color: rgba(6, 182, 212, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: rgba(6, 182, 212, 0.32); transform: scale(1.01); box-shadow: 0 10px 24px rgba(6,182,212,0.22); }
-            100% { background-color: rgba(6, 182, 212, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-        }
-        @keyframes bgBlinkAmber {
-            0%   { background-color: rgba(245, 158, 11, 0.12); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: rgba(245, 158, 11, 0.34); transform: scale(1.01); box-shadow: 0 10px 24px rgba(245,158,11,0.22); }
-            100% { background-color: rgba(245, 158, 11, 0.12); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-        }
-        @keyframes bgBlinkFuchsia {
-            0%   { background-color: rgba(217, 70, 239, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: rgba(217, 70, 239, 0.30); transform: scale(1.01); box-shadow: 0 10px 24px rgba(217,70,239,0.22); }
-            100% { background-color: rgba(217, 70, 239, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-        }
-        @keyframes bgBlinkEmerald {
-            0%   { background-color: rgba(16, 185, 129, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: rgba(16, 185, 129, 0.30); transform: scale(1.01); box-shadow: 0 10px 24px rgba(16,185,129,0.22); }
-            100% { background-color: rgba(16, 185, 129, 0.10); transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+        /* Default fallback (non metric-card stay white) */
+        .card.sales-card:not(.metric-card) {
+            background-color: #fff;
         }
 
-        /* Tiny floating pill to unlock audio (keep if you use sound) */
+        /* ---- Color presets via CSS variables ---- */
+        .metric-card {
+            /* base = idle tint; peak = blink tint */
+            --metric-base: rgba(0, 0, 0, 0.03);
+            --metric-peak: rgba(0, 0, 0, 0.12);
+            background-color: var(--metric-base);
+        }
+
+        .metric--cyan {
+            --metric-base: rgba(6, 182, 212, 0.12);
+            --metric-peak: rgba(6, 182, 212, 0.34);
+        }
+
+        .metric--amber {
+            --metric-base: rgba(245, 158, 11, 0.14);
+            --metric-peak: rgba(245, 158, 11, 0.36);
+        }
+
+        .metric--fuchsia {
+            --metric-base: rgba(217, 70, 239, 0.12);
+            --metric-peak: rgba(217, 70, 239, 0.32);
+        }
+
+        .metric--emerald {
+            --metric-base: rgba(16, 185, 129, 0.12);
+            --metric-peak: rgba(16, 185, 129, 0.32);
+        }
+
+        /* ---- Blink animation toggled via .is-blinking ---- */
+        .metric-card.is-blinking {
+            animation: metricBlink 1.2s ease-in-out 0s 6;
+        }
+
+        @keyframes metricBlink {
+            0% {
+                background-color: var(--metric-base);
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+            }
+
+            50% {
+                background-color: var(--metric-peak);
+                transform: scale(1.01);
+                box-shadow: 0 10px 24px rgba(0, 0, 0, 0.12);
+            }
+
+            100% {
+                background-color: var(--metric-base);
+                transform: none;
+                box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+
+        /* Accessibility: respect reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+
+            .metric-card,
+            .card.sales-card {
+                transition: background-color .2s ease;
+            }
+
+            .metric-card.is-blinking {
+                animation: none;
+                background-color: var(--metric-peak);
+            }
+        }
+
+        /* Tiny floating pill to unlock audio */
         #sound-unlock {
-            position: fixed; right: 16px; bottom: 16px; z-index: 9999;
-            background: #111827; color: #fff; padding: 8px 12px; border-radius: 999px;
-            box-shadow: 0 6px 20px rgba(0,0,0,.22); font-size: 12px; cursor: pointer; opacity: .9;
+            position: fixed;
+            right: 16px;
+            bottom: 16px;
+            z-index: 9999;
+            background: #111827;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 999px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .22);
+            font-size: 12px;
+            cursor: pointer;
+            opacity: .9;
         }
-        #sound-unlock.hidden { display: none; }
+
+        #sound-unlock.hidden {
+            display: none;
+        }
     </style>
 @endsection
 
@@ -194,7 +244,7 @@
                 <!-- Total Delivery Today (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-info text-white watch-card" data-color="emerald"
+                        <div class="card sales-card text-white metric-card metric--emerald"
                             style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
@@ -256,7 +306,7 @@
                 <!-- New Subscription (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
-                        <div class="card sales-card watch-card" data-color="amber"
+                        <div class="card sales-card metric-card metric--amber"
                             style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
@@ -276,7 +326,7 @@
                 <!-- Renewed Subscription (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card watch-card" data-color="fuchsia"
+                        <div class="card sales-card metric-card metric--fuchsia"
                             style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
@@ -296,7 +346,7 @@
                 <!-- Customize Order (WATCH, main one) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
-                        <div class="card sales-card watch-card" data-color="cyan"
+                        <div class="card sales-card metric-card metric--cyan"
                             style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-8">
@@ -312,7 +362,6 @@
                         </div>
                     </a>
                 </div>
-
 
                 <!-- Customize Order (Upcoming 3 Days) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
@@ -563,6 +612,7 @@
     {{-- Add the unlock pill --}}
     <div id="sound-unlock" class="hidden">🔔 Enable sound</div>
 @endsection
+
 @section('scripts')
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script src="{{ asset('assets/js/select2.js') }}"></script>
@@ -589,7 +639,6 @@
             const time1 = document.getElementById('liveTime');
             const date2 = document.getElementById('current-date');
             const time2 = document.getElementById('current-time');
-
             if (date1) date1.textContent = now.toLocaleDateString(undefined, {
                 year: 'numeric',
                 month: 'long',
@@ -608,30 +657,26 @@
         setInterval(updateDateTime, 1000);
     </script>
 
-    <!-- Live metrics poll + colorful glow + initial fire + robust sound unlock -->
+    <!-- Live metrics poll + blink + robust sound unlock -->
     <script>
         (function() {
-            // Map element IDs -> server key + glow color
+            // Map element IDs -> server key (we choose colors via class on the card now)
             const watchers = [{
                     key: 'ordersRequestedToday',
-                    elId: 'ordersRequestedTodayCount',
-                    color: 'cyan'
-                }, // main
+                    elId: 'ordersRequestedTodayCount'
+                }, // metric--cyan card
                 {
                     key: 'newUserSubscription',
-                    elId: 'newUserSubscriptionCount',
-                    color: 'amber'
-                },
+                    elId: 'newUserSubscriptionCount'
+                }, // metric--amber
                 {
                     key: 'renewSubscription',
-                    elId: 'renewSubscriptionCount',
-                    color: 'fuchsia'
-                },
+                    elId: 'renewSubscriptionCount'
+                }, // metric--fuchsia
                 {
                     key: 'totalDeliveriesToday',
-                    elId: 'totalDeliveriesTodayCount',
-                    color: 'emerald'
-                },
+                    elId: 'totalDeliveriesTodayCount'
+                } // metric--emerald
             ];
 
             const els = {};
@@ -646,22 +691,35 @@
                 }
             });
 
-            function findCard(el) {
-                return el ? (el.closest('.watch-card') || el.closest('.card')) : null;
+            function findMetricCard(el) {
+                return el ? (el.closest('.metric-card') || el.closest('.card')) : null;
             }
 
-            function glow(el, color) {
-                const card = findCard(el);
+            function glow(el) {
+                const card = findMetricCard(el);
                 if (!card) return;
-                const cls = `pulse-glow--${color}`;
-                card.classList.add(cls);
-                setTimeout(() => card.classList.remove(cls), 6000);
+
+                // remove and re-add to restart animation if already blinking
+                card.classList.remove('is-blinking');
+                // force reflow to restart CSS animation
+                // eslint-disable-next-line no-unused-expressions
+                card.offsetHeight;
+                card.classList.add('is-blinking');
+
+                // clean up after animation ends (in case CSS keeps class)
+                const endOnce = () => {
+                    card.classList.remove('is-blinking');
+                    card.removeEventListener('animationend', endOnce);
+                };
+                card.addEventListener('animationend', endOnce);
+                // fallback timeout in case animationend is missed
+                setTimeout(() => card.classList.remove('is-blinking'), 8000);
             }
 
-            // ---- Sound unlock (one global AudioContext reused) + QUEUE ----
+            // ---- Sound unlock + queue ----
             let audioEnabled = false;
             let audioCtx = null;
-            const beepQueue = []; // store [ms, freq] until unlocked
+            const beepQueue = [];
 
             function ensureAudio() {
                 try {
@@ -675,15 +733,13 @@
                         audioEnabled = true;
                         flushBeepQueue();
                     }
-                } catch (e) {
-                    /* ignore */
-                }
+                } catch (e) {}
             }
 
             function flushBeepQueue() {
                 while (audioEnabled && beepQueue.length) {
-                    const [ms, freq] = beepQueue.shift();
-                    _beep(ms, freq);
+                    const [ms, f] = beepQueue.shift();
+                    _beep(ms, f);
                 }
             }
 
@@ -698,12 +754,8 @@
                     osc.start();
                     gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 0.02);
                     gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms / 1000));
-                    setTimeout(() => {
-                        osc.stop();
-                    }, ms + 60);
-                } catch (e) {
-                    /* ignore */
-                }
+                    setTimeout(() => osc.stop(), ms + 60);
+                } catch (e) {}
             }
 
             function beep(ms = 230, freq = 880) {
@@ -717,15 +769,11 @@
             function setupUnlockUI() {
                 const pill = document.getElementById('sound-unlock');
                 const maybeHide = () => pill && pill.classList.add('hidden');
-
-                // if audio enabled already, hide pill
                 if (audioEnabled) {
                     maybeHide();
                     return;
                 }
-
                 if (pill) pill.classList.remove('hidden');
-
                 const unlock = () => {
                     ensureAudio();
                     maybeHide();
@@ -738,15 +786,14 @@
                 pill && pill.addEventListener('click', unlock, true);
             }
 
-            // ---- Initial glow/sound if values already > 0 on page load ----
+            // Kick on load if already > 0 (visual + queued sound)
             function initialKick() {
                 watchers.forEach(w => {
                     const el = els[w.key];
                     if (!el) return;
                     const val = prev[w.key] ?? 0;
                     if (val > 0) {
-                        glow(el, w.color);
-                        // More attention for Customize Orders
+                        glow(el);
                         if (w.key === 'ordersRequestedToday') {
                             beep(260, 1200);
                             setTimeout(() => beep(220, 900), 160);
@@ -774,16 +821,12 @@
                     watchers.forEach(w => {
                         const el = els[w.key];
                         if (!el) return;
-
                         const newVal = parseInt(data[w.key], 10) || 0;
                         const oldVal = prev[w.key] ?? 0;
-
                         if (newVal !== oldVal) {
                             el.textContent = newVal;
-
-                            // Highlight + sound on increases
                             if (newVal > oldVal) {
-                                glow(el, w.color);
+                                glow(el);
                                 if (w.key === 'ordersRequestedToday') {
                                     beep(260, 1200);
                                     setTimeout(() => beep(220, 900), 160);
@@ -795,8 +838,7 @@
                         }
                     });
                 } catch (e) {
-                    // optional console.warn(e);
-                }
+                    /* optional console.warn(e) */ }
             }
 
             document.addEventListener('visibilitychange', () => {
@@ -804,10 +846,10 @@
             });
 
             document.addEventListener('DOMContentLoaded', () => {
-                setupUnlockUI(); // show 🔔 pill until user interacts
-                initialKick(); // <<< glow + (queued) sound if counts already > 0
-                poll(); // initial sync
-                setInterval(poll, 5000); // poll every 5s
+                setupUnlockUI();
+                initialKick();
+                poll();
+                setInterval(poll, 5000);
             });
         })();
     </script>
