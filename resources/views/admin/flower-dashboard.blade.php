@@ -9,48 +9,60 @@
 
     <style>
         /* =============================================
-           Metric cards with native background blink
+           Metric cards with overlay background blink
+           (border stays untouched)
            ============================================= */
         .metric-card,
         .card.sales-card {
-            transition: background-color .35s ease, transform .2s ease, box-shadow .35s ease;
-            will-change: background-color, transform, box-shadow;
+            transition: transform .2s ease, box-shadow .35s ease;
+            will-change: transform, box-shadow;
             background-clip: padding-box;
+            border-radius: .75rem; /* feel free to match your theme */
+            position: relative; /* needed for overlay */
+            overflow: hidden;   /* keep overlay rounded */
         }
 
-        /* Default fallback (non metric-card stay white) */
+        /* Non-metric cards keep their default white background */
         .card.sales-card:not(.metric-card) { background-color: #fff; }
 
-        /* ---- Color presets via CSS variables ---- */
+        /* ---- Color presets via CSS variables (overlay tints) ---- */
         .metric-card {
-            /* base = idle tint; peak = blink tint */
             --metric-base: rgba(0,0,0,0.03);
             --metric-peak: rgba(0,0,0,0.12);
-            background-color: var(--metric-base);
         }
-        .metric--cyan    { --metric-base: rgba(6,182,212,0.12);  --metric-peak: rgba(6,182,212,0.34); }
-        .metric--amber   { --metric-base: rgba(245,158,11,0.14); --metric-peak: rgba(245,158,11,0.36); }
-        .metric--fuchsia { --metric-base: rgba(217,70,239,0.12); --metric-peak: rgba(217,70,239,0.32); }
-        .metric--emerald { --metric-base: rgba(16,185,129,0.12); --metric-peak: rgba(16,185,129,0.32); }
+        .metric--cyan    { --metric-base: rgba(6,182,212,0.14);  --metric-peak: rgba(6,182,212,0.36); }
+        .metric--amber   { --metric-base: rgba(245,158,11,0.16); --metric-peak: rgba(245,158,11,0.38); }
+        .metric--fuchsia { --metric-base: rgba(217,70,239,0.14); --metric-peak: rgba(217,70,239,0.34); }
+        .metric--emerald { --metric-base: rgba(16,185,129,0.14); --metric-peak: rgba(16,185,129,0.34); }
 
-        /* ---- Blink animation toggled via .is-blinking ---- */
-        .metric-card.is-blinking {
+        /* ---- Overlay that paints background (never affects border) ---- */
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-color: var(--metric-base) !important; /* ensure it wins */
+            transition: background-color .35s ease;
+            z-index: 0;
+        }
+        /* Keep content above overlay */
+        .metric-card > * { position: relative; z-index: 1; }
+
+        /* ---- Blink by animating the overlay only ---- */
+        .metric-card.is-blinking::before {
             animation: metricBlink 1.2s ease-in-out 0s 6;
         }
         @keyframes metricBlink {
-            0%   { background-color: var(--metric-base);   transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
-            50%  { background-color: var(--metric-peak);   transform: scale(1.01); box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
-            100% { background-color: var(--metric-base);   transform: none;        box-shadow: 0 0 0 rgba(0,0,0,0); }
+            0%   { background-color: var(--metric-base); }
+            50%  { background-color: var(--metric-peak); box-shadow: 0 10px 24px rgba(0,0,0,0.12); }
+            100% { background-color: var(--metric-base); }
         }
 
-        /* Accessibility: respect reduced motion */
+        /* Reduced motion: no animation, just stronger tint briefly */
         @media (prefers-reduced-motion: reduce) {
-            .metric-card,
-            .card.sales-card { transition: background-color .2s ease; }
-            .metric-card.is-blinking { animation: none; background-color: var(--metric-peak); }
+            .metric-card.is-blinking::before { animation: none; background-color: var(--metric-peak) !important; }
         }
 
-        /* Tiny floating pill to unlock audio */
+        /* Tiny floating pill to unlock audio (optional) */
         #sound-unlock {
             position: fixed; right: 16px; bottom: 16px; z-index: 9999;
             background: #111827; color: #fff; padding: 8px 12px; border-radius: 999px;
@@ -67,13 +79,14 @@
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h5 class="mb-2 tx-12">Active Subscription/Total Delivery</h5>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
-                                            {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}</h4>
+                                            {{ $activeSubscriptions }}/{{ $totalDeliveriesTodayCount }}
+                                        </h4>
                                     </div>
                                 </div>
                             </div>
@@ -81,16 +94,16 @@
                     </a>
                 </div>
 
-                <!-- Today Total Income -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Today Total Income</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">
-                                            ₹{{ number_format($totalIncomeToday, 2) }}</h4>
+                                            ₹{{ number_format($totalIncomeToday, 2) }}
+                                        </h4>
                                     </div>
                                 </div>
                             </div>
@@ -98,25 +111,24 @@
                     </a>
                 </div>
 
-                <!-- Today Total Expenditure -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                    <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                         <div class="row">
                             <div class="col-8">
                                 <div class="ps-4 pt-4 pe-3 pb-4">
                                     <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
                                     <h4 class="tx-20 font-weight-semibold mb-2">
-                                        ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
+                                        ₹{{ number_format($todayTotalExpenditure, 2) }}
+                                    </h4>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tomorrow Active Order -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'tomorrowOrder']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -139,21 +151,15 @@
             <div class="row">
                 @foreach ($ridersData as $data)
                     <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12 mb-4">
-                        <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank"
-                            class="text-decoration-none">
-                            <div class="sales-card"
-                                style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid rgb(186,185,185);">
+                        <a href="{{ route('admin.orderAssign', ['riderId' => $data['rider']->rider_id]) }}" target="_blank" class="text-decoration-none">
+                            <div class="sales-card" style="border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,.1); border: 1px solid rgb(186,185,185);">
                                 <div class="row">
                                     <div class="col-8">
                                         <div class="ps-4 pt-4 pe-3 pb-4">
                                             <h6 class="mb-2 text-dark">{{ $data['rider']->rider_name }}</h6>
                                             <div class="d-flex flex-column">
-                                                <h4 class="tx-12 font-weight-semibold text-dark mb-2">
-                                                    Delivery Assigned: {{ $data['totalAssignedOrders'] }}
-                                                </h4>
-                                                <h4 class="tx-12 font-weight-semibold text-dark mb-0">
-                                                    Delivered: {{ $data['totalDeliveredToday'] }}
-                                                </h4>
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-2">Delivery Assigned: {{ $data['totalAssignedOrders'] }}</h4>
+                                                <h4 class="tx-12 font-weight-semibold text-dark mb-0">Delivered: {{ $data['totalDeliveredToday'] }}</h4>
                                             </div>
                                         </div>
                                     </div>
@@ -166,17 +172,15 @@
         </div>
     </div>
 
-    <!-- row closed -->
+    <!-- Rider Details -->
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <h4 class="card-title-custom" style="font-size: 14px"> Rider Details</h4>
+            <h4 class="card-title-custom" style="font-size: 14px">Rider Details</h4>
 
             <div class="row">
-                <!-- Total Riders -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.manageRiderDetails') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-primary text-white"
-                            style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card bg-gradient-primary text-white" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -189,17 +193,14 @@
                     </a>
                 </div>
 
-                <!-- Total Delivery Today (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.totalDeliveries') }}" target="_blank">
-                        <div class="card sales-card text-white metric-card metric--emerald"
-                            style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card text-white metric-card metric--emerald" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Total Delivery Today</h6>
-                                        <h4 id="totalDeliveriesTodayCount" data-initial="{{ $totalDeliveriesToday }}"
-                                            class="tx-20 font-weight-semibold mb-2">
+                                        <h4 id="totalDeliveriesTodayCount" data-initial="{{ $totalDeliveriesToday }}" class="tx-20 font-weight-semibold mb-2">
                                             {{ $totalDeliveriesToday }}
                                         </h4>
                                     </div>
@@ -209,12 +210,9 @@
                     </a>
                 </div>
 
-                <!-- Total Delivery in Month -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}"
-                        target="_blank">
-                        <div class="card sales-card bg-gradient-success text-white"
-                            style="border: 1px solid rgb(186, 185, 185);">
+                    <a href="{{ route('admin.managedeliveryhistory', ['filter' => 'monthlydelivery']) }}" target="_blank">
+                        <div class="card sales-card bg-gradient-success text-white" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -227,11 +225,9 @@
                     </a>
                 </div>
 
-                <!-- Total Delivery -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.managedeliveryhistory') }}" target="_blank">
-                        <div class="card sales-card bg-gradient-secondary text-white"
-                            style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card bg-gradient-secondary text-white" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -247,21 +243,19 @@
         </div>
     </div>
 
+    <!-- Today's Order -->
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Todays Order</h4>
             <div class="row">
-                <!-- New Subscription (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'new']) }}" target="_blank">
-                        <div class="card sales-card metric-card metric--amber"
-                            style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card metric-card metric--amber" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">New Subscription</h6>
-                                        <h4 id="newUserSubscriptionCount" data-initial="{{ $newUserSubscription }}"
-                                            class="tx-20 font-weight-semibold mb-2">
+                                        <h4 id="newUserSubscriptionCount" data-initial="{{ $newUserSubscription }}" class="tx-20 font-weight-semibold mb-2">
                                             {{ $newUserSubscription }}
                                         </h4>
                                     </div>
@@ -271,17 +265,14 @@
                     </a>
                 </div>
 
-                <!-- Renewed Subscription (WATCH) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'renewed']) }}" target="_blank">
-                        <div class="card sales-card metric-card metric--fuchsia"
-                            style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card metric-card metric--fuchsia" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Renewed Subscription</h6>
-                                        <h4 id="renewSubscriptionCount" data-initial="{{ $renewSubscription }}"
-                                            class="tx-20 font-weight-semibold mb-2">
+                                        <h4 id="renewSubscriptionCount" data-initial="{{ $renewSubscription }}" class="tx-20 font-weight-semibold mb-2">
                                             {{ $renewSubscription }}
                                         </h4>
                                     </div>
@@ -294,14 +285,12 @@
                 <!-- Customize Order (WATCH, main one) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower-request', ['filter' => 'today']) }}" target="_blank">
-                        <div class="card sales-card metric-card metric--cyan"
-                             style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card metric-card metric--cyan" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h6 class="mb-2 tx-12">Customize Order</h6>
-                                        <h4 id="ordersRequestedTodayCount" data-initial="{{ $ordersRequestedToday }}"
-                                            class="tx-20 font-weight-semibold mb-2">
+                                        <h4 id="ordersRequestedTodayCount" data-initial="{{ $ordersRequestedToday }}" class="tx-20 font-weight-semibold mb-2">
                                             {{ $ordersRequestedToday }}
                                         </h4>
                                     </div>
@@ -311,10 +300,9 @@
                     </a>
                 </div>
 
-                <!-- Customize Order (Upcoming 3 Days) -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('flower-request', ['filter' => 'upcoming']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -326,18 +314,19 @@
                         </div>
                     </a>
                 </div>
+
             </div>
         </div>
     </div>
 
+    <!-- Subscription Status -->
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Subscription Status</h4>
             <div class="row">
-
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'end']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -352,7 +341,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'fivedays']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -367,7 +356,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'expired']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -382,11 +371,11 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.orders.index', ['filter' => 'rider']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-8">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12"> New Order Assign Rider</h6>
+                                        <h6 class="mb-2 tx-12">New Order Assign Rider</h6>
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $nonAssignedRidersCount }}</h4>
                                     </div>
                                 </div>
@@ -399,80 +388,14 @@
         </div>
     </div>
 
-    <div class="row card sales-card mt-2">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
-            <h4 class="card-title-custom" style="font-size: 14px">Paused Subscription</h4>
-            <div class="row">
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'todayrequest']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Today Paused Request</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $todayPausedRequest }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'paused']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Paused Subscription</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $pausedSubscriptions }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'tomorrow']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Next-Day Pause</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayPaused }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'nextdayresumed']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="ps-4 pt-4 pe-3 pb-4">
-                                        <h6 class="mb-2 tx-12">Next-Day Resumed</h6>
-                                        <h4 class="tx-22 font-weight-semibold mb-2">{{ $nextDayResumed }}</h4>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
+    <!-- Marketing -->
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Marketing</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.visitPlace', ['filter' => 'todayVisitPlace']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -488,14 +411,14 @@
         </div>
     </div>
 
+    <!-- Referral -->
     <div class="row card sales-card mt-2">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mt-2">
             <h4 class="card-title-custom" style="font-size: 14px">Referal Details</h4>
             <div class="row">
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}"
-                        target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'claimed', 'date' => 'today']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -509,9 +432,8 @@
                 </div>
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}"
-                        target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                    <a href="{{ route('refer.manageOfferClaim', ['status' => 'approved', 'date' => 'today']) }}" target="_blank">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -526,7 +448,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.referrals.index', ['date' => 'today']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -541,7 +463,7 @@
 
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
                     <a href="{{ route('admin.referrals.index', ['date' => 'all']) }}" target="_blank">
-                        <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
+                        <div class="card sales-card" style="border: 1px solid rgb(186,185,185);">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="ps-4 pt-4 pe-3 pb-4">
@@ -557,6 +479,7 @@
             </div>
         </div>
     </div>
+
     {{-- Add the unlock pill --}}
     <div id="sound-unlock" class="hidden">🔔 Enable sound</div>
 @endsection
@@ -572,7 +495,7 @@
         setTimeout(() => { const el = document.getElementById('welcomeSection'); if (el) el.style.display = 'none'; }, 5000);
         setTimeout(() => { const el = document.getElementById('welcomeSections'); if (el) el.style.display = 'none'; }, 5000);
 
-        // Single DateTime updater
+        // Live time
         function updateDateTime() {
             const now  = new Date();
             const date1 = document.getElementById('todayDate');
@@ -588,12 +511,11 @@
         setInterval(updateDateTime, 1000);
     </script>
 
-    <!-- Live metrics poll + blink + robust sound unlock -->
+    <!-- Live metrics poll + overlay blink -->
     <script>
         (function() {
-            // Map element IDs -> server key (we choose colors via class on the card now)
             const watchers = [
-                { key: 'ordersRequestedToday', elId: 'ordersRequestedTodayCount' }, // metric--cyan card
+                { key: 'ordersRequestedToday', elId: 'ordersRequestedTodayCount' }, // metric--cyan
                 { key: 'newUserSubscription',  elId: 'newUserSubscriptionCount'  }, // metric--amber
                 { key: 'renewSubscription',    elId: 'renewSubscriptionCount'    }, // metric--fuchsia
                 { key: 'totalDeliveriesToday', elId: 'totalDeliveriesTodayCount' }  // metric--emerald
@@ -614,94 +536,54 @@
                 return el ? (el.closest('.metric-card') || el.closest('.card')) : null;
             }
 
-            function glow(el) {
+            function blink(el) {
                 const card = findMetricCard(el);
                 if (!card) return;
 
-                // remove and re-add to restart animation if already blinking
+                // restart animation cleanly on the overlay
                 card.classList.remove('is-blinking');
-                // force reflow to restart CSS animation
-                // eslint-disable-next-line no-unused-expressions
-                card.offsetHeight;
+                // force reflow
+                void card.offsetWidth;
                 card.classList.add('is-blinking');
 
-                // clean up after animation ends (in case CSS keeps class)
                 const endOnce = () => {
                     card.classList.remove('is-blinking');
                     card.removeEventListener('animationend', endOnce);
                 };
                 card.addEventListener('animationend', endOnce);
-                // fallback timeout in case animationend is missed
                 setTimeout(() => card.classList.remove('is-blinking'), 8000);
             }
 
-            // ---- Sound unlock + queue ----
-            let audioEnabled = false;
-            let audioCtx = null;
-            const beepQueue = [];
-            function ensureAudio() {
-                try {
-                    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    if (audioCtx && audioCtx.state === 'suspended') {
-                        audioCtx.resume().then(() => { audioEnabled = true; flushBeepQueue(); });
-                    } else {
-                        audioEnabled = true; flushBeepQueue();
-                    }
-                } catch(e) {}
-            }
-            function flushBeepQueue() { while (audioEnabled && beepQueue.length) { const [ms,f] = beepQueue.shift(); _beep(ms,f);} }
-            function _beep(ms=230, freq=880) {
-                try {
-                    const osc = audioCtx.createOscillator();
-                    const gain = audioCtx.createGain();
-                    osc.type = 'sine'; osc.frequency.value = freq;
-                    gain.gain.value = 0.0001;
-                    osc.connect(gain).connect(audioCtx.destination);
-                    osc.start();
-                    gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime + 0.02);
-                    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + (ms/1000));
-                    setTimeout(()=>osc.stop(), ms+60);
-                } catch(e) {}
-            }
-            function beep(ms=230, freq=880) { if (!audioEnabled) { beepQueue.push([ms,freq]); return; } _beep(ms,freq); }
+            // (Optional) minimal beep queue if you still want sound
+            let audioEnabled = false, audioCtx = null, beepQueue = [];
+            function ensureAudio(){try{if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();if(audioCtx&&audioCtx.state==='suspended'){audioCtx.resume().then(()=>{audioEnabled=true;flush();});}else{audioEnabled=true;flush();}}catch(e){}}
+            function flush(){while(audioEnabled&&beepQueue.length){const [ms,f]=beepQueue.shift();_beep(ms,f);}}
+            function _beep(ms=230,f=880){try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='sine';o.frequency.value=f;g.gain.value=.0001;o.connect(g).connect(audioCtx.destination);o.start();g.gain.exponentialRampToValueAtTime(.06,audioCtx.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+(ms/1000));setTimeout(()=>o.stop(),ms+60);}catch(e){}}
+            function beep(ms=230,f=880){if(!audioEnabled){beepQueue.push([ms,f]);return;} _beep(ms,f);}
+            (function setupUnlock(){
+                const pill=document.getElementById('sound-unlock'); if(!pill) return;
+                const hide=()=>pill.classList.add('hidden');
+                pill.classList.remove('hidden');
+                const unlock=()=>{ensureAudio(); hide(); window.removeEventListener('click',unlock,true); window.removeEventListener('keydown',unlock,true); pill.removeEventListener('click',unlock,true);};
+                window.addEventListener('click',unlock,true); window.addEventListener('keydown',unlock,true); pill.addEventListener('click',unlock,true);
+            })();
 
-            function setupUnlockUI() {
-                const pill = document.getElementById('sound-unlock');
-                const maybeHide = () => pill && pill.classList.add('hidden');
-                if (audioEnabled) { maybeHide(); return; }
-                if (pill) pill.classList.remove('hidden');
-                const unlock = () => {
-                    ensureAudio(); maybeHide();
-                    window.removeEventListener('click', unlock, true);
-                    window.removeEventListener('keydown', unlock, true);
-                    pill && pill.removeEventListener('click', unlock, true);
-                };
-                window.addEventListener('click', unlock, true);
-                window.addEventListener('keydown', unlock, true);
-                pill && pill.addEventListener('click', unlock, true);
-            }
-
-            // Kick on load if already > 0 (visual + queued sound)
+            // Initial blink if values > 0
             function initialKick() {
                 watchers.forEach(w => {
-                    const el = els[w.key];
-                    if (!el) return;
+                    const el = els[w.key]; if (!el) return;
                     const val = prev[w.key] ?? 0;
                     if (val > 0) {
-                        glow(el);
-                        if (w.key === 'ordersRequestedToday') {
-                            beep(260, 1200); setTimeout(()=>beep(220, 900), 160);
-                        } else {
-                            beep(200, 880);
-                        }
+                        blink(el);
+                        if (w.key === 'ordersRequestedToday') { beep(260,1200); setTimeout(()=>beep(220,900),160); }
+                        else { beep(200,880); }
                     }
                 });
             }
 
             async function poll() {
                 try {
-                    const url = `{{ route('admin.flowerDashboard.liveMetrics') }}`;
-                    const res = await fetch(url, { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
+                    const res = await fetch(`{{ route('admin.flowerDashboard.liveMetrics') }}`, { headers: { 'Accept':'application/json' }, cache: 'no-store' });
                     if (!res.ok) throw new Error('Bad response');
                     const json = await res.json();
                     if (!json || !json.ok || !json.data) return;
@@ -715,17 +597,14 @@
                         if (newVal !== oldVal) {
                             el.textContent = newVal;
                             if (newVal > oldVal) {
-                                glow(el);
-                                if (w.key === 'ordersRequestedToday') {
-                                    beep(260, 1200); setTimeout(()=>beep(220, 900), 160);
-                                } else {
-                                    beep(200, 880);
-                                }
+                                blink(el); // overlay blink (background only)
+                                if (w.key === 'ordersRequestedToday') { beep(260,1200); setTimeout(()=>beep(220,900),160); }
+                                else { beep(200,880); }
                             }
                             prev[w.key] = newVal;
                         }
                     });
-                } catch (e) { /* optional console.warn(e) */ }
+                } catch(e) { /* console.warn(e); */ }
             }
 
             document.addEventListener('visibilitychange', () => {
@@ -733,7 +612,6 @@
             });
 
             document.addEventListener('DOMContentLoaded', () => {
-                setupUnlockUI();
                 initialKick();
                 poll();
                 setInterval(poll, 5000);
