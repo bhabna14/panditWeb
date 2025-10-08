@@ -1,12 +1,14 @@
+
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use App\Models\Subscription;
 use App\Models\FlowerProduct;
+use App\Http\Controllers\Controller;
 
 class FlowerEstimateController extends Controller
 {
