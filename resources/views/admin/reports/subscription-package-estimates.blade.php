@@ -48,8 +48,7 @@
         </ol>
     </div>
 
-    <form method="GET" action="{{ route('admin.subscriptionPackageEstimate') }}"
-        class="card card-soft p-3 mb-3">
+    <form method="GET" action="{{ route('admin.subscriptionPackageEstimate') }}" class="card card-soft p-3 mb-3">
         <div class="row gy-2">
             <div class="col-md-3">
                 <label class="form-label">Day</label>
@@ -66,13 +65,13 @@
                     <option value="all" @selected($selectedPdp === 'all')>All Subscription products</option>
                     <option value="has" @selected($selectedPdp === 'has')>Only with per-day price</option>
                     @foreach ($perDayPriceOptions as $opt)
-                        <option value="{{ $opt }}" @selected((string) $selectedPdp === (string) $opt)>
+                        <option value="{{ $opt }}" @selected((string) $selectedPdp === (string) $opt)">
                             ₹ {{ number_format((float) $opt, 2) }}
                         </option>
                     @endforeach
                 </select>
-                <small class="text-muted">Filter Subscription products by their per-day price. Cost below uses each package
-                    item's unit price.</small>
+                <small class="text-muted">Filter Subscription products by per-day price. Cost below uses package item
+                    price ÷ quantity to derive per-unit value.</small>
             </div>
 
             <div class="col-md-3 d-flex align-items-end">
@@ -94,8 +93,6 @@
             <div class="hstack">
                 <div><strong>Date:</strong> {{ $date->toFormattedDateString() }}</div>
                 <div class="chip">Items: {{ count($dayEstimate['lines']) }}</div>
-                {{-- <div class="chip">Total Qty: <span class="amount">{{ number_format($dayEstimate['total_qty'], 2) }}</span>
-                </div> --}}
                 <div class="chip">Est. Value: <strong class="amount">₹
                         {{ number_format($dayEstimate['total_cost'], 2) }}</strong></div>
             </div>
@@ -111,7 +108,7 @@
                                 <th style="width:36px;">#</th>
                                 <th>Item</th>
                                 <th class="text-end">Qty</th>
-                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Unit Price <small class="text-muted">(per unit)</small></th>
                                 <th class="text-end">Subtotal</th>
                             </tr>
                         </thead>
@@ -121,7 +118,10 @@
                                 <tr>
                                     <td>{{ $i++ }}</td>
                                     <td>{{ $row['item_name'] }}</td>
-                                    <td class="text-end amount">{{ number_format($row['qty'], 2) }}<span class="chip">{{ $row['unit'] }}</span></td>
+                                    <td class="text-end amount">
+                                        {{ number_format($row['qty'], 2) }}
+                                        <span class="chip">{{ $row['unit'] }}</span>
+                                    </td>
                                     <td class="text-end amount">₹ {{ number_format($row['unit_price'], 2) }}</td>
                                     <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong>
                                     </td>
@@ -130,8 +130,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="2" class="text-end"></th>
-                                <th></th>
+                                <th colspan="3" class="text-end"></th>
                                 <th>Totals</th>
                                 <th class="text-end amount"><strong>₹
                                         {{ number_format($dayEstimate['total_cost'], 2) }}</strong></th>
@@ -149,8 +148,6 @@
             <div class="hstack">
                 <div><strong>Month:</strong> {{ $monthStart->format('F Y') }}</div>
                 <div class="chip">Distinct Items: {{ count($monthEstimate['by_item']) }}</div>
-                {{-- <div class="chip">Total Qty: <span
-                        class="amount">{{ number_format($monthEstimate['total_qty'], 2) }}</span></div> --}}
                 <div class="chip">Est. Value: <strong class="amount">₹
                         {{ number_format($monthEstimate['total_cost'], 2) }}</strong></div>
             </div>
@@ -166,25 +163,24 @@
                                 <th style="width:36px;">#</th>
                                 <th>Item</th>
                                 <th class="text-end">Total Qty</th>
-                                <th class="text-end">Unit Price</th>
+                                <th class="text-end">Unit Price <small class="text-muted">(per unit)</small></th>
                                 <th class="text-end">Subtotal</th>
                             </tr>
                         </thead>
                         <tbody>
                             @php
                                 $i = 1;
-                                $sumQty = 0;
                                 $sumAmt = 0;
                             @endphp
                             @foreach ($monthEstimate['by_item'] as $row)
-                                @php
-                                    $sumQty += $row['qty'];
-                                    $sumAmt += $row['subtotal'];
-                                @endphp
+                                @php $sumAmt += $row['subtotal']; @endphp
                                 <tr>
                                     <td>{{ $i++ }}</td>
                                     <td>{{ $row['item_name'] }}</td>
-                                    <td class="text-end amount">{{ number_format($row['qty'], 2) }}<span class="chip">{{ $row['unit'] }}</span></td>
+                                    <td class="text-end amount">
+                                        {{ number_format($row['qty'], 2) }}
+                                        <span class="chip">{{ $row['unit'] }}</span>
+                                    </td>
                                     <td class="text-end amount">₹ {{ number_format($row['unit_price'], 2) }}</td>
                                     <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong>
                                     </td>
@@ -193,8 +189,7 @@
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th colspan="2" class="text-end"></th>
-                                <th></th>
+                                <th colspan="3" class="text-end"></th>
                                 <th>Month Totals</th>
                                 <th class="text-end amount"><strong>₹ {{ number_format($sumAmt, 2) }}</strong></th>
                             </tr>
@@ -210,7 +205,6 @@
                                 <tr>
                                     <th>Date</th>
                                     <th class="text-end">Items</th>
-                                    {{-- <th class="text-end">Total Qty</th> --}}
                                     <th class="text-end">Est. Value</th>
                                 </tr>
                             </thead>
@@ -219,7 +213,6 @@
                                     <tr>
                                         <td>{{ \Carbon\Carbon::parse($d)->format('D, d M Y') }}</td>
                                         <td class="text-end">{{ count($data['lines']) }}</td>
-                                        {{-- <td class="text-end amount">{{ number_format($data['total_qty'], 2) }}</td> --}}
                                         <td class="text-end amount">₹ {{ number_format($data['total_cost'], 2) }}</td>
                                     </tr>
                                 @endforeach

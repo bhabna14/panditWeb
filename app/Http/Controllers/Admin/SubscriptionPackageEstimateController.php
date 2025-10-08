@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 use App\Models\Subscription;
@@ -109,6 +108,7 @@ class SubscriptionPackageEstimateController extends Controller
                     $byItem[$key] = [
                         'item_name'  => $line['item_name'],
                         'unit'       => $line['unit'],
+                        // Keep per-unit price here too (derived)
                         'unit_price' => $line['unit_price'],
                         'qty'        => 0.0,
                         'subtotal'   => 0.0,
@@ -134,10 +134,6 @@ class SubscriptionPackageEstimateController extends Controller
 
     /**
      * Active subscriptions overlapping a date range, limited to Subscription products we filtered.
-     * - status = 'active' or is_active = 1
-     * - Overlaps (start_date..end_date)
-     * - Pause window exclusion is handled inside day tally
-     * - Only product_id in $subscriptionProductIds
      */
     protected function activeSubscriptionsOverlapping(Carbon $start, Carbon $end, array $subscriptionProductIds)
     {
@@ -162,10 +158,10 @@ class SubscriptionPackageEstimateController extends Controller
 
     /**
      * For a given day:
-     *   - Take active Subscription subscriptions (already filtered).
-     *   - Expand their package items from product__package_item (item_name, quantity, unit, price).
+     *   - Expand package items from product__package_item (item_name, quantity, unit, price).
+     *   - IMPORTANT: price is the BUNDLE price for the given quantity (not per-unit).
+     *   - We derive per-unit price = price / quantity for correct math when aggregating quantities.
      *   - Each active subscription contributes those items once per day.
-     *   - Subtotal = item.quantity * item.price (unit price) per subscription; aggregated over subs.
      */
     protected function tallyPackageItemsForDay(
         Collection $subscriptions,
@@ -207,30 +203,33 @@ class SubscriptionPackageEstimateController extends Controller
 
             $pkgItems = $pkgItemsByProduct->get($sub->product_id) ?? collect();
             foreach ($pkgItems as $it) {
-                $itemName  = (string) ($it->item_name ?? 'Item');
-                $unit      = (string) ($it->unit ?? 'unit');
-                $qty       = (float)  ($it->quantity ?? 0);
-                $unitPrice = (float)  ($it->price ?? 0); // Treat as unit price
+                $itemName   = (string) ($it->item_name ?? 'Item');
+                $unit       = (string) ($it->unit ?? 'unit');
+                $bundleQty  = (float)  ($it->quantity ?? 0);   // quantity for which the price applies
+                $bundlePrice= (float)  ($it->price ?? 0);      // price for the above quantity
 
-                if ($qty <= 0) continue;
+                if ($bundleQty <= 0) continue;
+
+                // Derive per-unit price (the key change)
+                $unitPrice  = $bundlePrice / $bundleQty;
 
                 $key = $this->norm($itemName) . '|' . strtolower($unit);
                 if (!isset($lines[$key])) {
                     $lines[$key] = [
                         'item_name'  => $itemName,
                         'unit'       => $unit,
-                        'unit_price' => round($unitPrice, 2),
+                        'unit_price' => round($unitPrice, 4), // keep more precision per unit
                         'qty'        => 0.0,
                         'subtotal'   => 0.0,
                     ];
                 }
 
-                // Per subscription per day: add the package quantities
-                $lines[$key]['qty']      += $qty;
+                // Per subscription per day: add bundle qty; subtotal grows by per-unit * qty
+                $lines[$key]['qty']      += $bundleQty;
                 $lines[$key]['subtotal']  = round($lines[$key]['qty'] * $lines[$key]['unit_price'], 2);
 
-                $totalQty  += $qty;
-                $totalCost += ($qty * $unitPrice);
+                $totalQty  += $bundleQty;
+                $totalCost += ($bundleQty * $unitPrice);
             }
         }
 
@@ -239,7 +238,7 @@ class SubscriptionPackageEstimateController extends Controller
         return [
             'lines'      => $lines,
             'total_qty'  => $totalQty,
-            'total_cost' => $totalCost,
+            'total_cost' => round($totalCost, 2),
         ];
     }
 
@@ -294,18 +293,31 @@ class SubscriptionPackageEstimateController extends Controller
 
             // Day
             fputcsv($out, ["Day-wise Estimate", $date->toDateString()]);
-            fputcsv($out, ['Item','Unit','Qty','Unit Price','Subtotal']);
+            // make it clear that unit price is per-unit (derived)
+            fputcsv($out, ['Item','Unit','Qty','Unit Price (per unit)','Subtotal']);
             foreach ($dayEstimate['lines'] as $row) {
-                fputcsv($out, [$row['item_name'], $row['unit'], $row['qty'], $row['unit_price'], $row['subtotal']]);
+                fputcsv($out, [
+                    $row['item_name'],
+                    $row['unit'],
+                    $row['qty'],
+                    $row['unit_price'],
+                    $row['subtotal'],
+                ]);
             }
             fputcsv($out, ['Totals','','','', $dayEstimate['total_cost']]);
             fputcsv($out, []);
 
             // Month
             fputcsv($out, ["Month-wise Estimate", $monthStart->format('Y-m')]);
-            fputcsv($out, ['Item','Unit','Total Qty','Unit Price','Subtotal']);
+            fputcsv($out, ['Item','Unit','Total Qty','Unit Price (per unit)','Subtotal']);
             foreach ($monthEstimate['by_item'] as $row) {
-                fputcsv($out, [$row['item_name'], $row['unit'], $row['qty'], $row['unit_price'], $row['subtotal']]);
+                fputcsv($out, [
+                    $row['item_name'],
+                    $row['unit'],
+                    $row['qty'],
+                    $row['unit_price'],
+                    $row['subtotal'],
+                ]);
             }
             fputcsv($out, ['Month Totals','','','', $monthEstimate['total_cost']]);
 
