@@ -10,6 +10,26 @@
   .money { font-variant-numeric: tabular-nums; }
   .nav-pills .nav-link.active { font-weight: 600; }
   .mini-stat { border-radius: .75rem; }
+
+  /* --- Mobile-friendly filter layout --- */
+  .filter-card .row > [class*="col-"] { min-width: 0; } /* avoid overflow from flex basis */
+  .btn-wrap { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .btn-wrap .btn { flex: 1 1 calc(50% - .5rem); } /* two per row on xs */
+  .btn-wrap .btn.wide { flex: 1 1 100%; }         /* full width helper */
+
+  .view-wrap { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .view-wrap .btn { flex: 1 1 calc(50% - .5rem); } /* day / month split on xs */
+  .action-stack { display: grid; gap: .5rem; grid-template-columns: 1fr; }
+
+  /* Make inputs not overflow on tiny screens */
+  .form-control[type="date"] { min-width: 0; }
+
+  /* md+ breakpoints: inline layout */
+  @media (min-width: 768px) {
+    .btn-wrap .btn { flex: 0 0 auto; }       /* no forced growth on md+ */
+    .view-wrap .btn { flex: 0 0 auto; }
+    .action-stack { grid-template-columns: auto; }
+  }
 </style>
 @endsection
 
@@ -19,8 +39,8 @@
 
     {{-- FILTER BAR --}}
     <div class="sticky-top-filter bg-light pb-3">
-      <form class="card card-body shadow-sm" method="get" action="{{ route('admin.flowerEstimate') }}">
-        <div class="row g-3">
+      <form class="card card-body shadow-sm filter-card" method="get" action="{{ route('admin.flowerEstimate') }}">
+        <div class="row g-3 align-items-end">
           <div class="col-12 col-md-8">
             <div class="row g-3">
               <div class="col-6 col-md-4">
@@ -33,34 +53,47 @@
               </div>
               <div class="col-12 col-md-4">
                 <label class="form-label d-block">Preset</label>
-                <div class="btn-group w-100" role="group">
-                  <button name="preset" value="today" class="btn btn-outline-secondary {{ $preset==='today' ? 'active' : '' }}">Today</button>
-                  <button name="preset" value="yesterday" class="btn btn-outline-secondary {{ $preset==='yesterday' ? 'active' : '' }}">Yesterday</button>
-                  <button name="preset" value="this_month" class="btn btn-outline-secondary {{ $preset==='this_month' ? 'active' : '' }}">This Month</button>
-                  <button name="preset" value="last_month" class="btn btn-outline-secondary {{ $preset==='last_month' ? 'active' : '' }}">Last Month</button>
+                {{-- Replace btn-group with a wrapping row --}}
+                <div class="btn-wrap">
+                  <button type="submit" name="preset" value="today"
+                          class="btn btn-outline-secondary {{ $preset==='today' ? 'active' : '' }}">
+                    Today
+                  </button>
+                  <button type="submit" name="preset" value="yesterday"
+                          class="btn btn-outline-secondary {{ $preset==='yesterday' ? 'active' : '' }}">
+                    Yesterday
+                  </button>
+                  <button type="submit" name="preset" value="this_month"
+                          class="btn btn-outline-secondary {{ $preset==='this_month' ? 'active' : '' }}">
+                    This Month
+                  </button>
+                  <button type="submit" name="preset" value="last_month"
+                          class="btn btn-outline-secondary {{ $preset==='last_month' ? 'active' : '' }}">
+                    Last Month
+                  </button>
                 </div>
               </div>
             </div>
           </div>
+
           <div class="col-12 col-md-4">
             <label class="form-label d-block">View</label>
-            <div class="d-flex gap-2">
-              <input type="hidden" name="mode" value="{{ $mode }}">
-              <div class="btn-group flex-grow-1" role="group">
-                <a href="{{ route('admin.flowerEstimate', array_merge(request()->query(), ['mode'=>'day'])) }}"
-                   class="btn btn-{{ $mode==='day' ? 'primary' : 'outline-primary' }}">
-                  <i class="bi bi-calendar-day"></i> Day
-                </a>
-                <a href="{{ route('admin.flowerEstimate', array_merge(request()->query(), ['mode'=>'month'])) }}"
-                   class="btn btn-{{ $mode==='month' ? 'primary' : 'outline-primary' }}">
-                  <i class="bi bi-calendar3"></i> Month
-                </a>
-              </div>
-              <div class="d-grid">
+            <div class="view-wrap">
+              {{-- Keep mode in query but render as links for fast toggle; they wrap on small screens --}}
+              <a href="{{ route('admin.flowerEstimate', array_merge(request()->query(), ['mode'=>'day'])) }}"
+                 class="btn btn-{{ $mode==='day' ? 'primary' : 'outline-primary' }}">
+                <i class="bi bi-calendar-day"></i> Day
+              </a>
+              <a href="{{ route('admin.flowerEstimate', array_merge(request()->query(), ['mode'=>'month'])) }}"
+                 class="btn btn-{{ $mode==='month' ? 'primary' : 'outline-primary' }}">
+                <i class="bi bi-calendar3"></i> Month
+              </a>
+
+              <div class="action-stack ms-auto">
                 <button type="submit" class="btn btn-success">
                   <i class="bi bi-funnel"></i> Apply
                 </button>
-                <a href="{{ route('admin.flowerEstimate') }}" class="btn btn-outline-secondary mt-2">Reset</a>
+                <a href="{{ route('admin.flowerEstimate') }}" class="btn btn-outline-secondary">Reset</a>
               </div>
             </div>
           </div>
