@@ -150,7 +150,7 @@
                 @endif
 
                 {{-- Items (per-unit math for consumption) --}}
-                <div class="table-responsive">
+                {{-- <div class="table-responsive">
                     <table class="table table-sm table-bordered align-middle">
                         <thead>
                             <tr>
@@ -184,7 +184,7 @@
                             </tr>
                         </tfoot>
                     </table>
-                </div>
+                </div> --}}
             @endif
         </div>
     </div>
