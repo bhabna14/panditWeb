@@ -21,7 +21,7 @@
   <div class="sticky-top-filter bg-light pb-3">
     <h1 class="h3 mb-3">Flower Estimate</h1>
 
-    <form class="card card-body shadow-sm" method="get" action="{{ route('flowerEstimate') }}">
+    <form class="card card-body shadow-sm" method="get" action="{{ route('admin.flowerEstimate') }}">
       <div class="row g-3 align-items-end">
         <div class="col-12 col-md-4">
           <label class="form-label">Start date</label>
@@ -35,7 +35,7 @@
           <button type="submit" class="btn btn-primary flex-grow-1">
             <i class="bi bi-funnel"></i> Apply
           </button>
-          <a href="{{ route('flowerEstimate') }}" class="btn btn-outline-secondary">
+          <a href="{{ route('admin.flowerEstimate') }}" class="btn btn-outline-secondary">
             Reset
           </a>
         </div>
