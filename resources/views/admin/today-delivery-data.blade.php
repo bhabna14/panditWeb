@@ -283,15 +283,15 @@
                                                         · {{ $todayDelivery->rider->rider_name }}
                                                     @endif
                                                 </small>
-
+{{-- 
                                                 <button class="btn btn-sm btn-outline-primary mt-1" data-bs-toggle="modal"
                                                     data-bs-target="#delv{{ $i }}">
                                                     Details
-                                                </button>
+                                                </button> --}}
                                             </div>
 
                                             <!-- Delivery Detail Modal -->
-                                            <div class="modal fade" id="delv{{ $i }}" tabindex="-1"
+                                            {{-- <div class="modal fade" id="delv{{ $i }}" tabindex="-1"
                                                 aria-hidden="true">
                                                 <div class="modal-dialog modal-dialog-centered">
                                                     <div class="modal-content">
@@ -316,7 +316,7 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </div> --}}
                                         @else
                                             <span class="badge bg-warning text-dark"><i class="bi bi-clock-history"></i>
                                                 Pending / Not Delivered</span>
