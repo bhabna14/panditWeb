@@ -12,18 +12,16 @@ class FlowerEstimateController extends Controller
 {
     public function index(Request $request)
     {
-        // ---- Parse filters ---------------------------------------------------
+        // ---- Filters ---------------------------------------------------------
         $preset = $request->string('preset')->toString();       // today|yesterday|this_month|last_month
-        $mode   = $request->string('mode')->toString() ?: 'day';// day|month (UI toggle)
+        $mode   = $request->string('mode')->toString() ?: 'day';// day|month
 
         [$start, $end] = $this->resolveRange($request, $preset);
-
-        // Guard: ensure start <= end
         if ($end->lt($start)) {
             [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
         }
 
-        // ---- Build daily numbers (canonical source) -------------------------
+        // ---- Build daily numbers --------------------------------------------
         $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
         $dailyEstimates = [];
 
@@ -32,65 +30,51 @@ class FlowerEstimateController extends Controller
                 'flowerProducts:id,product_id,name',
                 'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
             ])
-                ->activeOn($day)
-                ->get();
+            ->activeOn($day)
+            ->get();
 
             $byProduct = $subs->groupBy('product_id');
 
-            $productsForDay = [];
-            $grandTotalForDay = 0;
+            $productsForDay   = [];
+            $grandTotalForDay = 0.0;
 
             foreach ($byProduct as $productId => $subsForProduct) {
-                $product = optional($subsForProduct->first())->flowerProducts;
+                $product   = optional($subsForProduct->first())->flowerProducts;
                 $subsCount = $subsForProduct->count();
 
-                $items = [];
-                $productTotal = 0;
+                $items        = [];
+                $productTotal = 0.0;
 
                 if ($product) {
                     foreach ($product->packageItems as $pi) {
-                        // Per-subscription quantity and price (as stored)
-                        $perItemQty   = (float) ($pi->quantity ?? 0);
-                        $origUnit     = trim(strtolower($pi->unit ?? ''));
-                        $pricePerOrig = (float) ($pi->price ?? 0); // price per "origUnit"
+                        // Quantities: per-subscription qty stored in DB
+                        $perItemQty = (float) ($pi->quantity ?? 0);
+                        $origUnit   = strtolower(trim($pi->unit ?? ''));
 
-                        // Total qty across active subs (in original unit first)
-                        $totalQtyInOrigUnit = $perItemQty * $subsCount;
+                        // Prices: DB 'price' is per-subscription item price (NOT per unit)
+                        $itemPricePerSub = (float) ($pi->price ?? 0);
 
-                        // Convert price to BASE unit to be consistent during unit folding
-                        // and convert quantity to BASE as well.
-                        $category = $this->inferCategory($origUnit); // weight|volume|count|unknown
-                        $factorToBase = $this->toBaseFactor($origUnit); // e.g., kg -> 1000 g
+                        // Convert quantity for totals (base units: g / ml / pcs)
+                        $category     = $this->inferCategory($origUnit);
+                        if ($category === 'unknown') { $category = 'count'; $origUnit = 'pcs'; }
+                        $toBaseFactor = $this->toBaseFactor($origUnit);
 
-                        // If unknown unit, treat it like "count" (no conversion)
-                        if ($category === 'unknown') {
-                            $category = 'count';
-                            $origUnit = 'pcs';
-                            $factorToBase = 1.0;
-                        }
+                        $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor;
+                        [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
 
-                        // Price per base unit (e.g., Rs/kg -> Rs/gram)
-                        $pricePerBase = ($factorToBase > 0) ? $pricePerOrig / $factorToBase : $pricePerOrig;
-
-                        // Total qty in base (e.g., grams / ml / pcs)
-                        $totalQtyBase = $totalQtyInOrigUnit * $factorToBase;
-
-                        // Format totals into a friendly unit (e.g., 2500 g -> 2.5 kg)
-                        [$friendlyQty, $friendlyUnit, $displayFactorFromBase] = $this->formatFromBase($totalQtyBase, $category);
-
-                        // Compute total price using base quantities (most stable)
-                        $totalPrice = $pricePerBase * $totalQtyBase;
+                        // 💡 Price totals use per-subscription item price
+                        $totalPrice = $itemPricePerSub * $subsCount;
 
                         $items[] = [
                             'item_name'        => $pi->item_name,
                             'category'         => $category,
                             'per_item_qty'     => $perItemQty,
-                            'per_item_unit'    => $origUnit,          // original unit (as stored)
-                            'per_item_price'   => $pricePerOrig,      // price per original unit
-                            'total_qty_base'   => $totalQtyBase,      // numeric in base
-                            'total_qty_disp'   => $friendlyQty,       // numeric (formatted unit)
-                            'total_unit_disp'  => $friendlyUnit,      // e.g., kg / g / L / ml / pcs
-                            'total_price'      => $totalPrice,        // Rs
+                            'per_item_unit'    => $origUnit,
+                            'item_price_per_sub'=> $itemPricePerSub,  // shown as "Item Price (₹)"
+                            'total_qty_base'   => $totalQtyBase,
+                            'total_qty_disp'   => $qtyDisp,
+                            'total_unit_disp'  => $unitDisp,
+                            'total_price'      => $totalPrice,
                         ];
 
                         $productTotal += $totalPrice;
@@ -104,27 +88,28 @@ class FlowerEstimateController extends Controller
                     'subs_count'     => $subsCount,
                     'items'          => $items,
                     'product_total'  => $productTotal,
+                    // Also helpful to display bundle price per sub:
+                    'bundle_total_per_sub' => array_sum(array_column($items, 'item_price_per_sub')),
                 ];
             }
 
             $dailyEstimates[$day->toDateString()] = [
-                'products'            => $productsForDay,
-                'grand_total_amount'  => $grandTotalForDay,
+                'products'           => $productsForDay,
+                'grand_total_amount' => $grandTotalForDay,
             ];
         }
 
-        // ---- Month-wise rollup (aggregate from daily) -----------------------
+        // ---- Month-wise rollup ----------------------------------------------
         $monthlyEstimates = [];
         if ($mode === 'month') {
-            // bucket by YYYY-MM
             foreach ($dailyEstimates as $dateStr => $payload) {
                 $monthKey = Carbon::parse($dateStr)->format('Y-m');
 
                 if (!isset($monthlyEstimates[$monthKey])) {
                     $monthlyEstimates[$monthKey] = [
                         'month_label' => Carbon::parse($dateStr)->format('M Y'),
-                        'products'    => [], // product_id => items aggregated
-                        'grand_total' => 0,
+                        'products'    => [],
+                        'grand_total' => 0.0,
                     ];
                 }
 
@@ -132,16 +117,14 @@ class FlowerEstimateController extends Controller
                     if (!isset($monthlyEstimates[$monthKey]['products'][$pid])) {
                         $monthlyEstimates[$monthKey]['products'][$pid] = [
                             'product'       => $row['product'],
-                            'subs_days'     => 0, // how many subscription-day instances (not unique subs)
-                            'items'         => [], // item_name + category key aggregation
-                            'product_total' => 0,
+                            'subs_days'     => 0,      // sum of active subs per day (not unique subs)
+                            'items'         => [],     // aggregated in base units + price totals
+                            'product_total' => 0.0,
                         ];
                     }
 
-                    // add subscription day count (count of subs that day)
                     $monthlyEstimates[$monthKey]['products'][$pid]['subs_days'] += $row['subs_count'];
 
-                    // aggregate items by (item_name, category) in BASE UNITS
                     foreach ($row['items'] as $it) {
                         $key = strtolower($it['item_name']).'|'.$it['category'];
 
@@ -163,15 +146,15 @@ class FlowerEstimateController extends Controller
                 }
             }
 
-            // After accumulation, compute friendly quantities for month view
-            foreach ($monthlyEstimates as $mkey => &$mBlock) {
+            // Display-friendly units after aggregation
+            foreach ($monthlyEstimates as &$mBlock) {
                 foreach ($mBlock['products'] as &$pBlock) {
                     foreach ($pBlock['items'] as &$iBlock) {
                         [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase(
                             $iBlock['total_qty_base'],
                             $iBlock['category']
                         );
-                        $iBlock['total_qty_disp'] = $qtyDisp;
+                        $iBlock['total_qty_disp']  = $qtyDisp;
                         $iBlock['total_unit_disp'] = $unitDisp;
                     }
                 }
@@ -179,7 +162,6 @@ class FlowerEstimateController extends Controller
             unset($mBlock, $pBlock, $iBlock);
         }
 
-        // ---- Render ----------------------------------------------------------
         return view('admin.reports.flower-estimates', [
             'start'            => $start->toDateString(),
             'end'              => $end->toDateString(),
@@ -196,21 +178,13 @@ class FlowerEstimateController extends Controller
     {
         if ($preset) {
             $today = Carbon::today();
-            switch ($preset) {
-                case 'today':
-                    return [$today->copy()->startOfDay(), $today->copy()->endOfDay()];
-                case 'yesterday':
-                    $y = $today->copy()->subDay();
-                    return [$y->startOfDay(), $y->endOfDay()];
-                case 'this_month':
-                    $s = $today->copy()->startOfMonth();
-                    $e = $today->copy()->endOfMonth();
-                    return [$s, $e];
-                case 'last_month':
-                    $s = $today->copy()->subMonthNoOverflow()->startOfMonth();
-                    $e = $today->copy()->subMonthNoOverflow()->endOfMonth();
-                    return [$s, $e];
-            }
+            return match ($preset) {
+                'today'      => [$today->copy()->startOfDay(), $today->copy()->endOfDay()],
+                'yesterday'  => [$today->copy()->subDay()->startOfDay(), $today->copy()->subDay()->endOfDay()],
+                'this_month' => [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()],
+                'last_month' => [$today->copy()->subMonthNoOverflow()->startOfMonth(), $today->copy()->subMonthNoOverflow()->endOfMonth()],
+                default      => $this->resolveRange($request, null),
+            };
         }
 
         $start = $request->filled('start_date')
@@ -245,36 +219,16 @@ class FlowerEstimateController extends Controller
             'ml', 'milliliter', 'milliliters' => 1.0,
             'l', 'lt', 'liter', 'litre', 'liters', 'litres' => 1000.0,
             'piece', 'pieces', 'pc', 'pcs', 'count' => 1.0,
-            default => 1.0, // unknown treated as count
+            default => 1.0,
         };
-    }
-
-    private function formatFromBase(float $qtyBase, string $category): array
-    {
-        // Returns [friendlyQty, friendlyUnit, factorFromBase]
-        if ($category === 'weight') {
-            if ($qtyBase >= 1000) {
-                return [round($qtyBase / 1000, 3), 'kg', 1/1000];
-            }
-            return [round($qtyBase, 3), 'g', 1.0];
-        }
-        if ($category === 'volume') {
-            if ($qtyBase >= 1000) {
-                return [round($qtyBase / 1000, 3), 'L', 1/1000];
-            }
-            return [round($qtyBase, 3), 'ml', 1.0];
-        }
-        // count
-        return [round($qtyBase, 0), 'pcs', 1.0];
     }
 
     private function formatQtyByCategoryFromBase(float $qtyBase, string $category): array
     {
-        [$q, $u] = match ($category) {
+        return match ($category) {
             'weight' => $qtyBase >= 1000 ? [round($qtyBase / 1000, 3), 'kg'] : [round($qtyBase, 3), 'g'],
             'volume' => $qtyBase >= 1000 ? [round($qtyBase / 1000, 3), 'L']  : [round($qtyBase, 3), 'ml'],
             default  => [round($qtyBase, 0), 'pcs'],
         };
-        return [$q, $u];
     }
 }
