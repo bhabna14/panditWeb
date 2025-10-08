@@ -172,8 +172,6 @@
             </div>
 
             <div class="table-responsive">
-                {{-- ... your existing styles ... --}}
-
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered align-middle" id="subsTable">
                         <thead>
@@ -268,10 +266,7 @@
                                             —
                                         @endif
                                     </td>
-
                                     <td>₹{{ $perDay }}</td>
-
-                                    {{-- Today Delivery --}}
                                     <td>
                                         @if ($todayDelivery)
                                             <div class="d-flex flex-column align-items-center">
@@ -283,40 +278,7 @@
                                                         · {{ $todayDelivery->rider->rider_name }}
                                                     @endif
                                                 </small>
-{{-- 
-                                                <button class="btn btn-sm btn-outline-primary mt-1" data-bs-toggle="modal"
-                                                    data-bs-target="#delv{{ $i }}">
-                                                    Details
-                                                </button> --}}
                                             </div>
-
-                                            <!-- Delivery Detail Modal -->
-                                            {{-- <div class="modal fade" id="delv{{ $i }}" tabindex="-1"
-                                                aria-hidden="true">
-                                                <div class="modal-dialog modal-dialog-centered">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header bg-primary">
-                                                            <h5 class="modal-title text-white">Today's Delivery</h5>
-                                                            <button type="button" class="btn-close btn-close-white"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <ul class="list-group">
-                                                                <li class="list-group-item"><strong>Status:</strong>
-                                                                    {{ ucfirst($todayDelivery->delivery_status) }}</li>
-                                                                <li class="list-group-item"><strong>Delivered At:</strong>
-                                                                    {{ $todayDelivery->delivery_time }}</li>
-                                                                <li class="list-group-item"><strong>Rider:</strong>
-                                                                    {{ $todayDelivery->rider->rider_name ?? '—' }}</li>
-                                                                @if (!empty($todayDelivery->notes))
-                                                                    <li class="list-group-item"><strong>Notes:</strong>
-                                                                        {{ $todayDelivery->notes }}</li>
-                                                                @endif
-                                                            </ul>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div> --}}
                                         @else
                                             <span class="badge bg-warning text-dark"><i class="bi bi-clock-history"></i>
                                                 Pending / Not Delivered</span>
@@ -457,13 +419,25 @@
                 });
             }
 
-            // Bootstrp tooltips
+            // Bootstrap tooltips
             document.addEventListener('DOMContentLoaded', () => {
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+
+                // Cleanup any orphaned backdrops/classes on first paint
+                document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('padding-right');
             });
 
             // CSRF
             const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // Helper: ensure no leftover backdrops
+            function cleanupBackdrops() {
+                document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('padding-right');
+            }
 
             // Per-row assign form (AJAX)
             document.addEventListener('submit', async (ev) => {
@@ -473,7 +447,7 @@
 
                 const orderId = form.getAttribute('data-order-id'); // this is order.order_id
                 const labelId = form.getAttribute('data-label-id');
-                const dismissId = form.getAttribute('data-bs-dismiss-target');
+                const modalSel = form.getAttribute('data-bs-dismiss-target'); // e.g. "#riderModal3"
 
                 const formData = new FormData(form);
                 if (!formData.get('rider_id')) {
@@ -493,9 +467,8 @@
                 }
 
                 try {
-                    // IMPORTANT: param name must be 'order' to match the route
-                    const url = `{{ route('orders.assignRider', ['order' => '___OID___']) }}`.replace('___OID___',
-                        encodeURIComponent(orderId));
+                    const url = `{{ route('orders.assignRider', ['order' => '___OID___']) }}`
+                        .replace('___OID___', encodeURIComponent(orderId));
 
                     const res = await fetch(url, {
                         method: 'POST',
@@ -521,19 +494,43 @@
                     const label = document.getElementById(labelId);
                     if (label) label.textContent = data.rider_name || 'Unassigned';
 
-                    // Close modal
-                    const modalEl = document.querySelector(dismissId);
-                    if (modalEl) bootstrap.Modal.getOrCreateInstance(modalEl).hide();
-
-                    Swal.fire({
-                        icon: 'success',
-                        title: 'Updated',
-                        text: data.message || 'Rider assigned successfully.',
-                        timer: 1400,
-                        showConfirmButton: false
-                    });
+                    // Close modal gracefully, then show SweetAlert after the modal is fully hidden
+                    const modalEl = modalSel ? document.querySelector(modalSel) : null;
+                    if (modalEl) {
+                        const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                        // One-time listener
+                        const onHidden = async () => {
+                            modalEl.removeEventListener('hidden.bs.modal', onHidden);
+                            cleanupBackdrops();
+                            await Swal.fire({
+                                icon: 'success',
+                                title: 'Updated',
+                                text: data.message || 'Rider assigned successfully.',
+                                timer: 1400,
+                                showConfirmButton: false,
+                                didClose: cleanupBackdrops,
+                                willClose: cleanupBackdrops
+                            });
+                        };
+                        modalEl.addEventListener('hidden.bs.modal', onHidden, {
+                            once: true
+                        });
+                        bsModal.hide();
+                    } else {
+                        // No modal? Just notify and cleanup
+                        await Swal.fire({
+                            icon: 'success',
+                            title: 'Updated',
+                            text: data.message || 'Rider assigned successfully.',
+                            timer: 1400,
+                            showConfirmButton: false,
+                            didClose: cleanupBackdrops,
+                            willClose: cleanupBackdrops
+                        });
+                    }
 
                 } catch (err) {
+                    cleanupBackdrops();
                     Swal.fire({
                         icon: 'error',
                         title: 'Could not assign rider',
@@ -554,7 +551,12 @@
                 Swal.fire({
                     icon: 'success',
                     title: 'Success',
-                    text: @json(session('success'))
+                    text: @json(session('success')),
+                    didClose: () => {
+                        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.removeProperty('padding-right');
+                    }
                 });
             </script>
         @endif
@@ -563,7 +565,12 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',
-                    html: `{!! implode('<br>', $errors->all()) !!}`
+                    html: `{!! implode('<br>', $errors->all()) !!}`,
+                    didClose: () => {
+                        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                        document.body.classList.remove('modal-open');
+                        document.body.style.removeProperty('padding-right');
+                    }
                 });
             </script>
         @endif

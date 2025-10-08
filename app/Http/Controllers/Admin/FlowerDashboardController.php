@@ -239,74 +239,116 @@ class FlowerDashboardController extends Controller
             'totalRefer'
         ));
     }
+public function showTodayDeliveries()
+{
+    $today = Carbon::today();
 
-    public function showTodayDeliveries()
-    {
-        $today = Carbon::today();
+    $activeSubscriptions = Subscription::with([
+            'users:id,userid,name,mobile_number',
+            'order:id,order_id,user_id,address_id,total_price,created_at,rider_id',
+            'order.address:id,user_id,country,state,city,pincode,area,locality,apartment_name,apartment_flat_plot,landmark,address_type',
+            'order.address.localityDetails:id,locality_name,unique_code,pincode',
+            'order.rider:id,rider_id,rider_name',
+            'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration',
+            'order.deliveryHistories' => function ($q) use ($today) {
+                $q->whereDate('created_at', $today)
+                  ->where('delivery_status', 'delivered')
+                  ->latest('created_at');
+            },
+            'order.deliveryHistories.rider:id,rider_name'
+        ])
+        ->where('status', 'active')
+        ->orderBy('start_date', 'asc')
+        ->get()
+        ->map(function ($sub) use ($today) {
 
-        $activeSubscriptions = Subscription::with([
-                'users:id,userid,name,mobile_number',
-                'order:id,order_id,user_id,address_id,total_price,created_at,rider_id',
-                'order.address:id,user_id,country,state,city,pincode,area,locality,apartment_name,apartment_flat_plot,landmark,address_type',
-                'order.address.localityDetails:id,locality_name,unique_code,pincode',
-                'order.rider:id,rider_id,rider_name',
-                'flowerProducts:id,product_id,name,product_image,price,per_day_price,duration',
-                'order.deliveryHistories' => function ($q) use ($today) {
-                    $q->whereDate('created_at', $today)
-                      ->where('delivery_status', 'delivered')
-                      ->latest('created_at');
-                },
-                'order.deliveryHistories.rider:id,rider_name'
-            ])
-            ->where('status', 'active')
-            ->orderBy('start_date', 'asc')
-            ->get()
-            ->map(function ($sub) use ($today) {
-                $start  = $sub->start_date ? Carbon::parse($sub->start_date) : null;
-                $end    = $sub->end_date ? Carbon::parse($sub->end_date) : null;
+            $start = $sub->start_date ? Carbon::parse($sub->start_date)->startOfDay() : null;
+            $end   = $sub->end_date   ? Carbon::parse($sub->end_date)->endOfDay()   : null;
 
-                $days_total = ($start && $end) ? $start->diffInDays($end) + 1 : null;
-                $days_left  = $end ? max(0, $today->diffInDays($end, false)) : null;
+            // If there is a new_date, use it as the effective start for remaining calculation
+            $effectiveStart = $sub->new_date
+                ? Carbon::parse($sub->new_date)->startOfDay()
+                : $start;
 
-                $per_day = null;
-                if ($sub->order && $sub->order->total_price && $days_total && $days_total > 0) {
-                    $per_day = round($sub->order->total_price / $days_total, 2);
-                } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price) {
-                    $per_day = (float) $sub->flowerProducts->per_day_price;
+            // Base effective end
+            $effectiveEnd = $end ? $end->copy() : null;
+
+            // Optional: extend the end by paused days (if a pause window exists)
+            if ($effectiveStart && $effectiveEnd && $sub->pause_start_date && $sub->pause_end_date) {
+                $ps = Carbon::parse($sub->pause_start_date)->startOfDay();
+                $pe = Carbon::parse($sub->pause_end_date)->endOfDay();
+                if ($pe->lt($ps)) {
+                    [$ps, $pe] = [$pe, $ps]; // normalize
                 }
 
-                $sub->computed = (object) [
-                    'days_total' => $days_total,
-                    'days_left'  => $days_left,
-                    'per_day'    => $per_day,
-                ];
+                // overlap with active period [effectiveStart .. effectiveEnd]
+                $overlapStart = $ps->greaterThan($effectiveStart) ? $ps : $effectiveStart;
+                $overlapEnd   = $pe->lessThan($effectiveEnd) ? $pe : $effectiveEnd;
 
-                $addr = $sub->order?->address;
-                $sub->computed->address_line = $addr
-                    ? trim(implode(', ', array_filter([
-                        $addr->apartment_name,
-                        $addr->apartment_flat_plot,
-                        $addr->area,
-                        $addr->city,
-                        $addr->state,
-                        $addr->pincode
-                    ])))
-                    : null;
-
-                if ($sub->flowerProducts) {
-                    $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
+                if ($overlapEnd->gte($overlapStart)) {
+                    $pausedDays = $overlapStart->diffInDays($overlapEnd) + 1; // inclusive
+                    $effectiveEnd->addDays($pausedDays);
                 }
+            }
 
-                $sub->computed->todays_delivery = $sub->order?->deliveryHistories?->first();
-                return $sub;
-            });
+            // Days total (for per-day price): prefer the original plan
+            $days_total = ($start && $end) ? $start->diffInDays($end) + 1 : null;
 
-        $riders = RiderDetails::select('rider_id','rider_name')
-            ->orderBy('rider_name','asc')
-            ->get();
+            // ===== Days Left (inclusive of effectiveEnd) =====
+            $days_left = null;
+            if ($effectiveStart && $effectiveEnd) {
+                if ($today->lt($effectiveStart)) {
+                    // not started yet -> full block
+                    $days_left = $effectiveStart->diffInDays($effectiveEnd) + 1;
+                } elseif ($today->betweenIncluded($effectiveStart, $effectiveEnd)) {
+                    // in progress -> from today to end
+                    $days_left = $today->diffInDays($effectiveEnd) + 1;
+                } else {
+                    $days_left = 0; // finished
+                }
+            }
 
-        return view('admin.today-delivery-data', compact('activeSubscriptions', 'today', 'riders'));
-    }
+            // ===== Per day calculation =====
+            $per_day = null;
+            if ($sub->order && $sub->order->total_price && $days_total && $days_total > 0) {
+                $per_day = round($sub->order->total_price / $days_total, 2);
+            } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price !== null) {
+                $per_day = (float) $sub->flowerProducts->per_day_price;
+            }
+
+            $sub->computed = (object) [
+                'days_total' => $days_total,
+                'days_left'  => $days_left,
+                'per_day'    => $per_day,
+            ];
+
+            $addr = $sub->order?->address;
+            $sub->computed->address_line = $addr
+                ? trim(implode(', ', array_filter([
+                    $addr->apartment_name,
+                    $addr->apartment_flat_plot,
+                    $addr->area,
+                    $addr->city,
+                    $addr->state,
+                    $addr->pincode
+                ])))
+                : null;
+
+            if ($sub->flowerProducts) {
+                $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
+            }
+
+            $sub->computed->todays_delivery = $sub->order?->deliveryHistories?->first();
+
+            return $sub;
+        });
+
+    $riders = RiderDetails::select('rider_id','rider_name')
+        ->orderBy('rider_name','asc')
+        ->get();
+
+    return view('admin.today-delivery-data', compact('activeSubscriptions', 'today', 'riders'));
+}
 
     public function assignRider(Request $request, $order) // {order} from route
     {
