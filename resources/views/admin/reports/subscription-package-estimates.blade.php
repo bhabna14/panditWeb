@@ -2,8 +2,8 @@
 
 @section('styles')
     <style>
-        .card-soft { border: 1px solid #edf1f7; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.04); }
-        .table-sm thead th { font-size: .78rem; text-transform: uppercase; letter-spacing: .03em; }
+        .card-soft { border:1px solid #edf1f7; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.04); }
+        .table-sm thead th { font-size:.78rem; text-transform:uppercase; letter-spacing:.03em; }
         .chip { display:inline-block; padding:.25rem .5rem; border-radius:999px; background:#f6f8fa; border:1px solid #eaeef3; font-size:.78rem; }
         .amount { font-variant-numeric: tabular-nums; }
         .hstack { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
@@ -39,7 +39,7 @@
                     <option value="all" @selected($selectedPdp === 'all')>All Subscription products</option>
                     <option value="has" @selected($selectedPdp === 'has')>Only with per-day price</option>
                     @foreach ($perDayPriceOptions as $opt)
-                        {{-- fixed stray quote --}}
+                        {{-- fixed extra quote --}}
                         <option value="{{ $opt }}" @selected((string)$selectedPdp === (string)$opt)>
                             ₹ {{ number_format((float)$opt, 2) }}
                         </option>
@@ -47,7 +47,7 @@
                 </select>
                 <small class="text-muted">
                     Only Subscription products appear here. Cost below uses
-                    <strong>item bundle price ÷ quantity</strong> to derive the per-unit value.
+                    <strong>item bundle price ÷ quantity</strong> to derive per-unit value.
                 </small>
             </div>
 
@@ -77,13 +77,11 @@
             @if (empty($dayEstimate['lines']))
                 <div class="text-muted">No active Subscription deliveries on this day with the selected filter.</div>
             @else
-                {{-- NEW: which subscriptions contributed today --}}
-                @if(!empty($dayEstimate['by_product']))
-                    <details class="mb-3">
-                        <summary><strong>Show subscriptions contributing today</strong></summary>
-                        <div class="table-responsive mt-2">
-                            <table class="table table-sm table-bordered align-middle">
-                                <thead>
+                {{-- Always-visible: show which subscription products contributed today --}}
+                @if (!empty($dayEstimate['by_product']))
+                    <div class="table-responsive mb-3">
+                        <table class="table table-sm table-bordered align-middle">
+                            <thead>
                                 <tr>
                                     <th style="width:36px;">#</th>
                                     <th>Subscription Product</th>
@@ -91,9 +89,9 @@
                                     <th class="text-end">Bundle Total / sub</th>
                                     <th class="text-end">Subtotal</th>
                                 </tr>
-                                </thead>
-                                <tbody>
-                                @php $i=1; $bpSum=0; @endphp
+                            </thead>
+                            <tbody>
+                                @php $i = 1; $bpSum = 0; @endphp
                                 @foreach ($dayEstimate['by_product'] as $row)
                                     @php $bpSum += $row['subtotal']; @endphp
                                     <tr>
@@ -104,50 +102,49 @@
                                         <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong></td>
                                     </tr>
                                 @endforeach
-                                </tbody>
-                                <tfoot>
+                            </tbody>
+                            <tfoot>
                                 <tr>
                                     <th colspan="4" class="text-end">Day Total</th>
                                     <th class="text-end amount"><strong>₹ {{ number_format($bpSum, 2) }}</strong></th>
                                 </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </details>
+                            </tfoot>
+                        </table>
+                    </div>
                 @endif
 
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered align-middle">
                         <thead>
-                        <tr>
-                            <th style="width:36px;">#</th>
-                            <th>Item</th>
-                            <th class="text-end">Qty</th>
-                            <th class="text-end">Unit Price <small class="text-muted">(per unit)</small></th>
-                            <th class="text-end">Subtotal</th>
-                        </tr>
+                            <tr>
+                                <th style="width:36px;">#</th>
+                                <th>Item</th>
+                                <th class="text-end">Qty</th>
+                                <th class="text-end">Unit Price <small class="text-muted">(per unit)</small></th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        @php $i=1; @endphp
-                        @foreach ($dayEstimate['lines'] as $row)
-                            <tr>
-                                <td>{{ $i++ }}</td>
-                                <td>{{ $row['item_name'] }}</td>
-                                <td class="text-end amount">
-                                    {{ number_format($row['qty'], 2) }}
-                                    <span class="chip">{{ $row['unit'] }}</span>
-                                </td>
-                                <td class="text-end amount">₹ {{ number_format($row['unit_price'], 2) }}</td>
-                                <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong></td>
-                            </tr>
-                        @endforeach
+                            @php $i=1; @endphp
+                            @foreach ($dayEstimate['lines'] as $row)
+                                <tr>
+                                    <td>{{ $i++ }}</td>
+                                    <td>{{ $row['item_name'] }}</td>
+                                    <td class="text-end amount">
+                                        {{ number_format($row['qty'], 2) }}
+                                        <span class="chip">{{ $row['unit'] }}</span>
+                                    </td>
+                                    <td class="text-end amount">₹ {{ number_format($row['unit_price'], 2) }}</td>
+                                    <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong></td>
+                                </tr>
+                            @endforeach
                         </tbody>
                         <tfoot>
-                        <tr>
-                            <th colspan="3" class="text-end"></th>
-                            <th>Totals</th>
-                            <th class="text-end amount"><strong>₹ {{ number_format($dayEstimate['total_cost'], 2) }}</strong></th>
-                        </tr>
+                            <tr>
+                                <th colspan="3" class="text-end"></th>
+                                <th>Totals</th>
+                                <th class="text-end amount"><strong>₹ {{ number_format($dayEstimate['total_cost'], 2) }}</strong></th>
+                            </tr>
                         </tfoot>
                     </table>
                 </div>
@@ -171,36 +168,36 @@
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered align-middle">
                         <thead>
-                        <tr>
-                            <th style="width:36px;">#</th>
-                            <th>Item</th>
-                            <th class="text-end">Total Qty</th>
-                            <th class="text-end">Unit Price <small class="text-muted">(per unit)</small></th>
-                            <th class="text-end">Subtotal</th>
-                        </tr>
+                            <tr>
+                                <th style="width:36px;">#</th>
+                                <th>Item</th>
+                                <th class="text-end">Total Qty</th>
+                                <th class="text-end">Unit Price <small class="text-muted">(per unit)</small></th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
                         </thead>
                         <tbody>
-                        @php $i=1; $sumAmt=0; @endphp
-                        @foreach ($monthEstimate['by_item'] as $row)
-                            @php $sumAmt += $row['subtotal']; @endphp
-                            <tr>
-                                <td>{{ $i++ }}</td>
-                                <td>{{ $row['item_name'] }}</td>
-                                <td class="text-end amount">
-                                    {{ number_format($row['qty'], 2) }}
-                                    <span class="chip">{{ $row['unit'] }}</span>
-                                </td>
-                                <td class="text-end amount">₹ {{ number_format($row['unit_price'], 2) }}</td>
-                                <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong></td>
-                            </tr>
-                        @endforeach
+                            @php $i = 1; $sumAmt = 0; @endphp
+                            @foreach ($monthEstimate['by_item'] as $row)
+                                @php $sumAmt += $row['subtotal']; @endphp
+                                <tr>
+                                    <td>{{ $i++ }}</td>
+                                    <td>{{ $row['item_name'] }}</td>
+                                    <td class="text-end amount">
+                                        {{ number_format($row['qty'], 2) }}
+                                        <span class="chip">{{ $row['unit'] }}</span>
+                                    </td>
+                                    <td class="text-end amount">₹ {{ number_format($row['unit_price'], 2) }}</td>
+                                    <td class="text-end amount"><strong>₹ {{ number_format($row['subtotal'], 2) }}</strong></td>
+                                </tr>
+                            @endforeach
                         </tbody>
                         <tfoot>
-                        <tr>
-                            <th colspan="3" class="text-end"></th>
-                            <th>Month Totals</th>
-                            <th class="text-end amount"><strong>₹ {{ number_format($sumAmt, 2) }}</strong></th>
-                        </tr>
+                            <tr>
+                                <th colspan="3" class="text-end"></th>
+                                <th>Month Totals</th>
+                                <th class="text-end amount"><strong>₹ {{ number_format($sumAmt, 2) }}</strong></th>
+                            </tr>
                         </tfoot>
                     </table>
                 </div>
@@ -210,20 +207,20 @@
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered align-middle">
                             <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th class="text-end">Items</th>
-                                <th class="text-end">Est. Value</th>
-                            </tr>
+                                <tr>
+                                    <th>Date</th>
+                                    <th class="text-end">Items</th>
+                                    <th class="text-end">Est. Value</th>
+                                </tr>
                             </thead>
                             <tbody>
-                            @foreach ($monthEstimate['per_day'] as $d => $data)
-                                <tr>
-                                    <td>{{ \Carbon\Carbon::parse($d)->format('D, d M Y') }}</td>
-                                    <td class="text-end">{{ count($data['lines']) }}</td>
-                                    <td class="text-end amount">₹ {{ number_format($data['total_cost'], 2) }}</td>
-                                </tr>
-                            @endforeach
+                                @foreach ($monthEstimate['per_day'] as $d => $data)
+                                    <tr>
+                                        <td>{{ \Carbon\Carbon::parse($d)->format('D, d M Y') }}</td>
+                                        <td class="text-end">{{ count($data['lines']) }}</td>
+                                        <td class="text-end amount">₹ {{ number_format($data['total_cost'], 2) }}</td>
+                                    </tr>
+                                @endforeach
                             </tbody>
                         </table>
                     </div>
