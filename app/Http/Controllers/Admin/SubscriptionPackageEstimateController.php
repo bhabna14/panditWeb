@@ -16,22 +16,20 @@ class SubscriptionPackageEstimateController extends Controller
 {
     public function index(Request $request)
     {
-        // Inputs
         $dateStr   = $request->input('date',  Carbon::today()->toDateString());
         $monthStr  = $request->input('month', Carbon::today()->format('Y-m'));
-        // per-day-price filter on Subscription products: "all" | "has" | <numeric exact value>
         $pdpFilter = $request->input('per_day_price', 'all');
 
         $date       = Carbon::parse($dateStr)->startOfDay();
         $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth();
 
-        // --- Only Subscription category ---
+        // Only Subscription category
         $subProdQ = FlowerProduct::query()
             ->select('product_id','name','category','per_day_price','status')
             ->whereRaw('LOWER(category) = ?', ['subscription']);
 
-        // Dropdown options: ONLY Subscription products
+        // Dropdown options (Subscription only)
         $perDayPriceOptions = (clone $subProdQ)
             ->whereNotNull('per_day_price')
             ->distinct()
@@ -39,7 +37,7 @@ class SubscriptionPackageEstimateController extends Controller
             ->pluck('per_day_price')
             ->values();
 
-        // Apply chosen per_day_price filter
+        // Apply filter
         $subProdFilteredQ = clone $subProdQ;
         if ($pdpFilter === 'has') {
             $subProdFilteredQ->whereNotNull('per_day_price');
@@ -48,11 +46,9 @@ class SubscriptionPackageEstimateController extends Controller
         }
         $subProducts = $subProdFilteredQ->get();
 
-        // Lookups
         $subsByProductId = $subProducts->keyBy('product_id');
         $subscriptionProductIds = $subProducts->pluck('product_id')->all();
 
-        // Day + Month estimates
         $dayEstimate   = $this->estimateForDate($date, $subscriptionProductIds, $subsByProductId);
         $monthEstimate = $this->estimateForRange($monthStart, $monthEnd, $subscriptionProductIds, $subsByProductId);
 
@@ -92,9 +88,9 @@ class SubscriptionPackageEstimateController extends Controller
             $cursor->addDay();
         }
 
+        // Aggregate (Unit Price Total only)
         $byItem = [];
-        $totalQty = 0.0;
-        $totalCost = 0.0;
+        $unitPriceGrandTotal = 0.0;
 
         foreach ($perDay as $data) {
             foreach ($data['lines'] as $key => $line) {
@@ -104,24 +100,23 @@ class SubscriptionPackageEstimateController extends Controller
                         'unit'       => $line['unit'],
                         'unit_price' => $line['unit_price'], // per-unit (derived)
                         'qty'        => 0.0,
-                        'subtotal'   => 0.0,
                     ];
                 }
-                $byItem[$key]['qty']      += $line['qty'];
-                $byItem[$key]['subtotal'] += $line['subtotal'];
+                // keep qty just for display (not used in totals)
+                $byItem[$key]['qty'] += $line['qty'];
 
-                $totalQty  += $line['qty'];
-                $totalCost += $line['subtotal'];
+                // month total = sum of per-unit prices (one per item key)
+                // To be consistent with day view (one row per key), we add day's unit price only once per day.
+                $unitPriceGrandTotal += $line['unit_price'];
             }
         }
 
         uasort($byItem, fn($a,$b) => strcasecmp($a['item_name'], $b['item_name']));
 
         return [
-            'per_day'   => $perDay,
-            'by_item'   => $byItem,
-            'total_qty' => $totalQty,
-            'total_cost'=> round($totalCost, 2),
+            'per_day'    => $perDay,
+            'by_item'    => $byItem,
+            'total_cost' => round($unitPriceGrandTotal, 2), // now means Unit Price Total
         ];
     }
 
@@ -147,11 +142,10 @@ class SubscriptionPackageEstimateController extends Controller
     }
 
     /**
-     * Day tally (correct math):
-     * - Treat PackageItem.price as bundle price for bundle quantity.
-     * - Per-unit price = price / quantity.
-     * - Qty added = bundleQty × (#active subs for that product on this day).
-     * - Also return a by_product breakdown for visibility in the view.
+     * Day tally:
+     * - Convert bundle -> per-unit price (price / quantity).
+     * - Keep qty for info, but "total_cost" is the sum of unit prices across items (no qty multiplication).
+     * - Also keep by_product (unchanged) for visibility.
      */
     protected function tallyPackageItemsForDay(
         Collection $subscriptions,
@@ -160,7 +154,6 @@ class SubscriptionPackageEstimateController extends Controller
     ): array {
         $date = $day->copy()->startOfDay();
 
-        // Filter: in window and not paused on that day
         $deliveries = $subscriptions->filter(function ($s) use ($date) {
             $inWindow = Carbon::parse($s->start_date)->startOfDay()->lte($date)
                      && Carbon::parse($s->end_date)->endOfDay()->gte($date);
@@ -173,19 +166,17 @@ class SubscriptionPackageEstimateController extends Controller
         });
 
         if ($deliveries->isEmpty()) {
-            return ['lines' => [], 'total_qty' => 0.0, 'total_cost' => 0.0, 'by_product' => []];
+            return ['lines' => [], 'total_cost' => 0.0, 'by_product' => []];
         }
 
-        // Preload package items for all involved products
         $productIds = $deliveries->pluck('product_id')->unique()->all();
         $pkgItemsByProduct = PackageItem::whereIn('product_id', $productIds)
             ->get()
             ->groupBy('product_id');
 
-        $lines = [];     // item-level
-        $totalQty = 0.0;
-        $totalCost = 0.0;
-        $byProduct = []; // product-level summary for the "Subscriptions contributing today" table
+        $lines = [];     // item rows
+        $unitPriceTotal = 0.0;
+        $byProduct = []; // still useful for checking; not part of total
 
         foreach ($deliveries->groupBy('product_id') as $productId => $subsForProduct) {
             $subProd = $subsByProductId->get($productId);
@@ -193,7 +184,7 @@ class SubscriptionPackageEstimateController extends Controller
 
             $pkgItems = $pkgItemsByProduct->get($productId) ?? collect();
 
-            // For the product summary: one subscription's bundle total (sum of item bundle prices)
+            // by-product info (unchanged)
             $bundleTotal = 0.0;
             foreach ($pkgItems as $it) {
                 $bundleTotal += (float) ($it->price ?? 0);
@@ -206,7 +197,6 @@ class SubscriptionPackageEstimateController extends Controller
                 'subtotal'     => round($bundleTotal * $subsCount, 2),
             ];
 
-            // Item aggregation (correct per-unit math)
             foreach ($pkgItems as $it) {
                 $itemName   = (string) ($it->item_name ?? 'Item');
                 $unit       = (string) ($it->unit ?? 'unit');
@@ -221,18 +211,21 @@ class SubscriptionPackageEstimateController extends Controller
                     $lines[$key] = [
                         'item_name'  => $itemName,
                         'unit'       => $unit,
-                        'unit_price' => round($unitPrice, 4), // keep precision; render 2 dp
+                        'unit_price' => round($unitPrice, 4),
                         'qty'        => 0.0,
-                        'subtotal'   => 0.0,
                     ];
                 }
 
-                $addedQty = $bundleQty * $subsCount;
-                $lines[$key]['qty']      += $addedQty;
-                $lines[$key]['subtotal']  = round($lines[$key]['qty'] * $lines[$key]['unit_price'], 2);
+                // qty is informational only (sum of bundles across subs)
+                $lines[$key]['qty'] += $bundleQty * $subsCount;
 
-                $totalQty  += $addedQty;
-                $totalCost += ($addedQty * $unitPrice);
+                // total now sums ONLY unit prices (once per item key)
+                // Since lines are unique by key per day, add once here.
+                // If the same key appears from multiple products (unlikely), it's already grouped.
+                // To avoid double-adding when loop continues, only add when the line is first created.
+                if ($lines[$key]['qty'] == ($bundleQty * $subsCount)) {
+                    $unitPriceTotal += $lines[$key]['unit_price'];
+                }
             }
         }
 
@@ -240,8 +233,7 @@ class SubscriptionPackageEstimateController extends Controller
 
         return [
             'lines'      => $lines,
-            'total_qty'  => $totalQty,
-            'total_cost' => round($totalCost, 2),
+            'total_cost' => round($unitPriceTotal, 2), // now "Unit Price Total"
             'by_product' => $byProduct,
         ];
     }
@@ -253,68 +245,5 @@ class SubscriptionPackageEstimateController extends Controller
             ->trim()
             ->replaceMatches('/\s+/', ' ')
             ->toString();
-    }
-
-    // ========== CSV export (matches on-screen math) ==========
-    public function exportCsv(Request $request)
-    {
-        $dateStr   = $request->input('date',  Carbon::today()->toDateString());
-        $monthStr  = $request->input('month', Carbon::today()->format('Y-m'));
-        $pdpFilter = $request->input('per_day_price', 'all');
-
-        $date       = Carbon::parse($dateStr)->startOfDay();
-        $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
-        $monthEnd   = (clone $monthStart)->endOfMonth();
-
-        $subProdQ = FlowerProduct::query()
-            ->select('product_id','name','category','per_day_price','status')
-            ->whereRaw('LOWER(category) = ?', ['subscription']);
-
-        if ($pdpFilter === 'has') {
-            $subProdQ->whereNotNull('per_day_price');
-        } elseif ($pdpFilter !== 'all' && is_numeric($pdpFilter)) {
-            $subProdQ->where('per_day_price', (float)$pdpFilter);
-        }
-
-        $subProducts = $subProdQ->get();
-        $subsByProductId = $subProducts->keyBy('product_id');
-        $subscriptionProductIds = $subProducts->pluck('product_id')->all();
-
-        $dayEstimate   = $this->estimateForDate($date, $subscriptionProductIds, $subsByProductId);
-        $monthEstimate = $this->estimateForRange($monthStart, $monthEnd, $subscriptionProductIds, $subsByProductId);
-
-        $filename = "subscription_pkg_estimates_{$date->toDateString()}_{$monthStart->format('Y-m')}.csv";
-        $headers = [
-            'Content-Type'        => 'text/csv',
-            'Content-Disposition' => "attachment; filename=\"$filename\"",
-        ];
-
-        $callback = function () use ($date, $dayEstimate, $monthStart, $monthEstimate, $pdpFilter) {
-            $out = fopen('php://output', 'w');
-
-            fputcsv($out, ['Category', 'Subscription']);
-            fputcsv($out, ['Per-Day Price Filter', $pdpFilter]);
-
-            // Day (per unit)
-            fputcsv($out, ["Day-wise Estimate", $date->toDateString()]);
-            fputcsv($out, ['Item','Unit','Qty','Unit Price (per unit)','Subtotal']);
-            foreach ($dayEstimate['lines'] as $row) {
-                fputcsv($out, [$row['item_name'], $row['unit'], $row['qty'], $row['unit_price'], $row['subtotal']]);
-            }
-            fputcsv($out, ['Totals','','','', $dayEstimate['total_cost']]);
-            fputcsv($out, []);
-
-            // Month (per unit)
-            fputcsv($out, ["Month-wise Estimate", $monthStart->format('Y-m')]);
-            fputcsv($out, ['Item','Unit','Total Qty','Unit Price (per unit)','Subtotal']);
-            foreach ($monthEstimate['by_item'] as $row) {
-                fputcsv($out, [$row['item_name'], $row['unit'], $row['qty'], $row['unit_price'], $row['subtotal']]);
-            }
-            fputcsv($out, ['Month Totals','','','', $monthEstimate['total_cost']]);
-
-            fclose($out);
-        };
-
-        return response()->stream($callback, 200, $headers);
     }
 }
