@@ -35,13 +35,13 @@ class FlowerEstimateController extends Controller
             return $this->norm($f->name);
         });
 
-        // Day estimate (using legacy window rules)
+        // Day estimate (legacy window rules: end_date only)
         $dayEstimate = $this->estimateForDate($date, $flowerByProductId, $flowerByNormName);
 
-        // Month estimate (using legacy window rules)
+        // Month estimate (legacy window rules: end_date only)
         $monthEstimate = $this->estimateForRange($monthStart, $monthEnd, $flowerByProductId, $flowerByNormName);
 
-        // Tomorrow estimate (uses COALESCE(new_date, end_date), excludes expired)
+        // Tomorrow estimate (COALESCE(new_date, end_date), excludes expired)
         $tomorrowEstimate = $this->estimateForTomorrow($tomorrow, $flowerByProductId, $flowerByNormName);
 
         return view('admin.reports.flower-estimates', [
@@ -91,9 +91,10 @@ class FlowerEstimateController extends Controller
             $cursor->addDay();
         }
 
+        // Aggregate month by flower/unit with WEIGHTED average unit price
         $byFlower = [];
-        $totalQty = 0;
-        $totalCost = 0;
+        $totalQty = 0.0;
+        $totalCost = 0.0;
 
         foreach ($perDay as $data) {
             foreach ($data['lines'] as $key => $line) {
@@ -101,31 +102,36 @@ class FlowerEstimateController extends Controller
                     $byFlower[$key] = [
                         'flower_name' => $line['flower_name'],
                         'unit'        => $line['unit'],
-                        'unit_price'  => $line['unit_price'],
-                        'qty'         => 0,
-                        // subtotal kept for internal calc but not shown in UI
-                        'subtotal'    => 0,
+                        'unit_price'  => 0.0,         // will be weighted avg
+                        'qty'         => 0.0,
+                        'total_value' => 0.0,         // sum(qty*price)
                     ];
                 }
-                $byFlower[$key]['qty']      += $line['qty'];
-                $byFlower[$key]['subtotal'] += $line['subtotal'];
-                $totalQty                   += $line['qty'];
-                $totalCost                  += $line['subtotal'];
+                $byFlower[$key]['qty']         += $line['qty'];
+                $byFlower[$key]['total_value'] += $line['total_value'];
+
+                // recompute weighted average unit price for display
+                $byFlower[$key]['unit_price'] = $byFlower[$key]['qty'] > 0
+                    ? round($byFlower[$key]['total_value'] / $byFlower[$key]['qty'], 2)
+                    : 0.0;
+
+                $totalQty  += $line['qty'];
+                $totalCost += $line['total_value'];
             }
         }
 
         uasort($byFlower, fn($a,$b) => strcasecmp($a['flower_name'], $b['flower_name']));
 
         return [
-            'per_day'   => $perDay,
-            'by_flower' => $byFlower,
-            'total_qty' => $totalQty,
-            'total_cost'=> $totalCost,
+            'per_day'    => $perDay,
+            'by_flower'  => $byFlower,
+            'total_qty'  => $totalQty,
+            'total_cost' => round($totalCost, 2),
         ];
     }
 
     /**
-     * Active subscriptions (status 'active' or is_active=1) overlapping the range, using end_date only.
+     * Active subscriptions overlapping the range (end_date only).
      */
     protected function activeSubscriptionsOverlapping(Carbon $start, Carbon $end)
     {
@@ -144,8 +150,7 @@ class FlowerEstimateController extends Controller
     }
 
     /**
-     * Tomorrow-specific: use effective end = COALESCE(new_date, end_date), exclude expired.
-     * (Still excludes paused for the specific tomorrow date.)
+     * Tomorrow-specific: effective end = COALESCE(new_date, end_date), exclude expired.
      */
     protected function activeSubscriptionsOverlappingEffective(Carbon $start, Carbon $end)
     {
@@ -175,8 +180,9 @@ class FlowerEstimateController extends Controller
 
     /**
      * For a day, compute the flower requirement from subscriptions.
-     * - Direct flower product => +1 unit per subscription per day.
+     * - Direct flower product => +1 unit per day per subscription.
      * - Package product => expand PackageItem rows and add their quantities.
+     * Returns lines with: qty, unit_price (weighted avg), total_value, etc.
      */
     protected function tallyForSubscriptionsOnDate(
         Collection $subscriptions,
@@ -194,7 +200,6 @@ class FlowerEstimateController extends Controller
                        && Carbon::parse($s->pause_end_date)->endOfDay()->gte($date);
             }
 
-            // Exclude expired status outright
             $expired = (isset($s->status) && strtolower((string)$s->status) === 'expired');
 
             return $inWindow && !$paused && !$expired;
@@ -203,8 +208,8 @@ class FlowerEstimateController extends Controller
         if ($deliveries->isEmpty()) {
             return [
                 'lines'      => [],
-                'total_qty'  => 0,
-                'total_cost' => 0,
+                'total_qty'  => 0.0,
+                'total_cost' => 0.0,
             ];
         }
 
@@ -215,15 +220,15 @@ class FlowerEstimateController extends Controller
             ->groupBy('product_id');
 
         $lines = [];
-        $totalQty = 0;
-        $totalCost = 0;
+        $totalQty  = 0.0;
+        $totalCost = 0.0;
 
         foreach ($deliveries as $sub) {
             $product = $flowerByProductId->get($sub->product_id);
 
             if ($product && strtolower((string) $product->category) === 'flower') {
                 // Direct flower: +1 unit per day per subscription
-                $this->addFlowerLine($lines, $product->name, 'unit', 1, $this->unitPrice($product), $totalQty, $totalCost);
+                $this->addFlowerLine($lines, $product->name, 'unit', 1.0, $this->unitPrice($product), $totalQty, $totalCost);
             } else {
                 // Package: expand items
                 $items = $packageItemsByProduct->get($sub->product_id) ?? collect();
@@ -243,15 +248,19 @@ class FlowerEstimateController extends Controller
             }
         }
 
+        // sort by flower name
         uasort($lines, fn($a, $b) => strcasecmp($a['flower_name'], $b['flower_name']));
 
         return [
             'lines'      => $lines,
             'total_qty'  => $totalQty,
-            'total_cost' => $totalCost,
+            'total_cost' => round($totalCost, 2),
         ];
     }
 
+    /**
+     * Aggregation helper using WEIGHTED average pricing.
+     */
     protected function addFlowerLine(
         array &$lines,
         string $flowerName,
@@ -267,17 +276,24 @@ class FlowerEstimateController extends Controller
             $lines[$key] = [
                 'flower_name' => $flowerName,
                 'unit'        => $unit,
-                'unit_price'  => round($unitPrice, 2),
-                'qty'         => 0,
-                // subtotal kept for totals math; not shown in UI/CSV
-                'subtotal'    => 0,
+                'qty'         => 0.0,
+                'unit_price'  => 0.0,  // will be weighted avg for display
+                'total_value' => 0.0,  // running sum of qty*price (for accuracy)
             ];
         }
 
-        $lines[$key]['qty']      += $addQty;
-        $lines[$key]['subtotal']  = round($lines[$key]['qty'] * $lines[$key]['unit_price'], 2);
-        $totalQty                += $addQty;
-        $totalCost               += ($addQty * $lines[$key]['unit_price']);
+        // Update running totals for this flower/unit
+        $lines[$key]['qty']         += $addQty;
+        $lines[$key]['total_value'] += ($addQty * $unitPrice);
+
+        // Weighted average unit price for display
+        $lines[$key]['unit_price'] = $lines[$key]['qty'] > 0
+            ? round($lines[$key]['total_value'] / $lines[$key]['qty'], 2)
+            : 0.0;
+
+        // Global totals
+        $totalQty  += $addQty;
+        $totalCost += ($addQty * $unitPrice);
     }
 
     protected function unitPrice(FlowerProduct $product): float
@@ -297,7 +313,7 @@ class FlowerEstimateController extends Controller
     }
 
     /**
-     * CSV export: Tomorrow, Day, and Month sections (NO Subtotal column).
+     * CSV export (no per-line subtotal; totals use accurate total_value sums).
      */
     public function exportCsv(Request $request)
     {
@@ -328,7 +344,7 @@ class FlowerEstimateController extends Controller
 
             // Tomorrow
             fputcsv($out, ["Tomorrow-wise Estimate", $tomorrow->toDateString(), "Uses COALESCE(new_date, end_date)."]);
-            fputcsv($out, ['Flower','Unit','Qty','Unit Price']);
+            fputcsv($out, ['Flower','Unit','Qty','Avg Unit Price']);
             foreach ($tomorrowEstimate['lines'] as $row) {
                 fputcsv($out, [$row['flower_name'],$row['unit'],$row['qty'],$row['unit_price']]);
             }
@@ -337,7 +353,7 @@ class FlowerEstimateController extends Controller
 
             // Day
             fputcsv($out, ["Day-wise Estimate", $date->toDateString()]);
-            fputcsv($out, ['Flower','Unit','Qty','Unit Price']);
+            fputcsv($out, ['Flower','Unit','Qty','Avg Unit Price']);
             foreach ($dayEstimate['lines'] as $row) {
                 fputcsv($out, [$row['flower_name'],$row['unit'],$row['qty'],$row['unit_price']]);
             }
@@ -346,7 +362,7 @@ class FlowerEstimateController extends Controller
 
             // Month
             fputcsv($out, ["Month-wise Estimate", $monthStart->format('Y-m')]);
-            fputcsv($out, ['Flower','Unit','Total Qty','Unit Price']);
+            fputcsv($out, ['Flower','Unit','Total Qty','Avg Unit Price']);
             foreach ($monthEstimate['by_flower'] as $row) {
                 fputcsv($out, [$row['flower_name'],$row['unit'],$row['qty'],$row['unit_price']]);
             }
