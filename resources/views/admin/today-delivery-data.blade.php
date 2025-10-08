@@ -248,8 +248,8 @@
                                         <div class="d-flex flex-column">
                                             <span class="fw-bold"
                                                 @if ($addr) data-bs-toggle="tooltip"
-                                    data-bs-placement="top"
-                                    title="{{ $tooltip }}" @endif>
+                                                    data-bs-placement="top"
+                                                    title="{{ $tooltip }}" @endif>
                                                 {{ $user->name ?? '—' }}
                                             </span>
                                             <small class="text-muted">ID: {{ $sub->subscription_id }}</small>
