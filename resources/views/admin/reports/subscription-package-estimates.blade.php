@@ -39,15 +39,14 @@
                     <option value="all" @selected($selectedPdp === 'all')>All Subscription products</option>
                     <option value="has" @selected($selectedPdp === 'has')>Only with per-day price</option>
                     @foreach ($perDayPriceOptions as $opt)
-                        {{-- fixed extra quote --}}
                         <option value="{{ $opt }}" @selected((string)$selectedPdp === (string)$opt)>
                             ₹ {{ number_format((float)$opt, 2) }}
                         </option>
                     @endforeach
                 </select>
                 <small class="text-muted">
-                    Only Subscription products appear here. Cost below uses
-                    <strong>item bundle price ÷ quantity</strong> to derive per-unit value.
+                    Only Subscription products appear here. Cost calculations use bundle→per-unit for estimates;
+                    the Price List below shows the bundle prices exactly like your modal.
                 </small>
             </div>
 
@@ -77,7 +76,7 @@
             @if (empty($dayEstimate['lines']))
                 <div class="text-muted">No active Subscription deliveries on this day with the selected filter.</div>
             @else
-                {{-- Always-visible: show which subscription products contributed today --}}
+                {{-- Subscriptions contributing today --}}
                 @if (!empty($dayEstimate['by_product']))
                     <div class="table-responsive mb-3">
                         <table class="table table-sm table-bordered align-middle">
@@ -113,6 +112,44 @@
                     </div>
                 @endif
 
+                {{-- NEW: Price List like the modal (per subscription, per product) --}}
+                @if (!empty($dayEstimate['by_product_items']))
+                    @foreach ($dayEstimate['by_product_items'] as $pid => $group)
+                        <div class="mb-2 fw-bold">{{ $group['product_name'] }} — Price List (per subscription)</div>
+                        <div class="table-responsive mb-4">
+                            <table class="table table-sm table-bordered align-middle">
+                                <thead>
+                                    <tr>
+                                        <th style="width:36px;">#</th>
+                                        <th>Item</th>
+                                        <th class="text-end">Qty</th>
+                                        <th>Unit</th>
+                                        <th class="text-end">Item Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($group['items'] as $it)
+                                        <tr>
+                                            <td>{{ $it['idx'] }}</td>
+                                            <td>{{ $it['item_name'] }}</td>
+                                            <td class="text-end amount">{{ number_format($it['quantity'], 2) }}</td>
+                                            <td>{{ $it['unit'] }}</td>
+                                            <td class="text-end amount">₹ {{ number_format($it['item_price'], 2) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th colspan="4" class="text-end">Total</th>
+                                        <th class="text-end amount"><strong>₹ {{ number_format($group['total'], 2) }}</strong></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    @endforeach
+                @endif
+
+                {{-- Items (per-unit math for consumption) --}}
                 <div class="table-responsive">
                     <table class="table table-sm table-bordered align-middle">
                         <thead>
@@ -152,7 +189,7 @@
         </div>
     </div>
 
-    {{-- Month Summary --}}
+    {{-- Month Summary (unchanged) --}}
     <div class="card card-soft mb-4">
         <div class="card-header">
             <div class="hstack">

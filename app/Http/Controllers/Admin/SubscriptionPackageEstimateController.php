@@ -92,6 +92,7 @@ class SubscriptionPackageEstimateController extends Controller
             $cursor->addDay();
         }
 
+        // Aggregate by item (per-unit math stays the same)
         $byItem = [];
         $totalQty = 0.0;
         $totalCost = 0.0;
@@ -118,10 +119,10 @@ class SubscriptionPackageEstimateController extends Controller
         uasort($byItem, fn($a,$b) => strcasecmp($a['item_name'], $b['item_name']));
 
         return [
-            'per_day'   => $perDay,
-            'by_item'   => $byItem,
-            'total_qty' => $totalQty,
-            'total_cost'=> round($totalCost, 2),
+            'per_day'    => $perDay,
+            'by_item'    => $byItem,
+            'total_qty'  => $totalQty,
+            'total_cost' => round($totalCost, 2),
         ];
     }
 
@@ -147,11 +148,8 @@ class SubscriptionPackageEstimateController extends Controller
     }
 
     /**
-     * Day tally (correct math):
-     * - Treat PackageItem.price as bundle price for bundle quantity.
-     * - Per-unit price = price / quantity.
-     * - Qty added = bundleQty × (#active subs for that product on this day).
-     * - Also return a by_product breakdown for visibility in the view.
+     * Day tally (bundle -> per-unit math for consumption),
+     * plus per-product **price list** (bundle prices) for display like your modal.
      */
     protected function tallyPackageItemsForDay(
         Collection $subscriptions,
@@ -173,7 +171,13 @@ class SubscriptionPackageEstimateController extends Controller
         });
 
         if ($deliveries->isEmpty()) {
-            return ['lines' => [], 'total_qty' => 0.0, 'total_cost' => 0.0, 'by_product' => []];
+            return [
+                'lines'            => [],
+                'total_qty'        => 0.0,
+                'total_cost'       => 0.0,
+                'by_product'       => [],
+                'by_product_items' => [], // NEW: price list per product
+            ];
         }
 
         // Preload package items for all involved products
@@ -182,10 +186,12 @@ class SubscriptionPackageEstimateController extends Controller
             ->get()
             ->groupBy('product_id');
 
-        $lines = [];     // item-level
+        $lines = [];     // item-level (per-unit math)
         $totalQty = 0.0;
         $totalCost = 0.0;
-        $byProduct = []; // product-level summary for the "Subscriptions contributing today" table
+
+        $byProduct       = []; // summary by product
+        $byProductItems  = []; // NEW: price list per product (like modal)
 
         foreach ($deliveries->groupBy('product_id') as $productId => $subsForProduct) {
             $subProd = $subsByProductId->get($productId);
@@ -193,7 +199,7 @@ class SubscriptionPackageEstimateController extends Controller
 
             $pkgItems = $pkgItemsByProduct->get($productId) ?? collect();
 
-            // For the product summary: one subscription's bundle total (sum of item bundle prices)
+            // Per-product summary
             $bundleTotal = 0.0;
             foreach ($pkgItems as $it) {
                 $bundleTotal += (float) ($it->price ?? 0);
@@ -206,7 +212,33 @@ class SubscriptionPackageEstimateController extends Controller
                 'subtotal'     => round($bundleTotal * $subsCount, 2),
             ];
 
-            // Item aggregation (correct per-unit math)
+            // NEW: build the price list exactly like the modal (one subscription)
+            $priceItems = [];
+            $priceSum   = 0.0;
+            $rowIndex   = 1;
+            foreach ($pkgItems as $it) {
+                $itemName    = (string) ($it->item_name ?? 'Item');
+                $unit        = (string) ($it->unit ?? 'unit');
+                $bundleQty   = (float)  ($it->quantity ?? 0);
+                $bundlePrice = (float)  ($it->price ?? 0);
+                if ($bundleQty <= 0) continue;
+
+                $priceItems[] = [
+                    'idx'        => $rowIndex++,
+                    'item_name'  => $itemName,
+                    'quantity'   => $bundleQty,
+                    'unit'       => $unit,
+                    'item_price' => round($bundlePrice, 2),
+                ];
+                $priceSum += $bundlePrice;
+            }
+            $byProductItems[$productId] = [
+                'product_name' => (string) $subProd->name,
+                'items'        => $priceItems,
+                'total'        => round($priceSum, 2),
+            ];
+
+            // Item aggregation (per-unit math for consumption/estimates)
             foreach ($pkgItems as $it) {
                 $itemName   = (string) ($it->item_name ?? 'Item');
                 $unit       = (string) ($it->unit ?? 'unit');
@@ -227,7 +259,7 @@ class SubscriptionPackageEstimateController extends Controller
                     ];
                 }
 
-                $addedQty = $bundleQty * $subsCount;
+                $addedQty = $bundleQty * $subsCount;                 // qty across subs
                 $lines[$key]['qty']      += $addedQty;
                 $lines[$key]['subtotal']  = round($lines[$key]['qty'] * $lines[$key]['unit_price'], 2);
 
@@ -239,10 +271,11 @@ class SubscriptionPackageEstimateController extends Controller
         uasort($lines, fn($a,$b) => strcasecmp($a['item_name'], $b['item_name']));
 
         return [
-            'lines'      => $lines,
-            'total_qty'  => $totalQty,
-            'total_cost' => round($totalCost, 2),
-            'by_product' => $byProduct,
+            'lines'            => $lines,
+            'total_qty'        => $totalQty,
+            'total_cost'       => round($totalCost, 2),
+            'by_product'       => $byProduct,
+            'by_product_items' => $byProductItems, // expose to view
         ];
     }
 
@@ -255,7 +288,7 @@ class SubscriptionPackageEstimateController extends Controller
             ->toString();
     }
 
-    // ========== CSV export (matches on-screen math) ==========
+    // ========== CSV export unchanged (if you want price list in CSV, say so) ==========
     public function exportCsv(Request $request)
     {
         $dateStr   = $request->input('date',  Carbon::today()->toDateString());
