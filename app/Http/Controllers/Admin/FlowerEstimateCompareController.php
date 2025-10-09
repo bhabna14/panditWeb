@@ -43,7 +43,7 @@ class FlowerEstimateCompareController extends Controller
 
         $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get()->keyBy('vendor_id');
 
-        return view('admin.reports.vendor-compare', [
+        return view('admin.reports.flower-compare', [
             'date'          => $date,
             'monthStart'    => $monthStart,
             'selectedDate'  => $date->toDateString(),
