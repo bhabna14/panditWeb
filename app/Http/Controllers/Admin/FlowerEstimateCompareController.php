@@ -14,324 +14,217 @@ use App\Models\FlowerProduct;
 use App\Models\PackageItem;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
-use App\Models\FlowerVendor; // for vendor dropdown (if you have it)
+use App\Models\FlowerVendor;
 
-class FlowerEstimateCompareController extends Controller
+class FlowerVendorCompareController extends Controller
 {
     public function index(Request $request)
     {
-        // Inputs (defaults)
+        // Inputs
         $dateStr    = $request->input('date', Carbon::today()->toDateString());
         $monthStr   = $request->input('month', Carbon::today()->format('Y-m'));
-        $vendorId   = $request->input('vendor_id');            // optional
-        $userId     = $request->input('user_id');              // optional filter for estimates
+
         $date       = Carbon::parse($dateStr)->startOfDay();
-        $tomorrow   = Carbon::tomorrow()->startOfDay();
         $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth();
 
-        // Preload flower products and lookup maps
+        // Load flowers (for estimate unit price fallback)
         $allFlowers = FlowerProduct::select('product_id','name','category','price','per_day_price','status')->get();
         $flowerById = $allFlowers->keyBy('product_id');
-        $flowerByNormName = $allFlowers->keyBy(function ($f) { return $this->norm($f->name); });
+        $flowerByNormName = $allFlowers->keyBy(fn($f) => $this->norm($f->name));
 
-        // --- Build Comparisons ---
-        $compareTomorrow = $this->compareForDate($tomorrow, $flowerById, $flowerByNormName, $userId, $vendorId, true);  // effective end-date
-        $compareToday    = $this->compareForDate($date,     $flowerById, $flowerByNormName, $userId, $vendorId, true);
-        $compareMonth    = $this->compareForRange($monthStart, $monthEnd, $flowerById, $flowerByNormName, $userId, $vendorId);
+        // ---- DAY SECTION ----
+        $estDay   = $this->estimateTotalsForDate($date, $flowerById, $flowerByNormName);
+        $actDay   = $this->actualTotalsPerVendorForDate($date);
 
-        // Vendors list (optional dropdown)
-        $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get();
+        $compareDay = $this->composeVendorCompare($actDay['per_vendor'], $estDay['total_qty'], $estDay['total_value']);
 
-        return view('admin.reports.flower-compare', [
+        // ---- MONTH SECTION ----
+        $estMonth = $this->estimateTotalsForRange($monthStart, $monthEnd, $flowerById, $flowerByNormName);
+        $actMonth = $this->actualTotalsPerVendorForRange($monthStart, $monthEnd);
+
+        $compareMonth = $this->composeVendorCompare($actMonth['per_vendor'], $estMonth['total_qty'], $estMonth['total_value']);
+
+        // Vendors for friendly names in case some vendor didn’t pick in the window
+        $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get()->keyBy('vendor_id');
+
+        return view('admin.reports.vendor-compare', [
             'date'          => $date,
-            'tomorrow'      => $tomorrow,
             'monthStart'    => $monthStart,
-            'vendors'       => $vendors,
-            'vendorId'      => $vendorId,
-            'userId'        => $userId,
             'selectedDate'  => $date->toDateString(),
             'selectedMonth' => $monthStart->format('Y-m'),
 
-            'compareTomorrow'=> $compareTomorrow,
-            'compareToday'   => $compareToday,
-            'compareMonth'   => $compareMonth,
+            'vendors'       => $vendors,
+
+            'estDay'        => $estDay,
+            'compareDay'    => $compareDay,
+
+            'estMonth'      => $estMonth,
+            'compareMonth'  => $compareMonth,
         ]);
     }
 
-    // ---------- Core compare builders ----------
+    // ========== BUILD COMPARISON ROWS ==========
 
-    protected function compareForDate(
-        Carbon $date,
-        Collection $flowerById,
-        Collection $flowerByNormName,
-        ?int $userId = null,
-        ?int $vendorId = null,
-        bool $effectiveEnd = true
-    ): array {
-        $est = $this->estimateForDate($date, $flowerById, $flowerByNormName, $userId, $effectiveEnd);
-        $act = $this->pickupsForDate($date, $vendorId);
-
-        return $this->mergeEstimateActual($est['lines'], $act['lines'], [
-            'est_total_qty'   => $est['total_qty'],
-            'est_total_value' => $est['total_cost'],
-            'act_total_qty'   => $act['total_qty'],
-            'act_total_value' => $act['total_value'],
-        ]);
-    }
-
-    protected function compareForRange(
-        Carbon $start,
-        Carbon $end,
-        Collection $flowerById,
-        Collection $flowerByNormName,
-        ?int $userId = null,
-        ?int $vendorId = null
-    ): array {
-        $est = $this->estimateForRange($start, $end, $flowerById, $flowerByNormName, $userId);
-        $act = $this->pickupsForRange($start, $end, $vendorId);
-
-        // Convert estimate 'by_flower' format into lines keyed by flower|unit
-        $estLines = [];
-        foreach ($est['by_flower'] as $row) {
-            $key = $this->norm($row['flower_name']) . '|' . strtolower($row['unit'] ?? 'unit');
-            $estLines[$key] = [
-                'flower_name' => $row['flower_name'],
-                'unit'        => $row['unit'] ?? 'unit',
-                'qty'         => (float) $row['qty'],
-                'unit_price'  => (float) $row['unit_price'],
-                'subtotal'    => (float) $row['subtotal'],
-            ];
-        }
-
-        return $this->mergeEstimateActual($estLines, $act['lines'], [
-            'est_total_qty'   => $est['total_qty'],
-            'est_total_value' => $est['total_cost'],
-            'act_total_qty'   => $act['total_qty'],
-            'act_total_value' => $act['total_value'],
-        ]);
-    }
-
-    protected function mergeEstimateActual(array $estLines, array $actLines, array $totals): array
+    protected function composeVendorCompare(array $actualPerVendor, float $estQty, float $estValue): array
     {
-        $keys = array_unique(array_merge(array_keys($estLines), array_keys($actLines)));
         $rows = [];
-
-        $sumDiffQty = 0.0;
-        $sumDiffVal = 0.0;
-
-        foreach ($keys as $key) {
-            $e = $estLines[$key] ?? null;
-            $a = $actLines[$key] ?? null;
-
-            $flowerName = $e['flower_name'] ?? ($a['flower_name'] ?? '—');
-            $unit       = $e['unit'] ?? ($a['unit'] ?? 'unit');
-
-            $estQty   = $e['qty']        ?? 0.0;
-            $estValue = $e['subtotal']   ?? 0.0;
-
-            $actQty   = $a['qty']        ?? 0.0;
-            $actValue = $a['subtotal']   ?? 0.0;
-
-            $diffQty  = $actQty - $estQty;
-            $diffVal  = $actValue - $estValue;
-
-            $sumDiffQty += $diffQty;
-            $sumDiffVal += $diffVal;
-
+        $sumActQty = 0.0;
+        $sumActVal = 0.0;
+        foreach ($actualPerVendor as $vendorId => $v) {
+            $actQty = (float) $v['qty'];
+            $actVal = (float) $v['value'];
             $rows[] = [
-                'flower_name' => $flowerName,
-                'unit'        => $unit,
-                'est_qty'     => $estQty,
+                'vendor_id'   => $vendorId,
+                'vendor_name' => $v['vendor_name'],
                 'act_qty'     => $actQty,
-                'diff_qty'    => $diffQty,
+                'act_value'   => $actVal,
+                'est_qty'     => $estQty,
                 'est_value'   => $estValue,
-                'act_value'   => $actValue,
-                'diff_value'  => $diffVal,
+                'diff_qty'    => $actQty - $estQty,
+                'diff_value'  => $actVal - $estValue,
             ];
+            $sumActQty += $actQty;
+            $sumActVal += $actVal;
         }
 
-        // sort by name
-        usort($rows, fn($x, $y) => strcasecmp($x['flower_name'], $y['flower_name']));
-
-        return [
-            'rows' => $rows,
-            'totals' => [
-                'est_qty'    => (float) ($totals['est_total_qty']   ?? 0),
-                'act_qty'    => (float) ($totals['act_total_qty']   ?? 0),
-                'diff_qty'   => (float) ($sumDiffQty),
-                'est_value'  => (float) ($totals['est_total_value'] ?? 0),
-                'act_value'  => (float) ($totals['act_total_value'] ?? 0),
-                'diff_value' => (float) ($sumDiffVal),
-            ],
+        // Overall totals row (All Vendors)
+        $totals = [
+            'act_qty'    => $sumActQty,
+            'act_value'  => $sumActVal,
+            'est_qty'    => $estQty,
+            'est_value'  => $estValue,
+            'diff_qty'   => $sumActQty - $estQty,
+            'diff_value' => $sumActVal - $estValue,
         ];
+
+        // Sort by vendor name
+        usort($rows, fn($a,$b) => strcasecmp($a['vendor_name'], $b['vendor_name']));
+
+        return ['rows' => $rows, 'totals' => $totals];
     }
 
-    // ---------- Estimates ----------
+    // ========== ESTIMATE: TOTALS ONLY (QTY & VALUE) ==========
 
-    protected function estimateForDate(
-        Carbon $date,
-        Collection $flowerById,
-        Collection $flowerByNormName,
-        ?int $userId = null,
-        bool $effectiveEnd = true // true => use COALESCE(new_date, end_date)
-    ): array {
-        $subs = $effectiveEnd
-            ? $this->activeSubscriptionsOverlappingEffective($date, $date, $userId)
-            : $this->activeSubscriptionsOverlapping($date, $date, $userId);
-
-        return $this->tallyForSubscriptionsOnDate($subs, $date, $flowerById, $flowerByNormName);
-    }
-
-    protected function estimateForRange(
-        Carbon $start,
-        Carbon $end,
-        Collection $flowerById,
-        Collection $flowerByNormName,
-        ?int $userId = null
-    ): array {
-        $subs = $this->activeSubscriptionsOverlappingEffective($start, $end, $userId);
-
-        $perDay = [];
-        $cursor = $start->copy();
-        while ($cursor->lte($end)) {
-            $perDay[$cursor->toDateString()] = $this->tallyForSubscriptionsOnDate($subs, $cursor, $flowerById, $flowerByNormName);
-            $cursor->addDay();
-        }
-
-        $byFlower = [];
-        $totalQty = 0;
-        $totalCost = 0;
-
-        foreach ($perDay as $data) {
-            foreach ($data['lines'] as $key => $line) {
-                if (!isset($byFlower[$key])) {
-                    $byFlower[$key] = [
-                        'flower_name' => $line['flower_name'],
-                        'unit'        => $line['unit'],
-                        'unit_price'  => $line['unit_price'],
-                        'qty'         => 0,
-                        'subtotal'    => 0,
-                    ];
-                }
-                $byFlower[$key]['qty']      += $line['qty'];
-                $byFlower[$key]['subtotal'] += $line['subtotal'];
-                $totalQty                   += $line['qty'];
-                $totalCost                  += $line['subtotal'];
-            }
-        }
-
-        uasort($byFlower, fn($a,$b) => strcasecmp($a['flower_name'], $b['flower_name']));
-
-        return [
-            'per_day'   => $perDay,
-            'by_flower' => $byFlower,
-            'total_qty' => $totalQty,
-            'total_cost'=> $totalCost,
-        ];
-    }
-
-    protected function tallyForSubscriptionsOnDate(
-        Collection $subscriptions,
+    protected function estimateTotalsForDate(
         Carbon $date,
         Collection $flowerById,
         Collection $flowerByNormName
     ): array {
-        $deliveries = $subscriptions->filter(function ($s) use ($date) {
-            $endEff = $s->new_date ?? $s->end_date;
-            $inWindow = Carbon::parse($s->start_date)->startOfDay()->lte($date)
-                      && Carbon::parse($endEff)->endOfDay()->gte($date);
+        $subs = $this->activeSubscriptionsOverlappingEffective($date, $date);
 
-            $paused = false;
-            if ($s->pause_start_date && $s->pause_end_date) {
-                $paused = Carbon::parse($s->pause_start_date)->startOfDay()->lte($date)
-                       && Carbon::parse($s->pause_end_date)->endOfDay()->gte($date);
-            }
-
-            $expired = (isset($s->status) && strtolower((string)$s->status) === 'expired');
-
-            return $inWindow && !$paused && !$expired;
-        });
-
-        if ($deliveries->isEmpty()) {
-            return ['lines' => [], 'total_qty' => 0, 'total_cost' => 0];
+        $productIds = $subs->pluck('product_id')->unique()->all();
+        if (empty($productIds)) {
+            return ['total_qty' => 0.0, 'total_value' => 0.0];
         }
 
-        $productIds = $deliveries->pluck('product_id')->unique()->all();
-        $packageItemsByProduct = PackageItem::whereIn('product_id', $productIds)->get()->groupBy('product_id');
+        $pkgItemsByProduct = PackageItem::whereIn('product_id', $productIds)->get()->groupBy('product_id');
 
-        $lines = [];
-        $totalQty = 0;
-        $totalCost = 0;
+        $totalQty = 0.0;
+        $totalVal = 0.0;
 
-        foreach ($deliveries as $sub) {
-            $product = $flowerById->get($sub->product_id);
+        foreach ($subs->groupBy('product_id') as $pid => $subsForProduct) {
+            $countSubs = $subsForProduct->count();
+            $pkgItems  = $pkgItemsByProduct->get($pid) ?? collect();
 
-            if ($product && strtolower((string)$product->category) === 'flower') {
-                $this->addLine($lines, $product->name, 'unit', 1, $this->unitPrice($product), $totalQty, $totalCost);
-            } else {
-                $items = $packageItemsByProduct->get($sub->product_id) ?? collect();
-                foreach ($items as $item) {
-                    $norm = $this->norm($item->item_name);
-                    $matched = $flowerByNormName->get($norm);
+            foreach ($pkgItems as $it) {
+                $qty  = (float) ($it->quantity ?? 0);
+                $unit = $it->unit ?: 'unit';
 
-                    $flowerName = $matched ? $matched->name : $item->item_name;
-                    $unit       = $item->unit ?: 'unit';
-                    $unitPrice  = $matched ? $this->unitPrice($matched) : (float) ($item->price ?? 0);
-                    $qty        = (float) ($item->quantity ?? 0);
+                // derive per-unit price based on flower product if name matches, else bundle-price/qty
+                $matched = $flowerByNormName->get($this->norm($it->item_name));
+                $unitPrice = $matched ? $this->unitPrice($matched)
+                                      : ($qty > 0 ? (float)$it->price / $qty : 0.0);
 
-                    if ($qty > 0) {
-                        $this->addLine($lines, $flowerName, $unit, $qty, $unitPrice, $totalQty, $totalCost);
-                    }
-                }
+                $addQty = $qty * $countSubs;
+                $totalQty += $addQty;
+                $totalVal += ($addQty * $unitPrice);
             }
         }
 
-        uasort($lines, fn($a, $b) => strcasecmp($a['flower_name'], $b['flower_name']));
-
-        return ['lines' => $lines, 'total_qty' => $totalQty, 'total_cost' => $totalCost];
+        return ['total_qty' => round($totalQty, 2), 'total_value' => round($totalVal, 2)];
     }
 
-    protected function unitPrice(FlowerProduct $product): float
+    protected function estimateTotalsForRange(
+        Carbon $start,
+        Carbon $end,
+        Collection $flowerById,
+        Collection $flowerByNormName
+    ): array {
+        $cursor = $start->copy();
+        $sumQty = 0.0;
+        $sumVal = 0.0;
+
+        while ($cursor->lte($end)) {
+            $d = $this->estimateTotalsForDate($cursor, $flowerById, $flowerByNormName);
+            $sumQty += $d['total_qty'];
+            $sumVal += $d['total_value'];
+            $cursor->addDay();
+        }
+        return ['total_qty' => round($sumQty, 2), 'total_value' => round($sumVal, 2)];
+    }
+
+    protected function unitPrice(FlowerProduct $p): float
     {
-        if (!is_null($product->price))         return (float) $product->price;
-        if (!is_null($product->per_day_price)) return (float) $product->per_day_price;
+        if (!is_null($p->price))         return (float)$p->price;
+        if (!is_null($p->per_day_price)) return (float)$p->per_day_price;
         return 0.0;
     }
 
-    protected function addLine(
-        array &$lines,
-        string $flowerName,
-        string $unit,
-        float $addQty,
-        float $unitPrice,
-        float &$totalQty,
-        float &$totalCost
-    ): void {
-        $key = $this->norm($flowerName) . '|' . strtolower($unit ?: 'unit');
+    // ========== ACTUAL PICKUPS: GROUPED BY VENDOR (QTY & VALUE) ==========
 
-        if (!isset($lines[$key])) {
-            $lines[$key] = [
-                'flower_name' => $flowerName,
-                'unit'        => $unit ?: 'unit',
-                'unit_price'  => round($unitPrice, 2),
-                'qty'         => 0.0,
-                'subtotal'    => 0.0,
-            ];
-        }
+    protected function actualTotalsPerVendorForDate(Carbon $date): array
+    {
+        $rows = FlowerPickupDetails::with(['flowerPickupItems'])
+            ->whereDate('pickup_date', '=', $date->toDateString())
+            ->get();
 
-        $lines[$key]['qty']      += $addQty;
-        $lines[$key]['subtotal']  = round($lines[$key]['qty'] * $lines[$key]['unit_price'], 2);
-        $totalQty                += $addQty;
-        $totalCost               += ($addQty * $lines[$key]['unit_price']);
+        return $this->sumByVendor($rows);
     }
 
-    // ---------- Subscriptions: overlap helpers ----------
+    protected function actualTotalsPerVendorForRange(Carbon $start, Carbon $end): array
+    {
+        $rows = FlowerPickupDetails::with(['flowerPickupItems'])
+            ->whereDate('pickup_date', '>=', $start->toDateString())
+            ->whereDate('pickup_date', '<=', $end->toDateString())
+            ->get();
 
-    protected function activeSubscriptionsOverlappingEffective(Carbon $start, Carbon $end, ?int $userId = null)
+        return $this->sumByVendor($rows);
+    }
+
+    protected function sumByVendor(Collection $pickupDetails): array
+    {
+        $perVendor = []; // vendor_id => ['vendor_name'=>..., 'qty'=>..., 'value'=>...]
+        foreach ($pickupDetails as $detail) {
+            $vid  = $detail->vendor_id ?? 0;
+            $vname= $detail->vendor_name ?? ($detail->vendor->vendor_name ?? 'Unknown');
+
+            if (!isset($perVendor[$vid])) {
+                $perVendor[$vid] = ['vendor_name' => $vname, 'qty' => 0.0, 'value' => 0.0];
+            }
+
+            foreach ($detail->flowerPickupItems as $it) {
+                $q = (float)($it->quantity ?? 0);
+                $p = (float)($it->price ?? 0); // ASSUME unit price
+                $perVendor[$vid]['qty']   += $q;
+                $perVendor[$vid]['value'] += ($q * $p);
+            }
+        }
+
+        // Round
+        foreach ($perVendor as &$pv) {
+            $pv['qty']   = round($pv['qty'], 2);
+            $pv['value'] = round($pv['value'], 2);
+        }
+
+        return ['per_vendor' => $perVendor];
+    }
+
+    // ========== SUBS QUERY HELPERS ==========
+
+    protected function activeSubscriptionsOverlappingEffective(Carbon $start, Carbon $end)
     {
         return Subscription::query()
-            ->when($userId, fn($q) => $q->where('user_id', $userId))
             ->where(function ($q) {
                 $q->whereIn('status', ['active', 'paused'])
                   ->orWhere('is_active', 1);
@@ -346,101 +239,6 @@ class FlowerEstimateCompareController extends Controller
             ]);
     }
 
-    protected function activeSubscriptionsOverlapping(Carbon $start, Carbon $end, ?int $userId = null)
-    {
-        return Subscription::query()
-            ->when($userId, fn($q) => $q->where('user_id', $userId))
-            ->where(function ($q) {
-                $q->where('status', 'active')->orWhere('is_active', 1);
-            })
-            ->whereDate('start_date', '<=', $end->toDateString())
-            ->whereDate('end_date', '>=', $start->toDateString())
-            ->get([
-                'subscription_id','order_id','user_id','product_id',
-                'start_date','end_date',
-                'pause_start_date','pause_end_date',
-                'status','is_active'
-            ]);
-    }
-
-    // ---------- Actual pickups ----------
-
-    protected function pickupsForDate(Carbon $date, ?int $vendorId = null): array
-    {
-        $rows = FlowerPickupDetails::with([
-                'flowerPickupItems.flower',
-                'flowerPickupItems.unit',
-                'vendor',
-            ])
-            ->whereDate('pickup_date', '=', $date->toDateString())
-            ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
-            ->get();
-
-        return $this->aggregatePickupRows($rows);
-    }
-
-    protected function pickupsForRange(Carbon $start, Carbon $end, ?int $vendorId = null): array
-    {
-        $rows = FlowerPickupDetails::with([
-                'flowerPickupItems.flower',
-                'flowerPickupItems.unit',
-                'vendor',
-            ])
-            ->whereDate('pickup_date', '>=', $start->toDateString())
-            ->whereDate('pickup_date', '<=', $end->toDateString())
-            ->when($vendorId, fn($q) => $q->where('vendor_id', $vendorId))
-            ->get();
-
-        return $this->aggregatePickupRows($rows);
-    }
-
-    protected function aggregatePickupRows(Collection $pickupDetails): array
-    {
-        $lines = [];
-        $totalQty = 0.0;
-        $totalValue = 0.0;
-
-        foreach ($pickupDetails as $detail) {
-            foreach ($detail->flowerPickupItems as $it) {
-                $name = $it->flower?->name ?? 'Unknown';
-                $unit = $it->unit?->unit_name ?? 'unit';
-                $qty  = (float) ($it->quantity ?? 0);
-                $price = (float) ($it->price ?? 0); // ASSUMPTION: unit price; adjust if it's total
-
-                $key = $this->norm($name) . '|' . strtolower($unit);
-                if (!isset($lines[$key])) {
-                    $lines[$key] = [
-                        'flower_name' => $name,
-                        'unit'        => $unit,
-                        'qty'         => 0.0,
-                        'unit_price'  => $price, // last-seen; not used for subtotal calc
-                        'subtotal'    => 0.0,
-                    ];
-                }
-
-                $lines[$key]['qty']      += $qty;
-                $lines[$key]['subtotal'] += ($qty * $price);
-
-                $totalQty   += $qty;
-                $totalValue += ($qty * $price);
-            }
-        }
-
-        // round subtotals
-        foreach ($lines as &$L) {
-            $L['subtotal'] = round($L['subtotal'], 2);
-        }
-
-        // sort by name
-        uasort($lines, fn($a,$b) => strcasecmp($a['flower_name'], $b['flower_name']));
-
-        return [
-            'lines'       => $lines,
-            'total_qty'   => $totalQty,
-            'total_value' => $totalValue,
-        ];
-    }
-
     protected function norm(?string $s): string
     {
         return Str::of($s ?? '')
@@ -450,64 +248,63 @@ class FlowerEstimateCompareController extends Controller
             ->toString();
     }
 
-    // ---------- CSV Export (optional) ----------
+    // ========== CSV ==========
 
     public function exportCsv(Request $request)
     {
         $dateStr    = $request->input('date', Carbon::today()->toDateString());
         $monthStr   = $request->input('month', Carbon::today()->format('Y-m'));
-        $vendorId   = $request->input('vendor_id');
-        $userId     = $request->input('user_id');
 
         $date       = Carbon::parse($dateStr)->startOfDay();
-        $tomorrow   = Carbon::tomorrow()->startOfDay();
         $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth();
 
         $allFlowers = FlowerProduct::select('product_id','name','category','price','per_day_price','status')->get();
         $flowerById = $allFlowers->keyBy('product_id');
-        $flowerByNorm= $allFlowers->keyBy(fn($f) => $this->norm($f->name));
+        $flowerByNormName = $allFlowers->keyBy(fn($f) => $this->norm($f->name));
 
-        $cmpTomorrow = $this->compareForDate($tomorrow, $flowerById, $flowerByNorm, $userId, $vendorId, true);
-        $cmpToday    = $this->compareForDate($date,     $flowerById, $flowerByNorm, $userId, $vendorId, true);
-        $cmpMonth    = $this->compareForRange($monthStart, $monthEnd, $flowerById, $flowerByNorm, $userId, $vendorId);
+        $estDay     = $this->estimateTotalsForDate($date, $flowerById, $flowerByNormName);
+        $actDay     = $this->actualTotalsPerVendorForDate($date);
+        $cmpDay     = $this->composeVendorCompare($actDay['per_vendor'], $estDay['total_qty'], $estDay['total_value']);
 
-        $filename = "flower_compare_{$date->toDateString()}_{$monthStart->format('Y-m')}.csv";
+        $estMonth   = $this->estimateTotalsForRange($monthStart, $monthEnd, $flowerById, $flowerByNormName);
+        $actMonth   = $this->actualTotalsPerVendorForRange($monthStart, $monthEnd);
+        $cmpMonth   = $this->composeVendorCompare($actMonth['per_vendor'], $estMonth['total_qty'], $estMonth['total_value']);
+
+        $filename = "vendor_compare_{$date->toDateString()}_{$monthStart->format('Y-m')}.csv";
         $headers = [
             'Content-Type'        => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $callback = function () use ($tomorrow, $cmpTomorrow, $date, $cmpToday, $monthStart, $cmpMonth) {
+        $callback = function () use ($date, $cmpDay, $monthStart, $cmpMonth) {
             $out = fopen('php://output', 'w');
 
-            // Helper
-            $writeSection = function($title, $subTitle, $data) use ($out) {
-                fputcsv($out, [$title, $subTitle]);
-                fputcsv($out, ['Flower','Unit','Est Qty','Act Qty','Diff Qty','Est Value','Act Value','Diff Value']);
-                foreach ($data['rows'] as $r) {
+            $write = function($title, $subtitle, $cmp) use ($out) {
+                fputcsv($out, [$title, $subtitle]);
+                fputcsv($out, ['Vendor','Actual Qty','Actual Value','Est Qty','Est Value','Δ Qty','Δ Value']);
+                foreach ($cmp['rows'] as $r) {
                     fputcsv($out, [
-                        $r['flower_name'],
-                        $r['unit'],
-                        $r['est_qty'],
+                        $r['vendor_name'],
                         $r['act_qty'],
-                        $r['diff_qty'],
-                        $r['est_value'],
                         $r['act_value'],
+                        $r['est_qty'],
+                        $r['est_value'],
+                        $r['diff_qty'],
                         $r['diff_value'],
                     ]);
                 }
-                $t = $data['totals'];
-                fputcsv($out, ['Totals','',
-                    $t['est_qty'], $t['act_qty'], $t['diff_qty'],
-                    $t['est_value'], $t['act_value'], $t['diff_value']
+                $t = $cmp['totals'];
+                fputcsv($out, ['All Vendors',
+                    $t['act_qty'], $t['act_value'],
+                    $t['est_qty'], $t['est_value'],
+                    $t['diff_qty'], $t['diff_value'],
                 ]);
-                fputcsv($out, []); // blank line
+                fputcsv($out, []);
             };
 
-            $writeSection('Tomorrow Compare', $tomorrow->toDateString(), $cmpTomorrow);
-            $writeSection('Today Compare', $date->toDateString(), $cmpToday);
-            $writeSection('Month Compare', $monthStart->format('Y-m'), $cmpMonth);
+            $write('Day', $date->toDateString(), $cmpDay);
+            $write('Month', $monthStart->format('Y-m'), $cmpMonth);
 
             fclose($out);
         };

@@ -1,6 +1,5 @@
 @extends('admin.layouts.apps')
 
-
 @section('styles')
     <style>
         .card-soft {
@@ -44,136 +43,181 @@
             text-transform: uppercase;
             letter-spacing: .03em;
         }
-
-        .neg {
-            color: #b42318;
-            font-weight: 600;
-        }
-
-        .pos {
-            color: #027a48;
-            font-weight: 600;
-        }
     </style>
 @endsection
 
 @section('content')
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
-            <span class="main-content-title mg-b-0 mg-b-lg-1">Estimate vs Pickup Comparison</span>
-            <div class="text-muted">Tomorrow, Today, and Month-wise quantities & values</div>
+            <span class="main-content-title mg-b-0 mg-b-lg-1">Vendor vs Estimate</span>
+            <div class="text-muted">Compare only Quantity & Value — Day and Month</div>
         </div>
         <ol class="breadcrumb d-flex justify-content-between align-items-center">
             <li class="breadcrumb-item tx-15"><a href="{{ url('admin/dashboard') }}">Dashboard</a></li>
-            <li class="breadcrumb-item active tx-15" aria-current="page">Flower Compare</li>
+            <li class="breadcrumb-item active tx-15" aria-current="page">Vendor Compare</li>
         </ol>
     </div>
 
-    <form method="GET" action="{{ route('admin.flowerCompare') }}" class="card card-soft p-3 mb-3">
+    <form method="GET" action="{{ route('admin.vendorCompare') }}" class="card card-soft p-3 mb-3">
         <div class="row gy-2">
             <div class="col-md-3">
-                <label class="form-label">Date (Today)</label>
+                <label class="form-label">Date</label>
                 <input type="date" name="date" class="form-control" value="{{ $selectedDate }}" required>
             </div>
             <div class="col-md-3">
                 <label class="form-label">Month</label>
                 <input type="month" name="month" class="form-control" value="{{ $selectedMonth }}" required>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Vendor (actual)</label>
-                <select name="vendor_id" class="form-select">
-                    <option value="">All Vendors</option>
-                    @foreach ($vendors as $v)
-                        <option value="{{ $v->vendor_id }}" @selected($vendorId == $v->vendor_id)>{{ $v->vendor_name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label class="form-label">User ID (est.)</label>
-                <input type="number" name="user_id" class="form-control" value="{{ $userId }}"
-                    placeholder="Optional filter">
-            </div>
             <div class="col-md-3 d-flex align-items-end">
                 <button class="btn btn-primary w-100">Compare</button>
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <a class="btn btn-outline-secondary w-100"
-                    href="{{ route('admin.reports.flower_compare.export', ['date' => $selectedDate, 'month' => $selectedMonth, 'vendor_id' => $vendorId, 'user_id' => $userId]) }}">
+                    href="{{ route('admin.reports.vendor_compare.export', ['date' => $selectedDate, 'month' => $selectedMonth]) }}">
                     Export CSV
                 </a>
             </div>
         </div>
     </form>
 
-    {{-- Helper component --}}
     @php
-        function cmpTotalsChips($t)
-        {
+        $chipRow = function ($title, $t) {
+            $dq = $t['diff_qty'];
+            $dv = $t['diff_value'];
             return '
-          <div class="hstack">
-            <div class="chip">Est Qty: <span class="amount">' .
+            <div class="hstack">
+                <div class="chip">' .
+                $title .
+                '</div>
+                <div class="chip">Est Qty: <span class="amount">' .
                 number_format($t['est_qty'], 2) .
                 '</span></div>
-            <div class="chip">Act Qty: <span class="amount">' .
+                <div class="chip">Act Qty: <span class="amount">' .
                 number_format($t['act_qty'], 2) .
                 '</span></div>
-            <div class="chip ' .
-                ($t['diff_qty'] >= 0 ? 'good' : 'bad') .
+                <div class="chip ' .
+                ($dq >= 0 ? 'good' : 'bad') .
                 '">Δ Qty: <span class="amount">' .
-                number_format($t['diff_qty'], 2) .
+                number_format($dq, 2) .
                 '</span></div>
-            <div class="chip">Est Value: <strong class="amount">₹ ' .
+                <div class="chip">Est Value: <strong class="amount">₹ ' .
                 number_format($t['est_value'], 2) .
                 '</strong></div>
-            <div class="chip">Act Value: <strong class="amount">₹ ' .
+                <div class="chip">Act Value: <strong class="amount">₹ ' .
                 number_format($t['act_value'], 2) .
                 '</strong></div>
-            <div class="chip ' .
-                ($t['diff_value'] >= 0 ? 'good' : 'bad') .
+                <div class="chip ' .
+                ($dv >= 0 ? 'good' : 'bad') .
                 '">Δ Value: <strong class="amount">₹ ' .
-                number_format($t['diff_value'], 2) .
+                number_format($dv, 2) .
                 '</strong></div>
-          </div>';
-        }
+            </div>';
+        };
     @endphp
 
-    {{-- Tomorrow --}}
+    {{-- Day --}}
     <div class="card card-soft mb-4">
         <div class="card-header">
-            <div class="hstack">
-                <div><strong>Tomorrow:</strong> {{ $tomorrow->toFormattedDateString() }}</div>
-                {!! cmpTotalsChips($compareTomorrow['totals']) !!}
-                <div class="chip">Rule: COALESCE(new_date, end_date), skip paused/expired</div>
-            </div>
+            {!! $chipRow('Day: ' . $date->toFormattedDateString(), $compareDay['totals']) !!}
         </div>
         <div class="card-body">
-            @include('admin.reports.partials.compare-table', ['rows' => $compareTomorrow['rows']])
-        </div>
-    </div>
-
-    {{-- Today / Selected Date --}}
-    <div class="card card-soft mb-4">
-        <div class="card-header">
-            <div class="hstack">
-                <div><strong>Date:</strong> {{ $date->toFormattedDateString() }}</div>
-                {!! cmpTotalsChips($compareToday['totals']) !!}
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>Vendor</th>
+                            <th class="text-end">Actual Qty</th>
+                            <th class="text-end">Actual Value</th>
+                            <th class="text-end">Est. Qty</th>
+                            <th class="text-end">Est. Value</th>
+                            <th class="text-end">Δ Qty</th>
+                            <th class="text-end">Δ Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($compareDay['rows'] as $r)
+                            <tr>
+                                <td>{{ $r['vendor_name'] }}</td>
+                                <td class="text-end amount">{{ number_format($r['act_qty'], 2) }}</td>
+                                <td class="text-end amount">₹ {{ number_format($r['act_value'], 2) }}</td>
+                                <td class="text-end amount">{{ number_format($r['est_qty'], 2) }}</td>
+                                <td class="text-end amount">₹ {{ number_format($r['est_value'], 2) }}</td>
+                                <td class="text-end amount {{ $r['diff_qty'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                    {{ number_format($r['diff_qty'], 2) }}</td>
+                                <td class="text-end amount {{ $r['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">₹
+                                    {{ number_format($r['diff_value'], 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        @php $t = $compareDay['totals']; @endphp
+                        <tr>
+                            <th>All Vendors</th>
+                            <th class="text-end amount">{{ number_format($t['act_qty'], 2) }}</th>
+                            <th class="text-end amount">₹ {{ number_format($t['act_value'], 2) }}</th>
+                            <th class="text-end amount">{{ number_format($t['est_qty'], 2) }}</th>
+                            <th class="text-end amount">₹ {{ number_format($t['est_value'], 2) }}</th>
+                            <th class="text-end amount {{ $t['diff_qty'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                {{ number_format($t['diff_qty'], 2) }}</th>
+                            <th class="text-end amount {{ $t['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">₹
+                                {{ number_format($t['diff_value'], 2) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
-        </div>
-        <div class="card-body">
-            @include('admin.reports.partials.compare-table', ['rows' => $compareToday['rows']])
         </div>
     </div>
 
     {{-- Month --}}
     <div class="card card-soft mb-4">
         <div class="card-header">
-            <div class="hstack">
-                <div><strong>Month:</strong> {{ $monthStart->format('F Y') }}</div>
-                {!! cmpTotalsChips($compareMonth['totals']) !!}
-            </div>
+            {!! $chipRow('Month: ' . $monthStart->format('F Y'), $compareMonth['totals']) !!}
         </div>
         <div class="card-body">
-            @include('admin.reports.partials.compare-table', ['rows' => $compareMonth['rows']])
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>Vendor</th>
+                            <th class="text-end">Actual Qty</th>
+                            <th class="text-end">Actual Value</th>
+                            <th class="text-end">Est. Qty</th>
+                            <th class="text-end">Est. Value</th>
+                            <th class="text-end">Δ Qty</th>
+                            <th class="text-end">Δ Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($compareMonth['rows'] as $r)
+                            <tr>
+                                <td>{{ $r['vendor_name'] }}</td>
+                                <td class="text-end amount">{{ number_format($r['act_qty'], 2) }}</td>
+                                <td class="text-end amount">₹ {{ number_format($r['act_value'], 2) }}</td>
+                                <td class="text-end amount">{{ number_format($r['est_qty'], 2) }}</td>
+                                <td class="text-end amount">₹ {{ number_format($r['est_value'], 2) }}</td>
+                                <td class="text-end amount {{ $r['diff_qty'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                    {{ number_format($r['diff_qty'], 2) }}</td>
+                                <td class="text-end amount {{ $r['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">₹
+                                    {{ number_format($r['diff_value'], 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        @php $t = $compareMonth['totals']; @endphp
+                        <tr>
+                            <th>All Vendors</th>
+                            <th class="text-end amount">{{ number_format($t['act_qty'], 2) }}</th>
+                            <th class="text-end amount">₹ {{ number_format($t['act_value'], 2) }}</th>
+                            <th class="text-end amount">{{ number_format($t['est_qty'], 2) }}</th>
+                            <th class="text-end amount">₹ {{ number_format($t['est_value'], 2) }}</th>
+                            <th class="text-end amount {{ $t['diff_qty'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                {{ number_format($t['diff_qty'], 2) }}</th>
+                            <th class="text-end amount {{ $t['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">₹
+                                {{ number_format($t['diff_value'], 2) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
         </div>
     </div>
 @endsection
