@@ -922,8 +922,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/flower-estimate', [FlowerEstimateController::class, 'index'])
     ->name('flowerEstimate');
-    // Route::get('/reports/flower-estimates', [FlowerEstimateController::class, 'index'])->name('flowerEstimate');
-    // Route::get('/reports/flower-estimates/export', [FlowerEstimateController::class, 'exportCsv'])->name('reports.flower_estimates.export');
 });
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/flower-compare', [FlowerEstimateCompareController::class, 'index'])

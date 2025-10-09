@@ -7,31 +7,38 @@ use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use App\Models\Subscription;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 
 class FlowerEstimateController extends Controller
 {
     public function index(Request $request)
     {
         // ---- Filters ---------------------------------------------------------
-        $preset = $request->string('preset')->toString();       // today|yesterday|this_month|last_month
-        $mode   = $request->string('mode')->toString() ?: 'day';// day|month
+        $preset = $request->string('preset')->toString();        // today|yesterday|tomorrow|this_month|last_month
+        $mode   = $request->string('mode')->toString() ?: 'day'; // day|month
 
         [$start, $end] = $this->resolveRange($request, $preset);
         if ($end->lt($start)) {
             [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
         }
 
-        // ---- Build daily numbers --------------------------------------------
+        // ---- Tomorrow (separate, with effective end & pause handling) --------
+        $tomorrow = Carbon::tomorrow()->startOfDay();
+        $tomorrowSubs = $this->fetchActiveSubsEffectiveOn($tomorrow);
+        $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow);
+
+        // ---- Build daily numbers (existing view) -----------------------------
         $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
         $dailyEstimates = [];
 
         foreach ($period as $day) {
+            // Using your existing scope for the daily list (kept as-is).
             $subs = Subscription::with([
-                'flowerProducts:id,product_id,name',
-                'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
-            ])
-            ->activeOn($day)
-            ->get();
+                    'flowerProducts:id,product_id,name',
+                    'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
+                ])
+                ->activeOn($day) // uses start_date..end_date and pause exclusion
+                ->get();
 
             $byProduct = $subs->groupBy('product_id');
 
@@ -47,14 +54,10 @@ class FlowerEstimateController extends Controller
 
                 if ($product) {
                     foreach ($product->packageItems as $pi) {
-                        // Quantities: per-subscription qty stored in DB
-                        $perItemQty = (float) ($pi->quantity ?? 0);
-                        $origUnit   = strtolower(trim($pi->unit ?? ''));
-
-                        // Prices: DB 'price' is per-subscription item price (NOT per unit)
+                        $perItemQty      = (float) ($pi->quantity ?? 0);
+                        $origUnit        = strtolower(trim($pi->unit ?? ''));
                         $itemPricePerSub = (float) ($pi->price ?? 0);
 
-                        // Convert quantity for totals (base units: g / ml / pcs)
                         $category     = $this->inferCategory($origUnit);
                         if ($category === 'unknown') { $category = 'count'; $origUnit = 'pcs'; }
                         $toBaseFactor = $this->toBaseFactor($origUnit);
@@ -62,19 +65,18 @@ class FlowerEstimateController extends Controller
                         $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor;
                         [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
 
-                        // 💡 Price totals use per-subscription item price
                         $totalPrice = $itemPricePerSub * $subsCount;
 
                         $items[] = [
-                            'item_name'        => $pi->item_name,
-                            'category'         => $category,
-                            'per_item_qty'     => $perItemQty,
-                            'per_item_unit'    => $origUnit,
-                            'item_price_per_sub'=> $itemPricePerSub,  // shown as "Item Price (₹)"
-                            'total_qty_base'   => $totalQtyBase,
-                            'total_qty_disp'   => $qtyDisp,
-                            'total_unit_disp'  => $unitDisp,
-                            'total_price'      => $totalPrice,
+                            'item_name'         => $pi->item_name,
+                            'category'          => $category,
+                            'per_item_qty'      => $perItemQty,
+                            'per_item_unit'     => $origUnit,
+                            'item_price_per_sub'=> $itemPricePerSub,
+                            'total_qty_base'    => $totalQtyBase,
+                            'total_qty_disp'    => $qtyDisp,
+                            'total_unit_disp'   => $unitDisp,
+                            'total_price'       => $totalPrice,
                         ];
 
                         $productTotal += $totalPrice;
@@ -84,11 +86,10 @@ class FlowerEstimateController extends Controller
                 $grandTotalForDay += $productTotal;
 
                 $productsForDay[$productId] = [
-                    'product'        => $product,
-                    'subs_count'     => $subsCount,
-                    'items'          => $items,
-                    'product_total'  => $productTotal,
-                    // Also helpful to display bundle price per sub:
+                    'product'              => $product,
+                    'subs_count'           => $subsCount,
+                    'items'                => $items,
+                    'product_total'        => $productTotal,
                     'bundle_total_per_sub' => array_sum(array_column($items, 'item_price_per_sub')),
                 ];
             }
@@ -99,7 +100,7 @@ class FlowerEstimateController extends Controller
             ];
         }
 
-        // ---- Month-wise rollup ----------------------------------------------
+        // ---- Month-wise rollup (existing view) -------------------------------
         $monthlyEstimates = [];
         if ($mode === 'month') {
             foreach ($dailyEstimates as $dateStr => $payload) {
@@ -117,8 +118,8 @@ class FlowerEstimateController extends Controller
                     if (!isset($monthlyEstimates[$monthKey]['products'][$pid])) {
                         $monthlyEstimates[$monthKey]['products'][$pid] = [
                             'product'       => $row['product'],
-                            'subs_days'     => 0,      // sum of active subs per day (not unique subs)
-                            'items'         => [],     // aggregated in base units + price totals
+                            'subs_days'     => 0,
+                            'items'         => [],
                             'product_total' => 0.0,
                         ];
                     }
@@ -146,7 +147,6 @@ class FlowerEstimateController extends Controller
                 }
             }
 
-            // Display-friendly units after aggregation
             foreach ($monthlyEstimates as &$mBlock) {
                 foreach ($mBlock['products'] as &$pBlock) {
                     foreach ($pBlock['items'] as &$iBlock) {
@@ -163,16 +163,119 @@ class FlowerEstimateController extends Controller
         }
 
         return view('admin.reports.flower-estimates', [
-            'start'            => $start->toDateString(),
-            'end'              => $end->toDateString(),
-            'mode'             => $mode,
-            'preset'           => $preset,
-            'dailyEstimates'   => $dailyEstimates,
-            'monthlyEstimates' => $monthlyEstimates,
+            'start'              => $start->toDateString(),
+            'end'                => $end->toDateString(),
+            'mode'               => $mode,
+            'preset'             => $preset,
+            'dailyEstimates'     => $dailyEstimates,
+            'monthlyEstimates'   => $monthlyEstimates,
+            // Tomorrow block
+            'tomorrowDate'       => $tomorrow->toDateString(),
+            'tomorrowEstimate'   => $tomorrowEstimate,
         ]);
     }
 
-    // ----------------------------- Helpers -----------------------------------
+    /**
+     * Query subscriptions active on a specific date using:
+     * - start_date <= date
+     * - COALESCE(new_date, end_date) >= date
+     * - status in ['active','paused'] or is_active = 1
+     * Then filter out those paused on the date.
+     */
+    private function fetchActiveSubsEffectiveOn(Carbon $date)
+    {
+        $subs = Subscription::with([
+                'flowerProducts:id,product_id,name',
+                'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
+            ])
+            ->where(function ($q) {
+                $q->whereIn('status', ['active', 'paused'])
+                  ->orWhere('is_active', 1);
+            })
+            ->whereDate('start_date', '<=', $date->toDateString())
+            ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $date->toDateString())
+            ->get();
+
+        // Exclude paused on this date
+        $filtered = $subs->filter(function ($s) use ($date) {
+            if ($s->pause_start_date && $s->pause_end_date) {
+                $paused = Carbon::parse($s->pause_start_date)->startOfDay()->lte($date)
+                       && Carbon::parse($s->pause_end_date)->endOfDay()->gte($date);
+                if ($paused) return false;
+            }
+            return true;
+        });
+
+        return $filtered->values();
+    }
+
+    /**
+     * Build the same structure you show for a "day", from a subscription collection.
+     */
+    private function buildEstimateForSubsOnDate($subs, Carbon $date): array
+    {
+        $byProduct = $subs->groupBy('product_id');
+
+        $productsForDay   = [];
+        $grandTotalForDay = 0.0;
+
+        foreach ($byProduct as $productId => $subsForProduct) {
+            $product   = optional($subsForProduct->first())->flowerProducts;
+            $subsCount = $subsForProduct->count();
+
+            $items        = [];
+            $productTotal = 0.0;
+
+            if ($product) {
+                foreach ($product->packageItems as $pi) {
+                    $perItemQty      = (float) ($pi->quantity ?? 0);
+                    $origUnit        = strtolower(trim($pi->unit ?? ''));
+                    $itemPricePerSub = (float) ($pi->price ?? 0);
+
+                    $category     = $this->inferCategory($origUnit);
+                    if ($category === 'unknown') { $category = 'count'; $origUnit = 'pcs'; }
+                    $toBaseFactor = $this->toBaseFactor($origUnit);
+
+                    $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor;
+                    [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
+
+                    $totalPrice = $itemPricePerSub * $subsCount;
+
+                    $items[] = [
+                        'item_name'         => $pi->item_name,
+                        'category'          => $category,
+                        'per_item_qty'      => $perItemQty,
+                        'per_item_unit'     => $origUnit,
+                        'item_price_per_sub'=> $itemPricePerSub,
+                        'total_qty_base'    => $totalQtyBase,
+                        'total_qty_disp'    => $qtyDisp,
+                        'total_unit_disp'   => $unitDisp,
+                        'total_price'       => $totalPrice,
+                    ];
+
+                    $productTotal += $totalPrice;
+                }
+            }
+
+            $grandTotalForDay += $productTotal;
+
+            $productsForDay[$productId] = [
+                'product'              => $product,
+                'subs_count'           => $subsCount,
+                'items'                => $items,
+                'product_total'        => $productTotal,
+                'bundle_total_per_sub' => array_sum(array_column($items, 'item_price_per_sub')),
+            ];
+        }
+
+        return [
+            'date'               => $date->toDateString(),
+            'products'           => $productsForDay,
+            'grand_total_amount' => $grandTotalForDay,
+        ];
+    }
+
+    // --------------------- Helpers you already had ----------------------------
 
     private function resolveRange(Request $request, ?string $preset): array
     {
@@ -181,6 +284,7 @@ class FlowerEstimateController extends Controller
             return match ($preset) {
                 'today'      => [$today->copy()->startOfDay(), $today->copy()->endOfDay()],
                 'yesterday'  => [$today->copy()->subDay()->startOfDay(), $today->copy()->subDay()->endOfDay()],
+                'tomorrow'   => [$today->copy()->addDay()->startOfDay(), $today->copy()->addDay()->endOfDay()],
                 'this_month' => [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()],
                 'last_month' => [$today->copy()->subMonthNoOverflow()->startOfMonth(), $today->copy()->subMonthNoOverflow()->endOfMonth()],
                 default      => $this->resolveRange($request, null),
