@@ -55,55 +55,109 @@ class FlowerEstimateCompareController extends Controller
      * Merge actual-per-vendor with a global estimate (qty/value/unit).
      * Adds per-row act_unit and est_unit and totals act_unit/est_unit.
      */
-    protected function composeVendorCompare(array $actualPerVendor, array $estimateTotals): array
-    {
-        $rows = [];
-        $sumActQty = 0.0;
-        $sumActVal = 0.0;
+  protected function composeVendorCompare(array $actualPerVendor, array $estimateTotals): array
+{
+    $rows = [];
+    $sumActQty = 0.0;
+    $sumActVal = 0.0;
 
-        $estQty   = (float) ($estimateTotals['total_qty']   ?? 0);
-        $estValue = (float) ($estimateTotals['total_value'] ?? 0);
-        $estUnit  = (string)($estimateTotals['unit_label']  ?? 'units');
+    $estQty   = (float) ($estimateTotals['total_qty']   ?? 0);
+    $estValue = (float) ($estimateTotals['total_value'] ?? 0);
+    $estUnit  = (string)($estimateTotals['unit_label']  ?? 'units');
 
-        // Build rows (each vendor keeps its own actual unit label)
-        foreach ($actualPerVendor as $vendorId => $v) {
-            $actQty  = (float) $v['qty'];
-            $actVal  = (float) $v['value'];
-            $actUnit = (string)($v['unit_label'] ?? 'units');
+    // pull global unit counts (may not exist)
+    $globalUnitCounts = $actualPerVendor['_unit_counts'] ?? [];
 
-            $rows[] = [
-                'vendor_id'   => $vendorId,
-                'vendor_name' => $v['vendor_name'],
-                'act_qty'     => $actQty,
-                'act_value'   => $actVal,
-                'act_unit'    => $actUnit,
-                'est_qty'     => $estQty,
-                'est_value'   => $estValue,
-                'est_unit'    => $estUnit,
-                'diff_qty'    => $actQty - $estQty,
-                'diff_value'  => $actVal - $estValue,
-            ];
-            $sumActQty += $actQty;
-            $sumActVal += $actVal;
+    foreach ($actualPerVendor as $vendorId => $v) {
+        // skip meta rows or malformed rows
+        if (!is_array($v) || !array_key_exists('qty', $v)) {
+            continue;
         }
 
-        // Totals unit labels
-        $totalsActUnit = $this->pickUnitLabelFromCounts($actualPerVendor['_unit_counts'] ?? []);
-        $totals = [
-            'act_qty'    => $sumActQty,
-            'act_value'  => $sumActVal,
-            'act_unit'   => $totalsActUnit ?: 'units',
-            'est_qty'    => $estQty,
-            'est_value'  => $estValue,
-            'est_unit'   => $estUnit,
-            'diff_qty'   => $sumActQty - $estQty,
-            'diff_value' => $sumActVal - $estValue,
+        $actQty  = (float) ($v['qty']   ?? 0);
+        $actVal  = (float) ($v['value'] ?? 0);
+        $actUnit = (string)($v['unit_label'] ?? 'units');
+
+        $rows[] = [
+            'vendor_id'   => $vendorId,
+            'vendor_name' => $v['vendor_name'] ?? 'Unknown',
+            'act_qty'     => $actQty,
+            'act_value'   => $actVal,
+            'act_unit'    => $actUnit,
+            'est_qty'     => $estQty,
+            'est_value'   => $estValue,
+            'est_unit'    => $estUnit,
+            'diff_qty'    => $actQty - $estQty,
+            'diff_value'  => $actVal - $estValue,
         ];
 
-        usort($rows, fn($a,$b) => strcasecmp($a['vendor_name'], $b['vendor_name']));
-        return ['rows' => $rows, 'totals' => $totals];
+        $sumActQty += $actQty;
+        $sumActVal += $actVal;
     }
 
+    $totals = [
+        'act_qty'    => $sumActQty,
+        'act_value'  => $sumActVal,
+        'act_unit'   => $this->pickUnitLabelFromCounts($globalUnitCounts) ?: 'units',
+        'est_qty'    => $estQty,
+        'est_value'  => $estValue,
+        'est_unit'   => $estUnit,
+        'diff_qty'   => $sumActQty - $estQty,
+        'diff_value' => $sumActVal - $estValue,
+    ];
+
+    usort($rows, fn($a,$b) => strcasecmp($a['vendor_name'], $b['vendor_name']));
+    return ['rows' => $rows, 'totals' => $totals];
+}
+
+protected function sumByVendor(Collection $pickupDetails): array
+{
+    $perVendor = [];      // vendor_id => ['vendor_name'=>..., 'qty'=>..., 'value'=>..., 'unit_label'=>..., '_unit_counts'=>[]]
+    $globalUnitCounts = [];
+
+    foreach ($pickupDetails as $detail) {
+        $vid   = $detail->vendor_id ?? 0;
+        $vname = $detail->vendor->vendor_name ?? ($detail->vendor_name ?? 'Unknown');
+
+        if (!isset($perVendor[$vid])) {
+            $perVendor[$vid] = [
+                'vendor_name'  => $vname,
+                'qty'          => 0.0,
+                'value'        => 0.0,
+                'unit_label'   => 'units',
+                '_unit_counts' => [],
+            ];
+        }
+
+        foreach ($detail->flowerPickupItems as $it) {
+            $q = (float)($it->quantity ?? 0);
+            $p = (float)($it->price ?? 0); // unit price
+            $unitName = $this->prettyUnit($it->unit->unit_name ?? ($it->unit ?? ''));
+
+            $perVendor[$vid]['qty']   += $q;
+            $perVendor[$vid]['value'] += ($q * $p);
+
+            if ($unitName) {
+                $perVendor[$vid]['_unit_counts'][$unitName] = ($perVendor[$vid]['_unit_counts'][$unitName] ?? 0) + $q;
+                $globalUnitCounts[$unitName] = ($globalUnitCounts[$unitName] ?? 0) + $q;
+            }
+        }
+    }
+
+    // finalize labels + rounding
+    foreach ($perVendor as $vid => &$pv) {
+        $pv['qty']        = round($pv['qty'], 2);
+        $pv['value']      = round($pv['value'], 2);
+        $pv['unit_label'] = $this->pickUnitLabelFromCounts($pv['_unit_counts']) ?: 'units';
+        unset($pv['_unit_counts']);
+    }
+    unset($pv);
+
+    // attach global unit counts as meta for totals (composeVendorCompare will handle it safely)
+    $perVendor['_unit_counts'] = $globalUnitCounts;
+
+    return ['per_vendor' => $perVendor];
+}
     // ================= ESTIMATES (QTY + TOTAL ₹ + UNIT LABEL) =================
 
     /**
@@ -235,54 +289,7 @@ class FlowerEstimateCompareController extends Controller
      * - Track quantity contribution per unit; pick the dominant unit as the label
      * - Also build global unit counts for footer
      */
-    protected function sumByVendor(Collection $pickupDetails): array
-    {
-        $perVendor = [];      // vendor_id => ['vendor_name'=>..., 'qty'=>..., 'value'=>..., 'unit_label'=>..., '_unit_counts'=>[]]
-        $globalUnitCounts = [];
-
-        foreach ($pickupDetails as $detail) {
-            $vid   = $detail->vendor_id ?? 0;
-            $vname = $detail->vendor->vendor_name ?? ($detail->vendor_name ?? 'Unknown');
-
-            if (!isset($perVendor[$vid])) {
-                $perVendor[$vid] = [
-                    'vendor_name'  => $vname,
-                    'qty'          => 0.0,
-                    'value'        => 0.0,
-                    'unit_label'   => 'units',
-                    '_unit_counts' => [],
-                ];
-            }
-
-            foreach ($detail->flowerPickupItems as $it) {
-                $q = (float)($it->quantity ?? 0);
-                $p = (float)($it->price ?? 0); // unit price
-                $unitName = $this->prettyUnit($it->unit->unit_name ?? ($it->unit ?? ''));
-
-                $perVendor[$vid]['qty']   += $q;
-                $perVendor[$vid]['value'] += ($q * $p);
-
-                if ($unitName) {
-                    $perVendor[$vid]['_unit_counts'][$unitName] = ($perVendor[$vid]['_unit_counts'][$unitName] ?? 0) + $q;
-                    $globalUnitCounts[$unitName] = ($globalUnitCounts[$unitName] ?? 0) + $q;
-                }
-            }
-        }
-
-        // finalize labels + rounding
-        foreach ($perVendor as $vid => &$pv) {
-            $pv['qty']        = round($pv['qty'], 2);
-            $pv['value']      = round($pv['value'], 2);
-            $pv['unit_label'] = $this->pickUnitLabelFromCounts($pv['_unit_counts']) ?: 'units';
-            unset($pv['_unit_counts']);
-        }
-        unset($pv);
-
-        // stash global unit counts for totals label in composeVendorCompare
-        $perVendor['_unit_counts'] = $globalUnitCounts;
-
-        return ['per_vendor' => $perVendor];
-    }
+   
 
     // ================= Utils =================
 
