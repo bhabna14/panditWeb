@@ -14,13 +14,12 @@ use App\Models\FlowerProduct;
 use App\Models\PackageItem;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
-use App\Models\FlowerVendor; // for vendor dropdown (if you have it)
+use App\Models\FlowerVendor;
 
-class FlowerVendorCompareController extends Controller
+class FlowerVendorCompareReportController extends Controller
 {
     public function index(Request $request)
     {
-        // Inputs
         $dateStr    = $request->input('date', Carbon::today()->toDateString());
         $monthStr   = $request->input('month', Carbon::today()->format('Y-m'));
 
@@ -28,24 +27,20 @@ class FlowerVendorCompareController extends Controller
         $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth();
 
-        // Load flowers (for estimate unit price fallback)
         $allFlowers = FlowerProduct::select('product_id','name','category','price','per_day_price','status')->get();
         $flowerById = $allFlowers->keyBy('product_id');
         $flowerByNormName = $allFlowers->keyBy(fn($f) => $this->norm($f->name));
 
-        // ---- DAY SECTION ----
+        // DAY
         $estDay   = $this->estimateTotalsForDate($date, $flowerById, $flowerByNormName);
         $actDay   = $this->actualTotalsPerVendorForDate($date);
-
         $compareDay = $this->composeVendorCompare($actDay['per_vendor'], $estDay['total_qty'], $estDay['total_value']);
 
-        // ---- MONTH SECTION ----
+        // MONTH
         $estMonth = $this->estimateTotalsForRange($monthStart, $monthEnd, $flowerById, $flowerByNormName);
         $actMonth = $this->actualTotalsPerVendorForRange($monthStart, $monthEnd);
-
         $compareMonth = $this->composeVendorCompare($actMonth['per_vendor'], $estMonth['total_qty'], $estMonth['total_value']);
 
-        // Vendors for friendly names in case some vendor didn’t pick in the window
         $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get()->keyBy('vendor_id');
 
         return view('admin.reports.vendor-compare', [
@@ -53,24 +48,20 @@ class FlowerVendorCompareController extends Controller
             'monthStart'    => $monthStart,
             'selectedDate'  => $date->toDateString(),
             'selectedMonth' => $monthStart->format('Y-m'),
-
             'vendors'       => $vendors,
-
             'estDay'        => $estDay,
             'compareDay'    => $compareDay,
-
             'estMonth'      => $estMonth,
             'compareMonth'  => $compareMonth,
         ]);
     }
-
-    // ========== BUILD COMPARISON ROWS ==========
 
     protected function composeVendorCompare(array $actualPerVendor, float $estQty, float $estValue): array
     {
         $rows = [];
         $sumActQty = 0.0;
         $sumActVal = 0.0;
+
         foreach ($actualPerVendor as $vendorId => $v) {
             $actQty = (float) $v['qty'];
             $actVal = (float) $v['value'];
@@ -88,7 +79,6 @@ class FlowerVendorCompareController extends Controller
             $sumActVal += $actVal;
         }
 
-        // Overall totals row (All Vendors)
         $totals = [
             'act_qty'    => $sumActQty,
             'act_value'  => $sumActVal,
@@ -98,13 +88,9 @@ class FlowerVendorCompareController extends Controller
             'diff_value' => $sumActVal - $estValue,
         ];
 
-        // Sort by vendor name
         usort($rows, fn($a,$b) => strcasecmp($a['vendor_name'], $b['vendor_name']));
-
         return ['rows' => $rows, 'totals' => $totals];
     }
-
-    // ========== ESTIMATE: TOTALS ONLY (QTY & VALUE) ==========
 
     protected function estimateTotalsForDate(
         Carbon $date,
@@ -112,11 +98,8 @@ class FlowerVendorCompareController extends Controller
         Collection $flowerByNormName
     ): array {
         $subs = $this->activeSubscriptionsOverlappingEffective($date, $date);
-
         $productIds = $subs->pluck('product_id')->unique()->all();
-        if (empty($productIds)) {
-            return ['total_qty' => 0.0, 'total_value' => 0.0];
-        }
+        if (empty($productIds)) return ['total_qty' => 0.0, 'total_value' => 0.0];
 
         $pkgItemsByProduct = PackageItem::whereIn('product_id', $productIds)->get()->groupBy('product_id');
 
@@ -129,14 +112,13 @@ class FlowerVendorCompareController extends Controller
 
             foreach ($pkgItems as $it) {
                 $qty  = (float) ($it->quantity ?? 0);
-                $unit = $it->unit ?: 'unit';
+                if ($qty <= 0) continue;
 
-                // derive per-unit price based on flower product if name matches, else bundle-price/qty
-                $matched = $flowerByNormName->get($this->norm($it->item_name));
+                $matched   = $flowerByNormName->get($this->norm($it->item_name));
                 $unitPrice = $matched ? $this->unitPrice($matched)
-                                      : ($qty > 0 ? (float)$it->price / $qty : 0.0);
+                                      : ((float)$it->price / $qty);
 
-                $addQty = $qty * $countSubs;
+                $addQty    = $qty * $countSubs;
                 $totalQty += $addQty;
                 $totalVal += ($addQty * $unitPrice);
             }
@@ -171,11 +153,9 @@ class FlowerVendorCompareController extends Controller
         return 0.0;
     }
 
-    // ========== ACTUAL PICKUPS: GROUPED BY VENDOR (QTY & VALUE) ==========
-
     protected function actualTotalsPerVendorForDate(Carbon $date): array
     {
-        $rows = FlowerPickupDetails::with(['flowerPickupItems'])
+        $rows = FlowerPickupDetails::with(['flowerPickupItems','vendor'])
             ->whereDate('pickup_date', '=', $date->toDateString())
             ->get();
 
@@ -184,7 +164,7 @@ class FlowerVendorCompareController extends Controller
 
     protected function actualTotalsPerVendorForRange(Carbon $start, Carbon $end): array
     {
-        $rows = FlowerPickupDetails::with(['flowerPickupItems'])
+        $rows = FlowerPickupDetails::with(['flowerPickupItems','vendor'])
             ->whereDate('pickup_date', '>=', $start->toDateString())
             ->whereDate('pickup_date', '<=', $end->toDateString())
             ->get();
@@ -194,10 +174,10 @@ class FlowerVendorCompareController extends Controller
 
     protected function sumByVendor(Collection $pickupDetails): array
     {
-        $perVendor = []; // vendor_id => ['vendor_name'=>..., 'qty'=>..., 'value'=>...]
+        $perVendor = [];
         foreach ($pickupDetails as $detail) {
-            $vid  = $detail->vendor_id ?? 0;
-            $vname= $detail->vendor_name ?? ($detail->vendor->vendor_name ?? 'Unknown');
+            $vid   = $detail->vendor_id ?? 0;
+            $vname = $detail->vendor->vendor_name ?? ($detail->vendor_name ?? 'Unknown');
 
             if (!isset($perVendor[$vid])) {
                 $perVendor[$vid] = ['vendor_name' => $vname, 'qty' => 0.0, 'value' => 0.0];
@@ -205,22 +185,18 @@ class FlowerVendorCompareController extends Controller
 
             foreach ($detail->flowerPickupItems as $it) {
                 $q = (float)($it->quantity ?? 0);
-                $p = (float)($it->price ?? 0); // ASSUME unit price
+                $p = (float)($it->price ?? 0); // unit price assumed
                 $perVendor[$vid]['qty']   += $q;
                 $perVendor[$vid]['value'] += ($q * $p);
             }
         }
 
-        // Round
         foreach ($perVendor as &$pv) {
             $pv['qty']   = round($pv['qty'], 2);
             $pv['value'] = round($pv['value'], 2);
         }
-
         return ['per_vendor' => $perVendor];
     }
-
-    // ========== SUBS QUERY HELPERS ==========
 
     protected function activeSubscriptionsOverlappingEffective(Carbon $start, Carbon $end)
     {
@@ -248,8 +224,6 @@ class FlowerVendorCompareController extends Controller
             ->toString();
     }
 
-    // ========== CSV ==========
-
     public function exportCsv(Request $request)
     {
         $dateStr    = $request->input('date', Carbon::today()->toDateString());
@@ -263,13 +237,13 @@ class FlowerVendorCompareController extends Controller
         $flowerById = $allFlowers->keyBy('product_id');
         $flowerByNormName = $allFlowers->keyBy(fn($f) => $this->norm($f->name));
 
-        $estDay     = $this->estimateTotalsForDate($date, $flowerById, $flowerByNormName);
-        $actDay     = $this->actualTotalsPerVendorForDate($date);
-        $cmpDay     = $this->composeVendorCompare($actDay['per_vendor'], $estDay['total_qty'], $estDay['total_value']);
+        $estDay   = $this->estimateTotalsForDate($date, $flowerById, $flowerByNormName);
+        $actDay   = $this->actualTotalsPerVendorForDate($date);
+        $cmpDay   = $this->composeVendorCompare($actDay['per_vendor'], $estDay['total_qty'], $estDay['total_value']);
 
-        $estMonth   = $this->estimateTotalsForRange($monthStart, $monthEnd, $flowerById, $flowerByNormName);
-        $actMonth   = $this->actualTotalsPerVendorForRange($monthStart, $monthEnd);
-        $cmpMonth   = $this->composeVendorCompare($actMonth['per_vendor'], $estMonth['total_qty'], $estMonth['total_value']);
+        $estMonth = $this->estimateTotalsForRange($monthStart, $monthEnd, $flowerById, $flowerByNormName);
+        $actMonth = $this->actualTotalsPerVendorForRange($monthStart, $monthEnd);
+        $cmpMonth = $this->composeVendorCompare($actMonth['per_vendor'], $estMonth['total_qty'], $estMonth['total_value']);
 
         $filename = "vendor_compare_{$date->toDateString()}_{$monthStart->format('Y-m')}.csv";
         $headers = [
@@ -305,7 +279,6 @@ class FlowerVendorCompareController extends Controller
 
             $write('Day', $date->toDateString(), $cmpDay);
             $write('Month', $monthStart->format('Y-m'), $cmpMonth);
-
             fclose($out);
         };
 
