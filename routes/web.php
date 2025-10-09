@@ -928,7 +928,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/flower-compare', [FlowerEstimateCompareController::class, 'index'])
-        ->name('flowerCompare');
+        ->name('reports.vendor-compare');
 
     // Optional CSV export for the compare view
     Route::get('/reports/flower-compare/export', [FlowerEstimateCompareController::class, 'exportCsv'])
