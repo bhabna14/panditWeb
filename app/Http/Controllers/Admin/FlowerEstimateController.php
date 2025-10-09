@@ -27,9 +27,13 @@ class FlowerEstimateController extends Controller
         $tomorrowSubs = $this->fetchActiveSubsEffectiveOn($tomorrow);
         $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow);
 
+        // 👉 NEW: aggregate totals across all products for tomorrow
+        $tomorrowTotals = $this->aggregateTotalsAcrossProducts($tomorrowEstimate['products'] ?? []);
+
         // ---- Build daily numbers (existing view) -----------------------------
         $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
-        $dailyEstimates = [];
+        $dailyEstimates   = [];
+        $dailyItemTotals  = []; // 👉 NEW: per-day totals (all products combined)
 
         foreach ($period as $day) {
             // Using your existing scope for the daily list (kept as-is).
@@ -53,10 +57,10 @@ class FlowerEstimateController extends Controller
                 $productTotal = 0.0;
 
                 if ($product) {
-                    foreach ($product->packageItems as $pi) {
-                        $perItemQty      = (float) ($pi->quantity ?? 0);
-                        $origUnit        = strtolower(trim($pi->unit ?? ''));
-                        $itemPricePerSub = (float) ($pi->price ?? 0);
+                    foreach ($product->packageItems as $e) {
+                        $perItemQty      = (float) ($e->quantity ?? 0);
+                        $origUnit        = strtolower(trim($e->unit ?? ''));
+                        $itemPricePerSub = (float) ($e->price ?? 0);
 
                         $category     = $this->inferCategory($origUnit);
                         if ($category === 'unknown') { $category = 'count'; $origUnit = 'pcs'; }
@@ -68,7 +72,7 @@ class FlowerEstimateController extends Controller
                         $totalPrice = $itemPricePerSub * $subsCount;
 
                         $items[] = [
-                            'item_name'         => $pi->item_name,
+                            'item_name'         => $e->item_name,
                             'category'          => $category,
                             'per_item_qty'      => $perItemQty,
                             'per_item_unit'     => $origUnit,
@@ -94,14 +98,21 @@ class FlowerEstimateController extends Controller
                 ];
             }
 
-            $dailyEstimates[$day->toDateString()] = [
+            $dayKey = $day->toDateString();
+
+            $dailyEstimates[$dayKey] = [
                 'products'           => $productsForDay,
                 'grand_total_amount' => $grandTotalForDay,
             ];
+
+            // 👉 NEW: compute totals across ALL products for this day
+            $dailyItemTotals[$dayKey] = $this->aggregateTotalsAcrossProducts($productsForDay);
         }
 
         // ---- Month-wise rollup (existing view) -------------------------------
         $monthlyEstimates = [];
+        $monthlyItemTotals = []; // 👉 NEW: per-month totals (all products combined)
+
         if ($mode === 'month') {
             foreach ($dailyEstimates as $dateStr => $payload) {
                 $monthKey = Carbon::parse($dateStr)->format('Y-m');
@@ -147,6 +158,7 @@ class FlowerEstimateController extends Controller
                 }
             }
 
+            // Finalize item display units for product-level month items
             foreach ($monthlyEstimates as &$mBlock) {
                 foreach ($mBlock['products'] as &$pBlock) {
                     foreach ($pBlock['items'] as &$iBlock) {
@@ -160,6 +172,11 @@ class FlowerEstimateController extends Controller
                 }
             }
             unset($mBlock, $pBlock, $iBlock);
+
+            // 👉 NEW: build overall per-month totals across ALL products
+            foreach ($monthlyEstimates as $mKey => $mBlock) {
+                $monthlyItemTotals[$mKey] = $this->aggregateTotalsAcrossProducts($mBlock['products']);
+            }
         }
 
         return view('admin.reports.flower-estimates', [
@@ -169,9 +186,13 @@ class FlowerEstimateController extends Controller
             'preset'             => $preset,
             'dailyEstimates'     => $dailyEstimates,
             'monthlyEstimates'   => $monthlyEstimates,
+            // 👉 NEW: pass our cross-product item totals
+            'dailyItemTotals'    => $dailyItemTotals,
+            'monthlyItemTotals'  => $monthlyItemTotals,
             // Tomorrow block
             'tomorrowDate'       => $tomorrow->toDateString(),
             'tomorrowEstimate'   => $tomorrowEstimate,
+            'tomorrowTotals'     => $tomorrowTotals, // 👉 NEW
         ]);
     }
 
@@ -275,7 +296,48 @@ class FlowerEstimateController extends Controller
         ];
     }
 
-    // --------------------- Helpers you already had ----------------------------
+    // --------------------- Helpers ----------------------------
+
+    /**
+     * 👉 NEW:
+     * Aggregate totals (qty & price) across ALL products for a given payload structure.
+     * Expects $products like [productId => ['items' => [...]]]
+     * Returns a flat array keyed by "name|category" with qty in base + display units.
+     */
+    private function aggregateTotalsAcrossProducts(array $products): array
+    {
+        $totals = [];
+        foreach ($products as $row) {
+            foreach ($row['items'] ?? [] as $it) {
+                $key = strtolower($it['item_name']).'|'.$it['category'];
+                if (!isset($totals[$key])) {
+                    $totals[$key] = [
+                        'item_name'      => $it['item_name'],
+                        'category'       => $it['category'],
+                        'total_qty_base' => 0.0,
+                        'total_price'    => 0.0,
+                    ];
+                }
+                $totals[$key]['total_qty_base'] += (float)$it['total_qty_base'];
+                $totals[$key]['total_price']    += (float)$it['total_price'];
+            }
+        }
+
+        // compute display units
+        foreach ($totals as &$t) {
+            [$q, $u] = $this->formatQtyByCategoryFromBase($t['total_qty_base'], $t['category']);
+            $t['total_qty_disp']  = $q;
+            $t['total_unit_disp'] = $u;
+        }
+        unset($t);
+
+        // sort alpha by name for stable UI (optional)
+        uasort($totals, function ($a, $b) {
+            return strcasecmp($a['item_name'], $b['item_name']);
+        });
+
+        return $totals;
+    }
 
     private function resolveRange(Request $request, ?string $preset): array
     {

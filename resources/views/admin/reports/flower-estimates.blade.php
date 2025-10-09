@@ -84,6 +84,7 @@
             @php
                 $tProducts = $tomorrowEstimate['products'] ?? [];
                 $tGrand    = $tomorrowEstimate['grand_total_amount'] ?? 0;
+                $tTotals   = $tomorrowEstimate['totals_by_item'] ?? [];
             @endphp
 
             <div class="card border-0 shadow-sm mt-4">
@@ -170,6 +171,38 @@
                                 </div>
                             @endforeach
                         </div>
+
+                        {{-- NEW: Tomorrow Totals by Item --}}
+                        <div class="card border-0 shadow-sm mt-3">
+                            <div class="card-header bg-white">
+                                <strong>Tomorrow — Totals by Item (All Products)</strong>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Item</th>
+                                                <th class="text-end">Total Qty</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($tTotals as $it)
+                                                <tr>
+                                                    <td>{{ $it['item_name'] }}</td>
+                                                    <td class="text-end">
+                                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                                        {{ $it['total_unit_disp'] }}
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr><td colspan="2" class="text-muted">No items.</td></tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     @endif
                 </div>
             </div>
@@ -190,6 +223,7 @@
                                 $dayId = 'day-' . \Illuminate\Support\Str::slug($date);
                                 $grand = $payload['grand_total_amount'] ?? 0;
                                 $products = $payload['products'] ?? [];
+                                $dayTotals = $payload['totals_by_item'] ?? [];
                             @endphp
 
                             <div class="accordion-item shadow-sm mb-3">
@@ -282,6 +316,38 @@
                                                     </div>
                                                 @endforeach
                                             </div>
+
+                                            {{-- NEW: Day Totals by Item --}}
+                                            <div class="card border-0 shadow-sm mt-3">
+                                                <div class="card-header bg-white">
+                                                    <strong>Totals by Item (All Products)</strong>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm align-middle">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>Item</th>
+                                                                    <th class="text-end">Total Qty</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @forelse($dayTotals as $it)
+                                                                    <tr>
+                                                                        <td>{{ $it['item_name'] }}</td>
+                                                                        <td class="text-end">
+                                                                            {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                                                            {{ $it['total_unit_disp'] }}
+                                                                        </td>
+                                                                    </tr>
+                                                                @empty
+                                                                    <tr><td colspan="2" class="text-muted">No items.</td></tr>
+                                                                @endforelse
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -291,7 +357,6 @@
                 @endif
             @else
                 {{-- MONTH VIEW --}}
-                @php $hasMonthly = !empty($monthlyEstimates) && count($monthlyEstimates) > 0; @endphp
                 @if (!$hasMonthly)
                     <div class="alert alert-info mt-4">No data for the selected range.</div>
                 @else
@@ -301,6 +366,7 @@
                                 $monthId  = 'month-' . \Illuminate\Support\Str::slug($mkey);
                                 $grand    = $mblock['grand_total'] ?? 0;
                                 $products = $mblock['products'] ?? [];
+                                $mTotals  = $mblock['totals_by_item'] ?? [];
                             @endphp
                             <div class="accordion-item shadow-sm mb-3">
                                 <h2 class="accordion-header" id="{{ $monthId }}-header">
@@ -379,6 +445,39 @@
                                                     </div>
                                                 @endforeach
                                             </div>
+
+                                            {{-- NEW: Month Totals by Item --}}
+                                            <div class="card border-0 shadow-sm mt-3">
+                                                <div class="card-header bg-white">
+                                                    <strong>Totals by Item (All Products in Month)</strong>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="table-responsive">
+                                                        <table class="table table-sm align-middle">
+                                                            <thead class="table-light">
+                                                                <tr>
+                                                                    <th>Item</th>
+                                                                    <th class="text-end">Total Qty</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                @forelse($mTotals as $it)
+                                                                    <tr>
+                                                                        <td>{{ $it['item_name'] }}</td>
+                                                                        <td class="text-end">
+                                                                            {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                                                            {{ $it['total_unit_disp'] }}
+                                                                        </td>
+                                                                    </tr>
+                                                                @empty
+                                                                    <tr><td colspan="2" class="text-muted">No items.</td></tr>
+                                                                @endforelse
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         @endif
                                     </div>
                                 </div>
