@@ -12,207 +12,49 @@
 
     /**
      * SVG icon library (outline style).
-     * Set the "icon" column of menu_items to one of these keys.
-     * You can add more keys or override as needed.
-     * NOTE: Using class="side-menu__icon" to match CSS below.
+     * Keys must match menu_items.icon
+     * NOTE: using class="side-menu__icon" everywhere (CSS below targets it).
      */
     $iconMap = [
-        // Core
-        'dashboard' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="3" width="8" height="8" rx="2"></rect>
-                <rect x="13" y="3" width="8" height="5" rx="2"></rect>
-                <rect x="13" y="10" width="8" height="11" rx="2"></rect>
-                <rect x="3" y="13" width="8" height="8" rx="2"></rect>
-            </svg>',
-        'users' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="7.5" r="3.5"></circle>
-                <path d="M5 20a7 7 0 0 1 14 0"></path>
-            </svg>',
-        'folder' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3 7a2 2 0 0 1 2-2h5l2.5 2.5H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-            </svg>',
-        'list' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="5" cy="7" r="1.5"></circle>
-                <line x1="9" y1="7" x2="21" y2="7"></line>
-                <circle cx="5" cy="12" r="1.5"></circle>
-                <line x1="9" y1="12" x2="21" y2="12"></line>
-                <circle cx="5" cy="17" r="1.5"></circle>
-                <line x1="9" y1="17" x2="21" y2="17"></line>
-            </svg>',
-        'report' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="4" y="10" width="3" height="8" rx="1"></rect>
-                <rect x="10.5" y="6" width="3" height="12" rx="1"></rect>
-                <rect x="17" y="13" width="3" height="5" rx="1"></rect>
-                <path d="M4 4h16"></path>
-            </svg>',
-        'calendar' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="16" rx="2"></rect>
-                <line x1="8" y1="3" x2="8" y2="7"></line>
-                <line x1="16" y1="3" x2="16" y2="7"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>',
-        'settings' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.02.02a2 2 0 1 1-2.83 2.83l-.02-.02A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .33 1.7 1.7 0 0 0-.67.86l-.06.2a2 2 0 0 1-3.54 0l-.06-.2a1.7 1.7 0 0 0-.67-.86 1.7 1.7 0 0 0-1-.33 1.7 1.7 0 0 0-1.88.34l-.02.02a2 2 0 1 1-2.83-2.83l.02-.02A1.7 1.7 0 0 0 4.6 15 1.7 1.7 0 0 0 4.27 14a1.7 1.7 0 0 0-.86-.67l-.2-.06a2 2 0 0 1 0-3.54l.2-.06c.37-.1.68-.33.86-.67.16-.3.24-.64.33-1A1.7 1.7 0 0 0 4.6 4.6l-.02-.02A2 2 0 1 1 7.4 1.75l.02.02A1.7 1.7 0 0 0 9 4.6c.36.09.7.17 1 .33.34.18.57.49.67.86l.06.2a2 2 0 0 1 3.54 0l.06-.2c.1-.37.33-.68.67-.86.3-.16.64-.24 1-.33a1.7 1.7 0 0 0 1.88-.34l.02-.02A2 2 0 1 1 22.25 7.4l-.02.02A1.7 1.7 0 0 0 19.4 9c-.09.36-.17.7-.33 1-.18.34-.49.57-.86.67l-.2.06a2 2 0 0 1 0 3.54l.2.06c.37.1.68.33.86.67.16.3.24.64.33 1Z"></path>
-            </svg>',
-        'link' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M10 13a5 5 0 0 1 0-7l1.5-1.5a5 5 0 0 1 7 7L17 13"></path>
-                <path d="M14 11a5 5 0 0 1 0 7L12.5 19.5a5 5 0 1 1-7-7L7 11"></path>
-            </svg>',
+        'dashboard' => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></svg>',
+        'users'     => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7.5" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>',
+        'folder'    => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2.5 2.5H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+        'list'      => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="7" r="1.5"/><line x1="9" y1="7" x2="21" y2="7"/><circle cx="5" cy="12" r="1.5"/><line x1="9" y1="12" x2="21" y2="12"/><circle cx="5" cy="17" r="1.5"/><line x1="9" y1="17" x2="21" y2="17"/></svg>',
+        'report'    => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="3" height="8" rx="1"/><rect x="10.5" y="6" width="3" height="12" rx="1"/><rect x="17" y="13" width="3" height="5" rx="1"/><path d="M4 4h16"/></svg>',
+        'calendar'  => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+        'settings'  => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.02.02a2 2 0 1 1-2.83 2.83l-.02-.02A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .33 1.7 1.7 0 0 0-.67.86l-.06.2a2 2 0 0 1-3.54 0l-.06-.2a1.7 1.7 0 0 0-.67-.86 1.7 1.7 0 0 0-1-.33 1.7 1.7 0 0 0-1.88.34l-.02.02a2 2 0 1 1-2.83-2.83l.02-.02A1.7 1.7 0 0 0 4.6 15 1.7 1.7 0 0 0 4.27 14a1.7 1.7 0 0 0-.86-.67l-.2-.06a2 2 0 0 1 0-3.54l.2-.06c.37-.1.68-.33.86-.67.16-.3.24-.64.33-1A1.7 1.7 0 0 0 4.6 4.6"/></svg>',
+        'link'      => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 1 0-7l1.5-1.5a5 5 0 0 1 7 7L17 13"/><path d="M14 11a5 5 0 0 1 0 7L12.5 19.5a5 5 0 1 1-7-7L7 11"/></svg>',
 
-        // Nice extras you might be using in your menu tree
-        'orders' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M6 7h12l-1 12H7z"></path>
-                <path d="M9 7a3 3 0 0 1 6 0"></path>
-            </svg>',
-        'products' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 3l9 4-9 4-9-4 9-4z"></path>
-                <path d="M21 7v7l-9 4-9-4V7"></path>
-            </svg>',
-        'payments' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                <line x1="3" y1="9" x2="21" y2="9"></line>
-                <line x1="7" y1="15" x2="12" y2="15"></line>
-            </svg>',
-        'subscriptions' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3 12a9 9 0 0 1 14.5-7"></path>
-                <path d="M21 12a9 9 0 0 1-14.5 7"></path>
-                <polyline points="16 5 17 5 17 4"></polyline>
-                <polyline points="7 20 7 19 8 19"></polyline>
-            </svg>',
-        'analytics' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <polyline points="3 17 9 11 13 15 21 7"></polyline>
-                <circle cx="3" cy="17" r="1.5"></circle>
-                <circle cx="9" cy="11" r="1.5"></circle>
-                <circle cx="13" cy="15" r="1.5"></circle>
-                <circle cx="21" cy="7" r="1.5"></circle>
-            </svg>',
-        'bell' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"></path>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>',
-        'mail' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="5" width="18" height="14" rx="2"></rect>
-                <polyline points="3,7 12,13 21,7"></polyline>
-            </svg>',
-        'shield' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 3l8 4v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V7l8-4z"></path>
-            </svg>',
-        'lock' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="4" y="10" width="16" height="10" rx="2"></rect>
-                <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
-            </svg>',
-        'tag' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M20 13l-7 7-9-9V4h7l9 9z"></path>
-                <circle cx="7.5" cy="7.5" r="1.5"></circle>
-            </svg>',
-        'coupon' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="6" width="18" height="12" rx="2"></rect>
-                <path d="M7 6v12M17 6v12"></path>
-                <circle cx="12" cy="12" r="1.5"></circle>
-            </svg>',
-        'truck' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="7" width="10" height="8" rx="2"></rect>
-                <path d="M13 10h4l3 3v2h-7z"></path>
-                <circle cx="7.5" cy="18" r="2"></circle>
-                <circle cx="17.5" cy="18" r="2"></circle>
-            </svg>',
-        'location' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10z"></path>
-                <circle cx="12" cy="11" r="2.5"></circle>
-            </svg>',
-        'wallet' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="3" y="6" width="18" height="12" rx="2"></rect>
-                <rect x="12" y="10" width="6" height="4" rx="1"></rect>
-                <line x1="3" y1="8" x2="21" y2="8"></line>
-            </svg>',
-        'clipboard' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="5" y="4" width="14" height="16" rx="2"></rect>
-                <rect x="9" y="2" width="6" height="4" rx="1"></rect>
-                <line x1="8" y1="10" x2="16" y2="10"></line>
-                <line x1="8" y1="14" x2="16" y2="14"></line>
-            </svg>',
-        'sparkles' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 2l1.6 4.4L18 8l-4.4 1.6L12 14l-1.6-4.4L6 8l4.4-1.6L12 2z"></path>
-                <path d="M19 13l.9 2.5L22 16l-2.1.5L19 19l-.9-2.5L16 16l2.1-.5L19 13z"></path>
-            </svg>',
-        'star' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M12 3l3.1 6.3 6.9 1-5 4.8 1.2 6.9L12 18.9 5.8 22l1.2-6.9-5-4.8 6.9-1L12 3z"></path>
-            </svg>',
+        'orders'        => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 12H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>',
+        'products'      => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 4-9 4-9-4 9-4z"/><path d="M21 7v7l-9 4-9-4V7"/></svg>',
+        'payments'      => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="7" y1="15" x2="12" y2="15"/></svg>',
+        'subscriptions' => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 0 1 14.5-7"/><path d="M21 12a9 9 0 0 1-14.5 7"/></svg>',
+        'analytics'     => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="3 17 9 11 13 15 21 7"/><circle cx="3" cy="17" r="1.5"/><circle cx="9" cy="11" r="1.5"/><circle cx="13" cy="15" r="1.5"/><circle cx="21" cy="7" r="1.5"/></svg>',
+        'bell'          => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 7h18s-3 0-3-7"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+        'mail'          => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><polyline points="3,7 12,13 21,7"/></svg>',
+        'shield'        => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V7l8-4z"/></svg>',
+        'lock'          => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+        'tag'           => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 13l-7 7-9-9V4h7l9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg>',
+        'coupon'        => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 6v12M17 6v12"/><circle cx="12" cy="12" r="1.5"/></svg>',
+        'truck'         => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="10" height="8" rx="2"/><path d="M13 10h4l3 3v2h-7z"/><circle cx="7.5" cy="18" r="2"/><circle cx="17.5" cy="18" r="2"/></svg>',
+        'location'      => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10z"/><circle cx="12" cy="11" r="2.5"/></svg>',
+        'wallet'        => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><rect x="12" y="10" width="6" height="4" rx="1"/><line x1="3" y1="8" x2="21" y2="8"/></svg>',
+        'clipboard'     => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="14" height="16" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/></svg>',
+        'sparkles'      => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l1.6 4.4L18 8l-4.4 1.6L12 14l-1.6-4.4L6 8l4.4-1.6L12 2z"/><path d="M19 13l.9 2.5L22 16l-2.1.5L19 19l-.9-2.5L16 16l2.1-.5L19 13z"/></svg>',
+        'star'          => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l3.1 6.3 6.9 1-5 4.8 1.2 6.9L12 18.9 5.8 22l1.2-6.9-5-4.8 6.9-1L12 3z"/></svg>',
 
-        // Extra keys from your table
-        'flower' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="12" r="2.2"></circle>
-                <path d="M12 2c2 2 2 4 0 6c-2-2-2-4 0-6zM22 12c-2 2-4 2-6 0c2-2 4-2 6 0zM12 22c-2-2-2-4 0-6c2 2 2 4 0 6zM2 12c2-2 4-2 6 0c-2 2-4 2-6 0zM18 6c-1.2 2-3 2.5-5 .7c1.8-2.2 3.6-2.7 5-.7zM6 6c1.2 2 3 2.5 5 .7C9.2 4.5 7.4 4 6 6zM18 18c-1.2-2-3-2.5-5-.7c1.8 2.2 3.6 2.7 5 .7zM6 18c1.4-2 3.2-2.5 5-.7c-2 1.8-3.8 1.3-5 .7z"></path>
-            </svg>',
-        'vendor' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M4 10h16l-2 9H6z"></path>
-                <path d="M6 10l2-5h8l2 5"></path>
-                <circle cx="9" cy="20" r="1.5"></circle>
-                <circle cx="15" cy="20" r="1.5"></circle>
-            </svg>',
-        'marketing' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3 5v10l6-3 12 6V8L9 14 3 11V5z"></path>
-            </svg>',
-        'delivery' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3 7h11v7H3z"></path>
-                <path d="M14 10h4l3 3v4h-7z"></path>
-                <circle cx="7" cy="19" r="2"></circle>
-                <circle cx="18" cy="19" r="2"></circle>
-            </svg>',
-        'rider' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="5" cy="18" r="2"></circle>
-                <circle cx="17" cy="18" r="2"></circle>
-                <path d="M5 18l5-9 3 3 4-3"></path>
-                <circle cx="12" cy="5" r="1.7"></circle>
-            </svg>',
-        'product' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M3 7l9 5 9-5-9-4-9 4z"></path>
-                <path d="M3 7v10l9 5 9-5V7"></path>
-            </svg>',
+        // your extra keys
+        'flower'   => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.2"/><path d="M12 2c2 2 2 4 0 6c-2-2-2-4 0-6zM22 12c-2 2-4 2-6 0c2-2 4-2 6 0zM12 22c-2-2-2-4 0-6c2 2 2 4 0 6zM2 12c2-2 4-2 6 0c-2 2-4 2-6 0zM18 6c-1.2 2-3 2.5-5 .7c1.8-2.2 3.6-2.7 5-.7zM6 6c1.2 2 3 2.5 5 .7C9.2 4.5 7.4 4 6 6zM18 18c-1.2-2-3-2.5-5-.7c1.8 2.2 3.6 2.7 5 .7zM6 18c1.4-2 3.2-2.5 5-.7c-2 1.8-3.8 1.3-5 .7z"/></svg>',
+        'vendor'   => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h16l-2 9H6z"/><path d="M6 10l2-5h8l2 5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/></svg>',
+        'marketing'=> '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 5v10l6-3 12 6V8L9 14 3 11V5z"/></svg>',
+        'delivery' => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v7H3z"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="7" cy="19" r="2"/><circle cx="18" cy="19" r="2"/></svg>',
+        'rider'    => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="18" r="2"/><circle cx="17" cy="18" r="2"/><path d="M5 18l5-9 3 3 4-3"/><circle cx="12" cy="5" r="1.7"/></svg>',
+        'product'  => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9 5 9-5-9-4-9 4z"/><path d="M3 7v10l9 5 9-5V7"/></svg>',
 
-        // Fallback
-        'default' =>
-            '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="12" r="9"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <circle cx="12" cy="16" r="1"></circle>
-            </svg>',
+        'default'  => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="12"/><circle cx="12" cy="16" r="1"/></svg>',
     ];
 
     $defaultIcon = $iconMap['default'];
-
     $renderIcon = function ($item) use ($iconMap, $defaultIcon) {
         $key = trim((string) ($item->icon ?? ''));
         return $iconMap[$key] ?? $defaultIcon;
@@ -220,47 +62,39 @@
 
     // Active helpers (match current URL)
     $isUrlActive = function (string $href): bool {
-        if (Str::startsWith($href, 'javascript')) {
-            return false;
-        }
+        if (Str::startsWith($href, 'javascript')) return false;
         $current = rtrim(url()->current(), '/');
-        $norm = rtrim($href, '/');
+        $norm    = rtrim($href, '/');
         return $current === $norm || Str::startsWith($current, $norm);
     };
     $hasActiveDescendant = function ($item) use (&$hasActiveDescendant, $isUrlActive) {
-        if (!$item->childrenRecursive) {
-            return false;
-        }
+        if (!$item->childrenRecursive) return false;
         foreach ($item->childrenRecursive as $c) {
-            if ($isUrlActive($c->href) || $hasActiveDescendant($c)) {
-                return true;
-            }
+            if ($isUrlActive($c->href) || $hasActiveDescendant($c)) return true;
         }
         return false;
     };
 
-    // Renderer: EXACT template structure (kept the same)
+    // Renderer (unchanged DOM structure)
     $renderMenu = function ($items) use (&$renderMenu, $renderIcon, $isUrlActive, $hasActiveDescendant) {
         foreach ($items as $item) {
             $hasChildren = $item->childrenRecursive && $item->childrenRecursive->count();
-            $isCategory = $item->type === 'category' || $item->type === 'group';
-            $icon = $renderIcon($item);
+            $isCategory  = $item->type === 'category' || $item->type === 'group';
+            $icon        = $renderIcon($item);
 
             if ($isCategory) {
                 echo '<li class="side-item side-item-category">' . e($item->title) . '</li>';
-                if ($hasChildren) {
-                    echo $renderMenu($item->childrenRecursive);
-                }
+                if ($hasChildren) echo $renderMenu($item->childrenRecursive);
                 continue;
             }
 
-            $isActive = $isUrlActive($item->href);
+            $isActive     = $isUrlActive($item->href);
             $isOpenParent = $hasChildren && ($isActive || $hasActiveDescendant($item));
 
             if ($hasChildren) {
                 echo '<li class="slide' . ($isOpenParent ? ' open' : '') . '">';
                 echo '  <a class="side-menu__item' . ($isActive ? ' active' : '') . '" data-bs-toggle="slide" href="javascript:void(0);">';
-                echo $icon;
+                echo      $icon;
                 echo '      <span class="side-menu__label">' . e($item->title) . '</span>';
                 echo '      <i class="angle fas fa-chevron-right"></i>';
                 echo '  </a>';
@@ -274,7 +108,7 @@
             } else {
                 echo '<li class="slide">';
                 echo '  <a class="side-menu__item' . ($isActive ? ' active' : '') . '" href="' . e($item->href) . '">';
-                echo $icon;
+                echo      $icon;
                 echo '      <span class="side-menu__label">' . e($item->title) . '</span>';
                 echo '  </a>';
                 echo '</li>';
@@ -284,134 +118,111 @@
 @endphp
 
 <style>
-    /* ===== New Attractive Style (dark glass + gradient accents) ===== */
+/* ===== Attractive Sidebar with correct expanded/collapsed behavior ===== */
+:root{
+    --sb-width: 240px;      /* expanded width */
+    --sb-width-mini: 78px;  /* collapsed width when body.sidenav-toggled is present */
+    --sb-bg: #0b1220;
+    --sb-grad1: rgba(124,92,255,.18);
+    --sb-grad2: rgba(35,199,217,.18);
+    --sb-text: #e9eef8;
+    --sb-muted: #9aa4bb;
+    --sb-line: rgba(255,255,255,.08);
+    --sb-hover: rgba(255,255,255,.06);
+    --sb-active: rgba(124,92,255,.18);
+    --sb-ring: rgba(124,92,255,.45);
+    --sb-radius: 14px;
+}
 
-    :root{
-        --ink: #0b1220;
-        --ink-2: #111827;
-        --muted: #a0abc0;
-        --line: rgba(255,255,255,.08);
-        --brand-1: #7c5cff; /* indigo */
-        --brand-2: #23c7d9; /* cyan */
-        --hover: rgba(255,255,255,.06);
-        --active-bg: rgba(124,92,255,.18);
-        --active-ring: rgba(124,92,255,.45);
-        --radius: 14px;
-    }
+/* make width deterministic so content aligns */
+.app-sidebar{
+    width: var(--sb-width);
+    background:
+        radial-gradient(900px 180px at -10% 0%, var(--sb-grad1), transparent 60%),
+        radial-gradient(900px 180px at 110% 100%, var(--sb-grad2), transparent 60%),
+        var(--sb-bg);
+    border-right: 1px solid var(--sb-line);
+    color: var(--sb-text);
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+.main-sidebar-header{ background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0)); border-bottom: 1px solid var(--sb-line); padding: 16px 18px; }
+.header-logo .main-logo{ height: 30px; }
 
-    .sticky { position: sticky; top: 0; }
+.main-sidemenu{ padding: 10px 10px 18px; max-height: calc(100vh - 70px); overflow:auto; }
+.side-menu{ list-style:none; margin:0; padding:0; }
 
-    .app-sidebar {
-        background:
-            radial-gradient(900px 180px at -10% 0%, rgba(124,92,255,.18), transparent 60%),
-            radial-gradient(900px 180px at 110% 100%, rgba(35,199,217,.18), transparent 60%),
-            var(--ink);
-        border-right: 1px solid var(--line);
-        color: #e7ecf7;
-        min-height: 100vh;
-        position: relative;
-        overflow: hidden;
-    }
-    .app-sidebar::before {
-        content: '';
-        position: absolute; inset: 0;
-        backdrop-filter: blur(10px);
-        pointer-events: none;
-    }
+.side-item-category{
+    padding: 14px 14px 8px;
+    font-size: 12px; letter-spacing:.12em; text-transform:uppercase;
+    color: var(--sb-muted);
+}
+.slide{ margin:4px 6px; }
 
-    .main-sidebar-header {
-        background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,0));
-        border-bottom: 1px solid var(--line);
-        padding: 16px 18px;
-    }
-    .header-logo .main-logo { height: 30px; }
+.side-menu__item{
+    display:flex; align-items:center; gap:12px;
+    padding:10px 12px; border-radius: var(--sb-radius);
+    color: var(--sb-text); text-decoration:none;
+    transition: background .2s ease, box-shadow .25s ease;
+}
+.side-menu__item:hover{ background: var(--sb-hover); }
+.side-menu__item.active{ background: var(--sb-active); box-shadow: 0 0 0 1px var(--sb-ring) inset; }
 
-    .main-sidemenu { padding: 10px 10px 18px; max-height: calc(100vh - 70px); overflow: auto; }
-    .side-menu { list-style: none; margin: 0; padding: 0; }
+.side-menu__label{ font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-    .side-item-category {
-        padding: 14px 14px 8px;
-        font-size: 12px;
-        letter-spacing: .12em;
-        text-transform: uppercase;
-        color: var(--muted);
-    }
+/* outline icons with better contrast on dark */
+.side-menu__icon{
+    width:20px; height:20px; margin-right:6px; flex-shrink:0;
+    fill:none; stroke: currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;
+    color: #9aa8ff; /* high-contrast indigo */
+}
 
-    .slide { margin: 4px 6px; }
+/* sub menu */
+.slide-menu{ list-style:none; padding-left:44px; margin:6px 0 10px; border-left:1px dashed var(--sb-line); display:none; }
+.slide.open .slide-menu{ display:block; }
+.sub-side-menu__item{
+    display:block; color:var(--sb-text);
+    padding:8px 10px; margin:2px 0; border-radius: calc(var(--sb-radius) - 4px);
+    text-decoration:none; transition: background .2s ease, box-shadow .25s ease;
+}
+.sub-side-menu__item:hover{ background: var(--sb-hover); }
+.sub-side-menu__item.active{ background: var(--sb-active); box-shadow: 0 0 0 1px var(--sb-ring) inset; }
 
-    /* Menu Item */
-    .side-menu__item {
-        display: flex; align-items: center; gap: 12px;
-        padding: 10px 12px;
-        border-radius: var(--radius);
-        color: #e7ecf7; text-decoration: none;
-        transition: background .2s ease, box-shadow .25s ease, transform .06s ease;
-        position: relative; isolation: isolate;
-    }
-    .side-menu__item:hover { background: var(--hover); }
-    .side-menu__item.active {
-        background: var(--active-bg);
-        box-shadow: 0 0 0 1px var(--active-ring) inset;
-    }
+/* chevron even if FA is missing */
+.slide > .side-menu__item .angle{
+    margin-left:auto; width:10px; height:10px;
+    border: solid var(--sb-muted); border-width:0 2px 2px 0; display:inline-block;
+    transform: rotate(-45deg); transition: transform .25s ease, border-color .25s ease;
+}
+.slide.open > .side-menu__item .angle{ transform: rotate(45deg); border-color: var(--sb-text); }
 
-    .side-menu__label { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* scrollbar */
+.main-sidemenu::-webkit-scrollbar{ width:10px; }
+.main-sidemenu::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.12); border-radius:10px; }
+.main-sidemenu:hover::-webkit-scrollbar-thumb{ background: rgba(255,255,255,.25); }
 
-    /* Icon — outline + subtle glow */
-    .side-menu__icon {
-        width: 20px; height: 20px; margin-right: 6px; flex-shrink: 0;
-        fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-        color: color-mix(in oklab, var(--brand-1) 70%, var(--brand-2));
-        filter: drop-shadow(0 2px 6px rgba(124,92,255,.25));
-    }
+/* ===== collapsed state (template toggles body.sidenav-toggled) ===== */
+.sidenav-toggled .app-sidebar{ width: var(--sb-width-mini); }
+.sidenav-toggled .side-menu__label{ display:none; }
+.sidenav-toggled .slide-menu{ display:none !important; }
+.sidenav-toggled .angle{ display:none; }
 
-    /* Sub-menu */
-    .slide-menu {
-        list-style: none;
-        padding-left: 44px;
-        margin: 6px 0 10px;
-        border-left: 1px dashed var(--line);
-        display: none;
-    }
-    .slide.open .slide-menu { display: block; }
+/* keep icons centered in mini state */
+.sidenav-toggled .side-menu__item{ justify-content:center; padding:10px 0; }
+.sidenav-toggled .side-item-category{ display:none; }
 
-    .sub-side-menu__item {
-        display: block;
-        color: #e7ecf7;
-        padding: 8px 10px;
-        margin: 2px 0;
-        text-decoration: none;
-        border-radius: calc(var(--radius) - 4px);
-        transition: background .2s ease, box-shadow .25s ease;
-        position: relative;
-    }
-    .sub-side-menu__item:hover { background: var(--hover); }
-    .sub-side-menu__item.active {
-        background: var(--active-bg);
-        box-shadow: 0 0 0 1px var(--active-ring) inset;
-    }
+/* If your template shifts content with margin-left, keep alignment tidy */
+.app-content, .main-content, .content-area{
+    margin-left: var(--sb-width);
+    transition: margin-left .2s ease;
+}
+.sidenav-toggled .app-content, .sidenav-toggled .main-content, .sidenav-toggled .content-area{
+    margin-left: var(--sb-width-mini);
+}
 
-    /* Chevron (uses your existing .angle element) */
-    .slide > .side-menu__item .angle {
-        margin-left: auto;
-        border: solid var(--muted);
-        border-width: 0 2px 2px 0;
-        display: inline-block;
-        padding: 4px;
-        transform: rotate(-45deg);
-        transition: transform .25s ease, border-color .25s ease;
-    }
-    .slide.open > .side-menu__item .angle {
-        transform: rotate(45deg);
-        border-color: #e7ecf7;
-    }
-
-    /* Scrollbar styling */
-    .main-sidemenu::-webkit-scrollbar { width: 10px; }
-    .main-sidemenu::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 10px; }
-    .main-sidemenu:hover::-webkit-scrollbar-thumb { background: rgba(255,255,255,.25); }
-
-    /* Hide template’s slide arrows (keep DOM for compatibility) */
-    #slide-left, #slide-right { display: none; }
+/* Hide template’s slide arrows UI if present */
+#slide-left, #slide-right{ display:none; }
 </style>
 
 <!-- main-sidebar -->
