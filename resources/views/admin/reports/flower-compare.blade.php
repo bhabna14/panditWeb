@@ -50,7 +50,7 @@
     <div class="breadcrumb-header justify-content-between">
         <div class="left-content">
             <span class="main-content-title mg-b-0 mg-b-lg-1">Vendor vs Estimate</span>
-            <div class="text-muted">Compare only Quantity & Value — Day and Month</div>
+            <div class="text-muted">Compare only Quantity &amp; Value — Day and Month</div>
         </div>
         <ol class="breadcrumb d-flex justify-content-between align-items-center">
             <li class="breadcrumb-item tx-15"><a href="{{ url('admin/dashboard') }}">Dashboard</a></li>
@@ -91,15 +91,15 @@
                 '</div>
                 <div class="chip">Est Qty: <span class="amount">' .
                 number_format($t['est_qty'], 2) .
-                '</span></div>
+                ' units</span></div>
                 <div class="chip">Act Qty: <span class="amount">' .
                 number_format($t['act_qty'], 2) .
-                '</span></div>
+                ' units</span></div>
                 <div class="chip ' .
                 ($dq >= 0 ? 'good' : 'bad') .
                 '">Δ Qty: <span class="amount">' .
                 number_format($dq, 2) .
-                '</span></div>
+                ' units</span></div>
                 <div class="chip">Est Value: <strong class="amount">₹ ' .
                 number_format($t['est_value'], 2) .
                 '</strong></div>
@@ -126,11 +126,11 @@
                     <thead>
                         <tr>
                             <th>Vendor</th>
-                            <th class="text-end">Actual Qty</th>
+                            <th class="text-end">Actual Qty <small class="text-muted">(units)</small></th>
                             <th class="text-end">Actual Value</th>
-                            <th class="text-end">Est. Qty</th>
+                            <th class="text-end">Est. Qty <small class="text-muted">(units)</small></th>
                             <th class="text-end">Est. Value</th>
-                            <th class="text-end">Δ Qty</th>
+                            <th class="text-end">Δ Qty <small class="text-muted">(units)</small></th>
                             <th class="text-end">Δ Value</th>
                         </tr>
                     </thead>
@@ -138,14 +138,20 @@
                         @foreach ($compareDay['rows'] as $r)
                             <tr>
                                 <td>{{ $r['vendor_name'] }}</td>
-                                <td class="text-end amount">{{ number_format($r['act_qty'], 2) }}</td>
+                                <td class="text-end amount">
+                                    {{ number_format($r['act_qty'], 2) }} <span class="text-muted">units</span>
+                                </td>
                                 <td class="text-end amount">₹ {{ number_format($r['act_value'], 2) }}</td>
-                                <td class="text-end amount">{{ number_format($r['est_qty'], 2) }}</td>
+                                <td class="text-end amount">
+                                    {{ number_format($r['est_qty'], 2) }} <span class="text-muted">units</span>
+                                </td>
                                 <td class="text-end amount">₹ {{ number_format($r['est_value'], 2) }}</td>
                                 <td class="text-end amount {{ $r['diff_qty'] >= 0 ? 'text-success' : 'text-danger' }}">
-                                    {{ number_format($r['diff_qty'], 2) }}</td>
-                                <td class="text-end amount {{ $r['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">₹
-                                    {{ number_format($r['diff_value'], 2) }}</td>
+                                    {{ number_format($r['diff_qty'], 2) }} <span class="text-muted">units</span>
+                                </td>
+                                <td class="text-end amount {{ $r['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                    ₹ {{ number_format($r['diff_value'], 2) }}
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -153,14 +159,20 @@
                         @php $t = $compareDay['totals']; @endphp
                         <tr>
                             <th>All Vendors</th>
-                            <th class="text-end amount">{{ number_format($t['act_qty'], 2) }}</th>
+                            <th class="text-end amount">
+                                {{ number_format($t['act_qty'], 2) }} <span class="text-muted">units</span>
+                            </th>
                             <th class="text-end amount">₹ {{ number_format($t['act_value'], 2) }}</th>
-                            <th class="text-end amount">{{ number_format($t['est_qty'], 2) }}</th>
+                            <th class="text-end amount">
+                                {{ number_format($t['est_qty'], 2) }} <span class="text-muted">units</span>
+                            </th>
                             <th class="text-end amount">₹ {{ number_format($t['est_value'], 2) }}</th>
                             <th class="text-end amount {{ $t['diff_qty'] >= 0 ? 'text-success' : 'text-danger' }}">
-                                {{ number_format($t['diff_qty'], 2) }}</th>
-                            <th class="text-end amount {{ $t['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">₹
-                                {{ number_format($t['diff_value'], 2) }}</th>
+                                {{ number_format($t['diff_qty'], 2) }} <span class="text-muted">units</span>
+                            </th>
+                            <th class="text-end amount {{ $t['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                ₹ {{ number_format($t['diff_value'], 2) }}
+                            </th>
                         </tr>
                     </tfoot>
                 </table>
@@ -179,11 +191,11 @@
                     <thead>
                         <tr>
                             <th>Vendor</th>
-                            <th class="text-end">Actual Qty</th>
+                            <th class="text-end">Actual Qty <small class="text-muted">(units)</small></th>
                             <th class="text-end">Actual Value</th>
-                            <th class="text-end">Est. Qty</th>
+                            <th class="text-end">Est. Qty <small class="text-muted">(units)</small></th>
                             <th class="text-end">Est. Value</th>
-                            <th class="text-end">Δ Qty</th>
+                            <th class="text-end">Δ Qty <small class="text-muted">(units)</small></th>
                             <th class="text-end">Δ Value</th>
                         </tr>
                     </thead>
@@ -191,14 +203,20 @@
                         @foreach ($compareMonth['rows'] as $r)
                             <tr>
                                 <td>{{ $r['vendor_name'] }}</td>
-                                <td class="text-end amount">{{ number_format($r['act_qty'], 2) }}</td>
+                                <td class="text-end amount">
+                                    {{ number_format($r['act_qty'], 2) }} <span class="text-muted">units</span>
+                                </td>
                                 <td class="text-end amount">₹ {{ number_format($r['act_value'], 2) }}</td>
-                                <td class="text-end amount">{{ number_format($r['est_qty'], 2) }}</td>
+                                <td class="text-end amount">
+                                    {{ number_format($r['est_qty'], 2) }} <span class="text-muted">units</span>
+                                </td>
                                 <td class="text-end amount">₹ {{ number_format($r['est_value'], 2) }}</td>
                                 <td class="text-end amount {{ $r['diff_qty'] >= 0 ? 'text-success' : 'text-danger' }}">
-                                    {{ number_format($r['diff_qty'], 2) }}</td>
-                                <td class="text-end amount {{ $r['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">₹
-                                    {{ number_format($r['diff_value'], 2) }}</td>
+                                    {{ number_format($r['diff_qty'], 2) }} <span class="text-muted">units</span>
+                                </td>
+                                <td class="text-end amount {{ $r['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                    ₹ {{ number_format($r['diff_value'], 2) }}
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -206,14 +224,20 @@
                         @php $t = $compareMonth['totals']; @endphp
                         <tr>
                             <th>All Vendors</th>
-                            <th class="text-end amount">{{ number_format($t['act_qty'], 2) }}</th>
+                            <th class="text-end amount">
+                                {{ number_format($t['act_qty'], 2) }} <span class="text-muted">units</span>
+                            </th>
                             <th class="text-end amount">₹ {{ number_format($t['act_value'], 2) }}</th>
-                            <th class="text-end amount">{{ number_format($t['est_qty'], 2) }}</th>
+                            <th class="text-end amount">
+                                {{ number_format($t['est_qty'], 2) }} <span class="text-muted">units</span>
+                            </th>
                             <th class="text-end amount">₹ {{ number_format($t['est_value'], 2) }}</th>
                             <th class="text-end amount {{ $t['diff_qty'] >= 0 ? 'text-success' : 'text-danger' }}">
-                                {{ number_format($t['diff_qty'], 2) }}</th>
-                            <th class="text-end amount {{ $t['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">₹
-                                {{ number_format($t['diff_value'], 2) }}</th>
+                                {{ number_format($t['diff_qty'], 2) }} <span class="text-muted">units</span>
+                            </th>
+                            <th class="text-end amount {{ $t['diff_value'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                ₹ {{ number_format($t['diff_value'], 2) }}
+                            </th>
                         </tr>
                     </tfoot>
                 </table>
