@@ -925,16 +925,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Route::get('/reports/flower-estimates', [FlowerEstimateController::class, 'index'])->name('flowerEstimate');
     // Route::get('/reports/flower-estimates/export', [FlowerEstimateController::class, 'exportCsv'])->name('reports.flower_estimates.export');
 });
-
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/reports/flower-compare', [FlowerEstimateCompareController::class, 'index'])
         ->name('flowerCompare');
 
-    // Optional CSV export for the compare view
     Route::get('/reports/flower-compare/export', [FlowerEstimateCompareController::class, 'exportCsv'])
         ->name('reports.flower_compare.export');
 });
-
 Route::prefix('admin')->middleware(['auth:admins'])->group(function () {
     Route::get('/payment-collection', [PaymentCollectionController::class, 'index'])
         ->name('payment.collection.index');

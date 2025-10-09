@@ -73,7 +73,7 @@
             </div>
             <div class="col-md-3 d-flex align-items-end">
                 <a class="btn btn-outline-secondary w-100"
-                    href="{{ route('admin.reports.vendor_compare.export', ['date' => $selectedDate, 'month' => $selectedMonth]) }}">
+                    href="{{ route('admin.reports.flower_compare.export', ['date' => $selectedDate, 'month' => $selectedMonth]) }}">
                     Export CSV
                 </a>
             </div>
