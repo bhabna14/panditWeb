@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-use App\Models\Subscription;
+use App\Models\Subscription;            // ✅ missing import added
 use App\Models\FlowerProduct;
 use App\Models\PackageItem;
 use App\Models\FlowerPickupDetails;
@@ -27,17 +27,18 @@ class FlowerEstimateCompareController extends Controller
         $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth();
 
+        // Load flowers (kept; not used in price math anymore)
         $allFlowers = FlowerProduct::select('product_id','name','category','price','per_day_price','status')->get();
         $flowerById = $allFlowers->keyBy('product_id');
         $flowerByNormName = $allFlowers->keyBy(fn($f) => $this->norm($f->name));
 
-        // DAY
-        $estDay     = $this->estimateTotalsForDate($date, $flowerById, $flowerByNormName);
+        // ---- DAY ----
+        $estDay     = $this->estimateTotalsForDate($date);                 // ✅ simplified signature
         $actDay     = $this->actualTotalsPerVendorForDate($date);
         $compareDay = $this->composeVendorCompare($actDay['per_vendor'], $estDay['total_qty'], $estDay['total_value']);
 
-        // MONTH
-        $estMonth     = $this->estimateTotalsForRange($monthStart, $monthEnd, $flowerById, $flowerByNormName);
+        // ---- MONTH ----
+        $estMonth     = $this->estimateTotalsForRange($monthStart, $monthEnd);
         $actMonth     = $this->actualTotalsPerVendorForRange($monthStart, $monthEnd);
         $compareMonth = $this->composeVendorCompare($actMonth['per_vendor'], $estMonth['total_qty'], $estMonth['total_value']);
 
@@ -92,53 +93,84 @@ class FlowerEstimateCompareController extends Controller
         return ['rows' => $rows, 'totals' => $totals];
     }
 
-    // ---- Estimates (totals only) ----
-    protected function estimateTotalsForDate(
-        Carbon $date,
-        Collection $flowerById,
-        Collection $flowerByNormName
-    ): array {
-        $subs = $this->activeSubscriptionsOverlappingEffective($date, $date);
-        $productIds = $subs->pluck('product_id')->unique()->all();
-        if (empty($productIds)) return ['total_qty' => 0.0, 'total_value' => 0.0];
+    // ================= ESTIMATES (ONLY QTY + TOTAL ₹) =================
 
-        $pkgItemsByProduct = PackageItem::whereIn('product_id', $productIds)->get()->groupBy('product_id');
+    /**
+     * Estimate totals for a specific day:
+     * - Count subscriptions with: start_date <= D <= COALESCE(new_date, end_date)
+     * - EXCLUDE if D ∈ [pause_start_date, pause_end_date]
+     * - Ignore status 'expired'
+     * - PRICE = sum(item.price_per_subscription) * (#subs)
+     * - QTY   = sum(item.quantity)              * (#subs)
+     */
+    protected function estimateTotalsForDate(Carbon $date): array
+    {
+        // Pull overlapping subs (effective end)
+        $subs = Subscription::query()
+            ->where(function ($q) {
+                $q->whereIn('status', ['active', 'paused'])
+                  ->orWhere('is_active', 1);
+            })
+            ->whereDate('start_date', '<=', $date->toDateString())
+            ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $date->toDateString())
+            ->get([
+                'subscription_id','order_id','user_id','product_id',
+                'start_date','end_date','new_date',
+                'pause_start_date','pause_end_date','status','is_active'
+            ]);
+
+        // Exclude paused/expired on this exact date
+        $subs = $subs->filter(function ($s) use ($date) {
+            if (isset($s->status) && strtolower((string)$s->status) === 'expired') {
+                return false;
+            }
+            if ($s->pause_start_date && $s->pause_end_date) {
+                $paused = Carbon::parse($s->pause_start_date)->startOfDay()->lte($date)
+                       && Carbon::parse($s->pause_end_date)->endOfDay()->gte($date);
+                if ($paused) return false;
+            }
+            return true;
+        });
+
+        if ($subs->isEmpty()) {
+            return ['total_qty' => 0.0, 'total_value' => 0.0];
+        }
+
+        // Load package items for those products
+        $productIds = $subs->pluck('product_id')->unique()->all();
+        $pkgItemsByProduct = PackageItem::whereIn('product_id', $productIds)
+            ->get(['product_id','item_name','quantity','unit','price'])
+            ->groupBy('product_id');
 
         $totalQty = 0.0;
         $totalVal = 0.0;
 
         foreach ($subs->groupBy('product_id') as $pid => $subsForProduct) {
-            $countSubs = $subsForProduct->count();
+            $subsCount = $subsForProduct->count();
             $pkgItems  = $pkgItemsByProduct->get($pid) ?? collect();
 
             foreach ($pkgItems as $it) {
-                $qty  = (float) ($it->quantity ?? 0);
-                if ($qty <= 0) continue;
+                $qtyPerSub   = (float) ($it->quantity ?? 0);
+                $pricePerSub = (float) ($it->price ?? 0);   // ✅ direct per-subscription item price
 
-                $matched   = $flowerByNormName->get($this->norm($it->item_name));
-                $unitPrice = $matched ? $this->unitPrice($matched) : ((float)$it->price / $qty);
-
-                $addQty    = $qty * $countSubs;
-                $totalQty += $addQty;
-                $totalVal += ($addQty * $unitPrice);
+                if ($qtyPerSub > 0) {
+                    $totalQty += ($qtyPerSub * $subsCount);
+                }
+                $totalVal += ($pricePerSub * $subsCount);
             }
         }
 
         return ['total_qty' => round($totalQty, 2), 'total_value' => round($totalVal, 2)];
     }
 
-    protected function estimateTotalsForRange(
-        Carbon $start,
-        Carbon $end,
-        Collection $flowerById,
-        Collection $flowerByNormName
-    ): array {
+    protected function estimateTotalsForRange(Carbon $start, Carbon $end): array
+    {
         $cursor = $start->copy();
         $sumQty = 0.0;
         $sumVal = 0.0;
 
         while ($cursor->lte($end)) {
-            $d = $this->estimateTotalsForDate($cursor, $flowerById, $flowerByNormName);
+            $d = $this->estimateTotalsForDate($cursor);
             $sumQty += $d['total_qty'];
             $sumVal += $d['total_value'];
             $cursor->addDay();
@@ -146,14 +178,8 @@ class FlowerEstimateCompareController extends Controller
         return ['total_qty' => round($sumQty, 2), 'total_value' => round($sumVal, 2)];
     }
 
-    protected function unitPrice(FlowerProduct $p): float
-    {
-        if (!is_null($p->price))         return (float)$p->price;
-        if (!is_null($p->per_day_price)) return (float)$p->per_day_price;
-        return 0.0;
-    }
+    // ================= ACTUAL PICKUPS (BY VENDOR) =================
 
-    // ---- Actual by vendor ----
     protected function actualTotalsPerVendorForDate(Carbon $date): array
     {
         $rows = FlowerPickupDetails::with(['flowerPickupItems','vendor'])
@@ -186,7 +212,7 @@ class FlowerEstimateCompareController extends Controller
 
             foreach ($detail->flowerPickupItems as $it) {
                 $q = (float)($it->quantity ?? 0);
-                $p = (float)($it->price ?? 0); // unit price assumed
+                $p = (float)($it->price ?? 0); // unit price
                 $perVendor[$vid]['qty']   += $q;
                 $perVendor[$vid]['value'] += ($q * $p);
             }
@@ -199,23 +225,7 @@ class FlowerEstimateCompareController extends Controller
         return ['per_vendor' => $perVendor];
     }
 
-    // ---- Subs overlap helper ----
-    protected function activeSubscriptionsOverlappingEffective(Carbon $start, Carbon $end)
-    {
-        return Subscription::query()
-            ->where(function ($q) {
-                $q->whereIn('status', ['active', 'paused'])
-                  ->orWhere('is_active', 1);
-            })
-            ->whereDate('start_date', '<=', $end->toDateString())
-            ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $start->toDateString())
-            ->get([
-                'subscription_id','order_id','user_id','product_id',
-                'start_date','end_date','new_date',
-                'pause_start_date','pause_end_date',
-                'status','is_active'
-            ]);
-    }
+    // ================= Utils =================
 
     protected function norm(?string $s): string
     {
@@ -226,7 +236,8 @@ class FlowerEstimateCompareController extends Controller
             ->toString();
     }
 
-    // ---- CSV ----
+    // ================= CSV (same columns; qty + value only) =================
+
     public function exportCsv(Request $request)
     {
         $dateStr    = $request->input('date', Carbon::today()->toDateString());
@@ -236,15 +247,11 @@ class FlowerEstimateCompareController extends Controller
         $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth();
 
-        $allFlowers = FlowerProduct::select('product_id','name','category','price','per_day_price','status')->get();
-        $flowerById = $allFlowers->keyBy('product_id');
-        $flowerByNormName = $allFlowers->keyBy(fn($f) => $this->norm($f->name));
-
-        $estDay   = $this->estimateTotalsForDate($date, $flowerById, $flowerByNormName);
+        $estDay   = $this->estimateTotalsForDate($date);
         $actDay   = $this->actualTotalsPerVendorForDate($date);
         $cmpDay   = $this->composeVendorCompare($actDay['per_vendor'], $estDay['total_qty'], $estDay['total_value']);
 
-        $estMonth = $this->estimateTotalsForRange($monthStart, $monthEnd, $flowerById, $flowerByNormName);
+        $estMonth = $this->estimateTotalsForRange($monthStart, $monthEnd);
         $actMonth = $this->actualTotalsPerVendorForRange($monthStart, $monthEnd);
         $cmpMonth = $this->composeVendorCompare($actMonth['per_vendor'], $estMonth['total_qty'], $estMonth['total_value']);
 
