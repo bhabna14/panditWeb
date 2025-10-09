@@ -16,7 +16,7 @@ use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
 use App\Models\FlowerVendor;
 
-class FlowerVendorCompareReportController extends Controller
+class FlowerEstimateCompareController extends Controller
 {
     public function index(Request $request)
     {
