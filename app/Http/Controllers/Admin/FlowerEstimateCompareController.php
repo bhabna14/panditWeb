@@ -14,7 +14,7 @@ use App\Models\FlowerProduct;
 use App\Models\PackageItem;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
-use App\Models\FlowerVendor;
+use App\Models\FlowerVendor; // for vendor dropdown (if you have it)
 
 class FlowerVendorCompareController extends Controller
 {
