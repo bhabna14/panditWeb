@@ -132,10 +132,7 @@
                             </div>
                         </div>
                     </div>
-                    <small class="text-muted mt-2">
-                        Tip: “Tomorrow” uses <code>COALESCE(new_date, end_date)</code> and skips subscriptions paused
-                        tomorrow.
-                    </small>
+                    
                 </form>
             </div>
 
