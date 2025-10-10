@@ -31,7 +31,7 @@
             <div class="sticky-top-filter bg-light pb-3">
                 <form class="card card-body shadow-sm filter-card" method="get"
                       action="{{ route('admin.flowerEstimate') }}">
-                    {{-- IMPORTANT: keep current view (day/month) on submit --}}
+                    {{-- keep current view (day/month) on submit --}}
                     <input type="hidden" name="mode" value="{{ $mode }}"/>
 
                     <div class="row g-3 align-items-end">
@@ -85,7 +85,7 @@
 
             {{-- SELECTED RANGE — GRAND TOTALS (QUANTITY) --}}
             @php
-                $rByCat = $rangeTotals['by_category'] ?? [];
+                $rByCat  = $rangeTotals['by_category'] ?? [];
                 $rByItem = $rangeTotals['by_item'] ?? [];
             @endphp
             <div class="card border-0 shadow-sm mt-3">
@@ -141,19 +141,19 @@
                                                     <th class="text-end" style="width:45%">Total Qty</th>
                                                 </tr>
                                             </thead>
-                                            <tbody>
-                                                @forelse($rByItem as $it)
-                                                    <tr>
-                                                        <td>{{ $it['item_name'] }}</td>
-                                                        <td class="text-end">
-                                                            {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                                            {{ $it['total_unit_disp'] }}
-                                                        </td>
-                                                    </tr>
-                                                @empty
-                                                    <tr><td colspan="2" class="text-muted">No items in range.</td></tr>
-                                                @endforelse
-                                            </tbody>
+        <tbody>
+            @forelse($rByItem as $it)
+                <tr>
+                    <td>{{ $it['item_name'] }}</td>
+                    <td class="text-end">
+                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                        {{ $it['total_unit_disp'] }}
+                    </td>
+                </tr>
+            @empty
+                <tr><td colspan="2" class="text-muted">No items in range.</td></tr>
+            @endforelse
+        </tbody>
                                         </table>
                                     </div>
                                     <small class="text-muted">Units auto-scale (kg/g, L/ml, pcs).</small>
@@ -175,9 +175,14 @@
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <h5 class="mb-0">Tomorrow Estimate — {{ \Carbon\Carbon::parse($tomorrowDate)->toFormattedDateString() }}</h5>
-                        <span class="badge bg-success fs-6">Grand Total:
-                            <span class="money">₹{{ number_format($tGrand, 2) }}</span>
-                        </span>
+                        <div class="d-flex align-items-center gap-2">
+                            <button type="button" class="btn btn-warning" id="openAssignModal">
+                                <i class="bi bi-truck"></i> Assign Vendor
+                            </button>
+                            <span class="badge bg-success fs-6">Grand Total:
+                                <span class="money">₹{{ number_format($tGrand, 2) }}</span>
+                            </span>
+                        </div>
                     </div>
                     <small class="text-muted d-block mt-1">
                         Rule: <code>start_date ≤ tomorrow ≤ COALESCE(new_date, end_date)</code>, excluding paused (between <code>pause_start_date</code> and <code>pause_end_date</code>).
@@ -293,7 +298,7 @@
 
             {{-- DAY / MONTH VIEWS --}}
             @php
-                $hasDaily = !empty($dailyEstimates) && count($dailyEstimates) > 0;
+                $hasDaily   = !empty($dailyEstimates)   && count($dailyEstimates)   > 0;
                 $hasMonthly = !empty($monthlyEstimates) && count($monthlyEstimates) > 0;
             @endphp
 
@@ -304,18 +309,18 @@
                     <div class="accordion mt-4" id="daysAccordion">
                         @foreach ($dailyEstimates as $date => $payload)
                             @php
-                                $dayId = 'day-' . \Illuminate\Support\Str::slug($date);
-                                $grand = $payload['grand_total_amount'] ?? 0;
+                                $dayId    = 'day-' . \Illuminate\Support\Str::slug($date);
+                                $grand    = $payload['grand_total_amount'] ?? 0;
                                 $products = $payload['products'] ?? [];
-                                $dayTotals = $payload['totals_by_item'] ?? [];
+                                $dayTotals= $payload['totals_by_item'] ?? [];
                             @endphp
 
                             <div class="accordion-item shadow-sm mb-3">
                                 <h2 class="accordion-header" id="{{ $dayId }}-header">
                                     <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" type="button"
-                                        data-bs-toggle="collapse" data-bs-target="#{{ $dayId }}-body"
-                                        aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
-                                        aria-controls="{{ $dayId }}-body">
+                                            data-bs-toggle="collapse" data-bs-target="#{{ $dayId }}-body"
+                                            aria-expanded="{{ $loop->first ? 'true' : 'false' }}"
+                                            aria-controls="{{ $dayId }}-body">
                                         <div class="d-flex w-100 justify-content-between align-items-center">
                                             <div>
                                                 <strong>{{ \Carbon\Carbon::parse($date)->format('D, d M Y') }}</strong>
@@ -336,9 +341,9 @@
                                             <div class="row g-3">
                                                 @foreach ($products as $pid => $row)
                                                     @php
-                                                        $product = $row['product'];
-                                                        $subsCount = $row['subs_count'] ?? 0;
-                                                        $items = $row['items'] ?? [];
+                                                        $product      = $row['product'];
+                                                        $subsCount    = $row['subs_count'] ?? 0;
+                                                        $items        = $row['items'] ?? [];
                                                         $productTotal = $row['product_total'] ?? 0;
                                                         $bundlePerSub = $row['bundle_total_per_sub'] ?? 0;
                                                     @endphp
@@ -573,8 +578,216 @@
 
         </div>
     </div>
+
+    {{-- ASSIGN PICKUP MODAL --}}
+    <div class="modal fade" id="assignPickupModal" tabindex="-1" aria-labelledby="assignPickupLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <form method="POST" action="{{ route('admin.saveFlowerPickupAssignRider') }}" novalidate id="assignPickupForm">
+            @csrf
+            <div class="modal-header">
+              <h5 class="modal-title" id="assignPickupLabel">Assign Vendor for Tomorrow Items</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+              {{-- PICKUP INFO --}}
+              <div class="nu-card section-card mb-3">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h6 class="section-title mb-0">Pickup Information</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="vendor_id" class="form-label required">Vendor</label>
+                      <select id="vendor_id" name="vendor_id" class="form-control" required>
+                        <option value="" selected>Choose</option>
+                        @foreach ($vendors as $vendor)
+                          <option value="{{ $vendor->vendor_id }}">{{ $vendor->vendor_name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label for="pickup_date" class="form-label required">Pickup Date</label>
+                      <input type="date" id="pickup_date" name="pickup_date"
+                             class="form-control"
+                             value="{{ $tomorrowDate }}" min="{{ now()->toDateString() }}" required>
+                      <div class="form-text">Defaults to tomorrow.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {{-- FLOWERS LIST --}}
+              <div class="nu-card section-card mb-3">
+                <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-12">
+                  <h6 class="section-title m-0">Flower Items</h6>
+                  <div class="d-flex align-items-center gap-12">
+                    <span class="badge bg-light text-dark row-badge">
+                      Rows: <span id="rowCount">0</span>
+                    </span>
+                    <button type="button" class="btn btn-outline-primary" id="addRowBtn">Add Row</button>
+                    <button type="button" class="btn btn-outline-secondary" id="clearAllBtn">Clear All</button>
+                  </div>
+                </div>
+                <div class="card-body">
+                  <div id="rowsContainer"></div>
+
+                  {{-- Template for new rows --}}
+                  <template id="rowTemplate">
+                    <div class="pickup-row" data-row>
+                      <div class="row g-3 align-items-end">
+                        <div class="col-md-4">
+                          <label class="form-label required">Flower</label>
+                          <select name="flower_id[]" class="form-control" required>
+                            <option value="" selected>Choose flower</option>
+                            @foreach ($flowers as $flower)
+                              <option value="{{ $flower->product_id }}">{{ $flower->name }}</option>
+                            @endforeach
+                          </select>
+                        </div>
+                        <div class="col-md-4">
+                          <label class="form-label required">Unit</label>
+                          <select name="unit_id[]" class="form-control" required>
+                            <option value="" selected>Choose unit</option>
+                            @foreach ($units as $unit)
+                              <option value="{{ $unit->id }}">{{ $unit->unit_name }}</option>
+                            @endforeach
+                          </select>
+                        </div>
+                        <div class="col-md-3">
+                          <label class="form-label required">Quantity</label>
+                          <input type="number" name="quantity[]" class="form-control" placeholder="e.g. 10"
+                                 inputmode="decimal" min="0.01" step="0.01" required>
+                        </div>
+                        <div class="col-md-1 d-grid">
+                          <button type="button" class="btn btn-outline-danger remove-row-btn">Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              {{-- RIDER ASSIGNMENT --}}
+              <div class="nu-card section-card mb-3">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                  <h6 class="section-title m-0">Assign Rider</h6>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    <div class="col-md-6">
+                      <label for="rider_id" class="form-label required">Rider</label>
+                      <select id="rider_id" name="rider_id" class="form-control" required>
+                        <option value="" selected>Choose</option>
+                        @foreach ($riders as $rider)
+                          <option value="{{ $rider->rider_id }}">{{ $rider->rider_name }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>{{-- /modal-body --}}
+
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Submit Pickup</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
 @endsection
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Bootstrap modal
+    const assignModalEl = document.getElementById('assignPickupModal');
+    const assignModal   = new bootstrap.Modal(assignModalEl);
+
+    // Buttons / containers
+    const openBtn       = document.getElementById('openAssignModal');
+    const rowsContainer = document.getElementById('rowsContainer');
+    const rowTemplate   = document.getElementById('rowTemplate');
+    const rowCountEl    = document.getElementById('rowCount');
+    const addRowBtn     = document.getElementById('addRowBtn');
+    const clearAllBtn   = document.getElementById('clearAllBtn');
+
+    // Data from backend (fallback to [] so JS never breaks)
+    const tomorrowTotals = @json(array_values($tomorrowEstimate['totals_by_item'] ?? []));
+    const flowerNameToId = @json($flowerNameToId ?? []);
+    const unitSymbolToId = @json($unitSymbolToId ?? []);
+
+    function updateRowCount() {
+        rowCountEl.textContent = rowsContainer.querySelectorAll('[data-row]').length;
+    }
+
+    function attachRemove(btn) {
+        btn.addEventListener('click', function (e) {
+            e.target.closest('[data-row]').remove();
+            updateRowCount();
+        });
+    }
+
+    function addEmptyRow() {
+        const frag = document.importNode(rowTemplate.content, true);
+        attachRemove(frag.querySelector('.remove-row-btn'));
+        rowsContainer.appendChild(frag);
+        updateRowCount();
+    }
+
+    function clearAll() {
+        rowsContainer.innerHTML = '';
+        updateRowCount();
+    }
+
+    addRowBtn?.addEventListener('click', addEmptyRow);
+    clearAllBtn?.addEventListener('click', clearAll);
+
+    // Prefill from tomorrow totals
+    function prefillFromTomorrow() {
+        clearAll();
+        const alias = { kg:'kg', g:'g', l:'l', lt:'l', litre:'l', liters:'l', ml:'ml',
+                        pcs:'pcs', piece:'pcs', pieces:'pcs', count:'pcs' };
+
+        tomorrowTotals.forEach(item => {
+            const frag = document.importNode(rowTemplate.content, true);
+            const row  = frag.querySelector('[data-row]');
+            const flowerSel = row.querySelector('select[name="flower_id[]"]');
+            const unitSel   = row.querySelector('select[name="unit_id[]"]');
+            const qtyInput  = row.querySelector('input[name="quantity[]"]');
+
+            // Flower by exact name
+            const name = (item.item_name || '').trim();
+            const flowerId = flowerNameToId[name] ?? '';
+            if (flowerId) flowerSel.value = String(flowerId);
+
+            // Unit symbol -> unit_id
+            let dispUnit = String(item.total_unit_disp || '').toLowerCase();
+            if (alias[dispUnit]) dispUnit = alias[dispUnit];
+            const unitId = unitSymbolToId[dispUnit] ?? '';
+            if (unitId) unitSel.value = String(unitId);
+
+            // Quantity (already scaled)
+            qtyInput.value = (item.total_qty_disp ?? 0);
+
+            attachRemove(row.querySelector('.remove-row-btn'));
+            rowsContainer.appendChild(frag);
+        });
+
+        updateRowCount();
+    }
+
+    // Open modal and prefill rows
+    openBtn?.addEventListener('click', function () {
+        prefillFromTomorrow();
+        assignModal.show();
+    });
+});
+    </script>
 @endsection
