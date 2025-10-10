@@ -203,14 +203,17 @@
                                     $todayDelivery = $sub->computed->todays_delivery ?? null;
 
                                     $apt = $addr?->apartment_name;
+                                    $flat = $addr?->apartment_flat_plot; // 👈 NEW
                                     $local = $addr?->localityDetails?->locality_name;
                                     $localC = $addr?->localityDetails?->unique_code;
+
                                     $tooltip =
                                         trim(
                                             implode(
                                                 ' | ',
                                                 array_filter([
                                                     $apt ? 'Apartment: ' . $apt : null,
+                                                    $flat ? 'Flat: ' . $flat : null, // 👈 NEW
                                                     $local
                                                         ? 'Locality: ' . $local . ($localC ? " ($localC)" : '')
                                                         : null,
@@ -229,6 +232,7 @@
                                                 $addr?->city,
                                                 $addr?->state,
                                                 $addr?->pincode,
+                                                $flat, // optional: searchable by flat
                                                 $sub->subscription_id,
                                                 $order?->order_id,
                                             ]),

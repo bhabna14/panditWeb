@@ -258,9 +258,6 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     });
 
 
-            
-    
-
     Route::get('/manage-subadmins',  [SubadminController::class, 'managesubadmin'])->name('managesubadmin');
     Route::get('/subadmins/{id}/edit', [SubadminController::class, 'edit'])->name('subadmins.edit');
     Route::post('/subadmins/{id}/update', [SubadminController::class, 'update'])->name('subadmins.update');
