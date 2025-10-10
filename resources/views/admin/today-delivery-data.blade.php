@@ -256,9 +256,8 @@
 
                                     <td>{{ $user->mobile_number ?? '—' }}</td>
 
-                                    <td>
-                                        {{ $sub->computed->days_left ?? '—' }}
-                                    </td>
+                                  <td>{{ $sub->computed->days_left ?? '—' }}</td>
+
                                     <td>₹{{ $perDay }}</td>
                                     <td>
                                         @if ($todayDelivery)

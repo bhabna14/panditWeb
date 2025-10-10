@@ -262,10 +262,44 @@ class FlowerDashboardController extends Controller
             ->orderBy('start_date', 'asc')
             ->get()
             ->map(function ($sub) use ($today) {
-            // ---------- Dates (normalize to day edges) ----------
-            $origStart = $sub->start_date ? \Carbon\Carbon::parse($sub->start_date)->startOfDay() : null;
-            $origEnd   = $sub->end_date   ? \Carbon\Carbon::parse($sub->end_date)->endOfDay()   : null;
-            $newStart  = $sub->new_date   ? \Carbon\Carbon::parse($sub->new_date)->startOfDay() : null;
+           // -------- Normalize dates --------
+    $start = $sub->start_date ? \Carbon\Carbon::parse($sub->start_date)->startOfDay() : null;
+    $end   = $sub->end_date   ? \Carbon\Carbon::parse($sub->end_date)->endOfDay()   : null;
+    $new   = $sub->new_date   ? \Carbon\Carbon::parse($sub->new_date)->startOfDay() : null;
+
+    // -------- Effective window (NO extension of end) --------
+    // If new_date exists AND it is after start_date, use it as effective start.
+    // Otherwise keep start_date. End is always end_date.
+    $effectiveStart = $start;
+    if ($new && $start) {
+        $effectiveStart = $new->gt($start) ? $new : $start;
+    } elseif ($new && !$start) {
+        // If only new_date exists, honor it
+        $effectiveStart = $new;
+    }
+
+    $effectiveEnd = $end;
+
+    // If dates are unusable or inverted -> zero out
+    if (!$effectiveStart || !$effectiveEnd || $effectiveEnd->lt($effectiveStart)) {
+        $days_total = null;
+        $days_left  = 0;
+    } else {
+        // Total plan days (inclusive)
+        $days_total = $effectiveStart->diffInDays($effectiveEnd) + 1;
+
+        // -------- Days Left (inclusive) --------
+        if ($today->lt($effectiveStart)) {
+            // Not started yet → full remaining window
+            $days_left = $effectiveStart->diffInDays($effectiveEnd) + 1;
+        } elseif ($today->betweenIncluded($effectiveStart, $effectiveEnd)) {
+            // Running → from today to end (inclusive)
+            $days_left = $today->diffInDays($effectiveEnd) + 1;
+        } else {
+            // Finished
+            $days_left = 0;
+        }
+    }
 
             // Effective start = new_start ?? start_date
             $effectiveStart = $newStart ?: $origStart;
@@ -291,22 +325,6 @@ class FlowerDashboardController extends Controller
             $days_total = null;
             if ($effectiveStart && $effectiveEnd) {
                 $days_total = $effectiveStart->diffInDays($effectiveEnd) + 1;
-            }
-
-            // ---------- Days left (inclusive) ----------
-            // Rule:
-            // - If today < effectiveStart: from effectiveStart → effectiveEnd
-            // - If effectiveStart ≤ today ≤ effectiveEnd: from today → effectiveEnd
-            // - Else: 0
-            $days_left = null;
-            if ($effectiveStart && $effectiveEnd) {
-                if ($today->lt($effectiveStart)) {
-                    $days_left = $effectiveStart->diffInDays($effectiveEnd) + 1;
-                } elseif ($today->betweenIncluded($effectiveStart, $effectiveEnd)) {
-                    $days_left = $today->diffInDays($effectiveEnd) + 1;
-                } else {
-                    $days_left = 0;
-                }
             }
 
             // ---------- ₹/Day = total_price / 30 (fallback to product per_day_price) ----------
