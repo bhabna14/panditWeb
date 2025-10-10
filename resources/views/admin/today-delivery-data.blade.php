@@ -278,7 +278,7 @@
                                             </div>
                                         @else
                                             <span class="badge bg-warning text-dark"><i class="bi bi-clock-history"></i>
-                                                Pending / Not Delivered</span>
+                                                Not Delivered</span>
                                         @endif
                                     </td>
 
