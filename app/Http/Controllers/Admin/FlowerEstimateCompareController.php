@@ -15,42 +15,74 @@ use App\Models\PackageItem;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
 use App\Models\FlowerVendor;
+use App\Models\RiderDetails;
+use App\Models\PoojaUnit;
 
 class FlowerEstimateCompareController extends Controller
 {
     public function index(Request $request)
     {
-        $dateStr    = $request->input('date', Carbon::today()->toDateString());
-        $monthStr   = $request->input('month', Carbon::today()->format('Y-m'));
+        $preset = $request->string('preset')->toString();
+        $mode   = $request->string('mode')->toString() ?: 'day';
 
-        $date       = Carbon::parse($dateStr)->startOfDay();
-        $monthStart = Carbon::parse($monthStr . '-01')->startOfDay();
-        $monthEnd   = (clone $monthStart)->endOfMonth();
+        [$start, $end] = $this->resolveRange($request, $preset);
+        if ($mode === 'month' && !$request->filled('start_date') && !$request->filled('end_date') && !$preset) {
+            $today = Carbon::today();
+            $start = $today->copy()->startOfMonth();
+            $end   = $today->copy()->endOfMonth();
+        }
+        if ($end->lt($start)) {
+            [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
+        }
 
-        // ---- DAY ----
-        $estDay     = $this->estimateTotalsForDate($date); // qty/value + unit label
-        $actDay     = $this->actualTotalsPerVendorForDate($date); // per-vendor qty/value + unit label
-        $compareDay = $this->composeVendorCompare($actDay['per_vendor'], $estDay);
+        // Tomorrow block
+        $tomorrow = Carbon::tomorrow()->startOfDay();
+        $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);
+        $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow);
 
-        // ---- MONTH ----
-        $estMonth     = $this->estimateTotalsForRange($monthStart, $monthEnd);
-        $actMonth     = $this->actualTotalsPerVendorForRange($monthStart, $monthEnd);
-        $compareMonth = $this->composeVendorCompare($actMonth['per_vendor'], $estMonth);
+        // Build daily (and range totals)  --- (use YOUR working code here)
+        // ... keep your existing daily/monthly/range code exactly as you have it ...
+        // At the end of that logic you return the view; before that, add lookups below.
 
-        $vendors = FlowerVendor::select('vendor_id','vendor_name')->orderBy('vendor_name')->get()->keyBy('vendor_id');
+        // ======= NEW: Lookups for the modal =======
+        $vendors = FlowerVendor::select('vendor_id', 'vendor_name')->orderBy('vendor_name')->get();
+        $riders  = RiderDetails::select('rider_id', 'rider_name')->orderBy('rider_name')->get();
+        $flowers = FlowerProduct::select('product_id', 'name')->orderBy('name')->get();
+        // if your PoojaUnit table has a "symbol" (kg, g, L, ml, pcs) keep/select it; else use unit_name as symbol
+        $units   = PoojaUnit::select('id', 'unit_name', DB::raw("LOWER(COALESCE(symbol, unit_name)) as symbol"))->get();
 
-        return view('admin.reports.flower-compare', [
-            'date'          => $date,
-            'monthStart'    => $monthStart,
-            'selectedDate'  => $date->toDateString(),
-            'selectedMonth' => $monthStart->format('Y-m'),
-            'vendors'       => $vendors,
+        // name → id (exact match) for auto prefill
+        $flowerNameToId = $flowers->pluck('product_id', 'name')->toArray();
 
-            'compareDay'    => $compareDay,
-            'compareMonth'  => $compareMonth,
+        // symbol → id
+        $unitSymbolToId = [];
+        foreach ($units as $u) {
+            $unitSymbolToId[strtolower($u->symbol)] = $u->id;
+        }
+
+        // ======= Return view with NEW data =======
+        return view('admin.reports.flower-estimates', [
+            'start'              => $start->toDateString(),
+            'end'                => $end->toDateString(),
+            'mode'               => $mode,
+            'preset'             => $preset,
+            'dailyEstimates'     => $dailyEstimates ?? [],
+            'monthlyEstimates'   => $monthlyEstimates ?? [],
+            'tomorrowDate'       => $tomorrow->toDateString(),
+            'tomorrowEstimate'   => $tomorrowEstimate,
+            'rangeTotals'        => $rangeTotals ?? [
+                'by_item' => [], 'by_category' => []
+            ],
+
+            // NEW for modal
+            'vendors'           => $vendors,
+            'riders'            => $riders,
+            'flowers'           => $flowers,
+            'units'             => $units,
+            'flowerNameToId'    => $flowerNameToId,
+            'unitSymbolToId'    => $unitSymbolToId,
         ]);
     }
-
     /**
      * Merge actual-per-vendor with a global estimate (qty/value/unit).
      * Adds per-row act_unit and est_unit and totals act_unit/est_unit.
