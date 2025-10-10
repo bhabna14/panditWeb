@@ -193,8 +193,6 @@
                                     $order = $sub->order;
                                     $addr = $order?->address;
                                     $prod = $sub->flowerProducts;
-
-                                    $daysLeft = $sub->computed->days_left ?? null;
                                     $perDay =
                                         $sub->computed->per_day !== null
                                             ? number_format($sub->computed->per_day, 2)
@@ -263,12 +261,7 @@
                                     <td>{{ $user->mobile_number ?? '—' }}</td>
 
                                     <td>
-                                        @if ($daysLeft !== null)
-                                            <span
-                                                class="fw-bold {{ $daysLeft <= 3 ? 'text-danger' : 'text-success' }}">{{ $daysLeft }}</span>
-                                        @else
-                                            —
-                                        @endif
+                                        {{ $sub->computed->days_left ?? '—' }}
                                     </td>
                                     <td>₹{{ $perDay }}</td>
                                     <td>
