@@ -46,8 +46,16 @@ class FlowerEstimateController extends Controller
         $riders  = RiderDetails::select('rider_id', 'rider_name')->orderBy('rider_name')->get();
         $flowers = FlowerProduct::select('product_id', 'name')->orderBy('name')->get();
         // if your PoojaUnit table has a "symbol" (kg, g, L, ml, pcs) keep/select it; else use unit_name as symbol
-        $units   = PoojaUnit::select('id', 'unit_name', DB::raw("LOWER(COALESCE(symbol, unit_name)) as symbol"))->get();
+            $units = PoojaUnit::select('id', 'unit_name')->get();
 
+            // Build a symbol->id map in PHP (kg/g/L/ml/pcs…)
+            $unitSymbolToId = [];
+            foreach ($units as $u) {
+                $sym = $this->normalizeUnitSymbol($u->unit_name);
+                if ($sym) {
+                    $unitSymbolToId[$sym] = $u->id;
+                }
+            }
         // name → id (exact match) for auto prefill
         $flowerNameToId = $flowers->pluck('product_id', 'name')->toArray();
 
