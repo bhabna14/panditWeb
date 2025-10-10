@@ -10,6 +10,8 @@ use App\Http\Controllers\User\FooterController;
 
 use App\Http\Controllers\OtplessLoginController;
 
+use App\Http\Controllers\Admin\FlowerPickupAssignController;
+
 use App\Http\Controllers\Admin\PujaController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Admin\OrderController;
@@ -991,3 +993,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         ->whereNumber('id')
         ->name('flower-pickup-details.items');
 });
+
+Route::get('/admin/flower-pickups/create-from-estimate', [FlowerPickupAssignController::class, 'createFromEstimate'])
+    ->name('admin.assignPickupForm');
+
+// save the pickup (uses the same name you were already posting to)
+Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'store'])
+    ->name('admin.saveFlowerPickupAssignRider');
