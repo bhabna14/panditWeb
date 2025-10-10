@@ -262,75 +262,91 @@ class FlowerDashboardController extends Controller
             ->orderBy('start_date', 'asc')
             ->get()
             ->map(function ($sub) use ($today) {
+            // ---------- Dates (normalize to day edges) ----------
+            $origStart = $sub->start_date ? \Carbon\Carbon::parse($sub->start_date)->startOfDay() : null;
+            $origEnd   = $sub->end_date   ? \Carbon\Carbon::parse($sub->end_date)->endOfDay()   : null;
+            $newStart  = $sub->new_date   ? \Carbon\Carbon::parse($sub->new_date)->startOfDay() : null;
 
-                // Effective Start = new_date (if present) else start_date
-                $effectiveStart = $sub->new_date
-                    ? Carbon::parse($sub->new_date)->startOfDay()
-                    : ($sub->start_date ? Carbon::parse($sub->start_date)->startOfDay() : null);
+            // Effective start = new_start ?? start_date
+            $effectiveStart = $newStart ?: $origStart;
 
-                // End = end_date (as requested)
-                $effectiveEnd = $sub->end_date
-                    ? Carbon::parse($sub->end_date)->endOfDay()
-                    : null;
+            // Adjusted end:
+            // If new_date exists and is LATER than start_date, extend end by that delay.
+            // (e.g., start=Oct 1, new_date=Oct 5, end=Oct 30 -> adjusted_end = Oct 30 + 4 days)
+            $effectiveEnd = $origEnd ? $origEnd->copy() : null;
 
-                // Total plan days (inclusive)
-                $days_total = null;
-                if ($effectiveStart && $effectiveEnd) {
-                    $days_total = $effectiveStart->diffInDays($effectiveEnd) + 1;
+            if ($origStart && $newStart && $origEnd) {
+                if ($newStart->gt($origStart)) {
+                    $delayDays = $origStart->diffInDays($newStart); // exact # days delayed
+                    $effectiveEnd = $effectiveEnd->addDays($delayDays);
                 }
+            }
 
-                // Days left (inclusive)
-                $days_left = null;
-                if ($effectiveStart && $effectiveEnd) {
-                    if ($today->lt($effectiveStart)) {
-                        // Not started yet
-                        $days_left = $effectiveStart->diffInDays($effectiveEnd) + 1;
-                    } elseif ($today->betweenIncluded($effectiveStart, $effectiveEnd)) {
-                        // Currently running
-                        $days_left = $today->diffInDays($effectiveEnd) + 1;
-                    } else {
-                        // Finished
-                        $days_left = 0;
-                    }
+            // Safety: if dates are missing or inverted, null out to avoid negative math
+            if ($effectiveStart && $effectiveEnd && $effectiveEnd->lt($effectiveStart)) {
+                $effectiveEnd = null;
+            }
+
+            // ---------- Totals (inclusive) ----------
+            $days_total = null;
+            if ($effectiveStart && $effectiveEnd) {
+                $days_total = $effectiveStart->diffInDays($effectiveEnd) + 1;
+            }
+
+            // ---------- Days left (inclusive) ----------
+            // Rule:
+            // - If today < effectiveStart: from effectiveStart → effectiveEnd
+            // - If effectiveStart ≤ today ≤ effectiveEnd: from today → effectiveEnd
+            // - Else: 0
+            $days_left = null;
+            if ($effectiveStart && $effectiveEnd) {
+                if ($today->lt($effectiveStart)) {
+                    $days_left = $effectiveStart->diffInDays($effectiveEnd) + 1;
+                } elseif ($today->betweenIncluded($effectiveStart, $effectiveEnd)) {
+                    $days_left = $today->diffInDays($effectiveEnd) + 1;
+                } else {
+                    $days_left = 0;
                 }
+            }
 
-                $per_day = null;
-                $total = $sub->order?->total_price;
+            // ---------- ₹/Day = total_price / 30 (fallback to product per_day_price) ----------
+            $per_day = null;
+            $total = $sub->order?->total_price;
+            if (is_numeric($total) && (float)$total > 0) {
+                $per_day = round(((float)$total) / 30, 2);
+            } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price !== null) {
+                $per_day = (float) $sub->flowerProducts->per_day_price;
+            }
 
-                if (is_numeric($total) && (float)$total > 0) {
-                    $per_day = round(((float)$total) / 30, 2);
-                } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price !== null) {
-                    $per_day = (float) $sub->flowerProducts->per_day_price;
-                }
+            // ---------- Address line (unchanged) ----------
+            $addr = $sub->order?->address;
+            $address_line = $addr
+                ? trim(implode(', ', array_filter([
+                    $addr->apartment_name,
+                    $addr->apartment_flat_plot,
+                    $addr->area,
+                    $addr->city,
+                    $addr->state,
+                    $addr->pincode
+                ])))
+                : null;
 
-                // Address line (optional)
-                $addr = $sub->order?->address;
-                $address_line = $addr
-                    ? trim(implode(', ', array_filter([
-                        $addr->apartment_name,
-                        $addr->apartment_flat_plot,
-                        $addr->area,
-                        $addr->city,
-                        $addr->state,
-                        $addr->pincode
-                    ])))
-                    : null;
+            // ---------- Attach computed ----------
+            $sub->computed = (object) [
+                'effective_start' => $effectiveStart,
+                'effective_end'   => $effectiveEnd,
+                'days_total'      => $days_total,
+                'days_left'       => $days_left,
+                'per_day'         => $per_day,
+                'address_line'    => $address_line,
+                'todays_delivery' => $sub->order?->deliveryHistories?->first(),
+            ];
 
-                // Attach computed values for the Blade
-                $sub->computed = (object) [
-                    'effective_start' => $effectiveStart,
-                    'effective_end'   => $effectiveEnd,
-                    'days_total'      => $days_total,
-                    'days_left'       => $days_left,
-                    'per_day'         => $per_day,
-                    'address_line'    => $address_line,
-                    'todays_delivery' => $sub->order?->deliveryHistories?->first(),
-                ];
+            // Optional: passthrough for image url
+            if ($sub->flowerProducts) {
+                $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
+            }
 
-                // Pass through product image url as-is (if you need it)
-                if ($sub->flowerProducts) {
-                    $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
-                }
 
                 return $sub;
             });
