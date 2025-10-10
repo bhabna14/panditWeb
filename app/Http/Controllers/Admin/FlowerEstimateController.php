@@ -9,242 +9,77 @@ use App\Models\Subscription;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 
+
+use App\Models\FlowerVendor;
+use App\Models\RiderDetails;
+use App\Models\FlowerProduct;
+use App\Models\PoojaUnit;
+
 class FlowerEstimateController extends Controller
 {
-    public function index(Request $request)
+  public function index(Request $request)
     {
-        // ---- Filters ---------------------------------------------------------
-        $preset = $request->string('preset')->toString();        // today|yesterday|tomorrow|this_month|last_month
-        $mode   = $request->string('mode')->toString() ?: 'day'; // day|month
+        $preset = $request->string('preset')->toString();
+        $mode   = $request->string('mode')->toString() ?: 'day';
 
         [$start, $end] = $this->resolveRange($request, $preset);
-
-        // If user switched to Month view but didn't send dates or a preset, default to whole current month
         if ($mode === 'month' && !$request->filled('start_date') && !$request->filled('end_date') && !$preset) {
             $today = Carbon::today();
             $start = $today->copy()->startOfMonth();
             $end   = $today->copy()->endOfMonth();
         }
-
         if ($end->lt($start)) {
             [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
         }
 
-        // ---- Tomorrow (separate, with effective end & pause handling) --------
+        // Tomorrow block
         $tomorrow = Carbon::tomorrow()->startOfDay();
-        $tomorrowSubs = $this->fetchActiveSubsEffectiveOn($tomorrow);
+        $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);
         $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow);
 
-        // ---- Build daily numbers + RANGE GRAND TOTALS ------------------------
-        $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
-        $dailyEstimates = [];
+        // Build daily (and range totals)  --- (use YOUR working code here)
+        // ... keep your existing daily/monthly/range code exactly as you have it ...
+        // At the end of that logic you return the view; before that, add lookups below.
 
-        // overall range totals (base units)
-        $rangeTotalsByItemBase = []; // key: "name|category" => total_qty_base
-        $rangeTotalsByCategoryBase = [
-            'weight' => 0.0, // grams
-            'volume' => 0.0, // milliliters
-            'count'  => 0.0, // pieces
-        ];
+        // ======= NEW: Lookups for the modal =======
+        $vendors = FlowerVendor::select('vendor_id', 'vendor_name')->orderBy('vendor_name')->get();
+        $riders  = RiderDetails::select('rider_id', 'rider_name')->orderBy('rider_name')->get();
+        $flowers = FlowerProduct::select('product_id', 'name')->orderBy('name')->get();
+        // if your PoojaUnit table has a "symbol" (kg, g, L, ml, pcs) keep/select it; else use unit_name as symbol
+        $units   = PoojaUnit::select('id', 'unit_name', DB::raw("LOWER(COALESCE(symbol, unit_name)) as symbol"))->get();
 
-        foreach ($period as $day) {
-            $subs = Subscription::with([
-                    'flowerProducts:id,product_id,name',
-                    'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
-                ])
-                ->activeOn($day)
-                ->get();
+        // name → id (exact match) for auto prefill
+        $flowerNameToId = $flowers->pluck('product_id', 'name')->toArray();
 
-            $byProduct = $subs->groupBy('product_id');
-
-            $productsForDay   = [];
-            $grandTotalForDay = 0.0;
-
-            // day-level totals by item (across all products)
-            $dayTotalsByItemBase = [];
-
-            foreach ($byProduct as $productId => $subsForProduct) {
-                $product   = optional($subsForProduct->first())->flowerProducts;
-                $subsCount = $subsForProduct->count();
-
-                $items        = [];
-                $productTotal = 0.0;
-
-                if ($product) {
-                    foreach ($product->packageItems as $pi) {
-                        $perItemQty      = (float) ($pi->quantity ?? 0);
-                        $origUnit        = strtolower(trim($pi->unit ?? ''));
-                        $itemPricePerSub = (float) ($pi->price ?? 0);
-
-                        $category     = $this->inferCategory($origUnit);
-                        if ($category === 'unknown') { $category = 'count'; $origUnit = 'pcs'; }
-                        $toBaseFactor = $this->toBaseFactor($origUnit);
-
-                        $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor; // base for category
-                        [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
-
-                        $totalPrice = $itemPricePerSub * $subsCount;
-
-                        $items[] = [
-                            'item_name'         => $pi->item_name,
-                            'category'          => $category,
-                            'per_item_qty'      => $perItemQty,
-                            'per_item_unit'     => $origUnit,
-                            'item_price_per_sub'=> $itemPricePerSub,
-                            'total_qty_base'    => $totalQtyBase,
-                            'total_qty_disp'    => $qtyDisp,
-                            'total_unit_disp'   => $unitDisp,
-                            'total_price'       => $totalPrice,
-                        ];
-
-                        $productTotal += $totalPrice;
-
-                        // --- aggregate to day totals (by item)
-                        $key = strtolower($pi->item_name).'|'.$category;
-                        if (!isset($dayTotalsByItemBase[$key])) {
-                            $dayTotalsByItemBase[$key] = [
-                                'item_name'      => $pi->item_name,
-                                'category'       => $category,
-                                'total_qty_base' => 0.0,
-                            ];
-                        }
-                        $dayTotalsByItemBase[$key]['total_qty_base'] += $totalQtyBase;
-
-                        // --- aggregate to RANGE totals (by item)
-                        if (!isset($rangeTotalsByItemBase[$key])) {
-                            $rangeTotalsByItemBase[$key] = [
-                                'item_name'      => $pi->item_name,
-                                'category'       => $category,
-                                'total_qty_base' => 0.0,
-                            ];
-                        }
-                        $rangeTotalsByItemBase[$key]['total_qty_base'] += $totalQtyBase;
-
-                        // --- aggregate to RANGE totals (by category)
-                        $rangeTotalsByCategoryBase[$category] += $totalQtyBase;
-                    }
-                }
-
-                $grandTotalForDay += $productTotal;
-
-                $productsForDay[$productId] = [
-                    'product'              => $product,
-                    'subs_count'           => $subsCount,
-                    'items'                => $items,
-                    'product_total'        => $productTotal,
-                    'bundle_total_per_sub' => array_sum(array_column($items, 'item_price_per_sub')),
-                ];
-            }
-
-            // format day totals for display
-            $dayTotalsForDisplay = $this->formatTotalsByItem($dayTotalsByItemBase);
-
-            $dailyEstimates[$day->toDateString()] = [
-                'products'           => $productsForDay,
-                'grand_total_amount' => $grandTotalForDay,
-                'totals_by_item'     => $dayTotalsForDisplay,
-            ];
+        // symbol → id
+        $unitSymbolToId = [];
+        foreach ($units as $u) {
+            $unitSymbolToId[strtolower($u->symbol)] = $u->id;
         }
 
-        // ---- Month-wise rollup (shown when $mode === 'month') ----------------
-        $monthlyEstimates = [];
-        if ($mode === 'month') {
-            foreach ($dailyEstimates as $dateStr => $payload) {
-                $monthKey = Carbon::parse($dateStr)->format('Y-m');
-
-                if (!isset($monthlyEstimates[$monthKey])) {
-                    $monthlyEstimates[$monthKey] = [
-                        'month_label' => Carbon::parse($dateStr)->format('M Y'),
-                        'products'    => [],
-                        'grand_total' => 0.0,
-                        'totals_by_item_base' => [],
-                    ];
-                }
-
-                foreach ($payload['products'] as $pid => $row) {
-                    if (!isset($monthlyEstimates[$monthKey]['products'][$pid])) {
-                        $monthlyEstimates[$monthKey]['products'][$pid] = [
-                            'product'       => $row['product'],
-                            'subs_days'     => 0,
-                            'items'         => [],
-                            'product_total' => 0.0,
-                        ];
-                    }
-
-                    $monthlyEstimates[$monthKey]['products'][$pid]['subs_days'] += $row['subs_count'];
-
-                    foreach ($row['items'] as $it) {
-                        $key = strtolower($it['item_name']).'|'.$it['category'];
-
-                        if (!isset($monthlyEstimates[$monthKey]['products'][$pid]['items'][$key])) {
-                            $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key] = [
-                                'item_name'      => $it['item_name'],
-                                'category'       => $it['category'],
-                                'total_qty_base' => 0.0,
-                                'total_price'    => 0.0,
-                            ];
-                        }
-
-                        $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_qty_base'] += $it['total_qty_base'];
-                        $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_price']    += $it['total_price'];
-
-                        // month-level totals by item
-                        if (!isset($monthlyEstimates[$monthKey]['totals_by_item_base'][$key])) {
-                            $monthlyEstimates[$monthKey]['totals_by_item_base'][$key] = [
-                                'item_name'      => $it['item_name'],
-                                'category'       => $it['category'],
-                                'total_qty_base' => 0.0,
-                            ];
-                        }
-                        $monthlyEstimates[$monthKey]['totals_by_item_base'][$key]['total_qty_base'] += $it['total_qty_base'];
-                    }
-
-                    $monthlyEstimates[$monthKey]['products'][$pid]['product_total'] += $row['product_total'];
-                    $monthlyEstimates[$monthKey]['grand_total'] += $row['product_total'];
-                }
-            }
-
-            // finalize formatting
-            foreach ($monthlyEstimates as &$mBlock) {
-                foreach ($mBlock['products'] as &$pBlock) {
-                    foreach ($pBlock['items'] as &$iBlock) {
-                        [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase(
-                            $iBlock['total_qty_base'],
-                            $iBlock['category']
-                        );
-                        $iBlock['total_qty_disp']  = $qtyDisp;
-                        $iBlock['total_unit_disp'] = $unitDisp;
-                    }
-                }
-
-                // compute display array for month-level totals-by-item
-                $mBlock['totals_by_item'] = $this->formatTotalsByItem($mBlock['totals_by_item_base']);
-                unset($mBlock['totals_by_item_base']);
-            }
-            unset($mBlock, $pBlock, $iBlock);
-        }
-
-        // ---- RANGE GRAND TOTALS (display ready) ------------------------------
-        $rangeTotals = [
-            'by_item'     => $this->formatTotalsByItem($rangeTotalsByItemBase),
-            'by_category' => $this->formatTotalsByCategory($rangeTotalsByCategoryBase),
-        ];
-
+        // ======= Return view with NEW data =======
         return view('admin.reports.flower-estimates', [
             'start'              => $start->toDateString(),
             'end'                => $end->toDateString(),
             'mode'               => $mode,
             'preset'             => $preset,
-            'dailyEstimates'     => $dailyEstimates,
-            'monthlyEstimates'   => $monthlyEstimates,
-            // Tomorrow block
+            'dailyEstimates'     => $dailyEstimates ?? [],
+            'monthlyEstimates'   => $monthlyEstimates ?? [],
             'tomorrowDate'       => $tomorrow->toDateString(),
             'tomorrowEstimate'   => $tomorrowEstimate,
-            // NEW: Range grand totals
-            'rangeTotals'        => $rangeTotals,
+            'rangeTotals'        => $rangeTotals ?? [
+                'by_item' => [], 'by_category' => []
+            ],
+
+            // NEW for modal
+            'vendors'           => $vendors,
+            'riders'            => $riders,
+            'flowers'           => $flowers,
+            'units'             => $units,
+            'flowerNameToId'    => $flowerNameToId,
+            'unitSymbolToId'    => $unitSymbolToId,
         ]);
     }
-
     /**
      * Query subscriptions active on a specific date using:
      * - start_date <= date
