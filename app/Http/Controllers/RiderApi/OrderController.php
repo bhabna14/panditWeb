@@ -114,87 +114,97 @@ class OrderController extends Controller
         }
     }
     
-
     // startDelivery method to start delivery for rider
     public function startDelivery(Request $request)
     {
         try {
             $rider = Auth::guard('rider-api')->user();
-    
+
             if (!$rider) {
                 return response()->json([
-                    'status' => 401,
+                    'status'  => 401,
                     'message' => 'Unauthorized',
                 ], 401);
             }
-    
-            // Fetch today's orders assigned to the rider
-            $today = Carbon::today();
+
+            $today = Carbon::today(); // app timezone
+
+            // Fetch today's active subscription orders assigned to this rider
             $orders = Order::where('rider_id', $rider->rider_id)
-                ->whereHas('subscription', function ($query) use ($today) {
-                    $query->where('status', 'active')
-                        ->where(function ($query) use ($today) {
-                            $query->whereNotNull('new_date')
-                                ->whereDate('new_date', '>=', $today)
-                                ->orWhere(function ($query) use ($today) {
-                                    $query->whereNull('new_date')
-                                        ->whereDate('end_date', '>=', $today);
-                                });
-                        });
+                ->whereHas('subscription', function ($q) use ($today) {
+                    $q->where('status', 'active')
+                    ->where(function ($q) use ($today) {
+                        $q->whereNotNull('new_date')
+                            ->whereDate('new_date', '>=', $today)
+                            ->orWhere(function ($q) use ($today) {
+                                $q->whereNull('new_date')
+                                ->whereDate('end_date', '>=', $today);
+                            });
+                    });
                 })
                 ->get();
-    
+
             if ($orders->isEmpty()) {
                 return response()->json([
-                    'status' => 200,
+                    'status'  => 200,
                     'message' => 'No orders assigned for today',
-                    'data' => [],
+                    'data'    => [],
                 ]);
             }
-    
-            // Save orders to delivery_history after checking for duplicates
-            foreach ($orders as $order) {
-                $existingDelivery = DeliveryHistory::where('order_id', $order->order_id)
-                    ->where('rider_id', $rider->rider_id)
-                    ->whereDate('created_at', $today)
-                    ->first();
-    
-                if ($existingDelivery) {
-                    return response()->json([
-                        'status' => 409, // Conflict status
-                        'message' => "Duplicate entry detected for order ID {$order->order_id} and rider ID {$rider->rider_id}. Delivery already started for today.",
+
+            DB::transaction(function () use ($orders, $rider, $request, $today) {
+                $now = now();
+
+                foreach ($orders as $order) {
+                    // Is there already a delivery_history row for this order+rider today?
+                    $exists = DeliveryHistory::where('order_id', $order->order_id)
+                        ->where('rider_id', $rider->rider_id)
+                        ->whereDate('created_at', $today)
+                        ->exists();
+
+                    if ($exists) {
+                        // Skip duplicates; do not abort the whole process
+                        continue;
+                    }
+
+                    DeliveryHistory::create([
+                        'order_id'        => $order->order_id,
+                        'rider_id'        => $rider->rider_id,
+                        'delivery_status' => 'pending',
+                        // ✅ write to the actual column that exists in your model/table
+                        'delivery_time'   => $now,
+                        'longitude'       => $request->longitude,
+                        'latitude'        => $request->latitude,
                     ]);
                 }
-    
-                DeliveryHistory::create([
-                    'order_id' => $order->order_id,
-                    'rider_id' => $rider->rider_id,
-                    'delivery_status' => 'pending',
-                    'start_delivery_time' => now(),
-                    'longitude' => $request->longitude ?? null,
-                    'latitude' => $request->latitude ?? null,
-                ]);
-            }
-    
-            // Save start delivery time to delivery_start_history table
-            DeliveryStartHistory::updateOrCreate(
-                ['rider_id' => $rider->rider_id, 'start_delivery_time' => $today],
-                ['start_delivery_time' => now()]
-            );
-    
+
+                // Record the daily "start" for the rider.
+                // ⚠️ Ensure your delivery_start_history table has a DATE column (e.g., 'for_date')
+                // that stores the day, separate from the timestamp column.
+                DeliveryStartHistory::updateOrCreate(
+                    [
+                        'rider_id' => $rider->rider_id,
+                        'for_date' => $today->toDateString(), // unique per rider per day
+                    ],
+                    [
+                        'start_delivery_time' => $now, // exact timestamp of starting
+                    ]
+                );
+            });
+
             return response()->json([
-                'status' => 200,
+                'status'  => 200,
                 'message' => 'Delivery started successfully. Orders have been saved in delivery history.',
             ]);
-        } catch (\Exception $e) {
+
+        } catch (\Throwable $e) {
             return response()->json([
-                'status' => 500,
+                'status'  => 500,
                 'message' => 'An error occurred while starting the delivery.',
-                'error' => $e->getMessage(),
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }
-    
 
     public function getAssignedOrders()
     {
