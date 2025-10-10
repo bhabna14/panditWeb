@@ -294,10 +294,11 @@ class FlowerDashboardController extends Controller
                     }
                 }
 
-                // ₹/Day (prefer order total / plan days; else product per_day_price)
                 $per_day = null;
-                if (($sub->order?->total_price) && $days_total && $days_total > 0) {
-                    $per_day = round($sub->order->total_price / $days_total, 2);
+                $total = $sub->order?->total_price;
+
+                if (is_numeric($total) && (float)$total > 0) {
+                    $per_day = round(((float)$total) / 30, 2);
                 } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price !== null) {
                     $per_day = (float) $sub->flowerProducts->per_day_price;
                 }
@@ -340,7 +341,7 @@ class FlowerDashboardController extends Controller
 
         return view('admin.today-delivery-data', compact('activeSubscriptions', 'today', 'riders'));
     }
-    
+
     public function assignRider(Request $request, $order) // {order} from route
     {
         try {

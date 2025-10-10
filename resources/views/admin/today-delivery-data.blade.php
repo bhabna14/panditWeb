@@ -193,13 +193,14 @@
                                     $order = $sub->order;
                                     $addr = $order?->address;
                                     $prod = $sub->flowerProducts;
-                                    $perDay = $sub->computed->per_day !== null ? number_format($sub->computed->per_day, 2) : '—';
                                     $todayDelivery = $sub->computed->todays_delivery ?? null;
                                     $apt = $addr?->apartment_name;
                                     $flat = $addr?->apartment_flat_plot; // 👈 NEW
                                     $local = $addr?->localityDetails?->locality_name;
                                     $localC = $addr?->localityDetails?->unique_code;
-
+                                    $perDay = $sub->computed->per_day !== null
+                                            ? number_format($sub->computed->per_day, 2)
+                                            : '—';
                                     $tooltip =
                                         trim(
                                             implode(
