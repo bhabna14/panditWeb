@@ -171,7 +171,6 @@ class OrderController extends Controller
                         'order_id'        => $order->order_id,
                         'rider_id'        => $rider->rider_id,
                         'delivery_status' => 'pending',
-                        // ✅ write to the actual column that exists in your model/table
                         'delivery_time'   => $now,
                         'longitude'       => $request->longitude,
                         'latitude'        => $request->latitude,
