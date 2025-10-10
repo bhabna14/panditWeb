@@ -18,6 +18,14 @@ class FlowerEstimateController extends Controller
         $mode   = $request->string('mode')->toString() ?: 'day'; // day|month
 
         [$start, $end] = $this->resolveRange($request, $preset);
+
+        // If user switched to Month view but didn't send dates or a preset, default to whole current month
+        if ($mode === 'month' && !$request->filled('start_date') && !$request->filled('end_date') && !$preset) {
+            $today = Carbon::today();
+            $start = $today->copy()->startOfMonth();
+            $end   = $today->copy()->endOfMonth();
+        }
+
         if ($end->lt($start)) {
             [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
         }
@@ -31,7 +39,7 @@ class FlowerEstimateController extends Controller
         $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
         $dailyEstimates = [];
 
-        // NEW: overall range totals accumulators (base units)
+        // overall range totals (base units)
         $rangeTotalsByItemBase = []; // key: "name|category" => total_qty_base
         $rangeTotalsByCategoryBase = [
             'weight' => 0.0, // grams
@@ -72,7 +80,7 @@ class FlowerEstimateController extends Controller
                         if ($category === 'unknown') { $category = 'count'; $origUnit = 'pcs'; }
                         $toBaseFactor = $this->toBaseFactor($origUnit);
 
-                        $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor; // in base for category
+                        $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor; // base for category
                         [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
 
                         $totalPrice = $itemPricePerSub * $subsCount;
@@ -138,7 +146,7 @@ class FlowerEstimateController extends Controller
             ];
         }
 
-        // ---- Month-wise rollup (existing view) -------------------------------
+        // ---- Month-wise rollup (shown when $mode === 'month') ----------------
         $monthlyEstimates = [];
         if ($mode === 'month') {
             foreach ($dailyEstimates as $dateStr => $payload) {
@@ -180,7 +188,7 @@ class FlowerEstimateController extends Controller
                         $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_qty_base'] += $it['total_qty_base'];
                         $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_price']    += $it['total_price'];
 
-                        // also add into month global totals by item
+                        // month-level totals by item
                         if (!isset($monthlyEstimates[$monthKey]['totals_by_item_base'][$key])) {
                             $monthlyEstimates[$monthKey]['totals_by_item_base'][$key] = [
                                 'item_name'      => $it['item_name'],
