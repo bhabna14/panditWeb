@@ -179,7 +179,7 @@
                                 <th>#</th>
                                 <th>Customer</th>
                                 <th>Phone</th>
-                                <th>Days Left</th>
+                                {{-- <th>Days Left</th> --}}
                                 <th>₹/Day</th>
                                 <th>Today Delivery</th>
                                 <th>Assigned Rider</th> {{-- 👈 NEW --}}
@@ -256,7 +256,7 @@
 
                                     <td>{{ $user->mobile_number ?? '—' }}</td>
 
-                                  <td>{{ $sub->computed->days_left ?? '—' }}</td>
+                                  {{-- <td>{{ $sub->computed->days_left ?? '—' }}</td> --}}
 
                                     <td>₹{{ $perDay }}</td>
                                     <td>
