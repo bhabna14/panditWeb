@@ -262,109 +262,80 @@ class FlowerDashboardController extends Controller
             ->orderBy('start_date', 'asc')
             ->get()
             ->map(function ($sub) use ($today) {
-           // -------- Normalize dates --------
-    $start = $sub->start_date ? \Carbon\Carbon::parse($sub->start_date)->startOfDay() : null;
-    $end   = $sub->end_date   ? \Carbon\Carbon::parse($sub->end_date)->endOfDay()   : null;
-    $new   = $sub->new_date   ? \Carbon\Carbon::parse($sub->new_date)->startOfDay() : null;
+                // -------- Normalize dates --------
+                $start = $sub->start_date ? Carbon::parse($sub->start_date)->startOfDay() : null;
+                $end   = $sub->end_date   ? Carbon::parse($sub->end_date)->endOfDay()   : null;
+                $new   = $sub->new_date   ? Carbon::parse($sub->new_date)->startOfDay() : null;
 
-    // -------- Effective window (NO extension of end) --------
-    // If new_date exists AND it is after start_date, use it as effective start.
-    // Otherwise keep start_date. End is always end_date.
-    $effectiveStart = $start;
-    if ($new && $start) {
-        $effectiveStart = $new->gt($start) ? $new : $start;
-    } elseif ($new && !$start) {
-        // If only new_date exists, honor it
-        $effectiveStart = $new;
-    }
-
-    $effectiveEnd = $end;
-
-    // If dates are unusable or inverted -> zero out
-    if (!$effectiveStart || !$effectiveEnd || $effectiveEnd->lt($effectiveStart)) {
-        $days_total = null;
-        $days_left  = 0;
-    } else {
-        // Total plan days (inclusive)
-        $days_total = $effectiveStart->diffInDays($effectiveEnd) + 1;
-
-        // -------- Days Left (inclusive) --------
-        if ($today->lt($effectiveStart)) {
-            // Not started yet → full remaining window
-            $days_left = $effectiveStart->diffInDays($effectiveEnd) + 1;
-        } elseif ($today->betweenIncluded($effectiveStart, $effectiveEnd)) {
-            // Running → from today to end (inclusive)
-            $days_left = $today->diffInDays($effectiveEnd) + 1;
-        } else {
-            // Finished
-            $days_left = 0;
-        }
-    }
-
-            // Effective start = new_start ?? start_date
-            $effectiveStart = $newStart ?: $origStart;
-
-            // Adjusted end:
-            // If new_date exists and is LATER than start_date, extend end by that delay.
-            // (e.g., start=Oct 1, new_date=Oct 5, end=Oct 30 -> adjusted_end = Oct 30 + 4 days)
-            $effectiveEnd = $origEnd ? $origEnd->copy() : null;
-
-            if ($origStart && $newStart && $origEnd) {
-                if ($newStart->gt($origStart)) {
-                    $delayDays = $origStart->diffInDays($newStart); // exact # days delayed
-                    $effectiveEnd = $effectiveEnd->addDays($delayDays);
+                // -------- Effective window (NO extension of end) --------
+                // If new_date exists and is after start_date, use new_date as effective start.
+                // Otherwise keep start_date. If only new_date exists, use it.
+                $effectiveStart = $start;
+                if ($new && $start) {
+                    $effectiveStart = $new->gt($start) ? $new : $start;
+                } elseif ($new && !$start) {
+                    $effectiveStart = $new;
                 }
-            }
 
-            // Safety: if dates are missing or inverted, null out to avoid negative math
-            if ($effectiveStart && $effectiveEnd && $effectiveEnd->lt($effectiveStart)) {
-                $effectiveEnd = null;
-            }
+                $effectiveEnd = $end;
 
-            // ---------- Totals (inclusive) ----------
-            $days_total = null;
-            if ($effectiveStart && $effectiveEnd) {
-                $days_total = $effectiveStart->diffInDays($effectiveEnd) + 1;
-            }
+                // Guard: unusable/inverted -> zero days left
+                if (!$effectiveStart || !$effectiveEnd || $effectiveEnd->lt($effectiveStart)) {
+                    $days_total = null;
+                    $days_left  = 0;
+                } else {
+                    // -------- Totals (inclusive) --------
+                    $days_total = $effectiveStart->diffInDays($effectiveEnd) + 1;
 
-            // ---------- ₹/Day = total_price / 30 (fallback to product per_day_price) ----------
-            $per_day = null;
-            $total = $sub->order?->total_price;
-            if (is_numeric($total) && (float)$total > 0) {
-                $per_day = round(((float)$total) / 30, 2);
-            } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price !== null) {
-                $per_day = (float) $sub->flowerProducts->per_day_price;
-            }
+                    // -------- Days Left (inclusive) --------
+                    if ($today->lt($effectiveStart)) {
+                        // Not started yet → from effectiveStart to effectiveEnd
+                        $days_left = $effectiveStart->diffInDays($effectiveEnd) + 1;
+                    } elseif ($today->betweenIncluded($effectiveStart, $effectiveEnd)) {
+                        // Running → from today to effectiveEnd
+                        $days_left = $today->diffInDays($effectiveEnd) + 1;
+                    } else {
+                        // Finished
+                        $days_left = 0;
+                    }
+                }
 
-            // ---------- Address line (unchanged) ----------
-            $addr = $sub->order?->address;
-            $address_line = $addr
-                ? trim(implode(', ', array_filter([
-                    $addr->apartment_name,
-                    $addr->apartment_flat_plot,
-                    $addr->area,
-                    $addr->city,
-                    $addr->state,
-                    $addr->pincode
-                ])))
-                : null;
+                // -------- ₹/Day = total_price / 30 (fallback to product per_day_price) --------
+                $per_day = null;
+                $total = $sub->order?->total_price;
+                if (is_numeric($total) && (float)$total > 0) {
+                    $per_day = round(((float)$total) / 30, 2);
+                } elseif ($sub->flowerProducts && $sub->flowerProducts->per_day_price !== null) {
+                    $per_day = (float) $sub->flowerProducts->per_day_price;
+                }
 
-            // ---------- Attach computed ----------
-            $sub->computed = (object) [
-                'effective_start' => $effectiveStart,
-                'effective_end'   => $effectiveEnd,
-                'days_total'      => $days_total,
-                'days_left'       => $days_left,
-                'per_day'         => $per_day,
-                'address_line'    => $address_line,
-                'todays_delivery' => $sub->order?->deliveryHistories?->first(),
-            ];
+                // -------- Address line (unchanged) --------
+                $addr = $sub->order?->address;
+                $address_line = $addr
+                    ? trim(implode(', ', array_filter([
+                        $addr->apartment_name,
+                        $addr->apartment_flat_plot,
+                        $addr->area,
+                        $addr->city,
+                        $addr->state,
+                        $addr->pincode
+                    ])))
+                    : null;
 
-            // Optional: passthrough for image url
-            if ($sub->flowerProducts) {
-                $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
-            }
+                // -------- Attach computed --------
+                $sub->computed = (object) [
+                    'effective_start' => $effectiveStart,
+                    'effective_end'   => $effectiveEnd,
+                    'days_total'      => $days_total,
+                    'days_left'       => $days_left,
+                    'per_day'         => $per_day,
+                    'address_line'    => $address_line,
+                    'todays_delivery' => $sub->order?->deliveryHistories?->first(),
+                ];
 
+                if ($sub->flowerProducts) {
+                    $sub->flowerProducts->product_image_url = $sub->flowerProducts->product_image;
+                }
 
                 return $sub;
             });
