@@ -304,4 +304,34 @@ class FlowerEstimateController extends Controller
         }
         return $out;
     }
+
+    private function normalizeUnitSymbol(?string $name): ?string
+{
+    if (!$name) return null;
+    $n = strtolower(trim($name));
+
+    // common straight matches
+    $map = [
+        'kg' => 'kg', 'kilogram' => 'kg', 'kilograms' => 'kg', 'kgs' => 'kg',
+        'g'  => 'g',  'gram' => 'g', 'grams' => 'g', 'gm' => 'g',
+
+        'l' => 'l', 'lt' => 'l', 'liter' => 'l', 'litre' => 'l', 'liters' => 'l', 'litres' => 'l',
+        'ml' => 'ml', 'milliliter' => 'ml', 'milliliters' => 'ml',
+
+        'pcs' => 'pcs', 'piece' => 'pcs', 'pieces' => 'pcs', 'count' => 'pcs',
+    ];
+    if (isset($map[$n])) return $map[$n];
+
+    // fallback: try to detect by substrings
+    if (str_contains($n, 'kilo')) return 'kg';
+    if (str_contains($n, 'gram')) return 'g';
+    if (str_contains($n, 'millil')) return 'ml';
+    if (str_contains($n, 'liter') || str_contains($n, 'litre')) return 'l';
+    if (str_contains($n, 'piece') || str_contains($n, 'count')) return 'pcs';
+
+    // last resort: if it already looks like a known symbol
+    if (in_array($n, ['kg','g','l','ml','pcs'], true)) return $n;
+
+    return null;
+}
 }
