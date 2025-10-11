@@ -248,89 +248,115 @@ class OrderController extends Controller
         }
     }
     
-    // Mark order as delivered by rider
-public function markAsDelivered(Request $request, $order_id)
-{
-    try {
-        // Rider auth
-        $rider = Auth::guard('rider-api')->user();
-        if (!$rider) {
-            return response()->json([
-                'status'  => 401,
-                'message' => 'Unauthorized',
-            ], 401);
-        }
+    public function markAsDelivered(Request $request, $order_id)
+    {
+        // Always tell Laravel this is an API call (prevents HTML validation response)
+        $request->headers->set('Accept', 'application/json');
 
-        // Validate coords
-        $validated = $request->validate([
-            'longitude' => 'required|numeric',
-            'latitude'  => 'required|numeric',
-        ]);
+        try {
+            // Rider auth (middleware also enforces, but keep explicit check)
+            $rider = Auth::guard('rider-api')->user();
+            if (!$rider) {
+                return response()->json([
+                    'status'  => 401,
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
 
-        // Verify order belongs to rider and is active (via subscription)
-        $order = Order::where('order_id', $order_id)
-            ->where('rider_id', $rider->rider_id)
-            ->whereHas('subscription', function ($q) {
-                $q->where('status', 'active');
-            })
-            ->first();
-
-        if (!$order) {
-            return response()->json([
-                'status'  => 404,
-                'message' => 'Order not found or not assigned to this rider',
-            ], 404);
-        }
-
-        // Update the most recent PENDING history for this order+rider
-        // (avoids issues with whereDate(created_at, ...))
-        $history = DeliveryHistory::where('order_id', $order->order_id)
-            ->where('rider_id', $rider->rider_id)
-            ->where('delivery_status', 'pending')
-            ->latest('created_at')
-            ->first();
-
-        if ($history) {
-            $history->update([
-                'delivery_status' => 'delivered',
-                'longitude'       => $validated['longitude'],
-                'latitude'        => $validated['latitude'],
-                // ✅ write DB "now" into delivery_time
-                'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'),
+            // API-friendly validation (no HTML)
+            $v = Validator::make($request->all(), [
+                'longitude' => ['required','numeric'],
+                'latitude'  => ['required','numeric'],
             ]);
-        } else {
-            // If no pending row exists (e.g., missed start), create a delivered row
-            $history = DeliveryHistory::create([
-                'order_id'        => $order->order_id,
-                'rider_id'        => $rider->rider_id,
-                'delivery_status' => 'delivered',
-                'longitude'       => $validated['longitude'],
-                'latitude'        => $validated['latitude'],
-                // ✅ ensure time is saved
-                'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'),
-            ]);
+
+            if ($v->fails()) {
+                return response()->json([
+                    'status'  => 422,
+                    'message' => 'Validation failed',
+                    'errors'  => $v->errors(),
+                ], 422);
+            }
+
+            // Verify order belongs to rider and is active via subscription
+            $order = Order::where('order_id', $order_id)
+                ->where('rider_id', $rider->rider_id)
+                ->whereHas('subscription', function ($q) {
+                    $q->where('status', 'active');
+                })
+                ->first();
+
+            if (!$order) {
+                return response()->json([
+                    'status'  => 404,
+                    'message' => 'Order not found or not assigned to this rider',
+                ], 404);
+            }
+
+            // Lon/Lat
+            $lon = (float) $request->input('longitude');
+            $lat = (float) $request->input('latitude');
+
+            // Use a transaction to keep things consistent
+            DB::beginTransaction();
+
+            // Find the most recent PENDING history today (or overall) for this order+rider
+            $history = DeliveryHistory::where('order_id', $order->order_id)
+                ->where('rider_id', $rider->rider_id)
+                ->where('delivery_status', 'pending')
+                ->latest('created_at')
+                ->first();
+
+            if ($history) {
+                $history->update([
+                    'delivery_status' => 'delivered',
+                    'longitude'       => $lon,
+                    'latitude'        => $lat,
+                    'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'), // ✅ DB "now"
+                ]);
+            } else {
+                // If there’s no pending record, create a delivered row
+                $history = DeliveryHistory::create([
+                    'order_id'        => $order->order_id,
+                    'rider_id'        => $rider->rider_id,
+                    'delivery_status' => 'delivered',
+                    'longitude'       => $lon,
+                    'latitude'        => $lat,
+                    'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'), // ✅ DB "now"
+                ]);
+            }
+
+            // (Optional) Also update order status if your flow requires it
+            // $order->update(['status' => 'delivered']);
+
+            DB::commit();
+
+            // Refresh to get hydrated attributes
+            $history->refresh();
+
+            return response()->json([
+                'status'  => 200,
+                'message' => 'Order marked as delivered successfully',
+                'data'    => $history,
+            ], 200);
+
+        } catch (QueryException $qe) {
+            DB::rollBack();
+            Log::error('markAsDelivered DB error', ['error' => $qe->getMessage()]);
+            return response()->json([
+                'status'  => 500,
+                'message' => 'Database error while marking the order as delivered.',
+                'error'   => app()->environment('local') ? $qe->getMessage() : null,
+            ], 500);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('markAsDelivered error', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status'  => 500,
+                'message' => 'An error occurred while marking the order as delivered.',
+                'error'   => app()->environment('local') ? $e->getMessage() : null,
+            ], 500);
         }
-
-        // (Optional) Update order status
-        // $order->update(['status' => 'delivered']);
-
-        // reload fresh values
-        $history->refresh();
-
-        return response()->json([
-            'status'  => 200,
-            'message' => 'Order marked as delivered successfully',
-            'data'    => $history,
-        ]);
-
-    } catch (\Throwable $e) {
-        return response()->json([
-            'status'  => 500,
-            'message' => 'An error occurred while marking the order as delivered.',
-            'error'   => app()->environment('local') ? $e->getMessage() : null,
-        ], 500);
     }
-}
     
     //get assign requested orders to rider
     public function getTodayRequestedOrders()
