@@ -342,7 +342,7 @@
     <div class="container px-0">
         <div class="row g-3">
             <!-- LEFT: Sticky Summary -->
-            <div class="col-lg-5">
+            <div class="col-lg-6">
 
                 <div class="timeline-card">
                     <div class="timeline-header">
@@ -429,7 +429,7 @@
             </div>
 
             <!-- RIGHT: Logs + Delivery -->
-            <div class="col-lg-7">
+            <div class="col-lg-6">
 
                 <!-- Pause/Resume Logs -->
                 @if ($order->pauseResumeLogs->count() > 0)
