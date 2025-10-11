@@ -12,7 +12,8 @@ use App\Models\DeliveryStartHistory;
 use App\Models\DeliveryCustomizeHistory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Validator;    // ✅ for API-style validation
+use Illuminate\Database\QueryException;      // ✅ optional, for clearer DB errors
 use App\Models\Order;;
 use Carbon\Carbon;
 // use Illuminate\Support\Facades\Log;
@@ -247,7 +248,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
-    
+
     public function markAsDelivered(Request $request, $order_id)
     {
         // Always tell Laravel this is an API call (prevents HTML validation response)
