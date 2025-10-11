@@ -178,18 +178,6 @@ class OrderController extends Controller
                     ]);
                 }
 
-                // Record the daily "start" for the rider.
-                // ⚠️ Ensure your delivery_start_history table has a DATE column (e.g., 'for_date')
-                // that stores the day, separate from the timestamp column.
-                DeliveryStartHistory::updateOrCreate(
-                    [
-                        'rider_id' => $rider->rider_id,
-                        'for_date' => $today->toDateString(), // unique per rider per day
-                    ],
-                    [
-                        'start_delivery_time' => $now, // exact timestamp of starting
-                    ]
-                );
             });
 
             return response()->json([
