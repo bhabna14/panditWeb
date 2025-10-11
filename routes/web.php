@@ -253,8 +253,10 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
         Route::get('/total-deliveries', 'showTodayDeliveries')->name('admin.totalDeliveries');
         Route::post('/orders/{order}/assign-rider', 'assignRider')
             ->name('orders.assignRider');
-          Route::get('/flower-dashboard/live-metrics',  'liveTodayMetrics')
+        Route::get('/flower-dashboard/live-metrics',  'liveTodayMetrics')
             ->name('admin.flowerDashboard.liveMetrics');
+        Route::get('/flower/expenditure/today','todayExpenditure')->name('flower.expenditure.today');
+            
     });
 
 

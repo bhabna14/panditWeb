@@ -395,4 +395,53 @@ class FlowerDashboardController extends Controller
         }
     }
 
+    public function todayExpenditure(Request $request)
+    {
+        $tz   = config('app.timezone');
+        $date = $request->input('date', Carbon::today($tz)->toDateString());
+
+        // Optional filters
+        $vendorId       = $request->input('vendor_id');
+        $riderId        = $request->input('rider_id');
+        $paymentMethod  = $request->input('payment_method');
+        $paymentStatus  = $request->input('payment_status');
+
+        $base = FlowerPickupDetails::with([
+                'vendor:vendor_id,vendor_name,phone_no',
+                'rider:rider_id,rider_name',
+                'flowerPickupItems' // items will render per pickup row
+            ])
+            ->whereDate('pickup_date', $date);
+
+        if ($vendorId)      $base->where('vendor_id', $vendorId);
+        if ($riderId)       $base->where('rider_id', $riderId);
+        if ($paymentMethod) $base->where('payment_method', $paymentMethod);
+        if ($paymentStatus) $base->where('payment_status', $paymentStatus);
+
+        // Clone-free totals (separate builders)
+        $totalForDay = (clone $base)->sum('total_price');
+
+        $byVendor = (clone $base)
+            ->select('vendor_id', DB::raw('SUM(total_price) AS total'))
+            ->groupBy('vendor_id')
+            ->with('vendor:vendor_id,vendor_name')
+            ->get();
+
+        $pickups = $base->orderByDesc('pickup_date')
+                        ->orderByDesc('pick_up_id')
+                        ->paginate(25)
+                        ->withQueryString();
+
+        return view('admin.reports.today-expenditure', [
+            'date'          => $date,
+            'pickups'       => $pickups,
+            'totalForDay'   => $totalForDay,
+            'byVendor'      => $byVendor,
+            'vendorId'      => $vendorId,
+            'riderId'       => $riderId,
+            'paymentMethod' => $paymentMethod,
+            'paymentStatus' => $paymentStatus,
+        ]);
+    }
+
 }

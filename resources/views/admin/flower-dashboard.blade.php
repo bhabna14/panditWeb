@@ -87,7 +87,7 @@
         }
 
         /* ========= NEW: background blink using a pseudo-element =========
-               This wins against gradients and !important backgrounds */
+                       This wins against gradients and !important backgrounds */
         .pulse-bg--cyan::after {
             --tint: rgba(6, 182, 212, .16);
             animation: pulseBg 1.2s ease-in-out 0s 6;
@@ -217,20 +217,25 @@
                         </div>
                     </a> </div> <!-- Today Total Expenditure -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
-                        <div class="row">
-                            <div class="col-8">
-                                <div class="ps-4 pt-4 pe-3 pb-4">
-                                    <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
-                                    <h4 class="tx-20 font-weight-semibold mb-2">
-                                        ₹{{ number_format($todayTotalExpenditure, 2) }}</h4>
+                    <a href="{{ route('flower.expenditure.today') }}" class="text-decoration-none d-block">
+                        <div class="card sales-card position-relative" style="border: 1px solid rgb(186, 185, 185);">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="ps-4 pt-4 pe-3 pb-4">
+                                        <h6 class="mb-2 tx-12">Today Total Expenditure</h6>
+                                        <h4 class="tx-20 font-weight-semibold mb-2">
+                                            ₹{{ number_format($todayTotalExpenditure, 2) }}
+                                        </h4>
+                                        <span class="stretched-link"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div> <!-- Tomorrow Active Order -->
-                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12"> <a
-                        href="{{ route('admin.orders.index', ['filter' => 'tomorrowOrder']) }}" target="_blank">
+                    </a>
+                </div>
+                <!-- Tomorrow Active Order -->
+                <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
+                    <a href="{{ route('admin.orders.index', ['filter' => 'tomorrowOrder']) }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">
@@ -241,7 +246,8 @@
                                 </div>
                             </div>
                         </div>
-                    </a> </div>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -904,7 +910,8 @@
                         }
                     });
                 } catch (e) {
-                    /* optional console.warn(e) */ }
+                    /* optional console.warn(e) */
+                }
             }
 
             // keep your datetime updater if you use it elsewhere
