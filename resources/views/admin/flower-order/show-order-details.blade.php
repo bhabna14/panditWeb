@@ -343,139 +343,7 @@
         <div class="row g-3">
             <!-- LEFT: Sticky Summary -->
             <div class="col-lg-5">
-                <div class="subscription-card">
-                    <div class="card-header">
-                        <span><i class="bi bi-receipt-cutoff me-2"></i>Order & Subscription Summary</span>
-                        <div class="mini-actions">
-                            <button class="btn btn-sm btn-outline-secondary" id="copyOrderId"
-                                data-id="{{ $order->order_id }}">
-                                <i class="bi bi-clipboard"></i> Copy ID
-                            </button>
-                        </div>
-                    </div>
 
-                    <div class="details">
-                        <div class="info-row">
-                            <span class="info-label">Order ID</span>
-                            <span class="info-value">{{ $order->order_id }}</span>
-                        </div>
-
-                        <div class="info-row">
-                            <span class="info-label">Product</span>
-                            <span class="info-value">{{ optional($order->flowerProducts)->name ?? '—' }}</span>
-                        </div>
-
-                        <div class="info-row price-row">
-                            <span class="info-label">Total Price</span>
-                            <span class="info-value">₹
-                                {{ number_format(optional($order->order)->total_price ?? 0, 2) }}</span>
-                        </div>
-
-                        <div class="divider"></div>
-
-                        @if ($order)
-                            <div class="info-row">
-                                <span class="info-label">Start Date</span>
-                                <span class="info-value">
-                                    {{ $order->start_date ? \Carbon\Carbon::parse($order->start_date)->format('d M, Y') : '—' }}
-                                </span>
-                            </div>
-
-                            <div class="info-row">
-                                <span class="info-label">End Date</span>
-                                <span class="info-value">
-                                    {{ $order->end_date ? \Carbon\Carbon::parse($order->end_date)->format('d M, Y') : '—' }}
-                                </span>
-                            </div>
-
-                            @if ($order->pauseResumeLogs->count() > 0 && $order->new_date)
-                                <div class="info-row note-warning">
-                                    <span class="info-label"><i class="bi bi-info-circle"></i> Note</span>
-                                    <span class="info-value text-warning">
-                                        Subscription paused/resumed; extended end date:
-                                        {{ \Carbon\Carbon::parse($order->new_date)->format('d M, Y') }}.
-                                    </span>
-                                </div>
-                            @endif
-
-                            <div class="info-row">
-                                <span class="info-label">Status</span>
-                                @php
-                                    $status = strtolower($order->status ?? '');
-                                    $statusClass =
-                                        $status === 'active'
-                                            ? 'status-running'
-                                            : ($status === 'paused'
-                                                ? 'status-paused'
-                                                : 'status-expired');
-                                @endphp
-                                <span class="status-badge {{ $statusClass }}">{{ ucfirst($order->status ?? '—') }}</span>
-                            </div>
-                        @else
-                            <div class="info-row">
-                                <span class="info-label">Subscription</span>
-                                <span class="status-badge status-expired">No active subscription</span>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Status counts mini row -->
-                    @if (!empty($statusCounts) && count($statusCounts))
-                        <div class="mt-3 d-flex gap-2 flex-wrap">
-                            @foreach ($statusCounts as $st => $cnt)
-                                <span class="badge bg-light text-dark border">
-                                    <i class="bi bi-truck me-1"></i>{{ $st ?? 'Unknown' }}: <b>{{ $cnt }}</b>
-                                </span>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- RIGHT: Logs + Delivery -->
-            <div class="col-lg-7">
-
-                <!-- Pause/Resume Logs -->
-                @if ($order->pauseResumeLogs->count() > 0)
-                    <div class="card mb-3 border-0 shadow-sm">
-                        <div class="card-header d-flex align-items-center justify-content-between bg-white">
-                            <span><i class="bi bi-pause-circle me-2"></i>Subscription Pause/Resume Logs</span>
-                            <span class="subtle">Total: {{ $order->pauseResumeLogs->count() }}</span>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Action</th>
-                                        <th>Pause Start</th>
-                                        <th>Pause End</th>
-                                        <th>Resume</th>
-                                        <th>New End</th>
-                                        <th>Paused Days</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($order->pauseResumeLogs as $log)
-                                        <tr>
-                                            <td><span class="badge bg-secondary">{{ ucfirst($log->action) }}</span></td>
-                                            <td>{{ $log->pause_start_date ? \Carbon\Carbon::parse($log->pause_start_date)->format('d M, Y') : 'N/A' }}
-                                            </td>
-                                            <td>{{ $log->pause_end_date ? \Carbon\Carbon::parse($log->pause_end_date)->format('d M, Y') : 'N/A' }}
-                                            </td>
-                                            <td>{{ $log->resume_date ? \Carbon\Carbon::parse($log->resume_date)->format('d M, Y') : 'N/A' }}
-                                            </td>
-                                            <td>{{ $log->new_end_date ? \Carbon\Carbon::parse($log->new_end_date)->format('d M, Y') : '—' }}
-                                            </td>
-                                            <td>{{ $log->paused_days }} days</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Delivery History -->
                 <div class="timeline-card">
                     <div class="timeline-header">
                         <div class="timeline-title-row">
@@ -556,6 +424,138 @@
                                 @endforeach
                             </div>
                         @endforeach
+                    @endif
+                </div>
+            </div>
+
+            <!-- RIGHT: Logs + Delivery -->
+            <div class="col-lg-7">
+
+                <!-- Pause/Resume Logs -->
+                @if ($order->pauseResumeLogs->count() > 0)
+                    <div class="card mb-3 border-0 shadow-sm">
+                        <div class="card-header d-flex align-items-center justify-content-between bg-white">
+                            <span><i class="bi bi-pause-circle me-2"></i>Subscription Pause/Resume Logs</span>
+                            <span class="subtle">Total: {{ $order->pauseResumeLogs->count() }}</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Action</th>
+                                        <th>Pause Start</th>
+                                        <th>Pause End</th>
+                                        <th>Resume</th>
+                                        <th>New End</th>
+                                        <th>Paused Days</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($order->pauseResumeLogs as $log)
+                                        <tr>
+                                            <td><span class="badge bg-secondary">{{ ucfirst($log->action) }}</span></td>
+                                            <td>{{ $log->pause_start_date ? \Carbon\Carbon::parse($log->pause_start_date)->format('d M, Y') : 'N/A' }}
+                                            </td>
+                                            <td>{{ $log->pause_end_date ? \Carbon\Carbon::parse($log->pause_end_date)->format('d M, Y') : 'N/A' }}
+                                            </td>
+                                            <td>{{ $log->resume_date ? \Carbon\Carbon::parse($log->resume_date)->format('d M, Y') : 'N/A' }}
+                                            </td>
+                                            <td>{{ $log->new_end_date ? \Carbon\Carbon::parse($log->new_end_date)->format('d M, Y') : '—' }}
+                                            </td>
+                                            <td>{{ $log->paused_days }} days</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                @endif
+                <div class="subscription-card">
+                    <div class="card-header">
+                        <span><i class="bi bi-receipt-cutoff me-2"></i>Order & Subscription Summary</span>
+                        <div class="mini-actions">
+                            <button class="btn btn-sm btn-outline-secondary" id="copyOrderId"
+                                data-id="{{ $order->order_id }}">
+                                <i class="bi bi-clipboard"></i> Copy ID
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="details">
+                        <div class="info-row">
+                            <span class="info-label">Order ID</span>
+                            <span class="info-value">{{ $order->order_id }}</span>
+                        </div>
+
+                        <div class="info-row">
+                            <span class="info-label">Product</span>
+                            <span class="info-value">{{ optional($order->flowerProducts)->name ?? '—' }}</span>
+                        </div>
+
+                        <div class="info-row price-row">
+                            <span class="info-label">Total Price</span>
+                            <span class="info-value">₹
+                                {{ number_format(optional($order->order)->total_price ?? 0, 2) }}</span>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        @if ($order)
+                            <div class="info-row">
+                                <span class="info-label">Start Date</span>
+                                <span class="info-value">
+                                    {{ $order->start_date ? \Carbon\Carbon::parse($order->start_date)->format('d M, Y') : '—' }}
+                                </span>
+                            </div>
+
+                            <div class="info-row">
+                                <span class="info-label">End Date</span>
+                                <span class="info-value">
+                                    {{ $order->end_date ? \Carbon\Carbon::parse($order->end_date)->format('d M, Y') : '—' }}
+                                </span>
+                            </div>
+
+                            @if ($order->pauseResumeLogs->count() > 0 && $order->new_date)
+                                <div class="info-row note-warning">
+                                    <span class="info-label"><i class="bi bi-info-circle"></i> Note</span>
+                                    <span class="info-value text-warning">
+                                        Subscription paused/resumed; extended end date:
+                                        {{ \Carbon\Carbon::parse($order->new_date)->format('d M, Y') }}.
+                                    </span>
+                                </div>
+                            @endif
+
+                            <div class="info-row">
+                                <span class="info-label">Status</span>
+                                @php
+                                    $status = strtolower($order->status ?? '');
+                                    $statusClass =
+                                        $status === 'active'
+                                            ? 'status-running'
+                                            : ($status === 'paused'
+                                                ? 'status-paused'
+                                                : 'status-expired');
+                                @endphp
+                                <span
+                                    class="status-badge {{ $statusClass }}">{{ ucfirst($order->status ?? '—') }}</span>
+                            </div>
+                        @else
+                            <div class="info-row">
+                                <span class="info-label">Subscription</span>
+                                <span class="status-badge status-expired">No active subscription</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    <!-- Status counts mini row -->
+                    @if (!empty($statusCounts) && count($statusCounts))
+                        <div class="mt-3 d-flex gap-2 flex-wrap">
+                            @foreach ($statusCounts as $st => $cnt)
+                                <span class="badge bg-light text-dark border">
+                                    <i class="bi bi-truck me-1"></i>{{ $st ?? 'Unknown' }}: <b>{{ $cnt }}</b>
+                                </span>
+                            @endforeach
+                        </div>
                     @endif
                 </div>
 
