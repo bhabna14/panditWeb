@@ -172,7 +172,7 @@ class OrderController extends Controller
                         'order_id'        => $order->order_id,
                         'rider_id'        => $rider->rider_id,
                         'delivery_status' => 'pending',
-                        'delivery_time'   => $now,
+                        // 'delivery_time'   => $now,
                         'longitude'       => $request->longitude,
                         'latitude'        => $request->latitude,
                     ]);
@@ -248,89 +248,91 @@ class OrderController extends Controller
         }
     }
     
-    
-
-
-
     // Mark order as delivered by rider
-
-    public function markAsDelivered(Request $request, $order_id)
-    {
-        try {
-            // Authenticate the rider
-            $rider = Auth::guard('rider-api')->user();
-    
-            if (!$rider) {
-                return response()->json([
-                    'status' => 401,
-                    'message' => 'Unauthorized',
-                ], 401);
-            }
-    
-            // Validate the request for longitude and latitude
-            $validated = $request->validate([
-                'longitude' => 'required|numeric',
-                'latitude' => 'required|numeric',
-            ]);
-    
-            // Check if the order is assigned to the rider and active
-            $order = Order::where('order_id', $order_id)
-                        ->where('rider_id', $rider->rider_id)
-                        ->whereHas('subscription', function ($query) {
-                            $query->where('status', 'active');
-                        })
-                        ->first();
-    
-            if (!$order) {
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'Order not found or not assigned to this rider',
-                ], 404);
-            }
-    
-            // Find the delivery history record for today's date
-            $deliveryHistory = DeliveryHistory::where('order_id', $order->order_id)
-                                              ->where('rider_id', $rider->rider_id)
-                                              ->whereDate('created_at', Carbon::today()) // Only for today
-                                              ->first();
-    
-            if ($deliveryHistory) {
-                // Update the existing delivery history record
-                $deliveryHistory->update([
-                    'delivery_status' => 'delivered',
-                    'longitude' => $validated['longitude'],
-                    'latitude' => $validated['latitude'],
-                ]);
-            } else {
-                // No existing record for today, you can log or handle it as needed
-                return response()->json([
-                    'status' => 404,
-                    'message' => 'No delivery history record found for today',
-                ], 404);
-            }
-    
+public function markAsDelivered(Request $request, $order_id)
+{
+    try {
+        // Rider auth
+        $rider = Auth::guard('rider-api')->user();
+        if (!$rider) {
             return response()->json([
-                'status' => 200,
-                'message' => 'Order marked as delivered successfully',
-                'data' => $deliveryHistory,
-            ]);
-    
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'An error occurred while marking the order as delivered.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'status'  => 401,
+                'message' => 'Unauthorized',
+            ], 401);
         }
+
+        // Validate coords
+        $validated = $request->validate([
+            'longitude' => 'required|numeric',
+            'latitude'  => 'required|numeric',
+        ]);
+
+        // Verify order belongs to rider and is active (via subscription)
+        $order = Order::where('order_id', $order_id)
+            ->where('rider_id', $rider->rider_id)
+            ->whereHas('subscription', function ($q) {
+                $q->where('status', 'active');
+            })
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'status'  => 404,
+                'message' => 'Order not found or not assigned to this rider',
+            ], 404);
+        }
+
+        // Update the most recent PENDING history for this order+rider
+        // (avoids issues with whereDate(created_at, ...))
+        $history = DeliveryHistory::where('order_id', $order->order_id)
+            ->where('rider_id', $rider->rider_id)
+            ->where('delivery_status', 'pending')
+            ->latest('created_at')
+            ->first();
+
+        if ($history) {
+            $history->update([
+                'delivery_status' => 'delivered',
+                'longitude'       => $validated['longitude'],
+                'latitude'        => $validated['latitude'],
+                // ✅ write DB "now" into delivery_time
+                'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'),
+            ]);
+        } else {
+            // If no pending row exists (e.g., missed start), create a delivered row
+            $history = DeliveryHistory::create([
+                'order_id'        => $order->order_id,
+                'rider_id'        => $rider->rider_id,
+                'delivery_status' => 'delivered',
+                'longitude'       => $validated['longitude'],
+                'latitude'        => $validated['latitude'],
+                // ✅ ensure time is saved
+                'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'),
+            ]);
+        }
+
+        // (Optional) Update order status
+        // $order->update(['status' => 'delivered']);
+
+        // reload fresh values
+        $history->refresh();
+
+        return response()->json([
+            'status'  => 200,
+            'message' => 'Order marked as delivered successfully',
+            'data'    => $history,
+        ]);
+
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status'  => 500,
+            'message' => 'An error occurred while marking the order as delivered.',
+            'error'   => app()->environment('local') ? $e->getMessage() : null,
+        ], 500);
     }
+}
     
-    
-    
-
-
-
     //get assign requested orders to rider
-
     public function getTodayRequestedOrders()
     {
         try {
@@ -376,12 +378,79 @@ class OrderController extends Controller
             ], 500);
         }
     }
-
    
-public function markAsRequestedDelivered(Request $request, $order_id)
-{
-    try {
-        // Rider auth
+// public function markAsRequestedDelivered(Request $request, $order_id)
+// {
+//     try {
+//         // Rider auth
+//         $rider = Auth::guard('rider-api')->user();
+//         if (!$rider) {
+//             return response()->json([
+//                 'status' => 401,
+//                 'message' => 'Unauthorized',
+//             ], 401);
+//         }
+
+//         // Validate coords
+//         $validated = $request->validate([
+//             'longitude' => 'required|numeric',
+//             'latitude'  => 'required|numeric',
+//         ]);
+
+//         // Verify order belongs to rider and is a requested delivery
+//         $order = Order::where('order_id', $order_id)
+//             ->where('rider_id', $rider->rider_id)
+//             ->whereNotNull('request_id')
+//             ->whereHas('flowerRequest', function ($q) {
+//                 $q->whereNotNull('date');
+//             })
+//             ->first();
+
+//         if (!$order) {
+//             return response()->json([
+//                 'status'  => 404,
+//                 'message' => 'Order not found, not assigned to this rider, or does not have a valid request',
+//             ], 404);
+//         }
+
+//         // Create delivery history with DB's current timestamp for delivery_time
+//         $deliveryHistory = DeliveryCustomizeHistory::create([
+//             'order_id'        => $order->order_id,
+//             'rider_id'        => $rider->rider_id,
+//             'delivery_status' => 'delivered',
+//             'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'), // <= exactly "now" from DB
+//             'longitude'       => $validated['longitude'],
+//             'latitude'        => $validated['latitude'],
+//         ]);
+
+//         // Update order status
+//         $order->update(['status' => 'delivered']);
+
+//         return response()->json([
+//             'status'  => 200,
+//             'message' => 'Requested order marked as delivered successfully',
+//             'data'    => $deliveryHistory,
+//         ], 200);
+
+//     } catch (\Throwable $e) {
+//         Log::error('markAsRequestedDelivered error', ['err' => $e->getMessage()]);
+//         return response()->json([
+//             'status'  => 500,
+//             'message' => 'An error occurred while marking the requested order as delivered.',
+//             'error'   => app()->environment('local') ? $e->getMessage() : null,
+//         ], 500);
+//     }
+// }
+
+    public function savePickupRequest(Request $request)
+    {
+        // Validate input data
+        $request->validate([
+            'pickup_date' => 'required|date',
+            'pickdetails' => 'required|string',
+        ]);
+
+        // Get the authenticated rider
         $rider = Auth::guard('rider-api')->user();
         if (!$rider) {
             return response()->json([
@@ -390,98 +459,26 @@ public function markAsRequestedDelivered(Request $request, $order_id)
             ], 401);
         }
 
-        // Validate coords
-        $validated = $request->validate([
-            'longitude' => 'required|numeric',
-            'latitude'  => 'required|numeric',
-        ]);
+        // Create a new flower pickup request
+        $pickupRequest = new FlowerPickupRequest();
+        $pickupRequest->rider_id = $rider->rider_id;
+        $pickupRequest->pickup_date = $request->pickup_date;
+        // $pickupRequest->pickdetails = $request->pickdetails;
+        $pickupDetails = $request->pickdetails;
+        $formattedDetails = collect(explode("\n", $pickupDetails)) // Split by newlines (assuming details are line-separated)
+        ->map(fn($detail) => 'Vendor name : other vendor , ' . $detail) // Prepend the text
+        ->implode("\n"); // Join back into a single string with newlines
 
-        // Verify order belongs to rider and is for a requested delivery (has request_id & date)
-        $order = Order::where('order_id', $order_id)
-            ->where('rider_id', $rider->rider_id)
-            ->whereNotNull('request_id')
-            ->whereHas('flowerRequest', function ($q) {
-                $q->whereNotNull('date');
-            })
-            ->first();
+        $pickupRequest->pickdetails = $formattedDetails;
+        $pickupRequest->status = 'pending';  // default status is 'pending'
+        $pickupRequest->save();
 
-        if (!$order) {
-            return response()->json([
-                'status'  => 404,
-                'message' => 'Order not found, not assigned to this rider, or does not have a valid request',
-            ], 404);
-        }
-
-        // Use current server time for delivery_time
-        // If you want to force a specific timezone (e.g., IST), use: Carbon::now('Asia/Kolkata')
-        $deliveryTimestamp = Carbon::now(); // or Carbon::now(config('app.timezone'))
-
-        // Create delivery history
-        $deliveryHistory = DeliveryCustomizeHistory::create([
-            'order_id'        => $order->order_id,
-            'rider_id'        => $rider->rider_id,
-            'delivery_status' => 'delivered',
-            'delivery_time'   => $deliveryTimestamp,
-            'longitude'       => $validated['longitude'],
-            'latitude'        => $validated['latitude'],
-        ]);
-
-        // Update order status
-        $order->update(['status' => 'delivered']);
-
+        // Return response
         return response()->json([
-            'status'  => 200,
-            'message' => 'Requested order marked as delivered successfully',
-            'data'    => $deliveryHistory,
-        ], 200);
-
-    } catch (\Throwable $e) {
-        Log::error('markAsRequestedDelivered error', ['err' => $e->getMessage()]);
-        return response()->json([
-            'status'  => 500,
-            'message' => 'An error occurred while marking the requested order as delivered.',
-            'error'   => app()->environment('local') ? $e->getMessage() : null,
-        ], 500);
+            'status' => 200,
+            'message' => 'Flower pickup request saved successfully.',
+            'data' => $pickupRequest,
+        ], 201);
     }
-}
-
-public function savePickupRequest(Request $request)
-{
-    // Validate input data
-    $request->validate([
-        'pickup_date' => 'required|date',
-        'pickdetails' => 'required|string',
-    ]);
-
-    // Get the authenticated rider
-    $rider = Auth::guard('rider-api')->user();
-    if (!$rider) {
-        return response()->json([
-            'status' => 401,
-            'message' => 'Unauthorized',
-        ], 401);
-    }
-
-    // Create a new flower pickup request
-    $pickupRequest = new FlowerPickupRequest();
-    $pickupRequest->rider_id = $rider->rider_id;
-    $pickupRequest->pickup_date = $request->pickup_date;
-    // $pickupRequest->pickdetails = $request->pickdetails;
-    $pickupDetails = $request->pickdetails;
-    $formattedDetails = collect(explode("\n", $pickupDetails)) // Split by newlines (assuming details are line-separated)
-    ->map(fn($detail) => 'Vendor name : other vendor , ' . $detail) // Prepend the text
-    ->implode("\n"); // Join back into a single string with newlines
-
-    $pickupRequest->pickdetails = $formattedDetails;
-    $pickupRequest->status = 'pending';  // default status is 'pending'
-    $pickupRequest->save();
-
-    // Return response
-    return response()->json([
-        'status' => 200,
-        'message' => 'Flower pickup request saved successfully.',
-        'data' => $pickupRequest,
-    ], 201);
-}
 
 }
