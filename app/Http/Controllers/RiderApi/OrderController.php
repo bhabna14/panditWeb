@@ -248,14 +248,14 @@ class OrderController extends Controller
             ], 500);
         }
     }
-
+        
     public function markAsDelivered(Request $request, $order_id)
     {
-        // Always tell Laravel this is an API call (prevents HTML validation response)
+        // Force JSON responses for validation, etc.
         $request->headers->set('Accept', 'application/json');
 
         try {
-            // Rider auth (middleware also enforces, but keep explicit check)
+            // Rider auth
             $rider = Auth::guard('rider-api')->user();
             if (!$rider) {
                 return response()->json([
@@ -264,12 +264,11 @@ class OrderController extends Controller
                 ], 401);
             }
 
-            // API-friendly validation (no HTML)
+            // Validate inputs
             $v = Validator::make($request->all(), [
                 'longitude' => ['required','numeric'],
                 'latitude'  => ['required','numeric'],
             ]);
-
             if ($v->fails()) {
                 return response()->json([
                     'status'  => 422,
@@ -278,7 +277,7 @@ class OrderController extends Controller
                 ], 422);
             }
 
-            // Verify order belongs to rider and is active via subscription
+            // Verify order belongs to this rider & is active
             $order = Order::where('order_id', $order_id)
                 ->where('rider_id', $rider->rider_id)
                 ->whereHas('subscription', function ($q) {
@@ -293,14 +292,15 @@ class OrderController extends Controller
                 ], 404);
             }
 
-            // Lon/Lat
             $lon = (float) $request->input('longitude');
             $lat = (float) $request->input('latitude');
 
-            // Use a transaction to keep things consistent
+            // 👉 IST time-only string (HH:MM:SS)
+            $istTimeOnly = Carbon::now('Asia/Kolkata')->format('H:i:s');
+
             DB::beginTransaction();
 
-            // Find the most recent PENDING history today (or overall) for this order+rider
+            // Get the latest pending history for this order+rider
             $history = DeliveryHistory::where('order_id', $order->order_id)
                 ->where('rider_id', $rider->rider_id)
                 ->where('delivery_status', 'pending')
@@ -312,26 +312,24 @@ class OrderController extends Controller
                     'delivery_status' => 'delivered',
                     'longitude'       => $lon,
                     'latitude'        => $lat,
-                    'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'), // ✅ DB "now"
+                    // ✅ save only time in IST
+                    'delivery_time'   => $istTimeOnly,
                 ]);
             } else {
-                // If there’s no pending record, create a delivered row
+                // Create the record if none exists for today
                 $history = DeliveryHistory::create([
                     'order_id'        => $order->order_id,
                     'rider_id'        => $rider->rider_id,
                     'delivery_status' => 'delivered',
                     'longitude'       => $lon,
                     'latitude'        => $lat,
-                    'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'), // ✅ DB "now"
+                    // ✅ save only time in IST
+                    'delivery_time'   => $istTimeOnly,
                 ]);
             }
 
-            // (Optional) Also update order status if your flow requires it
-            // $order->update(['status' => 'delivered']);
-
             DB::commit();
 
-            // Refresh to get hydrated attributes
             $history->refresh();
 
             return response()->json([
@@ -358,7 +356,6 @@ class OrderController extends Controller
             ], 500);
         }
     }
-    
     //get assign requested orders to rider
     public function getTodayRequestedOrders()
     {
