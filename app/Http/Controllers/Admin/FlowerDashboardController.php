@@ -394,7 +394,6 @@ class FlowerDashboardController extends Controller
             ], 500);
         }
     }
-
     public function todayExpenditure(Request $request)
     {
         $tz   = config('app.timezone');
@@ -409,7 +408,15 @@ class FlowerDashboardController extends Controller
         $base = FlowerPickupDetails::with([
                 'vendor:vendor_id,vendor_name,phone_no',
                 'rider:rider_id,rider_name',
-                'flowerPickupItems' // items will render per pickup row
+                // Eager-load item relations so item & unit names are available in the view
+                'flowerPickupItems' => function ($q) {
+                    $q->with([
+                        'flower:product_id,name',      // item name from FlowerProduct
+                        'unit:id,unit_name',           // unit name from PoojaUnit
+                    ])->select([
+                        'id','pick_up_id','flower_id','unit_id','quantity','price'
+                    ]);
+                },
             ])
             ->whereDate('pickup_date', $date);
 
@@ -418,7 +425,6 @@ class FlowerDashboardController extends Controller
         if ($paymentMethod) $base->where('payment_method', $paymentMethod);
         if ($paymentStatus) $base->where('payment_status', $paymentStatus);
 
-        // Clone-free totals (separate builders)
         $totalForDay = (clone $base)->sum('total_price');
 
         $byVendor = (clone $base)
@@ -432,16 +438,21 @@ class FlowerDashboardController extends Controller
                         ->paginate(25)
                         ->withQueryString();
 
+        // Friendly counts for header chips
+        $totalPickupsCount = (clone $base)->count();
+        $totalItemsCount   = (clone $base)->withCount('flowerPickupItems')->get()->sum('flower_pickup_items_count');
+
         return view('admin.reports.today-expenditure', [
-            'date'          => $date,
-            'pickups'       => $pickups,
-            'totalForDay'   => $totalForDay,
-            'byVendor'      => $byVendor,
-            'vendorId'      => $vendorId,
-            'riderId'       => $riderId,
-            'paymentMethod' => $paymentMethod,
-            'paymentStatus' => $paymentStatus,
+            'date'                => $date,
+            'pickups'             => $pickups,
+            'totalForDay'         => $totalForDay,
+            'byVendor'            => $byVendor,
+            'vendorId'            => $vendorId,
+            'riderId'             => $riderId,
+            'paymentMethod'       => $paymentMethod,
+            'paymentStatus'       => $paymentStatus,
+            'totalPickupsCount'   => $totalPickupsCount,
+            'totalItemsCount'     => $totalItemsCount,
         ]);
     }
-
 }
