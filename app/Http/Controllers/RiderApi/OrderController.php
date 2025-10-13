@@ -214,12 +214,9 @@ class OrderController extends Controller
             $deliveries = DeliveryHistory::where('rider_id', $rider->rider_id)
                 // ->where('delivery_status', 'pending')
                 ->whereDate('created_at', Carbon::today())
-                ->whereHas('deliveryStartHistory', function ($query) use ($today) {
-                    $query->whereDate('start_delivery_time', '=', $today);
-                })
                 ->with([
                     'order.subscription',
-                   'order.delivery',
+                    'order.delivery',
                     'order.user',
                     'order.flowerProduct',
                     'order.address.localityDetails',
