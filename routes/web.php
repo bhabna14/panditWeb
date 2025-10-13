@@ -967,7 +967,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/new-user-order/save', [NewUserOrderController::class, 'saveNewUserOrder'])->name('saveNewUserOrder');
 });
 
-
 // Admin Users management (Super Admin & Admin with limits)
 Route::get('/manage-admin', [AdminUserController::class, 'index'])->name('users.index');
 Route::get('/create-admin', [AdminUserController::class, 'create'])->name('users.create');

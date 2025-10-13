@@ -279,7 +279,9 @@
                         <option value="">Select Locality</option>
                         @foreach ($localities as $locality)
                             <option value="{{ $locality->unique_code }}" data-locality-key="{{ $locality->unique_code }}"
-                                data-pincode="{{ $locality->pincode }}">{{ $locality->locality_name }}</option>
+                                data-pincode="{{ $locality->pincode }}">
+                                {{ $locality->locality_name }}
+                            </option>
                         @endforeach
                     </select>
                 </div>
@@ -408,6 +410,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // ---------- Toast + Modal helpers ----------
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -420,18 +423,25 @@
             title
         });
 
-        function showValidationErrors(errorsArray) {
-            if (!errorsArray?.length) return;
-            const html = '<ul style="text-align:left;margin:0;padding-left:18px;">' + errorsArray.map(e => `<li>${e}</li>`)
-                .join('') + '</ul>';
+        const showModalList = (icon, title, items = []) => {
+            const html = items?.length ?
+                '<ul style="text-align:left;margin:0;padding-left:18px;">' + items.map(e => `<li>${e}</li>`).join('') +
+                '</ul>' :
+                '';
             Swal.fire({
-                icon: 'error',
-                title: 'Please fix the following',
+                icon,
+                title,
                 html,
                 confirmButtonText: 'OK'
             });
+        };
+
+        function showValidationErrors(errorsArray) {
+            if (!errorsArray?.length) return;
+            showModalList('error', 'Please fix the following', errorsArray);
         }
 
+        // ---------- End-date helper ----------
         function setEndDateFromDuration() {
             const startStr = document.getElementById('start_date').value;
             const dur = (document.getElementById('duration').value || '').trim();
@@ -453,6 +463,7 @@
             document.getElementById('end_date').value = `${yyyy}-${mm}-${dd}`;
         }
 
+        // ---------- Locality -> Apartments ----------
         async function populateApartmentsFromLocality(selectEl) {
             const opt = selectEl.options[selectEl.selectedIndex];
             const localityKey = opt ? opt.getAttribute('data-locality-key') : null;
@@ -487,10 +498,11 @@
                 $apartmentSelect.trigger('change');
             } catch (e) {
                 $apartmentSelect.append(new Option('Failed to load apartments', '', false, false)).trigger('change');
-                showToast('error', 'Failed to load apartments');
+                showModalList('error', 'Failed to load apartments', [e?.message || 'Unknown error']);
             }
         }
 
+        // ---------- Address cards ----------
         function addressCardHtml(a) {
             const parts = a.label ? a.label.split(',').map(s => s.trim()) : [];
             const type = a.type || '';
@@ -596,6 +608,7 @@
             }
         }
 
+        // ---------- Init ----------
         $(function() {
             $('.select2').select2({
                 width: '100%'
@@ -641,12 +654,15 @@
             document.getElementById('duration').addEventListener('change', setEndDateFromDuration);
             document.getElementById('start_date').addEventListener('change', setEndDateFromDuration);
 
-            // Phone mask for NEW user (now targets #mobile_number)
+            // Phone mask for NEW user
             const phoneEl = document.getElementById('mobile_number');
             if (phoneEl) phoneEl.addEventListener('input', function() {
                 this.value = this.value.replace(/[^0-9]/g, '').slice(0, 10);
             });
 
+            // ------- Laravel -> SweetAlert bridges -------
+
+            // 1) Validation errors (auto from $errors)
             @if ($errors->any())
                 showValidationErrors([
                     @foreach ($errors->all() as $e)
@@ -654,11 +670,24 @@
                     @endforeach
                 ]);
             @endif
+
+            // 2) Server-thrown modal errors (from controller)
+            @if (session('error_modal'))
+                (function() {
+                    const title = @json(session('error_title', 'Error'));
+                    const lines = @json(session('error_messages', []));
+                    showModalList('error', title, lines);
+                })();
+            @endif
+
+            // 3) Simple flash errors -> modal
+            @if (session('error'))
+                showModalList('error', 'Error', [@json(session('error'))]);
+            @endif
+
+            // 4) Success/info/warning as toasts (keep UX snappy)
             @if (session('success'))
                 showToast('success', @json(session('success')));
-            @endif
-            @if (session('error'))
-                showToast('error', @json(session('error')));
             @endif
             @if (session('warning'))
                 showToast('warning', @json(session('warning')));

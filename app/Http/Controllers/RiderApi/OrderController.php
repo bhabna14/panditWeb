@@ -21,7 +21,6 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    // assign pickup details to rider
     public function getAssignPickup()
     {
         try {
@@ -65,8 +64,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
-    
-    // update price of each item of pickup by Rider
+
     public function updateFlowerPrices(Request $request, $pickupId)
     {
         try {
@@ -115,8 +113,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
-    
-    // startDelivery method to start delivery for rider
+
     public function startDelivery(Request $request)
     {
         try {
@@ -173,7 +170,6 @@ class OrderController extends Controller
                         'order_id'        => $order->order_id,
                         'rider_id'        => $rider->rider_id,
                         'delivery_status' => 'pending',
-                        // 'delivery_time'   => $now,
                         'longitude'       => $request->longitude,
                         'latitude'        => $request->latitude,
                     ]);
@@ -245,7 +241,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
-        
+
     public function markAsDelivered(Request $request, $order_id)
     {
         // Force JSON responses for validation, etc.
@@ -353,7 +349,7 @@ class OrderController extends Controller
             ], 500);
         }
     }
-    //get assign requested orders to rider
+
     public function getTodayRequestedOrders()
     {
         try {
@@ -399,69 +395,6 @@ class OrderController extends Controller
             ], 500);
         }
     }
-   
-// public function markAsRequestedDelivered(Request $request, $order_id)
-// {
-//     try {
-//         // Rider auth
-//         $rider = Auth::guard('rider-api')->user();
-//         if (!$rider) {
-//             return response()->json([
-//                 'status' => 401,
-//                 'message' => 'Unauthorized',
-//             ], 401);
-//         }
-
-//         // Validate coords
-//         $validated = $request->validate([
-//             'longitude' => 'required|numeric',
-//             'latitude'  => 'required|numeric',
-//         ]);
-
-//         // Verify order belongs to rider and is a requested delivery
-//         $order = Order::where('order_id', $order_id)
-//             ->where('rider_id', $rider->rider_id)
-//             ->whereNotNull('request_id')
-//             ->whereHas('flowerRequest', function ($q) {
-//                 $q->whereNotNull('date');
-//             })
-//             ->first();
-
-//         if (!$order) {
-//             return response()->json([
-//                 'status'  => 404,
-//                 'message' => 'Order not found, not assigned to this rider, or does not have a valid request',
-//             ], 404);
-//         }
-
-//         // Create delivery history with DB's current timestamp for delivery_time
-//         $deliveryHistory = DeliveryCustomizeHistory::create([
-//             'order_id'        => $order->order_id,
-//             'rider_id'        => $rider->rider_id,
-//             'delivery_status' => 'delivered',
-//             'delivery_time'   => DB::raw('CURRENT_TIMESTAMP'), // <= exactly "now" from DB
-//             'longitude'       => $validated['longitude'],
-//             'latitude'        => $validated['latitude'],
-//         ]);
-
-//         // Update order status
-//         $order->update(['status' => 'delivered']);
-
-//         return response()->json([
-//             'status'  => 200,
-//             'message' => 'Requested order marked as delivered successfully',
-//             'data'    => $deliveryHistory,
-//         ], 200);
-
-//     } catch (\Throwable $e) {
-//         Log::error('markAsRequestedDelivered error', ['err' => $e->getMessage()]);
-//         return response()->json([
-//             'status'  => 500,
-//             'message' => 'An error occurred while marking the requested order as delivered.',
-//             'error'   => app()->environment('local') ? $e->getMessage() : null,
-//         ], 500);
-//     }
-// }
 
     public function savePickupRequest(Request $request)
     {
