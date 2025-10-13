@@ -242,8 +242,6 @@
                                     <div class="ps-4 pt-4 pe-3 pb-4">
                                         <h5 class="mb-2 tx-12">Tomorrow Active Order</h5>
                                         <h4 class="tx-20 font-weight-semibold mb-2">{{ $activeTomorrowCount }}</h4>
-                                        {{-- (Optional) If you also want to show "Starting Tomorrow": --}}
-                                        {{-- <div class="text-muted small">Starting tomorrow: {{ $startingTomorrow }}</div> --}}
                                     </div>
                                 </div>
                             </div>
