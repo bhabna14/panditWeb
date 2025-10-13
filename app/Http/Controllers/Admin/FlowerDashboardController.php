@@ -65,12 +65,17 @@ class FlowerDashboardController extends Controller
 
    public function flowerDashboard()
 {
-  $tz           = config('app.timezone');
-$tmr          = Carbon::tomorrow($tz)->startOfDay();
-$excludeStats = ['expired', 'dead'];
+    $tz = config('app.timezone');
+
+    $activeSubscriptions = Subscription::where('status', 'active')->count();
+
+    $tomorrowDate = Carbon::tomorrow($tz)->toDateString();
+
+    $tmr          = Carbon::tomorrow($tz)->startOfDay();
+    $excludeStats = ['expired', 'dead'];
 
 // ✅ Count of subscriptions that will be ACTIVE tomorrow
-$activeTomorrowCount = Subscription::query()
+    $activeTomorrowCount = Subscription::query()
     ->whereNotIn('status', $excludeStats)
     ->where(function ($q) {
         $q->whereIn('status', ['active', 'paused', 'pending'])
@@ -87,30 +92,11 @@ $activeTomorrowCount = Subscription::query()
     })
     ->count();
 
-// (Optional) keep this if you also want the “starts tomorrow” metric elsewhere:
-$startingTomorrow = Subscription::query()
+    // (Optional) keep this if you also want the “starts tomorrow” metric elsewhere:
+    $startingTomorrow = Subscription::query()
     ->whereIn('status', ['active', 'paused', 'pending'])
     ->whereDate('start_date', $tmr->toDateString())
     ->count();
-
-
-    // ✅ Subscriptions ACTIVE on tomorrow (this is what you want to display)
-    $activeTomorrowCount = Subscription::where(function ($q) {
-            // treat these as “live-ish” states
-            $q->whereIn('status', ['active', 'paused', 'pending'])
-              ->orWhere('is_active', 1);
-        })
-        ->whereDate('start_date', '<=', $tmr->toDateString())
-        ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tmr->toDateString())
-        // Exclude if tomorrow is inside a pause range
-        ->where(function ($q) use ($tmr) {
-            $d = $tmr->toDateString();
-            $q->whereNull('pause_start_date')
-              ->orWhereNull('pause_end_date')
-              ->orWhereDate('pause_end_date', '<', $d)
-              ->orWhereDate('pause_start_date', '>', $d);
-        })
-        ->count();
 
     // --- the rest of your existing metrics (unchanged) ---
     $totalDeliveriesTodayCount = DeliveryHistory::whereDate('created_at', Carbon::today($tz)->toDateString())
