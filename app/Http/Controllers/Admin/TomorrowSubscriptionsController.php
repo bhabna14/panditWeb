@@ -15,16 +15,17 @@ class TomorrowSubscriptionsController extends Controller
         $today    = Carbon::today();
         $tomorrow = Carbon::tomorrow()->startOfDay();
 
-        // Base eager loads so we can show name/product/address nicely
+        // Eager load relations (no column-restrict to avoid custom PK pitfalls)
         $with = [
-            'users:userid,name,phone,email,address',
-            'order',                          // assumes you have shipping_* or address fields here
-            'flowerProducts:product_id,name', // product name
+            'users',                     // has mobile_number, email, custom PK `userid`
+            'users.addressDetails',      // default address (UserAddress)
+            'order',                     // shipping_* fields (if present)
+            'flowerProducts:product_id,name',
         ];
 
-        // 1) Active tomorrow (uses same logic as your estimate: start <= tmr, coalesce(new_date,end_date) >= tmr, exclude paused range on tmr)
+        // 1) Active tomorrow
         $activeTomorrow = Subscription::with($with)
-            ->where(function ($q) { // consider active/paused/is_active=1
+            ->where(function ($q) {
                 $q->whereIn('status', ['active', 'paused', 'pending'])
                   ->orWhere('is_active', 1);
             })
@@ -32,75 +33,85 @@ class TomorrowSubscriptionsController extends Controller
             ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tomorrow->toDateString())
             ->get()
             ->filter(function ($s) use ($tomorrow) {
-                // Exclude if paused tomorrow (pause_start_date..pause_end_date overlaps tomorrow)
                 if ($s->pause_start_date && $s->pause_end_date) {
                     $ps = Carbon::parse($s->pause_start_date)->startOfDay();
                     $pe = Carbon::parse($s->pause_end_date)->endOfDay();
                     if ($ps->lte($tomorrow) && $pe->gte($tomorrow)) {
-                        return false;
+                        return false; // paused on that day
                     }
                 }
                 return true;
             })->values();
 
-        // 2) Subscriptions that START tomorrow
+        // 2) Start tomorrow
         $startingTomorrow = Subscription::with($with)
             ->whereDate('start_date', '=', $tomorrow->toDateString())
             ->get();
 
-        // 3) Subscriptions that PAUSE starting tomorrow
+        // 3) Pause starts tomorrow
         $pausingTomorrow = Subscription::with($with)
             ->whereDate('pause_start_date', '=', $tomorrow->toDateString())
             ->get();
 
-        // 4) Subscriptions with (coalesced) END = today
+        // 4) End today (coalesced)
         $endingToday = Subscription::with($with)
             ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '=', $today->toDateString())
             ->get();
 
-        // 5) Subscriptions with (coalesced) END = tomorrow
+        // 5) End tomorrow (coalesced)
         $endingTomorrow = Subscription::with($with)
             ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '=', $tomorrow->toDateString())
             ->get();
 
-        // Build display rows (normalize address & convenient fields)
+        // Normalize each row for the view
         $mapRow = function ($s) {
-            $user   = $s->users;
-            $order  = $s->order;
-            $product= $s->flowerProducts;
+            $user    = $s->users;
+            $order   = $s->order;
+            $product = $s->flowerProducts;
 
-            // Try order shipping fields first (rename if yours differ)
-            $parts = [];
-            foreach (['shipping_name','shipping_address','shipping_street','shipping_area','shipping_city','shipping_state','shipping_pincode','shipping_zip'] as $f) {
-                if (isset($order->$f) && filled($order->$f)) $parts[] = $order->$f;
-            }
-            $address = trim(implode(', ', array_unique(array_filter($parts))));
+            // Address priority: order shipping_* -> user addressDetails
+            $address = '';
 
-            // Fallback to user->address or compose from common user fields if you have them
-            if (!$address) {
-                if ($user && filled($user->address)) {
-                    $address = $user->address;
-                } else {
-                    $chunks = [];
-                    foreach (['address_line1','address_line2','city','state','pincode','zip'] as $f) {
-                        if ($user && isset($user->$f) && filled($user->$f)) $chunks[] = $user->$f;
+            if ($order) {
+                $parts = [];
+                foreach ([
+                    'shipping_name','shipping_address','shipping_street','shipping_area',
+                    'shipping_city','shipping_state','shipping_pincode','shipping_zip',
+                ] as $f) {
+                    if (isset($order->$f) && filled($order->$f)) {
+                        $parts[] = $order->$f;
                     }
-                    $address = trim(implode(', ', $chunks));
                 }
+                $address = trim(implode(', ', array_unique(array_filter($parts))));
+            }
+
+            if (!$address && $user && $user->addressDetails) {
+                $ad = $user->addressDetails;
+                $chunks = array_filter([
+                    $ad->apartment_flat_plot ?? null,
+                    $ad->apartment_name ?? null,
+                    $ad->landmark ?? null,
+                    $ad->area ?? null,
+                    $ad->city ?? null,
+                    $ad->state ?? null,
+                    $ad->pincode ?? null,
+                ]);
+                $address = trim(implode(', ', $chunks));
             }
 
             return [
                 'subscription_id' => $s->subscription_id,
                 'order_id'        => $s->order_id,
                 'status'          => $s->status,
-                'is_active'       => (int)$s->is_active,
-                'start_date'      => optional($s->start_date) ? (string)$s->start_date : null,
-                'end_date'        => optional($s->end_date) ? (string)$s->end_date : null,
-                'new_date'        => optional($s->new_date) ? (string)$s->new_date : null,
-                'pause_start'     => optional($s->pause_start_date) ? (string)$s->pause_start_date : null,
-                'pause_end'       => optional($s->pause_end_date) ? (string)$s->pause_end_date : null,
+                'is_active'       => (int) $s->is_active,
+                'start_date'      => $s->start_date ? (string) $s->start_date : null,
+                'end_date'        => $s->end_date ? (string) $s->end_date : null,
+                'new_date'        => $s->new_date ? (string) $s->new_date : null,
+                'pause_start'     => $s->pause_start_date ? (string) $s->pause_start_date : null,
+                'pause_end'       => $s->pause_end_date ? (string) $s->pause_end_date : null,
+
                 'customer'        => $user?->name ?? '—',
-                'phone'           => $user?->phone ?? null,
+                'phone'           => $user?->mobile_number ?? null, // <-- fixed
                 'email'           => $user?->email ?? null,
                 'product'         => $product?->name ?? '—',
                 'address'         => $address ?: '—',
@@ -108,13 +119,13 @@ class TomorrowSubscriptionsController extends Controller
         };
 
         $data = [
-            'today'           => $today->toDateString(),
-            'tomorrow'        => $tomorrow->toDateString(),
-            'activeTomorrow'  => $activeTomorrow->map($mapRow)->all(),
-            'startingTomorrow'=> $startingTomorrow->map($mapRow)->all(),
-            'pausingTomorrow' => $pausingTomorrow->map($mapRow)->all(),
-            'endingToday'     => $endingToday->map($mapRow)->all(),
-            'endingTomorrow'  => $endingTomorrow->map($mapRow)->all(),
+            'today'            => $today->toDateString(),
+            'tomorrow'         => $tomorrow->toDateString(),
+            'activeTomorrow'   => $activeTomorrow->map($mapRow)->all(),
+            'startingTomorrow' => $startingTomorrow->map($mapRow)->all(),
+            'pausingTomorrow'  => $pausingTomorrow->map($mapRow)->all(),
+            'endingToday'      => $endingToday->map($mapRow)->all(),
+            'endingTomorrow'   => $endingTomorrow->map($mapRow)->all(),
         ];
 
         return view('admin.reports.tomorrow-subscriptions', $data);
