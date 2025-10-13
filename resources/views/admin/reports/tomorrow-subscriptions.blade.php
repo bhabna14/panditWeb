@@ -16,7 +16,7 @@
         }
 
         .page-header {
-            background: linear-gradient(180deg, var(--brand-bg), #111827);
+            background: linear-gradient(180deg, var(--brand-bg), #f1f2f3);
             color: #fff;
             border-radius: 1rem;
             padding: 1.25rem 1.25rem;
