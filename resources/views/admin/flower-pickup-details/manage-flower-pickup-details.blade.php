@@ -67,6 +67,7 @@
                                     <th>Rider</th>
                                     <th>Flower Details</th>
                                     <th>PickUp Date</th>
+                                    <th>Delivery Date</th>
                                     <th>Total Price</th>
                                     <th>Payment Status</th>
                                     <th>Status</th>
@@ -231,18 +232,21 @@
                         data: 5
                     },
                     {
-                        data: 6,
-                        searchable: false
+                        data: 6
                     },
                     {
                         data: 7,
                         searchable: false
                     },
                     {
-                        data: 8
+                        data: 8,
+                        searchable: false
                     },
                     {
-                        data: 9,
+                        data: 9
+                    },
+                    {
+                        data: 10,
                         orderable: false,
                         searchable: false
                     },
