@@ -60,7 +60,8 @@ class FlowerPickupController extends Controller
 
         return redirect()->back()->with('error', 'Pickup request not found.');
     }
-     public function manageflowerpickupdetails(Request $request)
+
+    public function manageflowerpickupdetails(Request $request)
     {
         // Use your real table name via the model (double underscore is fine)
         $totalExpensesday = FlowerPickupDetails::whereDate('pickup_date', Carbon::today())
@@ -68,10 +69,7 @@ class FlowerPickupController extends Controller
 
         return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('totalExpensesday'));
     }
-
-    /**
-     * DataTables server-side JSON
-     */
+        
     public function ajaxFlowerPickupDetails(Request $request)
     {
         try {
@@ -82,93 +80,82 @@ class FlowerPickupController extends Controller
             $filter = (string) $request->input('filter', 'all');
             $order  = $request->input('order', []);
 
-            // Build base query using Eloquent + relations (avoids hard-coded table names)
             $base = FlowerPickupDetails::query()
                 ->with([
-                    // select only what we need, and match your custom PKs
                     'vendor:vendor_id,vendor_name',
                     'rider:rider_id,rider_name',
                 ]);
 
-            // Filters on the details table
             switch ($filter) {
                 case 'todayexpenses':
-                    $base->whereDate('pickup_date', Carbon::today());
+                    $base->whereDate('pickup_date', \Carbon\Carbon::today());
                     break;
                 case 'todaypaidpickup':
-                    $base->whereDate('pickup_date', Carbon::today())
-                         ->where('payment_status', 'Paid');
+                    $base->whereDate('pickup_date', \Carbon\Carbon::today())
+                        ->where('payment_status', 'Paid');
                     break;
                 case 'todaypendingpickup':
-                    $base->whereDate('pickup_date', Carbon::today())
-                         ->where('payment_status', 'pending');
+                    $base->whereDate('pickup_date', \Carbon\Carbon::today())
+                        ->where('payment_status', 'pending');
                     break;
                 case 'monthlyexpenses':
-                    $base->whereMonth('pickup_date', Carbon::now()->month)
-                         ->whereYear('pickup_date', Carbon::now()->year);
+                    $base->whereMonth('pickup_date', \Carbon\Carbon::now()->month)
+                        ->whereYear('pickup_date', \Carbon\Carbon::now()->year);
                     break;
                 case 'monthlypaidpickup':
-                    $base->whereMonth('pickup_date', Carbon::now()->month)
-                         ->whereYear('pickup_date', Carbon::now()->year)
-                         ->where('payment_status', 'Paid');
+                    $base->whereMonth('pickup_date', \Carbon\Carbon::now()->month)
+                        ->whereYear('pickup_date', \Carbon\Carbon::now()->year)
+                        ->where('payment_status', 'Paid');
                     break;
                 case 'monthlypendingpickup':
-                    $base->whereMonth('pickup_date', Carbon::now()->month)
-                         ->whereYear('pickup_date', Carbon::now()->year)
-                         ->where('payment_status', 'pending');
+                    $base->whereMonth('pickup_date', \Carbon\Carbon::now()->month)
+                        ->whereYear('pickup_date', \Carbon\Carbon::now()->year)
+                        ->where('payment_status', 'pending');
                     break;
                 default:
-                    // 'all' -> no extra filter
+                    // no-op
                     break;
             }
 
-            // Total before search
             $recordsTotal = (clone $base)->count('id');
 
-            // Search across pick_up_id, payment_status, status + related vendor/rider names
             if ($search !== '') {
                 $like = '%' . strtr($search, ['%' => '\%', '_' => '\_']) . '%';
-
                 $base->where(function ($q) use ($like) {
                     $q->where('pick_up_id', 'like', $like)
-                      ->orWhere('payment_status', 'like', $like)
-                      ->orWhere('status', 'like', $like)
-                      ->orWhereHas('vendor', function ($vq) use ($like) {
-                          $vq->where('vendor_name', 'like', $like);
-                      })
-                      ->orWhereHas('rider', function ($rq) use ($like) {
-                          $rq->where('rider_name', 'like', $like);
-                      });
+                    ->orWhere('payment_status', 'like', $like)
+                    ->orWhere('status', 'like', $like)
+                    ->orWhereHas('vendor', fn($vq) => $vq->where('vendor_name', 'like', $like))
+                    ->orWhereHas('rider', fn($rq) => $rq->where('rider_name', 'like', $like));
                 });
             }
 
-            // Filtered count after search
             $recordsFiltered = (clone $base)->count('id');
 
-            // Safe ordering: allow only fields that live on the details table
-          // Safe ordering map (unchanged)
-$safeOrderMap = [
-    1 => 'pick_up_id',
-    5 => 'pickup_date',
-    6 => 'total_price',
-    7 => 'payment_status',
-    8 => 'status',
-];
+            // ✅ Updated safe order map to match your header indexes:
+            // 0:# 1:Pickup Id 2:Vendor 3:Rider 4:Flower Details 5:PickUp Date 6:Delivery Date
+            // 7:Total Price 8:Payment Status 9:Status 10:Actions
+            $safeOrderMap = [
+                1 => 'pick_up_id',
+                5 => 'pickup_date',
+                6 => 'delivery_date',   // ✅ new
+                7 => 'total_price',
+                8 => 'payment_status',
+                9 => 'status',
+            ];
 
-// ✅ Default sort by numeric primary key
-$orderBy = 'id';
-$dir     = 'desc';
+            $orderBy = 'id';
+            $dir     = 'desc';
 
-if (!empty($order[0])) {
-    $colIdx = (int)($order[0]['column'] ?? 5);
-    $dirRaw = strtolower($order[0]['dir'] ?? 'desc');
-    $dir    = in_array($dirRaw, ['asc', 'desc'], true) ? $dirRaw : 'desc';
-    if (isset($safeOrderMap[$colIdx])) {
-        $orderBy = $safeOrderMap[$colIdx];
-    }
-}
+            if (!empty($order[0])) {
+                $colIdx = (int)($order[0]['column'] ?? 5);
+                $dirRaw = strtolower($order[0]['dir'] ?? 'desc');
+                $dir    = in_array($dirRaw, ['asc', 'desc'], true) ? $dirRaw : 'desc';
+                if (isset($safeOrderMap[$colIdx])) {
+                    $orderBy = $safeOrderMap[$colIdx];
+                }
+            }
 
-            // Fetch paginated rows
             $rows = (clone $base)
                 ->orderBy($orderBy, $dir)
                 ->skip($start)
@@ -179,15 +166,21 @@ if (!empty($order[0])) {
                     'vendor_id',
                     'rider_id',
                     'pickup_date',
+                    'delivery_date',   // ✅ select it
                     'total_price',
                     'payment_status',
                     'status',
                 ]);
 
-            // Transform for DataTables
             $data = $rows->map(function ($r, $i) use ($start) {
                 $idx   = $start + $i + 1;
-                $date  = $r->pickup_date ? Carbon::parse($r->pickup_date)->format('d-m-Y') : 'N/A';
+                $pDate = $r->pickup_date
+                    ? \Carbon\Carbon::parse($r->pickup_date)->format('d-m-Y')
+                    : 'N/A';
+
+                $dDate = $r->delivery_date
+                    ? \Carbon\Carbon::parse($r->delivery_date)->format('d-m-Y')
+                    : '<span class="text-warning">Pending</span>';
 
                 $price = ($r->total_price !== null && $r->total_price !== '')
                     ? '₹' . number_format((float) $r->total_price, 2)
@@ -222,17 +215,19 @@ if (!empty($order[0])) {
                         <i class="fas fa-credit-card me-1"></i>
                     </button>';
 
+                // ✅ Return array aligned with your table columns (indexes 0..10):
                 return [
-                    $idx,                                   // #
-                    e($r->pick_up_id ?? 'N/A'),            // Pickup Id
-                    e(optional($r->vendor)->vendor_name ?? 'N/A'), // Vendor
-                    e(optional($r->rider)->rider_name ?? 'N/A'),   // Rider
-                    $viewBtn,                              // Flower Details
-                    $date,                                 // PickUp Date
-                    $price,                                // Total Price
-                    $payBadge,                             // Payment Status
-                    $statusBadge,                          // Status
-                    '<div class="d-flex align-items-center gap-2">'.$actions.'</div>', // Actions
+                    $idx,                                   // 0: #
+                    e($r->pick_up_id ?? 'N/A'),            // 1: Pickup Id
+                    e(optional($r->vendor)->vendor_name ?? 'N/A'), // 2: Vendor
+                    e(optional($r->rider)->rider_name ?? 'N/A'),   // 3: Rider
+                    $viewBtn,                              // 4: Flower Details
+                    $pDate,                                // 5: PickUp Date
+                    $dDate,                                // 6: Delivery Date  ✅ new slot
+                    $price,                                // 7: Total Price    (shifted)
+                    $payBadge,                             // 8: Payment Status (shifted)
+                    $statusBadge,                          // 9: Status         (shifted)
+                    '<div class="d-flex align-items-center gap-2">'.$actions.'</div>', // 10: Actions
                 ];
             })->values()->toArray();
 
@@ -243,8 +238,8 @@ if (!empty($order[0])) {
                 'data'            => $data,
             ], 200, ['Content-Type' => 'application/json']);
 
-        } catch (Throwable $e) {
-            Log::error('DT ajaxFlowerPickupDetails failed', [
+        } catch (\Throwable $e) {
+            \Log::error('DT ajaxFlowerPickupDetails failed', [
                 'msg'  => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -257,11 +252,6 @@ if (!empty($order[0])) {
         }
     }
 
-    /**
-     * Items list for the modal.
-     * Your items are linked by pick_up_id (NOT the numeric id),
-     * so we fetch the detail first, then query items by its pick_up_id.
-     */
     public function getFlowerPickupItems(int $id)
     {
         $detail = FlowerPickupDetails::findOrFail($id);
@@ -282,6 +272,7 @@ if (!empty($order[0])) {
 
         return response()->json(['items' => $items], 200, ['Content-Type' => 'application/json']);
     }
+
     public function edit($id)
     {
         $detail = FlowerPickupDetails::with(['flowerPickupItems', 'vendor', 'rider'])->findOrFail($id);
@@ -358,80 +349,80 @@ if (!empty($order[0])) {
     }
     
     public function saveFlowerPickupAssignRider(Request $request)
-{
-    // Validate the request
-    $request->validate([
-        'vendor_id'     => 'required|exists:flower__vendor_details,vendor_id',
-        'pickup_date'   => 'required|date',
-        'delivery_date' => 'required|date|after_or_equal:pickup_date', // ✅ NEW
-        'rider_id'      => 'required|exists:flower__rider_details,rider_id',
+    {
+        // Validate the request
+        $request->validate([
+            'vendor_id'     => 'required|exists:flower__vendor_details,vendor_id',
+            'pickup_date'   => 'required|date',
+            'delivery_date' => 'required|date|after_or_equal:pickup_date', // ✅ NEW
+            'rider_id'      => 'required|exists:flower__rider_details,rider_id',
 
-        'flower_id'     => 'required|array',
-        'flower_id.*'   => 'required|exists:flower_products,product_id',
+            'flower_id'     => 'required|array',
+            'flower_id.*'   => 'required|exists:flower_products,product_id',
 
-        'unit_id'       => 'required|array',
-        'unit_id.*'     => 'required|exists:pooja_units,id',
+            'unit_id'       => 'required|array',
+            'unit_id.*'     => 'required|exists:pooja_units,id',
 
-        'quantity'      => 'required|array',
-        'quantity.*'    => 'required|numeric|min:0.01',
+            'quantity'      => 'required|array',
+            'quantity.*'    => 'required|numeric|min:0.01',
 
-        // price is optional and may be missing entirely
-        'price'         => 'sometimes|array',
-        'price.*'       => 'nullable|numeric|min:0',
-    ]);
-
-    // Generate unique pick_up_id
-    $pickUpId = 'PICKUP-' . strtoupper(uniqid());
-
-    // Create the pickup (now includes delivery_date)
-    $pickup = FlowerPickupDetails::create([
-        'pick_up_id'     => $pickUpId,
-        'vendor_id'      => $request->vendor_id,
-        'pickup_date'    => $request->pickup_date,
-        'delivery_date'  => $request->delivery_date, // ✅ NEW
-        'rider_id'       => $request->rider_id,
-        'total_price'    => 0, // will calculate below
-        'payment_method' => null,
-        'payment_status' => 'pending',
-        'status'         => 'pending',
-        'payment_id'     => null,
-    ]);
-
-    // Read arrays safely (avoid undefined index notices)
-    $flowerIds = $request->input('flower_id', []);
-    $unitIds   = $request->input('unit_id',   []);
-    $qtys      = $request->input('quantity',  []);
-    $prices    = $request->input('price',     []); // may not exist; defaults to []
-
-    $totalPrice = 0;
-
-    foreach ($flowerIds as $i => $flowerId) {
-        $unitId   = $unitIds[$i]   ?? null;
-        $quantity = isset($qtys[$i])   ? (float)$qtys[$i]   : null;
-        $price    = isset($prices[$i]) ? (float)$prices[$i] : null; // nullable
-
-        // Create each item row
-        FlowerPickupItems::create([
-            'pick_up_id' => $pickUpId,
-            'flower_id'  => $flowerId,
-            'unit_id'    => $unitId,
-            'quantity'   => $quantity ?? 0,
-            'price'      => $price,         // nullable
+            // price is optional and may be missing entirely
+            'price'         => 'sometimes|array',
+            'price.*'       => 'nullable|numeric|min:0',
         ]);
 
-        // Accumulate total only if price provided
-        if ($price !== null && $quantity !== null) {
-            $totalPrice += $price * $quantity; // ✅ use price × quantity
+        // Generate unique pick_up_id
+        $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+
+        // Create the pickup (now includes delivery_date)
+        $pickup = FlowerPickupDetails::create([
+            'pick_up_id'     => $pickUpId,
+            'vendor_id'      => $request->vendor_id,
+            'pickup_date'    => $request->pickup_date,
+            'delivery_date'  => $request->delivery_date, // ✅ NEW
+            'rider_id'       => $request->rider_id,
+            'total_price'    => 0, // will calculate below
+            'payment_method' => null,
+            'payment_status' => 'pending',
+            'status'         => 'pending',
+            'payment_id'     => null,
+        ]);
+
+        // Read arrays safely (avoid undefined index notices)
+        $flowerIds = $request->input('flower_id', []);
+        $unitIds   = $request->input('unit_id',   []);
+        $qtys      = $request->input('quantity',  []);
+        $prices    = $request->input('price',     []); // may not exist; defaults to []
+
+        $totalPrice = 0;
+
+        foreach ($flowerIds as $i => $flowerId) {
+            $unitId   = $unitIds[$i]   ?? null;
+            $quantity = isset($qtys[$i])   ? (float)$qtys[$i]   : null;
+            $price    = isset($prices[$i]) ? (float)$prices[$i] : null; // nullable
+
+            // Create each item row
+            FlowerPickupItems::create([
+                'pick_up_id' => $pickUpId,
+                'flower_id'  => $flowerId,
+                'unit_id'    => $unitId,
+                'quantity'   => $quantity ?? 0,
+                'price'      => $price,         // nullable
+            ]);
+
+            // Accumulate total only if price provided
+            if ($price !== null && $quantity !== null) {
+                $totalPrice += $price * $quantity; // ✅ use price × quantity
+            }
         }
+
+        // Update total on header row
+        $pickup->update(['total_price' => $totalPrice]);
+
+        return redirect()
+            ->back()
+            ->with('success', 'Flower pickup details saved successfully!');
     }
-
-    // Update total on header row
-    $pickup->update(['total_price' => $totalPrice]);
-
-    return redirect()
-        ->back()
-        ->with('success', 'Flower pickup details saved successfully!');
-}
 
     public function update(Request $request, $id)
     {

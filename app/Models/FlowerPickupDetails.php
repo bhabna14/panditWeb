@@ -39,4 +39,9 @@ class FlowerPickupDetails extends Model
     {
         return $this->hasMany(FlowerPickupItems::class, 'pick_up_id', 'pick_up_id');
     }
+
+     protected $casts = [
+        'pickup_date'   => 'date',
+        'delivery_date' => 'date',
+    ];
 }
