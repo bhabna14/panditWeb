@@ -87,7 +87,7 @@
         }
 
         /* ========= NEW: background blink using a pseudo-element =========
-                       This wins against gradients and !important backgrounds */
+                           This wins against gradients and !important backgrounds */
         .pulse-bg--cyan::after {
             --tint: rgba(6, 182, 212, .16);
             animation: pulseBg 1.2s ease-in-out 0s 6;
@@ -235,7 +235,7 @@
                 </div>
                 <!-- Tomorrow Active Order -->
                 <div class="col-xl-3 col-lg-12 col-md-12 col-xs-12">
-                    <a href="{{ route('admin.orders.index', ['filter' => 'tomorrowOrder']) }}" target="_blank">
+                    <a href="{{ route('admin.tomorrowSubscriptions') }}" target="_blank">
                         <div class="card sales-card" style="border: 1px solid rgb(186, 185, 185);">
                             <div class="row">
                                 <div class="col-12">

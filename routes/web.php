@@ -56,6 +56,7 @@ use App\Http\Controllers\Admin\FlowerEstimateCompareController;
 use App\Http\Controllers\Admin\PaymentCollectionController;
 use App\Http\Controllers\Admin\SubscriptionPackageEstimateController;
 use App\Http\Controllers\Admin\MenuManagementController;
+use App\Http\Controllers\Admin\TomorrowSubscriptionsController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -998,3 +999,6 @@ Route::get('/admin/flower-pickups/create-from-estimate', [FlowerPickupAssignCont
 // save the pickup (uses the same name you were already posting to)
 Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'store'])
     ->name('admin.saveFlowerPickupAssignRider');
+
+    Route::get('/admin/reports/tomorrow-subscriptions', [TomorrowSubscriptionsController::class, 'index'])
+    ->name('admin.tomorrowSubscriptions');
