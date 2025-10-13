@@ -16,6 +16,7 @@ class FlowerPickupDetails extends Model
         'vendor_id',
         'rider_id',
         'pickup_date',
+        'delivery_date',
         'total_price',
         'payment_method',
         'paid_by',

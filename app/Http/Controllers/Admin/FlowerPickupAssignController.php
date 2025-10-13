@@ -78,81 +78,87 @@ class FlowerPickupAssignController extends Controller
 
     /** Store the pickup with items (fixed: total_price sums price * quantity if price provided). */
     public function store(Request $request)
-    {
-        $request->validate([
-            'vendor_id'      => 'required|exists:flower__vendor_details,vendor_id',
-            'pickup_date'    => 'required|date',
-            'rider_id'       => 'required|exists:flower__rider_details,rider_id',
-            'flower_id'      => 'required|array',
-            'flower_id.*'    => 'nullable|exists:flower_products,product_id',
-            'unit_id'        => 'required|array',
-            'unit_id.*'      => 'nullable|exists:pooja_units,id',
-            'quantity'       => 'required|array',
-            'quantity.*'     => 'nullable|numeric|min:0.01',
-            // optional prices coming from UI (if you add a price input per row)
-            'price'          => 'array',
-            'price.*'        => 'nullable|numeric|min:0',
-        ]);
+{
+    $request->validate([
+        'vendor_id'      => 'required|exists:flower__vendor_details,vendor_id',
+        'pickup_date'    => 'required|date',
+        'delivery_date'  => 'required|date|after_or_equal:pickup_date',   // ✅ new
+        'rider_id'       => 'required|exists:flower__rider_details,rider_id',
 
-        // Filter out completely empty rows (no flower_id AND no quantity)
-        $rows = [];
-        foreach ($request->flower_id as $i => $fid) {
-            $qty   = $request->quantity[$i] ?? null;
-            $unit  = $request->unit_id[$i] ?? null;
-            if (($fid || $qty) && $unit) {
-                $rows[] = [
-                    'flower_id' => $fid ?: null,
-                    'unit_id'   => $unit ?: null,
-                    'quantity'  => $qty ? (float)$qty : null,
-                    'price'     => $request->price[$i] ?? null,
-                ];
-            }
+        'flower_id'      => 'required|array',
+        'flower_id.*'    => 'nullable|exists:flower_products,product_id',
+        'unit_id'        => 'required|array',
+        'unit_id.*'      => 'nullable|exists:pooja_units,id',
+        'quantity'       => 'required|array',
+        'quantity.*'     => 'nullable|numeric|min:0.01',
+        'price'          => 'array',
+        'price.*'        => 'nullable|numeric|min:0',
+    ]);
+
+    // Build rows (skip empty)
+    $rows = [];
+    $flowerIds = $request->flower_id ?? [];
+    $unitIds   = $request->unit_id ?? [];
+    $qtys      = $request->quantity ?? [];
+    $prices    = $request->price ?? [];
+
+    foreach ($flowerIds as $i => $fid) {
+        $qty  = $qtys[$i]   ?? null;
+        $unit = $unitIds[$i]?? null;
+        $prc  = $prices[$i] ?? null;
+
+        if (($fid || $qty) && $unit) {
+            $rows[] = [
+                'flower_id' => $fid ?: null,
+                'unit_id'   => $unit ?: null,
+                'quantity'  => $qty ? (float)$qty : null,
+                'price'     => $prc !== null ? (float)$prc : null,
+            ];
         }
-
-        if (empty($rows)) {
-            return back()->withErrors(['flower_id.0' => 'Please add at least one item row.'])->withInput();
-        }
-
-        $pickUpId = 'PICKUP-' . strtoupper(uniqid());
-
-        $pickup = FlowerPickupDetails::create([
-            'pick_up_id'     => $pickUpId,
-            'vendor_id'      => $request->vendor_id,
-            'pickup_date'    => $request->pickup_date,
-            'rider_id'       => $request->rider_id,
-            'total_price'    => 0, // calc below
-            'payment_method' => null,
-            'payment_status' => 'pending',
-            'status'         => 'pending',
-            'payment_id'     => null,
-        ]);
-
-        $totalPrice = 0;
-
-        foreach ($rows as $r) {
-            FlowerPickupItems::create([
-                'pick_up_id' => $pickUpId,
-                'flower_id'  => $r['flower_id'],
-                'unit_id'    => $r['unit_id'],
-                'quantity'   => $r['quantity'] ?? 0,
-                'price'      => $r['price'], // nullable
-            ]);
-
-            // If price provided, total += price * quantity
-            if ($r['price'] !== null && $r['quantity'] !== null) {
-                $totalPrice += ((float)$r['price']) * ((float)$r['quantity']);
-            }
-        }
-
-        $pickup->total_price = $totalPrice;
-        $pickup->save();
-
-        return redirect()->route('admin.manageflowerpickupdetails')
-            ->with('success', 'Flower pickup details saved successfully!');
     }
 
-    // ===== helpers (copied/minified from your estimate logic) =====
+    if (empty($rows)) {
+        return back()->withErrors(['flower_id.0' => 'Please add at least one item row.'])->withInput();
+    }
 
+    $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+
+    $pickup = FlowerPickupDetails::create([
+        'pick_up_id'     => $pickUpId,
+        'vendor_id'      => $request->vendor_id,
+        'pickup_date'    => $request->pickup_date,
+        'delivery_date'  => $request->delivery_date,     // ✅ save delivery date
+        'rider_id'       => $request->rider_id,
+        'total_price'    => 0, // calc below
+        'payment_method' => null,
+        'payment_status' => 'pending',
+        'status'         => 'pending',
+        'payment_id'     => null,
+    ]);
+
+    $totalPrice = 0;
+
+    foreach ($rows as $r) {
+        FlowerPickupItems::create([
+            'pick_up_id' => $pickUpId,
+            'flower_id'  => $r['flower_id'],
+            'unit_id'    => $r['unit_id'],
+            'quantity'   => $r['quantity'] ?? 0,
+            'price'      => $r['price'], // nullable
+        ]);
+
+        if ($r['price'] !== null && $r['quantity'] !== null) {
+            $totalPrice += ((float)$r['price']) * ((float)$r['quantity']);
+        }
+    }
+
+    $pickup->update(['total_price' => $totalPrice]);
+
+    return redirect()->route('admin.manageflowerpickupdetails')
+        ->with('success', 'Flower pickup details saved successfully!');
+}
+
+    // ===== helpers (copied/minified from your estimate logic) =====
     private function fetchActiveSubsEffectiveOn(Carbon $date)
     {
         $subs = Subscription::with([
