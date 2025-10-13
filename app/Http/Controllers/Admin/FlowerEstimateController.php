@@ -52,11 +52,16 @@ class FlowerEstimateController extends Controller
         'count'  => 0.0, // pieces
     ];
 
+        $excludeStats = ['expired', 'dead'];
+
+
     foreach ($period as $day) {
         $subs = Subscription::with([
                 'flowerProducts:id,product_id,name',
                 'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
             ])
+                ->whereNotIn('status', $excludeStats)
+
             ->activeOn($day)
             ->get();
 
