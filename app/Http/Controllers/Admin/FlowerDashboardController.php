@@ -82,9 +82,10 @@ class FlowerDashboardController extends Controller
     ];
 
     // ✅ Subscriptions that START tomorrow (keep this if you show it elsewhere)
-    $startingTomorrow = Subscription::whereDate('start_date', '=', $tmr->toDateString())
-    ->whereNotIn('status', $excludeStatuses)
+ $startingTomorrow = Subscription::whereDate('start_date', $tmr->toDateString())
+    ->whereIn('status', ['active', 'paused', 'pending'])
     ->count();
+
 
     // ✅ Subscriptions ACTIVE on tomorrow (this is what you want to display)
     $activeTomorrowCount = Subscription::where(function ($q) {
