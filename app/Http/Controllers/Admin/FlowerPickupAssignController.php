@@ -74,89 +74,92 @@ class FlowerPickupAssignController extends Controller
             'prefillRows'     => $prefillRows,
         ]);
     }
-    
-public function store(Request $request)
-{
-    $request->validate([
-        'vendor_id'      => 'required|exists:flower__vendor_details,vendor_id',
-        'pickup_date'    => 'required|date',
-        'delivery_date'  => 'required|date|after_or_equal:pickup_date',
-        'rider_id'       => 'required|exists:flower__rider_details,rider_id',
 
-        'flower_id'      => 'required|array',
-        'flower_id.*'    => 'nullable|exists:flower_products,product_id',
-        'unit_id'        => 'required|array',
-        'unit_id.*'      => 'nullable|exists:pooja_units,id',
-        'quantity'       => 'required|array',
-        'quantity.*'     => 'nullable|numeric|min:0.01',
+    public function store(Request $request)
+    {
+        $request->validate([
+            'vendor_id'      => 'required|exists:flower__vendor_details,vendor_id',
+            'pickup_date'    => 'required|date',
+            'delivery_date'  => 'required|date|after_or_equal:pickup_date',
+            'rider_id'       => 'required|exists:flower__rider_details,rider_id',
 
-        // price is optional
-        'price'          => 'sometimes|array',
-        'price.*'        => 'nullable|numeric|min:0',
-    ]);
+            'flower_id'      => 'required|array',
+            'flower_id.*'    => 'nullable|exists:flower_products,product_id',
 
-    // Always read arrays with a safe default
-    $flowerIds = $request->input('flower_id', []);
-    $unitIds   = $request->input('unit_id',   []);
-    $qtys      = $request->input('quantity',  []);
-    $prices    = $request->input('price',     []); // <- may be missing
+            'unit_id'        => 'required|array',
+            'unit_id.*'      => 'nullable|exists:pooja_units,id',
 
-    $rows = [];
-    foreach ($flowerIds as $i => $fid) {
-        $qty  = $qtys[$i]   ?? null;
-        $unit = $unitIds[$i]?? null;
-        $prc  = $prices[$i] ?? null; // <- SAFE: no undefined index
+            'quantity'       => 'required|array',
+            'quantity.*'     => 'nullable|numeric|min:0.01',
 
-        if (($fid || $qty) && $unit) {
-            $rows[] = [
-                'flower_id' => $fid ?: null,
-                'unit_id'   => $unit ?: null,
-                'quantity'  => $qty !== null ? (float)$qty : null,
-                'price'     => $prc !== null ? (float)$prc : null,
-            ];
-        }
-    }
-
-    if (empty($rows)) {
-        return back()->withErrors(['flower_id.0' => 'Please add at least one item row.'])->withInput();
-    }
-
-    $pickUpId = 'PICKUP-' . strtoupper(uniqid());
-
-    $pickup = FlowerPickupDetails::create([
-        'pick_up_id'     => $pickUpId,
-        'vendor_id'      => $request->vendor_id,
-        'pickup_date'    => $request->pickup_date,
-        'delivery_date'  => $request->delivery_date,
-        'rider_id'       => $request->rider_id,
-        'total_price'    => 0,
-        'payment_method' => null,
-        'payment_status' => 'pending',
-        'status'         => 'pending',
-        'payment_id'     => null,
-    ]);
-
-    $totalPrice = 0;
-    foreach ($rows as $r) {
-        FlowerPickupItems::create([
-            'pick_up_id' => $pickUpId,
-            'flower_id'  => $r['flower_id'],
-            'unit_id'    => $r['unit_id'],
-            'quantity'   => $r['quantity'] ?? 0,
-            'price'      => $r['price'], // nullable
+            // price is optional — it may be missing entirely
+            'price'          => 'sometimes|array',
+            'price.*'        => 'nullable|numeric|min:0',
         ]);
 
-        if ($r['price'] !== null && $r['quantity'] !== null) {
-            $totalPrice += $r['price'] * $r['quantity'];
+        // Read arrays with safe defaults so undefined keys never occur
+        $flowerIds = $request->input('flower_id', []);
+        $unitIds   = $request->input('unit_id',   []);
+        $qtys      = $request->input('quantity',  []);
+        $prices    = $request->input('price',     []);  // <-- may not exist; default to []
+
+        $rows = [];
+        foreach ($flowerIds as $i => $fid) {
+            $qty  = $qtys[$i]   ?? null;
+            $unit = $unitIds[$i]?? null;
+            $prc  = $prices[$i] ?? null; // <-- SAFE: won’t trigger “Undefined array key 'price'”
+
+            // keep only meaningful rows (needs a unit; flower or qty present)
+            if (($fid || $qty) && $unit) {
+                $rows[] = [
+                    'flower_id' => $fid ?: null,
+                    'unit_id'   => $unit ?: null,
+                    'quantity'  => $qty !== null ? (float)$qty : null,
+                    'price'     => $prc !== null ? (float)$prc : null, // nullable
+                ];
+            }
         }
+
+        if (empty($rows)) {
+            return back()->withErrors(['flower_id.0' => 'Please add at least one item row.'])->withInput();
+        }
+
+        $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+
+        $pickup = \App\Models\FlowerPickupDetails::create([
+            'pick_up_id'     => $pickUpId,
+            'vendor_id'      => $request->vendor_id,
+            'pickup_date'    => $request->pickup_date,
+            'delivery_date'  => $request->delivery_date,
+            'rider_id'       => $request->rider_id,
+            'total_price'    => 0,
+            'payment_method' => null,
+            'payment_status' => 'pending',
+            'status'         => 'pending',
+            'payment_id'     => null,
+        ]);
+
+        $totalPrice = 0;
+
+        foreach ($rows as $r) {
+            \App\Models\FlowerPickupItems::create([
+                'pick_up_id' => $pickUpId,
+                'flower_id'  => $r['flower_id'],
+                'unit_id'    => $r['unit_id'],
+                'quantity'   => $r['quantity'] ?? 0,
+                'price'      => $r['price'],     // nullable
+            ]);
+
+            if ($r['price'] !== null && $r['quantity'] !== null) {
+                $totalPrice += $r['price'] * $r['quantity'];
+            }
+        }
+
+        $pickup->update(['total_price' => $totalPrice]);
+
+        return redirect()->route('admin.manageflowerpickupdetails')
+            ->with('success', 'Flower pickup details saved successfully!');
     }
-
-    $pickup->update(['total_price' => $totalPrice]);
-
-    return redirect()->route('admin.manageflowerpickupdetails')
-        ->with('success', 'Flower pickup details saved successfully!');
-}
-
 
     private function fetchActiveSubsEffectiveOn(Carbon $date)
     {
