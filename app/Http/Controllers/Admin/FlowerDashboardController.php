@@ -70,6 +70,14 @@ class FlowerDashboardController extends Controller
         $activeSubscriptions = Subscription::where('status', 'active')->count();
 
         $tomorrow = Carbon::tomorrow($tz)->toDateString();
+          // Eager load relations (no column-restrict to avoid custom PK pitfalls)
+        $with = [
+            'users',                     // has mobile_number, email, custom PK `userid`
+            'users.addressDetails',      // default address (UserAddress)
+            'order',                     // shipping_* fields (if present)
+            'flowerProducts:product_id,name',
+        ];
+
 
          $startingTomorrow = Subscription::with($with)
             ->whereDate('start_date', '=', $tomorrow->toDateString())
