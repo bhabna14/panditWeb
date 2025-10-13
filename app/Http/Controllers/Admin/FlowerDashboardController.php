@@ -71,6 +71,7 @@ class FlowerDashboardController extends Controller
 
     $tomorrowDate = Carbon::tomorrow($tz)->toDateString();
     $tmr = Carbon::tomorrow($tz)->startOfDay();
+    $excludeStatuses = ['expired', 'dead'];
 
     // Optional eager loads you already had (kept, but not needed for counts)
     $with = [
@@ -81,7 +82,9 @@ class FlowerDashboardController extends Controller
     ];
 
     // ✅ Subscriptions that START tomorrow (keep this if you show it elsewhere)
-    $startingTomorrow = Subscription::whereDate('start_date', '=', $tmr->toDateString())->count();
+    $startingTomorrow = Subscription::whereDate('start_date', '=', $tmr->toDateString())
+    ->whereNotIn('status', $excludeStatuses)
+    ->count();
 
     // ✅ Subscriptions ACTIVE on tomorrow (this is what you want to display)
     $activeTomorrowCount = Subscription::where(function ($q) {
