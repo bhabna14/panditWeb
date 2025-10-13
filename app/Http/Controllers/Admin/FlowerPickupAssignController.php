@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\DB;
 
 class FlowerPickupAssignController extends Controller
 {
-    /** Show full-page form prefilled from Tomorrow estimate (or ?date=YYYY-MM-DD). */
     public function createFromEstimate(Request $request)
     {
         // which date to prefill from
@@ -75,14 +74,13 @@ class FlowerPickupAssignController extends Controller
             'prefillRows'     => $prefillRows,
         ]);
     }
-
-    /** Store the pickup with items (fixed: total_price sums price * quantity if price provided). */
-    public function store(Request $request)
+    
+public function store(Request $request)
 {
     $request->validate([
         'vendor_id'      => 'required|exists:flower__vendor_details,vendor_id',
         'pickup_date'    => 'required|date',
-        'delivery_date'  => 'required|date|after_or_equal:pickup_date',   // ✅ new
+        'delivery_date'  => 'required|date|after_or_equal:pickup_date',
         'rider_id'       => 'required|exists:flower__rider_details,rider_id',
 
         'flower_id'      => 'required|array',
@@ -91,27 +89,29 @@ class FlowerPickupAssignController extends Controller
         'unit_id.*'      => 'nullable|exists:pooja_units,id',
         'quantity'       => 'required|array',
         'quantity.*'     => 'nullable|numeric|min:0.01',
-        'price'          => 'array',
+
+        // price is optional
+        'price'          => 'sometimes|array',
         'price.*'        => 'nullable|numeric|min:0',
     ]);
 
-    // Build rows (skip empty)
-    $rows = [];
-    $flowerIds = $request->flower_id ?? [];
-    $unitIds   = $request->unit_id ?? [];
-    $qtys      = $request->quantity ?? [];
-    $prices    = $request->price ?? [];
+    // Always read arrays with a safe default
+    $flowerIds = $request->input('flower_id', []);
+    $unitIds   = $request->input('unit_id',   []);
+    $qtys      = $request->input('quantity',  []);
+    $prices    = $request->input('price',     []); // <- may be missing
 
+    $rows = [];
     foreach ($flowerIds as $i => $fid) {
         $qty  = $qtys[$i]   ?? null;
         $unit = $unitIds[$i]?? null;
-        $prc  = $prices[$i] ?? null;
+        $prc  = $prices[$i] ?? null; // <- SAFE: no undefined index
 
         if (($fid || $qty) && $unit) {
             $rows[] = [
                 'flower_id' => $fid ?: null,
                 'unit_id'   => $unit ?: null,
-                'quantity'  => $qty ? (float)$qty : null,
+                'quantity'  => $qty !== null ? (float)$qty : null,
                 'price'     => $prc !== null ? (float)$prc : null,
             ];
         }
@@ -127,9 +127,9 @@ class FlowerPickupAssignController extends Controller
         'pick_up_id'     => $pickUpId,
         'vendor_id'      => $request->vendor_id,
         'pickup_date'    => $request->pickup_date,
-        'delivery_date'  => $request->delivery_date,     // ✅ save delivery date
+        'delivery_date'  => $request->delivery_date,
         'rider_id'       => $request->rider_id,
-        'total_price'    => 0, // calc below
+        'total_price'    => 0,
         'payment_method' => null,
         'payment_status' => 'pending',
         'status'         => 'pending',
@@ -137,7 +137,6 @@ class FlowerPickupAssignController extends Controller
     ]);
 
     $totalPrice = 0;
-
     foreach ($rows as $r) {
         FlowerPickupItems::create([
             'pick_up_id' => $pickUpId,
@@ -148,7 +147,7 @@ class FlowerPickupAssignController extends Controller
         ]);
 
         if ($r['price'] !== null && $r['quantity'] !== null) {
-            $totalPrice += ((float)$r['price']) * ((float)$r['quantity']);
+            $totalPrice += $r['price'] * $r['quantity'];
         }
     }
 
@@ -158,7 +157,7 @@ class FlowerPickupAssignController extends Controller
         ->with('success', 'Flower pickup details saved successfully!');
 }
 
-    // ===== helpers (copied/minified from your estimate logic) =====
+
     private function fetchActiveSubsEffectiveOn(Carbon $date)
     {
         $subs = Subscription::with([
