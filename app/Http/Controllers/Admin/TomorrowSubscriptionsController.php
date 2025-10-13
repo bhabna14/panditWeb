@@ -99,6 +99,9 @@ class TomorrowSubscriptionsController extends Controller
                 $address = trim(implode(', ', $chunks));
             }
 
+            $aptName = ($user && $user->addressDetails) ? ($user->addressDetails->apartment_name ?? '') : '';
+
+
             return [
                 'subscription_id' => $s->subscription_id,
                 'order_id'        => $s->order_id,
@@ -115,6 +118,9 @@ class TomorrowSubscriptionsController extends Controller
                 'email'           => $user?->email ?? null,
                 'product'         => $product?->name ?? '—',
                 'address'         => $address ?: '—',
+
+                'address'         => $address ?: '—',
+                'apartment_name'  => $aptName,   // <-- add this
             ];
         };
 
