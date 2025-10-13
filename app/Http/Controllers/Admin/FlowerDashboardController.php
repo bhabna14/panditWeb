@@ -65,25 +65,32 @@ class FlowerDashboardController extends Controller
 
    public function flowerDashboard()
 {
-    $tz = config('app.timezone');
+  $tz           = config('app.timezone');
+$tmr          = Carbon::tomorrow($tz)->startOfDay();
+$excludeStats = ['expired', 'dead'];
 
-    $activeSubscriptions = Subscription::where('status', 'active')->count();
+// ✅ Count of subscriptions that will be ACTIVE tomorrow
+$activeTomorrowCount = Subscription::query()
+    ->whereNotIn('status', $excludeStats)
+    ->where(function ($q) {
+        $q->whereIn('status', ['active', 'paused', 'pending'])
+          ->orWhere('is_active', 1);
+    })
+    ->whereDate('start_date', '<=', $tmr->toDateString())
+    ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tmr->toDateString())
+    // Exclude those paused ON that day:
+    ->where(function ($q) use ($tmr) {
+        $q->whereNull('pause_start_date')
+          ->orWhereNull('pause_end_date')
+          ->orWhereDate('pause_start_date', '>', $tmr->toDateString())
+          ->orWhereDate('pause_end_date', '<', $tmr->toDateString());
+    })
+    ->count();
 
-    $tomorrowDate = Carbon::tomorrow($tz)->toDateString();
-    $tmr = Carbon::tomorrow($tz)->startOfDay();
-    $excludeStatuses = ['expired', 'dead'];
-
-    // Optional eager loads you already had (kept, but not needed for counts)
-    $with = [
-        'users',
-        'users.addressDetails',
-        'order',
-        'flowerProducts:product_id,name',
-    ];
-
-    // ✅ Subscriptions that START tomorrow (keep this if you show it elsewhere)
- $startingTomorrow = Subscription::whereDate('start_date', $tmr->toDateString())
+// (Optional) keep this if you also want the “starts tomorrow” metric elsewhere:
+$startingTomorrow = Subscription::query()
     ->whereIn('status', ['active', 'paused', 'pending'])
+    ->whereDate('start_date', $tmr->toDateString())
     ->count();
 
 
