@@ -83,7 +83,7 @@ class FlowerDashboardController extends Controller
 
          $startingTomorrow = Subscription::with($with)
             ->whereDate('start_date', '=', $tomorrows->toDateString())
-            ->get();
+            ->count();
 
         $totalDeliveriesTodayCount = DeliveryHistory::whereDate('created_at', Carbon::today($tz)->toDateString())
             ->where('delivery_status', 'delivered')->count();
