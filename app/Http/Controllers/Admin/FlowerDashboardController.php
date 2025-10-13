@@ -70,6 +70,8 @@ class FlowerDashboardController extends Controller
         $activeSubscriptions = Subscription::where('status', 'active')->count();
 
         $tomorrow = Carbon::tomorrow($tz)->toDateString();
+                $tomorrows = Carbon::tomorrow()->startOfDay();
+
           // Eager load relations (no column-restrict to avoid custom PK pitfalls)
         $with = [
             'users',                     // has mobile_number, email, custom PK `userid`
@@ -80,7 +82,7 @@ class FlowerDashboardController extends Controller
 
 
          $startingTomorrow = Subscription::with($with)
-            ->whereDate('start_date', '=', $tomorrow->toDateString())
+            ->whereDate('start_date', '=', $tomorrows->toDateString())
             ->get();
 
         $totalDeliveriesTodayCount = DeliveryHistory::whereDate('created_at', Carbon::today($tz)->toDateString())
@@ -220,7 +222,7 @@ class FlowerDashboardController extends Controller
 
         return view('admin/flower-dashboard', compact(
             'activeSubscriptions',
-            'tomorrowActiveOrder',
+            'startingTomorrow',
             'totalDeliveriesTodayCount',
             'totalIncomeToday',
             'todayTotalExpenditure',
