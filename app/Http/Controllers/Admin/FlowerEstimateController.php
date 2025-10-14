@@ -15,293 +15,186 @@ use App\Models\FlowerProduct;
 use App\Models\PoojaUnit;
 class FlowerEstimateController extends Controller
 {
-  public function index(Request $request)
+ public function index(Request $request)
 {
-    // ---- Filters ---------------------------------------------------------
-    $preset = $request->string('preset')->toString();        // today|yesterday|tomorrow|this_month|last_month
-    $mode   = $request->string('mode')->toString() ?: 'day'; // day|month
 
-    [$start, $end] = $this->resolveRange($request, $preset);
-
-    // If user switched to Month view but didn't send dates or a preset, default to whole current month
-    if ($mode === 'month' && !$request->filled('start_date') && !$request->filled('end_date') && !$preset) {
-        $today = Carbon::today();
-        $start = $today->copy()->startOfMonth();
-        $end   = $today->copy()->endOfMonth();
-    }
-
-    // Ensure start <= end
-    if ($end->lt($start)) {
-        [$start, $end] = [$end->copy()->startOfDay(), $start->copy()->endOfDay()];
-    }
-
-    // ---- Tomorrow (separate, with effective end & pause handling) --------
+    $today    = Carbon::today();
     $tomorrow = Carbon::tomorrow()->startOfDay();
-    $tomorrowSubs     = $this->fetchActiveSubsEffectiveOn($tomorrow);
-    $tomorrowEstimate = $this->buildEstimateForSubsOnDate($tomorrowSubs, $tomorrow);
 
-    // ---- Build daily numbers + RANGE GRAND TOTALS ------------------------
-    $period = CarbonPeriod::create($start->toDateString(), $end->toDateString());
-    $dailyEstimates = [];
-
-    // overall range totals (base units)
-    $rangeTotalsByItemBase = []; // key: "name|category" => total_qty_base
-    $rangeTotalsByCategoryBase = [
-        'weight' => 0.0, // grams
-        'volume' => 0.0, // milliliters
-        'count'  => 0.0, // pieces
+    // Relations for display (include rider on the order + latest paid payment)
+    $with = [
+        'users',                    // has mobile_number, email, custom PK `userid`
+        'users.addressDetails',     // default address (UserAddress)
+        'order',                    // shipping_* fields (if present)
+        'order.rider:id,rider_id,rider_name',
+        'flowerProducts:product_id,name',
+        'latestPaidPayment',        // <-- used to decide if "pending today" is truly unpaid
+        'flowerPayments'            // <-- optional fallback check for 'status'='paid'
     ];
 
-        $excludeStats = ['expired', 'dead'];
+    // We will consistently exclude these terminal statuses everywhere
+    $excludeStatuses = ['expired', 'dead'];
 
-
-    foreach ($period as $day) {
-        $subs = Subscription::with([
-                'flowerProducts:id,product_id,name',
-                'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
-            ])
-                ->whereNotIn('status', $excludeStats)
-
-            ->activeOn($day)
-            ->get();
-
-        $byProduct = $subs->groupBy('product_id');
-
-        $productsForDay   = [];
-        $grandTotalForDay = 0.0;
-
-        // day-level totals by item (across all products)
-        $dayTotalsByItemBase = [];
-
-        foreach ($byProduct as $productId => $subsForProduct) {
-            $product   = optional($subsForProduct->first())->flowerProducts;
-            $subsCount = $subsForProduct->count();
-
-            $items        = [];
-            $productTotal = 0.0;
-
-            if ($product) {
-                foreach ($product->packageItems as $pi) {
-                    $perItemQty      = (float) ($pi->quantity ?? 0);
-                    $origUnit        = strtolower(trim($pi->unit ?? ''));
-                    $itemPricePerSub = (float) ($pi->price ?? 0);
-
-                    $category     = $this->inferCategory($origUnit);
-                    if ($category === 'unknown') { $category = 'count'; $origUnit = 'pcs'; }
-                    $toBaseFactor = $this->toBaseFactor($origUnit);
-
-                    $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor; // base for category
-                    [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($totalQtyBase, $category);
-
-                    $totalPrice = $itemPricePerSub * $subsCount;
-
-                    $items[] = [
-                        'item_name'         => $pi->item_name,
-                        'category'          => $category,
-                        'per_item_qty'      => $perItemQty,
-                        'per_item_unit'     => $origUnit,
-                        'item_price_per_sub'=> $itemPricePerSub,
-                        'total_qty_base'    => $totalQtyBase,
-                        'total_qty_disp'    => $qtyDisp,
-                        'total_unit_disp'   => $unitDisp,
-                        'total_price'       => $totalPrice,
-                    ];
-
-                    $productTotal += $totalPrice;
-
-                    // --- aggregate to day totals (by item)
-                    $key = strtolower($pi->item_name).'|'.$category;
-                    if (!isset($dayTotalsByItemBase[$key])) {
-                        $dayTotalsByItemBase[$key] = [
-                            'item_name'      => $pi->item_name,
-                            'category'       => $category,
-                            'total_qty_base' => 0.0,
-                        ];
-                    }
-                    $dayTotalsByItemBase[$key]['total_qty_base'] += $totalQtyBase;
-
-                    // --- aggregate to RANGE totals (by item)
-                    if (!isset($rangeTotalsByItemBase[$key])) {
-                        $rangeTotalsByItemBase[$key] = [
-                            'item_name'      => $pi->item_name,
-                            'category'       => $category,
-                            'total_qty_base' => 0.0,
-                        ];
-                    }
-                    $rangeTotalsByItemBase[$key]['total_qty_base'] += $totalQtyBase;
-
-                    // --- aggregate to RANGE totals (by category)
-                    $rangeTotalsByCategoryBase[$category] += $totalQtyBase;
-                }
-            }
-
-            $grandTotalForDay += $productTotal;
-
-            $productsForDay[$productId] = [
-                'product'              => $product,
-                'subs_count'           => $subsCount,
-                'items'                => $items,
-                'product_total'        => $productTotal,
-                'bundle_total_per_sub' => array_sum(array_column($items, 'item_price_per_sub')),
-            ];
+    // Helper: skip "pending & starts today & unpaid"
+    $shouldHide = function ($sub) use ($today) {
+        if (strtolower($sub->status ?? '') !== 'pending') {
+            return false;
+        }
+        // start date is today?
+        $startsToday = $sub->start_date ? Carbon::parse($sub->start_date)->isSameDay($today) : false;
+        if (!$startsToday) {
+            return false;
         }
 
-        // format day totals for display
-        $dayTotalsForDisplay = $this->formatTotalsByItem($dayTotalsByItemBase);
+        // Paid check #1 (preferred): has a latestPaidPayment (payment_status = 'paid')
+        $hasPaid = !empty($sub->latestPaidPayment);
 
-        $dailyEstimates[$day->toDateString()] = [
-            'products'           => $productsForDay,
-            'grand_total_amount' => $grandTotalForDay,
-            'totals_by_item'     => $dayTotalsForDisplay,
-        ];
-    }
-
-    // ---- Month-wise rollup (shown when $mode === 'month') ----------------
-    $monthlyEstimates = [];
-    if ($mode === 'month') {
-        foreach ($dailyEstimates as $dateStr => $payload) {
-            $monthKey = Carbon::parse($dateStr)->format('Y-m');
-
-            if (!isset($monthlyEstimates[$monthKey])) {
-                $monthlyEstimates[$monthKey] = [
-                    'month_label' => Carbon::parse($dateStr)->format('M Y'),
-                    'products'    => [],
-                    'grand_total' => 0.0,
-                    'totals_by_item_base' => [],
-                ];
-            }
-
-            foreach ($payload['products'] as $pid => $row) {
-                if (!isset($monthlyEstimates[$monthKey]['products'][$pid])) {
-                    $monthlyEstimates[$monthKey]['products'][$pid] = [
-                        'product'       => $row['product'],
-                        'subs_days'     => 0,
-                        'items'         => [],
-                        'product_total' => 0.0,
-                    ];
-                }
-
-                $monthlyEstimates[$monthKey]['products'][$pid]['subs_days'] += $row['subs_count'];
-
-                foreach ($row['items'] as $it) {
-                    $key = strtolower($it['item_name']).'|'.$it['category'];
-
-                    if (!isset($monthlyEstimates[$monthKey]['products'][$pid]['items'][$key])) {
-                        $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key] = [
-                            'item_name'      => $it['item_name'],
-                            'category'       => $it['category'],
-                            'total_qty_base' => 0.0,
-                            'total_price'    => 0.0,
-                        ];
-                    }
-
-                    $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_qty_base'] += $it['total_qty_base'];
-                    $monthlyEstimates[$monthKey]['products'][$pid]['items'][$key]['total_price']    += $it['total_price'];
-
-                    // month-level totals by item
-                    if (!isset($monthlyEstimates[$monthKey]['totals_by_item_base'][$key])) {
-                        $monthlyEstimates[$monthKey]['totals_by_item_base'][$key] = [
-                            'item_name'      => $it['item_name'],
-                            'category'       => $it['category'],
-                            'total_qty_base' => 0.0,
-                        ];
-                    }
-                    $monthlyEstimates[$monthKey]['totals_by_item_base'][$key]['total_qty_base'] += $it['total_qty_base'];
-                }
-
-                $monthlyEstimates[$monthKey]['products'][$pid]['product_total'] += $row['product_total'];
-                $monthlyEstimates[$monthKey]['grand_total'] += $row['product_total'];
-            }
+        // Paid check #2 (fallback): any payment row with status='paid' (if your schema uses "status")
+        if (!$hasPaid && $sub->relationLoaded('flowerPayments')) {
+            $hasPaid = $sub->flowerPayments->contains(function ($p) {
+                $ps = strtolower((string)($p->payment_status ?? ''));
+                $s  = strtolower((string)($p->status ?? ''));
+                return $ps === 'paid' || $s === 'paid';
+            });
         }
 
-        // finalize formatting
-        foreach ($monthlyEstimates as &$mBlock) {
-            foreach ($mBlock['products'] as &$pBlock) {
-                foreach ($pBlock['items'] as &$iBlock) {
-                    [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase(
-                        $iBlock['total_qty_base'],
-                        $iBlock['category']
-                    );
-                    $iBlock['total_qty_disp']  = $qtyDisp;
-                    $iBlock['total_unit_disp'] = $unitDisp;
-                }
-            }
-
-            // compute display array for month-level totals-by-item
-            $mBlock['totals_by_item'] = $this->formatTotalsByItem($mBlock['totals_by_item_base']);
-            unset($mBlock['totals_by_item_base']);
-        }
-        unset($mBlock, $pBlock, $iBlock);
-    }
-
-    // ---- RANGE GRAND TOTALS (display ready) ------------------------------
-    $rangeTotals = [
-        'by_item'     => $this->formatTotalsByItem($rangeTotalsByItemBase),
-        'by_category' => $this->formatTotalsByCategory($rangeTotalsByCategoryBase),
-    ];
-
-    // ======= NEW: Lookups for the "Assign Vendor" modal =======
-    // (No 'symbol' column needed anywhere.)
-    $vendors = \App\Models\FlowerVendor::select('vendor_id', 'vendor_name')->orderBy('vendor_name')->get();
-    $riders  = \App\Models\RiderDetails::select('rider_id', 'rider_name')->orderBy('rider_name')->get();
-    $flowers = \App\Models\FlowerProduct::select('product_id', 'name')->orderBy('name')->get();
-    $units   = \App\Models\PoojaUnit::select('id', 'unit_name')->orderBy('unit_name')->get();
-
-    // name → product_id (exact match for auto prefill)
-    $flowerNameToId = $flowers->pluck('product_id', 'name')->toArray();
-
-    // Normalize unit_name -> base symbol we use in UI ('kg','g','l','ml','pcs')
-    $normalizeUnit = function (?string $raw): string {
-        $u = strtolower(trim((string)$raw));
-        // exact common tokens
-        if (in_array($u, ['kg','kilogram','kilograms','kgs'])) return 'kg';
-        if (in_array($u, ['g','gram','grams','gm'])) return 'g';
-        if (in_array($u, ['l','lt','liter','litre','liters','litres'])) return 'l';
-        if (in_array($u, ['ml','milliliter','millilitre','milliliters','millilitres'])) return 'ml';
-        if (in_array($u, ['pcs','pc','piece','pieces','count'])) return 'pcs';
-
-        // fallback by substring (very forgiving)
-        if (str_contains($u, 'kilo')) return 'kg';
-        if ($u === 'mg' || str_contains($u, 'gram')) return 'g';
-        if (str_contains($u, 'millil')) return 'ml';
-        if (str_contains($u, 'lit')) return 'l';
-        if (str_contains($u, 'piece') || str_contains($u, 'pcs') || str_contains($u, 'count')) return 'pcs';
-
-        // default to pcs
-        return 'pcs';
+        // Hide only if still unpaid
+        return !$hasPaid;
     };
 
-    // symbol → unit_id (first match wins)
-    $unitSymbolToId = [];
-    foreach ($units as $u) {
-        $sym = $normalizeUnit($u->unit_name);
-        if (!isset($unitSymbolToId[$sym])) {
-            $unitSymbolToId[$sym] = $u->id;
+    // 1) Active tomorrow (your “estimate” rule + exclude paused that day)
+    $activeTomorrow = Subscription::with($with)
+        ->whereNotIn('status', $excludeStatuses)
+        ->where(function ($q) {
+            $q->whereIn('status', ['active', 'paused', 'pending'])
+              ->orWhere('is_active', 1);
+        })
+        ->whereDate('start_date', '<=', $tomorrow->toDateString())
+        ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tomorrow->toDateString())
+        ->get()
+        // paused on tomorrow? remove
+        ->filter(function ($s) use ($tomorrow) {
+            if ($s->pause_start_date && $s->pause_end_date) {
+                $ps = Carbon::parse($s->pause_start_date)->startOfDay();
+                $pe = Carbon::parse($s->pause_end_date)->endOfDay();
+                if ($ps->lte($tomorrow) && $pe->gte($tomorrow)) {
+                    return false;
+                }
+            }
+            return true;
+        })
+        // NEW: hide pending that start today and are unpaid
+        ->reject($shouldHide)
+        ->values();
+
+    // 2) Start tomorrow
+    $startingTomorrow = Subscription::with($with)
+        ->whereNotIn('status', $excludeStatuses)
+        ->whereDate('start_date', '=', $tomorrow->toDateString())
+        ->get()
+        // (Rule targets "start date = today", so not necessary here, but safe if you want uniformity)
+        ->reject($shouldHide)
+        ->values();
+
+    // 3) Pause starts tomorrow
+    $pausingTomorrow = Subscription::with($with)
+        ->whereNotIn('status', $excludeStatuses)
+        ->whereDate('pause_start_date', '=', $tomorrow->toDateString())
+        ->get()
+        ->reject($shouldHide)
+        ->values();
+
+    // 4) End today (coalesced)
+    $endingToday = Subscription::with($with)
+        ->whereNotIn('status', $excludeStatuses)
+        ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '=', $today->toDateString())
+        ->get()
+        ->reject($shouldHide)
+        ->values();
+
+    // 5) End tomorrow (coalesced)
+    $endingTomorrow = Subscription::with($with)
+        ->whereNotIn('status', $excludeStatuses)
+        ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '=', $tomorrow->toDateString())
+        ->get()
+        ->reject($shouldHide)
+        ->values();
+
+    // Normalize each row for the view
+    $mapRow = function ($s) {
+        $user    = $s->users;
+        $order   = $s->order;
+        $product = $s->flowerProducts;
+
+        // Build address: order shipping_* first, else user's default address
+        $address = '';
+        if ($order) {
+            $parts = [];
+            foreach ([
+                'shipping_name','shipping_address','shipping_street','shipping_area',
+                'shipping_city','shipping_state','shipping_pincode','shipping_zip',
+            ] as $f) {
+                if (isset($order->$f) && filled($order->$f)) {
+                    $parts[] = $order->$f;
+                }
+            }
+            $address = trim(implode(', ', array_unique(array_filter($parts))));
         }
-    }
 
-    // ======= Return view with NEW data =======
-    return view('admin.reports.flower-estimates', [
-        'start'              => $start->toDateString(),
-        'end'                => $end->toDateString(),
-        'mode'               => $mode,
-        'preset'             => $preset,
-        'dailyEstimates'     => $dailyEstimates,
-        'monthlyEstimates'   => $monthlyEstimates,
-        // Tomorrow block
-        'tomorrowDate'       => $tomorrow->toDateString(),
-        'tomorrowEstimate'   => $tomorrowEstimate,
-        // Range grand totals
-        'rangeTotals'        => $rangeTotals,
+        if (!$address && $user && $user->addressDetails) {
+            $ad = $user->addressDetails;
+            $chunks = array_filter([
+                $ad->apartment_flat_plot ?? null,
+                $ad->apartment_name ?? null,
+                $ad->landmark ?? null,
+                $ad->area ?? null,
+                $ad->city ?? null,
+                $ad->state ?? null,
+                $ad->pincode ?? null,
+            ]);
+            $address = trim(implode(', ', $chunks));
+        }
 
-        // For modal
-        'vendors'            => $vendors,
-        'riders'             => $riders,
-        'flowers'            => $flowers,
-        'units'              => $units,
-        'flowerNameToId'     => $flowerNameToId,
-        'unitSymbolToId'     => $unitSymbolToId,
-    ]);
+        $aptName   = ($user && $user->addressDetails) ? ($user->addressDetails->apartment_name ?? '') : '';
+        $rider     = $order?->rider;
+        $riderName = $rider?->rider_name ?? '—';
+
+        return [
+            'subscription_id' => $s->subscription_id,
+            'order_id'        => $s->order_id,
+            'status'          => $s->status,
+            'is_active'       => (int) $s->is_active,
+            'start_date'      => $s->start_date ? (string) $s->start_date : null,
+            'end_date'        => $s->end_date ? (string) $s->end_date : null,
+            'new_date'        => $s->new_date ? (string) $s->new_date : null,
+            'pause_start'     => $s->pause_start_date ? (string) $s->pause_start_date : null,
+            'pause_end'       => $s->pause_end_date ? (string) $s->pause_end_date : null,
+
+            'customer'        => $user?->name ?? '—',
+            'phone'           => $user?->mobile_number ?? null,
+            'email'           => $user?->email ?? null,
+
+            'product'         => $product?->name ?? '—',
+            'address'         => $address ?: '—',
+            'apartment_name'  => $aptName,
+
+            // rider fields
+            'rider_id'        => $rider?->rider_id ?? null,
+            'rider_name'      => $riderName,
+        ];
+    };
+
+    $data = [
+        'today'            => $today->toDateString(),
+        'tomorrow'         => $tomorrow->toDateString(),
+        'activeTomorrow'   => $activeTomorrow->map($mapRow)->all(),
+        'startingTomorrow' => $startingTomorrow->map($mapRow)->all(),
+        'pausingTomorrow'  => $pausingTomorrow->map($mapRow)->all(),
+        'endingToday'      => $endingToday->map($mapRow)->all(),
+        'endingTomorrow'   => $endingTomorrow->map($mapRow)->all(),
+    ];
+
+    return view('admin.reports.tomorrow-subscriptions', $data);
 }
 
 

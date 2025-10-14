@@ -111,7 +111,7 @@
                     <ul class="nav nav-pills flex-wrap" id="sectionsTabs" role="tablist">
                         @php
                             $sections = [
-                                ['key' => 'active', 'title' => 'Active Tomorrow', 'count' => count($activeTomorrow)],
+                                ['key' => 'active', 'title' => 'Tomorrow Delivery', 'count' => count($activeTomorrow)],
                                 ['key' => 'start', 'title' => 'Starting Tomorrow', 'count' => count($startingTomorrow)],
                                 ['key' => 'pause', 'title' => 'Pausing from Tomorrow', 'count' => count($pausingTomorrow)],
                                 ['key' => 'end_today', 'title' => 'Ending Today', 'count' => count($endingToday)],

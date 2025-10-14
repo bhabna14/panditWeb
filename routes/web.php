@@ -347,12 +347,12 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/follow-up-subscriptions', [FollowUpController::class, 'followUpSubscriptions'])->name('admin.followUpSubscriptions');
     Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
 
-// PRODUCT DETAILS ROUTES
-Route::controller(ProductSubscriptionController::class)->group(function() {
-    Route::get('/manage-customize-request','showCustomizeRequest')->name('product-customize-request');
-    Route::get('/manage-product-subscription','showProductSubscription')->name('admin.productSubscriptionOrder');
-    Route::post('/save-customize-price/{id}','saveCustomizePrice')->name('admin.saveCustomizePrice');
-});
+    // PRODUCT DETAILS ROUTES
+    Route::controller(ProductSubscriptionController::class)->group(function() {
+        Route::get('/manage-customize-request','showCustomizeRequest')->name('product-customize-request');
+        Route::get('/manage-product-subscription','showProductSubscription')->name('admin.productSubscriptionOrder');
+        Route::post('/save-customize-price/{id}','saveCustomizePrice')->name('admin.saveCustomizePrice');
+    });
 
     Route::get('/flower-pickup-report', [ReportController::class, 'flowerPickupReport'])->name('admin.flowerPickupReport');
     Route::post('/flower-pickup-report', [ReportController::class, 'generateReport'])->name('admin.generateFlowerPickupReport');
@@ -387,7 +387,7 @@ Route::controller(ProductSubscriptionController::class)->group(function() {
 
     });
 
-   Route::controller(RiderController::class)->group(function() {
+    Route::controller(RiderController::class)->group(function() {
         Route::get('/add-rider-details', 'addRiderDetails')->name('admin.addRiderDetails');
         Route::post('/save-rider-details', 'saveRiderDetails')->name('admin.saveRiderDetails');
         Route::get('/manage-rider-details', 'manageRiderDetails')->name('admin.manageRiderDetails');
