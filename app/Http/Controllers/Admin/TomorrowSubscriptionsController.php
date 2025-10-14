@@ -185,6 +185,7 @@ class TomorrowSubscriptionsController extends Controller
                 'customer'        => $user?->name ?? '—',
                 'phone'           => $user?->mobile_number ?? null,
                 'email'           => $user?->email ?? null,
+                'user_id'         => $user?->userid,  
 
                 'product'         => $product?->name ?? '—',
                 'address'         => $address ?: '—',
@@ -201,6 +202,7 @@ class TomorrowSubscriptionsController extends Controller
             $product = $fr->flowerProduct;
             $order   = $fr->order;
             $rider   = $order?->rider;
+            
 
             $chunks = array_filter([
                 $addr?->apartment_flat_plot ?? null,
@@ -240,6 +242,7 @@ class TomorrowSubscriptionsController extends Controller
                 'customer'       => $user?->name ?? '—',
                 'phone'          => $user?->mobile_number ?? null,
                 'email'          => $user?->email ?? null,
+                'user_id'         => $user?->userid,     // <-- ADD THIS
 
                 'product'        => $product?->name ?? '—',
                 'address'        => $address ?: '—',
