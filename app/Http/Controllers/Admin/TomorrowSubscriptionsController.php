@@ -10,17 +10,17 @@ use Illuminate\Support\Facades\DB;
 
 class TomorrowSubscriptionsController extends Controller
 {
-
 public function index(Request $request)
 {
     $today    = Carbon::today();
     $tomorrow = Carbon::tomorrow()->startOfDay();
 
-    // Relations for display
+    // Relations for display (include rider on the order)
     $with = [
         'users',                    // has mobile_number, email, custom PK `userid`
         'users.addressDetails',     // default address (UserAddress)
         'order',                    // shipping_* fields (if present)
+        'order.rider:id,rider_id,rider_name',
         'flowerProducts:product_id,name',
     ];
 
@@ -107,7 +107,9 @@ public function index(Request $request)
             $address = trim(implode(', ', $chunks));
         }
 
-        $aptName = ($user && $user->addressDetails) ? ($user->addressDetails->apartment_name ?? '') : '';
+        $aptName   = ($user && $user->addressDetails) ? ($user->addressDetails->apartment_name ?? '') : '';
+        $rider     = $order?->rider;
+        $riderName = $rider?->rider_name ?? '—';
 
         return [
             'subscription_id' => $s->subscription_id,
@@ -121,11 +123,16 @@ public function index(Request $request)
             'pause_end'       => $s->pause_end_date ? (string) $s->pause_end_date : null,
 
             'customer'        => $user?->name ?? '—',
-            'phone'           => $user?->mobile_number ?? null, // fixed column
+            'phone'           => $user?->mobile_number ?? null,
             'email'           => $user?->email ?? null,
+
             'product'         => $product?->name ?? '—',
             'address'         => $address ?: '—',
             'apartment_name'  => $aptName,
+
+            // NEW: rider fields
+            'rider_id'        => $rider?->rider_id ?? null,
+            'rider_name'      => $riderName,
         ];
     };
 
@@ -141,5 +148,6 @@ public function index(Request $request)
 
     return view('admin.reports.tomorrow-subscriptions', $data);
 }
+
 
 }

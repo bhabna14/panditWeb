@@ -256,7 +256,7 @@ class FlowerPickupController extends Controller
     {
         $detail = FlowerPickupDetails::findOrFail($id);
 
-        $items = FlowerPickupItems::with(['flower:product_id,name', 'unit:id,unit_name'])
+         $items = FlowerPickupItems::with(['flower:product_id,name', 'unit:id,unit_name'])
             ->where('pick_up_id', $detail->pick_up_id)
             ->get()
             ->map(function ($it) {

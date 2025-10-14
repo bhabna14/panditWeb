@@ -11,87 +11,39 @@
             --brand-soft: #e7f0ff;
             --card-border: #e5e7eb;
         }
-        .page-header{
-            background: linear-gradient(180deg, var(--brand-bg), #f1f2f3);
-            color:#090909;border-radius:1rem;padding:1.25rem 1.25rem;
-        }
+        .page-header{ background: linear-gradient(180deg, var(--brand-bg), #f1f2f3); color:#090909;border-radius:1rem;padding:1.25rem 1.25rem; }
         .page-subtitle{opacity:.85}
 
-        /* ===== NEW KPI styles ===== */
-        .kpi-grid{
-            display:grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: .9rem;
-        }
+        /* ===== KPI styles (unchanged) ===== */
+        .kpi-grid{ display:grid; grid-template-columns: repeat(12, 1fr); gap: .9rem; }
         @media (max-width: 991.98px){ .kpi-grid{ grid-template-columns: repeat(8, 1fr); } }
         @media (max-width: 767.98px){ .kpi-grid{ grid-template-columns: repeat(4, 1fr); } }
-        .kpi-card{
-            grid-column: span 4; /* 3 per row on lg, 2 on md, 1 on sm by default */
-            background: #fff;
-            border: 1px solid var(--card-border);
-            border-radius: 1rem;
-            overflow: hidden;
-            transition: transform .18s ease, box-shadow .18s ease;
-            position: relative;
-            isolation: isolate;
-        }
-        .kpi-card:hover{
-            transform: translateY(-2px);
-            box-shadow: 0 10px 26px rgba(0,0,0,.06);
-        }
-        .kpi-card .kpi-accent{
-            position: absolute; inset: 0;
-            background: radial-gradient(1200px 200px at 100% -30%, rgba(37,99,235,.08), transparent 60%),
-                        radial-gradient(900px 160px at -10% 120%, rgba(14,165,233,.08), transparent 55%);
-            z-index: 0;
-        }
-        .kpi-body{
-            position: relative; z-index: 1;
-            display: flex; align-items: center; gap: .9rem; padding: 1rem 1rem;
-            min-height: 96px;
-        }
-        .kpi-icon{
-            width: 46px; height: 46px; border-radius: 12px;
-            display: grid; place-items: center;
-            background: linear-gradient(135deg, #eff6ff, #e0f2fe);
-            border: 1px solid #e2e8f0;
-            flex: 0 0 46px;
-        }
-        .kpi-icon i{
-            font-size: 1.25rem; color: #0f172a;
-        }
-        .kpi-meta .label{
-            font-size: .84rem; color: #6b7280; font-weight: 600; letter-spacing:.2px;
-        }
-        .kpi-meta .value{
-            font-size: 1.8rem; font-weight: 800; color: #0f172a; line-height: 1.1;
-        }
-        .kpi-meta .hint{
-            font-size: .78rem; color: #64748b;
-        }
-        /* Make the last two KPIs share a row nicely on xl/xxl */
+        .kpi-card{ grid-column: span 4; background:#fff; border:1px solid var(--card-border); border-radius:1rem; overflow:hidden; transition: transform .18s ease, box-shadow .18s ease; position:relative; isolation:isolate; }
+        .kpi-card:hover{ transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.06); }
+        .kpi-card .kpi-accent{ position:absolute; inset:0; background: radial-gradient(1200px 200px at 100% -30%, rgba(37,99,235,.08), transparent 60%), radial-gradient(900px 160px at -10% 120%, rgba(14,165,233,.08), transparent 55%); z-index:0; }
+        .kpi-body{ position:relative; z-index:1; display:flex; align-items:center; gap:.9rem; padding:1rem 1rem; min-height:96px; }
+        .kpi-icon{ width:46px; height:46px; border-radius:12px; display:grid; place-items:center; background:linear-gradient(135deg, #eff6ff, #e0f2fe); border:1px solid #e2e8f0; flex:0 0 46px; }
+        .kpi-icon i{ font-size:1.25rem; color:#0f172a; }
+        .kpi-meta .label{ font-size:.84rem; color:#6b7280; font-weight:600; letter-spacing:.2px; }
+        .kpi-meta .value{ font-size:1.8rem; font-weight:800; color:#0f172a; line-height:1.1; }
+        .kpi-meta .hint{ font-size:.78rem; color:#64748b; }
         @media (min-width: 1200px){
-            .kpi-card.span-3 { grid-column: span 3; } /* 4 per row if needed */
-            .kpi-card.span-4 { grid-column: span 4; } /* default */
-            .kpi-card.span-6 { grid-column: span 6; } /* half row */
+            .kpi-card.span-3 { grid-column: span 3; }
+            .kpi-card.span-4 { grid-column: span 4; }
+            .kpi-card.span-6 { grid-column: span 6; }
         }
 
         .filter-card{ border:1px solid var(--card-border); border-radius:.75rem }
         .filter-card .form-label{ font-weight:600 }
         .tabs-wrap .nav-link{ border-radius:999px; padding:.4rem .9rem }
-        .tabs-wrap .nav-link.active{
-            background:var(--brand-accent); color:#fff !important;
-            box-shadow:0 6px 18px rgba(37,99,235,.25)
-        }
+        .tabs-wrap .nav-link.active{ background:var(--brand-accent); color:#fff !important; box-shadow:0 6px 18px rgba(37,99,235,.25) }
         .table-tight td,.table-tight th{ padding:.55rem .65rem }
         .badge-soft{ background:var(--brand-soft); color:#1e3a8a; border:1px solid #bfdbfe; }
         .row-tools{ gap:.5rem }
         .btn-ghost{ background:#fff; border:1px solid var(--card-border) }
-        .pill-count{
-            border-radius:999px;background:#f1f5f9;color:#0f172a;padding:.2rem .55rem;
-            font-weight:600;font-size:.825rem
-        }
+        .pill-count{ border-radius:999px;background:#f1f5f9;color:#0f172a;padding:.2rem .55rem; font-weight:600;font-size:.825rem }
         .address-col{ min-width:280px }
+        .rider-col{ min-width:160px } /* NEW */
     </style>
 @endsection
 
@@ -120,69 +72,14 @@
             </div>
         </div>
 
-        {{-- ===== NEW KPI LAYOUT ===== --}}
+        {{-- KPIs (unchanged) --}}
         <div class="kpi-grid mb-4">
-            <div class="kpi-card">
-                <div class="kpi-accent"></div>
-                <div class="kpi-body">
-                    <div class="kpi-icon"><i class="bi bi-lightning-charge"></i></div>
-                    <div class="kpi-meta">
-                        <div class="label">Active tomorrow</div>
-                        <div class="value">{{ count($activeTomorrow) }}</div>
-                        <div class="hint">Deliveries scheduled</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-accent"></div>
-                <div class="kpi-body">
-                    <div class="kpi-icon"><i class="bi bi-calendar-plus"></i></div>
-                    <div class="kpi-meta">
-                        <div class="label">Starting tomorrow</div>
-                        <div class="value">{{ count($startingTomorrow) }}</div>
-                        <div class="hint">New subscriptions begin</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-accent"></div>
-                <div class="kpi-body">
-                    <div class="kpi-icon"><i class="bi bi-pause-circle"></i></div>
-                    <div class="kpi-meta">
-                        <div class="label">Pausing from tomorrow</div>
-                        <div class="value">{{ count($pausingTomorrow) }}</div>
-                        <div class="hint">Temporarily on hold</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-accent"></div>
-                <div class="kpi-body">
-                    <div class="kpi-icon"><i class="bi bi-calendar-x"></i></div>
-                    <div class="kpi-meta">
-                        <div class="label">Ending today</div>
-                        <div class="value">{{ count($endingToday) }}</div>
-                        <div class="hint">Final day of service</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="kpi-card">
-                <div class="kpi-accent"></div>
-                <div class="kpi-body">
-                    <div class="kpi-icon"><i class="bi bi-flag"></i></div>
-                    <div class="kpi-meta">
-                        <div class="label">Ending tomorrow</div>
-                        <div class="value">{{ count($endingTomorrow) }}</div>
-                        <div class="hint">Wraps up tomorrow</div>
-                    </div>
-                </div>
-            </div>
+            <div class="kpi-card"><div class="kpi-accent"></div><div class="kpi-body"><div class="kpi-icon"><i class="bi bi-lightning-charge"></i></div><div class="kpi-meta"><div class="label">Active tomorrow</div><div class="value">{{ count($activeTomorrow) }}</div><div class="hint">Deliveries scheduled</div></div></div></div>
+            <div class="kpi-card"><div class="kpi-accent"></div><div class="kpi-body"><div class="kpi-icon"><i class="bi bi-calendar-plus"></i></div><div class="kpi-meta"><div class="label">Starting tomorrow</div><div class="value">{{ count($startingTomorrow) }}</div><div class="hint">New subscriptions begin</div></div></div></div>
+            <div class="kpi-card"><div class="kpi-accent"></div><div class="kpi-body"><div class="kpi-icon"><i class="bi bi-pause-circle"></i></div><div class="kpi-meta"><div class="label">Pausing from tomorrow</div><div class="value">{{ count($pausingTomorrow) }}</div><div class="hint">Temporarily on hold</div></div></div></div>
+            <div class="kpi-card"><div class="kpi-accent"></div><div class="kpi-body"><div class="kpi-icon"><i class="bi bi-calendar-x"></i></div><div class="kpi-meta"><div class="label">Ending today</div><div class="value">{{ count($endingToday) }}</div><div class="hint">Final day of service</div></div></div></div>
+            <div class="kpi-card"><div class="kpi-accent"></div><div class="kpi-body"><div class="kpi-icon"><i class="bi bi-flag"></i></div><div class="kpi-meta"><div class="label">Ending tomorrow</div><div class="value">{{ count($endingTomorrow) }}</div><div class="hint">Wraps up tomorrow</div></div></div></div>
         </div>
-        {{-- ===== /NEW KPI LAYOUT ===== --}}
 
         {{-- FILTERS + TABS --}}
         <div class="card filter-card shadow-sm mb-3">
@@ -199,6 +96,10 @@
                     <div class="col-12 col-md-3">
                         <label class="form-label">Filter by Apartment</label>
                         <input type="text" id="fApartment" class="form-control" placeholder="e.g. Sunrise Towers">
+                    </div>
+                    <div class="col-12 col-md-3"> {{-- NEW --}}
+                        <label class="form-label">Filter by Rider</label>
+                        <input type="text" id="fRider" class="form-control" placeholder="e.g. Rahul / Anita">
                     </div>
                     <div class="col-12 col-md-3 d-flex gap-2">
                         <button class="btn btn-primary flex-grow-1" id="btnApplyFilters"><i class="bi bi-funnel"></i> Apply</button>
@@ -243,7 +144,8 @@
                     }
                     echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
                     echo '<thead class="table-light">';
-                    echo '<tr><th>Customer</th><th>Order</th><th>Product</th><th>Status</th><th>Start</th><th>End</th><th>Pause</th><th class="address-col">Address</th></tr>';
+                    // NEW: add Rider column (placed before Address)
+                    echo '<tr><th>Customer</th><th>Order</th><th>Product</th><th>Status</th><th>Start</th><th>End</th><th>Pause</th><th class="rider-col">Rider</th><th class="address-col">Address</th></tr>';
                     echo '</thead><tbody>';
                     foreach ($rows as $r) {
                         $pause = ($r['pause_start'] || $r['pause_end']) ? (($r['pause_start'] ?? '—').' → '.($r['pause_end'] ?? '—')) : '—';
@@ -254,11 +156,13 @@
                         if (in_array($status, ['pending'])) $badgeClass = 'bg-info-subtle text-info';
                         if (in_array($status, ['expired', 'ended'])) $badgeClass = 'bg-danger-subtle text-danger';
                         $apt = $r['apartment_name'] ?? '';
+                        $riderName = $r['rider_name'] ?? '—';
 
                         echo '<tr class="row-item" '.
                              ' data-name="'.e(strtolower($r['customer'] ?? '')).'"'.
                              ' data-mobile="'.e(strtolower($r['phone'] ?? '')).'"'.
-                             ' data-apt="'.e(strtolower($apt)).'">';
+                             ' data-apt="'.e(strtolower($apt)).'"'.
+                             ' data-rider="'.e(strtolower($riderName)).'">'; // NEW
 
                         echo '<td><div class="fw-semibold">'.e($r['customer']).'</div>';
                         if ($r['phone'] || $r['email']) {
@@ -272,6 +176,9 @@
                         echo '<td>'.e($r['start_date'] ?? '—').'</td>';
                         echo '<td>'.e($r['new_date'] ?? ($r['end_date'] ?? '—')).'</td>';
                         echo '<td>'.e($pause).'</td>';
+
+                        // NEW: Rider cell
+                        echo '<td>'.e($riderName).'</td>';
 
                         $addrSafe = e($r['address']);
                         echo '<td>';
@@ -375,6 +282,7 @@
             const fName = document.getElementById('fName');
             const fMobile = document.getElementById('fMobile');
             const fApartment = document.getElementById('fApartment');
+            const fRider = document.getElementById('fRider'); // NEW
             const btnApply = document.getElementById('btnApplyFilters');
             const btnClear = document.getElementById('btnClearFilters');
 
@@ -390,20 +298,26 @@
                 const nameVal = normalize(fName.value);
                 const mobileVal = normalize(fMobile.value);
                 const aptVal = normalize(fApartment.value);
+                const riderVal = normalize(fRider.value); // NEW
 
                 pane.querySelectorAll('tbody .row-item').forEach(tr=>{
                     const dn = tr.getAttribute('data-name') || '';
                     const dm = tr.getAttribute('data-mobile') || '';
                     const da = tr.getAttribute('data-apt') || '';
+                    const dr = tr.getAttribute('data-rider') || ''; // NEW
 
                     const passName = !nameVal || dn.includes(nameVal);
                     const passMobile = !mobileVal || dm.includes(mobileVal);
                     const passApt = !aptVal || da.includes(aptVal);
+                    const passRider = !riderVal || dr.includes(riderVal); // NEW
 
-                    tr.style.display = (passName && passMobile && passApt) ? '' : 'none';
+                    tr.style.display = (passName && passMobile && passApt && passRider) ? '' : 'none';
                 });
             }
-            function clearFilters(){ fName.value=''; fMobile.value=''; fApartment.value=''; applyFilters(); }
+            function clearFilters(){
+                fName.value=''; fMobile.value=''; fApartment.value=''; if(fRider) fRider.value=''; // NEW
+                applyFilters();
+            }
 
             btnApply.addEventListener('click', e=>{ e.preventDefault(); applyFilters(); });
             btnClear.addEventListener('click', e=>{ e.preventDefault(); clearFilters(); });
