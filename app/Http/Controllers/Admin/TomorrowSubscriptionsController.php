@@ -55,8 +55,6 @@ class TomorrowSubscriptionsController extends Controller
             return !$hasPaid;
         };
 
-        /* ===== DATASETS ===== */
-
         // 1) Tomorrow Delivery (active tomorrow)
         $activeTomorrow = Subscription::with($withSubs)
             ->whereNotIn('status', $excludeStatuses)
@@ -68,7 +66,6 @@ class TomorrowSubscriptionsController extends Controller
             ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tomorrow->toDateString())
             ->get()
             ->filter(function ($s) use ($tomorrow) {
-                // exclude if paused on that day
                 if ($s->pause_start_date && $s->pause_end_date) {
                     $ps = Carbon::parse($s->pause_start_date)->startOfDay();
                     $pe = Carbon::parse($s->pause_end_date)->endOfDay();
@@ -79,7 +76,7 @@ class TomorrowSubscriptionsController extends Controller
             ->reject($shouldHide)
             ->values();
 
-        // 2) Starting Tomorrow (start_date == tomorrow)
+        // 2) Starting Tomorrow
         $startingTomorrow = Subscription::with($withSubs)
             ->whereNotIn('status', $excludeStatuses)
             ->whereDate('start_date', '=', $tomorrow->toDateString())
@@ -87,7 +84,7 @@ class TomorrowSubscriptionsController extends Controller
             ->reject($shouldHide)
             ->values();
 
-        // 3) Pausing from Tomorrow (pause_start_date == tomorrow)
+        // 3) Pausing from Tomorrow
         $pausingTomorrow = Subscription::with($withSubs)
             ->whereNotIn('status', $excludeStatuses)
             ->whereDate('pause_start_date', '=', $tomorrow->toDateString())
@@ -95,7 +92,7 @@ class TomorrowSubscriptionsController extends Controller
             ->reject($shouldHide)
             ->values();
 
-        // 4) Tomorrow Customize Orders (FlowerRequest::date == tomorrow)
+        // 4) Tomorrow Customize Orders
         $customizeTomorrow = FlowerRequest::with($withRequests)
             ->whereDate('date', '=', $tomorrow->toDateString())
             ->get();
@@ -109,14 +106,12 @@ class TomorrowSubscriptionsController extends Controller
             ->reject($shouldHide)
             ->values();
 
-        /* ===== MAPPERS ===== */
-
+        // Map helpers
         $mapSub = function ($s) {
             $user    = $s->users;
             $order   = $s->order;
             $product = $s->flowerProducts;
 
-            // address: order shipping_* first, else user default
             $address = '';
             if ($order) {
                 $parts = [];
@@ -213,8 +208,8 @@ class TomorrowSubscriptionsController extends Controller
             'tomorrow'           => $tomorrow->toDateString(),
 
             'activeTomorrow'     => $activeTomorrow->map($mapSub)->all(),
-            'startingTomorrow'   => $startingTomorrow->map($mapSub)->all(),   // NEW
-            'pausingTomorrow'    => $pausingTomorrow->map($mapSub)->all(),    // NEW
+            'startingTomorrow'   => $startingTomorrow->map($mapSub)->all(),
+            'pausingTomorrow'    => $pausingTomorrow->map($mapSub)->all(),
             'customizeTomorrow'  => $customizeTomorrow->map($mapRequest)->all(),
             'resumingTomorrow'   => $resumingTomorrow->map($mapSub)->all(),
         ];
