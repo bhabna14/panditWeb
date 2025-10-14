@@ -234,6 +234,42 @@
             </div>
         </div>
 
+          {{-- NEW: Tomorrow — Totals by Item (All Products) --}}
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-header bg-white">
+                <strong>Tomorrow — Totals by Item (All Products)</strong>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item</th>
+                                <th class="text-end">Total Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($tTotals as $it)
+                                <tr>
+                                    <td>{{ $it['item_name'] }}</td>
+                                    <td class="text-end">
+                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                        {{ $it['total_unit_disp'] }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="2" class="text-muted">No items.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
         {{-- TABS --}}
         <div class="card shadow-sm mb-3">
             <div class="card-body">
@@ -505,41 +541,7 @@
             </div>
         </div>
 
-        {{-- NEW: Tomorrow — Totals by Item (All Products) --}}
-        <div class="card border-0 shadow-sm mt-3">
-            <div class="card-header bg-white">
-                <strong>Tomorrow — Totals by Item (All Products)</strong>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Item</th>
-                                <th class="text-end">Total Qty</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($tTotals as $it)
-                                <tr>
-                                    <td>{{ $it['item_name'] }}</td>
-                                    <td class="text-end">
-                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                        {{ $it['total_unit_disp'] }}
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="2" class="text-muted">No items.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    </div>
+      
 
     {{-- ADDRESS MODAL --}}
     <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
