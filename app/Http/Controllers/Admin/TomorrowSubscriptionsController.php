@@ -8,11 +8,34 @@ use App\Models\FlowerRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth; // 👈 add this
 
 class TomorrowSubscriptionsController extends Controller
 {
     public function index(Request $request)
     {
+        // --- Role & IST time gate ---
+        $admin = Auth::guard('admins')->user();
+        $role  = $admin?->role ?? session('admin_role'); // fallback to session if needed
+
+        $nowIst     = Carbon::now('Asia/Kolkata');
+        $unlockAt   = (clone $nowIst)->setTime(17, 0, 0); // 5:00 PM IST today
+        $isAfter5pm = $nowIst->greaterThanOrEqualTo($unlockAt);
+        $canView    = ($role === 'super_admin') || $isAfter5pm;
+
+        // If admin & before 5PM: render the lock screen without heavy queries
+        if (!$canView) {
+            return view('admin.reports.tomorrow-subscriptions', [
+                'canView'      => false,
+                'role'         => $role,
+                'nowIst'       => $nowIst->toDateTimeString(),
+                'unlockAt'     => $unlockAt->toDateTimeString(),
+                'unlockAtMs'   => $unlockAt->valueOf(),  // ms epoch for precise countdown
+                'serverNowMs'  => $nowIst->valueOf(),
+            ]);
+        }
+
+        // --- If allowed, proceed with existing logic ---
         $today    = Carbon::today();
         $tomorrow = Carbon::tomorrow()->startOfDay();
 
@@ -36,7 +59,7 @@ class TomorrowSubscriptionsController extends Controller
             'flowerProduct:product_id,name',
             'order:id,order_id,request_id,rider_id',
             'order.rider:id,rider_id,rider_name',
-            'flowerRequestItems', // <--- NEW
+            'flowerRequestItems',
         ];
 
         $excludeStatuses = ['expired', 'dead'];
@@ -101,16 +124,16 @@ class TomorrowSubscriptionsController extends Controller
             ->get();
 
         // 5) Pause → Active from Tomorrow (pause_end_date == today)
+        $todayDate = $today->toDateString();
         $resumingTomorrow = Subscription::with($withSubs)
             ->whereNotIn('status', $excludeStatuses)
             ->whereNotNull('pause_end_date')
-            ->whereDate('pause_end_date', '=', $today->toDateString())
+            ->whereDate('pause_end_date', '=', $todayDate)
             ->get()
             ->reject($shouldHide)
             ->values();
 
-        // ------- NEW: Build "Tomorrow — Totals by Item (All Products)" -------
-        // We compute ONLY from subscriptions that will actually deliver tomorrow (activeTomorrow).
+        // Totals card (computed from activeTomorrow only)
         $tTotals = $this->computeTomorrowTotalsByItem($activeTomorrow);
 
         // Normalizers
@@ -225,35 +248,32 @@ class TomorrowSubscriptionsController extends Controller
                 'rider_id'       => $rider?->rider_id ?? null,
                 'rider_name'     => $rider?->rider_name ?? '—',
 
-                'items'          => $items, // <--- for modal
+                'items'          => $items,
             ];
         };
 
         $data = [
+            'canView'            => true,
+            'role'               => $role,
             'today'              => $today->toDateString(),
             'tomorrow'           => $tomorrow->toDateString(),
-
             'activeTomorrow'     => $activeTomorrow->map($mapSub)->all(),
             'startingTomorrow'   => $startingTomorrow->map($mapSub)->all(),
             'pausingTomorrow'    => $pausingTomorrow->map($mapSub)->all(),
             'customizeTomorrow'  => $customizeTomorrow->map($mapRequest)->all(),
             'resumingTomorrow'   => $resumingTomorrow->map($mapSub)->all(),
-
-            // NEW for totals card
             'tTotals'            => $tTotals,
         ];
 
         return view('admin.reports.tomorrow-subscriptions', $data);
     }
 
-    // ---------------------------------------------------------------------
-    // Helpers for totals by item (kept local to this controller)
-    // ---------------------------------------------------------------------
+    // ===== Helpers for totals by item =====
 
     /**
      * Build totals-by-item for tomorrow deliveries.
-     * @param \Illuminate\Support\Collection $activeTomorrow  // collection of Subscription models (with flowerProducts.packageItems)
-     * @return array [ ['item_name'=>..., 'total_qty_disp'=>..., 'total_unit_disp'=>...], ... ]
+     * @param \Illuminate\Support\Collection $activeTomorrow
+     * @return array
      */
     protected function computeTomorrowTotalsByItem($activeTomorrow): array
     {
@@ -298,7 +318,7 @@ class TomorrowSubscriptionsController extends Controller
             ];
         }
 
-        // Sort by item name (optional, nice touch)
+        // Sort by item name
         usort($out, function ($a, $b) {
             return strcasecmp($a['item_name'], $b['item_name']);
         });
@@ -320,7 +340,7 @@ class TomorrowSubscriptionsController extends Controller
         if (in_array($u, ['l','lt','liter','litre','liters','litres'])) return ['volume', 1000.0];
         if (in_array($u, ['ml','milliliter','millilitre','milliliters','millilitres'])) return ['volume', 1.0];
 
-        // count / piecey fallbacks
+        // count
         if (in_array($u, ['pcs','pc','piece','pieces','count'])) return ['count', 1.0];
 
         // forgiving substring fallbacks
@@ -330,7 +350,6 @@ class TomorrowSubscriptionsController extends Controller
         if (str_contains($u, 'lit')) return ['volume', 1000.0];
         if (str_contains($u, 'piece') || str_contains($u, 'pcs') || str_contains($u, 'count')) return ['count', 1.0];
 
-        // default to count
         return ['count', 1.0];
     }
 
@@ -350,7 +369,6 @@ class TomorrowSubscriptionsController extends Controller
             if ($base >= 1000) return [round($base / 1000, 3), 'l'];
             return [round($base, 3), 'ml'];
         }
-        // count
         return [round($base, 3), 'pcs'];
     }
 }
