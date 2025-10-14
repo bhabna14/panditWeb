@@ -34,6 +34,7 @@ class TomorrowSubscriptionsController extends Controller
             'flowerProduct:product_id,name',
             'order:id,order_id,request_id,rider_id',
             'order.rider:id,rider_id,rider_name',
+            'flowerRequestItems', // <--- NEW
         ];
 
         $excludeStatuses = ['expired', 'dead'];
@@ -67,8 +68,8 @@ class TomorrowSubscriptionsController extends Controller
             ->get()
             ->filter(function ($s) use ($tomorrow) {
                 if ($s->pause_start_date && $s->pause_end_date) {
-                    $ps = Carbon::parse($s->pause_start_date)->startOfDay();
-                    $pe = Carbon::parse($s->pause_end_date)->endOfDay();
+                    $ps = \Carbon\Carbon::parse($s->pause_start_date)->startOfDay();
+                    $pe = \Carbon\Carbon::parse($s->pause_end_date)->endOfDay();
                     if ($ps->lte($tomorrow) && $pe->gte($tomorrow)) return false;
                 }
                 return true;
@@ -183,6 +184,23 @@ class TomorrowSubscriptionsController extends Controller
             ]);
             $address = trim(implode(', ', $chunks));
 
+            // Items normalize (safe array for modal JSON)
+            $items = $fr->flowerRequestItems
+                ? $fr->flowerRequestItems->map(function ($it) {
+                    return [
+                        'type'              => (string)($it->type ?? ''),
+                        'garland_name'      => (string)($it->garland_name ?? ''),
+                        'garland_quantity'  => (string)($it->garland_quantity ?? ''),
+                        'garland_size'      => (string)($it->garland_size ?? ''),
+                        'flower_name'       => (string)($it->flower_name ?? ''),
+                        'flower_unit'       => (string)($it->flower_unit ?? ''),
+                        'flower_quantity'   => (string)($it->flower_quantity ?? ''),
+                        'flower_count'      => (string)($it->flower_count ?? ''),
+                        'size'              => (string)($it->size ?? ''),
+                    ];
+                })->values()->all()
+                : [];
+
             return [
                 'request_id'     => $fr->request_id,
                 'order_id'       => $order?->order_id,
@@ -200,6 +218,8 @@ class TomorrowSubscriptionsController extends Controller
 
                 'rider_id'       => $rider?->rider_id ?? null,
                 'rider_name'     => $rider?->rider_name ?? '—',
+
+                'items'          => $items, // <--- for modal
             ];
         };
 

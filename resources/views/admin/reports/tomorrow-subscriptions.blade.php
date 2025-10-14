@@ -363,13 +363,16 @@
                     }
                     echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
                     echo '<thead class="table-light">';
-                    echo '<tr><th>Customer</th><th>Request</th><th>Product</th><th>Status</th><th>Date</th><th>Time</th><th class="rider-col">Rider</th><th class="address-col">Address</th></tr>';
+                    echo '<tr><th>Customer</th><th>Request</th><th>Product</th><th>Status</th><th>Date</th><th>Time</th><th class="rider-col">Rider</th><th>Items</th><th class="address-col">Address</th></tr>';
                     echo '</thead><tbody>';
                     foreach ($rows as $r) {
                         $apt = $r['apartment_name'] ?? '';
                         $riderName = $r['rider_name'] ?? '—';
                         $reqId = $r['request_id'] ? '#' . $r['request_id'] : '—';
                         $ordId = $r['order_id'] ? '#' . $r['order_id'] : null;
+
+                        // Safe JSON for data attribute
+                        $itemsJson = e(json_encode($r['items'] ?? []));
 
                         echo '<tr class="row-item" ' .
                             ' data-name="' .
@@ -409,6 +412,15 @@
                         echo '<td>' . e($r['date'] ?? '—') . '</td>';
                         echo '<td>' . e($r['time'] ?? '—') . '</td>';
                         echo '<td>' . e($riderName) . '</td>';
+
+                        // Items button
+                        echo '<td>';
+                        echo '<button type="button" class="btn btn-sm btn-outline-secondary view-items" data-items="' .
+                            $itemsJson .
+                            '" data-bs-toggle="modal" data-bs-target="#itemsModal">';
+                        echo '<i class="bi bi-list-ul"></i> Items';
+                        echo '</button>';
+                        echo '</td>';
 
                         $addrSafe = e($r['address'] ?? '—');
                         echo '<td>';
@@ -511,6 +523,24 @@
             </div>
         </div>
     </div>
+
+    {{-- ITEMS MODAL --}}
+    <div class="modal fade" id="itemsModal" tabindex="-1" aria-labelledby="itemsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="modal-title" id="itemsModalLabel"><i class="bi bi-list-ul"></i> Customize Order Items</h6>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="itemsContainer"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -522,19 +552,85 @@
             const copyBtn = document.getElementById('copyAddressBtn');
 
             document.addEventListener('click', function(e) {
-                const btn = e.target.closest('.view-address');
-                if (!btn) return;
-                const addr = btn.getAttribute('data-address') || '—';
-                addressBody.textContent = addr;
+                const addrBtn = e.target.closest('.view-address');
+                if (addrBtn) {
+                    const addr = addrBtn.getAttribute('data-address') || '—';
+                    addressBody.textContent = addr;
+                }
+
+                const itemsBtn = e.target.closest('.view-items');
+                if (itemsBtn) {
+                    const raw = itemsBtn.getAttribute('data-items') || '[]';
+                    let items = [];
+                    try {
+                        items = JSON.parse(raw);
+                    } catch (e) {
+                        items = [];
+                    }
+                    renderItems(items);
+                }
             });
 
-            copyBtn.addEventListener('click', async function() {
+            copyBtn && copyBtn.addEventListener('click', async function() {
                 try {
                     await navigator.clipboard.writeText(addressBody.textContent || '');
                     copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied';
                     setTimeout(() => copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copy', 1200);
                 } catch (e) {}
             });
+
+            function renderItems(items) {
+                const el = document.getElementById('itemsContainer');
+                if (!items || !items.length) {
+                    el.innerHTML = '<div class="alert alert-secondary mb-0">No items found for this request.</div>';
+                    return;
+                }
+
+                let html = '';
+                html += '<div class="table-responsive">';
+                html += '<table class="table table-sm table-striped align-middle">';
+                html += '<thead class="table-light">';
+                html += '<tr>';
+                html += '<th>#</th>';
+                html += '<th>Type</th>';
+                html += '<th>Garland</th>';
+                html += '<th>Garland Qty</th>';
+                html += '<th>Garland Size</th>';
+                html += '<th>Flower</th>';
+                html += '<th>Unit</th>';
+                html += '<th>Flower Qty</th>';
+                html += '<th>Flower Count</th>';
+                html += '<th>Size</th>';
+                html += '</tr>';
+                html += '</thead><tbody>';
+
+                items.forEach((it, idx) => {
+                    html += '<tr>';
+                    html += '<td>' + (idx + 1) + '</td>';
+                    html += '<td>' + escapeHtml(it.type || '') + '</td>';
+                    html += '<td>' + escapeHtml(it.garland_name || '') + '</td>';
+                    html += '<td>' + escapeHtml(it.garland_quantity || '') + '</td>';
+                    html += '<td>' + escapeHtml(it.garland_size || '') + '</td>';
+                    html += '<td>' + escapeHtml(it.flower_name || '') + '</td>';
+                    html += '<td>' + escapeHtml(it.flower_unit || '') + '</td>';
+                    html += '<td>' + escapeHtml(it.flower_quantity || '') + '</td>';
+                    html += '<td>' + escapeHtml(it.flower_count || '') + '</td>';
+                    html += '<td>' + escapeHtml(it.size || '') + '</td>';
+                    html += '</tr>';
+                });
+
+                html += '</tbody></table></div>';
+                el.innerHTML = html;
+            }
+
+            function escapeHtml(str) {
+                return (str || '').toString()
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
         })();
     </script>
 @endsection
