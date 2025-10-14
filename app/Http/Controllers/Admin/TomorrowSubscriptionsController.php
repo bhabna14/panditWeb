@@ -106,7 +106,7 @@ class TomorrowSubscriptionsController extends Controller
             ->reject($shouldHide)
             ->values();
 
-        // Map helpers
+        // Normalizers
         $mapSub = function ($s) {
             $user    = $s->users;
             $order   = $s->order;

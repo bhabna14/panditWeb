@@ -109,26 +109,6 @@
             color: #64748b;
         }
 
-        .filter-card {
-            border: 1px solid var(--card-border);
-            border-radius: .75rem
-        }
-
-        .filter-card .form-label {
-            font-weight: 600
-        }
-
-        .tabs-wrap .nav-link {
-            border-radius: 999px;
-            padding: .4rem .9rem
-        }
-
-        .tabs-wrap .nav-link.active {
-            background: var(--brand-accent);
-            color: #fff !important;
-            box-shadow: 0 6px 18px rgba(37, 99, 235, .25)
-        }
-
         .table-tight td,
         .table-tight th {
             padding: .55rem .65rem
@@ -252,44 +232,20 @@
             </div>
         </div>
 
-        {{-- FILTERS + TABS --}}
-        <div class="card filter-card shadow-sm mb-3">
+        {{-- TABS --}}
+        <div class="card shadow-sm mb-3">
             <div class="card-body">
-                <div class="row g-3 align-items-end">
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">Filter by Name</label>
-                        <input type="text" id="fName" class="form-control" placeholder="e.g. John">
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">Filter by Mobile</label>
-                        <input type="text" id="fMobile" class="form-control" placeholder="e.g. 98xxxxx123">
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">Filter by Apartment</label>
-                        <input type="text" id="fApartment" class="form-control" placeholder="e.g. Sunrise Towers">
-                    </div>
-                    <div class="col-12 col-md-3">
-                        <label class="form-label">Filter by Rider</label>
-                        <input type="text" id="fRider" class="form-control" placeholder="e.g. Rahul / Anita">
-                    </div>
-                    <div class="col-12 col-md-3 d-flex gap-2">
-                        <button class="btn btn-primary flex-grow-1" id="btnApplyFilters"><i class="bi bi-funnel"></i>
-                            Apply</button>
-                        <button class="btn btn-outline-secondary" id="btnClearFilters">Clear</button>
-                    </div>
-                </div>
-
-                <div class="mt-3 tabs-wrap">
+                <div class="tabs-wrap">
                     <ul class="nav nav-pills flex-wrap" id="sectionsTabs" role="tablist">
                         @php
                             $sections = [
                                 ['key' => 'active', 'title' => 'Tomorrow Delivery', 'count' => count($activeTomorrow)],
-                                ['key' => 'start', 'title' => 'Starting Tomorrow', 'count' => count($startingTomorrow)], // PHP comment OK
+                                ['key' => 'start', 'title' => 'Starting Tomorrow', 'count' => count($startingTomorrow)],
                                 [
                                     'key' => 'pause',
                                     'title' => 'Pausing from Tomorrow',
                                     'count' => count($pausingTomorrow),
-                                ], // PHP comment OK
+                                ],
                                 [
                                     'key' => 'custom',
                                     'title' => 'Tomorrow Customize Orders',
@@ -561,65 +517,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         (function() {
-            const fName = document.getElementById('fName');
-            const fMobile = document.getElementById('fMobile');
-            const fApartment = document.getElementById('fApartment');
-            const fRider = document.getElementById('fRider');
-            const btnApply = document.getElementById('btnApplyFilters');
-            const btnClear = document.getElementById('btnClearFilters');
-
-            function activePane() {
-                return document.querySelector('#sectionsContent .tab-pane.active.show') ||
-                    document.querySelector('#sectionsContent .tab-pane.active') ||
-                    document.querySelector('#sectionsContent .tab-pane.show');
-            }
-
-            function normalize(v) {
-                return (v || '').toString().trim().toLowerCase();
-            }
-
-            function applyFilters() {
-                const pane = activePane();
-                if (!pane) return;
-                const nameVal = normalize(fName.value);
-                const mobileVal = normalize(fMobile.value);
-                const aptVal = normalize(fApartment.value);
-                const riderVal = normalize(fRider.value);
-
-                pane.querySelectorAll('tbody .row-item').forEach(tr => {
-                    const dn = tr.getAttribute('data-name') || '';
-                    const dm = tr.getAttribute('data-mobile') || '';
-                    const da = tr.getAttribute('data-apt') || '';
-                    const dr = tr.getAttribute('data-rider') || '';
-
-                    const passName = !nameVal || dn.includes(nameVal);
-                    const passMobile = !mobileVal || dm.includes(mobileVal);
-                    const passApt = !aptVal || da.includes(aptVal);
-                    const passRider = !riderVal || dr.includes(riderVal);
-
-                    tr.style.display = (passName && passMobile && passApt && passRider) ? '' : 'none';
-                });
-            }
-
-            function clearFilters() {
-                fName.value = '';
-                fMobile.value = '';
-                fApartment.value = '';
-                if (fRider) fRider.value = '';
-                applyFilters();
-            }
-
-            btnApply.addEventListener('click', e => {
-                e.preventDefault();
-                applyFilters();
-            });
-            btnClear.addEventListener('click', e => {
-                e.preventDefault();
-                clearFilters();
-            });
-            document.getElementById('sectionsTabs').addEventListener('shown.bs.tab', applyFilters);
-
-            // Address modal
+            // Address modal copy
             const addressBody = document.getElementById('addressModalBody');
             const copyBtn = document.getElementById('copyAddressBtn');
 
@@ -637,8 +535,6 @@
                     setTimeout(() => copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Copy', 1200);
                 } catch (e) {}
             });
-
-            applyFilters();
         })();
     </script>
 @endsection
