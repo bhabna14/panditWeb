@@ -293,7 +293,7 @@
                         if (empty($rows)) { echo '<div class="alert alert-secondary mb-0">No subscriptions found.</div>'; return; }
                         echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
                         echo '<thead class="table-light">';
-                        echo '<tr><th>Customer</th><th class="rider-col">Rider</th><th class="address-col">Address</th></tr>';
+                        echo '<tr><th>Customer</th><th class="rider-col">Rider</th><th class="address-col">Address</th><th>View Profile</th></tr>';
                         echo '</thead><tbody>';
                         foreach ($rows as $r) {
                             $pause = $r['pause_start'] || $r['pause_end'] ? ($r['pause_start'] ?? '—').' → '.($r['pause_end'] ?? '—') : '—';
