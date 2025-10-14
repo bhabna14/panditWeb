@@ -60,7 +60,9 @@
         .kpi-card .kpi-accent {
             position: absolute;
             inset: 0;
-            background: radial-gradient(1200px 200px at 100% -30%, rgba(37, 99, 235, .08), transparent 60%), radial-gradient(900px 160px at -10% 120%, rgba(14, 165, 233, .08), transparent 55%);
+            background:
+                radial-gradient(1200px 200px at 100% -30%, rgba(37, 99, 235, .08), transparent 60%),
+                radial-gradient(900px 160px at -10% 120%, rgba(14, 165, 233, .08), transparent 55%);
             z-index: 0;
         }
 
@@ -502,6 +504,41 @@
                 </div>
             </div>
         </div>
+
+        {{-- NEW: Tomorrow — Totals by Item (All Products) --}}
+        <div class="card border-0 shadow-sm mt-3">
+            <div class="card-header bg-white">
+                <strong>Tomorrow — Totals by Item (All Products)</strong>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item</th>
+                                <th class="text-end">Total Qty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($tTotals as $it)
+                                <tr>
+                                    <td>{{ $it['item_name'] }}</td>
+                                    <td class="text-end">
+                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
+                                        {{ $it['total_unit_disp'] }}
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="2" class="text-muted">No items.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     {{-- ADDRESS MODAL --}}

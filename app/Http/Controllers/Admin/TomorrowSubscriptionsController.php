@@ -22,7 +22,9 @@ class TomorrowSubscriptionsController extends Controller
             'users.addressDetails',
             'order',
             'order.rider:id,rider_id,rider_name',
+            // include package items so we can build the totals-by-item block
             'flowerProducts:product_id,name',
+            'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
             'latestPaidPayment',
             'flowerPayments',
         ];
@@ -106,6 +108,10 @@ class TomorrowSubscriptionsController extends Controller
             ->get()
             ->reject($shouldHide)
             ->values();
+
+        // ------- NEW: Build "Tomorrow — Totals by Item (All Products)" -------
+        // We compute ONLY from subscriptions that will actually deliver tomorrow (activeTomorrow).
+        $tTotals = $this->computeTomorrowTotalsByItem($activeTomorrow);
 
         // Normalizers
         $mapSub = function ($s) {
@@ -232,8 +238,119 @@ class TomorrowSubscriptionsController extends Controller
             'pausingTomorrow'    => $pausingTomorrow->map($mapSub)->all(),
             'customizeTomorrow'  => $customizeTomorrow->map($mapRequest)->all(),
             'resumingTomorrow'   => $resumingTomorrow->map($mapSub)->all(),
+
+            // NEW for totals card
+            'tTotals'            => $tTotals,
         ];
 
         return view('admin.reports.tomorrow-subscriptions', $data);
+    }
+
+    // ---------------------------------------------------------------------
+    // Helpers for totals by item (kept local to this controller)
+    // ---------------------------------------------------------------------
+
+    /**
+     * Build totals-by-item for tomorrow deliveries.
+     * @param \Illuminate\Support\Collection $activeTomorrow  // collection of Subscription models (with flowerProducts.packageItems)
+     * @return array [ ['item_name'=>..., 'total_qty_disp'=>..., 'total_unit_disp'=>...], ... ]
+     */
+    protected function computeTomorrowTotalsByItem($activeTomorrow): array
+    {
+        if ($activeTomorrow->isEmpty()) return [];
+
+        // Count subs per product
+        $subsCountByProduct = $activeTomorrow->groupBy('product_id')->map->count();
+
+        $totalsByItemBase = []; // key: "name|category" => ['item_name'=>..., 'category'=>..., 'total_qty_base'=>float]
+
+        foreach ($subsCountByProduct as $productId => $subsCount) {
+            $product = optional($activeTomorrow->firstWhere('product_id', $productId))->flowerProducts;
+            if (!$product || !$product->relationLoaded('packageItems')) continue;
+
+            foreach ($product->packageItems as $pi) {
+                $perItemQty = (float) ($pi->quantity ?? 0);
+                $unitRaw    = strtolower(trim((string)($pi->unit ?? '')));
+                [$category, $toBaseFactor] = $this->resolveCategoryAndFactor($unitRaw);
+
+                $totalQtyBase = $perItemQty * $subsCount * $toBaseFactor;
+
+                $key = strtolower($pi->item_name) . '|' . $category;
+                if (!isset($totalsByItemBase[$key])) {
+                    $totalsByItemBase[$key] = [
+                        'item_name'      => $pi->item_name,
+                        'category'       => $category,
+                        'total_qty_base' => 0.0,
+                    ];
+                }
+                $totalsByItemBase[$key]['total_qty_base'] += $totalQtyBase;
+            }
+        }
+
+        // Format for display
+        $out = [];
+        foreach ($totalsByItemBase as $row) {
+            [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($row['total_qty_base'], $row['category']);
+            $out[] = [
+                'item_name'       => $row['item_name'],
+                'total_qty_disp'  => $qtyDisp,
+                'total_unit_disp' => $unitDisp,
+            ];
+        }
+
+        // Sort by item name (optional, nice touch)
+        usort($out, function ($a, $b) {
+            return strcasecmp($a['item_name'], $b['item_name']);
+        });
+
+        return $out;
+    }
+
+    /**
+     * Map a raw unit to (category, toBaseFactor).
+     * Base units: weight->g, volume->ml, count->pcs.
+     */
+    protected function resolveCategoryAndFactor(string $u): array
+    {
+        // weight
+        if (in_array($u, ['kg','kilogram','kilograms','kgs'])) return ['weight', 1000.0];
+        if (in_array($u, ['g','gram','grams','gm']))           return ['weight', 1.0];
+
+        // volume
+        if (in_array($u, ['l','lt','liter','litre','liters','litres'])) return ['volume', 1000.0];
+        if (in_array($u, ['ml','milliliter','millilitre','milliliters','millilitres'])) return ['volume', 1.0];
+
+        // count / piecey fallbacks
+        if (in_array($u, ['pcs','pc','piece','pieces','count'])) return ['count', 1.0];
+
+        // forgiving substring fallbacks
+        if (str_contains($u, 'kilo')) return ['weight', 1000.0];
+        if ($u === 'mg' || str_contains($u, 'gram')) return ['weight', 1.0];
+        if (str_contains($u, 'millil')) return ['volume', 1.0];
+        if (str_contains($u, 'lit')) return ['volume', 1000.0];
+        if (str_contains($u, 'piece') || str_contains($u, 'pcs') || str_contains($u, 'count')) return ['count', 1.0];
+
+        // default to count
+        return ['count', 1.0];
+    }
+
+    /**
+     * Convert base qty to a display qty/unit per category.
+     * weight: g->kg when >= 1000
+     * volume: ml->l when >= 1000
+     * count: pcs
+     */
+    protected function formatQtyByCategoryFromBase(float $base, string $category): array
+    {
+        if ($category === 'weight') {
+            if ($base >= 1000) return [round($base / 1000, 3), 'kg'];
+            return [round($base, 3), 'g'];
+        }
+        if ($category === 'volume') {
+            if ($base >= 1000) return [round($base / 1000, 3), 'l'];
+            return [round($base, 3), 'ml'];
+        }
+        // count
+        return [round($base, 3), 'pcs'];
     }
 }
