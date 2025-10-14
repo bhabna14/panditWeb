@@ -19,27 +19,15 @@
             padding: 1.25rem;
         }
 
-        .page-subtitle {
-            opacity: .85
-        }
+        .page-subtitle { opacity: .85 }
 
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
             gap: .9rem;
         }
-
-        @media (max-width: 991.98px) {
-            .kpi-grid {
-                grid-template-columns: repeat(8, 1fr);
-            }
-        }
-
-        @media (max-width: 767.98px) {
-            .kpi-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
+        @media (max-width: 991.98px) { .kpi-grid { grid-template-columns: repeat(8, 1fr); } }
+        @media (max-width: 767.98px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
 
         .kpi-card {
             grid-column: span 4;
@@ -51,101 +39,84 @@
             position: relative;
             isolation: isolate;
         }
-
-        .kpi-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 26px rgba(0, 0, 0, .06);
-        }
-
+        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.06); }
         .kpi-card .kpi-accent {
-            position: absolute;
-            inset: 0;
+            position: absolute; inset: 0;
             background:
-                radial-gradient(1200px 200px at 100% -30%, rgba(37, 99, 235, .08), transparent 60%),
-                radial-gradient(900px 160px at -10% 120%, rgba(14, 165, 233, .08), transparent 55%);
+                radial-gradient(1200px 200px at 100% -30%, rgba(37,99,235,.08), transparent 60%),
+                radial-gradient(900px 160px at -10% 120%, rgba(14,165,233,.08), transparent 55%);
             z-index: 0;
         }
+        .kpi-body { position: relative; z-index: 1; display: flex; align-items: center; gap: .9rem; padding: 1rem; min-height: 96px; }
+        .kpi-icon { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, #eff6ff, #e0f2fe); border: 1px solid #e2e8f0; flex: 0 0 46px; }
+        .kpi-icon i { font-size: 1.25rem; color: #0f172a; }
+        .kpi-meta .label { font-size: .84rem; color: #6b7280; font-weight: 600; letter-spacing: .2px; }
+        .kpi-meta .value { font-size: 1.8rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
+        .kpi-meta .hint { font-size: .78rem; color: #64748b; }
 
-        .kpi-body {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            align-items: center;
-            gap: .9rem;
-            padding: 1rem;
-            min-height: 96px;
-        }
+        .table-tight td, .table-tight th { padding: .55rem .65rem }
+        .badge-soft { background: var(--brand-soft); color: #1e3a8a; border: 1px solid #bfdbfe; }
+        .row-tools { gap:.5rem }
+        .btn-ghost { background:#fff; border:1px solid var(--card-border) }
+        .pill-count { border-radius:999px; background:#f1f5f9; color:#0f172a; padding:.2rem .55rem; font-weight:600; font-size:.825rem }
+        .address-col { min-width:280px }
+        .rider-col { min-width:160px }
 
-        .kpi-icon {
-            width: 46px;
-            height: 46px;
-            border-radius: 12px;
+        /* NEW: Totals grid styles */
+        .totals-toolbar { display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; }
+        .totals-grid {
             display: grid;
-            place-items: center;
-            background: linear-gradient(135deg, #eff6ff, #e0f2fe);
-            border: 1px solid #e2e8f0;
-            flex: 0 0 46px;
+            grid-template-columns: repeat(12, 1fr);
+            gap: .9rem;
         }
+        @media (max-width: 1399.98px){ .totals-grid{ grid-template-columns: repeat(9, 1fr);} }
+        @media (max-width: 1199.98px){ .totals-grid{ grid-template-columns: repeat(8, 1fr);} }
+        @media (max-width: 991.98px){ .totals-grid{ grid-template-columns: repeat(6, 1fr);} }
+        @media (max-width: 767.98px){ .totals-grid{ grid-template-columns: repeat(4, 1fr);} }
+        @media (max-width: 575.98px){ .totals-grid{ grid-template-columns: repeat(2, 1fr);} }
 
-        .kpi-icon i {
-            font-size: 1.25rem;
-            color: #0f172a;
+        .total-card {
+            grid-column: span 4;
+            background:#fff;
+            border:1px solid var(--card-border);
+            border-radius:12px;
+            padding:.9rem;
+            display:flex;
+            flex-direction:column;
+            gap:.35rem;
+            min-height: 92px;
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
         }
-
-        .kpi-meta .label {
-            font-size: .84rem;
-            color: #6b7280;
-            font-weight: 600;
-            letter-spacing: .2px;
+        .total-card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.06); border-color:#dbe3f0; }
+        .total-top { display:flex; justify-content:space-between; gap:.6rem; align-items:flex-start; }
+        .total-name { font-weight:700; color:#0f172a; line-height:1.2; }
+        .total-qty { font-size:1.25rem; font-weight:800; color:#0b1528; }
+        .total-unit { font-size:.85rem; font-weight:700; opacity:.7; margin-left:.25rem; }
+        .unit-chip {
+            display:inline-flex; align-items:center; gap:.35rem;
+            font-size:.75rem; font-weight:600;
+            border-radius:999px; padding:.25rem .55rem;
+            border:1px solid #e5e7eb; background:#f8fafc; color:#0f172a;
         }
+        .unit-chip .dot { width:8px; height:8px; border-radius:999px; display:inline-block; }
 
-        .kpi-meta .value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: #0f172a;
-            line-height: 1.1;
+        /* Unit color accents */
+        .chip-weight { background:#f0f9ff; border-color:#cfe8ff; }
+        .chip-weight .dot{ background:#2563eb; }
+        .chip-volume { background:#f1f5ff; border-color:#dbe2ff; }
+        .chip-volume .dot{ background:#7c3aed; }
+        .chip-count  { background:#f0fdf4; border-color:#ccebd6; }
+        .chip-count .dot{ background:#16a34a; }
+
+        .total-actions { display:flex; gap:.4rem; }
+        .btn-icon {
+            border:1px solid #e5e7eb; background:#fff; border-radius:8px; padding:.35rem .5rem; line-height:1;
         }
+        .btn-icon:hover { background:#f8fafc; }
 
-        .kpi-meta .hint {
-            font-size: .78rem;
-            color: #64748b;
-        }
-
-        .table-tight td,
-        .table-tight th {
-            padding: .55rem .65rem
-        }
-
-        .badge-soft {
-            background: var(--brand-soft);
-            color: #1e3a8a;
-            border: 1px solid #bfdbfe;
-        }
-
-        .row-tools {
-            gap: .5rem
-        }
-
-        .btn-ghost {
-            background: #fff;
-            border: 1px solid var(--card-border)
-        }
-
-        .pill-count {
-            border-radius: 999px;
-            background: #f1f5f9;
-            color: #0f172a;
-            padding: .2rem .55rem;
-            font-weight: 600;
-            font-size: .825rem
-        }
-
-        .address-col {
-            min-width: 280px
-        }
-
-        .rider-col {
-            min-width: 160px
+        /* Empty state */
+        .empty-totals {
+            border:1px dashed #d1d5db; border-radius:12px; padding:1rem; background:#fafafa;
         }
     </style>
 @endsection
@@ -234,44 +205,87 @@
             </div>
         </div>
 
-          {{-- NEW: Tomorrow — Totals by Item (All Products) --}}
+        {{-- NEW: Tomorrow — Totals by Item (All Products) --}}
         <div class="card border-0 shadow-sm mt-3">
-            <div class="card-header bg-white">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <strong>Tomorrow — Totals by Item (All Products)</strong>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Item</th>
-                                <th class="text-end">Total Qty</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($tTotals as $it)
-                                <tr>
-                                    <td>{{ $it['item_name'] }}</td>
-                                    <td class="text-end">
-                                        {{ rtrim(rtrim(number_format($it['total_qty_disp'], 3), '0'), '.') }}
-                                        {{ $it['total_unit_disp'] }}
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="2" class="text-muted">No items.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+
+                <div class="totals-toolbar">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" id="totalsSearch" placeholder="Search item...">
+                    </div>
+                    <select class="form-select form-select-sm" id="totalsUnitFilter" style="min-width:150px">
+                        <option value="">All units</option>
+                        <option value="weight">Weight (kg/g)</option>
+                        <option value="volume">Volume (l/ml)</option>
+                        <option value="count">Count (pcs)</option>
+                    </select>
+                    <select class="form-select form-select-sm" id="totalsSort" style="min-width:150px">
+                        <option value="name-asc">Sort: Name A→Z</option>
+                        <option value="name-desc">Sort: Name Z→A</option>
+                        <option value="qty-desc">Sort: Qty High→Low</option>
+                        <option value="qty-asc">Sort: Qty Low→High</option>
+                    </select>
                 </div>
+            </div>
+
+            <div class="card-body">
+                @php
+                    // Helper to infer category from unit label
+                    $inferCategory = function($u){
+                        $u = strtolower((string)$u);
+                        if (in_array($u, ['kg','g'])) return 'weight';
+                        if (in_array($u, ['l','ml'])) return 'volume';
+                        return 'count';
+                    };
+                @endphp
+
+                @if (empty($tTotals))
+                    <div class="empty-totals text-center text-muted">
+                        <i class="bi bi-box-seam"></i> No items.
+                    </div>
+                @else
+                    <div class="totals-grid" id="totalsGrid">
+                        @foreach ($tTotals as $it)
+                            @php
+                                $unit = strtoupper($it['total_unit_disp'] ?? '');
+                                $category = $inferCategory($unit);
+                                $chipClass = $category === 'weight' ? 'chip-weight' : ($category === 'volume' ? 'chip-volume' : 'chip-count');
+                                $qty = rtrim(rtrim(number_format($it['total_qty_disp'] ?? 0, 3), '0'), '.');
+                            @endphp
+
+                            <div class="total-card"
+                                 data-name="{{ strtolower($it['item_name']) }}"
+                                 data-unit="{{ $category }}"
+                                 data-qty="{{ (float)($it['total_qty_disp'] ?? 0) }}">
+                                <div class="total-top">
+                                    <div class="total-name">{{ $it['item_name'] }}</div>
+                                    <div class="unit-chip {{ $chipClass }}">
+                                        <span class="dot"></span>
+                                        <span class="text-uppercase">{{ $unit }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-baseline justify-content-between">
+                                    <div>
+                                        <span class="total-qty">{{ $qty }}</span>
+                                        <span class="total-unit">{{ $unit }}</span>
+                                    </div>
+                                    <div class="total-actions">
+                                        <button class="btn btn-sm btn-icon copy-line" title="Copy">
+                                            <i class="bi bi-clipboard"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
 
-    </div>
-
         {{-- TABS --}}
-        <div class="card shadow-sm mb-3">
+        <div class="card shadow-sm mb-3 mt-3">
             <div class="card-body">
                 <div class="tabs-wrap">
                     <ul class="nav nav-pills flex-wrap" id="sectionsTabs" role="tablist">
@@ -279,21 +293,9 @@
                             $sections = [
                                 ['key' => 'active', 'title' => 'Tomorrow Delivery', 'count' => count($activeTomorrow)],
                                 ['key' => 'start', 'title' => 'Starting Tomorrow', 'count' => count($startingTomorrow)],
-                                [
-                                    'key' => 'pause',
-                                    'title' => 'Pausing from Tomorrow',
-                                    'count' => count($pausingTomorrow),
-                                ],
-                                [
-                                    'key' => 'custom',
-                                    'title' => 'Tomorrow Customize Orders',
-                                    'count' => count($customizeTomorrow),
-                                ],
-                                [
-                                    'key' => 'resume',
-                                    'title' => 'Pause → Active (Tomorrow)',
-                                    'count' => count($resumingTomorrow),
-                                ],
+                                ['key' => 'pause','title' => 'Pausing from Tomorrow','count' => count($pausingTomorrow)],
+                                ['key' => 'custom','title' => 'Tomorrow Customize Orders','count' => count($customizeTomorrow)],
+                                ['key' => 'resume','title' => 'Pause → Active (Tomorrow)','count' => count($resumingTomorrow)],
                             ];
                         @endphp
                         @foreach ($sections as $i => $s)
@@ -317,76 +319,46 @@
             @php
                 function renderSubsTable($rows)
                 {
-                    if (empty($rows)) {
-                        echo '<div class="alert alert-secondary mb-0">No subscriptions found.</div>';
-                        return;
-                    }
+                    if (empty($rows)) { echo '<div class="alert alert-secondary mb-0">No subscriptions found.</div>'; return; }
                     echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
                     echo '<thead class="table-light">';
                     echo '<tr><th>Customer</th><th>Order</th><th>Product</th><th>Status</th><th>Start</th><th>End</th><th>Pause</th><th class="rider-col">Rider</th><th class="address-col">Address</th></tr>';
                     echo '</thead><tbody>';
                     foreach ($rows as $r) {
-                        $pause =
-                            $r['pause_start'] || $r['pause_end']
-                                ? ($r['pause_start'] ?? '—') . ' → ' . ($r['pause_end'] ?? '—')
-                                : '—';
+                        $pause = $r['pause_start'] || $r['pause_end'] ? ($r['pause_start'] ?? '—').' → '.($r['pause_end'] ?? '—') : '—';
                         $status = strtolower($r['status'] ?? '');
                         $badgeClass = 'badge-soft';
-                        if (in_array($status, ['active'])) {
-                            $badgeClass = 'bg-success-subtle text-success';
-                        }
-                        if (in_array($status, ['paused'])) {
-                            $badgeClass = 'bg-warning-subtle text-warning';
-                        }
-                        if (in_array($status, ['pending'])) {
-                            $badgeClass = 'bg-info-subtle text-info';
-                        }
-                        if (in_array($status, ['expired', 'ended'])) {
-                            $badgeClass = 'bg-danger-subtle text-danger';
-                        }
+                        if (in_array($status, ['active']))  { $badgeClass = 'bg-success-subtle text-success'; }
+                        if (in_array($status, ['paused']))  { $badgeClass = 'bg-warning-subtle text-warning'; }
+                        if (in_array($status, ['pending'])) { $badgeClass = 'bg-info-subtle text-info'; }
+                        if (in_array($status, ['expired','ended'])) { $badgeClass = 'bg-danger-subtle text-danger'; }
                         $apt = $r['apartment_name'] ?? '';
                         $riderName = $r['rider_name'] ?? '—';
 
-                        echo '<tr class="row-item" ' .
-                            ' data-name="' .
-                            e(strtolower($r['customer'] ?? '')) .
-                            '"' .
-                            ' data-mobile="' .
-                            e(strtolower($r['phone'] ?? '')) .
-                            '"' .
-                            ' data-apt="' .
-                            e(strtolower($apt)) .
-                            '"' .
-                            ' data-rider="' .
-                            e(strtolower($riderName)) .
-                            '">';
+                        echo '<tr class="row-item" '.
+                             ' data-name="'.e(strtolower($r['customer'] ?? '')).'"'.
+                             ' data-mobile="'.e(strtolower($r['phone'] ?? '')).'"'.
+                             ' data-apt="'.e(strtolower($apt)).'"'.
+                             ' data-rider="'.e(strtolower($riderName)).'">';
 
-                        echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
+                        echo '<td><div class="fw-semibold">'.e($r['customer']).'</div>';
                         if ($r['phone'] || $r['email']) {
-                            echo '<div class="text-muted small">' .
-                                e($r['phone'] ?? '') .
-                                ($r['phone'] && $r['email'] ? ' • ' : '') .
-                                e($r['email'] ?? '') .
-                                '</div>';
+                            echo '<div class="text-muted small">'.e($r['phone'] ?? '').($r['phone'] && $r['email'] ? ' • ' : '').e($r['email'] ?? '').'</div>';
                         }
                         echo '</td>';
 
-                        echo '<td>#' . e($r['order_id']) . '</td>';
-                        echo '<td>' . e($r['product']) . '</td>';
-                        echo '<td><span class="badge ' . $badgeClass . '">' . e($r['status']) . '</span></td>';
-                        echo '<td>' . e($r['start_date'] ?? '—') . '</td>';
-                        echo '<td>' . e($r['new_date'] ?? ($r['end_date'] ?? '—')) . '</td>';
-                        echo '<td>' . e($pause) . '</td>';
-                        echo '<td>' . e($riderName) . '</td>';
+                        echo '<td>#'.e($r['order_id']).'</td>';
+                        echo '<td>'.e($r['product']).'</td>';
+                        echo '<td><span class="badge '.$badgeClass.'">'.e($r['status']).'</span></td>';
+                        echo '<td>'.e($r['start_date'] ?? '—').'</td>';
+                        echo '<td>'.e($r['new_date'] ?? ($r['end_date'] ?? '—')).'</td>';
+                        echo '<td>'.e($pause).'</td>';
+                        echo '<td>'.e($riderName).'</td>';
 
                         $addrSafe = e($r['address']);
                         echo '<td>';
-                        echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
-                            $addrSafe .
-                            '" data-bs-toggle="modal" data-bs-target="#addressModal">';
-                        echo '<i class="bi bi-geo-alt"></i> View';
-                        echo '</button>';
-                        echo '</td>';
+                        echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="'.$addrSafe.'" data-bs-toggle="modal" data-bs-target="#addressModal">';
+                        echo '<i class="bi bi-geo-alt"></i> View</button></td>';
 
                         echo '</tr>';
                     }
@@ -395,10 +367,7 @@
 
                 function renderCustomizeTable($rows)
                 {
-                    if (empty($rows)) {
-                        echo '<div class="alert alert-secondary mb-0">No customize orders found for tomorrow.</div>';
-                        return;
-                    }
+                    if (empty($rows)) { echo '<div class="alert alert-secondary mb-0">No customize orders found for tomorrow.</div>'; return; }
                     echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
                     echo '<thead class="table-light">';
                     echo '<tr><th>Customer</th><th>Request</th><th>Product</th><th>Status</th><th>Date</th><th>Time</th><th class="rider-col">Rider</th><th>Items</th><th class="address-col">Address</th></tr>';
@@ -406,68 +375,40 @@
                     foreach ($rows as $r) {
                         $apt = $r['apartment_name'] ?? '';
                         $riderName = $r['rider_name'] ?? '—';
-                        $reqId = $r['request_id'] ? '#' . $r['request_id'] : '—';
-                        $ordId = $r['order_id'] ? '#' . $r['order_id'] : null;
+                        $reqId = $r['request_id'] ? '#'.$r['request_id'] : '—';
+                        $ordId = $r['order_id'] ? '#'.$r['order_id'] : null;
 
-                        // Safe JSON for data attribute
                         $itemsJson = e(json_encode($r['items'] ?? []));
 
-                        echo '<tr class="row-item" ' .
-                            ' data-name="' .
-                            e(strtolower($r['customer'] ?? '')) .
-                            '"' .
-                            ' data-mobile="' .
-                            e(strtolower($r['phone'] ?? '')) .
-                            '"' .
-                            ' data-apt="' .
-                            e(strtolower($apt)) .
-                            '"' .
-                            ' data-rider="' .
-                            e(strtolower($riderName)) .
-                            '">';
+                        echo '<tr class="row-item" '.
+                             ' data-name="'.e(strtolower($r['customer'] ?? '')).'"'.
+                             ' data-mobile="'.e(strtolower($r['phone'] ?? '')).'"'.
+                             ' data-apt="'.e(strtolower($apt)).'"'.
+                             ' data-rider="'.e(strtolower($riderName)).'">';
 
-                        echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
+                        echo '<td><div class="fw-semibold">'.e($r['customer']).'</div>';
                         if ($r['phone'] || $r['email']) {
-                            echo '<div class="text-muted small">' .
-                                e($r['phone'] ?? '') .
-                                ($r['phone'] && $r['email'] ? ' • ' : '') .
-                                e($r['email'] ?? '') .
-                                '</div>';
+                            echo '<div class="text-muted small">'.e($r['phone'] ?? '').($r['phone'] && $r['email'] ? ' • ' : '').e($r['email'] ?? '').'</div>';
                         }
                         echo '</td>';
 
                         echo '<td>';
                         echo e($reqId);
-                        if ($ordId) {
-                            echo ' <span class="text-muted small">(&nbsp;Order ' . e($ordId) . '&nbsp;)</span>';
-                        }
+                        if ($ordId) echo ' <span class="text-muted small">(&nbsp;Order '.e($ordId).'&nbsp;)</span>';
                         echo '</td>';
 
-                        echo '<td>' . e($r['product'] ?? '—') . '</td>';
-                        echo '<td><span class="badge bg-info-subtle text-info">' .
-                            e($r['status'] ?? '—') .
-                            '</span></td>';
-                        echo '<td>' . e($r['date'] ?? '—') . '</td>';
-                        echo '<td>' . e($r['time'] ?? '—') . '</td>';
-                        echo '<td>' . e($riderName) . '</td>';
+                        echo '<td>'.e($r['product'] ?? '—').'</td>';
+                        echo '<td><span class="badge bg-info-subtle text-info">'.e($r['status'] ?? '—').'</span></td>';
+                        echo '<td>'.e($r['date'] ?? '—').'</td>';
+                        echo '<td>'.e($r['time'] ?? '—').'</td>';
+                        echo '<td>'.e($riderName).'</td>';
 
-                        // Items button
-                        echo '<td>';
-                        echo '<button type="button" class="btn btn-sm btn-outline-secondary view-items" data-items="' .
-                            $itemsJson .
-                            '" data-bs-toggle="modal" data-bs-target="#itemsModal">';
-                        echo '<i class="bi bi-list-ul"></i> Items';
-                        echo '</button>';
-                        echo '</td>';
+                        echo '<td><button type="button" class="btn btn-sm btn-outline-secondary view-items" data-items="'.$itemsJson.'" data-bs-toggle="modal" data-bs-target="#itemsModal">';
+                        echo '<i class="bi bi-list-ul"></i> Items</button></td>';
 
                         $addrSafe = e($r['address'] ?? '—');
-                        echo '<td>';
-                        echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
-                            $addrSafe .
-                            '" data-bs-toggle="modal" data-bs-target="#addressModal">';
-                        echo '<i class="bi bi-geo-alt"></i> View';
-                        echo '</button>';
-                        echo '</td>';
+                        echo '<td><button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="'.$addrSafe.'" data-bs-toggle="modal" data-bs-target="#addressModal">';
+                        echo '<i class="bi bi-geo-alt"></i> View</button></td>';
 
                         echo '</tr>';
                     }
@@ -541,7 +482,7 @@
             </div>
         </div>
 
-      
+    </div>
 
     {{-- ADDRESS MODAL --}}
     <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
@@ -585,12 +526,12 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        (function() {
+        (function () {
             // Address modal copy
             const addressBody = document.getElementById('addressModalBody');
             const copyBtn = document.getElementById('copyAddressBtn');
 
-            document.addEventListener('click', function(e) {
+            document.addEventListener('click', function (e) {
                 const addrBtn = e.target.closest('.view-address');
                 if (addrBtn) {
                     const addr = addrBtn.getAttribute('data-address') || '—';
@@ -601,16 +542,27 @@
                 if (itemsBtn) {
                     const raw = itemsBtn.getAttribute('data-items') || '[]';
                     let items = [];
-                    try {
-                        items = JSON.parse(raw);
-                    } catch (e) {
-                        items = [];
-                    }
+                    try { items = JSON.parse(raw); } catch (e) { items = []; }
                     renderItems(items);
+                }
+
+                const copyLineBtn = e.target.closest('.copy-line');
+                if (copyLineBtn) {
+                    const card = copyLineBtn.closest('.total-card');
+                    if (card) {
+                        const name = card.getAttribute('data-name') || '';
+                        const qty = card.getAttribute('data-qty') || '';
+                        const unit = card.querySelector('.unit-chip .text-uppercase')?.textContent || '';
+                        const text = `${name.toUpperCase()} - ${qty} ${unit}`;
+                        navigator.clipboard.writeText(text).then(() => {
+                            copyLineBtn.innerHTML = '<i class="bi bi-check2"></i>';
+                            setTimeout(() => copyLineBtn.innerHTML = '<i class="bi bi-clipboard"></i>', 1100);
+                        }).catch(() => {});
+                    }
                 }
             });
 
-            copyBtn && copyBtn.addEventListener('click', async function() {
+            copyBtn && copyBtn.addEventListener('click', async function () {
                 try {
                     await navigator.clipboard.writeText(addressBody.textContent || '');
                     copyBtn.innerHTML = '<i class="bi bi-check2"></i> Copied';
@@ -630,18 +582,9 @@
                 html += '<table class="table table-sm table-striped align-middle">';
                 html += '<thead class="table-light">';
                 html += '<tr>';
-                html += '<th>#</th>';
-                html += '<th>Type</th>';
-                html += '<th>Garland</th>';
-                html += '<th>Garland Qty</th>';
-                html += '<th>Garland Size</th>';
-                html += '<th>Flower</th>';
-                html += '<th>Unit</th>';
-                html += '<th>Flower Qty</th>';
-                html += '<th>Flower Count</th>';
-                html += '<th>Size</th>';
-                html += '</tr>';
-                html += '</thead><tbody>';
+                html += '<th>#</th><th>Type</th><th>Garland</th><th>Garland Qty</th><th>Garland Size</th>';
+                html += '<th>Flower</th><th>Unit</th><th>Flower Qty</th><th>Flower Count</th><th>Size</th>';
+                html += '</tr></thead><tbody>';
 
                 items.forEach((it, idx) => {
                     html += '<tr>';
@@ -664,12 +607,55 @@
 
             function escapeHtml(str) {
                 return (str || '').toString()
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
                     .replace(/'/g, '&#039;');
             }
+
+            // --- Filtering/sorting for totals grid ---
+            const searchInput = document.getElementById('totalsSearch');
+            const unitFilter  = document.getElementById('totalsUnitFilter');
+            const sortSelect  = document.getElementById('totalsSort');
+            const grid        = document.getElementById('totalsGrid');
+
+            function applyTotalsFilters() {
+                if (!grid) return;
+                const term = (searchInput?.value || '').trim().toLowerCase();
+                const unit = (unitFilter?.value || '').toLowerCase();
+                let cards = Array.from(grid.querySelectorAll('.total-card'));
+
+                // filter
+                cards.forEach(c => {
+                    const name = c.getAttribute('data-name') || '';
+                    const u = c.getAttribute('data-unit') || '';
+                    const visible = (!term || name.includes(term)) && (!unit || u === unit);
+                    c.style.display = visible ? '' : 'none';
+                });
+
+                // sort
+                const mode = sortSelect?.value || 'name-asc';
+                cards = cards.filter(c => c.style.display !== 'none');
+                cards.sort((a,b) => {
+                    const an = (a.getAttribute('data-name') || '');
+                    const bn = (b.getAttribute('data-name') || '');
+                    const aq = parseFloat(a.getAttribute('data-qty') || '0');
+                    const bq = parseFloat(b.getAttribute('data-qty') || '0');
+                    if (mode === 'name-asc')  return an.localeCompare(bn);
+                    if (mode === 'name-desc') return bn.localeCompare(an);
+                    if (mode === 'qty-asc')   return aq - bq;
+                    if (mode === 'qty-desc')  return bq - aq;
+                    return 0;
+                });
+                // reflow
+                cards.forEach(c => grid.appendChild(c));
+            }
+
+            ['input','change'].forEach(evt => {
+                searchInput?.addEventListener(evt, applyTotalsFilters);
+                unitFilter?.addEventListener(evt, applyTotalsFilters);
+                sortSelect?.addEventListener(evt, applyTotalsFilters);
+            });
+            applyTotalsFilters();
         })();
     </script>
 @endsection
