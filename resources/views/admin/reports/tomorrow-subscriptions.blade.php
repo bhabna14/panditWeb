@@ -210,7 +210,7 @@
             <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <strong>Tomorrow — Totals by Item (All Products)</strong>
 
-                <div class="totals-toolbar">
+                {{-- <div class="totals-toolbar">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
                         <input type="text" class="form-control" id="totalsSearch" placeholder="Search item...">
@@ -227,7 +227,7 @@
                         <option value="qty-desc">Sort: Qty High→Low</option>
                         <option value="qty-asc">Sort: Qty Low→High</option>
                     </select>
-                </div>
+                </div> --}}
             </div>
 
             <div class="card-body">
