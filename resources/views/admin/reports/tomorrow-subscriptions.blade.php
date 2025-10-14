@@ -79,7 +79,7 @@
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center gap-3 mb-2">
                             <i class="bi bi-shield-lock fs-2 text-warning"></i>
-                            <h4 class="mb-0">Access locked until 5:00 PM (India/Kolkata)</h4>
+                            <h4 class="mb-0">Access locked until 5:00 PM</h4>
                         </div>
                         <p class="text-muted mb-3">
                             Hello <strong>{{ ucfirst($role) }}</strong>! This page becomes available for admins after
