@@ -18,32 +18,29 @@ class TomorrowSubscriptionsController extends Controller
 
         // Eager-load for subscriptions
         $withSubs = [
-            'users',                    // mobile_number, email, custom PK `userid`
-            'users.addressDetails',     // default address
-            'order',                    // shipping_* fields (if present)
+            'users',
+            'users.addressDetails',
+            'order',
             'order.rider:id,rider_id,rider_name',
             'flowerProducts:product_id,name',
-            'latestPaidPayment',        // payment_status = 'paid'
-            'flowerPayments',           // fallback 'status'='paid'
+            'latestPaidPayment',
+            'flowerPayments',
         ];
 
         // Eager-load for customize orders (FlowerRequest)
         $withRequests = [
             'user:userid,name,mobile_number,email',
-            'address',                                  // show address
+            'address',
             'flowerProduct:product_id,name',
-            'order:id,order_id,request_id,rider_id',    // may be null if not converted to order
+            'order:id,order_id,request_id,rider_id',
             'order.rider:id,rider_id,rider_name',
         ];
 
-        // Exclude terminal statuses for subs
         $excludeStatuses = ['expired', 'dead'];
 
-        // Helper: hide "pending, starts today, unpaid"
+        // Hide "pending, starts today, unpaid"
         $shouldHide = function ($sub) use ($today) {
-            if (strtolower($sub->status ?? '') !== 'pending') {
-                return false;
-            }
+            if (strtolower($sub->status ?? '') !== 'pending') return false;
             $startsToday = $sub->start_date ? Carbon::parse($sub->start_date)->isSameDay($today) : false;
             if (!$startsToday) return false;
 
@@ -58,9 +55,9 @@ class TomorrowSubscriptionsController extends Controller
             return !$hasPaid;
         };
 
-        /* ===================== DATASETS ===================== */
+        /* ===== DATASETS ===== */
 
-        // A) Tomorrow Delivery (active tomorrow)
+        // 1) Tomorrow Delivery (active tomorrow)
         $activeTomorrow = Subscription::with($withSubs)
             ->whereNotIn('status', $excludeStatuses)
             ->where(function ($q) {
@@ -70,28 +67,40 @@ class TomorrowSubscriptionsController extends Controller
             ->whereDate('start_date', '<=', $tomorrow->toDateString())
             ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tomorrow->toDateString())
             ->get()
-            // exclude subs paused on that day
             ->filter(function ($s) use ($tomorrow) {
+                // exclude if paused on that day
                 if ($s->pause_start_date && $s->pause_end_date) {
                     $ps = Carbon::parse($s->pause_start_date)->startOfDay();
                     $pe = Carbon::parse($s->pause_end_date)->endOfDay();
-                    if ($ps->lte($tomorrow) && $pe->gte($tomorrow)) {
-                        return false;
-                    }
+                    if ($ps->lte($tomorrow) && $pe->gte($tomorrow)) return false;
                 }
                 return true;
             })
             ->reject($shouldHide)
             ->values();
 
-        // B) Tomorrow Customize Orders (from FlowerRequest)
+        // 2) Starting Tomorrow (start_date == tomorrow)
+        $startingTomorrow = Subscription::with($withSubs)
+            ->whereNotIn('status', $excludeStatuses)
+            ->whereDate('start_date', '=', $tomorrow->toDateString())
+            ->get()
+            ->reject($shouldHide)
+            ->values();
+
+        // 3) Pausing from Tomorrow (pause_start_date == tomorrow)
+        $pausingTomorrow = Subscription::with($withSubs)
+            ->whereNotIn('status', $excludeStatuses)
+            ->whereDate('pause_start_date', '=', $tomorrow->toDateString())
+            ->get()
+            ->reject($shouldHide)
+            ->values();
+
+        // 4) Tomorrow Customize Orders (FlowerRequest::date == tomorrow)
         $customizeTomorrow = FlowerRequest::with($withRequests)
             ->whereDate('date', '=', $tomorrow->toDateString())
             ->get();
 
-        // C) Pause → Active from Tomorrow (pause ends today)
-        // With your inclusive pause logic, if pause_end_date >= tomorrow they're still paused tomorrow.
-        // So "active from tomorrow" means pause_end_date == today.
+        // 5) Pause → Active from Tomorrow (pause_end_date == today)
         $resumingTomorrow = Subscription::with($withSubs)
             ->whereNotIn('status', $excludeStatuses)
             ->whereNotNull('pause_end_date')
@@ -100,14 +109,14 @@ class TomorrowSubscriptionsController extends Controller
             ->reject($shouldHide)
             ->values();
 
-        /* ===================== MAPPERS ===================== */
+        /* ===== MAPPERS ===== */
 
         $mapSub = function ($s) {
             $user    = $s->users;
             $order   = $s->order;
             $product = $s->flowerProducts;
 
-            // Build address: order shipping_* first, else user's default address
+            // address: order shipping_* first, else user default
             $address = '';
             if ($order) {
                 $parts = [];
@@ -165,10 +174,9 @@ class TomorrowSubscriptionsController extends Controller
             $user    = $fr->user;
             $addr    = $fr->address;
             $product = $fr->flowerProduct;
-            $order   = $fr->order;             // may be null
+            $order   = $fr->order;
             $rider   = $order?->rider;
 
-            // Build address from request address
             $chunks = array_filter([
                 $addr?->apartment_flat_plot ?? null,
                 $addr?->apartment_name ?? null,
@@ -181,22 +189,22 @@ class TomorrowSubscriptionsController extends Controller
             $address = trim(implode(', ', $chunks));
 
             return [
-                'request_id'   => $fr->request_id,
-                'order_id'     => $order?->order_id,
-                'status'       => $fr->status ?? '—',
-                'date'         => $fr->date ? (string)$fr->date : null,
-                'time'         => $fr->time ? (string)$fr->time : null,
+                'request_id'     => $fr->request_id,
+                'order_id'       => $order?->order_id,
+                'status'         => $fr->status ?? '—',
+                'date'           => $fr->date ? (string)$fr->date : null,
+                'time'           => $fr->time ? (string)$fr->time : null,
 
-                'customer'     => $user?->name ?? '—',
-                'phone'        => $user?->mobile_number ?? null,
-                'email'        => $user?->email ?? null,
+                'customer'       => $user?->name ?? '—',
+                'phone'          => $user?->mobile_number ?? null,
+                'email'          => $user?->email ?? null,
 
-                'product'      => $product?->name ?? '—',
-                'address'      => $address ?: '—',
+                'product'        => $product?->name ?? '—',
+                'address'        => $address ?: '—',
                 'apartment_name' => $addr?->apartment_name ?? '',
 
-                'rider_id'     => $rider?->rider_id ?? null,
-                'rider_name'   => $rider?->rider_name ?? '—',
+                'rider_id'       => $rider?->rider_id ?? null,
+                'rider_name'     => $rider?->rider_name ?? '—',
             ];
         };
 
@@ -204,10 +212,11 @@ class TomorrowSubscriptionsController extends Controller
             'today'              => $today->toDateString(),
             'tomorrow'           => $tomorrow->toDateString(),
 
-            // Three sections only
-            'activeTomorrow'     => $activeTomorrow->map($mapSub)->all(),       // "Tomorrow Delivery"
-            'customizeTomorrow'  => $customizeTomorrow->map($mapRequest)->all(),// "Tomorrow Customize Orders"
-            'resumingTomorrow'   => $resumingTomorrow->map($mapSub)->all(),     // "Pause → Active (from Tomorrow)"
+            'activeTomorrow'     => $activeTomorrow->map($mapSub)->all(),
+            'startingTomorrow'   => $startingTomorrow->map($mapSub)->all(),   // NEW
+            'pausingTomorrow'    => $pausingTomorrow->map($mapSub)->all(),    // NEW
+            'customizeTomorrow'  => $customizeTomorrow->map($mapRequest)->all(),
+            'resumingTomorrow'   => $resumingTomorrow->map($mapSub)->all(),
         ];
 
         return view('admin.reports.tomorrow-subscriptions', $data);
