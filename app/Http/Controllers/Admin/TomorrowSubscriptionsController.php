@@ -19,7 +19,7 @@ class TomorrowSubscriptionsController extends Controller
         $role  = $admin?->role ?? session('admin_role'); // fallback to session if needed
 
         $nowIst     = Carbon::now('Asia/Kolkata');
-        $unlockAt   = (clone $nowIst)->setTime(17, 0, 0); // 5:00 PM IST today
+        $unlockAt   = (clone $nowIst)->setTime(17, 05, 0); // 5:00 PM IST today
         $isAfter5pm = $nowIst->greaterThanOrEqualTo($unlockAt);
         $canView    = ($role === 'super_admin') || $isAfter5pm;
 
