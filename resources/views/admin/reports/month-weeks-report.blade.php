@@ -223,7 +223,7 @@
                                             <th>Renew</th>
                                             <th>New</th>
                                             <th>Pause</th>
-                                            <th>Custom</th>
+                                            <th>Customize</th>
 
                         @forelse($vendorColumns as $v)
                             <th>{{ $v }}</th>
