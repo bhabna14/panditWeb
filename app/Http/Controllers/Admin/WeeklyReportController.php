@@ -12,16 +12,14 @@ use App\Models\FlowerPayment;
 use App\Models\FlowerPickupDetails;
 use App\Models\DeliveryHistory;
 use App\Models\Subscription;
-use App\Models\RiderDetails;
-use App\Models\FlowerVendor; // if you have this model
-use App\Models\SubscriptionPauseResumeLog; // if available
-use App\Models\DeliveryCustomizeHistory;   // if available
+use App\Models\FlowerVendor;
+use App\Models\SubscriptionPauseResumeLog;
+use App\Models\DeliveryCustomizeHistory;
 
 class WeeklyReportController extends Controller
 {
     public function index(Request $request)
     {
-        // Week selection (defaults to current week, Mon→Sun)
         $start = $request->filled('start')
             ? Carbon::parse($request->input('start'))->startOfDay()
             : Carbon::now()->startOfWeek(Carbon::MONDAY);
@@ -29,7 +27,6 @@ class WeeklyReportController extends Controller
             ? Carbon::parse($request->input('end'))->endOfDay()
             : (clone $start)->endOfWeek(Carbon::SUNDAY)->endOfDay();
 
-        // Build period of days
         $period = CarbonPeriod::create($start, $end);
         $days   = [];
         foreach ($period as $d) {
@@ -38,19 +35,19 @@ class WeeklyReportController extends Controller
                 'dow'      => $d->format('l'),
                 'finance'  => ['income' => 0, 'expenditure' => 0],
                 'customer' => ['renew' => 0, 'new' => 0, 'pause' => 0, 'customize' => 0],
-                'vendors'  => [],  // vendor name => total
-                'pickup'   => [],  // rider name  => total
-                'riders'   => [],  // rider name  => delivered count
+                'vendors'  => [],
+                'pickup'   => [],
+                'riders'   => [],
                 'total_delivery' => 0,
             ];
         }
 
         // ---------- Finance ----------
-        // Income: paid payments by day
+        // Income: use paid_amount (NOT amount)
         $payments = FlowerPayment::query()
             ->select([
                 DB::raw("DATE(created_at) as d"),
-                DB::raw("SUM(amount) as amt")
+                DB::raw("SUM(paid_amount) as amt")
             ])
             ->where('payment_status', 'paid')
             ->whereBetween('created_at', [$start, $end])
@@ -59,11 +56,11 @@ class WeeklyReportController extends Controller
 
         foreach ($payments as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['finance']['income'] = (float)$row->amt;
+                $days[$row->d]['finance']['income'] = (float) $row->amt;
             }
         }
 
-        // Expenditure: vendor pickup paid by day (use pickup_date; switch to delivery_date if you prefer)
+        // Expenditure: vendor pickup paid by day
         $expend = FlowerPickupDetails::query()
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
@@ -76,43 +73,34 @@ class WeeklyReportController extends Controller
 
         foreach ($expend as $row) {
             if (isset($days[$row->d])) {
-                $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
+                $days[$row->d]['finance']['expenditure'] = (float) $row->amt;
             }
         }
 
         // ---------- Customer ----------
-        // New subscriptions → start_date
         $newSubs = Subscription::query()
             ->select([DB::raw("DATE(start_date) as d"), DB::raw("COUNT(*) as c")])
             ->whereBetween('start_date', [$start->toDateString(), $end->toDateString()])
             ->groupBy('d')
             ->get();
-        foreach ($newSubs as $row) {
-            if (isset($days[$row->d])) $days[$row->d]['customer']['new'] = (int)$row->c;
-        }
+        foreach ($newSubs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['new'] = (int) $row->c;
 
-        // Renew subscriptions → using 'new_date' (your model has this field)
         $renewSubs = Subscription::query()
             ->select([DB::raw("DATE(new_date) as d"), DB::raw("COUNT(*) as c")])
             ->whereNotNull('new_date')
             ->whereBetween('new_date', [$start->toDateString(), $end->toDateString()])
             ->groupBy('d')
             ->get();
-        foreach ($renewSubs as $row) {
-            if (isset($days[$row->d])) $days[$row->d]['customer']['renew'] = (int)$row->c;
-        }
+        foreach ($renewSubs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['renew'] = (int) $row->c;
 
-        // Pause customer → prefer logs if present; else use pause_start_date
         if (class_exists(SubscriptionPauseResumeLog::class)) {
             $pauses = SubscriptionPauseResumeLog::query()
                 ->select([DB::raw("DATE(created_at) as d"), DB::raw("COUNT(*) as c")])
-                ->where('action', 'paused') // adjust to your column values
+                ->where('action', 'paused')
                 ->whereBetween('created_at', [$start, $end])
                 ->groupBy('d')
                 ->get();
-            foreach ($pauses as $row) {
-                if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int)$row->c;
-            }
+            foreach ($pauses as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int) $row->c;
         } else {
             $pauses = Subscription::query()
                 ->select([DB::raw("DATE(pause_start_date) as d"), DB::raw("COUNT(*) as c")])
@@ -120,24 +108,19 @@ class WeeklyReportController extends Controller
                 ->whereBetween('pause_start_date', [$start->toDateString(), $end->toDateString()])
                 ->groupBy('d')
                 ->get();
-            foreach ($pauses as $row) {
-                if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int)$row->c;
-            }
+            foreach ($pauses as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int) $row->c;
         }
 
-        // Customize Order → if you track in DeliveryCustomizeHistory; else leave 0
         if (class_exists(DeliveryCustomizeHistory::class)) {
             $customs = DeliveryCustomizeHistory::query()
                 ->select([DB::raw("DATE(created_at) as d"), DB::raw("COUNT(*) as c")])
                 ->whereBetween('created_at', [$start, $end])
                 ->groupBy('d')
                 ->get();
-            foreach ($customs as $row) {
-                if (isset($days[$row->d])) $days[$row->d]['customer']['customize'] = (int)$row->c;
-            }
+            foreach ($customs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['customize'] = (int) $row->c;
         }
 
-        // ---------- Vendor Report (vendor-wise paid price per day) ----------
+        // ---------- Vendor Report ----------
         $vendorPaid = FlowerPickupDetails::query()
             ->join('flower_vendors as v', 'v.vendor_id', '=', 'flower__pickup_details.vendor_id')
             ->select([
@@ -153,13 +136,11 @@ class WeeklyReportController extends Controller
         $allVendors = [];
         foreach ($vendorPaid as $row) {
             $allVendors[$row->vendor] = true;
-            if (isset($days[$row->d])) {
-                $days[$row->d]['vendors'][$row->vendor] = (float)$row->amt;
-            }
+            if (isset($days[$row->d])) $days[$row->d]['vendors'][$row->vendor] = (float) $row->amt;
         }
-        $allVendors = array_keys($allVendors); // list for table headers
+        $allVendors = array_keys($allVendors);
 
-        // ---------- Flower Pickup by rider (sum total_price they handled that day) ----------
+        // ---------- Flower Pickup by Rider ----------
         $pickupByRider = FlowerPickupDetails::query()
             ->join('flower__rider_details as r', 'r.rider_id', '=', 'flower__pickup_details.rider_id')
             ->select([
@@ -174,13 +155,11 @@ class WeeklyReportController extends Controller
         $pickupRiders = [];
         foreach ($pickupByRider as $row) {
             $pickupRiders[$row->rider] = true;
-            if (isset($days[$row->d])) {
-                $days[$row->d]['pickup'][$row->rider] = (float)$row->amt;
-            }
+            if (isset($days[$row->d])) $days[$row->d]['pickup'][$row->rider] = (float) $row->amt;
         }
         $pickupRiders = array_keys($pickupRiders);
 
-        // ---------- Deliveries: per rider and total ----------
+        // ---------- Deliveries ----------
         $deliv = DeliveryHistory::query()
             ->join('flower__rider_details as r', 'r.rider_id', '=', 'delivery_history.rider_id')
             ->select([
@@ -197,18 +176,16 @@ class WeeklyReportController extends Controller
         foreach ($deliv as $row) {
             $deliveryRiders[$row->rider] = true;
             if (isset($days[$row->d])) {
-                $days[$row->d]['riders'][$row->rider] = (int)$row->c;
-                $days[$row->d]['total_delivery'] += (int)$row->c;
+                $days[$row->d]['riders'][$row->rider] = (int) $row->c;
+                $days[$row->d]['total_delivery'] += (int) $row->c;
             }
         }
         $deliveryRiders = array_keys($deliveryRiders);
 
-        // Build dynamic columns (stable order)
         sort($allVendors);
         sort($pickupRiders);
         sort($deliveryRiders);
 
-        // Totals row
         $totals = [
             'income'      => 0,
             'expenditure' => 0,
@@ -222,22 +199,16 @@ class WeeklyReportController extends Controller
             'total_delivery' => 0,
         ];
 
-        foreach ($days as $d => $row) {
+        foreach ($days as $row) {
             $totals['income']      += $row['finance']['income'];
             $totals['expenditure'] += $row['finance']['expenditure'];
             $totals['renew']       += $row['customer']['renew'];
             $totals['new']         += $row['customer']['new'];
             $totals['pause']       += $row['customer']['pause'];
             $totals['customize']   += $row['customer']['customize'];
-            foreach ($allVendors as $v) {
-                $totals['vendors'][$v] += $row['vendors'][$v] ?? 0;
-            }
-            foreach ($pickupRiders as $r) {
-                $totals['pickup'][$r] += $row['pickup'][$r] ?? 0;
-            }
-            foreach ($deliveryRiders as $r) {
-                $totals['riders'][$r] += $row['riders'][$r] ?? 0;
-            }
+            foreach ($allVendors as $v)   $totals['vendors'][$v] += $row['vendors'][$v] ?? 0;
+            foreach ($pickupRiders as $r) $totals['pickup'][$r] += $row['pickup'][$r] ?? 0;
+            foreach ($deliveryRiders as $r) $totals['riders'][$r] += $row['riders'][$r] ?? 0;
             $totals['total_delivery'] += $row['total_delivery'];
         }
 
