@@ -254,7 +254,7 @@
                                                 Rider Deliveries</th>
                                         </tr>
                                         <tr>
-                                            <th class="text-end">Inc</th>
+                                            <th class="text-end">Incm</th>
                                             <th class="text-end">Purch</th>
 
                                             <th>Renew</th>
