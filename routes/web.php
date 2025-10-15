@@ -1004,7 +1004,6 @@ Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'stor
 
     // routes/web.php
 
-
     Route::get('/admin/weekly-report', [WeeklyReportController::class, 'index'])->name('weekly-report');
      Route::get('admin/ops-report', [WeeklyReportController::class, 'index'])
             ->name('admin.ops-report');
