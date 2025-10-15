@@ -254,8 +254,8 @@
                                                 Rider Deliveries</th>
                                         </tr>
                                         <tr>
-                                            <th class="text-end">Total Income</th>
-                                            <th class="text-end">Total Expenditure</th>
+                                            <th class="text-end">Inc</th>
+                                            <th class="text-end">Exp</th>
 
                                             <th>Renew</th>
                                             <th>New</th>
@@ -268,7 +268,7 @@
                                                 <th class="text-center">—</th>
                                             @endforelse
 
-                                            <th>Total Delivery</th>
+                                            <th>Dlvy</th>
                                             @forelse($deliveryCols as $r)
                                                 <th>{{ $r }}</th>
                                             @empty
