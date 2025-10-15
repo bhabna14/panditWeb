@@ -1,4 +1,3 @@
-{{-- resources/views/admin/reports/weekly.blade.php --}}
 @extends('admin.layouts.apps')
 
 @section('styles')
@@ -35,12 +34,6 @@
             vertical-align: middle
         }
 
-        .sticky-top-filter {
-            position: sticky;
-            top: 0;
-            z-index: 1030
-        }
-
         .money {
             font-variant-numeric: tabular-nums
         }
@@ -73,7 +66,7 @@
 
 @section('content')
     <div class="container-fluid">
-        {{-- Header --}}
+
         <div class="nu-hero">
             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
@@ -109,7 +102,6 @@
             </div>
         </div>
 
-        {{-- Table --}}
         <div class="nu-card p-3">
             <div class="table-responsive">
                 <table class="table table-sm table-tight align-middle">
@@ -181,7 +173,6 @@
                             </tr>
                         @endforeach
 
-                        {{-- Totals --}}
                         <tr class="totals-row">
                             <td colspan="2">Total</td>
                             <td class="money">{{ number_format($totals['income']) }}</td>
