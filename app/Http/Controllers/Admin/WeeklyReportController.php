@@ -11,15 +11,16 @@ use App\Models\FlowerPayment;
 use App\Models\FlowerPickupDetails;
 use App\Models\DeliveryHistory;
 use App\Models\Subscription;
-use App\Models\FlowerVendor;                 // ok to keep
-use App\Models\SubscriptionPauseResumeLog;   // if exists
-use App\Models\DeliveryCustomizeHistory;     // if exists
+use App\Models\FlowerVendor;
+use App\Models\RiderDetails;
+use App\Models\SubscriptionPauseResumeLog;
+use App\Models\DeliveryCustomizeHistory;
 
 class WeeklyReportController extends Controller
 {
     public function index(Request $request)
     {
-        // Week selection (defaults Mon→Sun of current week)
+        // Week selection (defaults Mon→Sun current week)
         $start = $request->filled('start')
             ? Carbon::parse($request->input('start'))->startOfDay()
             : Carbon::now()->startOfWeek(Carbon::MONDAY);
@@ -27,7 +28,7 @@ class WeeklyReportController extends Controller
             ? Carbon::parse($request->input('end'))->endOfDay()
             : (clone $start)->endOfWeek(Carbon::SUNDAY)->endOfDay();
 
-        // Frame the days
+        // Build day skeleton
         $period = CarbonPeriod::create($start, $end);
         $days   = [];
         foreach ($period as $d) {
@@ -36,15 +37,16 @@ class WeeklyReportController extends Controller
                 'dow'      => $d->format('l'),
                 'finance'  => ['income' => 0, 'expenditure' => 0],
                 'customer' => ['renew' => 0, 'new' => 0, 'pause' => 0, 'customize' => 0],
-                'vendors'  => [],   // vendor name => amount
-                'pickup'   => [],   // rider name  => amount
+                'vendors'  => [],   // vendor name => amt
+                'pickup'   => [],   // rider name  => amt
                 'riders'   => [],   // rider name  => delivered count
                 'total_delivery' => 0,
             ];
         }
 
-        // ---------- Finance ----------
-        // Income: SUM(paid_amount) from flower_payments
+        /* ================= Finance ================= */
+
+        // Income (flower_payments.paid_amount)
         $payments = FlowerPayment::query()
             ->select([
                 DB::raw("DATE(created_at) as d"),
@@ -56,12 +58,10 @@ class WeeklyReportController extends Controller
             ->get();
 
         foreach ($payments as $row) {
-            if (isset($days[$row->d])) {
-                $days[$row->d]['finance']['income'] = (float) $row->amt;
-            }
+            if (isset($days[$row->d])) $days[$row->d]['finance']['income'] = (float)$row->amt;
         }
 
-        // Expenditure: vendor pickup paid by day
+        // Expenditure (vendor pickup: total_price on pickup_date)
         $expend = FlowerPickupDetails::query()
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
@@ -73,141 +73,126 @@ class WeeklyReportController extends Controller
             ->get();
 
         foreach ($expend as $row) {
-            if (isset($days[$row->d])) {
-                $days[$row->d]['finance']['expenditure'] = (float) $row->amt;
-            }
+            if (isset($days[$row->d])) $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
         }
 
-        // ---------- Customer ----------
+        /* ================= Customer ================= */
+
         // New subscriptions (start_date)
         $newSubs = Subscription::query()
             ->select([DB::raw("DATE(start_date) as d"), DB::raw("COUNT(*) as c")])
             ->whereBetween('start_date', [$start->toDateString(), $end->toDateString()])
-            ->groupBy('d')
-            ->get();
-        foreach ($newSubs as $row) {
-            if (isset($days[$row->d])) $days[$row->d]['customer']['new'] = (int) $row->c;
-        }
+            ->groupBy('d')->get();
+        foreach ($newSubs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['new'] = (int)$row->c;
 
-        // Renew subscriptions (new_date)
+        // Renewals (new_date)
         $renewSubs = Subscription::query()
             ->select([DB::raw("DATE(new_date) as d"), DB::raw("COUNT(*) as c")])
             ->whereNotNull('new_date')
             ->whereBetween('new_date', [$start->toDateString(), $end->toDateString()])
-            ->groupBy('d')
-            ->get();
-        foreach ($renewSubs as $row) {
-            if (isset($days[$row->d])) $days[$row->d]['customer']['renew'] = (int) $row->c;
-        }
+            ->groupBy('d')->get();
+        foreach ($renewSubs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['renew'] = (int)$row->c;
 
-        // Pauses (prefer log if exists)
+        // Pauses
         if (class_exists(SubscriptionPauseResumeLog::class)) {
             $pauses = SubscriptionPauseResumeLog::query()
                 ->select([DB::raw("DATE(created_at) as d"), DB::raw("COUNT(*) as c")])
-                ->where('action', 'paused') // adjust if your column differs
+                ->where('action', 'paused')
                 ->whereBetween('created_at', [$start, $end])
-                ->groupBy('d')
-                ->get();
-            foreach ($pauses as $row) {
-                if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int) $row->c;
-            }
+                ->groupBy('d')->get();
+            foreach ($pauses as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int)$row->c;
         } else {
             $pauses = Subscription::query()
                 ->select([DB::raw("DATE(pause_start_date) as d"), DB::raw("COUNT(*) as c")])
                 ->whereNotNull('pause_start_date')
                 ->whereBetween('pause_start_date', [$start->toDateString(), $end->toDateString()])
-                ->groupBy('d')
-                ->get();
-            foreach ($pauses as $row) {
-                if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int) $row->c;
-            }
+                ->groupBy('d')->get();
+            foreach ($pauses as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int)$row->c;
         }
 
-        // Customize Order count (if tracked)
+        // Customize Order (if tracked)
         if (class_exists(DeliveryCustomizeHistory::class)) {
             $customs = DeliveryCustomizeHistory::query()
                 ->select([DB::raw("DATE(created_at) as d"), DB::raw("COUNT(*) as c")])
                 ->whereBetween('created_at', [$start, $end])
-                ->groupBy('d')
-                ->get();
-            foreach ($customs as $row) {
-                if (isset($days[$row->d])) $days[$row->d]['customer']['customize'] = (int) $row->c;
-            }
+                ->groupBy('d')->get();
+            foreach ($customs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['customize'] = (int)$row->c;
         }
 
-        // ---------- Vendor Report (vendor-wise paid price per day) ----------
-        // IMPORTANT: your vendor table name is flower__vendor_details
+        /* ================= Lookups (no joins → no collation errors) ================= */
+
+        // ID → Name maps
+        $vendorMap = FlowerVendor::query()->pluck('vendor_name', 'vendor_id')->toArray();
+        $riderMap  = RiderDetails::query()->pluck('rider_name', 'rider_id')->toArray();
+
+        // Vendor report: aggregate by date + vendor_id
         $vendorPaid = FlowerPickupDetails::query()
-            ->join('flower__vendor_details as v', 'v.vendor_id', '=', 'flower__pickup_details.vendor_id')
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
-                'v.vendor_name as vendor',
+                'vendor_id',
                 DB::raw("SUM(total_price) as amt"),
             ])
             ->where('payment_status', 'paid')
             ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
-            ->groupBy('d', 'vendor')
+            ->groupBy('d', 'vendor_id')
             ->get();
 
         $allVendors = [];
         foreach ($vendorPaid as $row) {
-            $allVendors[$row->vendor] = true;
-            if (isset($days[$row->d])) {
-                $days[$row->d]['vendors'][$row->vendor] = (float) $row->amt;
-            }
+            $name = $vendorMap[$row->vendor_id] ?? $row->vendor_id; // fallback to ID if name missing
+            $allVendors[$name] = true;
+            if (isset($days[$row->d])) $days[$row->d]['vendors'][$name] = (float)$row->amt;
         }
         $allVendors = array_keys($allVendors);
 
-        // ---------- Flower Pickup by Rider (sum of pickup spend by rider) ----------
+        // Flower pickup by rider: aggregate by date + rider_id
         $pickupByRider = FlowerPickupDetails::query()
-            ->join('flower__rider_details as r', 'r.rider_id', '=', 'flower__pickup_details.rider_id')
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
-                'r.rider_name as rider',
+                'rider_id',
                 DB::raw("SUM(total_price) as amt"),
             ])
             ->whereBetween('pickup_date', [$start->toDateString(), $end->toDateString()])
-            ->groupBy('d', 'rider')
+            ->groupBy('d', 'rider_id')
             ->get();
 
         $pickupRiders = [];
         foreach ($pickupByRider as $row) {
-            $pickupRiders[$row->rider] = true;
-            if (isset($days[$row->d])) {
-                $days[$row->d]['pickup'][$row->rider] = (float) $row->amt;
-            }
+            $name = $riderMap[$row->rider_id] ?? $row->rider_id;
+            $pickupRiders[$name] = true;
+            if (isset($days[$row->d])) $days[$row->d]['pickup'][$name] = (float)$row->amt;
         }
         $pickupRiders = array_keys($pickupRiders);
 
-        // ---------- Deliveries (per-rider and total) ----------
+        // Deliveries per rider: aggregate by date + rider_id
         $deliv = DeliveryHistory::query()
-            ->join('flower__rider_details as r', 'r.rider_id', '=', 'delivery_history.rider_id')
             ->select([
                 DB::raw("DATE(delivery_time) as d"),
-                'r.rider_name as rider',
+                'rider_id',
                 DB::raw("COUNT(*) as c"),
             ])
             ->where('delivery_status', 'delivered')
             ->whereBetween('delivery_time', [$start, $end])
-            ->groupBy('d', 'rider')
+            ->groupBy('d', 'rider_id')
             ->get();
 
         $deliveryRiders = [];
         foreach ($deliv as $row) {
-            $deliveryRiders[$row->rider] = true;
+            $name = $riderMap[$row->rider_id] ?? $row->rider_id;
+            $deliveryRiders[$name] = true;
             if (isset($days[$row->d])) {
-                $days[$row->d]['riders'][$row->rider] = (int) $row->c;
-                $days[$row->d]['total_delivery'] += (int) $row->c;
+                $days[$row->d]['riders'][$name] = (int)$row->c;
+                $days[$row->d]['total_delivery'] += (int)$row->c;
             }
         }
         $deliveryRiders = array_keys($deliveryRiders);
 
-        // Column orders
+        // Order columns
         sort($allVendors);
         sort($pickupRiders);
         sort($deliveryRiders);
 
-        // Totals
+        /* ================= Totals ================= */
         $totals = [
             'income'      => 0,
             'expenditure' => 0,
