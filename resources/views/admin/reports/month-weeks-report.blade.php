@@ -255,7 +255,7 @@
                                         </tr>
                                         <tr>
                                             <th class="text-end">Inc</th>
-                                            <th class="text-end">Exp</th>
+                                            <th class="text-end">Purch</th>
 
                                             <th>Renew</th>
                                             <th>New</th>
