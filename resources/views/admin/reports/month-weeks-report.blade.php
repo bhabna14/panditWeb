@@ -64,6 +64,7 @@
   .accordion-button{
     font-weight: 600;
     padding: 16px 20px;
+    margin-bottom: 10px;
   }
   .accordion-button:not(.collapsed){
     background: linear-gradient(180deg, #f6faff, #f2f6ff);
