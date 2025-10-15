@@ -1006,3 +1006,5 @@ Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'stor
 
 
     Route::get('/admin/weekly-report', [WeeklyReportController::class, 'index'])->name('weekly-report');
+     Route::get('admin/ops-report', [WeeklyReportController::class, 'index'])
+            ->name('admin.ops-report');
