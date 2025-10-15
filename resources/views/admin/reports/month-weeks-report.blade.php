@@ -5,173 +5,44 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --brand-bg: #eaf3ff;
-            --ink: #1d2433;
-            --muted: #6b7280;
-            --surface: #fff;
-            --border: #e7ebf3;
-            --shadow: 0 8px 26px rgba(2, 8, 20, .06)
-        }
+        :root { --brand-bg:#eaf3ff; --ink:#1d2433; --muted:#6b7280; --surface:#fff; --border:#e7ebf3; --shadow:0 8px 26px rgba(2,8,20,.06) }
 
-        body,
-        .container-fluid,
-        .table,
-        .btn {
-            font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif
-        }
+        body, .container-fluid, .table, .btn { font-family:'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif }
+        .page-wrap { padding:8px }
 
-        .page-wrap {
-            padding: 8px
-        }
+        .hero { background:linear-gradient(180deg, var(--brand-bg), #f1f2f3); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow) }
 
-        .hero {
-            background: linear-gradient(180deg, var(--brand-bg), #f1f2f3);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: var(--shadow)
-        }
+        .kpi { border:1px solid var(--border); border-radius:16px; background:#fff; box-shadow:var(--shadow); padding:16px; height:100% }
+        .kpi .label { font-size:.78rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin-bottom:6px }
+        .kpi .value { font-variant-numeric:tabular-nums; font-weight:700; color:var(--ink) }
 
-        .kpi {
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            background: #fff;
-            box-shadow: var(--shadow);
-            padding: 16px;
-            height: 100%
-        }
+        .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:12px }
+        @media(max-width:992px){ .grid-3 { grid-template-columns:1fr } }
 
-        .kpi .label {
-            font-size: .78rem;
-            letter-spacing: .06em;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 6px
-        }
+        .accordion-item { border:1px solid var(--border)!important; border-radius:14px!important; overflow:hidden; box-shadow:var(--shadow); background:#fff }
+        .accordion-button { font-weight:600; padding:16px 20px; margin-bottom:10px }
+        .accordion-button:not(.collapsed){ background:linear-gradient(180deg,#f6faff,#f2f6ff); color:var(--ink); border-bottom:1px solid var(--border) }
 
-        .kpi .value {
-            font-variant-numeric: tabular-nums;
-            font-weight: 700;
-            color: var(--ink)
-        }
+        .week-header { position:sticky; top:56px; z-index:5; background:#fff; border-bottom:1px solid var(--border) }
 
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px
-        }
+        .table-card { border-radius:0 0 14px 14px; overflow:clip }
+        .table thead th { white-space:nowrap; font-weight:600; color:var(--muted); border-bottom:1px solid var(--border)!important }
+        .table thead tr:first-child th { background:#f9fbff }
+        .table thead tr:nth-child(2) th { background:#f3f6fb; font-size:.9rem }
+        .table.table-hover tbody tr:hover { background:#fbfdff }
+        .table-striped>tbody>tr:nth-of-type(odd){ --bs-table-accent-bg:#fcfdff }
 
-        @media(max-width:992px) {
-            .grid-3 {
-                grid-template-columns: 1fr
-            }
-        }
-
-        .accordion-item {
-            border: 1px solid var(--border) !important;
-            border-radius: 14px !important;
-            overflow: hidden;
-            box-shadow: var(--shadow);
-            background: #fff
-        }
-
-        .accordion-button {
-            font-weight: 600;
-            padding: 16px 20px;
-            margin-bottom: 10px
-        }
-
-        .accordion-button:not(.collapsed) {
-            background: linear-gradient(180deg, #f6faff, #f2f6ff);
-            color: var(--ink);
-            border-bottom: 1px solid var(--border)
-        }
-
-        .week-header {
-            position: sticky;
-            top: 56px;
-            z-index: 5;
-            background: #fff;
-            border-bottom: 1px solid var(--border)
-        }
-
-        .table-card {
-            border-radius: 0 0 14px 14px;
-            overflow: clip
-        }
-
-        .table thead th {
-            white-space: nowrap;
-            font-weight: 600;
-            color: var(--muted);
-            border-bottom: 1px solid var(--border) !important
-        }
-
-        .table thead tr:first-child th {
-            background: #f9fbff
-        }
-
-        .table thead tr:nth-child(2) th {
-            background: #f3f6fb;
-            font-size: .9rem
-        }
-
-        .table.table-hover tbody tr:hover {
-            background: #fbfdff
-        }
-
-        .table-striped>tbody>tr:nth-of-type(odd) {
-            --bs-table-accent-bg: #fcfdff
-        }
-
-        .money {
-            font-variant-numeric: tabular-nums
-        }
+        .money { font-variant-numeric:tabular-nums }
 
         /* Center ALL table cells/headers */
-        .table th,
-        .table td {
-            text-align: center !important;
-            vertical-align: middle
-        }
+        .table th, .table td { text-align:center!important; vertical-align:middle }
 
-        .totals-row {
-            font-weight: 700;
-            background: #fffdf5;
-            border-top: 2px solid #f5e6b3
-        }
+        .totals-row { font-weight:700; background:#fffdf5; border-top:2px solid #f5e6b3 }
 
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: .35rem;
-            padding: .25rem .6rem;
-            border-radius: 999px;
-            font-size: .8rem;
-            font-weight: 600;
-            background: #eef6ff;
-            color: #0b63d1;
-            border: 1px solid #dbe9ff
-        }
-
-        .chip.income {
-            background: #eafff3;
-            color: #0d5f3c;
-            border-color: #d9f7e7
-        }
-
-        .chip.exp {
-            background: #fff3ea;
-            color: #8a3a0c;
-            border-color: #ffe1cc
-        }
-
-        .chip.deliv {
-            background: #f0f5ff;
-            color: #1e40af;
-            border-color: #e1e9ff
-        }
+        .chip { display:inline-flex; align-items:center; gap:.35rem; padding:.25rem .6rem; border-radius:999px; font-size:.8rem; font-weight:600; background:#eef6ff; color:#0b63d1; border:1px solid #dbe9ff }
+        .chip.income { background:#eafff3; color:#0d5f3c; border-color:#d9f7e7 }
+        .chip.exp { background:#fff3ea; color:#8a3a0c; border-color:#ffe1cc }
+        .chip.deliv { background:#f0f5ff; color:#1e40af; border-color:#e1e9ff }
     </style>
 @endsection
 
@@ -191,8 +62,7 @@
                     <label class="form-label mb-1">Month</label>
                     <select class="form-select" name="month">
                         @for ($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}" @selected($m == $month)>
-                                {{ \Carbon\Carbon::createFromDate(2000, $m, 1)->format('F') }}</option>
+                            <option value="{{ $m }}" @selected($m == $month)>{{ \Carbon\Carbon::createFromDate(2000, $m, 1)->format('F') }}</option>
                         @endfor
                     </select>
                 </div>
@@ -270,7 +140,8 @@
 
                                         <th>Dlvy</th>
                                         @forelse($deliveryCols as $r)
-                                            <th>{{ $r }}</th>
+                                            {{-- SHOW ONLY FIRST 4 LETTERS OF RIDER NAME --}}
+                                            <th title="{{ $r }}">{{ \Illuminate\Support\Str::substr($r, 0, 4) }}</th>
                                         @empty
                                             <th>—</th>
                                         @endforelse
@@ -285,18 +156,10 @@
                                             <td class="money">₹{{ number_format($d['finance']['income']) }}</td>
                                             <td class="money">₹{{ number_format($d['finance']['expenditure']) }}</td>
 
-                                            <td><span
-                                                    class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span>
-                                            </td>
-                                            <td><span
-                                                    class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span>
-                                            </td>
-                                            <td><span
-                                                    class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span>
-                                            </td>
-                                            <td><span
-                                                    class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span>
-                                            </td>
+                                            <td><span class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span></td>
+                                            <td><span class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span></td>
+                                            <td><span class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span></td>
+                                            <td><span class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span></td>
 
                                             @foreach ($vendorColumns as $v)
                                                 <td class="money">₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
@@ -350,8 +213,7 @@
                             data-bs-toggle="collapse" data-bs-target="#collapse-{{ $weekId }}" aria-expanded="false"
                             aria-controls="collapse-{{ $weekId }}">
                             <div class="d-flex flex-wrap align-items-center gap-2">
-                                <span class="me-1">Week {{ $i + 1 }} <small
-                                        class="text-muted">({{ $title }})</small></span>
+                                <span class="me-1">Week {{ $i + 1 }} <small class="text-muted">({{ $title }})</small></span>
                                 <span class="chip income">Income ₹{{ number_format($w['totals']['income']) }}</span>
                                 <span class="chip exp">Expense ₹{{ number_format($w['totals']['expenditure']) }}</span>
                                 <span class="chip deliv">Deliveries {{ $w['totals']['total_delivery'] }}</span>
@@ -389,7 +251,8 @@
 
                                             <th>Dlvy</th>
                                             @forelse($deliveryCols as $r)
-                                                <th>{{ $r }}</th>
+                                                {{-- SHOW ONLY FIRST 4 LETTERS OF RIDER NAME --}}
+                                                <th title="{{ $r }}">{{ \Illuminate\Support\Str::substr($r, 0, 4) }}</th>
                                             @empty
                                                 <th>—</th>
                                             @endforelse
@@ -404,18 +267,10 @@
                                                 <td class="money">₹{{ number_format($d['finance']['income']) }}</td>
                                                 <td class="money">₹{{ number_format($d['finance']['expenditure']) }}</td>
 
-                                                <td><span
-                                                        class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span>
-                                                </td>
-                                                <td><span
-                                                        class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span>
-                                                </td>
-                                                <td><span
-                                                        class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span>
-                                                </td>
-                                                <td><span
-                                                        class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span>
-                                                </td>
+                                                <td><span class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span></td>
+                                                <td><span class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span></td>
+                                                <td><span class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span></td>
+                                                <td><span class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span></td>
 
                                                 @foreach ($vendorColumns as $v)
                                                     <td class="money">₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
@@ -439,8 +294,7 @@
                                             <td>{{ $w['totals']['customize'] }}</td>
 
                                             @foreach ($vendorColumns as $v)
-                                                <td class="money">₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}
-                                                </td>
+                                                <td class="money">₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}</td>
                                             @endforeach
 
                                             <td class="fw-semibold">{{ $w['totals']['total_delivery'] }}</td>
@@ -473,9 +327,7 @@
 
         function setAll(open) {
             document.querySelectorAll('#monthAccordion .accordion-collapse').forEach(el => {
-                const bs = bootstrap.Collapse.getOrCreateInstance(el, {
-                    toggle: false
-                });
+                const bs = bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
                 open ? bs.show() : bs.hide();
             });
         }
@@ -486,13 +338,10 @@
         const headEls = document.querySelectorAll('.week-header');
         const onScroll = () => {
             headEls.forEach(el => {
-                const scrolled = el.getBoundingClientRect().top <= 58 && el.nextElementSibling?.classList
-                    .contains('show');
+                const scrolled = el.getBoundingClientRect().top <= 58 && el.nextElementSibling?.classList.contains('show');
                 el.style.boxShadow = scrolled ? '0 6px 14px rgba(0,0,0,.05)' : 'none';
             });
         };
-        document.addEventListener('scroll', onScroll, {
-            passive: true
-        });
+        document.addEventListener('scroll', onScroll, { passive: true });
     </script>
 @endpush
