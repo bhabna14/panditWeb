@@ -57,6 +57,7 @@ use App\Http\Controllers\Admin\PaymentCollectionController;
 use App\Http\Controllers\Admin\SubscriptionPackageEstimateController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\TomorrowSubscriptionsController;
+use App\Http\Controllers\Admin\WeeklyReportController;
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -260,7 +261,6 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
             
     });
 
-
     Route::get('/manage-subadmins',  [SubadminController::class, 'managesubadmin'])->name('managesubadmin');
     Route::get('/subadmins/{id}/edit', [SubadminController::class, 'edit'])->name('subadmins.edit');
     Route::post('/subadmins/{id}/update', [SubadminController::class, 'update'])->name('subadmins.update');
@@ -285,12 +285,11 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/manage-product-request', 'showRequests')->name('product-request');
     Route::post('/save-product-order/{id}', 'saveProductOrder')->name('admin.saveProductOrder');
     Route::post('/mark-product-payment/{id}', 'markPayment')->name('admin.markProductPayment');
-
     });
 
     Route::get('/manage-flower-request', [FlowerRequestController::class, 'showRequests'])->name('flower-request');
     Route::get('/manage-flower-request/data', [FlowerRequestController::class, 'ajaxData'])->name('admin.flower-request.data');
-        
+
     Route::post('/save-order/{id}', [FlowerRequestController::class, 'saveOrder'])->name('admin.saveOrder');
     Route::post('/mark-payment/{id}', [FlowerRequestController::class, 'markPayment'])->name('admin.markPayment');
 
@@ -1002,3 +1001,8 @@ Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'stor
 
     Route::get('/admin/reports/tomorrow-subscriptions', [TomorrowSubscriptionsController::class, 'index'])
     ->name('admin.tomorrowSubscriptions');
+
+    // routes/web.php
+
+
+    Route::get('/admin/weekly-report', [WeeklyReportController::class, 'index'])->name('weekly-report');

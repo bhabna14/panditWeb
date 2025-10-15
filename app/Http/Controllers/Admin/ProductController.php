@@ -21,9 +21,9 @@ class ProductController extends Controller
 
     public function addproduct()
     {
-        $pooja_list     = Poojalist::where('status', 'active')->get();
+        $pooja_list  = Poojalist::where('status', 'active')->get();
         $flowerlist  = FlowerProduct::where('status', 'active')->where('category','Flower')->get(); // variants no longer needed
-        $pooja_units    = PoojaUnit::orderBy('unit_name')->get();
+        $pooja_units = PoojaUnit::orderBy('unit_name')->get();
 
         return view('admin.add-product', compact('flowerlist', 'pooja_list', 'pooja_units'));
     }

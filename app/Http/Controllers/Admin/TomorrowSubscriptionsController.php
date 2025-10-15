@@ -86,7 +86,7 @@ class TomorrowSubscriptionsController extends Controller
             ->whereNotIn('status', $excludeStatuses)
             ->where(function ($q) {
                 $q->whereIn('status', ['active', 'paused', 'pending'])
-                  ->orWhere('is_active', 1);
+                ->orWhere('is_active', 1);
             })
             ->whereDate('start_date', '<=', $tomorrow->toDateString())
             ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tomorrow->toDateString())
