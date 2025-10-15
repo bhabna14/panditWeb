@@ -21,9 +21,7 @@
             font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif
         }
 
-        .page-wrap {
-            padding: 8px
-        }
+        .page-wrap { padding: 8px }
 
         .hero {
             background: linear-gradient(180deg, var(--brand-bg), #f1f2f3);
@@ -63,9 +61,7 @@
         }
 
         @media(max-width:992px) {
-            .grid-3 {
-                grid-template-columns: 1fr
-            }
+            .grid-3 { grid-template-columns: 1fr }
         }
 
         .accordion-item {
@@ -96,10 +92,7 @@
             border-bottom: 1px solid var(--border)
         }
 
-        .table-card {
-            border-radius: 0 0 14px 14px;
-            overflow: clip
-        }
+        .table-card { border-radius: 0 0 14px 14px; overflow: clip }
 
         .table thead th {
             white-space: nowrap;
@@ -108,27 +101,16 @@
             border-bottom: 1px solid var(--border) !important
         }
 
-        .table thead tr:first-child th {
-            background: #f9fbff
-        }
+        .table thead tr:first-child th { background: #f9fbff }
+        .table thead tr:nth-child(2) th { background: #f3f6fb; font-size: .9rem }
 
-        .table thead tr:nth-child(2) th {
-            background: #f3f6fb;
-            font-size: .9rem
-        }
+        .table.table-hover tbody tr:hover { background: #fbfdff }
+        .table-striped>tbody>tr:nth-of-type(odd) { --bs-table-accent-bg: #fcfdff }
 
-        .table.table-hover tbody tr:hover {
-            background: #fbfdff
-        }
+        .money { font-variant-numeric: tabular-nums }
 
-        .table-striped>tbody>tr:nth-of-type(odd) {
-            --bs-table-accent-bg: #fcfdff
-        }
-
-        .money,
-        .text-end {
-            font-variant-numeric: tabular-nums
-        }
+        /* Center align ALL table header & cell content (overrides) */
+        .table th, .table td { text-align: center !important; vertical-align: middle; }
 
         .totals-row {
             font-weight: 700;
@@ -149,23 +131,9 @@
             border: 1px solid #dbe9ff
         }
 
-        .chip.income {
-            background: #eafff3;
-            color: #0d5f3c;
-            border-color: #d9f7e7
-        }
-
-        .chip.exp {
-            background: #fff3ea;
-            color: #8a3a0c;
-            border-color: #ffe1cc
-        }
-
-        .chip.deliv {
-            background: #f0f5ff;
-            color: #1e40af;
-            border-color: #e1e9ff
-        }
+        .chip.income { background: #eafff3; color: #0d5f3c; border-color: #d9f7e7 }
+        .chip.exp { background: #fff3ea; color: #8a3a0c; border-color: #ffe1cc }
+        .chip.deliv { background: #f0f5ff; color: #1e40af; border-color: #e1e9ff }
     </style>
 @endsection
 
@@ -185,8 +153,9 @@
                     <label class="form-label mb-1">Month</label>
                     <select class="form-select" name="month">
                         @for ($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}" @selected($m == $month)>
-                                {{ \Carbon\Carbon::createFromDate(2000, $m, 1)->format('F') }}</option>
+                            <option value="{{ $m }}" @selected($m == $month)">
+                                {{ \Carbon\Carbon::createFromDate(2000, $m, 1)->format('F') }}
+                            </option>
                         @endfor
                     </select>
                 </div>
@@ -217,6 +186,85 @@
             </div>
         </div>
 
+        {{-- ================= Month Summary Collapse (NEW) ================= --}}
+        @php
+            $monthId = 'month-summary';
+        @endphp
+        <div class="accordion mb-3" id="monthSummaryAccordion">
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-{{ $monthId }}">
+                    <button class="accordion-button collapsed d-flex justify-content-between" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#collapse-{{ $monthId }}"
+                            aria-expanded="false" aria-controls="collapse-{{ $monthId }}">
+                        <div class="d-flex flex-wrap align-items-center gap-2">
+                            <span class="me-1">Month Summary</span>
+                            <span class="chip income">Income ₹{{ number_format($monthTotals['income']) }}</span>
+                            <span class="chip exp">Expense ₹{{ number_format($monthTotals['expenditure']) }}</span>
+                            <span class="chip deliv">Deliveries {{ $monthTotals['total_delivery'] }}</span>
+                        </div>
+                    </button>
+                </h2>
+                <div id="collapse-{{ $monthId }}" class="accordion-collapse collapse"
+                     aria-labelledby="heading-{{ $monthId }}" data-bs-parent="#monthSummaryAccordion">
+                    <div class="accordion-body p-0">
+                        <div class="table-responsive table-card">
+                            <table class="table table-sm table-striped table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">Finance</th>
+                                        <th colspan="4">Customer</th>
+                                        <th colspan="{{ max(count($vendorColumns), 1) }}">Vendor Report</th>
+                                        <th colspan="{{ 1 + max(count($deliveryCols), 1) }}">Rider Deliveries</th>
+                                    </tr>
+                                    <tr>
+                                        <th>Income</th>
+                                        <th>Purchase</th>
+                                        <th>Renew</th>
+                                        <th>New</th>
+                                        <th>Pause</th>
+                                        <th>Customize</th>
+                                        @forelse($vendorColumns as $v)
+                                            <th>{{ $v }}</th>
+                                        @empty
+                                            <th>—</th>
+                                        @endforelse
+                                        <th>Dlvy</th>
+                                        @forelse($deliveryCols as $r)
+                                            <th>{{ $r }}</th>
+                                        @empty
+                                            <th>—</th>
+                                        @endforelse
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="totals-row">
+                                        <td class="money">₹{{ number_format($monthTotals['income']) }}</td>
+                                        <td class="money">₹{{ number_format($monthTotals['expenditure']) }}</td>
+
+                                        <td>{{ $monthTotals['renew'] }}</td>
+                                        <td>{{ $monthTotals['new'] }}</td>
+                                        <td>{{ $monthTotals['pause'] }}</td>
+                                        <td>{{ $monthTotals['customize'] }}</td>
+
+                                        @foreach ($vendorColumns as $v)
+                                            <td class="money">₹{{ number_format($monthTotals['vendors'][$v] ?? 0) }}</td>
+                                        @endforeach
+
+                                        <td class="fw-semibold">{{ $monthTotals['total_delivery'] }}</td>
+                                        @foreach ($deliveryCols as $r)
+                                            <td>{{ $monthTotals['riders'][$r] ?? 0 }}</td>
+                                        @endforeach
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div> {{-- /table-responsive --}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- ================= /Month Summary Collapse ================= --}}
+
+        {{-- ================= Weeks Accordion ================= --}}
         <div class="accordion" id="monthAccordion">
             @foreach ($weeks as $i => $w)
                 @php
@@ -246,16 +294,14 @@
                                         <tr>
                                             <th rowspan="2" class="ps-3">Date</th>
                                             <th rowspan="2">Day</th>
-                                            <th colspan="2" class="text-center">Finance</th>
-                                            <th colspan="4" class="text-center">Customer</th>
-                                            <th colspan="{{ max(count($vendorColumns), 1) }}" class="text-center">Vendor
-                                                Report</th>
-                                            <th colspan="{{ 1 + max(count($deliveryCols), 1) }}" class="text-center pe-3">
-                                                Rider Deliveries</th>
+                                            <th colspan="2">Finance</th>
+                                            <th colspan="4">Customer</th>
+                                            <th colspan="{{ max(count($vendorColumns), 1) }}">Vendor Report</th>
+                                            <th colspan="{{ 1 + max(count($deliveryCols), 1) }}">Rider Deliveries</th>
                                         </tr>
                                         <tr>
-                                            <th class="text-end">Incm</th>
-                                            <th class="text-end">Purch</th>
+                                            <th>Incm</th>
+                                            <th>Purch</th>
 
                                             <th>Renew</th>
                                             <th>New</th>
@@ -263,47 +309,35 @@
                                             <th>Customize</th>
 
                                             @forelse($vendorColumns as $v)
-                                                <th class="text-end">{{ $v }}</th>
+                                                <th>{{ $v }}</th>
                                             @empty
-                                                <th class="text-center">—</th>
+                                                <th>—</th>
                                             @endforelse
 
                                             <th>Dlvy</th>
                                             @forelse($deliveryCols as $r)
                                                 <th>{{ $r }}</th>
                                             @empty
-                                                <th class="text-center">—</th>
+                                                <th>—</th>
                                             @endforelse
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($w['days'] as $d)
                                             <tr>
-                                                <td class="ps-3">{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}
-                                                </td>
+                                                <td class="ps-3">{{ \Carbon\Carbon::parse($d['date'])->format('d/m/Y') }}</td>
                                                 <td class="text-muted">{{ $d['dow'] }}</td>
 
-                                                <td class="text-end money">₹{{ number_format($d['finance']['income']) }}
-                                                </td>
-                                                <td class="text-end money">
-                                                    ₹{{ number_format($d['finance']['expenditure']) }}</td>
+                                                <td class="money">₹{{ number_format($d['finance']['income']) }}</td>
+                                                <td class="money">₹{{ number_format($d['finance']['expenditure']) }}</td>
 
-                                                <td><span
-                                                        class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span>
-                                                </td>
-                                                <td><span
-                                                        class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span>
-                                                </td>
-                                                <td><span
-                                                        class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span>
-                                                </td>
-                                                <td><span
-                                                        class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span>
-                                                </td>
+                                                <td><span class="badge bg-success-subtle text-success">{{ $d['customer']['renew'] }}</span></td>
+                                                <td><span class="badge bg-primary-subtle text-primary">{{ $d['customer']['new'] }}</span></td>
+                                                <td><span class="badge bg-warning-subtle text-warning">{{ $d['customer']['pause'] }}</span></td>
+                                                <td><span class="badge bg-secondary-subtle text-secondary">{{ $d['customer']['customize'] }}</span></td>
 
                                                 @foreach ($vendorColumns as $v)
-                                                    <td class="text-end money">₹{{ number_format($d['vendors'][$v] ?? 0) }}
-                                                    </td>
+                                                    <td class="money">₹{{ number_format($d['vendors'][$v] ?? 0) }}</td>
                                                 @endforeach
 
                                                 <td class="fw-semibold">{{ $d['total_delivery'] }}</td>
@@ -315,9 +349,8 @@
 
                                         <tr class="totals-row">
                                             <td colspan="2" class="ps-3">Week Total</td>
-                                            <td class="text-end money">₹{{ number_format($w['totals']['income']) }}</td>
-                                            <td class="text-end money">₹{{ number_format($w['totals']['expenditure']) }}
-                                            </td>
+                                            <td class="money">₹{{ number_format($w['totals']['income']) }}</td>
+                                            <td class="money">₹{{ number_format($w['totals']['expenditure']) }}</td>
 
                                             <td>{{ $w['totals']['renew'] }}</td>
                                             <td>{{ $w['totals']['new'] }}</td>
@@ -325,8 +358,7 @@
                                             <td>{{ $w['totals']['customize'] }}</td>
 
                                             @foreach ($vendorColumns as $v)
-                                                <td class="text-end money">
-                                                    ₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}</td>
+                                                <td class="money">₹{{ number_format($w['totals']['vendors'][$v] ?? 0) }}</td>
                                             @endforeach
 
                                             <td class="fw-semibold">{{ $w['totals']['total_delivery'] }}</td>
@@ -342,6 +374,7 @@
                 </div>
             @endforeach
         </div>
+        {{-- ================= /Weeks Accordion ================= --}}
     </div>
 @endsection
 
@@ -352,15 +385,13 @@
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Expand/Collapse all
+        // Expand/Collapse all (weeks)
         const expandAllBtn = document.getElementById('expandAll');
         const collapseAllBtn = document.getElementById('collapseAll');
 
         function setAll(open) {
             document.querySelectorAll('#monthAccordion .accordion-collapse').forEach(el => {
-                const bs = bootstrap.Collapse.getOrCreateInstance(el, {
-                    toggle: false
-                });
+                const bs = bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
                 open ? bs.show() : bs.hide();
             });
         }
@@ -376,8 +407,6 @@
                 el.style.boxShadow = scrolled ? '0 6px 14px rgba(0,0,0,.05)' : 'none';
             });
         };
-        document.addEventListener('scroll', onScroll, {
-            passive: true
-        });
+        document.addEventListener('scroll', onScroll, { passive: true });
     </script>
 @endpush

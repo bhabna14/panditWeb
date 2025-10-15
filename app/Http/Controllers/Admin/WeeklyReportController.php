@@ -139,9 +139,7 @@ class WeeklyReportController extends Controller
         $vendorColumns = array_keys($vendorColumnsSet);
         sort($vendorColumns);
 
-        /* ================= Deliveries per rider (counts) =================
-           IMPORTANT: use created_at for the per-day grouping, as requested.
-           We also filter by delivery_status='delivered' to count only completed deliveries. */
+        /* ================= Deliveries per rider (counts) ================= */
         $deliv = DeliveryHistory::query()
             ->select([
                 DB::raw("DATE(created_at) as d"),
