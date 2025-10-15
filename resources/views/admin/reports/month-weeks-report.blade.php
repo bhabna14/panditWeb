@@ -206,7 +206,7 @@
         <div id="collapse-{{ $weekId }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ $weekId }}" data-bs-parent="#monthAccordion">
           <div class="accordion-body p-0">
             <div class="table-responsive table-card">
-              <table class="table table-sm table-striped table-hover align-middle mb-0">
+              <table class="table table-sm table-striped table-hover align-middle mb-2">
                 <thead>
                   <tr>
                     <th rowspan="2" class="ps-3">Date</th>
