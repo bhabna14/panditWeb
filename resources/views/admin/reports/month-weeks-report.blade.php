@@ -6,51 +6,138 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --brand-bg: #eaf3ff; --ink: #1d2433; --muted: #6b7280; --surface: #fff; --border: #e7ebf3;
+            --brand-bg: #eaf3ff;
+            --ink: #1d2433;
+            --muted: #6b7280;
+            --surface: #fff;
+            --border: #e7ebf3;
             --shadow: 0 8px 26px rgba(2, 8, 20, .06);
         }
+
         body, .container-fluid, .table, .btn {
             font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial, 'Noto Sans', 'Liberation Sans', sans-serif;
         }
+
         .page-wrap { padding: 8px; }
-        .hero { background: linear-gradient(180deg, var(--brand-bg), #f1f2f3); border: 1px solid var(--border); border-radius: 16px; padding: 18px; box-shadow: var(--shadow); }
-        .kpi { border: 1px solid var(--border); border-radius: 16px; background: #fff; box-shadow: var(--shadow); padding: 16px; height: 100%; }
-        .kpi .label { font-size: .78rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-        .kpi .value { font-variant-numeric: tabular-nums; font-weight: 700; color: var(--ink); }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+
+        .hero {
+            background: linear-gradient(180deg, var(--brand-bg), #f1f2f3);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: var(--shadow);
+        }
+
+        .kpi {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: var(--shadow);
+            padding: 16px;
+            height: 100%;
+        }
+
+        .kpi .label {
+            font-size: .78rem;
+            letter-spacing: .06em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .kpi .value {
+            font-variant-numeric: tabular-nums;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
         @media (max-width: 992px) { .grid-3 { grid-template-columns: 1fr; } }
-        .accordion-item { border: 1px solid var(--border) !important; border-radius: 14px !important; overflow: hidden; box-shadow: var(--shadow); background: #fff; }
-        .accordion-button { font-weight: 600; padding: 16px 20px; margin-bottom: 10px; }
-        .accordion-button:not(.collapsed) { background: linear-gradient(180deg, #f6faff, #f2f6ff); color: var(--ink); border-bottom: 1px solid var(--border); }
-        .week-header { position: sticky; top: 56px; z-index: 5; background: #fff; border-bottom: 1px solid var(--border); }
-        .table-card { border-radius: 0 0 14px 14px; overflow: clip; }
-        .table thead th { white-space: nowrap; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--border) !important; }
+
+        .accordion-item {
+            border: 1px solid var(--border) !important;
+            border-radius: 14px !important;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: #fff;
+        }
+
+        .accordion-button {
+            font-weight: 600;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+        }
+
+        .accordion-button:not(.collapsed) {
+            background: linear-gradient(180deg, #f6faff, #f2f6ff);
+            color: var(--ink);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .week-header {
+            position: sticky;
+            top: 56px;
+            z-index: 5;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table-card {
+            border-radius: 0 0 14px 14px;
+            overflow: clip;
+        }
+
+        .table thead th {
+            white-space: nowrap;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 1px solid var(--border) !important;
+        }
+
         .table thead tr:first-child th { background: #f9fbff; }
         .table thead tr:nth-child(2) th { background: #f3f6fb; font-size: .9rem; }
+
         .table.table-hover tbody tr:hover { background: #fbfdff; }
         .table-striped > tbody > tr:nth-of-type(odd) { --bs-table-accent-bg: #fcfdff; }
+
         .money { font-variant-numeric: tabular-nums; }
-        .totals-row { font-weight: 700; background: #fffdf5; border-top: 2px solid #f5e6b3; }
 
-        /* Center whole table */
-        .table th, .table td { text-align: center; }
-        .table td.text-end, .table th.text-end { text-align: center !important; }
-        .table .money { display: inline-block; min-width: 5ch; }
+        .totals-row {
+            font-weight: 700;
+            background: #fffdf5;
+            border-top: 2px solid #f5e6b3;
+        }
 
-        /* Chips */
-        .chip { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .6rem;
-                border-radius: 999px; font-size: .8rem; font-weight: 600; background: #eef6ff;
-                color: #0b63d1; border: 1px solid #dbe9ff; }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            padding: .25rem .6rem;
+            border-radius: 999px;
+            font-size: .8rem;
+            font-weight: 600;
+            background: #eef6ff;
+            color: #0b63d1;
+            border: 1px solid #dbe9ff;
+        }
         .chip.income { background: #eafff3; color: #0d5f3c; border-color: #d9f7e7; }
         .chip.exp    { background: #fff3ea; color: #8a3a0c; border-color: #ffe1cc; }
         .chip.deliv  { background: #f0f5ff; color: #1e40af; border-color: #e1e9ff; }
+
+        /* === Center align the entire table === */
+        .table th, .table td { text-align: center; }
+        /* Override any right-align utility classes used previously */
+        .table td.text-end, .table th.text-end { text-align: center !important; }
+        /* Keep numeric spacing tidy even if centered */
+        .table .money { display: inline-block; min-width: 5ch; }
     </style>
 @endsection
 
 @section('content')
-@php
-    use Illuminate\Support\Str;
-@endphp
     <div class="container-fluid page-wrap">
         <div class="hero mb-3">
             <form class="row g-3 align-items-end" method="get" action="{{ route('admin.ops-report') }}">
@@ -138,21 +225,18 @@
                                             <th>Pause</th>
                                             <th>Custom</th>
 
-                                            @forelse($vendorColumns as $v)
-                                                <th>{{ $v }}</th>
-                                            @empty
-                                                <th>—</th>
-                                            @endforelse
+                        @forelse($vendorColumns as $v)
+                            <th>{{ $v }}</th>
+                        @empty
+                            <th>—</th>
+                        @endforelse
 
-                                            <th>Dlvy</th>
-                                            @forelse($deliveryCols as $r)
-                                                {{-- show first 4 letters, keep full in tooltip --}}
-                                                <th data-bs-toggle="tooltip" title="{{ $r }}">
-                                                    {{ \Illuminate\Support\Str::limit($r, 4, '') }}
-                                                </th>
-                                            @empty
-                                                <th>—</th>
-                                            @endforelse
+                        <th>Dlvy</th>
+                        @forelse($deliveryCols as $r)
+                            <th>{{ $r }}</th>
+                        @empty
+                            <th>—</th>
+                        @endforelse
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -220,23 +304,20 @@
         // Expand/Collapse all
         const expandAllBtn = document.getElementById('expandAll');
         const collapseAllBtn = document.getElementById('collapseAll');
-        function setAll(open){
-            document.querySelectorAll('#monthAccordion .accordion-collapse').forEach(el=>{
-                const bs = bootstrap.Collapse.getOrCreateInstance(el, {toggle:false});
+
+        function setAll(open) {
+            document.querySelectorAll('#monthAccordion .accordion-collapse').forEach(el => {
+                const bs = bootstrap.Collapse.getOrCreateInstance(el, { toggle: false });
                 open ? bs.show() : bs.hide();
             });
         }
-        if(expandAllBtn) expandAllBtn.addEventListener('click', ()=>setAll(true));
-        if(collapseAllBtn) collapseAllBtn.addEventListener('click', ()=>setAll(false));
+        if (expandAllBtn) expandAllBtn.addEventListener('click', () => setAll(true));
+        if (collapseAllBtn) collapseAllBtn.addEventListener('click', () => setAll(false));
 
-        // Init tooltips (for full rider names on 4-letter headers)
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
-
-        // Sticky header shadow when open & scrolled
+        // Shadow on sticky header when open & scrolled
         const headEls = document.querySelectorAll('.week-header');
         const onScroll = () => {
-            headEls.forEach(el=>{
+            headEls.forEach(el => {
                 const scrolled = el.getBoundingClientRect().top <= 58 && el.nextElementSibling?.classList.contains('show');
                 el.style.boxShadow = scrolled ? '0 6px 14px rgba(0,0,0,.05)' : 'none';
             });
