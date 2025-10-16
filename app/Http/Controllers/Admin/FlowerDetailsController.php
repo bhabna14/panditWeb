@@ -76,7 +76,7 @@ class FlowerDetailsController extends Controller
      */
     public function edit(FlowerDetails $flower_detail)
     {
-        $units = ['bunch', 'piece', 'kg', 'g', 'bundle'];
+        $units = ['Bouquet', 'Kg', 'Gm', 'bundle', 'Garland', 'Packet','Piece'];
 
         return view('admin.add-flower-details', [
             'row'   => $flower_detail,
