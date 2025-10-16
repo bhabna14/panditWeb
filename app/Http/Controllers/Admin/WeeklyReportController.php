@@ -20,14 +20,25 @@ class WeeklyReportController extends Controller
 {
     public function index(Request $request)
     {
-        // --- Month / Year selection (defaults to current month)
+        // ---- Month / Year selection (defaults to current month)
         $year  = (int)($request->input('year', Carbon::now()->year));
         $month = (int)($request->input('month', Carbon::now()->month));
 
-        $monthStart = Carbon::createFromDate($year, $month, 1)->startOfDay();
+        // Timezone handling (for day grouping)
+        $tz = $request->input('tz', config('app.timezone', 'UTC'));
+        $tzOffset = Carbon::now($tz)->format('P'); // e.g. +05:30
+
+        $monthStart = Carbon::createFromDate($year, $month, 1, $tz)->startOfDay();
         $monthEnd   = (clone $monthStart)->endOfMonth()->endOfDay();
 
-        // --- Build day skeleton for entire month
+        // Convert to UTC for whereBetween on UTC timestamps
+        $monthStartUtc = $monthStart->clone()->setTimezone('UTC');
+        $monthEndUtc   = $monthEnd->clone()->setTimezone('UTC');
+
+        // Expression for DATE by timezone (works without MySQL timezone tables using numeric offset)
+        $dateExpr = "DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset'))";
+
+        // ---- Build day skeleton for entire month
         $days = [];
         foreach (CarbonPeriod::create($monthStart, $monthEnd) as $d) {
             $days[$d->toDateString()] = [
@@ -41,26 +52,27 @@ class WeeklyReportController extends Controller
             ];
         }
 
-        // --- Lookups
+        // ---- Lookups
         $vendorMap = FlowerVendor::query()->pluck('vendor_name', 'vendor_id')->toArray();
         $riderMap  = RiderDetails::query()->pluck('rider_name', 'rider_id')->toArray();
 
         /* ================= Finance ================= */
-        // Income per day
+        // Income per day (by created_at)
         $payments = FlowerPayment::query()
             ->select([
-                DB::raw("DATE(created_at) as d"),
+                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
                 DB::raw("SUM(paid_amount) as amt"),
             ])
             ->where('payment_status', 'paid')
-            ->whereBetween('created_at', [$monthStart, $monthEnd])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
             ->groupBy('d')
             ->get();
+
         foreach ($payments as $row) {
             if (isset($days[$row->d])) $days[$row->d]['finance']['income'] = (float)$row->amt;
         }
 
-        // Expenditure per day
+        // Expenditure per day (by pickup_date; this is a DATE column, keep as-is)
         $expend = FlowerPickupDetails::query()
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
@@ -74,28 +86,58 @@ class WeeklyReportController extends Controller
             if (isset($days[$row->d])) $days[$row->d]['finance']['expenditure'] = (float)$row->amt;
         }
 
-        /* ================= Customer ================= */
-        // New
-        $newSubs = Subscription::query()
-            ->select([DB::raw("DATE(start_date) as d"), DB::raw("COUNT(*) as c")])
-            ->whereBetween('start_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-            ->groupBy('d')->get();
-        foreach ($newSubs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['new'] = (int)$row->c;
+        /* ================= Customer (UPDATED per your logic) ================= */
 
-        // Renew
-        $renewSubs = Subscription::query()
-            ->select([DB::raw("DATE(new_date) as d"), DB::raw("COUNT(*) as c")])
-            ->whereNotNull('new_date')
-            ->whereBetween('new_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
-            ->groupBy('d')->get();
-        foreach ($renewSubs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['renew'] = (int)$row->c;
+        // NEW: users who have exactly one subscription overall, and that subscription was created that day with status='pending'
+        $firstTimeUserIds = Subscription::query()
+            ->select('user_id')
+            ->groupBy('user_id')
+            ->havingRaw('COUNT(*) = 1');
 
-        // Pause (prefer log)
+        $newPerDay = Subscription::query()
+            ->select([
+                DB::raw("$dateExpr as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->where('status', 'pending')
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereIn('user_id', $firstTimeUserIds)
+            ->groupBy('d')
+            ->get();
+
+        foreach ($newPerDay as $row) {
+            if (isset($days[$row->d])) $days[$row->d]['customer']['new'] = (int)$row->c;
+        }
+
+        // RENEW: subscriptions created that day whose order_id appears more than once
+        $renewOrderIds = Subscription::query()
+            ->select('order_id')
+            ->groupBy('order_id')
+            ->havingRaw('COUNT(order_id) > 1');
+
+        $renewPerDay = Subscription::query()
+            ->select([
+                DB::raw("$dateExpr as d"),
+                DB::raw("COUNT(*) as c"),
+            ])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
+            ->whereIn('order_id', $renewOrderIds)
+            ->groupBy('d')
+            ->get();
+
+        foreach ($renewPerDay as $row) {
+            if (isset($days[$row->d])) $days[$row->d]['customer']['renew'] = (int)$row->c;
+        }
+
+        // Pauses (prefer log)
         if (class_exists(SubscriptionPauseResumeLog::class)) {
             $pauses = SubscriptionPauseResumeLog::query()
-                ->select([DB::raw("DATE(created_at) as d"), DB::raw("COUNT(*) as c")])
+                ->select([
+                    DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                    DB::raw("COUNT(*) as c")
+                ])
                 ->where('action', 'paused')
-                ->whereBetween('created_at', [$monthStart, $monthEnd])
+                ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
                 ->groupBy('d')->get();
             foreach ($pauses as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int)$row->c;
         } else {
@@ -107,16 +149,19 @@ class WeeklyReportController extends Controller
             foreach ($pauses as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['pause'] = (int)$row->c;
         }
 
-        // Customize (if tracked)
+        // Customizations (if tracked)
         if (class_exists(DeliveryCustomizeHistory::class)) {
             $customs = DeliveryCustomizeHistory::query()
-                ->select([DB::raw("DATE(created_at) as d"), DB::raw("COUNT(*) as c")])
-                ->whereBetween('created_at', [$monthStart, $monthEnd])
+                ->select([
+                    DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
+                    DB::raw("COUNT(*) as c")
+                ])
+                ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
                 ->groupBy('d')->get();
             foreach ($customs as $row) if (isset($days[$row->d])) $days[$row->d]['customer']['customize'] = (int)$row->c;
         }
 
-        /* ================= Vendor daily ================= */
+        /* ================= Vendor daily (vendor-wise paid per day) ================= */
         $vendorPaid = FlowerPickupDetails::query()
             ->select([
                 DB::raw("DATE(pickup_date) as d"),
@@ -137,15 +182,15 @@ class WeeklyReportController extends Controller
         $vendorColumns = array_keys($vendorColumnsSet);
         sort($vendorColumns);
 
-        /* ================= Rider deliveries per day ================= */
+        /* ================= Deliveries per rider (counts, by created_at) ================= */
         $deliv = DeliveryHistory::query()
             ->select([
-                DB::raw("DATE(created_at) as d"),
+                DB::raw("DATE(CONVERT_TZ(created_at, '+00:00', '$tzOffset')) as d"),
                 'rider_id',
                 DB::raw("COUNT(*) as c"),
             ])
             ->where('delivery_status', 'delivered')
-            ->whereBetween('created_at', [$monthStart, $monthEnd])
+            ->whereBetween('created_at', [$monthStartUtc, $monthEndUtc])
             ->groupBy('d', 'rider_id')
             ->get();
 
@@ -161,7 +206,7 @@ class WeeklyReportController extends Controller
         $deliveryCols = array_keys($deliveryColsSet);
         sort($deliveryCols);
 
-        // --- Split into weeks (Mon→Sun)
+        // ---- Split into weeks (Mon→Sun) using display timezone
         $weeks = [];
         $cursor    = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
         $endCursor = $monthEnd->copy()->endOfWeek(Carbon::SUNDAY);
@@ -173,6 +218,7 @@ class WeeklyReportController extends Controller
             $rangeStart = $weekStart->lt($monthStart) ? $monthStart->copy() : $weekStart->copy();
             $rangeEnd   = $weekEnd->gt($monthEnd) ? $monthEnd->copy() : $weekEnd->copy();
 
+            // Collect day rows for this week
             $weekDays = [];
             foreach (CarbonPeriod::create($rangeStart, $rangeEnd) as $d) {
                 $key = $d->toDateString();
@@ -187,6 +233,7 @@ class WeeklyReportController extends Controller
                 ];
             }
 
+            // Week totals
             $weekTotals = [
                 'income' => 0, 'expenditure' => 0,
                 'renew' => 0, 'new' => 0, 'pause' => 0, 'customize' => 0,
@@ -216,7 +263,7 @@ class WeeklyReportController extends Controller
             $cursor->addWeek();
         }
 
-        // --- Month totals
+        // ---- Month totals
         $monthTotals = [
             'income'      => 0, 'expenditure' => 0,
             'renew'       => 0, 'new' => 0, 'pause' => 0, 'customize' => 0,
@@ -236,9 +283,9 @@ class WeeklyReportController extends Controller
             $monthTotals['total_delivery'] += $row['total_delivery'];
         }
 
-        // --- NEW: Ordered list of all month days for "Month (All Days)" table
+        // ---- Month (All Days) ordered for table
         $monthDays = $days;
-        ksort($monthDays); // ensure ascending by date
+        ksort($monthDays);
 
         $years = range(Carbon::now()->year - 3, Carbon::now()->year + 1);
 
@@ -251,7 +298,7 @@ class WeeklyReportController extends Controller
             'vendorColumns'  => $vendorColumns,
             'deliveryCols'   => $deliveryCols,
             'monthTotals'    => $monthTotals,
-            'monthDays'      => $monthDays,   // <-- pass all days of month
+            'monthDays'      => $monthDays,
             'years'          => $years,
         ]);
     }

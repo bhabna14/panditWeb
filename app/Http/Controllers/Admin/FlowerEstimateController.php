@@ -2,21 +2,20 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use App\Models\Subscription;
-use App\Models\FlowerRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
+
 use App\Models\FlowerVendor;
 use App\Models\RiderDetails;
 use App\Models\FlowerProduct;
 use App\Models\PoojaUnit;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-
-class FlowerEstimatesController extends Controller
+class FlowerEstimateController extends Controller
 {
-    public function index(Request $request)
+   public function index(Request $request)
     {
         // ---- Filters ---------------------------------------------------------
         $preset = $request->string('preset')->toString();        // today|yesterday|tomorrow|this_month|last_month
@@ -276,38 +275,63 @@ class FlowerEstimatesController extends Controller
     }
 
     /**
-     * Pull all subscriptions that are "effectively active" on a single date
-     * using the model scope (handles pending/paused/resume/expired/etc).
+     * Query subscriptions active on a specific date using:
+     * - start_date <= date
+     * - COALESCE(new_date, end_date) >= date
+     * - status in ['active','paused'] or is_active = 1
+     * Then filter out those paused on the date.
      */
-    protected function fetchActiveSubsEffectiveOn(Carbon $date)
+    private function fetchActiveSubsEffectiveOn(Carbon $date)
     {
-        return Subscription::with([
+        $subs = Subscription::with([
                 'flowerProducts:id,product_id,name',
                 'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
             ])
-            ->activeOn($date)
+            ->where(function ($q) {
+                $q->whereIn('status', ['active', 'paused'])
+                  ->orWhere('is_active', 1);
+            })
+            ->whereDate('start_date', '<=', $date->toDateString())
+            ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $date->toDateString())
             ->get();
+
+        // Exclude paused on this date
+        $filtered = $subs->filter(function ($s) use ($date) {
+            if ($s->pause_start_date && $s->pause_end_date) {
+                $paused = Carbon::parse($s->pause_start_date)->startOfDay()->lte($date)
+                       && Carbon::parse($s->pause_end_date)->endOfDay()->gte($date);
+                if ($paused) return false;
+            }
+            return true;
+        });
+
+        return $filtered->values();
     }
 
     /**
-     * Convert a set of subs for a date into the same structure your Blade expects.
+     * Build the same structure you show for a "day", from a subscription collection.
+     * + totals_by_item for that date (used for Tomorrow card).
      */
-    protected function buildEstimateForSubsOnDate($subs, Carbon $date): array
+    private function buildEstimateForSubsOnDate($subs, Carbon $date): array
     {
         $byProduct = $subs->groupBy('product_id');
-        $products  = [];
-        $grand     = 0.0;
+
+        $productsForDay   = [];
+        $grandTotalForDay = 0.0;
+
+        $dayTotalsByItemBase = [];
 
         foreach ($byProduct as $productId => $subsForProduct) {
             $product   = optional($subsForProduct->first())->flowerProducts;
             $subsCount = $subsForProduct->count();
-            $items     = [];
+
+            $items        = [];
             $productTotal = 0.0;
 
-            if ($product && $product->relationLoaded('packageItems')) {
+            if ($product) {
                 foreach ($product->packageItems as $pi) {
                     $perItemQty      = (float) ($pi->quantity ?? 0);
-                    $origUnit        = strtolower(trim((string)($pi->unit ?? '')));
+                    $origUnit        = strtolower(trim($pi->unit ?? ''));
                     $itemPricePerSub = (float) ($pi->price ?? 0);
 
                     $category     = $this->inferCategory($origUnit);
@@ -320,172 +344,150 @@ class FlowerEstimatesController extends Controller
                     $totalPrice = $itemPricePerSub * $subsCount;
 
                     $items[] = [
-                        'item_name'          => $pi->item_name,
-                        'category'           => $category,
-                        'per_item_qty'       => $perItemQty,
-                        'per_item_unit'      => $origUnit,
-                        'item_price_per_sub' => $itemPricePerSub,
-                        'total_qty_base'     => $totalQtyBase,
-                        'total_qty_disp'     => $qtyDisp,
-                        'total_unit_disp'    => $unitDisp,
-                        'total_price'        => $totalPrice,
+                        'item_name'         => $pi->item_name,
+                        'category'          => $category,
+                        'per_item_qty'      => $perItemQty,
+                        'per_item_unit'     => $origUnit,
+                        'item_price_per_sub'=> $itemPricePerSub,
+                        'total_qty_base'    => $totalQtyBase,
+                        'total_qty_disp'    => $qtyDisp,
+                        'total_unit_disp'   => $unitDisp,
+                        'total_price'       => $totalPrice,
                     ];
 
                     $productTotal += $totalPrice;
+
+                    // aggregate for tomorrow totals-by-item
+                    $key = strtolower($pi->item_name).'|'.$category;
+                    if (!isset($dayTotalsByItemBase[$key])) {
+                        $dayTotalsByItemBase[$key] = [
+                            'item_name'      => $pi->item_name,
+                            'category'       => $category,
+                            'total_qty_base' => 0.0,
+                        ];
+                    }
+                    $dayTotalsByItemBase[$key]['total_qty_base'] += $totalQtyBase;
                 }
             }
 
-            $products[$productId] = [
+            $grandTotalForDay += $productTotal;
+
+            $productsForDay[$productId] = [
                 'product'              => $product,
                 'subs_count'           => $subsCount,
                 'items'                => $items,
                 'product_total'        => $productTotal,
                 'bundle_total_per_sub' => array_sum(array_column($items, 'item_price_per_sub')),
             ];
-            $grand += $productTotal;
-        }
-
-        // Totals by item across all products for that date
-        $totalsByItemBase = [];
-        foreach ($products as $row) {
-            foreach ($row['items'] as $it) {
-                $key = strtolower($it['item_name']).'|'.$it['category'];
-                if (!isset($totalsByItemBase[$key])) {
-                    $totalsByItemBase[$key] = [
-                        'item_name'      => $it['item_name'],
-                        'category'       => $it['category'],
-                        'total_qty_base' => 0.0,
-                    ];
-                }
-                $totalsByItemBase[$key]['total_qty_base'] += $it['total_qty_base'];
-            }
         }
 
         return [
-            'products'             => $products,
-            'grand_total_amount'   => $grand,
-            'totals_by_item'       => $this->formatTotalsByItem($totalsByItemBase),
+            'date'               => $date->toDateString(),
+            'products'           => $productsForDay,
+            'grand_total_amount' => $grandTotalForDay,
+            'totals_by_item'     => $this->formatTotalsByItem($dayTotalsByItemBase),
         ];
     }
 
-    // ================== Helpers (units & formatting) ==================
+    // --------------------- Helpers -------------------------------------------
 
-    protected function inferCategory(string $u): string
+    private function resolveRange(Request $request, ?string $preset): array
     {
-        $u = strtolower(trim($u));
-        if (in_array($u, ['kg','kilogram','kilograms','kgs','g','gram','grams','gm','mg'])) return 'weight';
-        if (in_array($u, ['l','lt','liter','litre','liters','litres','ml','milliliter','millilitre','milliliters','millilitres'])) return 'volume';
-        if (in_array($u, ['pcs','pc','piece','pieces','count'])) return 'count';
+        if ($preset) {
+            $today = Carbon::today();
+            return match ($preset) {
+                'today'      => [$today->copy()->startOfDay(), $today->copy()->endOfDay()],
+                'yesterday'  => [$today->copy()->subDay()->startOfDay(), $today->copy()->subDay()->endOfDay()],
+                'tomorrow'   => [$today->copy()->addDay()->startOfDay(), $today->copy()->addDay()->endOfDay()],
+                'this_month' => [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()],
+                'last_month' => [$today->copy()->subMonthNoOverflow()->startOfMonth(), $today->copy()->subMonthNoOverflow()->endOfMonth()],
+                default      => $this->resolveRange($request, null),
+            };
+        }
 
-        if (str_contains($u, 'kilo') || str_contains($u, 'gram')) return 'weight';
-        if (str_contains($u, 'lit') || str_contains($u, 'millil')) return 'volume';
-        if (str_contains($u, 'piece') || str_contains($u, 'pcs') || str_contains($u, 'count')) return 'count';
+        $start = $request->filled('start_date')
+            ? Carbon::parse($request->input('start_date'))->startOfDay()
+            : Carbon::today();
 
+        $end = $request->filled('end_date')
+            ? Carbon::parse($request->input('end_date'))->endOfDay()
+            : Carbon::today()->endOfDay();
+
+        return [$start, $end];
+    }
+
+    private function inferCategory(string $unit): string
+    {
+        $u = strtolower(trim($unit));
+        if (in_array($u, ['g', 'gm', 'gram', 'grams'])) return 'weight';
+        if (in_array($u, ['kg', 'kgs', 'kilogram', 'kilograms'])) return 'weight';
+        if (in_array($u, ['ml', 'milliliter', 'milliliters'])) return 'volume';
+        if (in_array($u, ['l', 'lt', 'liter', 'litre', 'liters', 'litres'])) return 'volume';
+        if (in_array($u, ['piece', 'pieces', 'pc', 'pcs', 'count'])) return 'count';
         return 'unknown';
     }
 
-    protected function toBaseFactor(string $u): float
+    private function toBaseFactor(string $unit): float
     {
-        $u = strtolower(trim($u));
-        // weight base: g
-        if (in_array($u, ['kg','kilogram','kilograms','kgs'])) return 1000.0;
-        if (in_array($u, ['g','gram','grams','gm'])) return 1.0;
-        if ($u === 'mg') return 0.001;
-
-        // volume base: ml
-        if (in_array($u, ['l','lt','liter','litre','liters','litres'])) return 1000.0;
-        if (in_array($u, ['ml','milliliter','millilitre','milliliters','millilitres'])) return 1.0;
-
-        // count base: pcs
-        if (in_array($u, ['pcs','pc','piece','pieces','count'])) return 1.0;
-
-        // fallbacks
-        if (str_contains($u, 'kilo')) return 1000.0;
-        if (str_contains($u, 'gram')) return 1.0;
-        if (str_contains($u, 'millil')) return 1.0;
-        if (str_contains($u, 'lit')) return 1000.0;
-        if (str_contains($u, 'piece') || str_contains($u, 'pcs') || str_contains($u, 'count')) return 1.0;
-
-        return 1.0;
+        $u = strtolower(trim($unit));
+        // Base units: g, ml, pcs
+        return match ($u) {
+            'g', 'gm', 'gram', 'grams' => 1.0,
+            'kg', 'kgs', 'kilogram', 'kilograms' => 1000.0,
+            'ml', 'milliliter', 'milliliters' => 1.0,
+            'l', 'lt', 'liter', 'litre', 'liters', 'litres' => 1000.0,
+            'piece', 'pieces', 'pc', 'pcs', 'count' => 1.0,
+            default => 1.0,
+        };
     }
 
-    protected function formatQtyByCategoryFromBase(float $base, string $category): array
+    private function formatQtyByCategoryFromBase(float $qtyBase, string $category): array
     {
-        if ($category === 'weight') {
-            if ($base >= 1000) return [round($base / 1000, 3), 'kg'];
-            return [round($base, 3), 'g'];
-        }
-        if ($category === 'volume') {
-            if ($base >= 1000) return [round($base / 1000, 3), 'l'];
-            return [round($base, 3), 'ml'];
-        }
-        return [round($base, 3), 'pcs'];
+        return match ($category) {
+            'weight' => $qtyBase >= 1000 ? [round($qtyBase / 1000, 3), 'kg'] : [round($qtyBase, 3), 'g'],
+            'volume' => $qtyBase >= 1000 ? [round($qtyBase / 1000, 3), 'L']  : [round($qtyBase, 3), 'ml'],
+            default  => [round($qtyBase, 0), 'pcs'],
+        };
     }
 
-    protected function formatTotalsByItem(array $baseRows): array
+    /** Convert aggregated base qty map (item-wise) into display rows */
+    private function formatTotalsByItem(array $baseMap): array
     {
-        $out = [];
-        foreach ($baseRows as $row) {
-            [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($row['total_qty_base'], $row['category']);
-            $out[] = [
-                'item_name'       => $row['item_name'],
+        $rows = [];
+        foreach ($baseMap as $key => $info) {
+            [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($info['total_qty_base'], $info['category']);
+            $rows[$key] = [
+                'item_name'       => $info['item_name'],
+                'category'        => $info['category'],
+                'total_qty_base'  => $info['total_qty_base'],
                 'total_qty_disp'  => $qtyDisp,
                 'total_unit_disp' => $unitDisp,
             ];
         }
-        usort($out, fn($a,$b) => strcasecmp($a['item_name'], $b['item_name']));
-        return $out;
+        uasort($rows, fn($a,$b) => strcasecmp($a['item_name'], $b['item_name']));
+        return $rows;
     }
 
-    protected function formatTotalsByCategory(array $catBase): array
+    /** Convert aggregated base qty (category-wise) into display rows */
+    private function formatTotalsByCategory(array $baseByCat): array
     {
-        $labels = [
-            'weight' => 'Weight',
-            'volume' => 'Volume',
-            'count'  => 'Count',
-        ];
+        // keys: weight(g), volume(ml), count(pcs)
         $out = [];
-        foreach ($catBase as $cat => $base) {
-            [$qty, $unit] = $this->formatQtyByCategoryFromBase($base, $cat);
+        foreach (['weight','volume','count'] as $cat) {
+            [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($baseByCat[$cat] ?? 0, $cat);
+            $label = match ($cat) {
+                'weight' => 'Weight',
+                'volume' => 'Volume',
+                default  => 'Count',
+            };
             $out[] = [
-                'label'           => $labels[$cat] ?? ucfirst($cat),
-                'total_qty_disp'  => $qty,
-                'total_unit_disp' => $unit,
+                'label'          => $label,
+                'category'       => $cat,
+                'total_qty_base' => (float) ($baseByCat[$cat] ?? 0),
+                'total_qty_disp' => $qtyDisp,
+                'total_unit_disp'=> $unitDisp,
             ];
         }
         return $out;
-    }
-
-    protected function normalizeUnitSymbol(?string $raw): string
-    {
-        $u = strtolower(trim((string)$raw));
-        if (in_array($u, ['kg','kilogram','kilograms','kgs'])) return 'kg';
-        if (in_array($u, ['g','gram','grams','gm'])) return 'g';
-        if (in_array($u, ['l','lt','liter','litre','liters','litres'])) return 'l';
-        if (in_array($u, ['ml','milliliter','millilitre','milliliters','millilitres'])) return 'ml';
-        if (in_array($u, ['pcs','pc','piece','pieces','count'])) return 'pcs';
-        if (str_contains($u, 'kilo')) return 'kg';
-        if ($u === 'mg' || str_contains($u, 'gram')) return 'g';
-        if (str_contains($u, 'millil')) return 'ml';
-        if (str_contains($u, 'lit')) return 'l';
-        if (str_contains($u, 'piece') || str_contains($u, 'pcs') || str_contains($u, 'count')) return 'pcs';
-        return 'pcs';
-    }
-
-    // ======= Your existing resolveRange(...) goes here =======
-    protected function resolveRange(Request $request, ?string $preset): array
-    {
-        // Keep your existing implementation for resolving $start / $end.
-        // Stub (replace with your original):
-        $start = $request->filled('start_date') ? Carbon::parse($request->input('start_date')) : Carbon::today();
-        $end   = $request->filled('end_date')   ? Carbon::parse($request->input('end_date'))   : Carbon::today();
-
-        if ($preset === 'today')     { $start = Carbon::today(); $end = Carbon::today(); }
-        if ($preset === 'yesterday') { $start = Carbon::yesterday(); $end = Carbon::yesterday(); }
-        if ($preset === 'tomorrow')  { $start = Carbon::tomorrow(); $end = Carbon::tomorrow(); }
-        if ($preset === 'this_month'){ $start = Carbon::now()->startOfMonth(); $end = Carbon::now()->endOfMonth(); }
-        if ($preset === 'last_month'){ $start = Carbon::now()->subMonthNoOverflow()->startOfMonth(); $end = Carbon::now()->subMonthNoOverflow()->endOfMonth(); }
-
-        return [$start->startOfDay(), $end->endOfDay()];
     }
 }
