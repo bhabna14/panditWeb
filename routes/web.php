@@ -1010,9 +1010,31 @@ Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'stor
      Route::get('admin/ops-report', [WeeklyReportController::class, 'index'])
             ->name('admin.ops-report');
 
+Route::prefix('admin')->as('admin.')->group(function () {
+    // List (Manage page)
+    Route::get('flower-details', [FlowerDetailsController::class, 'index'])
+        ->name('flower-details.index');
 
-// If you already have an "admin" group, drop this inside it.
-// Otherwise, this will work as-is and mount at /admin/flower-details
-Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('flower-details', FlowerDetailsController::class);
+    // Create (Add page)
+    Route::get('flower-details/create', [FlowerDetailsController::class, 'create'])
+        ->name('flower-details.create');
+
+    // Store (Save new)
+    Route::post('flower-details', [FlowerDetailsController::class, 'store'])
+        ->name('flower-details.store');
+
+    // Edit (Edit page)
+    // Note: use {flower_detail} to match the controller's type-hinted parameter name
+    Route::get('flower-details/{flower_detail}/edit', [FlowerDetailsController::class, 'edit'])
+        ->name('flower-details.edit');
+
+    // Update (Save changes)
+    Route::put('flower-details/{flower_detail}', [FlowerDetailsController::class, 'update'])
+        ->name('flower-details.update');
+    Route::patch('flower-details/{flower_detail}', [FlowerDetailsController::class, 'update'])
+        ->name('flower-details.update.patch');
+
+    // Delete
+    Route::delete('flower-details/{flower_detail}', [FlowerDetailsController::class, 'destroy'])
+        ->name('flower-details.destroy');
 });
