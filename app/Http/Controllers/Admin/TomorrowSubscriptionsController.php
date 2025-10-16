@@ -8,7 +8,7 @@ use App\Models\FlowerRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth; // 👈 add this
+use Illuminate\Support\Facades\Auth;
 
 class TomorrowSubscriptionsController extends Controller
 {
@@ -16,21 +16,20 @@ class TomorrowSubscriptionsController extends Controller
     {
         // --- Role & IST time gate ---
         $admin = Auth::guard('admins')->user();
-        $role  = $admin?->role ?? session('admin_role'); // fallback to session if needed
+        $role  = $admin?->role ?? session('admin_role');
 
         $nowIst     = Carbon::now('Asia/Kolkata');
         $unlockAt   = (clone $nowIst)->setTime(17, 0, 0); // 5:00 PM IST today
         $isAfter5pm = $nowIst->greaterThanOrEqualTo($unlockAt);
         $canView    = ($role === 'super_admin') || $isAfter5pm;
 
-        // If admin & before 5PM: render the lock screen without heavy queries
         if (!$canView) {
             return view('admin.reports.tomorrow-subscriptions', [
                 'canView'      => false,
                 'role'         => $role,
                 'nowIst'       => $nowIst->toDateTimeString(),
                 'unlockAt'     => $unlockAt->toDateTimeString(),
-                'unlockAtMs'   => $unlockAt->valueOf(),  // ms epoch for precise countdown
+                'unlockAtMs'   => $unlockAt->valueOf(),
                 'serverNowMs'  => $nowIst->valueOf(),
             ]);
         }
@@ -45,7 +44,6 @@ class TomorrowSubscriptionsController extends Controller
             'users.addressDetails',
             'order',
             'order.rider:id,rider_id,rider_name',
-            // include package items so we can build the totals-by-item block
             'flowerProducts:product_id,name',
             'flowerProducts.packageItems:product_id,item_name,quantity,unit,price',
             'latestPaidPayment',
@@ -86,7 +84,7 @@ class TomorrowSubscriptionsController extends Controller
             ->whereNotIn('status', $excludeStatuses)
             ->where(function ($q) {
                 $q->whereIn('status', ['active', 'paused', 'pending'])
-                ->orWhere('is_active', 1);
+                  ->orWhere('is_active', 1);
             })
             ->whereDate('start_date', '<=', $tomorrow->toDateString())
             ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tomorrow->toDateString())
@@ -102,12 +100,21 @@ class TomorrowSubscriptionsController extends Controller
             ->reject($shouldHide)
             ->values();
 
-        // 2) Starting Tomorrow
-        $startingTomorrow = Subscription::with($withSubs)
+        // 2) Starting Tomorrow — **NEW USERS ONLY**
+        // "New user" definition: user has NO subscription with start_date < tomorrow.
+        // We also collapse multiple subs for the same user down to a single row (distinct user).
+        $startingTomorrowNew = Subscription::with($withSubs)
             ->whereNotIn('status', $excludeStatuses)
             ->whereDate('start_date', '=', $tomorrow->toDateString())
+            ->whereNotExists(function ($sq) use ($tomorrow) {
+                $sq->select(DB::raw(1))
+                   ->from('subscriptions as s2')
+                   ->whereColumn('s2.user_id', 'subscriptions.user_id')
+                   ->whereDate('s2.start_date', '<', $tomorrow->toDateString());
+            })
             ->get()
             ->reject($shouldHide)
+            ->unique('user_id') // distinct by user
             ->values();
 
         // 3) Pausing from Tomorrow
@@ -133,10 +140,19 @@ class TomorrowSubscriptionsController extends Controller
             ->reject($shouldHide)
             ->values();
 
+        // 6) **Expired Today — Users**
+        // Users whose subscription window ends today (COALESCE(new_date, end_date) = today).
+        // Collapse to distinct users.
+        $expiredTodayUsers = Subscription::with($withSubs)
+            ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '=', $today->toDateString())
+            ->get()
+            ->unique('user_id')
+            ->values();
+
         // Totals card (computed from activeTomorrow only)
         $tTotals = $this->computeTomorrowTotalsByItem($activeTomorrow);
 
-        // Normalizers
+        // Normalizers (same as your code)
         $mapSub = function ($s) {
             $user    = $s->users;
             $order   = $s->order;
@@ -185,7 +201,7 @@ class TomorrowSubscriptionsController extends Controller
                 'customer'        => $user?->name ?? '—',
                 'phone'           => $user?->mobile_number ?? null,
                 'email'           => $user?->email ?? null,
-                'user_id'         => $user?->userid,  
+                'user_id'         => $user?->userid,
 
                 'product'         => $product?->name ?? '—',
                 'address'         => $address ?: '—',
@@ -202,7 +218,6 @@ class TomorrowSubscriptionsController extends Controller
             $product = $fr->flowerProduct;
             $order   = $fr->order;
             $rider   = $order?->rider;
-            
 
             $chunks = array_filter([
                 $addr?->apartment_flat_plot ?? null,
@@ -215,7 +230,6 @@ class TomorrowSubscriptionsController extends Controller
             ]);
             $address = trim(implode(', ', $chunks));
 
-            // Items normalize (safe array for modal JSON)
             $items = $fr->flowerRequestItems
                 ? $fr->flowerRequestItems->map(function ($it) {
                     return [
@@ -242,7 +256,7 @@ class TomorrowSubscriptionsController extends Controller
                 'customer'       => $user?->name ?? '—',
                 'phone'          => $user?->mobile_number ?? null,
                 'email'          => $user?->email ?? null,
-                'user_id'         => $user?->userid,     // <-- ADD THIS
+                'user_id'        => $user?->userid,
 
                 'product'        => $product?->name ?? '—',
                 'address'        => $address ?: '—',
@@ -256,16 +270,19 @@ class TomorrowSubscriptionsController extends Controller
         };
 
         $data = [
-            'canView'            => true,
-            'role'               => $role,
-            'today'              => $today->toDateString(),
-            'tomorrow'           => $tomorrow->toDateString(),
-            'activeTomorrow'     => $activeTomorrow->map($mapSub)->all(),
-            'startingTomorrow'   => $startingTomorrow->map($mapSub)->all(),
-            'pausingTomorrow'    => $pausingTomorrow->map($mapSub)->all(),
-            'customizeTomorrow'  => $customizeTomorrow->map($mapRequest)->all(),
-            'resumingTomorrow'   => $resumingTomorrow->map($mapSub)->all(),
-            'tTotals'            => $tTotals,
+            'canView'              => true,
+            'role'                 => $role,
+            'today'                => $today->toDateString(),
+            'tomorrow'             => $tomorrow->toDateString(),
+
+            'activeTomorrow'       => $activeTomorrow->map($mapSub)->all(),
+            'startingTomorrowNew'  => $startingTomorrowNew->map($mapSub)->all(), // changed
+            'pausingTomorrow'      => $pausingTomorrow->map($mapSub)->all(),
+            'customizeTomorrow'    => $customizeTomorrow->map($mapRequest)->all(),
+            'resumingTomorrow'     => $resumingTomorrow->map($mapSub)->all(),
+            'expiredTodayUsers'    => $expiredTodayUsers->map($mapSub)->all(),   // new
+
+            'tTotals'              => $tTotals,
         ];
 
         return view('admin.reports.tomorrow-subscriptions', $data);
@@ -273,19 +290,12 @@ class TomorrowSubscriptionsController extends Controller
 
     // ===== Helpers for totals by item =====
 
-    /**
-     * Build totals-by-item for tomorrow deliveries.
-     * @param \Illuminate\Support\Collection $activeTomorrow
-     * @return array
-     */
     protected function computeTomorrowTotalsByItem($activeTomorrow): array
     {
         if ($activeTomorrow->isEmpty()) return [];
 
-        // Count subs per product
         $subsCountByProduct = $activeTomorrow->groupBy('product_id')->map->count();
-
-        $totalsByItemBase = []; // key: "name|category" => ['item_name'=>..., 'category'=>..., 'total_qty_base'=>float]
+        $totalsByItemBase = [];
 
         foreach ($subsCountByProduct as $productId => $subsCount) {
             $product = optional($activeTomorrow->firstWhere('product_id', $productId))->flowerProducts;
@@ -310,7 +320,6 @@ class TomorrowSubscriptionsController extends Controller
             }
         }
 
-        // Format for display
         $out = [];
         foreach ($totalsByItemBase as $row) {
             [$qtyDisp, $unitDisp] = $this->formatQtyByCategoryFromBase($row['total_qty_base'], $row['category']);
@@ -321,32 +330,20 @@ class TomorrowSubscriptionsController extends Controller
             ];
         }
 
-        // Sort by item name
-        usort($out, function ($a, $b) {
-            return strcasecmp($a['item_name'], $b['item_name']);
-        });
-
+        usort($out, fn($a, $b) => strcasecmp($a['item_name'], $b['item_name']));
         return $out;
     }
 
-    /**
-     * Map a raw unit to (category, toBaseFactor).
-     * Base units: weight->g, volume->ml, count->pcs.
-     */
     protected function resolveCategoryAndFactor(string $u): array
     {
-        // weight
         if (in_array($u, ['kg','kilogram','kilograms','kgs'])) return ['weight', 1000.0];
         if (in_array($u, ['g','gram','grams','gm']))           return ['weight', 1.0];
 
-        // volume
         if (in_array($u, ['l','lt','liter','litre','liters','litres'])) return ['volume', 1000.0];
         if (in_array($u, ['ml','milliliter','millilitre','milliliters','millilitres'])) return ['volume', 1.0];
 
-        // count
         if (in_array($u, ['pcs','pc','piece','pieces','count'])) return ['count', 1.0];
 
-        // forgiving substring fallbacks
         if (str_contains($u, 'kilo')) return ['weight', 1000.0];
         if ($u === 'mg' || str_contains($u, 'gram')) return ['weight', 1.0];
         if (str_contains($u, 'millil')) return ['volume', 1.0];
@@ -356,22 +353,10 @@ class TomorrowSubscriptionsController extends Controller
         return ['count', 1.0];
     }
 
-    /**
-     * Convert base qty to a display qty/unit per category.
-     * weight: g->kg when >= 1000
-     * volume: ml->l when >= 1000
-     * count: pcs
-     */
     protected function formatQtyByCategoryFromBase(float $base, string $category): array
     {
-        if ($category === 'weight') {
-            if ($base >= 1000) return [round($base / 1000, 3), 'kg'];
-            return [round($base, 3), 'g'];
-        }
-        if ($category === 'volume') {
-            if ($base >= 1000) return [round($base / 1000, 3), 'l'];
-            return [round($base, 3), 'ml'];
-        }
+        if ($category === 'weight') return $base >= 1000 ? [round($base/1000, 3), 'kg'] : [round($base, 3), 'g'];
+        if ($category === 'volume') return $base >= 1000 ? [round($base/1000, 3), 'l']  : [round($base, 3), 'ml'];
         return [round($base, 3), 'pcs'];
     }
 }
