@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use App\Models\FlowerDetails;   // ← NEW: per-unit price & unit source
+use Illuminate\Support\Facades\Schema; // ← add this
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
