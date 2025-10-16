@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\FlowerDetails;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class FlowerDetailsController extends Controller
 {
@@ -37,7 +37,7 @@ class FlowerDetailsController extends Controller
      */
     public function create()
     {
-        $units = ['bunch', 'piece', 'kg', 'g', 'bundle'];
+        $units = ['bunch', 'piece', 'kg', 'g', 'bundle', 'bouquet', 'garland', 'packet'];
         return view('admin.add-flower-details', [
             'row'   => new FlowerDetails(),
             'units' => $units,
@@ -59,9 +59,11 @@ class FlowerDetailsController extends Controller
             'price'     => ['required', 'numeric', 'min:0'],
         ]);
 
+        // Ensure uppercase + autogenerate if empty
+        $data['flower_id'] = $this->ensureFlowerId($data['flower_id'] ?? null, $data['name']);
+
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')
-                ->store('flower_details', 'public'); // storage/app/public/flower_details/...
+            $data['image'] = $request->file('image')->store('flower_details', 'public');
         }
 
         FlowerDetails::create($data);
@@ -76,7 +78,7 @@ class FlowerDetailsController extends Controller
      */
     public function edit(FlowerDetails $flower_detail)
     {
-        $units = ['Bouquet', 'Kg', 'Gm', 'bundle', 'Garland', 'Packet','Piece'];
+        $units = ['bunch', 'piece', 'kg', 'g', 'bundle', 'bouquet', 'garland', 'packet'];
 
         return view('admin.add-flower-details', [
             'row'   => $flower_detail,
@@ -99,13 +101,21 @@ class FlowerDetailsController extends Controller
             'price'     => ['required', 'numeric', 'min:0'],
         ]);
 
+        // If provided, uppercase it; if empty, regenerate from name (keeps existing if already set)
+        if (!empty($data['flower_id'])) {
+            $data['flower_id'] = strtoupper($data['flower_id']);
+        } else {
+            // Keep existing if present; otherwise generate
+            $data['flower_id'] = $flower_detail->flower_id ?: $this->generateFlowerIdFromName($data['name']);
+            // Try to avoid accidental duplicates if changed
+            $data['flower_id'] = $this->makeUniqueIfNeeded($data['flower_id']);
+        }
+
         if ($request->hasFile('image')) {
-            // delete old image if any
             if ($flower_detail->image && Storage::disk('public')->exists($flower_detail->image)) {
                 Storage::disk('public')->delete($flower_detail->image);
             }
-            $data['image'] = $request->file('image')
-                ->store('flower_details', 'public');
+            $data['image'] = $request->file('image')->store('flower_details', 'public');
         }
 
         $flower_detail->update($data);
@@ -129,5 +139,50 @@ class FlowerDetailsController extends Controller
         return redirect()
             ->route('admin.flower-details.index')
             ->with('success', 'Flower details deleted.');
+    }
+
+    /**
+     * Ensure an uppercase Flower ID; generate from name if empty.
+     */
+    private function ensureFlowerId(?string $flowerId, string $name): string
+    {
+        $candidate = $flowerId ? strtoupper($flowerId) : $this->generateFlowerIdFromName($name);
+        return $this->makeUniqueIfNeeded($candidate);
+    }
+
+    /**
+     * Generate ID: first 4 letters of name (A–Z only) + 4 random digits.
+     * Example: "Marigold" -> "MARI4821"
+     */
+    private function generateFlowerIdFromName(string $name): string
+    {
+        // Keep only letters, then take first 4; if fewer, right-pad with X
+        $lettersOnly = preg_replace('/[^a-zA-Z]/', '', $name) ?: 'FLOW';
+        $prefix = strtoupper(Str::substr($lettersOnly, 0, 4));
+        $prefix = str_pad($prefix, 4, 'X'); // make sure it's 4 chars
+
+        $digits = str_pad((string)random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+
+        return $prefix . $digits;
+    }
+
+    /**
+     * Try a few times to avoid duplicates.
+     */
+    private function makeUniqueIfNeeded(string $candidate): string
+    {
+        if (!FlowerDetails::where('flower_id', $candidate)->exists()) {
+            return $candidate;
+        }
+        // Try a handful of variations
+        for ($i = 0; $i < 5; $i++) {
+            $base = substr($candidate, 0, 4); // first 4 are the letters
+            $candidate = $base . str_pad((string)random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+            if (!FlowerDetails::where('flower_id', $candidate)->exists()) {
+                return $candidate;
+            }
+        }
+        // Fall back to a timestamp suffix (very unlikely)
+        return substr($candidate, 0, 4) . substr((string)time(), -4);
     }
 }
