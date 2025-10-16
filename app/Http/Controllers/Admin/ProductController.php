@@ -12,6 +12,7 @@ use App\Models\PoojaUnit;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
+use App\Models\FlowerDetails;   // ← NEW: per-unit price & unit source
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -24,12 +25,12 @@ class ProductController extends Controller
         $pooja_list    = Poojalist::where('status', 'active')->get();
 
         // We now pull items from FlowerDetails (price is per unit in DB)
-        $flowerDetails = \App\Models\FlowerDetails::orderBy('name')
+        $flowerDetails = FlowerDetails::orderBy('name')
             ->get(['id', 'name', 'unit', 'price']); // price = per-unit price
 
         return view('admin.add-product', compact('pooja_list', 'flowerDetails'));
     }
-
+        
     public function createProduct(Request $request)
     {
         $validated = $request->validate([
@@ -44,27 +45,24 @@ class ProductController extends Controller
 
             'product_image' => ['required','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
 
-            // Package rows
+            // ── Package rows (FlowerDetails-backed) ───────────────────────────────
+            // front-end sends item_id[], quantity[], (unit_text[] readonly), item_price[] (UX only)
             'item_id'       => ['nullable','array'],
-            'item_id.*'     => ['nullable','integer'],
+            'item_id.*'     => ['nullable','integer','exists:flower__details,id'],
             'quantity'      => ['nullable','array'],
             'quantity.*'    => ['nullable','numeric','min:0'],
-            'unit_id'       => ['nullable','array'],
-            'unit_id.*'     => ['nullable','integer'],
             'item_price'    => ['nullable','array'],
             'item_price.*'  => ['nullable','numeric','min:0'],
 
-            // Subscription (single price + items)
+            // ── Subscription (single price + items) ──────────────────────────────
             'duration'        => ['nullable','required_if:category,Subscription','in:1,3,6'],
             'per_day_price'   => ['nullable','required_if:category,Subscription','numeric','min:0'],
 
-            // Subscription item rows
+            // Subscription item rows (FlowerDetails-backed)
             'sub_item_id'      => ['nullable','array'],
-            'sub_item_id.*'    => ['nullable','integer'],
+            'sub_item_id.*'    => ['nullable','integer','exists:flower__details,id'],
             'sub_quantity'     => ['nullable','array'],
             'sub_quantity.*'   => ['nullable','numeric','min:0'],
-            'sub_unit_id'      => ['nullable','array'],
-            'sub_unit_id.*'    => ['nullable','integer'],
             'sub_item_price'   => ['nullable','array'],
             'sub_item_price.*' => ['nullable','numeric','min:0'],
 
@@ -85,124 +83,98 @@ class ProductController extends Controller
             'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
         ]);
 
-        // -------- PACKAGE rows (resolve item names from FlowerProduct where category=Flower) ----------
+        // ─────────────────────────────────────────────────────────────────────────
+        // Build PACKAGE rows from FlowerDetails (server-side price = unit_price * qty)
+        // ─────────────────────────────────────────────────────────────────────────
         $packageRows = [];
         if (($validated['category'] ?? null) === 'Package') {
-            $items   = (array) $request->input('item_id', []);
-            $qtys    = (array) $request->input('quantity', []);
-            $unitIds = (array) $request->input('unit_id', []);
-            $prices  = (array) $request->input('item_price', []);
+            $items  = (array) $request->input('item_id', []);
+            $qtys   = (array) $request->input('quantity', []);
+            $prices = (array) $request->input('item_price', []); // UX only; server will recompute
 
-            foreach ($items as $i => $itemId) {
-                if ($itemId === null || $itemId === '') continue;
+            foreach ($items as $i => $flowerDetailsId) {
+                if ($flowerDetailsId === null || $flowerDetailsId === '') continue;
 
-                $qty   = $qtys[$i]    ?? null;
-                $unit  = $unitIds[$i] ?? null;
-                $price = $prices[$i]  ?? null;
-
-                if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
-                    return back()->withErrors(['package' => 'Each package row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])->withInput();
+                $qty = $qtys[$i] ?? null;
+                if ($qty === null || $qty === '' || !is_numeric($qty) || $qty < 0) {
+                    return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
                 }
-                if (!is_numeric($qty) || $qty < 0)     return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
-                if (!is_numeric($price) || $price < 0) return back()->withErrors(['package' => 'Item Price must be a non-negative number. (Row '.($i+1).')'])->withInput();
+
+                // Pull once from FlowerDetails
+                /** @var FlowerDetails|null $fd */
+                $fd = FlowerDetails::find($flowerDetailsId);
+                if (!$fd) {
+                    return back()->withErrors(['item_id' => 'Selected item not found. (Row '.($i+1).')'])->withInput();
+                }
+
+                $perUnit  = (float) $fd->price; // per-unit price stored in FlowerDetails
+                $unitName = (string) $fd->unit; // read-only in UI
+                $itemName = (string) $fd->name;
+
+                $computed = $perUnit * (float) $qty; // authoritative total
 
                 $packageRows[] = [
-                    'item_id'  => (int) $itemId,
-                    'quantity' => (float) $qty,
-                    'unit_id'  => (int) $unit,
-                    'price'    => (float) $price,
-                    'idx'      => $i,
+                    'item_id'   => (int) $flowerDetailsId,
+                    'item_name' => $itemName,
+                    'quantity'  => (float) $qty,
+                    'unit_name' => $unitName,
+                    'price'     => round($computed, 2),
+                    'idx'       => $i,
                 ];
             }
 
             if (count($packageRows) < 1) {
                 return back()->withErrors(['item_id' => 'Please add at least one package item.'])->withInput();
             }
-
-            $itemIds  = collect($packageRows)->pluck('item_id')->unique()->values();
-            $unitIdsC = collect($packageRows)->pluck('unit_id')->unique()->values();
-
-            // ✅ Use FlowerProduct names (only category=Flower)
-            $itemNamesById = FlowerProduct::whereIn('id', $itemIds)
-                ->where('category', 'Flower')
-                ->pluck('name', 'id');
-
-            $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)->pluck('unit_name', 'id');
-
-            if ($itemNamesById->count() !== $itemIds->count())  {
-                return back()->withErrors(['item_id' => 'One or more selected items were not found among Flower products.'])->withInput();
-            }
-            if ($unitNamesById->count() !== $unitIdsC->count()) {
-                return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
-            }
-
-            // Map to the exact keys we save later
-            $packageRows = array_map(function ($row) use ($itemNamesById, $unitNamesById) {
-                $row['item_name'] = (string) ($itemNamesById[$row['item_id']] ?? '');
-                $row['unit_name'] = (string) ($unitNamesById[$row['unit_id']] ?? '');
-                return $row;
-            }, $packageRows);
         }
 
-        // -------- SUBSCRIPTION item rows (same source: FlowerProduct) ----------
+        // ─────────────────────────────────────────────────────────────────────────
+        // Build SUBSCRIPTION rows from FlowerDetails (server-side price = unit_price * qty)
+        // ─────────────────────────────────────────────────────────────────────────
         $subscriptionRows = [];
         if (($validated['category'] ?? null) === 'Subscription') {
-            $sItems   = (array) $request->input('sub_item_id', []);
-            $sQtys    = (array) $request->input('sub_quantity', []);
-            $sUnitIds = (array) $request->input('sub_unit_id', []);
-            $sPrices  = (array) $request->input('sub_item_price', []);
+            $sItems  = (array) $request->input('sub_item_id', []);
+            $sQtys   = (array) $request->input('sub_quantity', []);
+            $sPrices = (array) $request->input('sub_item_price', []); // UX only
 
-            foreach ($sItems as $i => $itemId) {
-                if ($itemId === null || $itemId === '') continue;
+            foreach ($sItems as $i => $flowerDetailsId) {
+                if ($flowerDetailsId === null || $flowerDetailsId === '') continue;
 
-                $qty   = $sQtys[$i]    ?? null;
-                $unit  = $sUnitIds[$i] ?? null;
-                $price = $sPrices[$i]  ?? null;
-
-                if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
-                    return back()->withErrors(['subscription_items' => 'Each subscription row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])->withInput();
+                $qty = $sQtys[$i] ?? null;
+                if ($qty === null || $qty === '' || !is_numeric($qty) || $qty < 0) {
+                    return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
                 }
-                if (!is_numeric($qty) || $qty < 0)     return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
-                if (!is_numeric($price) || $price < 0) return back()->withErrors(['subscription_items' => 'Item Price must be a non-negative number. (Row '.($i+1).')'])->withInput();
+
+                /** @var FlowerDetails|null $fd */
+                $fd = FlowerDetails::find($flowerDetailsId);
+                if (!$fd) {
+                    return back()->withErrors(['sub_item_id' => 'Selected subscription item not found. (Row '.($i+1).')'])->withInput();
+                }
+
+                $perUnit  = (float) $fd->price;
+                $unitName = (string) $fd->unit;
+                $itemName = (string) $fd->name;
+
+                $computed = $perUnit * (float) $qty;
 
                 $subscriptionRows[] = [
-                    'item_id'  => (int) $itemId,
-                    'quantity' => (float) $qty,
-                    'unit_id'  => (int) $unit,
-                    'price'    => (float) $price,
-                    'idx'      => $i,
+                    'item_id'   => (int) $flowerDetailsId,
+                    'item_name' => $itemName,
+                    'quantity'  => (float) $qty,
+                    'unit_name' => $unitName,
+                    'price'     => round($computed, 2),
+                    'idx'       => $i,
                 ];
             }
 
             if (count($subscriptionRows) < 1) {
                 return back()->withErrors(['sub_item_id' => 'Please add at least one subscription item.'])->withInput();
             }
-
-            $sItemIds  = collect($subscriptionRows)->pluck('item_id')->unique()->values();
-            $sUnitIdsC = collect($subscriptionRows)->pluck('unit_id')->unique()->values();
-
-            // ✅ Use FlowerProduct names (only category=Flower)
-            $sItemNamesById = FlowerProduct::whereIn('id', $sItemIds)
-                ->where('category', 'Flower')
-                ->pluck('name', 'id');
-
-            $sUnitNamesById = PoojaUnit::whereIn('id', $sUnitIdsC)->pluck('unit_name', 'id');
-
-            if ($sItemNamesById->count() !== $sItemIds->count())  {
-                return back()->withErrors(['sub_item_id' => 'One or more selected subscription items were not found among Flower products.'])->withInput();
-            }
-            if ($sUnitNamesById->count() !== $sUnitIdsC->count()) {
-                return back()->withErrors(['sub_unit_id' => 'One or more selected subscription units were not found.'])->withInput();
-            }
-
-            $subscriptionRows = array_map(function ($row) use ($sItemNamesById, $sUnitNamesById) {
-                $row['item_name'] = (string) ($sItemNamesById[$row['item_id']] ?? '');
-                $row['unit_name'] = (string) ($sUnitNamesById[$row['unit_id']] ?? '');
-                return $row;
-            }, $subscriptionRows);
         }
 
+        // ─────────────────────────────────────────────────────────────────────────
         // Image
+        // ─────────────────────────────────────────────────────────────────────────
         $imageUrl = null;
         if ($request->hasFile('product_image')) {
             $hashName = $request->file('product_image')->hashName();
@@ -210,7 +182,9 @@ class ProductController extends Controller
             $imageUrl = asset('product_images/' . $hashName);
         }
 
-        // Derivations
+        // ─────────────────────────────────────────────────────────────────────────
+        // Derivations / flags
+        // ─────────────────────────────────────────────────────────────────────────
         $isFlower = (($validated['category'] ?? null) === 'Flower');
         $isSub    = (($validated['category'] ?? null) === 'Subscription');
 
@@ -230,12 +204,15 @@ class ProductController extends Controller
             $isFlowerAvailableBool = isset($validated['flower_available']) ? $validated['flower_available'] === 'yes' : null;
         }
 
-        // Persist
+        // ─────────────────────────────────────────────────────────────────────────
+        // Persist everything in a transaction
+        // ─────────────────────────────────────────────────────────────────────────
         DB::transaction(function () use (
             $request, $validated, $productId, $slug, $benefitString, $imageUrl,
             $malaProvidedBool, $isFlowerAvailableBool, $isFlower, $isSub,
             $packageRows, $subscriptionRows
         ) {
+            // Main product row
             $product = new FlowerProduct();
             $product->product_id    = $productId;
             $product->name          = $validated['name'];
@@ -256,7 +233,7 @@ class ProductController extends Controller
             $product->benefits      = $benefitString;
             $product->product_image = $imageUrl;
 
-            // Flower-only
+            // Flower-only fields
             $product->mala_provided       = $malaProvidedBool;
             $product->is_flower_available = $isFlowerAvailableBool;
             $product->available_from      = $isFlower ? $request->input('available_from') : null;
@@ -264,28 +241,28 @@ class ProductController extends Controller
 
             $product->save();
 
-            // PACKAGE items
+            // Package items (save computed rows)
             if (($validated['category'] ?? null) === 'Package' && !empty($packageRows)) {
                 foreach ($packageRows as $row) {
                     PackageItem::create([
                         'product_id' => $product->product_id,
-                        'item_name'  => $row['item_name'], // ✅ FlowerProduct->name
+                        'item_name'  => $row['item_name'],
                         'quantity'   => $row['quantity'],
                         'unit'       => $row['unit_name'],
-                        'price'      => $row['price'],
+                        'price'      => $row['price'],   // server-computed
                     ]);
                 }
             }
 
-            // SUBSCRIPTION items
+            // Subscription items (save computed rows)
             if ($isSub && !empty($subscriptionRows)) {
                 foreach ($subscriptionRows as $row) {
                     PackageItem::create([
                         'product_id' => $product->product_id,
-                        'item_name'  => $row['item_name'], // ✅ FlowerProduct->name
+                        'item_name'  => $row['item_name'],
                         'quantity'   => $row['quantity'],
                         'unit'       => $row['unit_name'],
-                        'price'      => $row['price'],
+                        'price'      => $row['price'],   // server-computed
                     ]);
                 }
             }
@@ -294,72 +271,22 @@ class ProductController extends Controller
         return redirect()->back()->with('success', 'Product created successfully.');
     }
 
-    // public function editProduct($id)
-    // {
-    //     $product = FlowerProduct::findOrFail($id);
-
-    //     // Items list = Flower products (names)
-    //     $Poojaitemlist = FlowerProduct::where('category', 'Flower')
-    //         ->orderBy('name')
-    //         ->get(['id','name']);
-
-    //     // Units = all units (names)
-    //     $pooja_units = PoojaUnit::orderBy('unit_name')
-    //         ->get(['id','unit_name']);
-
-    //     // Existing rows (we stored names already)
-    //     $rows = PackageItem::where('product_id', $product->product_id)
-    //         ->get(['item_name','unit','quantity','price']);
-
-    //     // Build simple array for the Blade (only labels + numbers)
-    //     $packageItems = $rows->map(function ($r) {
-    //         return [
-    //             'item_label'  => (string) $r->item_name,
-    //             'unit_label'  => (string) $r->unit,
-    //             'quantity'    => $r->quantity,
-    //             'price'       => $r->price,
-
-    //             // flags for UI (not strictly needed now, but harmless)
-    //             'item_not_found' => false,
-    //             'unit_not_found' => false,
-    //         ];
-    //     })->values()->toArray();
-
-    //     // Ensure at least one empty row for Package/Subscription with no items yet
-    //     if (empty($packageItems) && in_array($product->category, ['Package','Subscription'], true)) {
-    //         $packageItems = [[
-    //             'item_label'     => null,
-    //             'unit_label'     => null,
-    //             'quantity'       => null,
-    //             'price'          => null,
-    //             'item_not_found' => false,
-    //             'unit_not_found' => false,
-    //         ]];
-    //     }
-
-    //     return view('admin.edit-product', compact(
-    //         'product',
-    //         'Poojaitemlist',
-    //         'pooja_units',
-    //         'packageItems'
-    //     ));
-    // }
-
     public function editProduct($id)
     {
         $product = FlowerProduct::with([
-        'pooja:id,pooja_name',
-        'packageItems:id,product_id,item_name,quantity,unit,price',
+            'pooja:id,pooja_name',
+            'packageItems:id,product_id,item_name,quantity,unit,price',
         ])->findOrFail($id);
 
-
+        // Still need Pooja list if category is Package
         $pooja_list = Poojalist::where('status', 'active')->get(['id','pooja_name']);
-        $flowerlist = FlowerProduct::where('status', 'active')->where('category','Flower')->get(['id','name']);
-        $pooja_units = PoojaUnit::orderBy('unit_name')->get(['id','unit_name']);
 
+        // NEW: source items from FlowerDetails (has name, unit, per-unit price)
+        $flowerDetails = FlowerDetails::orderBy('name')
+            ->get(['id','name','unit','price']);
 
-        // Blade shipped earlier: resources/views/admin/edit-product.blade.php
-        return view('admin.edit-product', compact('product', 'pooja_list', 'flowerlist', 'pooja_units'));
+        // Blade updated below: resources/views/admin/edit-product.blade.php
+        return view('admin.edit-product', compact('product', 'pooja_list', 'flowerDetails'));
     }
 
     public function deleteProduct($id)
@@ -370,25 +297,29 @@ class ProductController extends Controller
         return redirect()->route('manageproduct')->with('success', 'Product deleted successfully.');
     }
 
-    public function manageproduct()
-    {
-        $products = FlowerProduct::query()
-            ->where('status','!=', 'deleted')
-            ->select([
-                'id','product_id','name','product_image','mrp','price','discount','stock',
-                'category','status','benefits',
-                'mala_provided','is_flower_available','available_from','available_to',
-                'duration','per_day_price','pooja_id'
-            ])
-            ->with([
-                'pooja:id,pooja_name',
-                'packageItems:id,product_id,item_name,quantity,unit,price',
-            ])
-            ->orderByDesc('id')
-            ->get();
+public function manageproduct()
+{
+    $products = FlowerProduct::query()
+        ->where('status','!=', 'deleted')
+        ->select([
+            'id','product_id','name','product_image','mrp','price','discount','stock',
+            'category','status','benefits',
+            'mala_provided','is_flower_available','available_from','available_to',
+            'duration','per_day_price','pooja_id'
+        ])
+        ->with([
+            'pooja:id,pooja_name',
+            'packageItems:id,product_id,item_name,quantity,unit,price',
+        ])
+        ->orderByDesc('id')
+        ->get();
 
-        return view('admin.manage-product', compact('products'));
-    }
+    // Map FlowerDetails by name for quick lookup in the blade
+    $fdByName = FlowerDetails::select('id','name','unit','price')->get()->keyBy('name');
+
+    return view('admin.manage-product', compact('products','fdByName'));
+}
+
 
     public function toggleProduct($id)
     {
@@ -398,214 +329,7 @@ class ProductController extends Controller
 
         return redirect()->back()->with('success', 'Product status updated successfully.');
     }
-
-    // public function updateProduct(Request $request, $id)
-    // {
-    //     $product = FlowerProduct::findOrFail($id);
-
-    //     // 1) Validate
-    //     $validated = $request->validate([
-    //         'name'          => ['required','string','max:255'],
-    //         'odia_name'     => ['nullable','string','max:255'],
-    //         'mrp'           => ['required','numeric','min:0'],
-    //         'price'         => ['required','numeric','min:0','lte:mrp'],
-    //         'discount'      => ['nullable','numeric','min:0'],
-    //         'category'      => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
-    //         'stock'         => ['nullable','integer','min:0'],
-
-    //         // Subscription-only
-    //         'duration'        => ['nullable','required_if:category,Subscription','in:1,3,6'],
-    //         'per_day_price'   => ['nullable','required_if:category,Subscription','numeric','min:0'],
-
-    //         'product_image' => ['nullable','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
-    //         'description'   => ['required','string'],
-
-    //         // Line rows for Package & Subscription
-    //         'item_id'       => ['nullable','array'],
-    //         'item_id.*'     => ['nullable','integer'],
-    //         'quantity'      => ['nullable','array'],
-    //         'quantity.*'    => ['nullable','numeric','min:0'],
-    //         'unit_id'       => ['nullable','array'],
-    //         'unit_id.*'     => ['nullable','integer'],
-    //         'item_price'    => ['nullable','array'],
-    //         'item_price.*'  => ['nullable','numeric','min:0'],
-
-    //         // Benefits
-    //         'benefits'      => ['nullable','array'],
-    //         'benefits.*'    => ['nullable','string','max:255'],
-
-    //         // Flower-only
-    //         'mala_provided'    => ['nullable','required_if:category,Flower','in:yes,no'],
-    //         'flower_available' => ['nullable','required_if:category,Flower','in:yes,no'],
-    //         'available_from'   => ['nullable','required_if:flower_available,yes','date'],
-    //         'available_to'     => ['nullable','required_if:flower_available,yes','date','after_or_equal:available_from'],
-
-    //         // Package-only meta
-    //         'pooja_id'         => ['nullable','integer'],
-    //     ], [
-    //         'price.lte' => 'Sale price must be less than or equal to MRP.',
-    //         'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
-    //     ]);
-
-    //     // 2) Build line rows (for Package OR Subscription)
-    //     $lineRows = [];
-    //     $category = $validated['category'] ?? null;
-
-    //     if (in_array($category, ['Package','Subscription'], true)) {
-    //         $items   = (array) $request->input('item_id', []);
-    //         $qtys    = (array) $request->input('quantity', []);
-    //         $unitIds = (array) $request->input('unit_id', []);
-    //         $prices  = (array) $request->input('item_price', []);
-
-    //         foreach ($items as $i => $itemId) {
-    //             if ($itemId === null || $itemId === '') continue;
-
-    //             $qty   = $qtys[$i]    ?? null;
-    //             $unit  = $unitIds[$i] ?? null;
-    //             $price = $prices[$i]  ?? null;
-
-    //             if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
-    //                 return back()->withErrors([
-    //                     'package' => 'Each row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'
-    //                 ])->withInput();
-    //             }
-    //             if (!is_numeric($qty) || $qty < 0) {
-    //                 return back()->withErrors([
-    //                     'package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'
-    //                 ])->withInput();
-    //             }
-    //             if (!is_numeric($price) || $price < 0) {
-    //                 return back()->withErrors([
-    //                     'package' => 'Item Price must be a non-negative number. (Row '.($i+1).')'
-    //                 ])->withInput();
-    //             }
-
-    //             $lineRows[] = [
-    //                 'item_id'  => (int) $itemId,
-    //                 'quantity' => (float) $qty,
-    //                 'unit_id'  => (int) $unit,
-    //                 'price'    => (float) $price,
-    //             ];
-    //         }
-
-    //         // Resolve names (store names, not IDs) — from FlowerProduct where category=Flower
-    //         $itemIds  = collect($lineRows)->pluck('item_id')->unique()->values()->all();
-    //         $unitIdsC = collect($lineRows)->pluck('unit_id')->unique()->values()->all();
-
-    //         // Build INT-keyed maps to avoid type issues
-    //         $itemNamesById = FlowerProduct::whereIn('id', $itemIds)
-    //             ->where('category', 'Flower')
-    //             ->get(['id','name'])
-    //             ->keyBy('id')                   // keys are ints
-    //             ->map(fn($r) => (string) $r->name)
-    //             ->toArray();
-
-    //         $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)
-    //             ->get(['id','unit_name'])
-    //             ->keyBy('id')
-    //             ->map(fn($r) => (string) $r->unit_name)
-    //             ->toArray();
-
-    //         if (count($itemNamesById) !== count($itemIds)) {
-    //             return back()->withErrors(['item_id' => 'One or more selected items were not found among Flower products.'])->withInput();
-    //         }
-    //         if (count($unitNamesById) !== count($unitIdsC)) {
-    //             return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
-    //         }
-
-    //         // Attach resolved names
-    //         foreach ($lineRows as &$r) {
-    //             $iid = (int) $r['item_id'];
-    //             $uid = (int) $r['unit_id'];
-    //             $r['item_name'] = $itemNamesById[$iid] ?? '';   // ✅ safe int indexing
-    //             $r['unit_name'] = $unitNamesById[$uid] ?? '';
-    //         }
-    //         unset($r);
-    //     }
-
-    //     // 3) Persist
-    //     DB::transaction(function () use ($request, $validated, $product, $lineRows) {
-    //         $isFlower       = ($validated['category'] === 'Flower');
-    //         $isSubscription = ($validated['category'] === 'Subscription');
-    //         $isPackage      = ($validated['category'] === 'Package');
-
-    //         // Benefits -> "#"
-    //         $benefitString = null;
-    //         if (!empty($validated['benefits'])) {
-    //             $cleaned = array_filter(array_map('trim', $validated['benefits']));
-    //             $benefitString = $cleaned ? implode('#', $cleaned) : null;
-    //         }
-
-    //         // Slug refresh if name changed
-    //         if ($product->name !== $validated['name']) {
-    //             $product->slug = Str::slug($validated['name'], '-');
-    //         }
-
-    //         // Flower radios
-    //         $malaProvidedBool    = null;
-    //         $flowerAvailableBool = null;
-    //         if ($isFlower) {
-    //             $malaProvidedBool    = $request->filled('mala_provided')    ? $request->mala_provided === 'yes'    : null;
-    //             $flowerAvailableBool = $request->filled('flower_available') ? $request->flower_available === 'yes' : null;
-    //         }
-
-    //         // Main fields
-    //         $product->name        = $validated['name'];
-    //         $product->odia_name   = $validated['odia_name'] ?? null;
-    //         $product->price       = $validated['price'];
-    //         $product->mrp         = $validated['mrp'];
-    //         $product->discount    = $validated['discount'] ?? null;
-    //         $product->description = $validated['description'];
-    //         $product->category    = $validated['category'];
-
-    //         // Stock & Subscription meta
-    //         $product->stock          = $isFlower ? null : ($request->input('stock') !== null ? (int)$request->input('stock') : ($product->stock ?? 0));
-    //         $product->duration       = $isSubscription ? $request->input('duration') : null;
-    //         $product->per_day_price  = $isSubscription ? (float) $request->input('per_day_price', 0) : null;
-
-    //         // Package meta
-    //         $product->pooja_id = $isPackage ? $request->input('pooja_id', null) : null;
-
-    //         // Benefits & Flower-only
-    //         $product->benefits            = $benefitString;
-    //         $product->mala_provided       = $malaProvidedBool;
-    //         $product->is_flower_available = $flowerAvailableBool;
-    //         $product->available_from      = $isFlower ? $request->input('available_from') : null;
-    //         $product->available_to        = $isFlower ? $request->input('available_to')   : null;
-
-    //         // Image replace
-    //         if ($request->hasFile('product_image')) {
-    //             if ($product->product_image && file_exists(public_path('product_images/' . basename($product->product_image)))) {
-    //                 @unlink(public_path('product_images/' . basename($product->product_image)));
-    //             }
-    //             $hashName = $request->file('product_image')->hashName();
-    //             $request->file('product_image')->move(public_path('product_images'), $hashName);
-    //             $product->product_image = asset('product_images/' . $hashName);
-    //         }
-
-    //         $product->save();
-
-    //         // Rebuild line rows for Package & Subscription
-    //         PackageItem::where('product_id', $product->product_id)->delete();
-
-    //         if (($isPackage || $isSubscription) && !empty($lineRows)) {
-    //             foreach ($lineRows as $row) {
-    //                 PackageItem::create([
-    //                     'product_id' => $product->product_id,
-    //                     'item_name'  => $row['item_name'],  // ✅ always from FlowerProduct->name
-    //                     'quantity'   => $row['quantity'],
-    //                     'unit'       => $row['unit_name'],  // store unit name
-    //                     'price'      => $row['price'],
-    //                 ]);
-    //             }
-    //         }
-    //     });
-
-    //     return redirect()
-    //         ->route('admin.edit-product', $product->id)
-    //         ->with('success', 'Product updated successfully.');
-    // }
-
+        
     public function updateProduct(Request $request, $id)
     {
         $product = FlowerProduct::with('packageItems')->findOrFail($id);
@@ -622,27 +346,23 @@ class ProductController extends Controller
 
             'product_image' => ['nullable','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
 
-            // Package rows
+            // Package rows (FlowerDetails-backed)
             'item_id'       => ['nullable','array'],
-            'item_id.*'     => ['nullable','integer'],
+            'item_id.*'     => ['nullable','integer','exists:flower__details,id'],
             'quantity'      => ['nullable','array'],
             'quantity.*'    => ['nullable','numeric','min:0'],
-            'unit_id'       => ['nullable','array'],
-            'unit_id.*'     => ['nullable','integer'],
-            'item_price'    => ['nullable','array'],
+            'item_price'    => ['nullable','array'],        // UX only, server will recompute
             'item_price.*'  => ['nullable','numeric','min:0'],
 
             // Subscription (single price + items)
             'duration'        => ['nullable','required_if:category,Subscription','in:1,3,6'],
             'per_day_price'   => ['nullable','required_if:category,Subscription','numeric','min:0'],
 
-            // Subscription item rows
+            // Subscription rows (FlowerDetails-backed)
             'sub_item_id'      => ['nullable','array'],
-            'sub_item_id.*'    => ['nullable','integer'],
+            'sub_item_id.*'    => ['nullable','integer','exists:flower__details,id'],
             'sub_quantity'     => ['nullable','array'],
             'sub_quantity.*'   => ['nullable','numeric','min:0'],
-            'sub_unit_id'      => ['nullable','array'],
-            'sub_unit_id.*'    => ['nullable','integer'],
             'sub_item_price'   => ['nullable','array'],
             'sub_item_price.*' => ['nullable','numeric','min:0'],
 
@@ -663,121 +383,89 @@ class ProductController extends Controller
             'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
         ]);
 
-        // Build rows (Package or Subscription)
+        // Build PACKAGE rows from FlowerDetails (server-side price = unit_price * qty)
         $packageRows = [];
         if (($validated['category'] ?? null) === 'Package') {
-            $items   = (array) $request->input('item_id', []);
-            $qtys    = (array) $request->input('quantity', []);
-            $unitIds = (array) $request->input('unit_id', []);
-            $prices  = (array) $request->input('item_price', []);
+            $items  = (array) $request->input('item_id', []);
+            $qtys   = (array) $request->input('quantity', []);
 
-            foreach ($items as $i => $itemId) {
-                if ($itemId === null || $itemId === '') continue;
-                $qty   = $qtys[$i]    ?? null;
-                $unit  = $unitIds[$i] ?? null;
-                $price = $prices[$i]  ?? null;
+            foreach ($items as $i => $flowerDetailsId) {
+                if ($flowerDetailsId === null || $flowerDetailsId === '') continue;
 
-                if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
-                    return back()->withErrors(['package' => 'Each package row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])->withInput();
+                $qty = $qtys[$i] ?? null;
+                if ($qty === null || $qty === '' || !is_numeric($qty) || $qty < 0) {
+                    return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
                 }
-                if (!is_numeric($qty) || $qty < 0)     return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
-                if (!is_numeric($price) || $price < 0) return back()->withErrors(['package' => 'Item Price must be a non-negative number. (Row '.($i+1).')'])->withInput();
+
+                $fd = FlowerDetails::find($flowerDetailsId);
+                if (!$fd) {
+                    return back()->withErrors(['item_id' => 'Selected item not found. (Row '.($i+1).')'])->withInput();
+                }
+
+                $perUnit  = (float) $fd->price;
+                $unitName = (string) $fd->unit;
+                $itemName = (string) $fd->name;
+
+                $computed = $perUnit * (float) $qty;
 
                 $packageRows[] = [
-                    'item_id'  => (int) $itemId,
-                    'quantity' => (float) $qty,
-                    'unit_id'  => (int) $unit,
-                    'price'    => (float) $price,
-                    'idx'      => $i,
+                    'item_id'   => (int) $flowerDetailsId,
+                    'item_name' => $itemName,
+                    'quantity'  => (float) $qty,
+                    'unit_name' => $unitName,
+                    'price'     => round($computed, 2),
+                    'idx'       => $i,
                 ];
             }
 
             if (count($packageRows) < 1) {
                 return back()->withErrors(['item_id' => 'Please add at least one package item.'])->withInput();
             }
-
-            $itemIds  = collect($packageRows)->pluck('item_id')->unique()->values();
-            $unitIdsC = collect($packageRows)->pluck('unit_id')->unique()->values();
-
-            $itemNamesById = FlowerProduct::whereIn('id', $itemIds)
-                ->where('category', 'Flower')
-                ->pluck('name', 'id');
-
-            $unitNamesById = PoojaUnit::whereIn('id', $unitIdsC)->pluck('unit_name', 'id');
-
-            if ($itemNamesById->count() !== $itemIds->count())  {
-                return back()->withErrors(['item_id' => 'One or more selected items were not found among Flower products.'])->withInput();
-            }
-            if ($unitNamesById->count() !== $unitIdsC->count()) {
-                return back()->withErrors(['unit_id' => 'One or more selected units were not found.'])->withInput();
-            }
-
-            $packageRows = array_map(function ($row) use ($itemNamesById, $unitNamesById) {
-                $row['item_name'] = (string) ($itemNamesById[$row['item_id']] ?? '');
-                $row['unit_name'] = (string) ($unitNamesById[$row['unit_id']] ?? '');
-                return $row;
-            }, $packageRows);
         }
 
+        // Build SUBSCRIPTION rows from FlowerDetails
         $subscriptionRows = [];
         if (($validated['category'] ?? null) === 'Subscription') {
-            $sItems   = (array) $request->input('sub_item_id', []);
-            $sQtys    = (array) $request->input('sub_quantity', []);
-            $sUnitIds = (array) $request->input('sub_unit_id', []);
-            $sPrices  = (array) $request->input('sub_item_price', []);
+            $sItems = (array) $request->input('sub_item_id', []);
+            $sQtys  = (array) $request->input('sub_quantity', []);
 
-            foreach ($sItems as $i => $itemId) {
-                if ($itemId === null || $itemId === '') continue;
-                $qty   = $sQtys[$i]    ?? null;
-                $unit  = $sUnitIds[$i] ?? null;
-                $price = $sPrices[$i]  ?? null;
+            foreach ($sItems as $i => $flowerDetailsId) {
+                if ($flowerDetailsId === null || $flowerDetailsId === '') continue;
 
-                if ($qty === null || $qty === '' || $unit === null || $unit === '' || $price === null || $price === '') {
-                    return back()->withErrors(['subscription_items' => 'Each subscription row must include Item, Qty, Unit, and Item Price. (Row '.($i+1).')'])->withInput();
+                $qty = $sQtys[$i] ?? null;
+                if ($qty === null || $qty === '' || !is_numeric($qty) || $qty < 0) {
+                    return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
                 }
-                if (!is_numeric($qty) || $qty < 0)     return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
-                if (!is_numeric($price) || $price < 0) return back()->withErrors(['subscription_items' => 'Item Price must be a non-negative number. (Row '.($i+1).')'])->withInput();
+
+                $fd = FlowerDetails::find($flowerDetailsId);
+                if (!$fd) {
+                    return back()->withErrors(['sub_item_id' => 'Selected subscription item not found. (Row '.($i+1).')'])->withInput();
+                }
+
+                $perUnit  = (float) $fd->price;
+                $unitName = (string) $fd->unit;
+                $itemName = (string) $fd->name;
+
+                $computed = $perUnit * (float) $qty;
 
                 $subscriptionRows[] = [
-                    'item_id'  => (int) $itemId,
-                    'quantity' => (float) $qty,
-                    'unit_id'  => (int) $unit,
-                    'price'    => (float) $price,
-                    'idx'      => $i,
+                    'item_id'   => (int) $flowerDetailsId,
+                    'item_name' => $itemName,
+                    'quantity'  => (float) $qty,
+                    'unit_name' => $unitName,
+                    'price'     => round($computed, 2),
+                    'idx'       => $i,
                 ];
             }
 
             if (count($subscriptionRows) < 1) {
                 return back()->withErrors(['sub_item_id' => 'Please add at least one subscription item.'])->withInput();
             }
-
-            $sItemIds  = collect($subscriptionRows)->pluck('item_id')->unique()->values();
-            $sUnitIdsC = collect($subscriptionRows)->pluck('unit_id')->unique()->values();
-
-            $sItemNamesById = FlowerProduct::whereIn('id', $sItemIds)
-                ->where('category', 'Flower')
-                ->pluck('name', 'id');
-
-            $sUnitNamesById = PoojaUnit::whereIn('id', $sUnitIdsC)->pluck('unit_name', 'id');
-
-            if ($sItemNamesById->count() !== $sItemIds->count())  {
-                return back()->withErrors(['sub_item_id' => 'One or more selected subscription items were not found among Flower products.'])->withInput();
-            }
-            if ($sUnitNamesById->count() !== $sUnitIdsC->count()) {
-                return back()->withErrors(['sub_unit_id' => 'One or more selected subscription units were not found.'])->withInput();
-            }
-
-            $subscriptionRows = array_map(function ($row) use ($sItemNamesById, $sUnitNamesById) {
-                $row['item_name'] = (string) ($sItemNamesById[$row['item_id']] ?? '');
-                $row['unit_name'] = (string) ($sUnitNamesById[$row['unit_id']] ?? '');
-                return $row;
-            }, $subscriptionRows);
         }
 
         // Image upload (optional replace)
         $newImageUrl = null;
         if ($request->hasFile('product_image')) {
-            // delete old file if ours
             if ($product->product_image) {
                 $basename = basename(parse_url($product->product_image, PHP_URL_PATH) ?: '');
                 $oldPath  = public_path('product_images/' . $basename);
@@ -788,7 +476,6 @@ class ProductController extends Controller
             $newImageUrl = asset('product_images/' . $hashName);
         }
 
-        // Derivations
         $isFlower = (($validated['category'] ?? null) === 'Flower');
         $isSub    = (($validated['category'] ?? null) === 'Subscription');
 
@@ -838,7 +525,7 @@ class ProductController extends Controller
 
             $product->save();
 
-            // Reset and re-create items based on category
+            // Reset and re-create items
             PackageItem::where('product_id', $product->product_id)->delete();
 
             if (($validated['category'] ?? null) === 'Package' && !empty($packageRows)) {
@@ -848,7 +535,7 @@ class ProductController extends Controller
                         'item_name'  => $row['item_name'],
                         'quantity'   => $row['quantity'],
                         'unit'       => $row['unit_name'],
-                        'price'      => $row['price'],
+                        'price'      => $row['price'],   // server-computed
                     ]);
                 }
             }
@@ -860,7 +547,7 @@ class ProductController extends Controller
                         'item_name'  => $row['item_name'],
                         'quantity'   => $row['quantity'],
                         'unit'       => $row['unit_name'],
-                        'price'      => $row['price'],
+                        'price'      => $row['price'],   // server-computed
                     ]);
                 }
             }

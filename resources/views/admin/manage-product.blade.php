@@ -28,11 +28,16 @@
 
         .list-group-item:hover {
             background-color: #f1f1f1;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, .1);
         }
 
         .modal-footer {
             border-top: 2px solid #ddd;
+        }
+
+        .small-muted {
+            font-size: .825rem;
+            color: #6c757d;
         }
     </style>
 @endsection
@@ -54,15 +59,10 @@
     <!-- /breadcrumb -->
 
     @if (session('success'))
-        <div id = 'Message' class="alert alert-success">
-            {{ session('success') }}
-        </div>
+        <div id='Message' class="alert alert-success">{{ session('success') }}</div>
     @endif
-
     @if (session('danger'))
-        <div id = 'Message' class="alert alert-danger">
-            {{ session('danger') }}
-        </div>
+        <div id='Message' class="alert alert-danger">{{ session('danger') }}</div>
     @endif
 
     <!-- Row -->
@@ -72,7 +72,7 @@
                 <div class="card-body">
 
                     @php
-                        // Small helpers to keep markup clean
+                        // helpers
                         $money = function ($n) {
                             return is_numeric($n) ? 'Rs. ' . number_format((float) $n, 2) : '-';
                         };
@@ -138,7 +138,7 @@
 
                                         <td>{{ $product->category }}</td>
 
-                                        {{-- Category-specific details (now shows Per-Day Price for Subscription) --}}
+                                        {{-- Category-specific details --}}
                                         <td>
                                             @switch($product->category)
                                                 @case('Flower')
@@ -161,17 +161,13 @@
 
                                                 @case('Subscription')
                                                     <div class="d-flex flex-column gap-1">
-                                                        <span class="badge bg-info">
-                                                            Duration: {{ $product->duration ? $product->duration . ' mo' : '—' }}
-                                                        </span>
-                                                        <span class="badge bg-primary">
-                                                            Per-Day:
-                                                            {{ $product->per_day_price !== null ? $money($product->per_day_price) : '—' }}
-                                                        </span>
+                                                        <span class="badge bg-info">Duration:
+                                                            {{ $product->duration ? $product->duration . ' mo' : '—' }}</span>
+                                                        <span class="badge bg-primary">Per-Day:
+                                                            {{ $product->per_day_price !== null ? $money($product->per_day_price) : '—' }}</span>
                                                         @if ($product->packageItems->isNotEmpty())
-                                                            <span class="badge bg-secondary">
-                                                                Items: {{ $product->packageItems->count() }}
-                                                            </span>
+                                                            <span class="badge bg-secondary">Items:
+                                                                {{ $product->packageItems->count() }}</span>
                                                         @endif
                                                     </div>
                                                 @break
@@ -182,9 +178,8 @@
                                                             <span class="badge bg-secondary">Pooja:
                                                                 {{ $product->pooja->pooja_name }}</span>
                                                         @endif
-                                                        <span class="badge bg-primary">
-                                                            Items: {{ $product->packageItems->count() }}
-                                                        </span>
+                                                        <span class="badge bg-primary">Items:
+                                                            {{ $product->packageItems->count() }}</span>
                                                     </div>
                                                 @break
 
@@ -195,7 +190,7 @@
 
                                         <td>{{ ucfirst($product->status) }}</td>
 
-                                        {{-- Items modal/button (used for Package & Subscription) --}}
+                                        {{-- Items modal/button --}}
                                         <td>
                                             @if ($product->packageItems->isNotEmpty())
                                                 <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
@@ -228,11 +223,37 @@
                                                                                 <th>Item</th>
                                                                                 <th class="text-end">Qty</th>
                                                                                 <th>Unit</th>
-                                                                                <th class="text-end">Item Price</th>
+                                                                                <th class="text-end">Price</th>
                                                                             </tr>
                                                                         </thead>
                                                                         <tbody>
                                                                             @foreach ($product->packageItems as $idx => $packageItem)
+                                                                                @php
+                                                                                    // Find live details by item name (FlowerDetails-wise)
+                                                                                    $fd =
+                                                                                        $fdByName[
+                                                                                            $packageItem->item_name
+                                                                                        ] ?? null;
+
+                                                                                    $qty =
+                                                                                        (float) ($packageItem->quantity ??
+                                                                                            0);
+                                                                                    $unit = $fd
+                                                                                        ? (string) $fd->unit
+                                                                                        : $packageItem->unit ?? '—';
+                                                                                    $perUnit = $fd
+                                                                                        ? (float) $fd->price
+                                                                                        : ($qty > 0
+                                                                                            ? (float) $packageItem->price /
+                                                                                                $qty
+                                                                                            : null);
+
+                                                                                    // current total using FD price if available, else stored line price
+                                                                                    $currentTotal = is_numeric($perUnit)
+                                                                                        ? $perUnit * $qty
+                                                                                        : (float) ($packageItem->price ??
+                                                                                            0);
+                                                                                @endphp
                                                                                 <tr>
                                                                                     <td>{{ $idx + 1 }}</td>
                                                                                     <td>{{ $packageItem->item_name ?? 'N/A' }}
@@ -240,22 +261,65 @@
                                                                                     <td class="text-end">
                                                                                         {{ $qtyFmt($packageItem->quantity) }}
                                                                                     </td>
-                                                                                    <td>{{ $packageItem->unit ?? '—' }}
-                                                                                    </td>
+                                                                                    <td>{{ $unit }}</td>
                                                                                     <td class="text-end">
-                                                                                        {{ $money($packageItem->price) }}
+                                                                                        <div
+                                                                                            class="d-flex flex-column text-end">
+                                                                                            <span
+                                                                                                class="small-muted">Per-Unit:
+                                                                                                {{ is_numeric($perUnit) ? $money($perUnit) : '—' }}</span>
+                                                                                            <span
+                                                                                                class="fw-600">{{ $money($currentTotal) }}</span>
+                                                                                            @if (!$fd)
+                                                                                                <span class="small-muted">(*
+                                                                                                    using saved
+                                                                                                    unit/price)</span>
+                                                                                            @endif
+                                                                                        </div>
                                                                                     </td>
                                                                                 </tr>
                                                                             @endforeach
                                                                         </tbody>
                                                                         <tfoot>
+                                                                            @php
+                                                                                // FlowerDetails-wise grand total (fallback to saved line price when no FD match)
+                                                                                $grand = $product->packageItems->sum(
+                                                                                    function ($i) use ($fdByName) {
+                                                                                        $fd =
+                                                                                            $fdByName[$i->item_name] ??
+                                                                                            null;
+                                                                                        $qty =
+                                                                                            (float) ($i->quantity ?? 0);
+                                                                                        $per = $fd
+                                                                                            ? (float) $fd->price
+                                                                                            : ($qty > 0
+                                                                                                ? (float) $i->price /
+                                                                                                    $qty
+                                                                                                : 0);
+                                                                                        return $per * $qty;
+                                                                                    },
+                                                                                );
+
+                                                                                // Saved total from package_items (for reference)
+                                                                                $savedGrand = $product->packageItems->sum(
+                                                                                    fn($i) => (float) $i->price,
+                                                                                );
+                                                                            @endphp
                                                                             <tr>
                                                                                 <th colspan="4" class="text-end">Total
-                                                                                </th>
-                                                                                <th class="text-end">
-                                                                                    {{ $money($product->packageItems->sum(fn($i) => (float) $i->price)) }}
+                                                                                    (by FlowerDetails)</th>
+                                                                                <th class="text-end">{{ $money($grand) }}
                                                                                 </th>
                                                                             </tr>
+                                                                            @if (abs($grand - $savedGrand) > 0.009)
+                                                                                <tr>
+                                                                                    <th colspan="4"
+                                                                                        class="text-end small-muted">Saved
+                                                                                        Total (at purchase time)</th>
+                                                                                    <th class="text-end small-muted">
+                                                                                        {{ $money($savedGrand) }}</th>
+                                                                                </tr>
+                                                                            @endif
                                                                         </tfoot>
                                                                     </table>
                                                                 </div>
@@ -282,7 +346,6 @@
                                                     View
                                                 </button>
 
-                                                <!-- Benefit Modal -->
                                                 <div class="modal fade" id="benefitModal{{ $product->product_id }}"
                                                     tabindex="-1"
                                                     aria-labelledby="benefitModalLabel{{ $product->product_id }}"
@@ -329,12 +392,14 @@
                                                 onclick="return confirm('Are you sure you want to delete this product?');">
                                                 <i class="fa fa-trash"></i>
                                             </a>
-                                            <form action="{{ url('admin/toggle-product-status/' . $product->id) }}" method="POST" style="display:inline;">
+                                            <form action="{{ url('admin/toggle-product-status/' . $product->id) }}"
+                                                method="POST" style="display:inline;">
                                                 @csrf
                                                 <button type="submit"
                                                     class="btn btn-sm {{ $product->status === 'active' ? 'btn-success' : 'btn-secondary' }}"
                                                     title="{{ $product->status === 'active' ? 'Deactivate' : 'Activate' }}">
-                                                    <i class="fa {{ $product->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
+                                                    <i
+                                                        class="fa {{ $product->status === 'active' ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
                                                 </button>
                                             </form>
                                         </td>
@@ -348,7 +413,6 @@
             </div>
         </div>
     </div>
-
     <!-- End Row -->
 @endsection
 
@@ -372,7 +436,8 @@
     <script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
     <script>
         setTimeout(function() {
-            document.getElementById('Message').style.display = 'none';
+            var m = document.getElementById('Message');
+            if (m) m.style.display = 'none';
         }, 3000);
     </script>
 @endsection
