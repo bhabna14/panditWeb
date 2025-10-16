@@ -4,6 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
     <style>
         :root {
             --brand-bg: #dcf8f9;
@@ -19,15 +20,27 @@
             padding: 1.25rem;
         }
 
-        .page-subtitle { opacity: .85 }
+        .page-subtitle {
+            opacity: .85
+        }
 
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(12, 1fr);
             gap: .9rem;
         }
-        @media (max-width: 991.98px) { .kpi-grid { grid-template-columns: repeat(8, 1fr); } }
-        @media (max-width: 767.98px) { .kpi-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        @media (max-width: 991.98px) {
+            .kpi-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .kpi-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
 
         .kpi-card {
             grid-column: span 4;
@@ -39,196 +52,543 @@
             position: relative;
             isolation: isolate;
         }
-        .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.06); }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, .06);
+        }
 
         .kpi-card .kpi-accent {
-            position: absolute; inset: 0;
+            position: absolute;
+            inset: 0;
             background:
-              radial-gradient(1200px 200px at 100% -30%, rgba(37,99,235,.08), transparent 60%),
-              radial-gradient(900px 160px at -10% 120%, rgba(14,165,233,.08), transparent 55%);
+                radial-gradient(1200px 200px at 100% -30%, rgba(37, 99, 235, .08), transparent 60%),
+                radial-gradient(900px 160px at -10% 120%, rgba(14, 165, 233, .08), transparent 55%);
             z-index: 0;
         }
-        .kpi-body { position: relative; z-index: 1; display: flex; align-items: center; gap: .9rem; padding: 1rem; min-height: 96px; }
-        .kpi-icon { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, #eff6ff, #e0f2fe); border: 1px solid #e2e8f0; flex: 0 0 46px; }
-        .kpi-icon i { font-size: 1.25rem; color: #0f172a; }
-        .kpi-meta .label { font-size: .84rem; color: #6b7280; font-weight: 600; letter-spacing: .2px; }
-        .kpi-meta .value { font-size: 1.8rem; font-weight: 800; color: #0f172a; line-height: 1.1; }
-        .kpi-meta .hint { font-size: .78rem; color: #64748b; }
 
-        .table-tight td, .table-tight th { padding: .55rem .65rem; }
-        .badge-soft { background: var(--brand-soft); color: #1e3a8a; border: 1px solid #bfdbfe; }
-        .row-tools { gap: .5rem }
-        .btn-ghost { background: #fff; border: 1px solid var(--card-border) }
-        .pill-count { border-radius: 999px; background: #f1f5f9; color: #0f172a; padding: .2rem .55rem; font-weight: 600; font-size: .825rem }
-        .address-col { min-width: 280px }
-        .rider-col { min-width: 160px }
+        .kpi-body {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: .9rem;
+            padding: 1rem;
+            min-height: 96px;
+        }
+
+        .kpi-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: grid;
+            place-items: center;
+            background: linear-gradient(135deg, #eff6ff, #e0f2fe);
+            border: 1px solid #e2e8f0;
+            flex: 0 0 46px;
+        }
+
+        .kpi-icon i {
+            font-size: 1.25rem;
+            color: #0f172a;
+        }
+
+        .kpi-meta .label {
+            font-size: .84rem;
+            color: #6b7280;
+            font-weight: 600;
+            letter-spacing: .2px;
+        }
+
+        .kpi-meta .value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .kpi-meta .hint {
+            font-size: .78rem;
+            color: #64748b;
+        }
+
+        .table-tight td,
+        .table-tight th {
+            padding: .55rem .65rem;
+        }
+
+        .badge-soft {
+            background: var(--brand-soft);
+            color: #1e3a8a;
+            border: 1px solid #bfdbfe;
+        }
+
+        .row-tools {
+            gap: .5rem
+        }
+
+        .btn-ghost {
+            background: #fff;
+            border: 1px solid var(--card-border)
+        }
+
+        .pill-count {
+            border-radius: 999px;
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: .2rem .55rem;
+            font-weight: 600;
+            font-size: .825rem
+        }
+
+        .address-col {
+            min-width: 280px
+        }
+
+        .rider-col {
+            min-width: 160px
+        }
 
         /* Totals grid */
-        .totals-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: .9rem; }
-        @media (max-width:1399.98px) { .totals-grid { grid-template-columns: repeat(9, 1fr); } }
-        @media (max-width:1199.98px) { .totals-grid { grid-template-columns: repeat(8, 1fr); } }
-        @media (max-width:991.98px)  { .totals-grid { grid-template-columns: repeat(6, 1fr); } }
-        @media (max-width:767.98px)  { .totals-grid { grid-template-columns: repeat(4, 1fr); } }
-        @media (max-width:575.98px)  { .totals-grid { grid-template-columns: repeat(2, 1fr); } }
+        .totals-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: .9rem;
+        }
+
+        @media (max-width:1399.98px) {
+            .totals-grid {
+                grid-template-columns: repeat(9, 1fr);
+            }
+        }
+
+        @media (max-width:1199.98px) {
+            .totals-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        @media (max-width:991.98px) {
+            .totals-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        @media (max-width:767.98px) {
+            .totals-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width:575.98px) {
+            .totals-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
         .total-card {
             grid-column: span 4;
-            background: #fff; border: 1px solid var(--card-border); border-radius: 12px;
-            padding: .9rem; display: flex; flex-direction: column; gap: .35rem; min-height: 92px;
+            background: #fff;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: .9rem;
+            display: flex;
+            flex-direction: column;
+            gap: .35rem;
+            min-height: 92px;
             transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
         }
-        .total-card:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(0,0,0,.06); border-color: #dbe3f0; }
-        .total-top { display: flex; justify-content: space-between; gap: .6rem; align-items: flex-start; }
-        .total-name { font-weight: 700; color: #0f172a; line-height: 1.2; }
-        .total-qty { font-size: 1.25rem; font-weight: 800; color: #0b1528; }
-        .total-unit { font-size: .85rem; font-weight: 700; opacity: .7; margin-left: .25rem; }
-        .unit-chip { display: inline-flex; align-items: center; gap: .35rem; font-size: .75rem; font-weight: 600; border-radius: 999px; padding: .25rem .55rem; border: 1px solid #e5e7eb; background: #f8fafc; color: #0f172a; }
-        .unit-chip .dot { width: 8px; height: 8px; border-radius: 999px; display: inline-block; }
-        .chip-weight { background: #f0f9ff; border-color: #cfe8ff; }
-        .chip-weight .dot { background: #2563eb; }
-        .chip-volume { background: #f1f5ff; border-color: #dbe2ff; }
-        .chip-volume .dot { background: #7c3aed; }
-        .chip-count { background: #f0fdf4; border-color: #ccebd6; }
-        .chip-count .dot { background: #16a34a; }
-        .total-actions { display: flex; gap: .4rem; }
-        .btn-icon { border: 1px solid #e5e7eb; background: #fff; border-radius: 8px; padding: .35rem .5rem; line-height: 1; }
-        .btn-icon:hover { background: #f8fafc; }
-        .empty-totals { border: 1px dashed #d1d5db; border-radius: 12px; padding: 1rem; background: #fafafa; }
+
+        .total-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 26px rgba(0, 0, 0, .06);
+            border-color: #dbe3f0;
+        }
+
+        .total-top {
+            display: flex;
+            justify-content: space-between;
+            gap: .6rem;
+            align-items: flex-start;
+        }
+
+        .total-name {
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .total-qty {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #0b1528;
+        }
+
+        .total-unit {
+            font-size: .85rem;
+            font-weight: 700;
+            opacity: .7;
+            margin-left: .25rem;
+        }
+
+        .unit-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: .35rem;
+            font-size: .75rem;
+            font-weight: 600;
+            border-radius: 999px;
+            padding: .25rem .55rem;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            color: #0f172a;
+        }
+
+        .unit-chip .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            display: inline-block;
+        }
+
+        .chip-weight {
+            background: #f0f9ff;
+            border-color: #cfe8ff;
+        }
+
+        .chip-weight .dot {
+            background: #2563eb;
+        }
+
+        .chip-volume {
+            background: #f1f5ff;
+            border-color: #dbe2ff;
+        }
+
+        .chip-volume .dot {
+            background: #7c3aed;
+        }
+
+        .chip-count {
+            background: #f0fdf4;
+            border-color: #ccebd6;
+        }
+
+        .chip-count .dot {
+            background: #16a34a;
+        }
+
+        .total-actions {
+            display: flex;
+            gap: .4rem;
+        }
+
+        .btn-icon {
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 8px;
+            padding: .35rem .5rem;
+            line-height: 1;
+        }
+
+        .btn-icon:hover {
+            background: #f8fafc;
+        }
+
+        .empty-totals {
+            border: 1px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 1rem;
+            background: #fafafa;
+        }
 
         /* Lock screen */
-        .lock-wrap { max-width: 720px; margin: 48px auto; }
-        .lock-card { border: 1px solid var(--card-border); border-radius: 16px; }
-        .countdown { font-size: 1.35rem; font-weight: 800; }
+        .lock-wrap {
+            max-width: 720px;
+            margin: 48px auto;
+        }
+
+        .lock-card {
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+        }
+
+        .countdown {
+            font-size: 1.35rem;
+            font-weight: 800;
+        }
+
+        .nav-creative {
+            --tab-radius: 12px;
+            --ink-height: 3px;
+            position: relative;
+            padding-bottom: calc(var(--ink-height) + 4px);
+        }
+
+        /* Ink bar */
+        .nav-creative .ink-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: var(--ink-height);
+            width: 0;
+            background: linear-gradient(90deg, #6366f1, #22d3ee);
+            border-radius: 999px;
+            transition: transform .28s ease, width .28s ease, background .28s ease;
+            will-change: transform, width;
+        }
+
+        /* Pill buttons */
+        .nav-creative .nav-link {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            border-radius: var(--tab-radius);
+            border: 1px solid #e5e7eb;
+            background: #ffffff;
+            color: #0f172a;
+            font-weight: 600;
+            padding: .5rem .8rem;
+            transition: border-color .2s ease, box-shadow .2s ease, transform .08s ease;
+        }
+
+        .nav-creative .nav-link:hover {
+            border-color: #d1d5db;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .06);
+            transform: translateY(-1px);
+        }
+
+        .nav-creative .nav-link:focus-visible {
+            outline: 3px solid rgba(59, 130, 246, .35);
+            outline-offset: 2px;
+        }
+
+        /* Active tab – white text on gradient */
+        .nav-creative .nav-link.active {
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .10);
+        }
+
+        /* Soft count badge inside pills */
+        .nav-creative .pill-count {
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: .78rem;
+            padding: .15rem .45rem;
+            line-height: 1;
+            border: 1px solid rgba(255, 255, 255, .35);
+            background: rgba(255, 255, 255, .22);
+            color: #fff;
+        }
+
+        /* Icons inside pills */
+        .nav-creative .nav-link i {
+            font-size: 1.05rem;
+            opacity: .92;
+        }
+
+        /* ===== Color themes per tab ===== */
+        .btn-tab-active.active {
+            background: linear-gradient(135deg, #22d3ee, #0ea5e9);
+        }
+
+        .btn-tab-pause.active {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+        }
+
+        .btn-tab-custom.active {
+            background: linear-gradient(135deg, #a78bfa, #6366f1);
+        }
+
+        .btn-tab-resume.active {
+            background: linear-gradient(135deg, #34d399, #10b981);
+        }
+
+        .btn-tab-expired.active {
+            background: linear-gradient(135deg, #fb7185, #ef4444);
+        }
+
+        /* Hover hints for inactive pills (light tinted bg) */
+        .btn-tab-active:hover:not(.active) {
+            background: linear-gradient(0deg, rgba(34, 211, 238, .06), rgba(34, 211, 238, .06)), #fff;
+        }
+
+        .btn-tab-pause:hover:not(.active) {
+            background: linear-gradient(0deg, rgba(245, 158, 11, .08), rgba(245, 158, 11, .08)), #fff;
+        }
+
+        .btn-tab-custom:hover:not(.active) {
+            background: linear-gradient(0deg, rgba(99, 102, 241, .08), rgba(99, 102, 241, .08)), #fff;
+        }
+
+        .btn-tab-resume:hover:not(.active) {
+            background: linear-gradient(0deg, rgba(16, 185, 129, .08), rgba(16, 185, 129, .08)), #fff;
+        }
+
+        .btn-tab-expired:hover:not(.active) {
+            background: linear-gradient(0deg, rgba(239, 68, 68, .08), rgba(239, 68, 68, .08)), #fff;
+        }
     </style>
 @endsection
 
 @section('content')
     @php
         // Defaults in case controller didn't pass (for safety)
-        $canView = $canView ?? true;
-        $role = $role ?? 'super_admin';
+$canView = $canView ?? true;
+$role = $role ?? 'super_admin';
 
-        // Helper renderers as local functions:
-        function renderSubsTable($rows) {
-            if (empty($rows)) {
-                echo '<div class="alert alert-secondary mb-0">No subscriptions found.</div>';
-                return;
-            }
-            echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
-            echo '<thead class="table-light">';
-            echo '<tr><th>Customer</th><th class="rider-col">Rider</th><th class="address-col">Address</th><th>View Profile</th></tr>';
-            echo '</thead><tbody>';
-            foreach ($rows as $r) {
-                $status = strtolower($r['status'] ?? '');
-                $badgeClass = 'badge-soft';
-                if (in_array($status, ['active'])) { $badgeClass = 'bg-success-subtle text-success'; }
-                if (in_array($status, ['paused'])) { $badgeClass = 'bg-warning-subtle text-warning'; }
-                if (in_array($status, ['pending'])) { $badgeClass = 'bg-info-subtle text-info'; }
-                if (in_array($status, ['expired', 'ended'])) { $badgeClass = 'bg-danger-subtle text-danger'; }
-
-                $apt = $r['apartment_name'] ?? '';
-                $riderName = $r['rider_name'] ?? '—';
-
-                echo '<tr class="row-item" ' .
-                    ' data-name="' . e(strtolower($r['customer'] ?? '')) . '"' .
-                    ' data-mobile="' . e(strtolower($r['phone'] ?? '')) . '"' .
-                    ' data-apt="' . e(strtolower($apt)) . '"' .
-                    ' data-rider="' . e(strtolower($riderName)) . '"' .
-                    '>';
-
-                echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
-                if ($r['phone'] || $r['email']) {
-                    echo '<div class="text-muted small">' .
-                        e($r['phone'] ?? '') .
-                        ($r['phone'] && $r['email'] ? ' • ' : '') .
-                        e($r['email'] ?? '') .
-                        '</div>';
-                }
-                echo '</td>';
-
-                echo '<td>' . e($riderName) . '</td>';
-
-                $addrSafe = e($r['address'] ?? '—');
-                echo '<td>';
-                echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
-                    $addrSafe .
-                    '" data-bs-toggle="modal" data-bs-target="#addressModal">';
-                echo '<i class="bi bi-geo-alt"></i> View</button></td>';
-
-                echo '<td>';
-                $uid = $r['user_id'] ?? null;
-                if ($uid) {
-                    $profileUrl = route('showCustomerDetails', $uid);
-                    echo '<a class="btn btn-warning btn-sm text-center" href="' . e($profileUrl) . '" target="_blank" rel="noopener">View Details</a>';
-                } else {
-                    echo '—';
-                }
-                echo '</td>';
-
-                echo '</tr>';
-            }
-            echo '</tbody></table></div>';
+// Helper renderers as local functions:
+function renderSubsTable($rows)
+{
+    if (empty($rows)) {
+        echo '<div class="alert alert-secondary mb-0">No subscriptions found.</div>';
+        return;
+    }
+    echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
+    echo '<thead class="table-light">';
+    echo '<tr><th>Customer</th><th class="rider-col">Rider</th><th class="address-col">Address</th><th>View Profile</th></tr>';
+    echo '</thead><tbody>';
+    foreach ($rows as $r) {
+        $status = strtolower($r['status'] ?? '');
+        $badgeClass = 'badge-soft';
+        if (in_array($status, ['active'])) {
+            $badgeClass = 'bg-success-subtle text-success';
+        }
+        if (in_array($status, ['paused'])) {
+            $badgeClass = 'bg-warning-subtle text-warning';
+        }
+        if (in_array($status, ['pending'])) {
+            $badgeClass = 'bg-info-subtle text-info';
+        }
+        if (in_array($status, ['expired', 'ended'])) {
+            $badgeClass = 'bg-danger-subtle text-danger';
         }
 
-        function renderCustomizeTable($rows) {
-            if (empty($rows)) {
-                echo '<div class="alert alert-secondary mb-0">No customize orders found for tomorrow.</div>';
-                return;
-            }
-            echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
-            echo '<thead class="table-light">';
-            echo '<tr><th>Customer</th><th>Request</th><th>Product</th><th>Status</th><th>Date</th><th>Time</th><th class="rider-col">Rider</th><th>Items</th><th class="address-col">Address</th></tr>';
-            echo '</thead><tbody>';
-            foreach ($rows as $r) {
-                $apt = $r['apartment_name'] ?? '';
-                $riderName = $r['rider_name'] ?? '—';
-                $reqId = $r['request_id'] ? '#' . $r['request_id'] : '—';
-                $ordId = $r['order_id'] ? '#' . $r['order_id'] : null;
+        $apt = $r['apartment_name'] ?? '';
+        $riderName = $r['rider_name'] ?? '—';
 
-                $itemsJson = e(json_encode($r['items'] ?? []));
+        echo '<tr class="row-item" ' .
+            ' data-name="' .
+            e(strtolower($r['customer'] ?? '')) .
+            '"' .
+            ' data-mobile="' .
+            e(strtolower($r['phone'] ?? '')) .
+            '"' .
+            ' data-apt="' .
+            e(strtolower($apt)) .
+            '"' .
+            ' data-rider="' .
+            e(strtolower($riderName)) .
+            '"' .
+            '>';
 
-                echo '<tr class="row-item" ' .
-                    ' data-name="' . e(strtolower($r['customer'] ?? '')) . '"' .
-                    ' data-mobile="' . e(strtolower($r['phone'] ?? '')) . '"' .
-                    ' data-apt="' . e(strtolower($apt)) . '"' .
-                    ' data-rider="' . e(strtolower($riderName)) . '"' .
-                    '>';
+        echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
+        if ($r['phone'] || $r['email']) {
+            echo '<div class="text-muted small">' .
+                e($r['phone'] ?? '') .
+                ($r['phone'] && $r['email'] ? ' • ' : '') .
+                e($r['email'] ?? '') .
+                '</div>';
+        }
+        echo '</td>';
 
-                echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
-                if ($r['phone'] || $r['email']) {
-                    echo '<div class="text-muted small">' .
-                        e($r['phone'] ?? '') .
-                        ($r['phone'] && $r['email'] ? ' • ' : '') .
-                        e($r['email'] ?? '') .
-                        '</div>';
-                }
-                echo '</td>';
+        echo '<td>' . e($riderName) . '</td>';
 
-                echo '<td>';
-                echo e($reqId);
-                if ($ordId) echo ' <span class="text-muted small">(&nbsp;Order ' . e($ordId) . '&nbsp;)</span>';
-                echo '</td>';
+        $addrSafe = e($r['address'] ?? '—');
+        echo '<td>';
+        echo '<button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
+            $addrSafe .
+            '" data-bs-toggle="modal" data-bs-target="#addressModal">';
+        echo '<i class="bi bi-geo-alt"></i> View</button></td>';
 
-                echo '<td>' . e($r['product'] ?? '—') . '</td>';
-                echo '<td><span class="badge bg-info-subtle text-info">' . e($r['status'] ?? '—') . '</span></td>';
-                echo '<td>' . e($r['date'] ?? '—') . '</td>';
-                echo '<td>' . e($r['time'] ?? '—') . '</td>';
-                echo '<td>' . e($riderName) . '</td>';
+        echo '<td>';
+        $uid = $r['user_id'] ?? null;
+        if ($uid) {
+            $profileUrl = route('showCustomerDetails', $uid);
+            echo '<a class="btn btn-warning btn-sm text-center" href="' .
+                e($profileUrl) .
+                '" target="_blank" rel="noopener">View Details</a>';
+        } else {
+            echo '—';
+        }
+        echo '</td>';
 
-                echo '<td><button type="button" class="btn btn-sm btn-outline-secondary view-items" data-items="' .
-                    $itemsJson .
-                    '" data-bs-toggle="modal" data-bs-target="#itemsModal">';
-                echo '<i class="bi bi-list-ul"></i> Items</button></td>';
+        echo '</tr>';
+    }
+    echo '</tbody></table></div>';
+}
 
-                $addrSafe = e($r['address'] ?? '—');
-                echo '<td><button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
-                    $addrSafe .
-                    '" data-bs-toggle="modal" data-bs-target="#addressModal">';
-                echo '<i class="bi bi-geo-alt"></i> View</button></td>';
+function renderCustomizeTable($rows)
+{
+    if (empty($rows)) {
+        echo '<div class="alert alert-secondary mb-0">No customize orders found for tomorrow.</div>';
+        return;
+    }
+    echo '<div class="table-responsive"><table class="table table-sm table-tight align-middle">';
+    echo '<thead class="table-light">';
+    echo '<tr><th>Customer</th><th>Request</th><th>Product</th><th>Status</th><th>Date</th><th>Time</th><th class="rider-col">Rider</th><th>Items</th><th class="address-col">Address</th></tr>';
+    echo '</thead><tbody>';
+    foreach ($rows as $r) {
+        $apt = $r['apartment_name'] ?? '';
+        $riderName = $r['rider_name'] ?? '—';
+        $reqId = $r['request_id'] ? '#' . $r['request_id'] : '—';
+        $ordId = $r['order_id'] ? '#' . $r['order_id'] : null;
 
-                echo '</tr>';
-            }
-            echo '</tbody></table></div>';
+        $itemsJson = e(json_encode($r['items'] ?? []));
+
+        echo '<tr class="row-item" ' .
+            ' data-name="' .
+            e(strtolower($r['customer'] ?? '')) .
+            '"' .
+            ' data-mobile="' .
+            e(strtolower($r['phone'] ?? '')) .
+            '"' .
+            ' data-apt="' .
+            e(strtolower($apt)) .
+            '"' .
+            ' data-rider="' .
+            e(strtolower($riderName)) .
+            '"' .
+            '>';
+
+        echo '<td><div class="fw-semibold">' . e($r['customer']) . '</div>';
+        if ($r['phone'] || $r['email']) {
+            echo '<div class="text-muted small">' .
+                e($r['phone'] ?? '') .
+                ($r['phone'] && $r['email'] ? ' • ' : '') .
+                e($r['email'] ?? '') .
+                '</div>';
+        }
+        echo '</td>';
+
+        echo '<td>';
+        echo e($reqId);
+        if ($ordId) {
+            echo ' <span class="text-muted small">(&nbsp;Order ' . e($ordId) . '&nbsp;)</span>';
+        }
+        echo '</td>';
+
+        echo '<td>' . e($r['product'] ?? '—') . '</td>';
+        echo '<td><span class="badge bg-info-subtle text-info">' . e($r['status'] ?? '—') . '</span></td>';
+        echo '<td>' . e($r['date'] ?? '—') . '</td>';
+        echo '<td>' . e($r['time'] ?? '—') . '</td>';
+        echo '<td>' . e($riderName) . '</td>';
+
+        echo '<td><button type="button" class="btn btn-sm btn-outline-secondary view-items" data-items="' .
+            $itemsJson .
+            '" data-bs-toggle="modal" data-bs-target="#itemsModal">';
+        echo '<i class="bi bi-list-ul"></i> Items</button></td>';
+
+        $addrSafe = e($r['address'] ?? '—');
+        echo '<td><button type="button" class="btn btn-sm btn-outline-primary view-address" data-address="' .
+            $addrSafe .
+            '" data-bs-toggle="modal" data-bs-target="#addressModal">';
+        echo '<i class="bi bi-geo-alt"></i> View</button></td>';
+
+        echo '</tr>';
+    }
+    echo '</tbody></table></div>';
         }
     @endphp
 
@@ -311,7 +671,7 @@
                         </div>
                     </div>
                 </div>
-                 <div class="kpi-card">
+                <div class="kpi-card">
                     <div class="kpi-accent"></div>
                     <div class="kpi-body">
                         <div class="kpi-icon"><i class="bi bi-sliders2"></i></div>
@@ -344,7 +704,7 @@
                         </div>
                     </div>
                 </div>
-               
+
                 <div class="kpi-card">
                     <div class="kpi-accent"></div>
                     <div class="kpi-body">
@@ -379,8 +739,12 @@
                     @php
                         $inferCategory = function ($u) {
                             $u = strtolower((string) $u);
-                            if (in_array($u, ['kg', 'g'])) return 'weight';
-                            if (in_array($u, ['l', 'ml'])) return 'volume';
+                            if (in_array($u, ['kg', 'g'])) {
+                                return 'weight';
+                            }
+                            if (in_array($u, ['l', 'ml'])) {
+                                return 'volume';
+                            }
                             return 'count';
                         };
                     @endphp
@@ -395,12 +759,18 @@
                                 @php
                                     $unit = strtoupper($it['total_unit_disp'] ?? '');
                                     $category = $inferCategory($unit);
-                                    $chipClass = $category === 'weight' ? 'chip-weight' : ($category === 'volume' ? 'chip-volume' : 'chip-count');
+                                    $chipClass =
+                                        $category === 'weight'
+                                            ? 'chip-weight'
+                                            : ($category === 'volume'
+                                                ? 'chip-volume'
+                                                : 'chip-count');
                                     $qty = rtrim(rtrim(number_format($it['total_qty_disp'] ?? 0, 3), '0'), '.');
                                 @endphp
 
                                 <div class="total-card" data-name="{{ strtolower($it['item_name']) }}"
-                                     data-unit="{{ $category }}" data-qty="{{ (float) ($it['total_qty_disp'] ?? 0) }}">
+                                    data-unit="{{ $category }}"
+                                    data-qty="{{ (float) ($it['total_qty_disp'] ?? 0) }}">
                                     <div class="total-top">
                                         <div class="total-name">{{ $it['item_name'] }}</div>
                                         <div class="unit-chip {{ $chipClass }}">
@@ -430,27 +800,69 @@
             <div class="card shadow-sm mb-3 mt-3">
                 <div class="card-body">
                     <div class="tabs-wrap">
-                        <ul class="nav nav-pills flex-wrap" id="sectionsTabs" role="tablist">
+                        <ul class="nav nav-pills nav-creative flex-wrap position-relative" id="sectionsTabs"
+                            role="tablist">
+                            {{-- animated ink bar --}}
+                            <span class="ink-bar" id="inkBar"></span>
+
                             @php
                                 $sections = [
-                                    ['key' => 'active',        'title' => 'Tomorrow Delivery',                 'count' => count($activeTomorrow)],
-                                    ['key' => 'start-new',     'title' => 'Starting Tomorrow (New Users)',     'count' => count($startingTomorrowNew)],
-                                    ['key' => 'pause',         'title' => 'Pausing from Tomorrow',             'count' => count($pausingTomorrow)],
-                                    ['key' => 'custom',        'title' => 'Tomorrow Customize Orders',         'count' => count($customizeTomorrow)],
-                                    ['key' => 'resume',        'title' => 'Pause → Active (Tomorrow)',         'count' => count($resumingTomorrow)],
-                                    ['key' => 'expired-today', 'title' => 'Expired Today Users',               'count' => count($expiredTodayUsers)],
+                                    [
+                                        'key' => 'active',
+                                        'title' => 'Tomorrow Delivery',
+                                        'count' => count($activeTomorrow),
+                                        'icon' => 'bi-truck',
+                                        'btn' => 'btn-tab-active',
+                                    ],
+                                    // If you also have “Starting Tomorrow (New Users)” tab, add here:
+                                    // [
+                                    //     'key'   => 'start-new',
+                                    //     'title' => 'Starting Tomorrow (New Users)',
+                                    //     'count' => count($startingTomorrowNew),
+                                    //     'icon'  => 'bi-person-plus',
+                                    //     'btn'   => 'btn-tab-active',
+                                    // ],
+                                    [
+                                        'key' => 'pause',
+                                        'title' => 'Pausing from Tomorrow',
+                                        'count' => count($pausingTomorrow),
+                                        'icon' => 'bi-pause-circle',
+                                        'btn' => 'btn-tab-pause',
+                                    ],
+                                    [
+                                        'key' => 'custom',
+                                        'title' => 'Tomorrow Customize Orders',
+                                        'count' => count($customizeTomorrow),
+                                        'icon' => 'bi-sliders2',
+                                        'btn' => 'btn-tab-custom',
+                                    ],
+                                    [
+                                        'key' => 'resume',
+                                        'title' => 'Pause → Active (Tomorrow)',
+                                        'count' => count($resumingTomorrow),
+                                        'icon' => 'bi-play-circle',
+                                        'btn' => 'btn-tab-resume',
+                                    ],
+                                    [
+                                        'key' => 'expired-today',
+                                        'title' => 'Expired Today Users',
+                                        'count' => count($expiredTodayUsers),
+                                        'icon' => 'bi-calendar-x',
+                                        'btn' => 'btn-tab-expired',
+                                    ],
                                 ];
                             @endphp
+
                             @foreach ($sections as $i => $s)
                                 <li class="nav-item me-2 mb-2" role="presentation">
-                                    <button class="nav-link {{ $i === 0 ? 'active' : '' }}"
-                                            id="tab-{{ $s['key'] }}"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#pane-{{ $s['key'] }}"
-                                            type="button" role="tab"
-                                            aria-controls="pane-{{ $s['key'] }}"
-                                            aria-selected="{{ $i === 0 ? 'true' : 'false' }}">
-                                        {{ $s['title'] }}
+                                    <button class="nav-link {{ $s['btn'] }} {{ $i === 0 ? 'active' : '' }}"
+                                        id="tab-{{ $s['key'] }}" data-bs-toggle="tab"
+                                        data-bs-target="#pane-{{ $s['key'] }}" type="button" role="tab"
+                                        aria-controls="pane-{{ $s['key'] }}"
+                                        aria-selected="{{ $i === 0 ? 'true' : 'false' }}"
+                                        data-ink-color="{{ $s['btn'] }}">
+                                        <i class="bi {{ $s['icon'] }}"></i>
+                                        <span>{{ $s['title'] }}</span>
                                         <span class="pill-count ms-1">{{ $s['count'] }}</span>
                                     </button>
                                 </li>
@@ -459,6 +871,7 @@
                     </div>
                 </div>
             </div>
+
 
             {{-- TAB PANES --}}
             <div class="tab-content" id="sectionsContent">
@@ -543,15 +956,18 @@
         </div>
 
         {{-- ADDRESS MODAL --}}
-        <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel" aria-hidden="true">
+        <div class="modal fade" id="addressModal" tabindex="-1" aria-labelledby="addressModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-md modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h6 class="modal-title" id="addressModalLabel"><i class="bi bi-geo-alt"></i> Delivery Address</h6>
+                        <h6 class="modal-title" id="addressModalLabel"><i class="bi bi-geo-alt"></i> Delivery Address
+                        </h6>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <pre class="mb-0" id="addressModalBody" style="white-space:pre-wrap;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Liberation Sans',sans-serif;"></pre>
+                        <pre class="mb-0" id="addressModalBody"
+                            style="white-space:pre-wrap;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial,'Noto Sans','Liberation Sans',sans-serif;"></pre>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
@@ -566,7 +982,8 @@
             <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h6 class="modal-title" id="itemsModalLabel"><i class="bi bi-list-ul"></i> Customize Order Items</h6>
+                        <h6 class="modal-title" id="itemsModalLabel"><i class="bi bi-list-ul"></i> Customize Order Items
+                        </h6>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -641,7 +1058,11 @@
                 if (itemsBtn) {
                     const raw = itemsBtn.getAttribute('data-items') || '[]';
                     let items = [];
-                    try { items = JSON.parse(raw); } catch (e) { items = []; }
+                    try {
+                        items = JSON.parse(raw);
+                    } catch (e) {
+                        items = [];
+                    }
                     renderItems(items);
                 }
 
@@ -655,7 +1076,8 @@
                         const text = `${name} - ${qty} ${unit}`;
                         navigator.clipboard.writeText(text).then(() => {
                             copyLineBtn.innerHTML = '<i class="bi bi-check2"></i>';
-                            setTimeout(() => copyLineBtn.innerHTML = '<i class="bi bi-clipboard"></i>', 1100);
+                            setTimeout(() => copyLineBtn.innerHTML = '<i class="bi bi-clipboard"></i>',
+                                1100);
                         }).catch(() => {});
                     }
                 }
@@ -712,5 +1134,51 @@
                     .replace(/'/g, '&#039;');
             }
         })();
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.getElementById('sectionsTabs');
+            const inkBar = document.getElementById('inkBar');
+            if (!tabs || !inkBar) return;
+
+            const setInkTo = (btn) => {
+                const btnRect = btn.getBoundingClientRect();
+                const parentRect = tabs.getBoundingClientRect();
+                const left = btnRect.left - parentRect.left + tabs.scrollLeft;
+                const width = btnRect.width;
+
+                // Match ink color to active button gradient start
+                if (btn.classList.contains('btn-tab-active')) inkBar.style.background =
+                    'linear-gradient(90deg,#22d3ee,#0ea5e9)';
+                if (btn.classList.contains('btn-tab-pause')) inkBar.style.background =
+                    'linear-gradient(90deg,#f59e0b,#ef4444)';
+                if (btn.classList.contains('btn-tab-custom')) inkBar.style.background =
+                    'linear-gradient(90deg,#a78bfa,#6366f1)';
+                if (btn.classList.contains('btn-tab-resume')) inkBar.style.background =
+                    'linear-gradient(90deg,#34d399,#10b981)';
+                if (btn.classList.contains('btn-tab-expired')) inkBar.style.background =
+                    'linear-gradient(90deg,#fb7185,#ef4444)';
+
+                inkBar.style.width = `${width}px`;
+                inkBar.style.transform = `translateX(${left}px)`;
+            };
+
+            // Initialize to current active
+            const initActive = tabs.querySelector('.nav-link.active');
+            if (initActive) setInkTo(initActive);
+
+            // Update on tab change
+            tabs.addEventListener('shown.bs.tab', function(e) {
+                const btn = e.target; // newly activated tab
+                setInkTo(btn);
+            });
+
+            // Reposition on resize
+            window.addEventListener('resize', () => {
+                const active = tabs.querySelector('.nav-link.active');
+                if (active) setInkTo(active);
+            });
+        });
     </script>
 @endsection
