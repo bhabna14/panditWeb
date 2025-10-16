@@ -94,14 +94,14 @@
             <div class="col-md-6">
                 <label class="form-label">Name <span class="text-danger">*</span></label>
                 <input type="text" name="name" id="flower_name" class="form-control" maxlength="120"
-                       value="{{ old('name', $row->name) }}" placeholder="e.g., Marigold">
+                    value="{{ old('name', $row->name) }}" placeholder="e.g., Marigold">
             </div>
 
             {{-- Quantity --}}
             <div class="col-md-3">
                 <label class="form-label">Quantity <span class="text-danger">*</span></label>
                 <input type="number" step="0.01" min="0" name="quantity" class="form-control"
-                       value="{{ old('quantity', $row->quantity) }}" placeholder="e.g., 10">
+                    value="{{ old('quantity', $row->quantity) }}" placeholder="e.g., 10">
             </div>
 
             {{-- Unit --}}

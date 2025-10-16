@@ -21,11 +21,13 @@ class ProductController extends Controller
 
     public function addproduct()
     {
-        $pooja_list  = Poojalist::where('status', 'active')->get();
-        $flowerlist  = FlowerProduct::where('status', 'active')->where('category','Flower')->get(); // variants no longer needed
-        $pooja_units = PoojaUnit::orderBy('unit_name')->get();
+        $pooja_list    = Poojalist::where('status', 'active')->get();
 
-        return view('admin.add-product', compact('flowerlist', 'pooja_list', 'pooja_units'));
+        // We now pull items from FlowerDetails (price is per unit in DB)
+        $flowerDetails = \App\Models\FlowerDetails::orderBy('name')
+            ->get(['id', 'name', 'unit', 'price']); // price = per-unit price
+
+        return view('admin.add-product', compact('pooja_list', 'flowerDetails'));
     }
 
     public function createProduct(Request $request)
