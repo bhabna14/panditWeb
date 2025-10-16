@@ -13,7 +13,7 @@ use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class FlowerEstimatesController extends Controller
+class FlowerEstimateController extends Controller
 {
     public function index(Request $request)
     {
