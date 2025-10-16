@@ -32,239 +32,246 @@ class ProductController extends Controller
         return view('admin.add-product', compact('pooja_list', 'flowerDetails'));
     }
         
-     public function createProduct(Request $request)
-    {
-        $validated = $request->validate([
-            'name'        => ['required','string','max:255'],
-            'odia_name'   => ['nullable','string','max:255'],
-            'price'       => ['required','numeric','min:0','lte:mrp'],
-            'mrp'         => ['required','numeric','min:0'],
-            'discount'    => ['nullable','numeric','min:0'],
-            'description' => ['required','string'],
-            'category'    => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
-            'pooja_id'    => ['nullable','integer'],
+    public function createProduct(Request $request)
+{
+    $validated = $request->validate([
+        'name'        => ['required','string','max:255'],
+        'odia_name'   => ['nullable','string','max:255'],
+        'price'       => ['required','numeric','min:0','lte:mrp'],
+        'mrp'         => ['required','numeric','min:0'],
+        'discount'    => ['nullable','numeric','min:0'],
+        'description' => ['required','string'],
+        'category'    => ['required', Rule::in(['Puja Item','Subscription','Flower','Immediateproduct','Customizeproduct','Package','Books'])],
+        'pooja_id'    => ['nullable','integer'],
 
-            'product_image' => ['required','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
+        'product_image' => ['required','image','mimes:jpeg,png,jpg,gif,webp','max:10000'],
 
-            // Package rows (FlowerDetails-backed)
-            'item_id'       => ['nullable','array'],
-            'item_id.*'     => ['nullable','integer','exists:flower__details,id'],
-            'quantity'      => ['nullable','array'],
-            'quantity.*'    => ['nullable','numeric','min:0'],
+        // ── Package rows (FlowerDetails-backed) ───────────────────────────────
+        // front-end sends item_id[], quantity[], (unit_text[] readonly), item_price[] (UX only)
+        'item_id'       => ['nullable','array'],
+        'item_id.*'     => ['nullable','integer','exists:flower__details,id'],
+        'quantity'      => ['nullable','array'],
+        'quantity.*'    => ['nullable','numeric','min:0'],
+        'item_price'    => ['nullable','array'],
+        'item_price.*'  => ['nullable','numeric','min:0'],
 
-            // Subscription (single price + items)
-            'duration'        => ['nullable','required_if:category,Subscription','in:1,3,6'],
-            'per_day_price'   => ['nullable','required_if:category,Subscription','numeric','min:0'],
+        // ── Subscription (single price + items) ──────────────────────────────
+        'duration'        => ['nullable','required_if:category,Subscription','in:1,3,6'],
+        'per_day_price'   => ['nullable','required_if:category,Subscription','numeric','min:0'],
 
-            // Subscription rows (FlowerDetails-backed)
-            'sub_item_id'      => ['nullable','array'],
-            'sub_item_id.*'    => ['nullable','integer','exists:flower__details,id'],
-            'sub_quantity'     => ['nullable','array'],
-            'sub_quantity.*'   => ['nullable','numeric','min:0'],
+        // Subscription item rows (FlowerDetails-backed)
+        'sub_item_id'      => ['nullable','array'],
+        'sub_item_id.*'    => ['nullable','integer','exists:flower__details,id'],
+        'sub_quantity'     => ['nullable','array'],
+        'sub_quantity.*'   => ['nullable','numeric','min:0'],
+        'sub_item_price'   => ['nullable','array'],
+        'sub_item_price.*' => ['nullable','numeric','min:0'],
 
-            // Benefits
-            'benefit'   => ['nullable','array'],
-            'benefit.*' => ['nullable','string','max:255'],
+        // Benefits
+        'benefit'   => ['nullable','array'],
+        'benefit.*' => ['nullable','string','max:255'],
 
-            // Flower-only
-            'mala_provided'    => ['nullable','required_if:category,Flower','in:yes,no'],
-            'flower_available' => ['nullable','required_if:category,Flower','in:yes,no'],
-            'available_from'   => ['nullable','required_if:flower_available,yes','date'],
-            'available_to'     => ['nullable','required_if:flower_available,yes','date','after_or_equal:available_from'],
+        // Flower-only
+        'mala_provided'    => ['nullable','required_if:category,Flower','in:yes,no'],
+        'flower_available' => ['nullable','required_if:category,Flower','in:yes,no'],
+        'available_from'   => ['nullable','required_if:flower_available,yes','date'],
+        'available_to'     => ['nullable','required_if:flower_available,yes','date','after_or_equal:available_from'],
 
-            // Stock
-            'stock'            => ['nullable','integer','min:0'],
-        ], [
-            'price.lte' => 'Sale price must be less than or equal to MRP.',
-            'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
-        ]);
+        // Stock
+        'stock'            => ['nullable','integer','min:0'],
+    ], [
+        'price.lte' => 'Sale price must be less than or equal to MRP.',
+        'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
+    ]);
 
-        // ── Build PACKAGE rows (use string flower_id from FlowerDetails) ──
-        $packageRows = [];
-        if (($validated['category'] ?? null) === 'Package') {
-            $items  = (array) $request->input('item_id', []);
-            $qtys   = (array) $request->input('quantity', []);
+    // ─────────────────────────────────────────────────────────────────────────
+    // Build PACKAGE rows from FlowerDetails (server-side price = unit_price * qty)
+    // ─────────────────────────────────────────────────────────────────────────
+    $packageRows = [];
+    if (($validated['category'] ?? null) === 'Package') {
+        $items  = (array) $request->input('item_id', []);
+        $qtys   = (array) $request->input('quantity', []);
+        $prices = (array) $request->input('item_price', []); // UX only; server will recompute
 
-            foreach ($items as $i => $flowerDetailsId) {
-                if ($flowerDetailsId === null || $flowerDetailsId === '') continue;
+        foreach ($items as $i => $flowerDetailsId) {
+            if ($flowerDetailsId === null || $flowerDetailsId === '') continue;
 
-                $qty = $qtys[$i] ?? null;
-                if ($qty === null || $qty === '' || !is_numeric($qty) || $qty < 0) {
-                    return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
-                }
-
-                /** @var FlowerDetails|null $fd */
-                $fd = FlowerDetails::find($flowerDetailsId);
-                if (!$fd) {
-                    return back()->withErrors(['item_id' => 'Selected item not found. (Row '.($i+1).')'])->withInput();
-                }
-
-                // string flower_id like FLOW8095 / GEND7597
-                $flowerId = trim((string) $fd->flower_id);
-                if ($flowerId === '') {
-                    return back()->withErrors(['item_id' => 'Selected item has empty flower_id in Flower Details ('.$fd->name.'). (Row '.($i+1).')'])->withInput();
-                }
-
-                $perUnit   = (float) $fd->price;
-                $unitName  = (string) $fd->unit;
-                $itemName  = (string) $fd->name;
-                $computed  = $perUnit * (float) $qty;
-
-                $packageRows[] = [
-                    'flower_details_id' => (int) $fd->id, // optional if column exists
-                    'flower_id'         => $flowerId,     // keep as string
-                    'item_name'         => $itemName,
-                    'quantity'          => (float) $qty,
-                    'unit_name'         => $unitName,
-                    'price'             => round($computed, 2),
-                    'idx'               => $i,
-                ];
+            $qty = $qtys[$i] ?? null;
+            if ($qty === null || $qty === '' || !is_numeric($qty) || $qty < 0) {
+                return back()->withErrors(['package' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
             }
 
-            if (count($packageRows) < 1) {
-                return back()->withErrors(['item_id' => 'Please add at least one package item.'])->withInput();
+            // Pull once from FlowerDetails
+            /** @var FlowerDetails|null $fd */
+            $fd = FlowerDetails::find($flowerDetailsId);
+            if (!$fd) {
+                return back()->withErrors(['item_id' => 'Selected item not found. (Row '.($i+1).')'])->withInput();
             }
+
+            $perUnit  = (float) $fd->price; // per-unit price stored in FlowerDetails
+            $unitName = (string) $fd->unit; // read-only in UI
+            $itemName = (string) $fd->name;
+
+            $computed = $perUnit * (float) $qty; // authoritative total
+
+            $packageRows[] = [
+                'item_id'   => (int) $flowerDetailsId,
+                'item_name' => $itemName,
+                'quantity'  => (float) $qty,
+                'unit_name' => $unitName,
+                'price'     => round($computed, 2),
+                'idx'       => $i,
+            ];
         }
 
-        // ── Build SUBSCRIPTION rows (use string flower_id) ──
-        $subscriptionRows = [];
-        if (($validated['category'] ?? null) === 'Subscription') {
-            $sItems = (array) $request->input('sub_item_id', []);
-            $sQtys  = (array) $request->input('sub_quantity', []);
-
-            foreach ($sItems as $i => $flowerDetailsId) {
-                if ($flowerDetailsId === null || $flowerDetailsId === '') continue;
-
-                $qty = $sQtys[$i] ?? null;
-                if ($qty === null || $qty === '' || !is_numeric($qty) || $qty < 0) {
-                    return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
-                }
-
-                $fd = FlowerDetails::find($flowerDetailsId);
-                if (!$fd) {
-                    return back()->withErrors(['sub_item_id' => 'Selected subscription item not found. (Row '.($i+1).')'])->withInput();
-                }
-
-                $flowerId = trim((string) $fd->flower_id);
-                if ($flowerId === '') {
-                    return back()->withErrors(['sub_item_id' => 'Selected subscription item has empty flower_id in Flower Details ('.$fd->name.'). (Row '.($i+1).')'])->withInput();
-                }
-
-                $perUnit   = (float) $fd->price;
-                $unitName  = (string) $fd->unit;
-                $itemName  = (string) $fd->name;
-                $computed  = $perUnit * (float) $qty;
-
-                $subscriptionRows[] = [
-                    'flower_details_id' => (int) $fd->id, // optional if column exists
-                    'flower_id'         => $flowerId,     // keep as string
-                    'item_name'         => $itemName,
-                    'quantity'          => (float) $qty,
-                    'unit_name'         => $unitName,
-                    'price'             => round($computed, 2),
-                    'idx'               => $i,
-                ];
-            }
-
-            if (count($subscriptionRows) < 1) {
-                return back()->withErrors(['sub_item_id' => 'Please add at least one subscription item.'])->withInput();
-            }
+        if (count($packageRows) < 1) {
+            return back()->withErrors(['item_id' => 'Please add at least one package item.'])->withInput();
         }
-
-        // Image upload
-        $imageUrl = null;
-        if ($request->hasFile('product_image')) {
-            $hashName = $request->file('product_image')->hashName();
-            $request->file('product_image')->move(public_path('product_images'), $hashName);
-            $imageUrl = asset('product_images/' . $hashName);
-        }
-
-        // Flags
-        $isFlower = (($validated['category'] ?? null) === 'Flower');
-        $isSub    = (($validated['category'] ?? null) === 'Subscription');
-
-        $productId = $isFlower ? 'FLOW' . mt_rand(1000000, 9999999) : 'PRODUCT' . mt_rand(1000000, 9999999);
-        $slug      = Str::slug($validated['name'], '-');
-
-        $benefitString = null;
-        if (!empty($validated['benefit'])) {
-            $cleanedBenefits = array_filter(array_map('trim', $validated['benefit']));
-            $benefitString = $cleanedBenefits ? implode('#', $cleanedBenefits) : null;
-        }
-
-        $malaProvidedBool      = null;
-        $isFlowerAvailableBool = null;
-        if ($isFlower) {
-            $malaProvidedBool      = isset($validated['mala_provided'])    ? $validated['mala_provided'] === 'yes'    : null;
-            $isFlowerAvailableBool = isset($validated['flower_available']) ? $validated['flower_available'] === 'yes' : null;
-        }
-
-        DB::transaction(function () use (
-            $request, $validated, $productId, $slug, $benefitString, $imageUrl,
-            $malaProvidedBool, $isFlowerAvailableBool, $isFlower, $isSub,
-            $packageRows, $subscriptionRows
-        ) {
-            // Product
-            $product = new FlowerProduct();
-            $product->product_id    = $productId;
-            $product->name          = $validated['name'];
-            $product->odia_name     = $validated['odia_name'] ?? null;
-            $product->slug          = $slug;
-            $product->price         = (float) $validated['price'];
-            $product->mrp           = (float) $validated['mrp'];
-            $product->discount      = $validated['discount'] ?? null;
-            $product->description   = $validated['description'];
-            $product->category      = $validated['category'];
-            $product->pooja_id      = ($validated['category'] === 'Package') ? $request->input('pooja_id', null) : null;
-            $product->stock         = $isFlower ? null : ($request->filled('stock') ? (int)$request->input('stock') : 0);
-            $product->duration      = $isSub ? $request->input('duration', null) : null;
-            $product->per_day_price = $isSub ? (float) $request->input('per_day_price', 0) : null;
-            $product->benefits      = $benefitString;
-            $product->product_image = $imageUrl;
-            // Flower-only
-            $product->mala_provided       = $malaProvidedBool;
-            $product->is_flower_available = $isFlowerAvailableBool;
-            $product->available_from      = $isFlower ? $request->input('available_from') : null;
-            $product->available_to        = $isFlower ? $request->input('available_to')   : null;
-            $product->save();
-
-            // Package items
-            if (($validated['category'] ?? null) === 'Package' && !empty($packageRows)) {
-                foreach ($packageRows as $row) {
-                    $pi = new PackageItem();
-                    $pi->product_id = $product->product_id;
-                    $pi->flower_id  = $row['flower_id'];   // STRING ID (e.g., FLOW8095 / GEND7597)
-                    if (isset($row['flower_details_id']) && schema()->hasColumn('product__package_item','flower_details_id')) {
-                        $pi->flower_details_id = (int) $row['flower_details_id'];
-                    }
-                    $pi->item_name  = $row['item_name'];
-                    $pi->quantity   = (float) $row['quantity'];
-                    $pi->unit       = $row['unit_name'];
-                    $pi->price      = (float) $row['price'];
-                    $pi->save();
-                }
-            }
-
-            // Subscription items
-            if ($isSub && !empty($subscriptionRows)) {
-                foreach ($subscriptionRows as $row) {
-                    $pi = new PackageItem();
-                    $pi->product_id = $product->product_id;
-                    $pi->flower_id  = $row['flower_id'];   // STRING ID
-                    if (isset($row['flower_details_id']) && schema()->hasColumn('product__package_item','flower_details_id')) {
-                        $pi->flower_details_id = (int) $row['flower_details_id'];
-                    }
-                    $pi->item_name  = $row['item_name'];
-                    $pi->quantity   = (float) $row['quantity'];
-                    $pi->unit       = $row['unit_name'];
-                    $pi->price      = (float) $row['price'];
-                    $pi->save();
-                }
-            }
-        });
-
-        return redirect()->back()->with('success', 'Product created successfully.');
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Build SUBSCRIPTION rows from FlowerDetails (server-side price = unit_price * qty)
+    // ─────────────────────────────────────────────────────────────────────────
+    $subscriptionRows = [];
+    if (($validated['category'] ?? null) === 'Subscription') {
+        $sItems  = (array) $request->input('sub_item_id', []);
+        $sQtys   = (array) $request->input('sub_quantity', []);
+        $sPrices = (array) $request->input('sub_item_price', []); // UX only
+
+        foreach ($sItems as $i => $flowerDetailsId) {
+            if ($flowerDetailsId === null || $flowerDetailsId === '') continue;
+
+            $qty = $sQtys[$i] ?? null;
+            if ($qty === null || $qty === '' || !is_numeric($qty) || $qty < 0) {
+                return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
+            }
+
+            /** @var FlowerDetails|null $fd */
+            $fd = FlowerDetails::find($flowerDetailsId);
+            if (!$fd) {
+                return back()->withErrors(['sub_item_id' => 'Selected subscription item not found. (Row '.($i+1).')'])->withInput();
+            }
+
+            $perUnit  = (float) $fd->price;
+            $unitName = (string) $fd->unit;
+            $itemName = (string) $fd->name;
+
+            $computed = $perUnit * (float) $qty;
+
+            $subscriptionRows[] = [
+                'item_id'   => (int) $flowerDetailsId,
+                'item_name' => $itemName,
+                'quantity'  => (float) $qty,
+                'unit_name' => $unitName,
+                'price'     => round($computed, 2),
+                'idx'       => $i,
+            ];
+        }
+
+        if (count($subscriptionRows) < 1) {
+            return back()->withErrors(['sub_item_id' => 'Please add at least one subscription item.'])->withInput();
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Image
+    // ─────────────────────────────────────────────────────────────────────────
+    $imageUrl = null;
+    if ($request->hasFile('product_image')) {
+        $hashName = $request->file('product_image')->hashName();
+        $request->file('product_image')->move(public_path('product_images'), $hashName);
+        $imageUrl = asset('product_images/' . $hashName);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Derivations / flags
+    // ─────────────────────────────────────────────────────────────────────────
+    $isFlower = (($validated['category'] ?? null) === 'Flower');
+    $isSub    = (($validated['category'] ?? null) === 'Subscription');
+
+    $productId = $isFlower ? 'FLOW' . mt_rand(1000000, 9999999) : 'PRODUCT' . mt_rand(1000000, 9999999);
+    $slug      = Str::slug($validated['name'], '-');
+
+    $benefitString = null;
+    if (!empty($validated['benefit'])) {
+        $cleanedBenefits = array_filter(array_map('trim', $validated['benefit']));
+        $benefitString = $cleanedBenefits ? implode('#', $cleanedBenefits) : null;
+    }
+
+    $malaProvidedBool      = null;
+    $isFlowerAvailableBool = null;
+    if ($isFlower) {
+        $malaProvidedBool      = isset($validated['mala_provided'])    ? $validated['mala_provided'] === 'yes'    : null;
+        $isFlowerAvailableBool = isset($validated['flower_available']) ? $validated['flower_available'] === 'yes' : null;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Persist everything in a transaction
+    // ─────────────────────────────────────────────────────────────────────────
+    DB::transaction(function () use (
+        $request, $validated, $productId, $slug, $benefitString, $imageUrl,
+        $malaProvidedBool, $isFlowerAvailableBool, $isFlower, $isSub,
+        $packageRows, $subscriptionRows
+    ) {
+        // Main product row
+        $product = new FlowerProduct();
+        $product->product_id    = $productId;
+        $product->name          = $validated['name'];
+        $product->odia_name     = $validated['odia_name'] ?? null;
+        $product->slug          = $slug;
+        $product->price         = (float) $validated['price'];
+        $product->mrp           = (float) $validated['mrp'];
+        $product->discount      = $validated['discount'] ?? null;
+        $product->description   = $validated['description'];
+        $product->category      = $validated['category'];
+
+        $product->pooja_id      = ($validated['category'] === 'Package') ? $request->input('pooja_id', null) : null;
+
+        $product->stock         = $isFlower ? null : ($request->filled('stock') ? (int)$request->input('stock') : 0);
+        $product->duration      = $isSub ? $request->input('duration', null) : null;
+        $product->per_day_price = $isSub ? (float) $request->input('per_day_price', 0) : null;
+
+        $product->benefits      = $benefitString;
+        $product->product_image = $imageUrl;
+
+        // Flower-only fields
+        $product->mala_provided       = $malaProvidedBool;
+        $product->is_flower_available = $isFlowerAvailableBool;
+        $product->available_from      = $isFlower ? $request->input('available_from') : null;
+        $product->available_to        = $isFlower ? $request->input('available_to')   : null;
+
+        $product->save();
+
+        // Package items (save computed rows)
+        if (($validated['category'] ?? null) === 'Package' && !empty($packageRows)) {
+            foreach ($packageRows as $row) {
+                PackageItem::create([
+                    'product_id' => $product->product_id,
+                    'item_name'  => $row['item_name'],
+                    'quantity'   => $row['quantity'],
+                    'unit'       => $row['unit_name'],
+                    'price'      => $row['price'],   // server-computed
+                ]);
+            }
+        }
+
+        // Subscription items (save computed rows)
+        if ($isSub && !empty($subscriptionRows)) {
+            foreach ($subscriptionRows as $row) {
+                PackageItem::create([
+                    'product_id' => $product->product_id,
+                    'item_name'  => $row['item_name'],
+                    'quantity'   => $row['quantity'],
+                    'unit'       => $row['unit_name'],
+                    'price'      => $row['price'],   // server-computed
+                ]);
+            }
+        }
+    });
+
+    return redirect()->back()->with('success', 'Product created successfully.');
+}
+
     public function editProduct($id)
     {
         $product = FlowerProduct::with([
