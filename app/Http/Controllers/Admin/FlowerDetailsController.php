@@ -67,7 +67,7 @@ class FlowerDetailsController extends Controller
         FlowerDetails::create($data);
 
         return redirect()
-            ->route('admin.manage-flower-details')
+            ->route('admin.flower-details.index')
             ->with('success', 'Flower details added successfully.');
     }
 
@@ -111,7 +111,7 @@ class FlowerDetailsController extends Controller
         $flower_detail->update($data);
 
         return redirect()
-            ->route('admin.manage-flower-details')
+            ->route('admin.flower-details.index')
             ->with('success', 'Flower details updated successfully.');
     }
 
@@ -127,7 +127,7 @@ class FlowerDetailsController extends Controller
         $flower_detail->delete();
 
         return redirect()
-            ->route('admin.manage-flower-details')
+            ->route('admin.flower-details.index')
             ->with('success', 'Flower details deleted.');
     }
 }

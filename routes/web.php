@@ -1031,6 +1031,7 @@ Route::prefix('admin')->as('admin.')->group(function () {
     // Update (Save changes)
     Route::put('flower-details/{flower_detail}', [FlowerDetailsController::class, 'update'])
         ->name('flower-details.update');
+        
     Route::patch('flower-details/{flower_detail}', [FlowerDetailsController::class, 'update'])
         ->name('flower-details.update.patch');
 
