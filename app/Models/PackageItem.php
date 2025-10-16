@@ -12,7 +12,7 @@ class PackageItem extends Model
     protected $table = 'product__package_item';
 
     protected $fillable = [
-        'product_id','item_name','quantity','unit','price'
+        'product_id','flower_id','item_name','quantity','unit','price'
     ];
 
 }
