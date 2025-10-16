@@ -37,7 +37,7 @@ class FlowerDetailsController extends Controller
      */
     public function create()
     {
-        $units = ['bunch', 'piece', 'kg', 'g', 'bundle', 'bouquet', 'garland', 'packet'];
+        $units = ['bunch', 'piece', 'kg', 'gm', 'bundle', 'bouquet', 'garland', 'packet'];
         return view('admin.add-flower-details', [
             'row'   => new FlowerDetails(),
             'units' => $units,
@@ -78,7 +78,7 @@ class FlowerDetailsController extends Controller
      */
     public function edit(FlowerDetails $flower_detail)
     {
-        $units = ['bunch', 'piece', 'kg', 'g', 'bundle', 'bouquet', 'garland', 'packet'];
+        $units = ['bunch', 'piece', 'kg', 'gm', 'bundle', 'bouquet', 'garland', 'packet'];
 
         return view('admin.add-flower-details', [
             'row'   => $flower_detail,
