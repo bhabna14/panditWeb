@@ -50,8 +50,6 @@ class ProductController extends Controller
             'item_id.*'     => ['nullable','integer','exists:flower__details,id'],
             'quantity'      => ['nullable','array'],
             'quantity.*'    => ['nullable','numeric','min:0'],
-            'item_price'    => ['nullable','array'],
-            'item_price.*'  => ['nullable','numeric','min:0'],
 
             // Subscription (single price + items)
             'duration'        => ['nullable','required_if:category,Subscription','in:1,3,6'],
@@ -62,8 +60,6 @@ class ProductController extends Controller
             'sub_item_id.*'    => ['nullable','integer','exists:flower__details,id'],
             'sub_quantity'     => ['nullable','array'],
             'sub_quantity.*'   => ['nullable','numeric','min:0'],
-            'sub_item_price'   => ['nullable','array'],
-            'sub_item_price.*' => ['nullable','numeric','min:0'],
 
             // Benefits
             'benefit'   => ['nullable','array'],
@@ -82,7 +78,7 @@ class ProductController extends Controller
             'available_to.after_or_equal' => 'The "Available To" date must be the same as or after the "Available From" date.',
         ]);
 
-        // Build PACKAGE rows
+        // ── Build PACKAGE rows (use string flower_id from FlowerDetails) ──
         $packageRows = [];
         if (($validated['category'] ?? null) === 'Package') {
             $items  = (array) $request->input('item_id', []);
@@ -102,10 +98,10 @@ class ProductController extends Controller
                     return back()->withErrors(['item_id' => 'Selected item not found. (Row '.($i+1).')'])->withInput();
                 }
 
-                // Defensive: ensure flower_id is present and > 0
-                $flowerId = (int) $fd->flower_id;
-                if ($flowerId <= 0) {
-                    return back()->withErrors(['item_id' => 'Selected item has no valid flower_id. Please check Flower Details for "'.$fd->name.'". (Row '.($i+1).')'])->withInput();
+                // string flower_id like FLOW8095 / GEND7597
+                $flowerId = trim((string) $fd->flower_id);
+                if ($flowerId === '') {
+                    return back()->withErrors(['item_id' => 'Selected item has empty flower_id in Flower Details ('.$fd->name.'). (Row '.($i+1).')'])->withInput();
                 }
 
                 $perUnit   = (float) $fd->price;
@@ -114,8 +110,8 @@ class ProductController extends Controller
                 $computed  = $perUnit * (float) $qty;
 
                 $packageRows[] = [
-                    'flower_details_id' => (int) $fd->id,  // optional (if you have this column)
-                    'flower_id'         => $flowerId,      // store this
+                    'flower_details_id' => (int) $fd->id, // optional if column exists
+                    'flower_id'         => $flowerId,     // keep as string
                     'item_name'         => $itemName,
                     'quantity'          => (float) $qty,
                     'unit_name'         => $unitName,
@@ -129,7 +125,7 @@ class ProductController extends Controller
             }
         }
 
-        // Build SUBSCRIPTION rows
+        // ── Build SUBSCRIPTION rows (use string flower_id) ──
         $subscriptionRows = [];
         if (($validated['category'] ?? null) === 'Subscription') {
             $sItems = (array) $request->input('sub_item_id', []);
@@ -143,15 +139,14 @@ class ProductController extends Controller
                     return back()->withErrors(['subscription_items' => 'Quantity must be a non-negative number. (Row '.($i+1).')'])->withInput();
                 }
 
-                /** @var FlowerDetails|null $fd */
                 $fd = FlowerDetails::find($flowerDetailsId);
                 if (!$fd) {
                     return back()->withErrors(['sub_item_id' => 'Selected subscription item not found. (Row '.($i+1).')'])->withInput();
                 }
 
-                $flowerId = (int) $fd->flower_id;
-                if ($flowerId <= 0) {
-                    return back()->withErrors(['sub_item_id' => 'Selected subscription item has no valid flower_id. Please check Flower Details for "'.$fd->name.'". (Row '.($i+1).')'])->withInput();
+                $flowerId = trim((string) $fd->flower_id);
+                if ($flowerId === '') {
+                    return back()->withErrors(['sub_item_id' => 'Selected subscription item has empty flower_id in Flower Details ('.$fd->name.'). (Row '.($i+1).')'])->withInput();
                 }
 
                 $perUnit   = (float) $fd->price;
@@ -160,8 +155,8 @@ class ProductController extends Controller
                 $computed  = $perUnit * (float) $qty;
 
                 $subscriptionRows[] = [
-                    'flower_details_id' => (int) $fd->id,  // optional (if you have this column)
-                    'flower_id'         => $flowerId,
+                    'flower_details_id' => (int) $fd->id, // optional if column exists
+                    'flower_id'         => $flowerId,     // keep as string
                     'item_name'         => $itemName,
                     'quantity'          => (float) $qty,
                     'unit_name'         => $unitName,
@@ -232,38 +227,36 @@ class ProductController extends Controller
             $product->available_to        = $isFlower ? $request->input('available_to')   : null;
             $product->save();
 
-            // Package items (explicit assign + save to avoid mass-assignment quirks)
+            // Package items
             if (($validated['category'] ?? null) === 'Package' && !empty($packageRows)) {
                 foreach ($packageRows as $row) {
                     $pi = new PackageItem();
-                    $pi->product_id         = $product->product_id;      // string id
-                    $pi->flower_id          = (int) $row['flower_id'];   // ensure int
-                    // store details for clarity
-                    if (isset($row['flower_details_id'])) {
-                        // only if your table has this column; harmless otherwise (ignored)
+                    $pi->product_id = $product->product_id;
+                    $pi->flower_id  = $row['flower_id'];   // STRING ID (e.g., FLOW8095 / GEND7597)
+                    if (isset($row['flower_details_id']) && schema()->hasColumn('product__package_item','flower_details_id')) {
                         $pi->flower_details_id = (int) $row['flower_details_id'];
                     }
-                    $pi->item_name          = $row['item_name'];
-                    $pi->quantity           = (float) $row['quantity'];
-                    $pi->unit               = $row['unit_name'];
-                    $pi->price              = (float) $row['price'];
+                    $pi->item_name  = $row['item_name'];
+                    $pi->quantity   = (float) $row['quantity'];
+                    $pi->unit       = $row['unit_name'];
+                    $pi->price      = (float) $row['price'];
                     $pi->save();
                 }
             }
 
-            // Subscription items (explicit assign + save)
+            // Subscription items
             if ($isSub && !empty($subscriptionRows)) {
                 foreach ($subscriptionRows as $row) {
                     $pi = new PackageItem();
-                    $pi->product_id         = $product->product_id;
-                    $pi->flower_id          = (int) $row['flower_id'];
-                    if (isset($row['flower_details_id'])) {
+                    $pi->product_id = $product->product_id;
+                    $pi->flower_id  = $row['flower_id'];   // STRING ID
+                    if (isset($row['flower_details_id']) && schema()->hasColumn('product__package_item','flower_details_id')) {
                         $pi->flower_details_id = (int) $row['flower_details_id'];
                     }
-                    $pi->item_name          = $row['item_name'];
-                    $pi->quantity           = (float) $row['quantity'];
-                    $pi->unit               = $row['unit_name'];
-                    $pi->price              = (float) $row['price'];
+                    $pi->item_name  = $row['item_name'];
+                    $pi->quantity   = (float) $row['quantity'];
+                    $pi->unit       = $row['unit_name'];
+                    $pi->price      = (float) $row['price'];
                     $pi->save();
                 }
             }
