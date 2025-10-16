@@ -75,12 +75,6 @@
                 </div>
             </div>
 
-            <div class="col-md-3">
-                <label class="form-label">Flower ID (optional)</label>
-                <input type="text" name="flower_id" class="form-control" maxlength="50"
-                       value="{{ old('flower_id', $row->flower_id) }}" placeholder="e.g., FL-102">
-            </div>
-
             <div class="col-md-6">
                 <label class="form-label">Name <span class="text-danger">*</span></label>
                 <input type="text" name="name" class="form-control" maxlength="120"
