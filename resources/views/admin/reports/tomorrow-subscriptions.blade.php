@@ -311,6 +311,17 @@
                         </div>
                     </div>
                 </div>
+                 <div class="kpi-card">
+                    <div class="kpi-accent"></div>
+                    <div class="kpi-body">
+                        <div class="kpi-icon"><i class="bi bi-sliders2"></i></div>
+                        <div class="kpi-meta">
+                            <div class="label">Customize Orders (Tomorrow)</div>
+                            <div class="value">{{ count($customizeTomorrow) }}</div>
+                            <div class="hint">Requests scheduled</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="kpi-card">
                     <div class="kpi-accent"></div>
                     <div class="kpi-body">
@@ -333,17 +344,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-accent"></div>
-                    <div class="kpi-body">
-                        <div class="kpi-icon"><i class="bi bi-sliders2"></i></div>
-                        <div class="kpi-meta">
-                            <div class="label">Customize Orders (Tomorrow)</div>
-                            <div class="value">{{ count($customizeTomorrow) }}</div>
-                            <div class="hint">Requests scheduled</div>
-                        </div>
-                    </div>
-                </div>
+               
                 <div class="kpi-card">
                     <div class="kpi-accent"></div>
                     <div class="kpi-body">
