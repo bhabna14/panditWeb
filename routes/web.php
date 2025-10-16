@@ -58,6 +58,8 @@ use App\Http\Controllers\Admin\SubscriptionPackageEstimateController;
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\TomorrowSubscriptionsController;
 use App\Http\Controllers\Admin\WeeklyReportController;
+use App\Http\Controllers\Admin\FlowerDetailsController;
+
 
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserCustomizeOrderController;
@@ -1007,3 +1009,10 @@ Route::post('/admin/flower-pickups', [FlowerPickupAssignController::class, 'stor
     Route::get('/admin/weekly-report', [WeeklyReportController::class, 'index'])->name('weekly-report');
      Route::get('admin/ops-report', [WeeklyReportController::class, 'index'])
             ->name('admin.ops-report');
+
+
+// If you already have an "admin" group, drop this inside it.
+// Otherwise, this will work as-is and mount at /admin/flower-details
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('flower-details', FlowerDetailsController::class);
+});
