@@ -11,7 +11,7 @@ use App\Models\PoojaUnit;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\DB as DBFacade; // ✅ explicit alias
 
 class FlowerEstimateController extends Controller
 {
@@ -319,7 +319,7 @@ class FlowerEstimateController extends Controller
                   ->orWhere('is_active', 1);
             })
             ->whereDate('start_date', '<=', $date->toDateString())
-            ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $date->toDateString())
+            ->whereDate(DBFacade::raw('COALESCE(new_date, end_date)'), '>=', $date->toDateString()) // ✅ use DBFacade
             ->get();
 
         // Exclude paused on this date
