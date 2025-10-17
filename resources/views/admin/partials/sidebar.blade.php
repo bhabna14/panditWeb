@@ -39,8 +39,10 @@
 
     /**
      * Duotone icon library (solid, rounded).
-     * Colored via CSS using [data-icon="<key>"] + currentColor.
-     * `.duo-1` is the subtle layer, `.duo-2` is the main shape.
+     * We color layers via CSS custom properties:
+     *   --ico1 = subtle layer color (duo-1)
+     *   --ico2 = main shape color  (duo-2)
+     * We also use --item-color to tint hovers/active background per item.
      */
     $iconMap = [
         'dashboard' => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -215,7 +217,7 @@
         return false;
     };
 
-    // Renderer (sets --item-color per item based on icon key)
+    // Renderer (sets --item-color + layer colors per item based on icon key)
     $renderMenu = function ($items) use (&$renderMenu, $renderIcon, $isUrlActive, $hasActiveDescendant) {
         foreach ($items as $item) {
             $hasChildren = $item->childrenRecursive && $item->childrenRecursive->count();
@@ -223,7 +225,13 @@
             $icon        = $renderIcon($item);
             $iconKeyRaw  = trim((string) ($item->icon ?? 'default'));
             $iconKey     = e($iconKeyRaw);
-            $styleColor  = '--item-color: var(--ico-' . $iconKey . ', var(--ico-default));';
+
+            // Style variables:
+            //  --item-color  : master tint used for backgrounds
+            //  --ico1 / --ico2: duotone layer fills (subtle / main)
+            $styleColor  = '--item-color: var(--ico-' . $iconKey . ', var(--ico-default));'
+                         . '--ico1: var(--ico-' . $iconKey . '-1, color-mix(in srgb, var(--item-color) 32%, #0000));'
+                         . '--ico2: var(--ico-' . $iconKey . '-2, var(--item-color));';
 
             if ($isCategory) {
                 echo '<li class="side-item side-item-category">' . e($item->title) . '</li>';
@@ -246,7 +254,9 @@
                     $childActive = $isUrlActive($child->href);
                     $ckeyRaw = trim((string) ($child->icon ?? $iconKeyRaw));
                     $ckey    = e($ckeyRaw);
-                    $cStyle  = '--item-color: var(--ico-' . $ckey . ', var(--ico-default));';
+                    $cStyle  = '--item-color: var(--ico-' . $ckey . ', var(--ico-default));'
+                             . '--ico1: var(--ico-' . $ckey . '-1, color-mix(in srgb, var(--item-color) 32%, #0000));'
+                             . '--ico2: var(--ico-' . $ckey . '-2, var(--item-color));';
                     echo '      <li><a class="sub-side-menu__item'.($childActive ? ' active' : '').'" href="'.e($child->href).'" data-icon="'.$ckey.'" style="'.$cStyle.'">'.e($child->title).'</a></li>';
                 }
                 echo '  </ul>';
@@ -273,11 +283,11 @@
         --sidebar-tint-1: #f7fbff;
         --sidebar-tint-2: #fff7fb;
 
-        --hover-strength: 9%;
-        --active-strength: 16%;
+        --hover-strength: 12%;
+        --active-strength: 20%;
         --ring: #93c5fd;
 
-        /* Distinct colors for icons/sections */
+        /* Distinct master tints for items (used for backgrounds & defaults) */
         --ico-dashboard: #6366f1;  --ico-users: #10b981;    --ico-folder: #8b5cf6;
         --ico-list: #06b6d4;       --ico-report: #f59e0b;   --ico-calendar: #ef4444;
         --ico-settings: #64748b;   --ico-link: #0ea5e9;     --ico-orders: #ec4899;
@@ -288,6 +298,38 @@
         --ico-wallet: #0ea5e9;     --ico-clipboard: #84cc16;--ico-sparkles: #a78bfa;
         --ico-star: #f59e0b;       --ico-vendor: #06b6d4;   --ico-marketing: #ef4444;
         --ico-delivery: #60a5fa;   --ico-rider: #f97316;    --ico-default: #6366f1;
+
+        /* Duotone layer palettes per icon (Layer1 = subtle, Layer2 = main) */
+        --ico-dashboard-1:#c7d2fe; --ico-dashboard-2:#6366f1;
+        --ico-users-1:#a7f3d0;     --ico-users-2:#10b981;
+        --ico-folder-1:#ddd6fe;    --ico-folder-2:#8b5cf6;
+        --ico-list-1:#a5f3fc;      --ico-list-2:#06b6d4;
+        --ico-report-1:#fde68a;    --ico-report-2:#f59e0b;
+        --ico-calendar-1:#fecaca;  --ico-calendar-2:#ef4444;
+        --ico-settings-1:#cbd5e1;  --ico-settings-2:#64748b;
+        --ico-link-1:#bae6fd;      --ico-link-2:#0ea5e9;
+        --ico-orders-1:#fbcfe8;    --ico-orders-2:#ec4899;
+        --ico-products-1:#bbf7d0;  --ico-products-2:#22c55e;
+        --ico-payments-1:#bfeae6;  --ico-payments-2:#14b8a6;
+        --ico-subscriptions-1:#e9d5ff; --ico-subscriptions-2:#a855f7;
+        --ico-analytics-1:#fde047; --ico-analytics-2:#eab308;
+        --ico-bell-1:#fed7aa;      --ico-bell-2:#f97316;
+        --ico-mail-1:#bfdbfe;      --ico-mail-2:#3b82f6;
+        --ico-shield-1:#99f6e4;    --ico-shield-2:#22d3ee;
+        --ico-lock-1:#cbd5e1;      --ico-lock-2:#94a3b8;
+        --ico-tag-1:#fecaca;       --ico-tag-2:#fb7185;
+        --ico-coupon-1:#bbf7d0;    --ico-coupon-2:#34d399;
+        --ico-truck-1:#bfdbfe;     --ico-truck-2:#60a5fa;
+        --ico-location-1:#fecdd3;  --ico-location-2:#f43f5e;
+        --ico-wallet-1:#bae6fd;    --ico-wallet-2:#0ea5e9;
+        --ico-clipboard-1:#d9f99d; --ico-clipboard-2:#84cc16;
+        --ico-sparkles-1:#ddd6fe;  --ico-sparkles-2:#a78bfa;
+        --ico-star-1:#fde68a;      --ico-star-2:#f59e0b;
+        --ico-vendor-1:#a5f3fc;    --ico-vendor-2:#06b6d4;
+        --ico-marketing-1:#fecaca; --ico-marketing-2:#ef4444;
+        --ico-delivery-1:#bfdbfe;  --ico-delivery-2:#60a5fa;
+        --ico-rider-1:#fed7aa;     --ico-rider-2:#f97316;
+        --ico-default-1:#c7d2fe;   --ico-default-2:#6366f1;
     }
 
     /* ---------- Container ---------- */
@@ -299,7 +341,7 @@
         border-right: 1px solid var(--sidebar-border);
     }
     .main-sidebar-header {
-        background: transparent;
+        background: linear-gradient(180deg, #fff 0%, #f8fafc 100%);
         border-bottom: 1px solid var(--sidebar-border);
         padding: 14px 16px;
     }
@@ -330,7 +372,7 @@
         gap: 12px;
         padding: 10px 12px;
         border-radius: 12px;
-        color: var(--item-color, var(--ico-default)); /* each item’s unique color */
+        color: var(--item-color, var(--ico-default)); /* master tint */
         text-decoration: none;
         transition: background .16s ease, color .16s ease, box-shadow .16s ease, transform .08s ease;
         will-change: background, color, transform;
@@ -346,12 +388,13 @@
     }
     .side-menu__item.active {
         background:
-          linear-gradient(135deg,
-            color-mix(in srgb, var(--item-color) var(--active-strength), white 0%) 0%,
-            color-mix(in srgb, var(--item-color) calc(var(--active-strength) * 1.3), white 0%) 100%);
+          radial-gradient(200% 120% at 0% 0%,
+            color-mix(in srgb, var(--item-color) calc(var(--active-strength) * 1.2), white 0%) 0%,
+            color-mix(in srgb, var(--item-color) calc(var(--active-strength) * 1.6), white 0%) 60%,
+            transparent 100%);
         box-shadow:
           inset 0 0 0 1px color-mix(in srgb, var(--item-color) 28%, transparent),
-          0 4px 12px -6px color-mix(in srgb, var(--item-color) 30%, transparent);
+          0 6px 18px -8px color-mix(in srgb, var(--item-color) 36%, transparent);
     }
     .slide.open > .side-menu__item::before,
     .side-menu__item.active::before {
@@ -371,7 +414,11 @@
         font-size: 13px;
         padding: 8px 12px 8px 24px;
         border-radius: 10px;
-        color: #1f2937; /* text remains readable */
+        color: #0b1220;
+        background:
+          linear-gradient(90deg,
+            color-mix(in srgb, var(--item-color) 4%, transparent) 0%,
+            transparent 100%);
     }
     .sub-side-menu__item::before {
         content: "";
@@ -379,13 +426,22 @@
         left: 12px; top: 50%;
         width: 8px; height: 8px; border-radius: 50%;
         transform: translateY(-50%);
-        background: radial-gradient(circle at 40% 40%, var(--item-color) 0%, color-mix(in srgb, var(--item-color) 30%, transparent) 60%, transparent 61%);
-        opacity: .9;
+        background:
+          radial-gradient(circle at 40% 40%, var(--ico2) 0%, color-mix(in srgb, var(--ico2) 25%, transparent) 60%, transparent 61%),
+          radial-gradient(circle at 60% 60%, var(--ico1) 0%, transparent 60%);
+        opacity: .95;
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--ico2) 20%, #fff);
     }
-    .sub-side-menu__item:hover { background: color-mix(in srgb, var(--item-color) 10%, transparent); }
+    .sub-side-menu__item:hover {
+        background: color-mix(in srgb, var(--item-color) 12%, transparent);
+    }
     .sub-side-menu__item.active {
-        background: color-mix(in srgb, var(--item-color) 14%, white 0%);
-        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--item-color) 28%, transparent);
+        background:
+          linear-gradient(90deg,
+            color-mix(in srgb, var(--item-color) 18%, white 0%) 0%,
+            color-mix(in srgb, var(--item-color) 8%, white 0%) 100%);
+        box-shadow:
+          inset 0 0 0 1px color-mix(in srgb, var(--item-color) 28%, transparent);
         color: #0f172a;
     }
 
@@ -393,15 +449,16 @@
     .slide .angle { margin-left: 6px; font-size: 11px; transition: transform .18s ease; opacity: .9; }
     .slide.open > .side-menu__item .angle { transform: rotate(90deg); }
 
-    /* ---------- Icon (no badge) ---------- */
+    /* ---------- Icon (duotone layers use --ico1 / --ico2) ---------- */
     .side-menu__icon {
-        width: 20px; height: 20px; flex: 0 0 20px;
-        display: block; fill: currentColor; margin-left: 2px;
+        width: 22px; height: 22px; flex: 0 0 22px;
+        display: block; margin-left: 2px;
+        filter: drop-shadow(0 2px 6px color-mix(in srgb, var(--ico2) 30%, transparent));
     }
-    .side-menu__icon .duo-1 { opacity: .25; }
-    .side-menu__icon .duo-2 { opacity: 1; }
+    .side-menu__icon .duo-1 { fill: var(--ico1, var(--ico-default-1)); }
+    .side-menu__icon .duo-2 { fill: var(--ico2, var(--ico-default-2)); }
 
-    /* Also allow direct [data-icon] color mapping (for legacy) */
+    /* Legacy direct [data-icon] color mapping (kept for backwards compat) */
     .side-menu__icon[data-icon="dashboard"], [data-icon="dashboard"] { color: var(--ico-dashboard); }
     .side-menu__icon[data-icon="users"],     [data-icon="users"]     { color: var(--ico-users); }
     .side-menu__icon[data-icon="folder"],    [data-icon="folder"]    { color: var(--ico-folder); }
@@ -443,7 +500,7 @@
     @media (max-height: 800px) {
         .side-menu__item { padding: 9px 10px; }
         .sub-side-menu__item { padding: 7px 10px 7px 22px; }
-        .side-menu__icon { width: 18px; height: 18px; flex-basis: 18px; }
+        .side-menu__icon { width: 20px; height: 20px; flex-basis: 20px; }
     }
 </style>
 
