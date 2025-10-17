@@ -75,91 +75,133 @@ class FlowerPickupAssignController extends Controller
         ]);
     }
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'vendor_id'      => 'required|exists:flower__vendor_details,vendor_id',
-            'pickup_date'    => 'required|date',
-            'delivery_date'  => 'required|date|after_or_equal:pickup_date',
-            'rider_id'       => 'required|exists:flower__rider_details,rider_id',
+   public function store(Request $request)
+{
+    // -------- Validate -------------------------------------------------------
+    $request->validate([
+        'pickup_date'    => 'required|date',
+        'delivery_date'  => 'required|date|after_or_equal:pickup_date',
 
-            'flower_id'      => 'required|array',
-            'flower_id.*'    => 'nullable|exists:flower_products,product_id',
+        // core item arrays
+        'flower_id'      => 'required|array',
+        'flower_id.*'    => 'nullable|exists:flower_products,product_id',
 
-            'unit_id'        => 'required|array',
-            'unit_id.*'      => 'nullable|exists:pooja_units,id',
+        'unit_id'        => 'required|array',
+        'unit_id.*'      => 'nullable|exists:pooja_units,id',
 
-            'quantity'       => 'required|array',
-            'quantity.*'     => 'nullable|numeric|min:0.01',
+        'quantity'       => 'required|array',
+        'quantity.*'     => 'nullable|numeric|min:0.01',
 
-            // price is optional — it may be missing entirely
-            'price'          => 'sometimes|array',
-            'price.*'        => 'nullable|numeric|min:0',
-        ]);
+        'price'          => 'sometimes|array',
+        'price.*'        => 'nullable|numeric|min:0',
 
-        // Read arrays with safe defaults so undefined keys never occur
-        $flowerIds = $request->input('flower_id', []);
-        $unitIds   = $request->input('unit_id',   []);
-        $qtys      = $request->input('quantity',  []);
-        $prices    = $request->input('price',     []);  // <-- may not exist; default to []
+        // item-wise vendor & rider (nullable each row)
+        'row_vendor_id'   => 'sometimes|array',
+        'row_vendor_id.*' => 'nullable|exists:flower__vendor_details,vendor_id',
 
-        $rows = [];
-        foreach ($flowerIds as $i => $fid) {
-            $qty  = $qtys[$i]   ?? null;
-            $unit = $unitIds[$i]?? null;
-            $prc  = $prices[$i] ?? null; // <-- SAFE: won’t trigger “Undefined array key 'price'”
+        'row_rider_id'    => 'sometimes|array',
+        'row_rider_id.*'  => 'nullable|exists:flower__rider_details,rider_id',
 
-            // keep only meaningful rows (needs a unit; flower or qty present)
-            if (($fid || $qty) && $unit) {
-                $rows[] = [
-                    'flower_id' => $fid ?: null,
-                    'unit_id'   => $unit ?: null,
-                    'quantity'  => $qty !== null ? (float)$qty : null,
-                    'price'     => $prc !== null ? (float)$prc : null, // nullable
-                ];
-            }
+        // bulk rider toggle + value
+        'apply_one_rider' => 'sometimes|in:1',
+        'bulk_rider_id'   => 'sometimes|nullable|exists:flower__rider_details,rider_id',
+    ]);
+
+    // -------- Read inputs safely --------------------------------------------
+    $flowerIds  = $request->input('flower_id', []);
+    $unitIds    = $request->input('unit_id',   []);
+    $qtys       = $request->input('quantity',  []);
+    $prices     = $request->input('price',     []); // may be missing entirely
+
+    $rowVendors = $request->input('row_vendor_id', []);
+    $rowRiders  = $request->input('row_rider_id',  []);
+
+    $useBulkRider = $request->boolean('apply_one_rider');
+    $bulkRiderId  = $request->input('bulk_rider_id');
+
+    // -------- Build normalized rows (keep only meaningful) -------------------
+    $rows = [];
+    foreach ($flowerIds as $i => $fid) {
+        $unit = $unitIds[$i]  ?? null;
+        $qty  = $qtys[$i]     ?? null;
+        $prc  = $prices[$i]   ?? null;
+
+        $vendorId = $rowVendors[$i] ?? null;
+        $riderId  = $rowRiders[$i]  ?? null;
+
+        // Apply bulk rider on the server too (robust against JS being bypassed)
+        if ($useBulkRider && $bulkRiderId) {
+            $riderId = $bulkRiderId;
         }
 
-        if (empty($rows)) {
-            return back()->withErrors(['flower_id.0' => 'Please add at least one item row.'])->withInput();
+        // Keep only rows that have a unit and either a flower or quantity
+        if (($fid || $qty) && $unit) {
+            $rows[] = [
+                'flower_id' => $fid ?: null,
+                'unit_id'   => $unit ?: null,
+                'quantity'  => $qty  !== null ? (float) $qty  : null,
+                'price'     => $prc  !== null ? (float) $prc  : null,   // nullable
+                'vendor_id' => $vendorId ?: null,                        // item-wise
+                'rider_id'  => $riderId  ?: null,                        // item-wise
+            ];
         }
-
-        $pickUpId = 'PICKUP-' . strtoupper(uniqid());
-
-        $pickup = \App\Models\FlowerPickupDetails::create([
-            'pick_up_id'     => $pickUpId,
-            'vendor_id'      => $request->vendor_id,
-            'pickup_date'    => $request->pickup_date,
-            'delivery_date'  => $request->delivery_date,
-            'rider_id'       => $request->rider_id,
-            'total_price'    => 0,
-            'payment_method' => null,
-            'payment_status' => 'pending',
-            'status'         => 'pending',
-            'payment_id'     => null,
-        ]);
-
-        $totalPrice = 0;
-
-        foreach ($rows as $r) {
-            \App\Models\FlowerPickupItems::create([
-                'pick_up_id' => $pickUpId,
-                'flower_id'  => $r['flower_id'],
-                'unit_id'    => $r['unit_id'],
-                'quantity'   => $r['quantity'] ?? 0,
-                'price'      => $r['price'],     // nullable
-            ]);
-
-            if ($r['price'] !== null && $r['quantity'] !== null) {
-                $totalPrice += $r['price'] * $r['quantity'];
-            }
-        }
-
-        $pickup->update(['total_price' => $totalPrice]);
-
-        return redirect()->route('admin.manageflowerpickupdetails')
-            ->with('success', 'Flower pickup details saved successfully!');
     }
+
+    if (empty($rows)) {
+        return back()
+            ->withErrors(['flower_id.0' => 'Please add at least one item row.'])
+            ->withInput();
+    }
+
+    // -------- Determine header-level vendor/rider (only if uniform) ---------
+    $allVendors = array_values(array_unique(array_map(fn($r) => $r['vendor_id'] ?: null, $rows)));
+    $allRiders  = array_values(array_unique(array_map(fn($r) => $r['rider_id']  ?: null, $rows)));
+
+    $headerVendorId = (count($allVendors) === 1) ? $allVendors[0] : null;
+    $headerRiderId  = (count($allRiders)  === 1) ? $allRiders[0]  : null;
+
+    // -------- Create header (pickup) ----------------------------------------
+    $pickUpId = 'PICKUP-' . strtoupper(uniqid());
+
+    /** @var \App\Models\FlowerPickupDetails $pickup */
+    $pickup = \App\Models\FlowerPickupDetails::create([
+        'pick_up_id'     => $pickUpId,
+        'vendor_id'      => $headerVendorId,         // nullable if mixed item vendors
+        'pickup_date'    => $request->pickup_date,
+        'delivery_date'  => $request->delivery_date,
+        'rider_id'       => $headerRiderId,          // nullable if mixed item riders
+        'total_price'    => 0,
+        'payment_method' => null,
+        'payment_status' => 'pending',
+        'status'         => 'pending',
+        'payment_id'     => null,
+    ]);
+
+    // -------- Create items + compute total ----------------------------------
+    $totalPrice = 0.0;
+
+    foreach ($rows as $r) {
+        \App\Models\FlowerPickupItems::create([
+            'pick_up_id' => $pickUpId,
+            'flower_id'  => $r['flower_id'],
+            'unit_id'    => $r['unit_id'],
+            'quantity'   => $r['quantity'] ?? 0,
+            'price'      => $r['price'],          // nullable
+            'vendor_id'  => $r['vendor_id'],      // <-- ensure column exists in table
+            'rider_id'   => $r['rider_id'],       // <-- ensure column exists in table
+        ]);
+
+        if ($r['price'] !== null && $r['quantity'] !== null) {
+            $totalPrice += $r['price'] * $r['quantity'];
+        }
+    }
+
+    $pickup->update(['total_price' => $totalPrice]);
+
+    return redirect()
+        ->route('admin.manageflowerpickupdetails')
+        ->with('success', 'Flower pickup details saved successfully!');
+}
 
     private function fetchActiveSubsEffectiveOn(Carbon $date)
     {
