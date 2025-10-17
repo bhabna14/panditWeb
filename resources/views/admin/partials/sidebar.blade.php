@@ -51,6 +51,18 @@
             <rect class="duo-2" x="13" y="10" width="8" height="11" rx="2"></rect>
             <rect class="duo-2" x="3" y="13" width="8" height="8" rx="2"></rect>
         </svg>',
+        'flower' => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
+            <g class="duo-1">
+                <ellipse cx="12" cy="4.8" rx="2.8" ry="1.6"></ellipse>
+                <ellipse cx="17.2" cy="8.8" rx="2.8" ry="1.6" transform="rotate(45 17.2 8.8)"></ellipse>
+                <ellipse cx="17.2" cy="15.2" rx="2.8" ry="1.6" transform="rotate(90 17.2 15.2)"></ellipse>
+                <ellipse cx="12" cy="19.2" rx="2.8" ry="1.6" transform="rotate(135 12 19.2)"></ellipse>
+                <ellipse cx="6.8" cy="15.2" rx="2.8" ry="1.6" transform="rotate(180 6.8 15.2)"></ellipse>
+                <ellipse cx="6.8" cy="8.8" rx="2.8" ry="1.6" transform="rotate(225 6.8 8.8)"></ellipse>
+            </g>
+            <circle class="duo-2" cx="12" cy="12" r="2.4"></circle>
+            <rect class="duo-2" x="11" y="14.5" width="2" height="5" rx="1"></rect>
+        </svg>',
         'users' => '<svg class="side-menu__icon" viewBox="0 0 24 24" aria-hidden="true">
             <circle class="duo-1" cx="12" cy="8" r="3.8"></circle>
             <path class="duo-2" d="M4.5 19a7.5 7.5 0 0 1 15 0c0 .55-.45 1-1 1H5.5a1 1 0 0 1-1-1Z"></path>
@@ -523,10 +535,10 @@
                 </svg>
             </div>
 
-            <ul class="side-menu">
+            {{-- <ul class="side-menu">
                 <li class="side-item side-item-category">Main</li>
                 {!! $renderMenu($menuRoots) !!}
-            </ul>
+            </ul> --}}
 
             <div class="slide-right" id="slide-right" aria-hidden="true">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
