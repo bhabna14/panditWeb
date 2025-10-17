@@ -261,7 +261,7 @@
         $key = trim((string) ($item->icon ?? ''));
         $svg = $iconMap[$key] ?? $defaultIcon;
         $svg = preg_replace('/<svg\b/', '<svg data-icon="' . e($key ?: 'default') . '"', $svg, 1);
-        return '<span class="icon-badge" aria-hidden="true">'.$svg.'</span>';
+        return $svg; // <-- no badge wrapper; icon only
     };
 
     // Active helpers (match current URL, safer segment-aware check)
@@ -389,12 +389,13 @@
 
     .side-menu { padding: 8px 10px 10px; }
 
+    /* ---------- Items ---------- */
     .side-menu__item,
     .sub-side-menu__item {
         position: relative;
         display: flex;
-        align-items: center;
-        gap: 10px;
+        align-items: center;         /* centers icon vertically */
+        gap: 12px;
         padding: 10px 12px;
         border-radius: 10px;
         color: var(--ink);
@@ -420,26 +421,25 @@
         color: #0f172a;
     }
 
+    /* ---------- Chevron rotation for open groups ---------- */
     .slide .angle { margin-left: 6px; font-size: 11px; transition: transform .18s ease; }
     .slide.open > .side-menu__item .angle { transform: rotate(90deg); }
 
-    .slide-menu { padding-left: 44px; margin: 6px 0 10px; display: none; }
+    .slide-menu { padding-left: 36px; margin: 6px 0 10px; display: none; }
 
-    /* ---------- Icon system (duotone) ---------- */
-    .icon-badge {
-        width: 30px; height: 30px; min-width: 30px;
-        border-radius: 10px; display: grid; place-items: center;
-        background: color-mix(in srgb, currentColor 14%, transparent);
-        box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 28%, transparent);
-    }
+    /* ---------- Icon (no badge) ---------- */
     .side-menu__icon {
-        width: 18px; height: 18px; flex-shrink: 0;
-        fill: currentColor; /* solid icons now use fill */
+        width: 20px;
+        height: 20px;
+        flex: 0 0 20px;        /* fixed column so the label lines up */
+        display: block;        /* ensures the svg occupies its box */
+        fill: currentColor;
+        margin-left: 2px;      /* slight optical balance */
     }
     .side-menu__icon .duo-1 { opacity: .25; }
     .side-menu__icon .duo-2 { opacity: 1; }
 
-    /* Per-icon color mapping */
+    /* Per-icon color mapping (drives currentColor) */
     .side-menu__icon[data-icon="dashboard"],    [data-icon="dashboard"] { color: var(--ico-dashboard); }
     .side-menu__icon[data-icon="users"],        [data-icon="users"] { color: var(--ico-users); }
     .side-menu__icon[data-icon="folder"],       [data-icon="folder"] { color: var(--ico-folder); }
@@ -471,20 +471,16 @@
     .side-menu__icon[data-icon="rider"],        [data-icon="rider"] { color: var(--ico-rider); }
     .side-menu__icon[data-icon="default"],      [data-icon="default"] { color: var(--ico-default); }
 
-    .side-menu__item.active .icon-badge {
-        background: color-mix(in srgb, currentColor 18%, transparent);
-        box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 36%, transparent);
-    }
-
+    /* Focus styles for accessibility */
     .side-menu__item:focus-visible,
     .sub-side-menu__item:focus-visible {
         outline: none; box-shadow: 0 0 0 2px #93c5fd;
     }
 
+    /* Compact mode for shorter viewports */
     @media (max-height: 800px) {
         .side-menu__item { padding: 9px 10px; }
-        .icon-badge { width: 28px; height: 28px; min-width: 28px; border-radius: 9px; }
-        .side-menu__icon { width: 17px; height: 17px; }
+        .side-menu__icon { width: 18px; height: 18px; flex-basis: 18px; }
     }
 </style>
 
