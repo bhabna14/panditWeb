@@ -2,18 +2,45 @@
 @php
     use Illuminate\Support\Facades\Auth;
     use Illuminate\Support\Str;
+    use App\Models\MenuItem;
 
     // Prefer View Composer; if not passed, compute here.
     if (!isset($menuRoots)) {
         /** @var \App\Models\Admin|null $admin */
         $admin = Auth::guard('admin')->user();
-        $menuRoots = \App\Models\MenuItem::treeForAdmin($admin);
+        $menuRoots = MenuItem::treeForAdmin($admin);
     }
+
+    // ---- Final defensive sort (NULLS LAST) on roots and each level ----
+    $sortFn = function ($items) use (&$sortFn) {
+        $items = collect($items)->sort(function ($a, $b) {
+            $ao = $a->order ?? PHP_INT_MAX;
+            $bo = $b->order ?? PHP_INT_MAX;
+
+            if ($ao === $bo) {
+                $tA = mb_strtolower((string) $a->title);
+                $tB = mb_strtolower((string) $b->title);
+                if ($tA === $tB) {
+                    return $a->id <=> $b->id;
+                }
+                return $tA <=> $tB;
+            }
+            return $ao <=> $bo;
+        })->values();
+
+        // Recurse children
+        return $items->map(function ($i) use ($sortFn) {
+            if ($i->childrenRecursive) {
+                $i->setRelation('childrenRecursive', $sortFn($i->childrenRecursive));
+            }
+            return $i;
+        });
+    };
+
+    $menuRoots = $sortFn($menuRoots);
 
     /**
      * SVG icon library (outline style).
-     * Set the "icon" column of menu_items to one of these keys.
-     * You can add more keys or override as needed.
      */
     $iconMap = [
         // Core

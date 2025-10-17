@@ -2,94 +2,127 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
-use Throwable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class MenuItem extends Model
 {
-    use HasFactory;
+    // If your table is not "menu_items", uncomment the next line:
+    // protected $table = 'menu_items';
 
     protected $fillable = [
-        'title',
-        'route',
-        'icon',
-        'type',
-        'parent_id',
-        'order',
-        'status',  // using string status (active/inactive)
+        'title', 'route', 'icon', 'type', 'parent_id', 'order', 'status',
     ];
 
     protected $casts = [
-        'order' => 'integer',
+        'parent_id' => 'integer',
+        'order'     => 'integer',
     ];
 
-    public function children()
+    /**
+     * Children relationship (NOT recursive) ordered by `order` ASC (NULLS LAST), then by id.
+     */
+    public function children(): HasMany
     {
-        return $this->hasMany(self::class, 'parent_id')->orderBy('order');
+        return $this->hasMany(MenuItem::class, 'parent_id')
+            ->orderByRaw('CASE WHEN "order" IS NULL THEN 1 ELSE 0 END ASC') // put non-null first
+            ->orderBy('order', 'asc')
+            ->orderBy('id', 'asc');
     }
 
+    /**
+     * Children recursive: eager-loads children->children... all pre-sorted.
+     */
     public function childrenRecursive()
     {
-        return $this->children()->with('childrenRecursive');
+        return $this->children()->with(['childrenRecursive']);
     }
 
-    public function parent()
-    {
-        return $this->belongsTo(self::class, 'parent_id');
-    }
-
+    /**
+     * Optional accessor to normalize an href from a route or a URL-like value.
+     * Expects:
+     * - type = 'link' uses route()/url() from 'route' column
+     * - type = 'group' or 'category' acts as toggles (no href)
+     */
     public function getHrefAttribute(): string
     {
-        if (blank($this->route)) {
+        // If type is group/category, no navigable href:
+        if (in_array($this->type, ['group', 'category'], true)) {
             return 'javascript:void(0);';
         }
 
-        $val = trim($this->route);
+        $val = (string) ($this->route ?? '');
 
-        if (Str::startsWith($val, ['http://', 'https://', '/', 'admin/'])) {
-            return url($val);
-        }
-
-        try {
+        // If it's a named route:
+        if ($val && app('router')->has($val)) {
             return route($val);
-        } catch (Throwable $e) {
+        }
+
+        // If it's already a URL-ish path, return url($val)
+        if ($val && (str_starts_with($val, 'http') || str_starts_with($val, '/'))) {
             return url($val);
         }
+
+        // Fallback to '#'
+        return '#';
     }
 
-    public function scopeRoots($query)
+    /**
+     * Build a tree of menu roots for the given admin (pre-sorted).
+     * Adjust the query to apply your visibility / role rules as needed.
+     */
+    public static function treeForAdmin($admin): Collection
     {
-        return $query->whereNull('parent_id');
-    }
-
-    public static function treeForAdmin(?\App\Models\Admin $admin)
-    {
+        // Base constraint: only active items
         $query = static::query()
-            ->where('status', 'active')   // ✅ matches your schema
-            ->orderBy('order');
+            ->where('status', 'active')
+            // order roots deterministically; children are ordered via relation
+            ->whereNull('parent_id')
+            ->orderByRaw('CASE WHEN "order" IS NULL THEN 1 ELSE 0 END ASC')
+            ->orderBy('order', 'asc')
+            ->orderBy('id', 'asc')
+            ->with(['childrenRecursive']); // will load ordered children
 
-        if (!$admin) {
-            return $query->with('childrenRecursive')->roots()->get();
-        }
+        // TODO: apply role/permission filters if you have any, e.g.:
+        // $query->where(fn($q) => ... based on $admin);
 
-        $allowedIds = $admin->menuItems()->pluck('menu_items.id')->toArray();
+        $roots = $query->get();
 
-        $roots = $query->with('childrenRecursive')->roots()->get();
+        // Defensive sort (keeps things stable even if DB col is null)
+        $roots = self::sortCollection($roots);
 
-        $filterTree = function ($items) use (&$filterTree, $allowedIds) {
-            return $items->map(function ($item) use ($filterTree, $allowedIds) {
-                $item->childrenRecursive = $filterTree($item->childrenRecursive);
+        return $roots;
+    }
 
-                $isAllowed       = in_array($item->id, $allowedIds, true);
-                $hasVisibleChild = $item->childrenRecursive->isNotEmpty();
+    /**
+     * Recursively sort a collection by `order` asc (NULLS LAST) then title asc as tie-breaker.
+     */
+    public static function sortCollection(Collection $items): Collection
+    {
+        $sorted = $items->sort(function ($a, $b) {
+            $ao = $a->order ?? PHP_INT_MAX;
+            $bo = $b->order ?? PHP_INT_MAX;
 
-                $keep = $isAllowed || $hasVisibleChild || $item->type === 'category';
-                return $keep ? $item : null;
-            })->filter()->values();
-        };
+            if ($ao === $bo) {
+                // Tie-breaker: title asc, then id asc
+                $tA = mb_strtolower((string) $a->title);
+                $tB = mb_strtolower((string) $b->title);
+                if ($tA === $tB) {
+                    return $a->id <=> $b->id;
+                }
+                return $tA <=> $tB;
+            }
+            return $ao <=> $bo;
+        })->values();
 
-        return $filterTree($roots);
+        // Recurse into children (if already loaded)
+        $sorted->each(function ($item) {
+            if ($item->relationLoaded('childrenRecursive')) {
+                $item->setRelation('childrenRecursive', self::sortCollection(collect($item->childrenRecursive)));
+            }
+        });
+
+        return $sorted;
     }
 }
