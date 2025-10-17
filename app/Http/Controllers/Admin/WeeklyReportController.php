@@ -87,7 +87,6 @@ class WeeklyReportController extends Controller
         }
 
         /* ================= Customer (UPDATED per your logic) ================= */
-
         // NEW: users who have exactly one subscription overall, and that subscription was created that day with status='pending'
         $firstTimeUserIds = Subscription::query()
             ->select('user_id')
