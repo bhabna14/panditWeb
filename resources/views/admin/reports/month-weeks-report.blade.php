@@ -287,7 +287,7 @@
         {{-- TABS: Weeks FIRST (active), Month SECOND --}}
         <div class="nu-tabs p-3">
             <ul class="nav nav-pills nu mb-3 row g-2" id="reportTabs" role="tablist">
-                <li class="nav-item col-12 col-lg-6" role="presentation">
+                <li class="nav-item col-12 col-lg-6 text-ceter" role="presentation">
                     <button class="nav-link active w-100" id="tab-weeks" data-bs-toggle="pill" data-bs-target="#pane-weeks"
                         type="button" role="tab" aria-controls="pane-weeks" aria-selected="true" data-color="cyan">
                         Weekly Report
