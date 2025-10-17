@@ -20,9 +20,7 @@
             if ($ao === $bo) {
                 $tA = mb_strtolower((string) $a->title);
                 $tB = mb_strtolower((string) $b->title);
-                if ($tA === $tB) {
-                    return $a->id <=> $b->id;
-                }
+                if ($tA === $tB) return $a->id <=> $b->id;
                 return $tA <=> $tB;
             }
             return $ao <=> $bo;
@@ -261,7 +259,7 @@
         $key = trim((string) ($item->icon ?? ''));
         $svg = $iconMap[$key] ?? $defaultIcon;
         $svg = preg_replace('/<svg\b/', '<svg data-icon="' . e($key ?: 'default') . '"', $svg, 1);
-        return $svg; // <-- no badge wrapper; icon only
+        return $svg; // icon only
     };
 
     // Active helpers (match current URL, safer segment-aware check)
@@ -327,159 +325,223 @@
     /* ---------- Theme tokens ---------- */
     :root {
         --sidebar-bg: #ffffff;
-        --sidebar-border: #eef0f4;
+        --sidebar-border: #ecedf2;
         --ink: #0f172a;
-        --ink-muted: #6b7280;
 
-        --active-bg: linear-gradient(135deg, #eef3ff 0%, #eaf8ff 100%);
-        --hover-bg: color-mix(in srgb, #3b82f6 6%, transparent);
+        /* Base colorful canvas with a very subtle diagonal pattern */
+        --sidebar-tint-1: #f7fbff;
+        --sidebar-tint-2: #fff7fb;
+
+        /* Active & hover will be blended from item color via color-mix */
+        --hover-strength: 9%;
+        --active-strength: 16%;
+        --ring: #93c5fd;
 
         /* Icon color palette by key */
-        --ico-dashboard: #4f46e5;
-        --ico-users: #10b981;
-        --ico-folder: #8b5cf6;
-        --ico-list: #06b6d4;
-        --ico-report: #f59e0b;
-        --ico-calendar: #ef4444;
-        --ico-settings: #64748b;
-        --ico-link: #0ea5e9;
-        --ico-orders: #ec4899;
-        --ico-products: #22c55e;
-        --ico-payments: #14b8a6;
-        --ico-subscriptions: #a855f7;
-        --ico-analytics: #eab308;
-        --ico-bell: #f97316;
-        --ico-mail: #3b82f6;
-        --ico-shield: #22d3ee;
-        --ico-lock: #94a3b8;
-        --ico-tag: #fb7185;
-        --ico-coupon: #34d399;
-        --ico-truck: #60a5fa;
-        --ico-location: #f43f5e;
-        --ico-wallet: #0ea5e9;
-        --ico-clipboard: #84cc16;
-        --ico-sparkles: #a78bfa;
-        --ico-star: #f59e0b;
-        --ico-vendor: #06b6d4;
-        --ico-marketing: #ef4444;
-        --ico-delivery: #60a5fa;
-        --ico-rider: #f97316;
-        --ico-default: #4f46e5;
+        --ico-dashboard: #6366f1;   /* indigo */
+        --ico-users: #10b981;       /* emerald */
+        --ico-folder: #8b5cf6;      /* violet */
+        --ico-list: #06b6d4;        /* cyan */
+        --ico-report: #f59e0b;      /* amber */
+        --ico-calendar: #ef4444;    /* red */
+        --ico-settings: #64748b;    /* slate */
+        --ico-link: #0ea5e9;        /* sky */
+        --ico-orders: #ec4899;      /* pink */
+        --ico-products: #22c55e;    /* green */
+        --ico-payments: #14b8a6;    /* teal */
+        --ico-subscriptions: #a855f7;/* purple */
+        --ico-analytics: #eab308;   /* yellow */
+        --ico-bell: #f97316;        /* orange */
+        --ico-mail: #3b82f6;        /* blue */
+        --ico-shield: #22d3ee;      /* cyan-light */
+        --ico-lock: #94a3b8;        /* slate-400 */
+        --ico-tag: #fb7185;         /* rose */
+        --ico-coupon: #34d399;      /* emerald-light */
+        --ico-truck: #60a5fa;       /* blue-light */
+        --ico-location: #f43f5e;    /* rose-600 */
+        --ico-wallet: #0ea5e9;      /* sky */
+        --ico-clipboard: #84cc16;   /* lime */
+        --ico-sparkles: #a78bfa;    /* violet-300 */
+        --ico-star: #f59e0b;        /* amber */
+        --ico-vendor: #06b6d4;      /* cyan */
+        --ico-marketing: #ef4444;   /* red */
+        --ico-delivery: #60a5fa;    /* blue */
+        --ico-rider: #f97316;       /* orange */
+        --ico-default: #6366f1;     /* fallback indigo */
     }
 
     /* ---------- Container ---------- */
     .app-sidebar {
-        background: var(--sidebar-bg);
+        background:
+          radial-gradient(1200px 500px at -10% 0%, var(--sidebar-tint-1) 0%, transparent 60%),
+          radial-gradient(800px 600px at 120% 20%, var(--sidebar-tint-2) 0%, transparent 55%),
+          var(--sidebar-bg);
         border-right: 1px solid var(--sidebar-border);
     }
     .main-sidebar-header {
-        background: var(--sidebar-bg);
+        background: transparent;
         border-bottom: 1px solid var(--sidebar-border);
         padding: 14px 16px;
     }
 
+    /* ---------- Category ---------- */
     .side-item-category {
         padding: 12px 14px 8px;
         font-size: 12px;
         letter-spacing: .12em;
         text-transform: uppercase;
-        color: #0f0f0f;
-        opacity: .7;
+        color: #334155;
+        opacity: .8;
+        background:
+          linear-gradient(90deg, #ecfeff 0%, transparent 60%);
+        border-left: 3px solid #06b6d4;
+        border-radius: 6px;
+        margin: 6px 8px 6px;
     }
 
-    .side-menu { padding: 8px 10px 10px; }
+    /* ---------- List ---------- */
+    .side-menu { padding: 10px 10px 12px; }
 
     /* ---------- Items ---------- */
     .side-menu__item,
     .sub-side-menu__item {
         position: relative;
         display: flex;
-        align-items: center;         /* centers icon vertically */
+        align-items: center;
         gap: 12px;
         padding: 10px 12px;
-        border-radius: 10px;
+        border-radius: 12px;
         color: var(--ink);
         text-decoration: none;
-        transition: background .16s ease, color .16s ease, box-shadow .16s ease;
+        transition: background .16s ease, color .16s ease, box-shadow .16s ease, transform .08s ease;
         will-change: background, color, transform;
+        isolation: isolate; /* keep glow under text */
     }
-    .side-menu__item:hover { background: var(--hover-bg); }
+
+    /* Each item knows its main color via [data-icon] -> sets currentColor */
+    .side-menu__item:hover {
+        background:
+          linear-gradient(135deg,
+            color-mix(in srgb, currentColor var(--hover-strength), transparent) 0%,
+            color-mix(in srgb, currentColor calc(var(--hover-strength) * 0.6), transparent) 100%);
+        box-shadow: 0 1px 0 0 color-mix(in srgb, currentColor 12%, transparent);
+        transform: translateY(-0.5px);
+    }
     .side-menu__item.active {
-        background: var(--active-bg);
-        box-shadow: inset 0 0 0 1px rgba(79,70,229,.14);
+        background:
+          linear-gradient(135deg,
+            color-mix(in srgb, currentColor var(--active-strength), white 0%) 0%,
+            color-mix(in srgb, currentColor calc(var(--active-strength) * 1.3), white 0%) 100%);
+        box-shadow:
+          inset 0 0 0 1px color-mix(in srgb, currentColor 28%, transparent),
+          0 4px 12px -6px color-mix(in srgb, currentColor 30%, transparent);
+    }
+    /* Color left border accent for active or open groups */
+    .slide.open > .side-menu__item::before,
+    .side-menu__item.active::before {
+        content: "";
+        position: absolute;
+        left: 6px;
+        top: 8px;
+        bottom: 8px;
+        width: 4px;
+        border-radius: 3px;
+        background: linear-gradient(180deg,
+          color-mix(in srgb, currentColor 60%, transparent),
+          color-mix(in srgb, currentColor 30%, transparent));
     }
 
     .side-menu__label { font-size: 14px; line-height: 1.2; flex: 1; }
 
+    /* ---------- Sub items ---------- */
+    .slide-menu { padding-left: 38px; margin: 6px 0 10px; display: none; }
     .sub-side-menu__item {
-        font-size: 13px; padding: 8px 12px; border-radius: 8px; color: #1f2937;
+        font-size: 13px;
+        padding: 8px 12px 8px 24px;
+        border-radius: 10px;
+        color: #1f2937;
     }
-    .sub-side-menu__item:hover { background: color-mix(in srgb, #6366f1 7%, transparent); }
+    .sub-side-menu__item::before {
+        /* tiny colored dot driven by parent color */
+        content: "";
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        transform: translateY(-50%);
+        background: radial-gradient(circle at 40% 40%, currentColor 0%, color-mix(in srgb, currentColor 30%, transparent) 60%, transparent 61%);
+        opacity: .9;
+    }
+    .sub-side-menu__item:hover {
+        background: color-mix(in srgb, currentColor 10%, transparent);
+    }
     .sub-side-menu__item.active {
-        background: var(--active-bg);
-        box-shadow: inset 0 0 0 1px rgba(99,102,241,.16);
+        background: color-mix(in srgb, currentColor 14%, white 0%);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 28%, transparent);
         color: #0f172a;
     }
 
     /* ---------- Chevron rotation for open groups ---------- */
-    .slide .angle { margin-left: 6px; font-size: 11px; transition: transform .18s ease; }
+    .slide .angle { margin-left: 6px; font-size: 11px; transition: transform .18s ease; opacity: .9; }
     .slide.open > .side-menu__item .angle { transform: rotate(90deg); }
-
-    .slide-menu { padding-left: 36px; margin: 6px 0 10px; display: none; }
 
     /* ---------- Icon (no badge) ---------- */
     .side-menu__icon {
         width: 20px;
         height: 20px;
-        flex: 0 0 20px;        /* fixed column so the label lines up */
-        display: block;        /* ensures the svg occupies its box */
-        fill: currentColor;
-        margin-left: 2px;      /* slight optical balance */
+        flex: 0 0 20px;      /* fixed icon column */
+        display: block;
+        fill: currentColor;  /* duotone layers use currentColor with opacity */
+        margin-left: 2px;    /* slight optical balance */
+        filter: drop-shadow(0 0 0 color-mix(in srgb, currentColor 0%, transparent));
     }
     .side-menu__icon .duo-1 { opacity: .25; }
     .side-menu__icon .duo-2 { opacity: 1; }
 
-    /* Per-icon color mapping (drives currentColor) */
-    .side-menu__icon[data-icon="dashboard"],    [data-icon="dashboard"] { color: var(--ico-dashboard); }
-    .side-menu__icon[data-icon="users"],        [data-icon="users"] { color: var(--ico-users); }
-    .side-menu__icon[data-icon="folder"],       [data-icon="folder"] { color: var(--ico-folder); }
-    .side-menu__icon[data-icon="list"],         [data-icon="list"] { color: var(--ico-list); }
-    .side-menu__icon[data-icon="report"],       [data-icon="report"] { color: var(--ico-report); }
-    .side-menu__icon[data-icon="calendar"],     [data-icon="calendar"] { color: var(--ico-calendar); }
-    .side-menu__icon[data-icon="settings"],     [data-icon="settings"] { color: var(--ico-settings); }
-    .side-menu__icon[data-icon="link"],         [data-icon="link"] { color: var(--ico-link); }
-    .side-menu__icon[data-icon="orders"],       [data-icon="orders"] { color: var(--ico-orders); }
-    .side-menu__icon[data-icon="products"],     [data-icon="products"] { color: var(--ico-products); }
-    .side-menu__icon[data-icon="payments"],     [data-icon="payments"] { color: var(--ico-payments); }
-    .side-menu__icon[data-icon="subscriptions"],[data-icon="subscriptions"] { color: var(--ico-subscriptions); }
-    .side-menu__icon[data-icon="analytics"],    [data-icon="analytics"] { color: var(--ico-analytics); }
-    .side-menu__icon[data-icon="bell"],         [data-icon="bell"] { color: var(--ico-bell); }
-    .side-menu__icon[data-icon="mail"],         [data-icon="mail"] { color: var(--ico-mail); }
-    .side-menu__icon[data-icon="shield"],       [data-icon="shield"] { color: var(--ico-shield); }
-    .side-menu__icon[data-icon="lock"],         [data-icon="lock"] { color: var(--ico-lock); }
-    .side-menu__icon[data-icon="tag"],          [data-icon="tag"] { color: var(--ico-tag); }
-    .side-menu__icon[data-icon="coupon"],       [data-icon="coupon"] { color: var(--ico-coupon); }
-    .side-menu__icon[data-icon="truck"],        [data-icon="truck"] { color: var(--ico-truck); }
-    .side-menu__icon[data-icon="location"],     [data-icon="location"] { color: var(--ico-location); }
-    .side-menu__icon[data-icon="wallet"],       [data-icon="wallet"] { color: var(--ico-wallet); }
-    .side-menu__icon[data-icon="clipboard"],    [data-icon="clipboard"] { color: var(--ico-clipboard); }
-    .side-menu__icon[data-icon="sparkles"],     [data-icon="sparkles"] { color: var(--ico-sparkles); }
-    .side-menu__icon[data-icon="star"],         [data-icon="star"] { color: var(--ico-star); }
-    .side-menu__icon[data-icon="vendor"],       [data-icon="vendor"] { color: var(--ico-vendor); }
-    .side-menu__icon[data-icon="marketing"],    [data-icon="marketing"] { color: var(--ico-marketing); }
-    .side-menu__icon[data-icon="delivery"],     [data-icon="delivery"] { color: var(--ico-delivery); }
-    .side-menu__icon[data-icon="rider"],        [data-icon="rider"] { color: var(--ico-rider); }
-    .side-menu__icon[data-icon="default"],      [data-icon="default"] { color: var(--ico-default); }
+    /* Per-icon color mapping (drives currentColor via [data-icon]) */
+    .side-menu__icon[data-icon="dashboard"],     [data-icon="dashboard"] { color: var(--ico-dashboard); }
+    .side-menu__icon[data-icon="users"],         [data-icon="users"] { color: var(--ico-users); }
+    .side-menu__icon[data-icon="folder"],        [data-icon="folder"] { color: var(--ico-folder); }
+    .side-menu__icon[data-icon="list"],          [data-icon="list"] { color: var(--ico-list); }
+    .side-menu__icon[data-icon="report"],        [data-icon="report"] { color: var(--ico-report); }
+    .side-menu__icon[data-icon="calendar"],      [data-icon="calendar"] { color: var(--ico-calendar); }
+    .side-menu__icon[data-icon="settings"],      [data-icon="settings"] { color: var(--ico-settings); }
+    .side-menu__icon[data-icon="link"],          [data-icon="link"] { color: var(--ico-link); }
+    .side-menu__icon[data-icon="orders"],        [data-icon="orders"] { color: var(--ico-orders); }
+    .side-menu__icon[data-icon="products"],      [data-icon="products"] { color: var(--ico-products); }
+    .side-menu__icon[data-icon="payments"],      [data-icon="payments"] { color: var(--ico-payments); }
+    .side-menu__icon[data-icon="subscriptions"], [data-icon="subscriptions"] { color: var(--ico-subscriptions); }
+    .side-menu__icon[data-icon="analytics"],     [data-icon="analytics"] { color: var(--ico-analytics); }
+    .side-menu__icon[data-icon="bell"],          [data-icon="bell"] { color: var(--ico-bell); }
+    .side-menu__icon[data-icon="mail"],          [data-icon="mail"] { color: var(--ico-mail); }
+    .side-menu__icon[data-icon="shield"],        [data-icon="shield"] { color: var(--ico-shield); }
+    .side-menu__icon[data-icon="lock"],          [data-icon="lock"] { color: var(--ico-lock); }
+    .side-menu__icon[data-icon="tag"],           [data-icon="tag"] { color: var(--ico-tag); }
+    .side-menu__icon[data-icon="coupon"],        [data-icon="coupon"] { color: var(--ico-coupon); }
+    .side-menu__icon[data-icon="truck"],         [data-icon="truck"] { color: var(--ico-truck); }
+    .side-menu__icon[data-icon="location"],      [data-icon="location"] { color: var(--ico-location); }
+    .side-menu__icon[data-icon="wallet"],        [data-icon="wallet"] { color: var(--ico-wallet); }
+    .side-menu__icon[data-icon="clipboard"],     [data-icon="clipboard"] { color: var(--ico-clipboard); }
+    .side-menu__icon[data-icon="sparkles"],      [data-icon="sparkles"] { color: var(--ico-sparkles); }
+    .side-menu__icon[data-icon="star"],          [data-icon="star"] { color: var(--ico-star); }
+    .side-menu__icon[data-icon="vendor"],        [data-icon="vendor"] { color: var(--ico-vendor); }
+    .side-menu__icon[data-icon="marketing"],     [data-icon="marketing"] { color: var(--ico-marketing); }
+    .side-menu__icon[data-icon="delivery"],      [data-icon="delivery"] { color: var(--ico-delivery); }
+    .side-menu__icon[data-icon="rider"],         [data-icon="rider"] { color: var(--ico-rider); }
+    .side-menu__icon[data-icon="default"],       [data-icon="default"] { color: var(--ico-default); }
 
-    /* Focus styles for accessibility */
+    /* Focus ring for keyboard users */
     .side-menu__item:focus-visible,
     .sub-side-menu__item:focus-visible {
-        outline: none; box-shadow: 0 0 0 2px #93c5fd;
+        outline: none;
+        box-shadow: 0 0 0 2px var(--ring);
     }
 
     /* Compact mode for shorter viewports */
     @media (max-height: 800px) {
         .side-menu__item { padding: 9px 10px; }
+        .sub-side-menu__item { padding: 7px 10px 7px 22px; }
         .side-menu__icon { width: 18px; height: 18px; flex-basis: 18px; }
     }
 </style>
@@ -498,7 +560,7 @@
 
         <div class="main-sidemenu">
             <div class="slide-left disabled" id="slide-left" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.293z" />
                 </svg>
             </div>
@@ -509,7 +571,7 @@
             </ul>
 
             <div class="slide-right" id="slide-right" aria-hidden="true">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="#7b8191" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M10.707 17.707 16.414 12l-5.707-5.707-1.414 1.414L13.586 12l-4.293 4.293z" />
                 </svg>
             </div>
