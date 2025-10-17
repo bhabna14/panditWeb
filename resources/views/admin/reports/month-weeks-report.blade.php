@@ -287,24 +287,25 @@
         {{-- TABS: Weeks FIRST (active), Month SECOND --}}
         <div class="nu-tabs p-3">
             <ul class="nav nav-pills nu mb-3 row g-2" id="reportTabs" role="tablist">
-                <li class="nav-item col-12 col-lg-6 text-ceter" role="presentation">
-                    <button class="nav-link active w-100" id="tab-weeks" data-bs-toggle="pill" data-bs-target="#pane-weeks"
-                        type="button" role="tab" aria-controls="pane-weeks" aria-selected="true" data-color="cyan">
+                <li class="nav-item col-12 col-lg-6" role="presentation">
+                    <button class="nav-link active w-100 d-flex justify-content-center align-items-center gap-2 text-center"
+                        id="tab-weeks" data-bs-toggle="pill" data-bs-target="#pane-weeks" type="button" role="tab"
+                        aria-controls="pane-weeks" aria-selected="true" data-color="cyan">
                         Weekly Report
                         <span class="badge bg-light text-dark ms-1">{{ count($weeks) }} Weeks</span>
                     </button>
                 </li>
                 <li class="nav-item col-12 col-lg-6" role="presentation">
-                    <button class="nav-link w-100" id="tab-month" data-bs-toggle="pill" data-bs-target="#pane-month"
-                        type="button" role="tab" aria-controls="pane-month" aria-selected="false" data-color="violet">
+                    <button class="nav-link w-100 d-flex justify-content-center align-items-center gap-2 text-center"
+                        id="tab-month" data-bs-toggle="pill" data-bs-target="#pane-month" type="button" role="tab"
+                        aria-controls="pane-month" aria-selected="false" data-color="violet">
                         Month Report
-                        <span
-                            class="badge bg-light text-dark ms-1">{{ \Carbon\Carbon::createFromDate($year, $month, 1)->format('M Y') }}</span>
+                        <span class="badge bg-light text-dark ms-1">
+                            {{ \Carbon\Carbon::createFromDate($year, $month, 1)->format('M Y') }}
+                        </span>
                     </button>
                 </li>
             </ul>
-
-
             <div class="tab-content" id="reportTabsContent">
                 {{-- ======================= WEEKS TAB (ACTIVE) ======================= --}}
                 <div class="tab-pane fade show active" id="pane-weeks" role="tabpanel" aria-labelledby="tab-weeks"
