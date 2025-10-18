@@ -36,101 +36,46 @@ class OfficeTransactionController extends Controller
         return view('admin.manage-office-transaction', compact('transactions', 'todayTotal', 'rangeTotal'));
     }
 
-    public function index()
-    {
-        return view('admin.office-ledger-transaction');
-    }
-
-    public function filter(Request $request)
+     public function filter(Request $request)
     {
         try {
             $from = $request->query('from_date');
             $to   = $request->query('to_date');
-            $cat  = $request->query('category');
 
-            // ------- Funds (IN) -------
-            $funds = Fund::query();
+            $q = OfficeTransaction::query();
 
-            if ($from) $funds->whereDate('date', '>=', $from);
-            if ($to)   $funds->whereDate('date', '<=', $to);
+            if ($from) $q->whereDate('date', '>=', $from);
+            if ($to)   $q->whereDate('date', '<=', $to);
 
-            // If your Fund has category column, uncomment:
-            // if ($cat)  $funds->where('category', $cat);
-
-            // Select only the columns we need; rename if your schema differs
-            $funds = $funds->get([
-                'id', 'date', 'amount', 'mode', 'received_by', 'description',
-                // 'category' // uncomment if exists
+            $transactions = $q->orderByDesc('date')->get([
+                'id', 'date', 'categories', 'amount', 'mode_of_payment', 'paid_by', 'description'
             ]);
 
-            // ------- Payments (OUT) -------
-            $payments = OfficeTransaction::query();
+            // Totals
+            $rangeTotal = (float) $transactions->sum('amount');
 
-            if ($from) $payments->whereDate('date', '>=', $from);
-            if ($to)   $payments->whereDate('date', '<=', $to);
-            if ($cat)  $payments->where('categories', $cat);
+            // Today total (based on app timezone)
+            $today = Carbon::today(config('app.timezone'))->format('Y-m-d');
+            $todayTotal = (float) OfficeTransaction::whereDate('date', $today)->sum('amount');
 
-            $payments = $payments->get([
-                'id', 'date', 'amount', 'mode_of_payment', 'paid_by', 'description', 'categories'
-            ]);
-
-            // ------- Build ledger rows -------
-            $rows = [];
-
-            // IN rows from funds
-            foreach ($funds as $i => $f) {
-                $rows[] = [
-                    'sl'          => count($rows) + 1,
-                    'date'        => Carbon::parse($f->date)->format('Y-m-d'),
-                    'category'    => $f->category ?? null,    // null if not present
-                    'direction'   => 'in',
-                    'amount'      => (float) $f->amount,
-                    'mode'        => $f->mode ?? null,        // 'cash'/'upi' etc.
-                    'paid_by'     => null,
-                    'received_by' => $f->received_by ?? null,
-                    'description' => $f->description ?? '',
-                    'source'      => 'fund',
-                    'source_id'   => $f->id,
+            // Map rows into the JSON shape the JS expects
+            $list = $transactions->map(function ($t) {
+                return [
+                    'id'              => $t->id,
+                    'date'            => Carbon::parse($t->date)->format('Y-m-d'),
+                    'categories'      => $t->categories,
+                    'amount'          => (float) $t->amount,
+                    'mode_of_payment' => $t->mode_of_payment,
+                    'paid_by'         => $t->paid_by,
+                    'description'     => $t->description ?? '',
                 ];
-            }
-
-            // OUT rows from payments
-            foreach ($payments as $p) {
-                $rows[] = [
-                    'sl'          => count($rows) + 1,
-                    'date'        => Carbon::parse($p->date)->format('Y-m-d'),
-                    'category'    => $p->categories ?? null,
-                    'direction'   => 'out',
-                    'amount'      => (float) $p->amount,
-                    'mode'        => $p->mode_of_payment ?? null, // 'cash'/'upi'
-                    'paid_by'     => $p->paid_by ?? null,
-                    'received_by' => null,
-                    'description' => $p->description ?? '',
-                    'source'      => 'payment',
-                    'source_id'   => $p->id,
-                ];
-            }
-
-            // Sort DESC by date, then by source_id to stabilize
-            usort($rows, function ($a, $b) {
-                if ($a['date'] === $b['date']) return $b['source_id'] <=> $a['source_id'];
-                return strcmp($b['date'], $a['date']);
-            });
-
-            // Metrics
-            $inTotal  = array_reduce($rows, fn($c, $r) => $c + ($r['direction'] === 'in'  ? $r['amount'] : 0), 0);
-            $outTotal = array_reduce($rows, fn($c, $r) => $c + ($r['direction'] === 'out' ? $r['amount'] : 0), 0);
-            $netTotal = $inTotal - $outTotal;
-
-            // Re-number SL after sort
-            foreach ($rows as $i => &$r) $r['sl'] = $i + 1;
+            })->values();
 
             return response()->json([
-                'success'   => true,
-                'in_total'  => round($inTotal, 2),
-                'out_total' => round($outTotal, 2),
-                'net_total' => round($netTotal, 2),
-                'ledger'    => $rows,
+                'success'       => true,
+                'today_total'   => round($todayTotal, 2),
+                'range_total'   => round($rangeTotal, 2),
+                'transactions'  => $list,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -139,7 +84,7 @@ class OfficeTransactionController extends Controller
             ], 500);
         }
     }
-
+    
     public function manageOfficeFund()
     {
         // Initial list (active + latest first)
