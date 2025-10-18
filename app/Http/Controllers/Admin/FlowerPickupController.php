@@ -11,6 +11,7 @@ use App\Models\RiderDetails;
 use App\Models\FlowerPickupDetails;
 use App\Models\FlowerPickupItems;
 use App\Models\FlowerPickupRequest;
+use Illuminate\Validation\Rule;
 
 use Illuminate\Support\Facades\Log;
 
@@ -350,55 +351,65 @@ class FlowerPickupController extends Controller
  
 public function saveFlowerPickupAssignRider(Request $request)
 {
-    // ✅ FIX: correct table names (single underscore)
+    /**
+     * Instead of exists:table,column (which has been flaky due to table name variants),
+     * validate vendor_id and rider_id against the in-memory lists powering the selects.
+     * Do the same for flowers/units via DB-based exists (those table names are stable),
+     * but without the fragile array size coupling.
+     */
+
+    // These should be the same collections you pass to the Blade view
+    // If you're already passing $vendors/$riders/$flowers/$units to the view,
+    // you can fetch them again here OR (better) move saving into the same controller
+    // that renders the form and share via a dedicated FormRequest. For now:
+    $vendors = \App\Models\FlowerVendor::select('vendor_id')->get();
+    $riders  = \App\Models\RiderDetails::select('rider_id')->get();
+
     $rules = [
-        'vendor_id'     => 'required|exists:flower_vendor_details,vendor_id',
-        'pickup_date'   => 'required|date',
-        'delivery_date' => 'required|date|after_or_equal:pickup_date',
-        'rider_id'      => 'required|exists:flower_rider_details,rider_id',
+        'vendor_id'     => ['required', Rule::in($vendors->pluck('vendor_id')->all())],
+        'pickup_date'   => ['required','date'],
+        'delivery_date' => ['required','date','after_or_equal:pickup_date'],
+        'rider_id'      => ['required', Rule::in($riders->pluck('rider_id')->all())],
 
-        // Arrays
-        'flower_id'     => 'required|array|min:1',
-        'flower_id.*'   => 'required|exists:flower_products,product_id',
+        'flower_id'     => ['required','array','min:1'],
+        'flower_id.*'   => ['required','exists:flower_products,product_id'],
 
-        'unit_id'       => 'required|array|size:' . count($request->input('flower_id', [])),
-        'unit_id.*'     => 'required|exists:pooja_units,id',
+        'unit_id'       => ['required','array'],
+        'unit_id.*'     => ['required','exists:pooja_units,id'],
 
-        'quantity'      => 'required|array|size:' . count($request->input('flower_id', [])),
-        'quantity.*'    => 'required|numeric|min:0.01',
+        'quantity'      => ['required','array'],
+        'quantity.*'    => ['required','numeric','min:0.01'],
 
-        // price is optional; must be array if present; align size if present
-        'price'         => 'sometimes|array',
-        'price.*'       => 'nullable|numeric|min:0',
+        // price is optional
+        'price'         => ['sometimes','array'],
+        'price.*'       => ['nullable','numeric','min:0'],
     ];
 
     $messages = [
-        'unit_id.size'    => 'Unit rows must match the number of flower rows.',
-        'quantity.size'   => 'Quantity rows must match the number of flower rows.',
+        'vendor_id.in'  => 'Selected vendor is not valid.',
+        'rider_id.in'   => 'Selected rider is not valid.',
         'delivery_date.after_or_equal' => 'Delivery date must be same as or after pickup date.',
     ];
 
     $validated = $request->validate($rules, $messages);
 
-    // Build safe arrays
+    // Read arrays
     $flowerIds = $request->input('flower_id', []);
     $unitIds   = $request->input('unit_id',   []);
     $qtys      = $request->input('quantity',  []);
-    $prices    = $request->input('price',     []); // optional
+    $prices    = $request->input('price',     []); // may be missing
 
-    // ✅ ensure at least one usable row survives
+    // Defensive: make sure we only iterate over actual row count by flower_id
     $rowCount = count($flowerIds);
     if ($rowCount === 0) {
-        return back()->withErrors(['flower_id' => 'Add at least one row.'])->withInput();
+        return back()->withErrors(['flower_id' => 'Add at least one item row.'])->withInput();
     }
 
     try {
-        $result = DB::transaction(function () use ($request, $flowerIds, $unitIds, $qtys, $prices) {
-
-            // Generate unique pick_up_id
+        DB::transaction(function () use ($request, $flowerIds, $unitIds, $qtys, $prices, $rowCount) {
             $pickUpId = 'PICKUP-' . strtoupper(uniqid());
 
-            // Create header (delivery_date included)
+            /** @var \App\Models\FlowerPickupDetails $pickup */
             $pickup = \App\Models\FlowerPickupDetails::create([
                 'pick_up_id'     => $pickUpId,
                 'vendor_id'      => $request->vendor_id,
@@ -412,23 +423,22 @@ public function saveFlowerPickupAssignRider(Request $request)
                 'payment_id'     => null,
             ]);
 
-            $total = 0;
+            $total = 0.0;
 
-            for ($i = 0; $i < count($flowerIds); $i++) {
+            for ($i = 0; $i < $rowCount; $i++) {
                 $flowerId = $flowerIds[$i] ?? null;
                 $unitId   = $unitIds[$i]   ?? null;
                 $qty      = isset($qtys[$i]) ? (float) $qtys[$i] : null;
-                $price    = array_key_exists($i, $prices) && $prices[$i] !== null && $prices[$i] !== ''
-                            ? (float) $prices[$i]
-                            : null;
+                $price    = (array_key_exists($i, $prices) && $prices[$i] !== null && $prices[$i] !== '')
+                            ? (float) $prices[$i] : null;
 
-                // Create item row
+                // Create item
                 \App\Models\FlowerPickupItems::create([
                     'pick_up_id' => $pickUpId,
                     'flower_id'  => $flowerId,
                     'unit_id'    => $unitId,
                     'quantity'   => $qty ?? 0,
-                    'price'      => $price, // nullable
+                    'price'      => $price,
                 ]);
 
                 if ($price !== null && $qty !== null && $qty > 0) {
@@ -436,21 +446,15 @@ public function saveFlowerPickupAssignRider(Request $request)
                 }
             }
 
-            // Update header with final total
             $pickup->update(['total_price' => $total]);
-
-            return $pickup;
         });
 
-        return redirect()
-            ->back()
-            ->with('success', 'Flower pickup details saved successfully!');
-
+        return back()->with('success', 'Flower pickup details saved successfully!');
     } catch (\Throwable $e) {
-        Log::error('Failed to save pickup', ['err' => $e->getMessage()]);
-        return redirect()->back()->withErrors([
-            'general' => 'Could not save pickup. Please try again.'
-        ])->withInput();
+        Log::error('Pickup save error', ['msg' => $e->getMessage()]);
+        return back()
+            ->withErrors(['general' => 'Could not save pickup. Please try again.'])
+            ->withInput();
     }
 }
 
