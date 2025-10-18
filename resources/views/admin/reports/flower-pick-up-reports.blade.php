@@ -154,6 +154,49 @@
             color: #374151;
         }
 
+        /* Vendor cards */
+        .vendor-card {
+            position: relative;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: var(--sh-sm);
+            height: 100%;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .vendor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(2, 6, 23, .10);
+        }
+
+        .vendor-title {
+            font-weight: 800;
+            margin-bottom: .4rem;
+        }
+
+        .vendor-sub {
+            color: var(--muted);
+            font-size: .85rem;
+        }
+
+        .vendor-amount {
+            font-size: 1.25rem;
+            font-weight: 900;
+        }
+
+        .vendor-chip {
+            display: inline-block;
+            padding: .25rem .6rem;
+            border-radius: 999px;
+            background: #F3F6FF;
+            border: 1px dashed var(--border);
+            font-size: .75rem;
+            font-weight: 700;
+            color: #334155;
+        }
+
         /* Table */
         .export-table .dataTables_wrapper .dt-buttons .btn {
             margin-left: .4rem;
@@ -283,6 +326,40 @@
         </div>
     </div>
 
+    {{-- Vendor Cards --}}
+    <div class="mb-3">
+        <h6 class="mb-2" style="font-weight:800;">Vendors</h6>
+        <div class="row g-3" id="vendorCards">
+            @foreach ($vendorSummaries ?? [] as $v)
+                <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
+                    <div class="vendor-card">
+                        <div class="vendor-title">{{ $v['vendor_name'] }}</div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="vendor-sub">Total Amount</div>
+                                <div class="vendor-amount">₹{{ number_format($v['total_amount'], 2) }}</div>
+                            </div>
+                            <div class="text-end">
+                                <span class="vendor-chip">{{ $v['pickups_count'] }} pickups</span>
+                                @if (!empty($v['last_pickup']))
+                                    <div class="vendor-sub mt-1">Last:
+                                        {{ \Carbon\Carbon::parse($v['last_pickup'])->format('d M Y') }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+            @if (empty($vendorSummaries) || count($vendorSummaries) === 0)
+                <div class="col-12">
+                    <div class="vendor-card text-center">
+                        <span class="vendor-sub">No data available for current filters.</span>
+                    </div>
+                </div>
+            @endif
+        </div>
+    </div>
+
     {{-- Table --}}
     <div class="table-responsive export-table">
         <table id="file-datatable" class="table table-bordered table-hover align-middle w-100">
@@ -390,6 +467,10 @@
             n = parseFloat(n || 0);
             return '₹' + n.toFixed(2);
         }
+        // nice trimming: 12.00 -> 12 ; 12.50 -> 12.5
+        function trim2(n) {
+            return (parseFloat(n || 0)).toFixed(2).replace(/\.?0+$/, '');
+        }
 
         $(function() {
             $('.select2').select2({
@@ -453,6 +534,48 @@
                 $('#searchBtn').trigger('click');
             });
 
+            // Vendor cards renderer
+            function renderVendorCards(vendorSummaries) {
+                const $wrap = $('#vendorCards');
+                $wrap.empty();
+
+                if (!vendorSummaries || vendorSummaries.length === 0) {
+                    $wrap.append(`
+                        <div class="col-12">
+                            <div class="vendor-card text-center">
+                                <span class="vendor-sub">No data available for current filters.</span>
+                            </div>
+                        </div>
+                    `);
+                    return;
+                }
+
+                vendorSummaries.forEach(v => {
+                    const name = v.vendor_name || '—';
+                    const total = money(v.total_amount || 0);
+                    const count = v.pickups_count || 0;
+                    const last = v.last_pickup ? moment(v.last_pickup).format('DD MMM YYYY') : '';
+
+                    $wrap.append(`
+                        <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
+                            <div class="vendor-card">
+                                <div class="vendor-title">${name}</div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="vendor-sub">Total Amount</div>
+                                        <div class="vendor-amount">${total}</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="vendor-chip">${count} pickups</span>
+                                        ${last ? `<div class="vendor-sub mt-1">Last: ${last}</div>` : ``}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
             // DataTable
             const table = $('#file-datatable').DataTable({
                 responsive: true,
@@ -489,10 +612,9 @@
                     }
                 ],
                 columnDefs: [{
-                        targets: 6,
-                        className: 'text-end'
-                    } // price right-aligned
-                ]
+                    targets: 6,
+                    className: 'text-end'
+                }]
             });
 
             // Search (AJAX)
@@ -518,14 +640,13 @@
                         _token: $('meta[name="csrf-token"]').attr('content')
                     },
                     success: function(response) {
+                        // Rebuild table
                         table.clear();
-
                         (response.data || []).forEach(item => {
                             const items = (item.flower_pickup_items || []).map(i => {
                                 const flowerName = i.flower?.name || '—';
                                 const unitName = i.unit?.unit_name || '';
-                                const qty = (parseFloat(i.quantity || 0))
-                                    .toString();
+                                const qty = trim2(i.quantity);
                                 return `${flowerName} (${qty} ${unitName})`;
                             }).join('<br>');
 
@@ -546,9 +667,9 @@
                                 'status-badge--neutral';
 
                             table.row.add([
-                                moment(item.pickup_date).isValid() ? moment(item
-                                    .pickup_date).format('DD MMM YYYY') : (item
-                                    .pickup_date || '—'),
+                                moment(item.pickup_date).isValid() ?
+                                moment(item.pickup_date).format('DD MMM YYYY') :
+                                (item.pickup_date || '—'),
                                 item.vendor?.vendor_name || '—',
                                 item.rider?.rider_name || '—',
                                 capFirst(item.paid_by),
@@ -557,11 +678,14 @@
                                 money(item.total_price)
                             ]);
                         });
-
                         table.draw(false);
 
+                        // KPIs
                         $('#totalPrice').text(money(response.total_price));
                         $('#todayPrice').text(money(response.today_price));
+
+                        // Vendor cards (comes pre-aggregated from backend)
+                        renderVendorCards(response.vendor_summaries || []);
                     },
                     error: function() {
                         Swal.fire('Error', 'Unable to fetch data.', 'error');
