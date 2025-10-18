@@ -49,7 +49,7 @@
         <div class="alert alert-danger">{{ $message }}</div>
     @enderror
 
-    <form method="POST" action="{{ route('storeFlowerPickup') }}" novalidate>
+    <form method="POST" action="{{ route('admin.storeFlowerPickup') }}" novalidate>
         @csrf
 
         {{-- PICKUP & DELIVERY --}}
