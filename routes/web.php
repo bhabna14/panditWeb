@@ -873,6 +873,8 @@ Route::controller(OfficeTransactionController::class)->group(function () {
     Route::get('/office-ledger/filter', 'filterLedger')->name('officeLedger.filter');
     Route::put('/office-transactions/{id}', 'update')->name('officeTransactions.update');
     Route::delete('/office-transactions/{id}', 'destroy')->name('officeTransactions.destroy');
+    Route::get('/office-transactions/filter', 'filter')
+    ->name('officeTransactions.filter');
 });
 
 Route::controller(ReferController::class)->group(function() {

@@ -43,7 +43,6 @@
         }
         .metric svg { stroke: var(--brand); }
 
-        /* Filters panel */
         .filters { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
 
         .quick-chip {
@@ -52,7 +51,6 @@
         }
         .quick-chip:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(79,70,229,.08); }
 
-        /* Tables */
         .table-premium { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
         .table-premium thead th {
             position: sticky; top: 0; z-index: 2; background: linear-gradient(180deg,#f9fbff,#f6f8fe);
@@ -60,13 +58,9 @@
         }
         .table-premium tbody td { vertical-align: middle; }
 
-        .badge-soft {
-            background: #eef3ff; color: var(--brand); border: 1px solid rgba(79,70,229,.25);
-            border-radius: 999px; padding: .25rem .5rem; font-weight: 600;
-        }
+        .badge-soft { background: #eef3ff; color: var(--brand); border: 1px solid rgba(79,70,229,.25); border-radius: 999px; padding: .25rem .5rem; font-weight: 600; }
         .text-capitalize { text-transform: capitalize; }
 
-        /* Buttons */
         .btn-brand {
             background: linear-gradient(135deg, var(--brand), var(--brand-2));
             border: none; color: #fff; box-shadow: 0 10px 20px rgba(79,70,229,.25);
@@ -75,7 +69,6 @@
         .btn-outline-brand { border-color: var(--brand); color: var(--brand); }
         .btn-outline-brand:hover { background: #eef3ff; border-color: var(--brand); color: var(--brand); }
 
-        /* Skeleton */
         .skeleton { position: relative; overflow: hidden; background: #eef2f7; border-radius: 6px; }
         .skeleton::after {
             content: ''; position: absolute; inset: 0; transform: translateX(-100%);
@@ -86,20 +79,7 @@
 
         .dt-buttons .btn { border-radius: 999px !important; }
         table.dataTable tbody tr:hover { background: #fbfdff; }
-        .dataTables_wrapper .dataTables_filter input {
-            border-radius: 999px; padding: .4rem .8rem; border: 1px solid var(--line);
-        }
-
-        /* In/Out chips */
-        .chip-in  { background: var(--success-bg); color: var(--success-fg); border: 1px solid var(--success-br); }
-        .chip-out { background: var(--danger-bg);  color: var(--danger-fg);  border: 1px solid var(--danger-br); }
-
-        /* Toolbar for ledger */
-        .toolbar {
-            display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; justify-content: flex-end; padding: .5rem 0;
-        }
-        .toolbar .btn-toggle { border-radius: 999px; padding: .35rem .75rem; }
-        .toolbar .btn-toggle.active { background: #eef3ff; border-color: var(--brand); color: var(--brand); }
+        .dataTables_wrapper .dataTables_filter input { border-radius: 999px; padding: .4rem .8rem; border: 1px solid var(--line); }
 
         .note-muted { color: var(--muted); font-size: .9rem; }
     </style>
@@ -186,9 +166,7 @@
                                     </span>
                                     <div>
                                         <div class="label">All-time Received</div>
-                                        <div class="value h4 mb-0">
-                                            ₹{{ number_format($ledgerInTotal ?? 0, 2) }}
-                                        </div>
+                                        <div class="value h4 mb-0">₹{{ number_format($ledgerInTotal ?? 0, 2) }}</div>
                                     </div>
                                 </div>
                                 <span class="badge-soft">Ledger</span>
@@ -207,9 +185,7 @@
                                     </span>
                                     <div>
                                         <div class="label">All-time Spent</div>
-                                        <div class="value h4 mb-0">
-                                            ₹{{ number_format($ledgerOutTotal ?? 0, 2) }}
-                                        </div>
+                                        <div class="value h4 mb-0">₹{{ number_format($ledgerOutTotal ?? 0, 2) }}</div>
                                     </div>
                                 </div>
                                 <span class="badge-soft">Ledger</span>
@@ -228,9 +204,7 @@
                                     </span>
                                     <div>
                                         <div class="label">All-time Balance</div>
-                                        <div class="value h4 mb-0">
-                                            ₹{{ number_format($ledgerNetTotal ?? 0, 2) }}
-                                        </div>
+                                        <div class="value h4 mb-0">₹{{ number_format($ledgerNetTotal ?? 0, 2) }}</div>
                                     </div>
                                 </div>
                                 <span class="badge-soft">Ledger</span>
@@ -238,7 +212,7 @@
                         </div>
                     </div>
 
-                    {{-- ======= FILTERS (shared by both sections) ======= --}}
+                    {{-- ======= FILTERS ======= --}}
                     <div class="filters mb-3">
                         <div class="row g-3 align-items-end">
                             <div class="col-md-3">
@@ -272,9 +246,7 @@
                                     </svg>
                                     Search
                                 </button>
-                                <button type="button" id="resetBtn" class="btn btn-outline-brand">
-                                    Reset
-                                </button>
+                                <button type="button" id="resetBtn" class="btn btn-outline-brand">Reset</button>
                             </div>
                         </div>
                         <div class="d-flex flex-wrap gap-2 mt-3">
@@ -286,16 +258,16 @@
                         </div>
                     </div>
 
-                    {{-- ======= LEDGER OPEN BUTTON ======= --}}
+                    {{-- ======= OPEN LEDGER IN NEW TAB ======= --}}
                     <div class="d-flex justify-content-end mb-3">
-                        <button type="button" class="btn btn-brand" data-bs-toggle="modal" data-bs-target="#ledgerModal" id="openLedgerBtn">
+                        <a href="#" id="openLedgerBtn" class="btn btn-brand" target="_blank" rel="noopener">
                             <svg width="18" height="18" class="me-1" viewBox="0 0 24 24"
                                  fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="3" y="4" width="18" height="14" rx="2"></rect>
                                 <path d="M7 10h10M7 14h6"></path>
                             </svg>
                             View Ledger
-                        </button>
+                        </a>
                     </div>
 
                     {{-- ======= TRANSACTIONS TABLE ======= --}}
@@ -304,222 +276,62 @@
                         <div class="table-responsive">
                             <table id="file-datatable" class="table table-hover align-middle text-nowrap mb-0">
                                 <thead>
-                                    <tr>
-                                        <th>Sl No.</th>
-                                        <th>Date</th>
-                                        <th>Categories</th>
-                                        <th class="text-end">Amount</th>
-                                        <th>Mode</th>
-                                        <th>Paid By</th>
-                                        <th>Description</th>
-                                        <th>Action</th>
-                                    </tr>
+                                <tr>
+                                    <th>Sl No.</th>
+                                    <th>Date</th>
+                                    <th>Categories</th>
+                                    <th class="text-end">Amount</th>
+                                    <th>Mode</th>
+                                    <th>Paid By</th>
+                                    <th>Description</th>
+                                    <th>Action</th>
+                                </tr>
                                 </thead>
                                 <tbody id="transactionsBody">
-                                    @foreach ($transactions as $transaction)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
-                                            <td><span class="badge-soft text-capitalize">{{ str_replace('_', ' ', $transaction->categories) }}</span></td>
-                                            <td class="text-end">₹{{ number_format($transaction->amount, 2) }}</td>
-                                            <td class="text-capitalize">{{ $transaction->mode_of_payment }}</td>
-                                            <td class="text-capitalize">{{ $transaction->paid_by }}</td>
-                                            <td>{{ $transaction->description }}</td>
-                                            <td class="d-flex gap-2">
-                                                <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
-                                                        data-bs-toggle="modal" data-bs-target="#editModal"
-                                                        data-id="{{ $transaction->id }}"
-                                                        data-date="{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}"
-                                                        data-categories="{{ $transaction->categories }}"
-                                                        data-amount="{{ $transaction->amount }}"
-                                                        data-mode_of_payment="{{ $transaction->mode_of_payment }}"
-                                                        data-paid_by="{{ $transaction->paid_by }}"
-                                                        data-description="{{ $transaction->description }}">
-                                                    Edit
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-danger btn-delete"
-                                                        data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                                        data-id="{{ $transaction->id }}">
-                                                    Delete
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    @endforeach
+                                @foreach ($transactions as $transaction)
+                                    <tr>
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}</td>
+                                        <td><span class="badge-soft text-capitalize">{{ str_replace('_', ' ', $transaction->categories) }}</span></td>
+                                        <td class="text-end">₹{{ number_format($transaction->amount, 2) }}</td>
+                                        <td class="text-capitalize">{{ $transaction->mode_of_payment }}</td>
+                                        <td class="text-capitalize">{{ $transaction->paid_by }}</td>
+                                        <td>{{ $transaction->description }}</td>
+                                        <td class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-brand btn-edit"
+                                                    data-bs-toggle="modal" data-bs-target="#editModal"
+                                                    data-id="{{ $transaction->id }}"
+                                                    data-date="{{ \Carbon\Carbon::parse($transaction->date)->format('Y-m-d') }}"
+                                                    data-categories="{{ $transaction->categories }}"
+                                                    data-amount="{{ $transaction->amount }}"
+                                                    data-mode_of_payment="{{ $transaction->mode_of_payment }}"
+                                                    data-paid_by="{{ $transaction->paid_by }}"
+                                                    data-description="{{ $transaction->description }}">
+                                                Edit
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger btn-delete"
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                    data-id="{{ $transaction->id }}">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                @endforeach
                                 </tbody>
                                 <tfoot class="table-light">
-                                    <tr>
-                                        <th colspan="3" class="text-end">Total (shown):</th>
-                                        <th class="text-end" id="tableShownTotal">—</th>
-                                        <th colspan="4"></th>
-                                    </tr>
+                                <tr>
+                                    <th colspan="3" class="text-end">Total (shown):</th>
+                                    <th class="text-end" id="tableShownTotal">—</th>
+                                    <th colspan="4"></th>
+                                </tr>
                                 </tfoot>
                             </table>
                         </div>
                     </div>
 
-                    {{-- (Inline ledger removed – now shown in modal) --}}
-
                 </div>
             </div>
         </div>
-    </div>
-
-    {{-- ======= LEDGER MODAL ======= --}}
-    <div class="modal fade" id="ledgerModal" tabindex="-1" aria-labelledby="ledgerModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-fullscreen-lg-down modal-xl">
-        <div class="modal-content">
-          <div class="modal-header border-0">
-            <h5 class="modal-title" id="ledgerModalLabel">Ledger (funds in & payments out)</h5>
-            <div class="toolbar ms-auto d-none d-md-flex">
-                <button class="btn btn-sm btn-outline-brand btn-toggle" data-filter="">All</button>
-                <button class="btn btn-sm btn-outline-brand btn-toggle" data-filter="in">In</button>
-                <button class="btn btn-sm btn-outline-brand btn-toggle" data-filter="out">Out</button>
-            </div>
-            <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-
-          <div class="modal-body pt-0">
-            {{-- Metrics --}}
-            <div class="row g-3 mb-3">
-                <div class="col-md-4">
-                    <div class="metric d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <span class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 1v22"></path><path d="M17 5l-5-4-5 4"></path>
-                                </svg>
-                            </span>
-                            <div>
-                                <div class="label">Total Received (Range)</div>
-                                <div class="value h4 mb-0" id="ledgerIn_m">₹0.00</div>
-                            </div>
-                        </div>
-                        <span class="badge-soft">Ledger</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="metric d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <span class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 23V1"></path><path d="M7 19l5 4 5-4"></path>
-                                </svg>
-                            </span>
-                            <div>
-                                <div class="label">Total Spent (Range)</div>
-                                <div class="value h4 mb-0" id="ledgerOut_m">₹0.00</div>
-                            </div>
-                        </div>
-                        <span class="badge-soft">Ledger</span>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="metric d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <span class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <path d="M16 12A4 4 0 1 1 8 12a4 4 0 0 1 8 0z"></path>
-                                </svg>
-                            </span>
-                            <div>
-                                <div class="label">Net Balance (Range)</div>
-                                <div class="value h4 mb-0" id="ledgerNet_m">₹0.00</div>
-                            </div>
-                        </div>
-                        <span class="badge-soft">Ledger</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Cash / UPI split --}}
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                    <div class="metric d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <span class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="1.8">
-                                    <path d="M3 10h18M7 15h10M5 7h14" />
-                                </svg>
-                            </span>
-                            <div>
-                                <div class="label">Cash (In − Out)</div>
-                                <div class="value h4 mb-0" id="cashNet_m">₹0.00</div>
-                            </div>
-                        </div>
-                        <span class="badge-soft" id="cashTotals_m">In ₹0 • Out ₹0</span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="metric d-flex align-items-center justify-content-between">
-                        <div class="d-flex align-items-center">
-                            <span class="icon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                                     stroke="currentColor" stroke-width="1.8">
-                                    <rect x="3" y="4" width="18" height="14" rx="3" />
-                                    <path d="M7 10h6" />
-                                </svg>
-                            </span>
-                            <div>
-                                <div class="label">UPI (In − Out)</div>
-                                <div class="value h4 mb-0" id="upiNet_m">₹0.00</div>
-                            </div>
-                        </div>
-                        <span class="badge-soft" id="upiTotals_m">In ₹0 • Out ₹0</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Ledger table --}}
-            <div class="table-premium">
-                <div class="d-flex align-items-center justify-content-between px-3 pt-3">
-                    <div class="note-muted">Ledger details below</div>
-                    <div class="toolbar d-flex d-md-none">
-                        <button class="btn btn-sm btn-outline-brand btn-toggle" data-filter="">All</button>
-                        <button class="btn btn-sm btn-outline-brand btn-toggle" data-filter="in">In</button>
-                        <button class="btn btn-sm btn-outline-brand btn-toggle" data-filter="out">Out</button>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table id="ledger-datatable-modal" class="table table-hover align-middle text-nowrap mb-0">
-                        <thead>
-                            <tr>
-                                <th>Sl</th>
-                                <th>Date</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th class="text-end">Amount</th>
-                                <th>Mode</th>
-                                <th>Paid By</th>
-                                <th>Received By</th>
-                                <th>Description</th>
-                                <th>Source</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ledgerBody_m">
-                            <tr><td colspan="10" class="text-center text-muted">Use filters and click Search</td></tr>
-                        </tbody>
-                        <tfoot class="table-light">
-                            <tr>
-                                <th colspan="4" class="text-end">Total (shown):</th>
-                                <th class="text-end" id="ledgerShownTotal_m">—</th>
-                                <th colspan="5"></th>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-          </div>
-
-          <div class="modal-footer border-0">
-            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     {{-- Edit Modal --}}
@@ -618,7 +430,7 @@
 @endsection
 
 @section('scripts')
-    <!-- jQuery DataTables & plugins -->
+    <!-- DataTables & plugins -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.buttons.min.js') }}"></script>
@@ -665,18 +477,12 @@
                     case '30':    f = addDays(today, -29); t = today; break;
                     case 'fy':    f = fyStart(); t = today; break;
                 }
-                if (f && t) {
-                    fromEl.value = toISO(f);
-                    toEl.value   = toISO(t);
-                    doSearch();
-                    if (document.getElementById('ledgerModal').classList.contains('show')) loadLedger();
-                }
+                if (f && t) { fromEl.value = toISO(f); toEl.value = toISO(t); doSearch(); }
             }
             document.querySelectorAll('.quick-chip').forEach(chip => chip.addEventListener('click', () => setRange(chip.dataset.range)));
             document.getElementById('resetBtn').addEventListener('click', () => {
                 fromEl.value = ''; toEl.value = ''; catEl.value = '';
                 doSearch();
-                if (document.getElementById('ledgerModal').classList.contains('show')) loadLedger();
             });
 
             // ===== DataTable init (Transactions) =====
@@ -751,8 +557,7 @@
                 if (loading) {
                     btn.disabled = true;
                     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Searching…';
-                    todayCard.classList.add('skeleton');
-                    rangeCard.classList.add('skeleton');
+                    todayCard.classList.add('skeleton'); rangeCard.classList.add('skeleton');
                     body.innerHTML = `<tr><td colspan="8">
                         <div class="skeleton" style="height:12px;margin:8px 0;"></div>
                         <div class="skeleton" style="height:12px;margin:8px 0;"></div>
@@ -760,10 +565,8 @@
                         <div class="skeleton" style="height:12px;margin:8px 0;"></div>
                     </td></tr>`;
                 } else {
-                    btn.disabled = false;
-                    btn.textContent = 'Search';
-                    todayCard.classList.remove('skeleton');
-                    rangeCard.classList.remove('skeleton');
+                    btn.disabled = false; btn.textContent = 'Search';
+                    todayCard.classList.remove('skeleton'); rangeCard.classList.remove('skeleton');
                 }
             }
 
@@ -831,170 +634,19 @@
                 } finally { setLoadingState(false); }
             }
 
-            document.getElementById('searchBtn').addEventListener('click', () => {
-                doSearch();
-                if (document.getElementById('ledgerModal').classList.contains('show')) loadLedger();
-            });
+            document.getElementById('searchBtn').addEventListener('click', doSearch);
 
-            /* =========================
-             * LEDGER (MODAL) JS
-             * =======================*/
-            const ledgerTableEl = $('#ledger-datatable-modal');
-            const ledgerBody    = document.getElementById('ledgerBody_m');
-            const ledgerIn      = document.getElementById('ledgerIn_m');
-            const ledgerOut     = document.getElementById('ledgerOut_m');
-            const ledgerNet     = document.getElementById('ledgerNet_m');
-            const ledgerShownTotal = document.getElementById('ledgerShownTotal_m');
-            const cashNet       = document.getElementById('cashNet_m');
-            const upiNet        = document.getElementById('upiNet_m');
-            const cashTotals    = document.getElementById('cashTotals_m');
-            const upiTotals     = document.getElementById('upiTotals_m');
-            let ledgerDT = null;
-
-            function initLedgerDT() {
-                if ($.fn.dataTable.isDataTable(ledgerTableEl)) ledgerTableEl.DataTable().destroy();
-                ledgerDT = ledgerTableEl.DataTable({
-                    responsive: true, autoWidth: false, pageLength: 25,
-                    order: [[1, 'desc']],
-                    columnDefs: [{ targets: [4], className: 'text-end' }],
-                    dom: "<'row align-items-center mb-2'<'col-md-6'l><'col-md-6 text-end'B>>" +
-                         "<'row'<'col-sm-12'tr>>" +
-                         "<'row mt-2'<'col-md-5'i><'col-md-7'p>>",
-                    buttons: [
-                        { extend: 'copyHtml5',  className: 'btn btn-outline-brand me-2', title: 'Office Ledger' },
-                        { extend: 'csvHtml5',   className: 'btn btn-outline-brand me-2', title: 'Office Ledger' },
-                        { extend: 'excelHtml5', className: 'btn btn-outline-brand me-2', title: 'Office Ledger' },
-                        { extend: 'pdfHtml5',   className: 'btn btn-outline-brand me-2', title: 'Office Ledger' },
-                        { extend: 'print',      className: 'btn btn-outline-brand',      title: 'Office Ledger' }
-                    ]
-                });
-                computeLedgerShownTotal();
-                ledgerDT.on('draw', computeLedgerShownTotal);
-            }
-
-            function computeLedgerShownTotal() {
-                let sum = 0;
-                ledgerDT.rows({ page: 'current' }).every(function () {
-                    const td = $(this.node()).find('td').eq(4).text().trim();
-                    const num = parseFloat(String(td).replace(/[^\d.-]/g, ''));
-                    if (!isNaN(num)) sum += num;
-                });
-                ledgerShownTotal.textContent = fmtINR(sum);
-            }
-
-            function ledgerRowHTML(r) {
-                const typeChip = r.direction === 'in'
-                    ? '<span class="badge-soft chip-in px-2 py-1">In</span>'
-                    : '<span class="badge-soft chip-out px-2 py-1">Out</span>';
-                const src = r.source === 'fund' ? 'Fund' : 'Payment';
-                const amountSigned = (r.direction === 'out' ? '-' : '') + r.amount;
-                return `
-                    <tr data-direction="${r.direction}">
-                        <td>${r.sl}</td>
-                        <td>${r.date}</td>
-                        <td class="text-capitalize">${(r.category || '').replace(/_/g,' ')}</td>
-                        <td>${typeChip}</td>
-                        <td class="text-end">${fmtINR(amountSigned)}</td>
-                        <td class="text-capitalize">${r.mode || ''}</td>
-                        <td class="text-capitalize">${r.paid_by || ''}</td>
-                        <td class="text-capitalize">${r.received_by || ''}</td>
-                        <td>${r.description ? String(r.description) : ''}</td>
-                        <td>${src} #${r.source_id}</td>
-                    </tr>
-                `;
-            }
-
-            function computeModeSplits(list) {
-                const sum = { cashIn: 0, cashOut: 0, upiIn: 0, upiOut: 0 };
-                list.forEach(r => {
-                    const amt = Number(r.amount || 0);
-                    const mode = (r.mode || '').toLowerCase();
-                    if (mode === 'cash') { if (r.direction === 'in') sum.cashIn += amt; else sum.cashOut += amt; }
-                    if (mode === 'upi')  { if (r.direction === 'in') sum.upiIn  += amt; else sum.upiOut  += amt; }
-                });
-                cashNet.textContent    = fmtINR(sum.cashIn - sum.cashOut);
-                upiNet.textContent     = fmtINR(sum.upiIn  - sum.upiOut);
-                cashTotals.textContent = `In ${fmtINR(sum.cashIn)} • Out ${fmtINR(sum.cashOut)}`;
-                upiTotals.textContent  = `In ${fmtINR(sum.upiIn)} • Out ${fmtINR(sum.upiOut)}`;
-            }
-
-            async function loadLedger() {
+            // ===== Open Ledger in new tab (carry filters via query params) =====
+            document.getElementById('openLedgerBtn').addEventListener('click', function (e) {
+                e.preventDefault();
                 const params = new URLSearchParams();
                 if (fromEl.value) params.append('from_date', fromEl.value);
                 if (toEl.value)   params.append('to_date', toEl.value);
-                if (catEl.value)  params.append('category', catEl.value);
-                const url = `{{ route('officeLedger.filter') }}?${params.toString()}`;
-
-                ledgerBody.innerHTML = `<tr><td colspan="10">
-                    <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                    <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                    <div class="skeleton" style="height:12px;margin:8px 0;"></div>
-                </td></tr>`;
-
-                try {
-                    const res  = await fetch(url, { headers: { 'Accept': 'application/json' } });
-                    const data = await res.json();
-                    if (!data || !data.success) throw new Error('Failed');
-
-                    ledgerIn.textContent  = fmtINR(data.in_total  || 0);
-                    ledgerOut.textContent = fmtINR(data.out_total || 0);
-                    ledgerNet.textContent = fmtINR(data.net_total || 0);
-
-                    const list = Array.isArray(data.ledger) ? data.ledger : [];
-                    computeModeSplits(list);
-
-                    const html = list.map(ledgerRowHTML).join('') || `<tr><td colspan="10" class="text-center text-muted">No records</td></tr>`;
-
-                    if ($.fn.dataTable.isDataTable(ledgerTableEl)) ledgerTableEl.DataTable().clear().destroy();
-                    ledgerBody.innerHTML = html;
-                    initLedgerDT();
-
-                    // Reset toolbar to "All"
-                    document.querySelectorAll('#ledgerModal .btn-toggle').forEach(b => b.classList.remove('active'));
-                    document.querySelector('#ledgerModal .btn-toggle[data-filter=""]').classList.add('active');
-                    ledgerDT.search('').columns().search('').draw();
-                } catch (e) {
-                    console.error(e);
-                    if ($.fn.dataTable.isDataTable(ledgerTableEl)) ledgerTableEl.DataTable().clear().destroy();
-                    ledgerBody.innerHTML = `<tr><td colspan="10" class="text-center text-danger">Error loading ledger</td></tr>`;
-                    initLedgerDT();
-                    ledgerIn.textContent  = fmtINR(0);
-                    ledgerOut.textContent = fmtINR(0);
-                    ledgerNet.textContent = fmtINR(0);
-                    cashNet.textContent   = fmtINR(0);
-                    upiNet.textContent    = fmtINR(0);
-                    cashTotals.textContent = `In ${fmtINR(0)} • Out ${fmtINR(0)}`;
-                    upiTotals.textContent  = `In ${fmtINR(0)} • Out ${fmtINR(0)}`;
-                }
-            }
-
-            // Open modal -> (re)load with current filters
-            const ledgerModal = document.getElementById('ledgerModal');
-            ledgerModal.addEventListener('shown.bs.modal', function () {
-                loadLedger();
-                // Fix columns after modal animation
-                setTimeout(() => { if (ledgerDT) ledgerDT.columns.adjust().responsive.recalc(); }, 200);
+                if (document.getElementById('ledger_category').value) params.append('category', document.getElementById('ledger_category').value);
+                const url = `{{ route('officeLedger.index') }}${params.toString() ? '?' + params.toString() : ''}`;
+                window.open(url, '_blank', 'noopener');
             });
 
-            // Category change while modal open
-            catEl.addEventListener('change', function () {
-                if (ledgerModal.classList.contains('show')) loadLedger();
-            });
-
-            // Toolbar filter inside modal
-            document.querySelectorAll('#ledgerModal .btn-toggle').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    document.querySelectorAll('#ledgerModal .btn-toggle').forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    const ft = btn.getAttribute('data-filter');
-                    if (ft === '') {
-                        ledgerDT.column(3).search('').draw();
-                    } else {
-                        const pattern = ft === 'in' ? 'In' : 'Out';
-                        ledgerDT.column(3).search(pattern, true, false).draw();
-                    }
-                });
-            });
         })();
     </script>
 @endsection
