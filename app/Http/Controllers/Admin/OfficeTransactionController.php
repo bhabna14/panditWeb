@@ -172,9 +172,6 @@ class OfficeTransactionController extends Controller
         return view('admin.manage-office-fund', compact('transactions', 'todayTotal', 'rangeTotal'));
     }
 
-    /* =========================
-     |  CREATE
-     |=========================*/
     public function saveOfficeTransaction(Request $request)
     {
         $validatedData = $request->validate([
@@ -214,9 +211,6 @@ class OfficeTransactionController extends Controller
         return redirect()->back()->with('success', 'Office fund saved successfully.');
     }
 
-    /* =========================
-     |  READ/FILTER (AJAX)
-     |=========================*/
     public function filterOfficeTransactions(Request $request)
     {
         $request->validate([
@@ -324,7 +318,6 @@ class OfficeTransactionController extends Controller
         ]);
     }
 
-    /** HISTORY / LEDGER FILTER (AJAX) */
     public function filterOfficeLedger(Request $request)
     {
         $request->validate([
@@ -375,9 +368,6 @@ class OfficeTransactionController extends Controller
         ]);
     }
 
-    /* =========================
-     |  UPDATE
-     |=========================*/
     public function update(Request $request, $id)
     {
         $transaction = OfficeTransaction::findOrFail($id);
@@ -423,9 +413,6 @@ class OfficeTransactionController extends Controller
             ->with('success', 'Office fund updated successfully.');
     }
 
-    /* =========================
-     |  DELETE
-     |=========================*/
     public function destroy($id)
     {
         $transaction = OfficeTransaction::findOrFail($id);
@@ -459,9 +446,6 @@ class OfficeTransactionController extends Controller
         return redirect()->route('manageOfficeFund')->with('success', 'Office fund deleted successfully.');
     }
 
-    /* =========================
-     |  CATEGORY STATS (existing)
-     |=========================*/
     public function fundTotalsByCategory(Request $request)
     {
         $request->validate([
@@ -487,9 +471,6 @@ class OfficeTransactionController extends Controller
         ]);
     }
 
-    /* =========================
-     |  LEDGER HELPERS
-     |=========================*/
     private function upsertLedgerFromFund(OfficeFund $fund): void
     {
         OfficeLedger::updateOrCreate(
