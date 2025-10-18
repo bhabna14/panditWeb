@@ -577,7 +577,7 @@ class FlowerPickupController extends Controller
                 'payment_method'=> null,            // fill later if needed
                 'paid_by'       => null,
                 'payment_status'=> 'pending',       // or null / default
-                'status'        => 'scheduled',     // or your preferred default
+                'status'        => 'pending',     // or your preferred default
                 'payment_id'    => null,
             ]);
 
