@@ -380,7 +380,6 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
 
         Route::post('/save-flower-pickup-details', 'saveFlowerPickupDetails')->name('admin.saveFlowerPickupDetails');
         Route::post('/save-flower-pickup-assign-rider', 'saveFlowerPickupAssignRider')->name('admin.saveFlowerPickupAssignRider');
-        Route::post('/flower-pickups', 'storeFlowerPickup')->name('admin.storeFlowerPickup');
         Route::post('/update-payment/{pickup_id}', 'updatePayment')->name('update.payment');
 
         Route::get('/flower-pickup/edit/{id}', 'edit')->name('flower-pickup.edit');
@@ -1038,4 +1037,8 @@ Route::prefix('admin')->as('admin.')->group(function () {
     // Delete
     Route::delete('flower-details/{flower_detail}', [FlowerDetailsController::class, 'destroy'])
         ->name('flower-details.destroy');
+
+
 });
+
+    Route::post('/flower-pickups', [FlowerPickupController::class, 'storeFlowerPickup'])->name('admin.storeFlowerPickup');
