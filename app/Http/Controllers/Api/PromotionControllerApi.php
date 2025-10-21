@@ -12,9 +12,9 @@ class PromotionControllerApi extends Controller
     {
         try {
             $promotion = PromotionDetails::where('status', 'active')
-                ->orderBy('created_at', 'desc')
-                ->get();
-           
+            ->orderBy('created_at', 'desc')
+            ->get();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Promotion managed successfully',

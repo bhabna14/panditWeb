@@ -144,9 +144,6 @@ Route::controller(userController::class)->group(function() {
     Route::get('/book-now/{panditSlug}/{poojaSlug}/{poojaFee}', 'bookNow')->name('book.now');
     Route::post('/booking/confirm',  'confirmBooking')->name('booking.confirm');
     
-    // Route::get('/booking/success',  'bookingSuccess')->name('booking.success');
-    // Route::get('/pandit-details', 'panditetails')->name('panditdetails');
-    // Route::get('/book-now', 'booknow')->name('booknow');
     Route::get('/contact', 'contact')->name('contact');
    
     Route::get('/userlogin', 'userlogin')->name('userlogin');
@@ -155,11 +152,9 @@ Route::controller(userController::class)->group(function() {
     Route::post('/check-otp', 'checkuserotp')->name('check.userotp');
     Route::post('user/authenticate', 'userauthenticate')->name('userauthenticate');
     Route::post('user/logout', 'userlogout')->name('userlogout');
-    // Route::get('/search',  'search')->name('pandit.search');
     Route::get('/ajax-search',  'ajaxSearch')->name('pandit.ajaxSearch');
     Route::get('/ajax-search-pooja', 'ajaxSearchPooja')->name('pooja.ajaxSearchPooja');
 
-    // Route::get('/search-pooja','searchPooja')->name('search.pooja');
 
     // routes/web.php
 Route::get('/poojas', 'fetchPoojas')->name('fetchPoojas');
@@ -182,7 +177,6 @@ Route::controller(FlowerUserBookingController::class)->group(function() {
 Route::group(['middleware' => ['auth:users']], function () {
         Route::controller(userController::class)->group(function() {
         Route::get('/user-dashboard', 'userdashboard')->name('userdashboard');
-
         Route::get('/manage-address', 'mngaddress')->name('mngaddress');
         Route::get('/address/set-default/{id}', 'setDefault')->name('setDefaultAddress');
         Route::get('/addaddress', 'addfrontaddress')->name('addfrontaddress');
@@ -194,22 +188,15 @@ Route::group(['middleware' => ['auth:users']], function () {
         Route::get('removeaddress/{id}',  'removeAddress')->name('removeaddress');
         Route::get('/booking-history', 'orderhistory')->name('booking.history');
         Route::get('/rate-pooja/{id}','ratePooja')->name('rate.pooja');
-        // Route::post('submit-rating', 'submitRating')->name('submitRating');
-        // Route::post('/submit-or-update-rating',  'submitOrUpdateRating')->name('submitOrUpdateRating');
         Route::post('/submitOrUpdateRating', 'submitOrUpdateRating')->name('submitOrUpdateRating');
-
         Route::get('/view-ordered-pooja-details/{id}', [UserController::class, 'viewdetails'])->name('viewdetails');
-
-        // Route::get('/view-ordered-pooja-details', 'viewdetails')->name('viewdetails');
         Route::get('/userprofile', 'userprofile')->name('user.userprofile');
         Route::get('/coupons', 'coupons')->name('coupons');
-        // Route::delete('/profile/photo', 'deletePhoto')->name('user.deletePhoto');
         Route::put('/profile',  'updateProfile')->name('user.updateProfile');
-
         Route::delete('/delete-user-photo', 'deletePhoto')->name('delete.user.photo');
-
     });
 });
+
 Route::group(['middleware' => ['auth:users']], function () {
     Route::get('/payment/{booking_id}', [PaymentController::class, 'showPaymentPage'])->name('payment.page');
     Route::post('/payment/process/{booking_id}', [PaymentController::class, 'processPayment'])->name('payment.process');

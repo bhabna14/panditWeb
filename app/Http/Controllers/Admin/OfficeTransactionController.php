@@ -36,7 +36,7 @@ class OfficeTransactionController extends Controller
         return view('admin.manage-office-transaction', compact('transactions', 'todayTotal', 'rangeTotal'));
     }
 
-     public function filter(Request $request)
+    public function filter(Request $request)
     {
         try {
             $from = $request->query('from_date');
