@@ -193,7 +193,6 @@ public function reportCustomize(Request $request)
 
     return view('admin.reports.flower-customize-report');
 }
-
 public function flowerPickUp(Request $request)
 {
     $fromDate = $request->input('from_date', \Carbon\Carbon::now()->startOfMonth()->toDateString());
@@ -204,13 +203,20 @@ public function flowerPickUp(Request $request)
         ->get();
 
     $query = \App\Models\FlowerPickupDetails::with([
-            'flowerPickupItems.flower:id,name',
+            // IMPORTANT: use product_id (owner key) — not id
+            'flowerPickupItems.flower:product_id,name,category',
             'flowerPickupItems.unit:id,unit_name',
             'vendor:vendor_id,vendor_name',
             'rider:rider_id,rider_name',
         ])
         ->whereDate('pickup_date', '>=', $fromDate)
         ->whereDate('pickup_date', '<=', $toDate);
+
+    // Only include items where the product category is "Flower" (case-sensitive).
+    // If you want case-insensitive, replace with whereRaw('LOWER(category)=?', ['flower'])
+    $query->whereHas('flowerPickupItems.flower', function ($q) {
+        $q->where('category', 'Flower');
+    });
 
     if ($request->filled('vendor_id')) {
         $query->where('vendor_id', $request->vendor_id);
@@ -232,12 +238,13 @@ public function flowerPickUp(Request $request)
         ->groupBy('vendor_id')
         ->map(function ($rows) {
             $first = $rows->first();
+            $lastPickup = $rows->max('pickup_date'); // Carbon (pickup_date is cast)
             return [
                 'vendor_id'     => $first->vendor->vendor_id ?? $first->vendor_id,
                 'vendor_name'   => $first->vendor->vendor_name ?? '—',
                 'total_amount'  => (float) $rows->sum('total_price'),
                 'pickups_count' => (int) $rows->count(),
-                'last_pickup'   => optional($rows->max('pickup_date'))->format('Y-m-d'),
+                'last_pickup'   => $lastPickup ? \Carbon\Carbon::parse($lastPickup)->format('Y-m-d') : null,
             ];
         })
         ->sortByDesc('total_amount')
@@ -245,12 +252,12 @@ public function flowerPickUp(Request $request)
 
     if ($request->ajax()) {
         return response()->json([
-            'data'            => $reportData,
-            'total_price'     => $totalPrice,
-            'today_price'     => $todayPrice,
-            'from_date'       => $fromDate,
-            'to_date'         => $toDate,
-            'vendor_summaries'=> $vendorSummaries,
+            'data'             => $reportData,
+            'total_price'      => $totalPrice,
+            'today_price'      => $todayPrice,
+            'from_date'        => $fromDate,
+            'to_date'          => $toDate,
+            'vendor_summaries' => $vendorSummaries,
         ]);
     }
 

@@ -12,91 +12,48 @@
 
     <style>
         :root {
-            /* Base */
-            --bg-subtle: #F5F7FC;
-            --surface: #FFFFFF;
-            --border: #E7EAF3;
-            --text: #0F172A;
-            --muted: #6B7280;
-
-            /* Brand */
-            --indigo: #6F6BFE;
-            --indigo-600: #5F59F2;
-            --cyan: #0EC5D7;
-
-            /* Actions */
-            --accent-red: #F24B5B;
-            --accent-red-2: #E34050;
-
-            /* Shadows */
-            --sh-sm: 0 2px 10px rgba(15, 23, 42, .06);
-            --sh-md: 0 12px 28px rgba(2, 6, 23, .10);
+            --bg-subtle: #F5F7FC; --surface: #FFFFFF; --border: #E7EAF3; --text: #0F172A; --muted: #6B7280;
+            --indigo: #6F6BFE; --indigo-600: #5F59F2; --cyan: #0EC5D7;
+            --accent-red: #F24B5B; --accent-red-2: #E34050;
+            --sh-sm: 0 2px 10px rgba(15,23,42,.06); --sh-md: 0 12px 28px rgba(2,6,23,.10);
         }
-
-        body {
-            font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif !important;
-            color: var(--text);
-            background:
-                radial-gradient(900px 500px at 100% -10%, rgba(111, 107, 254, .08), transparent 60%),
-                radial-gradient(900px 500px at 0% 10%, rgba(14, 197, 215, .08), transparent 55%),
-                var(--bg-subtle);
-        }
-
-        /* KPI cards */
-        .stats-card {
-            border-radius: 16px;
-            padding: 18px 20px;
-            background: linear-gradient(180deg, #fff, #FAFBFF);
-            box-shadow: var(--sh-md);
-            border: 1px solid var(--border);
-            transition: transform .18s ease, box-shadow .18s ease;
-        }
-
-        .stats-card:hover { transform: translateY(-2px); box-shadow: 0 18px 36px rgba(2, 6, 23, .12); }
-        .stats-card .card-title { color: var(--muted); font-weight: 600; letter-spacing: .2px; }
-        .stats-card .fw-bold { font-weight: 800 !important; }
-
-        /* Filter wrap */
-        .filter-wrap { border-radius: 16px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--sh-sm); padding: 16px; }
-        .form-label { color: var(--muted); font-weight: 600; }
-        .form-control, .form-select { border-radius: 12px; border-color: var(--border); }
-
-        .select2-container .select2-selection--single { height: 38px; border-radius: 12px; border: 1px solid var(--border); }
-        .select2-selection__rendered { line-height: 36px !important; padding-left: 12px !important; }
-        .select2-selection__arrow { height: 36px !important; }
-
-        /* Chips */
-        .chip { display: inline-flex; align-items: center; gap: .35rem; padding: .45rem .8rem; border-radius: 999px; background: #fff; border: 1px dashed var(--border); color: #334155; font-weight: 700; font-size: .85rem; cursor: pointer; transition: all .15s ease; }
-        .chip:hover { border-color: var(--indigo); color: var(--indigo); }
-        .chip.active { background: linear-gradient(90deg, var(--indigo), var(--cyan)); border-color: transparent; color: #fff; box-shadow: 0 6px 16px rgba(14, 197, 215, .25); }
-
-        /* Buttons */
-        .btn-grad { border: none; color: #fff; font-weight: 800; letter-spacing: .2px; background-image: linear-gradient(90deg, var(--indigo), var(--cyan)); border-radius: 999px; box-shadow: 0 6px 18px rgba(14, 197, 215, .25); }
-        .btn-grad:hover { filter: brightness(.96); }
-        .btn-reset { color: #6b7280; font-weight: 700; }
-        .btn-reset:hover { color: #374151; }
-
-        /* Vendor cards */
-        .vendor-card { position: relative; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 16px; box-shadow: var(--sh-sm); height: 100%; transition: transform .15s ease, box-shadow .15s ease; }
-        .vendor-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(2, 6, 23, .10); }
-        .vendor-title { font-weight: 800; margin-bottom: .4rem; }
-        .vendor-sub { color: var(--muted); font-size: .85rem; }
-        .vendor-amount { font-size: 1.25rem; font-weight: 900; }
-        .vendor-chip { display: inline-block; padding: .25rem .6rem; border-radius: 999px; background: #F3F6FF; border: 1px dashed var(--border); font-size: .75rem; font-weight: 700; color: #334155; }
-
-        /* Table */
-        .export-table .dataTables_wrapper .dt-buttons .btn { margin-left: .4rem; }
-        .table { border-color: var(--border) !important; }
-        .table thead th { background: #F3F6FF !important; border-bottom: 1px solid var(--border) !important; color: #0F172A; font-weight: 800; }
-        .table-hover tbody tr:hover { background: #F8FBFF; }
-
-        /* Status badge */
-        .status-badge { padding: .38rem .68rem; border-radius: 999px; font-weight: 800; font-size: .78rem; color: #fff; border: 1px solid transparent; display: inline-block; }
-        .status-badge--success { background: #0E9F6E; border-color: #0A6B4B; }
-        .status-badge--warning { background: #D97706; border-color: #B65F04; }
-        .status-badge--danger { background: #DC2626; border-color: #A51B1B; }
-        .status-badge--info { background: #1D4ED8; border-color: #153AA3; }
-        .status-badge--neutral { background: #334155; border-color: #1F2937; }
+        body{font-family:"Inter",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,sans-serif!important;color:var(--text);
+            background: radial-gradient(900px 500px at 100% -10%, rgba(111,107,254,.08), transparent 60%),
+                        radial-gradient(900px 500px at 0% 10%, rgba(14,197,215,.08), transparent 55%),
+                        var(--bg-subtle);}
+        .stats-card{border-radius:16px;padding:18px 20px;background:linear-gradient(180deg,#fff,#FAFBFF);box-shadow:var(--sh-md);border:1px solid var(--border);transition:transform .18s ease, box-shadow .18s ease;}
+        .stats-card:hover{transform:translateY(-2px);box-shadow:0 18px 36px rgba(2,6,23,.12);}
+        .stats-card .card-title{color:var(--muted);font-weight:600;letter-spacing:.2px;}
+        .stats-card .fw-bold{font-weight:800!important;}
+        .filter-wrap{border-radius:16px;border:1px solid var(--border);background:var(--surface);box-shadow:var(--sh-sm);padding:16px;}
+        .form-label{color:var(--muted);font-weight:600;}
+        .form-control,.form-select{border-radius:12px;border-color:var(--border);}
+        .select2-container .select2-selection--single{height:38px;border-radius:12px;border:1px solid var(--border);}
+        .select2-selection__rendered{line-height:36px!important;padding-left:12px!important;}
+        .select2-selection__arrow{height:36px!important;}
+        .chip{display:inline-flex;align-items:center;gap:.35rem;padding:.45rem .8rem;border-radius:999px;background:#fff;border:1px dashed var(--border);color:#334155;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .15s ease;}
+        .chip:hover{border-color:var(--indigo);color:var(--indigo);}
+        .chip.active{background:linear-gradient(90deg,var(--indigo),var(--cyan));border-color:transparent;color:#fff;box-shadow:0 6px 16px rgba(14,197,215,.25);}
+        .btn-grad{border:none;color:#fff;font-weight:800;letter-spacing:.2px;background-image:linear-gradient(90deg,var(--indigo),var(--cyan));border-radius:999px;box-shadow:0 6px 18px rgba(14,197,215,.25);}
+        .btn-grad:hover{filter:brightness(.96);}
+        .btn-reset{color:#6b7280;font-weight:700;}
+        .btn-reset:hover{color:#374151;}
+        .vendor-card{position:relative;background:#fff;border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--sh-sm);height:100%;transition:transform .15s ease, box-shadow .15s ease;}
+        .vendor-card:hover{transform:translateY(-2px);box-shadow:0 16px 32px rgba(2,6,23,.10);}
+        .vendor-title{font-weight:800;margin-bottom:.4rem;}
+        .vendor-sub{color:var(--muted);font-size:.85rem;}
+        .vendor-amount{font-size:1.25rem;font-weight:900;}
+        .vendor-chip{display:inline-block;padding:.25rem .6rem;border-radius:999px;background:#F3F6FF;border:1px dashed var(--border);font-size:.75rem;font-weight:700;color:#334155;}
+        .export-table .dataTables_wrapper .dt-buttons .btn{margin-left:.4rem;}
+        .table{border-color:var(--border)!important;}
+        .table thead th{background:#F3F6FF!important;border-bottom:1px solid var(--border)!important;color:#0F172A;font-weight:800;}
+        .table-hover tbody tr:hover{background:#F8FBFF;}
+        .status-badge{padding:.38rem .68rem;border-radius:999px;font-weight:800;font-size:.78rem;color:#fff;border:1px solid transparent;display:inline-block;}
+        .status-badge--success{background:#0E9F6E;border-color:#0A6B4B;}
+        .status-badge--warning{background:#D97706;border-color:#B65F04;}
+        .status-badge--danger{background:#DC2626;border-color:#A51B1B;}
+        .status-badge--info{background:#1D4ED8;border-color:#153AA3;}
+        .status-badge--neutral{background:#334155;border-color:#1F2937;}
     </style>
 @endsection
 
@@ -187,8 +144,7 @@
                             <div class="text-end">
                                 <span class="vendor-chip">{{ $v['pickups_count'] }} pickups</span>
                                 @if (!empty($v['last_pickup']))
-                                    <div class="vendor-sub mt-1">Last:
-                                        {{ \Carbon\Carbon::parse($v['last_pickup'])->format('d M Y') }}</div>
+                                    <div class="vendor-sub mt-1">Last: {{ \Carbon\Carbon::parse($v['last_pickup'])->format('d M Y') }}</div>
                                 @endif
                             </div>
                         </div>
@@ -228,7 +184,7 @@
                         <td>{{ $item->paid_by ? ucfirst($item->paid_by) : '—' }}</td>
                         <td>
                             @forelse ($item->flowerPickupItems as $f)
-                                {{-- CHANGED: show name — ₹price (qty unit) --}}
+                                {{-- Name — ₹price (qty unit). Name comes from FlowerProduct.name --}}
                                 {{ $f->flower?->name ?? '—' }}
                                 — ₹{{ rtrim(rtrim(number_format((float) ($f->price ?? 0), 2), '0'), '.') }}
                                 ({{ rtrim(rtrim(number_format((float) $f->quantity, 2), '0'), '.') }}
@@ -242,15 +198,10 @@
                             @php $s = strtolower($item->status ?? ''); @endphp
                             @php
                                 $cls = 'status-badge--info';
-                                if (in_array($s, ['success','completed','complete','active','ok','paid','delivered','resume'])) {
-                                    $cls = 'status-badge--success';
-                                } elseif (in_array($s, ['pending','processing','in-progress','on hold','hold','awaiting'])) {
-                                    $cls = 'status-badge--warning';
-                                } elseif (in_array($s, ['cancel','cancelled','failed','rejected','expired','unpaid'])) {
-                                    $cls = 'status-badge--danger';
-                                } elseif (in_array($s, ['new','created','open'])) {
-                                    $cls = 'status-badge--neutral';
-                                }
+                                if (in_array($s, ['success','completed','complete','active','ok','paid','delivered','resume'])) $cls = 'status-badge--success';
+                                elseif (in_array($s, ['pending','processing','in-progress','on hold','hold','awaiting'])) $cls = 'status-badge--warning';
+                                elseif (in_array($s, ['cancel','cancelled','failed','rejected','expired','unpaid'])) $cls = 'status-badge--danger';
+                                elseif (in_array($s, ['new','created','open'])) $cls = 'status-badge--neutral';
                             @endphp
                             <span class="status-badge {{ $cls }}">{{ $item->status ? ucfirst($item->status) : '—' }}</span>
                         </td>
@@ -280,83 +231,48 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
-        // prevent DT alerts
         $.fn.dataTable.ext.errMode = 'none';
+        function capFirst(str){return (!str ? '—' : (str.charAt(0).toUpperCase()+str.slice(1)));}
+        function money(n){n=parseFloat(n||0);return '₹'+n.toFixed(2);}
+        function trim2(n){return (parseFloat(n||0)).toFixed(2).replace(/\.?0+$/,'');}
 
-        function capFirst(str) { return (!str ? '—' : (str.charAt(0).toUpperCase() + str.slice(1))); }
-        function money(n) { n = parseFloat(n || 0); return '₹' + n.toFixed(2); }
-        function trim2(n) { return (parseFloat(n || 0)).toFixed(2).replace(/\.?0+$/, ''); }
+        $(function(){
+            $('.select2').select2({width:'100%'});
 
-        $(function() {
-            $('.select2').select2({ width: '100%' });
+            const $from=$('#from_date'), $to=$('#to_date');
 
-            // Quick ranges
-            const $from = $('#from_date');
-            const $to = $('#to_date');
-
-            function applyRange(key) {
-                const today = moment().startOf('day');
-                let start = today.clone(), end = today.clone();
-
-                switch (key) {
+            function applyRange(key){
+                const today=moment().startOf('day'); let start=today.clone(), end=today.clone();
+                switch(key){
                     case 'today': break;
-                    case 'week': start = moment().startOf('isoWeek'); end = moment().endOf('isoWeek'); break;
-                    case 'month': start = moment().startOf('month'); end = moment().endOf('month'); break;
-                    case 'last30': start = moment().subtract(29, 'days').startOf('day'); end = today.clone(); break;
+                    case 'week': start=moment().startOf('isoWeek'); end=moment().endOf('isoWeek'); break;
+                    case 'month': start=moment().startOf('month'); end=moment().endOf('month'); break;
+                    case 'last30': start=moment().subtract(29,'days').startOf('day'); end=today.clone(); break;
                     case 'fy': {
-                        const y = moment().year();
-                        const fyStart = moment({ year: (moment().month() >= 3 ? y : y - 1), month: 3, day: 1 }).startOf('day'); // Apr 1
-                        const fyEnd = moment(fyStart).add(1, 'year').subtract(1, 'day').endOf('day'); // Mar 31
-                        start = fyStart; end = fyEnd; break;
+                        const y=moment().year();
+                        const fyStart=moment({year:(moment().month()>=3?y:y-1),month:3,day:1}).startOf('day');
+                        const fyEnd=moment(fyStart).add(1,'year').subtract(1,'day').endOf('day'); start=fyStart; end=fyEnd; break;
                     }
                 }
-                $from.val(start.format('YYYY-MM-DD'));
-                $to.val(end.format('YYYY-MM-DD'));
+                $from.val(start.format('YYYY-MM-DD')); $to.val(end.format('YYYY-MM-DD'));
             }
 
-            $('.chip').on('click', function() {
-                $('.chip').removeClass('active');
-                $(this).addClass('active');
-                applyRange($(this).data('range'));
-                $('#searchBtn').trigger('click');
-            });
+            $('.chip').on('click', function(){ $('.chip').removeClass('active'); $(this).addClass('active'); applyRange($(this).data('range')); $('#searchBtn').trigger('click'); });
+            $('#resetBtn').on('click', function(){ $from.val(''); $to.val(''); $('#vendor_id').val('').trigger('change'); $('#payment_mode').val(''); $('.chip').removeClass('active'); $('#searchBtn').trigger('click'); });
 
-            $('#resetBtn').on('click', function() {
-                $from.val(''); $to.val(''); $('#vendor_id').val('').trigger('change'); $('#payment_mode').val(''); $('.chip').removeClass('active');
-                $('#searchBtn').trigger('click');
-            });
-
-            // Vendor cards renderer
-            function renderVendorCards(vendorSummaries) {
-                const $wrap = $('#vendorCards');
-                $wrap.empty();
-
-                if (!vendorSummaries || vendorSummaries.length === 0) {
-                    $wrap.append(`
-                        <div class="col-12">
-                            <div class="vendor-card text-center">
-                                <span class="vendor-sub">No data available for current filters.</span>
-                            </div>
-                        </div>
-                    `);
-                    return;
+            function renderVendorCards(vendorSummaries){
+                const $wrap=$('#vendorCards'); $wrap.empty();
+                if(!vendorSummaries || vendorSummaries.length===0){
+                    $wrap.append(`<div class="col-12"><div class="vendor-card text-center"><span class="vendor-sub">No data available for current filters.</span></div></div>`); return;
                 }
-
-                vendorSummaries.forEach(v => {
-                    const name = v.vendor_name || '—';
-                    const total = money(v.total_amount || 0);
-                    const count = v.pickups_count || 0;
-                    const last = v.last_pickup ? moment(v.last_pickup).format('DD MMM YYYY') : '';
-
+                vendorSummaries.forEach(v=>{
+                    const name=v.vendor_name||'—', total=money(v.total_amount||0), count=v.pickups_count||0, last=v.last_pickup?moment(v.last_pickup).format('DD MMM YYYY'):'';
                     $wrap.append(`
                         <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
                             <div class="vendor-card">
                                 <div class="vendor-title">${name}</div>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <div class="vendor-sub">Total Amount</div>
-                                        <div class="vendor-amount">${total}</div>
-                                    </div>
+                                    <div><div class="vendor-sub">Total Amount</div><div class="vendor-amount">${total}</div></div>
                                     <div class="text-end">
                                         <span class="vendor-chip">${count} pickups</span>
                                         ${last ? `<div class="vendor-sub mt-1">Last: ${last}</div>` : ``}
@@ -368,90 +284,62 @@
                 });
             }
 
-            // DataTable
-            const table = $('#file-datatable').DataTable({
-                responsive: true,
-                searching: true,
-                paging: true,
-                info: true,
-                dom: "<'row'<'col-sm-6'l><'col-sm-6 text-end'B>>" +
-                     "<'row'<'col-12'tr>>" +
-                     "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-                buttons: [
-                    { extend: 'copyHtml5', text: 'Copy', className: 'btn btn-outline-secondary btn-sm' },
-                    { extend: 'csvHtml5',  text: 'CSV',  className: 'btn btn-outline-secondary btn-sm' },
-                    { extend: 'excelHtml5',text: 'Excel',className: 'btn btn-outline-secondary btn-sm' },
-                    { extend: 'pdfHtml5',  text: 'PDF',  className: 'btn btn-outline-secondary btn-sm' },
-                    { extend: 'print',     text: 'Print',className: 'btn btn-outline-secondary btn-sm' }
+            const table=$('#file-datatable').DataTable({
+                responsive:true, searching:true, paging:true, info:true,
+                dom:"<'row'<'col-sm-6'l><'col-sm-6 text-end'B>>" + "<'row'<'col-12'tr>>" + "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+                buttons:[
+                    {extend:'copyHtml5',text:'Copy',className:'btn btn-outline-secondary btn-sm'},
+                    {extend:'csvHtml5', text:'CSV', className:'btn btn-outline-secondary btn-sm'},
+                    {extend:'excelHtml5',text:'Excel',className:'btn btn-outline-secondary btn-sm'},
+                    {extend:'pdfHtml5', text:'PDF', className:'btn btn-outline-secondary btn-sm'},
+                    {extend:'print',    text:'Print',className:'btn btn-outline-secondary btn-sm'}
                 ],
-                columnDefs: [{ targets: 6, className: 'text-end' }]
+                columnDefs:[{targets:6,className:'text-end'}]
             });
 
-            // Search (AJAX)
-            $('#searchBtn').on('click', function() {
-                const fromDate = $from.val();
-                const toDate = $to.val();
-                const vendorId = $('#vendor_id').val();
-                const paymentMode = $('#payment_mode').val();
-
-                if (!fromDate || !toDate) {
-                    Swal.fire('Warning', 'Please select both from and to dates.', 'warning');
-                    return;
-                }
+            $('#searchBtn').on('click', function(){
+                const fromDate=$from.val(), toDate=$to.val(), vendorId=$('#vendor_id').val(), paymentMode=$('#payment_mode').val();
+                if(!fromDate || !toDate){ Swal.fire('Warning','Please select both from and to dates.','warning'); return; }
 
                 $.ajax({
-                    url: '{{ route('report.flower.pickup') }}',
-                    type: 'POST',
-                    data: {
-                        from_date: fromDate,
-                        to_date: toDate,
-                        vendor_id: vendorId,
-                        payment_mode: paymentMode,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        // Rebuild table
+                    url:'{{ route('report.flower.pickup') }}',
+                    type:'POST',
+                    data:{ from_date:fromDate, to_date:toDate, vendor_id:vendorId, payment_mode:paymentMode, _token:$('meta[name="csrf-token"]').attr('content') },
+                    success:function(response){
                         table.clear();
-                        (response.data || []).forEach(item => {
-                            const items = (item.flower_pickup_items || []).map(i => {
-                                const flowerName = (i.flower && i.flower.name) ? i.flower.name : '—';
-                                const unitName   = (i.unit && i.unit.unit_name) ? i.unit.unit_name : '';
-                                const qty        = trim2(i.quantity);
-                                const price      = trim2(i.price || 0); // CHANGED: include price
-                                // Output: Name — ₹price (qty unit)
-                                return `${flowerName} — ₹${price} (${qty} ${unitName})`;
+                        (response.data||[]).forEach(item=>{
+                            const items=(item.flower_pickup_items||[]).map(i=>{
+                                const name=(i.flower && i.flower.name) ? i.flower.name : '—';
+                                const unit=(i.unit && i.unit.unit_name) ? i.unit.unit_name : '';
+                                const qty = trim2(i.quantity);
+                                const price = trim2(i.price || 0);
+                                return `${name} — ₹${price} (${qty} ${unit})`;
                             }).join('<br>');
 
-                            // status class mapping
-                            const t = (item.status || '').toString().trim().toLowerCase();
-                            let cls = 'status-badge--info';
-                            if (['success','completed','complete','active','ok','paid','delivered','resume'].includes(t)) cls = 'status-badge--success';
-                            else if (['pending','processing','in-progress','on hold','hold','awaiting'].includes(t)) cls = 'status-badge--warning';
-                            else if (['cancel','cancelled','failed','rejected','expired','unpaid'].includes(t)) cls = 'status-badge--danger';
-                            else if (['new','created','open'].includes(t)) cls = 'status-badge--neutral';
+                            const t=(item.status||'').toString().trim().toLowerCase();
+                            let cls='status-badge--info';
+                            if(['success','completed','complete','active','ok','paid','delivered','resume'].includes(t)) cls='status-badge--success';
+                            else if(['pending','processing','in-progress','on hold','hold','awaiting'].includes(t)) cls='status-badge--warning';
+                            else if(['cancel','cancelled','failed','rejected','expired','unpaid'].includes(t)) cls='status-badge--danger';
+                            else if(['new','created','open'].includes(t)) cls='status-badge--neutral';
 
                             table.row.add([
-                                moment(item.pickup_date).isValid() ? moment(item.pickup_date).format('DD MMM YYYY') : (item.pickup_date || '—'),
-                                (item.vendor && item.vendor.vendor_name) ? item.vendor.vendor_name : '—',
-                                (item.rider && item.rider.rider_name) ? item.rider.rider_name : '—',
+                                moment(item.pickup_date).isValid()?moment(item.pickup_date).format('DD MMM YYYY'):(item.pickup_date||'—'),
+                                (item.vendor && item.vendor.vendor_name)?item.vendor.vendor_name:'—',
+                                (item.rider && item.rider.rider_name)?item.rider.rider_name:'—',
                                 capFirst(item.paid_by),
-                                items || '—', // CHANGED: now includes price
+                                items || '—',
                                 `<span class="status-badge ${cls}">${capFirst(item.status || '—')}</span>`,
                                 money(item.total_price)
                             ]);
                         });
                         table.draw(false);
 
-                        // KPIs
                         $('#totalPrice').text(money(response.total_price));
                         $('#todayPrice').text(money(response.today_price));
-
-                        // Vendor cards (comes pre-aggregated from backend)
-                        renderVendorCards(response.vendor_summaries || []);
+                        renderVendorCards(response.vendor_summaries||[]);
                     },
-                    error: function() {
-                        Swal.fire('Error', 'Unable to fetch data.', 'error');
-                    }
+                    error:function(){ Swal.fire('Error','Unable to fetch data.','error'); }
                 });
             });
         });

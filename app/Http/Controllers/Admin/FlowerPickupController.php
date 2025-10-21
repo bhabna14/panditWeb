@@ -23,14 +23,11 @@ class FlowerPickupController extends Controller
 
     public function addflowerpickupdetails()
     {
-      
-        $flowers = FlowerProduct::where('status', 'active')
-                        ->where('category', 'Flower')
-                        ->get();
+        $flowers = FlowerProduct::where('status', 'active')->where('category', 'Flower')->get();
         $units = PoojaUnit::where('status', 'active')->get();
         $vendors = FlowerVendor::where('status', 'active')->get();
         $riders = RiderDetails::where('status', 'active')->get();
-    
+
         return view('admin.flower-pickup-details.add-flower-pickup-details', compact('flowers', 'units', 'vendors', 'riders'));
     }
 
@@ -258,19 +255,19 @@ class FlowerPickupController extends Controller
     {
         $detail = FlowerPickupDetails::findOrFail($id);
 
-         $items = FlowerPickupItems::with(['flower:product_id,name', 'unit:id,unit_name'])
-            ->where('pick_up_id', $detail->pick_up_id)
-            ->get()
-            ->map(function ($it) {
-                return [
-                    'flower'   => $it->flower->name ?? 'N/A',
-                    'quantity' => $it->quantity ?? 'N/A',
-                    'unit'     => $it->unit->unit_name ?? 'N/A',
-                    'price'    => $it->price ?? 'N/A',
-                ];
-            })
-            ->values()
-            ->toArray();
+        $items = FlowerPickupItems::with(['flower:product_id,name', 'unit:id,unit_name'])
+        ->where('pick_up_id', $detail->pick_up_id)
+        ->get()
+        ->map(function ($it) {
+            return [
+                'flower'   => $it->flower->name ?? 'N/A',
+                'quantity' => $it->quantity ?? 'N/A',
+                'unit'     => $it->unit->unit_name ?? 'N/A',
+                'price'    => $it->price ?? 'N/A',
+            ];
+        })
+        ->values()
+        ->toArray();
 
         return response()->json(['items' => $items], 200, ['Content-Type' => 'application/json']);
     }
