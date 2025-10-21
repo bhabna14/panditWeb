@@ -315,7 +315,7 @@ class FlowerPickupController extends Controller
             'total_price' => 0, // Will calculate later
             'payment_method' => null,
             'payment_status' => 'pending',
-            'status' => 'PickupCompleted',
+            'status' => 'Completed',
             'payment_id' => null,
         ]);
     
@@ -562,7 +562,7 @@ class FlowerPickupController extends Controller
             DB::beginTransaction();
 
             // robust unique pick_up_id (string)
-            $pickUpId = 'PU-' . now()->format('Ymd-His') . '-' . Str::upper(Str::random(5));
+            $pickUpId = 'PICKUP-' . strtoupper(uniqid());
 
             $parent = FlowerPickupDetails::create([
                 'pick_up_id'    => $pickUpId,
