@@ -31,7 +31,7 @@
         </div>
         <div class="justify-content-center mt-2">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('admin.promotions.index') }}">Promotions</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.manageFlowerPromotion') }}">Promotions</a></li>
                 <li class="breadcrumb-item active" aria-current="page">New</li>
             </ol>
         </div>
