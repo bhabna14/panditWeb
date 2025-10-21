@@ -63,7 +63,7 @@ class FlowerDashboardController extends Controller
         ]);
     }
 
-   public function flowerDashboard()
+public function flowerDashboard()
 {
     $tz = config('app.timezone');
 
@@ -79,16 +79,16 @@ class FlowerDashboardController extends Controller
     ->whereNotIn('status', $excludeStats)
     ->where(function ($q) {
         $q->whereIn('status', ['active', 'paused', 'pending'])
-          ->orWhere('is_active', 1);
+        ->orWhere('is_active', 1);
     })
     ->whereDate('start_date', '<=', $tmr->toDateString())
     ->whereDate(DB::raw('COALESCE(new_date, end_date)'), '>=', $tmr->toDateString())
     // Exclude those paused ON that day:
     ->where(function ($q) use ($tmr) {
         $q->whereNull('pause_start_date')
-          ->orWhereNull('pause_end_date')
-          ->orWhereDate('pause_start_date', '>', $tmr->toDateString())
-          ->orWhereDate('pause_end_date', '<', $tmr->toDateString());
+        ->orWhereNull('pause_end_date')
+        ->orWhereDate('pause_start_date', '>', $tmr->toDateString())
+        ->orWhereDate('pause_end_date', '<', $tmr->toDateString());
     })
     ->count();
 
@@ -163,7 +163,7 @@ class FlowerDashboardController extends Controller
     $renewSubscription = Subscription::whereDate('created_at', Carbon::today($tz))
         ->whereIn('order_id', function ($query) {
             $query->select('order_id')->from('subscriptions')
-                  ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
+                ->groupBy('order_id')->havingRaw('COUNT(order_id) > 1');
         })->count();
 
     $todayEndSubscription = Subscription::where(function ($query) use ($tz) {

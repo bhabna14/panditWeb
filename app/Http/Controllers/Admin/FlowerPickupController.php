@@ -68,7 +68,7 @@ class FlowerPickupController extends Controller
 
         return view('admin.flower-pickup-details.manage-flower-pickup-details', compact('totalExpensesday'));
     }
-        
+
     public function ajaxFlowerPickupDetails(Request $request)
     {
         try {
@@ -493,7 +493,6 @@ class FlowerPickupController extends Controller
         return redirect()->back()->with('success', 'Payment details updated successfully');
     }
 
-
     public function storeFlowerPickup(Request $request)
     {
         // ---- 1) Validate top-level + array fields ---------------------------
@@ -502,7 +501,6 @@ class FlowerPickupController extends Controller
             'pickup_date'   => 'required|date',
             'delivery_date' => 'required|date|after_or_equal:pickup_date',
             'rider_id'      => 'required|exists:flower__rider_details,rider_id',
-
             // Arrays
             'flower_id'     => 'required|array',
             'flower_id.*'   => 'nullable|exists:flower_products,product_id',

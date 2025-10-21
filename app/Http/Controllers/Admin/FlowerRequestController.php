@@ -38,7 +38,7 @@ public function showRequests(Request $request)
 
     switch ($filter) {
         case 'today':
-            $query->whereDate('created_at', $today);
+            $query->whereDate('date', $today);
             break;
         case 'upcoming':
             $query->whereBetween('date', [$today, Carbon::parse($today)->addDays(3)->toDateString()]);
