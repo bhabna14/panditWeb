@@ -110,7 +110,7 @@
                     <div class="card-body d-flex flex-wrap justify-content-between align-items-center">
                         <div class="text-muted">Fields marked <span class="text-danger">*</span> are mandatory.</div>
                         <div class="d-flex gap-2">
-                            <a href="{{ route('admin.promotions.index') }}" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="{{ route('admin.promotionList') }}" class="btn btn-outline-secondary">Cancel</a>
                             <button type="submit" class="btn btn-primary">Save Promotion</button>
                         </div>
                     </div>
