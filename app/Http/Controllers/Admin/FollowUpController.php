@@ -66,128 +66,138 @@ class FollowUpController extends Controller
      * - Shows a single clear error when we cannot infer it
      */
     public function sendUserNotification(Request $request)
-    {
-        // Soft validation (no required on user_id; we’ll derive it)
-        $validator = Validator::make($request->all(), [
-            'user_id'           => 'nullable|string',
-            'title'             => 'required|string|max:255',
-            'description'       => 'required|string|max:1000',
-            'image'             => 'nullable|image|max:2048',
-            'context_user_name' => 'nullable|string',
-            'context_order_id'  => 'nullable|string', // we’ll use this to derive user_id
-            'context_end_date'  => 'nullable|string',
-        ]);
+{
+    // Soft validate (don’t require user_id; we’ll derive it)
+    $v = Validator::make($request->all(), [
+        'user_id'           => 'nullable|string',
+        'userid'            => 'nullable|string',
+        'userId'            => 'nullable|string',
+        'context_order_id'  => 'nullable|string',
+        'order_id'          => 'nullable|string',
+        'orderId'           => 'nullable|string',
+        'title'             => 'required|string|max:255',
+        'description'       => 'required|string|max:1000',
+        'image'             => 'nullable|image|max:2048',
+        'context_user_name' => 'nullable|string',
+        'context_end_date'  => 'nullable|string',
+    ]);
 
-        if ($validator->fails()) {
-            return back()
-                ->withErrors($validator)
-                ->withInput()
-                ->with([
-                    'open_send_modal' => true,
-                    'open_user_id'    => $request->input('user_id', ''),
-                    'open_user_name'  => $request->input('context_user_name', 'User'),
-                    'open_order_id'   => $request->input('context_order_id', '-'),
-                    'open_end'        => $request->input('context_end_date', '-'),
-                ]);
-        }
-
-        $data = $validator->validated();
-
-        // 1) Try given user_id
-        $uid = $data['user_id'] ?? '';
-
-        // 2) If missing, try to derive from the order_id in context
-        if (!$uid && !empty($data['context_order_id'])) {
-            // In your schema, orders.user_id stores users.userid (string like USER39581)
-            $uid = Order::where('order_id', $data['context_order_id'])->value('user_id') ?? '';
-        }
-
-        // 3) If still missing, bail with ONE clear error and reopen the modal
-        if (!$uid) {
-            return back()
-                ->withInput()
-                ->with([
-                    'error'            => 'The user id field is required (and could not be inferred from the order).',
-                    'open_send_modal'  => true,
-                    // preserve context so the modal chips look right
-                    'open_user_id'     => '',
-                    'open_user_name'   => $request->input('context_user_name', 'User'),
-                    'open_order_id'    => $request->input('context_order_id', '-'),
-                    'open_end'         => $request->input('context_end_date', '-'),
-                ]);
-        }
-
-        // Optional image
-        $imagePath = $request->hasFile('image')
-            ? $request->file('image')->store('notifications', 'public')
-            : null;
-
-        // Record the notification row
-        $notification = FCMNotification::create([
-            'title'         => $data['title'],
-            'description'   => $data['description'],
-            'image'         => $imagePath,
-            'status'        => 'queued',
-            'success_count' => 0,
-            'failure_count' => 0,
-        ]);
-
-        // Collect device tokens for this users.userid
-        $tokens = UserDevice::query()
-            ->where('user_id', $uid)
-            ->whereNotNull('device_id')
-            ->pluck('device_id')
-            ->filter()
-            ->unique()
-            ->values()
-            ->toArray();
-
-        if (empty($tokens)) {
-            return back()
-                ->withInput()
-                ->with([
-                    'error'            => 'No valid device tokens found for this user.',
-                    'open_send_modal'  => true,
-                    'open_user_id'     => $uid,
-                    'open_user_name'   => $request->input('context_user_name', 'User'),
-                    'open_order_id'    => $request->input('context_order_id', '-'),
-                    'open_end'         => $request->input('context_end_date', '-'),
-                ]);
-        }
-
-        try {
-            $service = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
-            $resp = $service->sendBulkNotifications(
-                $tokens,
-                $notification->title,
-                $notification->description,
-                ['image' => $imagePath ? asset('storage/'.$imagePath) : '']
-            );
-
-            $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : null;
-            $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : null;
-
-            $notification->update([
-                'status'        => ($failure === 0) ? 'sent' : (($success > 0) ? 'partial' : 'failed'),
-                'success_count' => $success,
-                'failure_count' => $failure,
+    if ($v->fails()) {
+        return back()
+            ->withErrors($v)
+            ->withInput()
+            ->with([
+                'open_send_modal' => true,
+                'open_user_id'    => $request->input('user_id', $request->input('userid', $request->input('userId', ''))),
+                'open_user_name'  => $request->input('context_user_name', 'User'),
+                'open_order_id'   => $request->input('context_order_id', $request->input('order_id', $request->input('orderId', '-'))),
+                'open_end'        => $request->input('context_end_date', '-'),
             ]);
-
-            return back()->with('success', 'Notification sent successfully to the selected user!');
-        } catch (\Throwable $e) {
-            Log::error('Single user FCM send error: '.$e->getMessage(), ['user_id' => $uid]);
-            $notification->update(['status' => 'failed']);
-
-            return back()
-                ->withInput()
-                ->with([
-                    'error'            => 'Failed to send notification. '.$e->getMessage(),
-                    'open_send_modal'  => true,
-                    'open_user_id'     => $uid,
-                    'open_user_name'   => $request->input('context_user_name', 'User'),
-                    'open_order_id'    => $request->input('context_order_id', '-'),
-                    'open_end'         => $request->input('context_end_date', '-'),
-                ]);
-        }
     }
+
+    $data = collect($v->validated())->map(fn($v) => is_string($v) ? trim($v) : $v);
+
+    // --- Normalize inputs ---
+    $uid = $data->get('user_id')
+        ?: $data->get('userid')
+        ?: $data->get('userId')
+        ?: '';
+
+    $oid = $data->get('context_order_id')
+        ?: $data->get('order_id')
+        ?: $data->get('orderId')
+        ?: '';
+
+    // If user id missing, try to derive from any order id we have
+    if ($uid === '' && $oid !== '') {
+        // IMPORTANT: in your schema orders.user_id holds users.userid (e.g. "USER39581")
+        $uid = (string) (Order::where('order_id', $oid)->value('user_id') ?? '');
+    }
+
+    if ($uid === '') {
+        return back()
+            ->withInput()
+            ->with([
+                'error'           => 'The user id field is required (and could not be inferred from the order).',
+                'open_send_modal' => true,
+                'open_user_id'    => '',
+                'open_user_name'  => $request->input('context_user_name', 'User'),
+                'open_order_id'   => $oid ?: '-',
+                'open_end'        => $request->input('context_end_date', '-'),
+            ]);
+    }
+
+    // Optional image
+    $imagePath = $request->hasFile('image')
+        ? $request->file('image')->store('notifications', 'public')
+        : null;
+
+    $notification = FCMNotification::create([
+        'title'         => $data->get('title'),
+        'description'   => $data->get('description'),
+        'image'         => $imagePath,
+        'status'        => 'queued',
+        'success_count' => 0,
+        'failure_count' => 0,
+    ]);
+
+    // Get device tokens for this users.userid
+    $tokens = UserDevice::query()
+        ->where('user_id', $uid)
+        ->whereNotNull('device_id')
+        ->pluck('device_id')
+        ->filter()
+        ->unique()
+        ->values()
+        ->toArray();
+
+    if (empty($tokens)) {
+        return back()
+            ->withInput()
+            ->with([
+                'error'           => 'No valid device tokens found for this user.',
+                'open_send_modal' => true,
+                'open_user_id'    => $uid,
+                'open_user_name'  => $request->input('context_user_name', 'User'),
+                'open_order_id'   => $oid ?: '-',
+                'open_end'        => $request->input('context_end_date', '-'),
+            ]);
+    }
+
+    try {
+        $service = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
+        $resp = $service->sendBulkNotifications(
+            $tokens,
+            $notification->title,
+            $notification->description,
+            ['image' => $imagePath ? asset('storage/'.$imagePath) : '']
+        );
+
+        $success = method_exists($resp, 'successes') ? count($resp->successes()->getItems()) : null;
+        $failure = method_exists($resp, 'failures') ? count($resp->failures()->getItems()) : null;
+
+        $notification->update([
+            'status'        => ($failure === 0) ? 'sent' : (($success > 0) ? 'partial' : 'failed'),
+            'success_count' => $success,
+            'failure_count' => $failure,
+        ]);
+
+        return back()->with('success', 'Notification sent successfully to the selected user!');
+    } catch (\Throwable $e) {
+        Log::error('Single user FCM send error: '.$e->getMessage(), ['user_id' => $uid, 'order_id' => $oid]);
+        $notification->update(['status' => 'failed']);
+
+        return back()
+            ->withInput()
+            ->with([
+                'error'           => 'Failed to send notification. '.$e->getMessage(),
+                'open_send_modal' => true,
+                'open_user_id'    => $uid,
+                'open_user_name'  => $request->input('context_user_name', 'User'),
+                'open_order_id'   => $oid ?: '-',
+                'open_end'        => $request->input('context_end_date', '-'),
+            ]);
+    }
+}
+
 }

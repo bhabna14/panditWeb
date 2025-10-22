@@ -449,15 +449,17 @@
                     {{-- Hidden context + hard error placeholder --}}
                     <input type="hidden" name="user_id" id="notif_user_id"
                         value="{{ old('user_id', session('open_user_id')) }}">
+                    <input type="hidden" name="userid" value="{{ old('user_id', session('open_user_id')) }}">
                     <input type="hidden" name="context_user_name" id="context_user_name"
                         value="{{ old('context_user_name', session('open_user_name')) }}">
+
                     <input type="hidden" name="context_order_id" id="context_order_id"
                         value="{{ old('context_order_id', session('open_order_id')) }}">
+                    <input type="hidden" name="order_id"
+                        value="{{ old('context_order_id', session('open_order_id')) }}">
+
                     <input type="hidden" name="context_end_date" id="context_end_date"
                         value="{{ old('context_end_date', session('open_end')) }}">
-                    <div id="inlineUidError" class="inline-error">User is missing. Close and click “Send Notification”
-                        again.</div>
-
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Title</label>
                         <input type="text" name="title" id="notif_title"
@@ -571,7 +573,7 @@
                 table.search(this.value).draw();
             });
         }
-    
+
         // Hide flash after 3s
         setTimeout(() => {
             document.querySelectorAll('#Message').forEach(el => el.style.display = 'none');
@@ -632,9 +634,13 @@
 
             // Pre-fill hidden fields + chips
             userField.value = ctx.uid;
-            document.getElementById('context_user_name').value = ctx.uname;
+
+
+            document.getElementById('notif_user_id').value = ctx.uid;
+            document.querySelector('input[name="userid"]').value = ctx.uid;
+
             document.getElementById('context_order_id').value = ctx.oid;
-            document.getElementById('context_end_date').value = ctx.end;
+            document.querySelector('input[name="order_id"]').value = ctx.oid;
 
             chipUser.innerHTML = `<i class="bi bi-person"></i> ${ctx.uname}`;
             chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order ${ctx.oid}`;
