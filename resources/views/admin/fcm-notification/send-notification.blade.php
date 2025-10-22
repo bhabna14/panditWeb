@@ -154,6 +154,7 @@
                                         {{ $u->email ?? $u->mobile_number }}</option>
                                 @endforeach
                             </select>
+
                             <div class="form-hint">Searchable multi-select. Start typing a name, email, or number.</div>
                         </div>
 

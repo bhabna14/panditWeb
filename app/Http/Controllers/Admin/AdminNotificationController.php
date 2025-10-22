@@ -28,7 +28,7 @@ class AdminNotificationController extends Controller
         return view('admin.fcm-notification.send-whatsaap-notification', compact('users'));
     }
 
-  public function send(Request $request)
+ public function send(Request $request)
 {
     // Strict, conditional validation based on selected audience
     $validated = $request->validate([
@@ -37,9 +37,9 @@ class AdminNotificationController extends Controller
         'image'        => 'nullable|image|max:2048',
         'audience'     => 'required|in:all,users,platform',
 
-        // When targeting users, users[] must be present & integer IDs
+        // 👉 When targeting users, we accept userid STRINGS like "USER30382"
         'users'        => 'required_if:audience,users|array|min:1',
-        'users.*'      => 'required_if:audience,users|integer',
+        'users.*'      => 'required_if:audience,users|string',
 
         // When targeting platform(s), platform[] must be present & valid
         'platform'     => 'required_if:audience,platform|array|min:1',
@@ -52,7 +52,6 @@ class AdminNotificationController extends Controller
         ? $request->file('image')->store('notifications', 'public')
         : null;
 
-    // Create DB row (queued)
     $notification = FCMNotification::create([
         'title'         => $validated['title'],
         'description'   => $validated['description'],
@@ -62,21 +61,33 @@ class AdminNotificationController extends Controller
         'failure_count' => 0,
     ]);
 
-    // Base query
+    // Base token query
     $tokensQuery = UserDevice::query()
         ->authorized()
         ->whereNotNull('device_id');
 
-    // Apply strict audience filters
     if ($validated['audience'] === 'users') {
-        // We know users[] exists and is all integers due to validation above
-        $userIds = array_map('intval', $validated['users']);
-        $tokensQuery->whereIn('user_id', $userIds);
+        // 👉 We received userid codes (strings). Clean them up and filter.
+        $userCodes = array_values(array_filter(
+            array_map(function ($v) {
+                $v = is_string($v) ? trim($v) : (string) $v;
+                return $v !== '' ? $v : null;
+            }, $validated['users'])
+        ));
+
+        if (empty($userCodes)) {
+            // prevent accidental send-to-all
+            $notification->update(['status' => 'failed']);
+            return back()->withErrors(['users' => 'Please select at least one valid user.']);
+        }
+
+        // 🔑 UserDevice.user_id stores the users.userid string (e.g., "USER30382")
+        $tokensQuery->whereIn('user_id', $userCodes);
     } elseif ($validated['audience'] === 'platform') {
         $tokensQuery->whereIn('platform', $validated['platform']);
-    } // audience === 'all' => no extra filters
+    }
+    // audience === 'all' => no additional filter
 
-    // Collect tokens
     $deviceTokens = $tokensQuery->distinct()->pluck('device_id')->toArray();
 
     if (empty($deviceTokens)) {
@@ -89,7 +100,6 @@ class AdminNotificationController extends Controller
         return back()->with('error', 'No valid device tokens found for the selected audience.');
     }
 
-    // Send to FCM
     try {
         $notificationService = new NotificationService(env('FIREBASE_USER_CREDENTIALS_PATH'));
         $resp = $notificationService->sendBulkNotifications(
@@ -115,6 +125,7 @@ class AdminNotificationController extends Controller
         return back()->with('error', 'Failed to send notification. '.$e->getMessage());
     }
 }
+
 
     public function delete($id)
     {
