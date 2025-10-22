@@ -333,6 +333,11 @@ Route::prefix('superadmin')->middleware(['superadmin'])->group(function () {
     Route::get('/follow-up-subscriptions', [FollowUpController::class, 'followUpSubscriptions'])->name('admin.followUpSubscriptions');
     Route::post('/save-follow-up', [FollowUpController::class, 'saveFollowUp'])->name('admin.saveFollowUp');
 
+
+
+Route::post('/admin/follow-ups/send-user-notification', [FollowUpController::class, 'sendUserNotification'])
+    ->name('admin.followup.sendUserNotification'); // ← exact name your Blade calls
+    
     // PRODUCT DETAILS ROUTES
     Route::controller(ProductSubscriptionController::class)->group(function() {
         Route::get('/manage-customize-request','showCustomizeRequest')->name('product-customize-request');
