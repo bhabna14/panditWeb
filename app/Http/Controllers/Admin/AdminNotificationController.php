@@ -24,20 +24,20 @@ class AdminNotificationController extends Controller
 
     public function whatsappcreate()
     {
-        // We’ll still show users to pick from, but the option VALUE will be a phone number now.
         $users = User::orderBy('name')->select('userid','name','mobile_number','email')->get();
         return view('admin.fcm-notification.send-whatsaap-notification', compact('users'));
     }
 
     public function send(Request $request)
     {
+        // 🔧 Change: make users.* permissive (no integer rule), then cast to int below.
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'required|string|max:1000',
             'image'       => 'nullable|image|max:2048',
             'audience'    => 'required|in:all,users,platform',
             'users'       => 'nullable|array',
-            'users.*'     => 'nullable|integer',
+            'users.*'     => 'nullable', // <= was integer; allow any, we will sanitize
             'platform'    => 'nullable|array',
             'platform.*'  => 'nullable|string|in:android,ios,web',
             'dry_run'     => 'nullable|boolean',
@@ -61,7 +61,20 @@ class AdminNotificationController extends Controller
             ->whereNotNull('device_id');
 
         if ($validated['audience'] === 'users' && !empty($validated['users'])) {
-            $tokensQuery->whereIn('user_id', $validated['users']);
+            // 🔧 Change: robustly coerce to integer IDs and drop anything non-numeric
+            $userIds = array_values(array_filter(
+                array_map(function ($v) {
+                    // accept "123", 123, " 123 ", etc.
+                    return is_numeric($v) ? (int)$v : null;
+                }, $validated['users'])
+            ));
+
+            // If nothing remains after coercion, you’ll simply target nobody (and we’ll error below)
+            if (!empty($userIds)) {
+                $tokensQuery->whereIn('user_id', $userIds);
+            } else {
+                Log::warning('Selected users contained no valid numeric IDs.', ['users' => $validated['users']]);
+            }
         }
 
         if ($validated['audience'] === 'platform' && !empty($validated['platform'])) {
@@ -150,19 +163,19 @@ class AdminNotificationController extends Controller
 
     public function sendWhatsappNotification(Request $request)
     {
-        // 🔧 Accept phone numbers in user[]
+        // WhatsApp page still accepts phone numbers directly:
         $validated = $request->validate([
             'title'       => 'required|string|max:255',
             'user'        => 'required|array|min:1',
-            'user.*'      => 'required|string', // << was integer; now string to allow phone numbers
+            'user.*'      => 'required|string',
             'description' => 'required|string',
             'image'       => 'nullable|file|mimes:jpg,jpeg,png|max:2048',
-            'default_cc'  => 'nullable|string', // e.g. +91
+            'default_cc'  => 'nullable|string',
         ]);
 
         $title       = $validated['title'];
         $description = $validated['description'];
-        $numbers     = $validated['user']; // each is a phone number string now
+        $numbers     = $validated['user'];
         $imagePath   = $request->file('image') ? $request->file('image')->store('uploads', 'public') : null;
 
         $sid   = config('services.twilio.sid');
@@ -179,9 +192,9 @@ class AdminNotificationController extends Controller
                 $twilio->messages->create(
                     'whatsapp:' . $to,
                     [
-                        'from'     => config('services.twilio.whatsapp_number'), // e.g. 'whatsapp:+1415xxxxxxx'
+                        'from'     => config('services.twilio.whatsapp_number'),
                         'body'     => $body,
-                        'mediaUrl' => $mediaArr, // array or null
+                        'mediaUrl' => $mediaArr,
                     ]
                 );
             } catch (\Throwable $e) {
@@ -202,17 +215,12 @@ class AdminNotificationController extends Controller
     {
         $digits = preg_replace('/\D+/', '', (string)$raw);
 
-        // 10-digit local: add default country code
         if (strlen($digits) === 10) {
             return $defaultCc . $digits;
         }
-
-        // already with +
         if ($digits && $raw && str_starts_with($raw, '+')) {
             return '+' . $digits;
         }
-
-        // fallback
         return '+' . $digits;
     }
 }
