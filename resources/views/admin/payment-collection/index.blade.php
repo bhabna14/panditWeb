@@ -313,6 +313,7 @@
                             <th>Type</th>
                             <th>Amount (Due)</th>
                             <th>Since</th>
+                            <th>Notify</th> {{-- 👈 NEW --}}
                             <th>Collect</th>
                         </tr>
                     </thead>
@@ -353,6 +354,16 @@
                                         —
                                     @endif
                                 </td>
+
+                                {{-- 👇 NEW: Notify button (deep-link with ?user=userid) --}}
+                                <td>
+                                    <a href="{{ route('admin.notification.create', ['user' => $row->user_id]) }}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="Send notification to {{ $row->user_name }}">
+                                        Notify
+                                    </a>
+                                </td>
+
                                 <td>
                                     <button type="button" class="btn btn-sm btn-success btn-collect"
                                         data-id="{{ $row->latest_payment_row_id }}"
@@ -360,15 +371,18 @@
                                         data-amount="{{ $row->due_amount ?? 0 }}"
                                         data-method="{{ $row->payment_method ?? '' }}"
                                         data-url="{{ route('payment.collection.collect', $row->latest_payment_row_id) }}"
-                                        data-bs-toggle="modal" data-bs-target="#collectModal">Collect</button>
+                                        data-bs-toggle="modal" data-bs-target="#collectModal">
+                                        Collect
+                                    </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-4">No pending payments 🎉</td>
+                                <td colspan="9" class="text-center py-4">No pending payments 🎉</td>
                             </tr>
                         @endforelse
                     </tbody>
+
                 </table>
             </div>
             {{ $pendingPayments->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
