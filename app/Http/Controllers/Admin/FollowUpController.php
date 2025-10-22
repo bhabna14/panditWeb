@@ -60,19 +60,24 @@ class FollowUpController extends Controller
     }
 
     /**
-     * Send a push notification (FCM) to a single user (users.userid).
+     * Send a push notification (FCM) to a single user.
+     * Accepts either 'user_id' or 'userid' and normalizes to $uid.
      */
     public function sendUserNotification(Request $request)
     {
-        // Use manual validator so we can set session flags even on validation errors
+        // Accept user_id OR userid (safety net), but require at least one.
         $validator = Validator::make($request->all(), [
-            'user_id'           => 'required|string',
+            'user_id'           => 'required_without:userid|string|nullable',
+            'userid'            => 'required_without:user_id|string|nullable',
             'title'             => 'required|string|max:255',
             'description'       => 'required|string|max:1000',
             'image'             => 'nullable|image|max:2048',
             'context_user_name' => 'nullable|string',
             'context_order_id'  => 'nullable|string',
             'context_end_date'  => 'nullable|string',
+        ], [
+            'user_id.required_without' => 'The user id field is required.',
+            'userid.required_without'  => 'The user id field is required.',
         ]);
 
         if ($validator->fails()) {
@@ -81,7 +86,7 @@ class FollowUpController extends Controller
                 ->withInput()
                 ->with([
                     'open_send_modal' => true,
-                    'open_user_id'    => $request->input('user_id', ''),
+                    'open_user_id'    => $request->input('user_id', $request->input('userid', '')),
                     'open_user_name'  => $request->input('context_user_name', 'User'),
                     'open_order_id'   => $request->input('context_order_id', '-'),
                     'open_end'        => $request->input('context_end_date', '-'),
@@ -89,6 +94,7 @@ class FollowUpController extends Controller
         }
 
         $validated = $validator->validated();
+        $uid = $validated['user_id'] ?? $validated['userid'] ?? '';
 
         $imagePath = $request->hasFile('image')
             ? $request->file('image')->store('notifications', 'public')
@@ -103,9 +109,8 @@ class FollowUpController extends Controller
             'failure_count' => 0,
         ]);
 
-        // Fetch tokens for this exact user_id (string)
         $tokens = UserDevice::query()
-            ->where('user_id', $validated['user_id'])
+            ->where('user_id', $uid) // stores users.userid string
             ->whereNotNull('device_id')
             ->pluck('device_id')
             ->filter()
@@ -119,7 +124,7 @@ class FollowUpController extends Controller
                 ->with([
                     'error' => 'No valid device tokens found for this user.',
                     'open_send_modal' => true,
-                    'open_user_id'    => $validated['user_id'],
+                    'open_user_id'    => $uid,
                     'open_user_name'  => $request->input('context_user_name', 'User'),
                     'open_order_id'   => $request->input('context_order_id', '-'),
                     'open_end'        => $request->input('context_end_date', '-'),
@@ -146,7 +151,7 @@ class FollowUpController extends Controller
 
             return back()->with('success', 'Notification sent successfully to the selected user!');
         } catch (\Throwable $e) {
-            Log::error('Single user FCM send error: '.$e->getMessage(), ['user_id' => $validated['user_id']]);
+            Log::error('Single user FCM send error: '.$e->getMessage(), ['user_id' => $uid]);
             $notification->update(['status' => 'failed']);
 
             return back()
@@ -154,7 +159,7 @@ class FollowUpController extends Controller
                 ->with([
                     'error' => 'Failed to send notification. '.$e->getMessage(),
                     'open_send_modal' => true,
-                    'open_user_id'    => $validated['user_id'],
+                    'open_user_id'    => $uid,
                     'open_user_name'  => $request->input('context_user_name', 'User'),
                     'open_order_id'   => $request->input('context_order_id', '-'),
                     'open_end'        => $request->input('context_end_date', '-'),
