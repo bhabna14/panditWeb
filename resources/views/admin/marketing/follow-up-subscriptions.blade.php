@@ -32,8 +32,97 @@
         .metric-card .value{font-size:1.25rem;font-weight:700}
         .metric-card .label{font-size:.8rem;color:#64748b}
         .badge-status{font-size:.78rem}
-        /* ★ NEW: small img preview */
-        .img-preview{max-height:80px;border:1px dashed #cbd5e1;border-radius:10px;padding:6px;background:#f8fafc}
+
+        /* ========== Notification Modal ========== */
+        .notif-modal .modal-content{
+            border:0;
+            border-radius:16px;
+            overflow:hidden;
+            box-shadow:0 24px 60px rgba(2,8,23,.22);
+        }
+        .notif-modal .modal-header{
+            border-bottom:0;
+            padding:18px 20px;
+            background: linear-gradient(135deg,#e0f2fe 0%, #fef3c7 55%, #ffe4e6 100%);
+            position: relative;
+        }
+        .notif-modal .modal-header .modal-title{
+            font-weight:800;
+            letter-spacing:.2px;
+            display:flex;
+            align-items:center;
+            gap:.6rem;
+        }
+        .notif-badge{
+            display:inline-flex;
+            align-items:center;
+            gap:.35rem;
+            background:#fff;
+            border:1px solid #e2e8f0;
+            border-radius:999px;
+            padding:.25rem .55rem;
+            font-size:.75rem;
+            font-weight:700;
+            color:#334155;
+        }
+        .notif-modal .modal-body{
+            background:#fff;
+            padding:18px 20px 10px 20px;
+        }
+        .notif-modal .modal-footer{
+            border-top:0;
+            padding:14px 20px 20px 20px;
+            background:#fff;
+        }
+        .form-hint{
+            font-size:.8rem;
+            color:#64748b;
+        }
+        .counter{
+            font-size:.75rem;
+            color:#64748b;
+        }
+        .counter .ok{color:#059669}
+        .counter .warn{color:#b45309}
+        .counter .bad{color:#b91c1c}
+        .img-preview{
+            display:block;
+            max-height:110px;
+            border:1px dashed #cbd5e1;
+            border-radius:12px;
+            padding:6px;
+            background:#f8fafc;
+        }
+        .input-chip{
+            display:inline-flex;
+            align-items:center;
+            gap:.5rem;
+            padding:.35rem .6rem;
+            background:#f1f5f9;
+            border:1px solid #e2e8f0;
+            border-radius:999px;
+            font-size:.8rem;
+            color:#0f172a;
+            font-weight:600;
+        }
+        .btn-gradient{
+            background: linear-gradient(135deg,#10b981 0%, #3b82f6 90%);
+            border:0;
+            color:#fff;
+        }
+        .btn-gradient:hover{
+            opacity:.95;
+            color:#fff;
+        }
+        .subtle{
+            color:#0ea5e9;
+            font-weight:700;
+        }
+        .divider{
+            height:1px;
+            background:#eef2f7;
+            margin:10px 0 6px 0;
+        }
     </style>
 @endsection
 
@@ -106,7 +195,7 @@
                             <th>Product / Window</th>
                             <th>Ends</th>
                             <th style="min-width:280px">Address</th>
-                            <th style="min-width:300px">Actions</th>
+                            <th style="min-width:340px">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -161,7 +250,7 @@
                                                 <i class="bi bi-eye"></i> View Notes
                                             </button>
 
-                                            <!-- ★ NEW: Send Notification button -->
+                                            <!-- New: Send Notification button -->
                                             <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#sendNotifModal-{{ $order->id }}">
                                                 <i class="bi bi-send"></i> Send Notification
                                             </button>
@@ -169,46 +258,88 @@
                                     </td>
                                 </tr>
 
-                                <!-- Existing: View Notes Modal -->
-                                {{-- ... (your existing view notes modal below remains unchanged) --}}
+                                <!-- View Notes Modal (existing) -->
+                                {{-- existing view-notes modal remains below --}}
 
-                                <!-- ★ NEW: Send Notification Modal (per row) -->
-                                <div class="modal fade" id="sendNotifModal-{{ $order->id }}" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
+                                <!-- Redesigned Send Notification Modal (per row) -->
+                                <div class="modal fade notif-modal" id="sendNotifModal-{{ $order->id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered modal-lg">
                                         <form action="{{ route('admin.followup.sendUserNotification') }}" method="POST" enctype="multipart/form-data" class="modal-content">
                                             @csrf
+
                                             <div class="modal-header">
-                                                <h5 class="modal-title">Send Notification to {{ $order->user->name }}</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                <div class="d-flex flex-column w-100">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <h5 class="modal-title">
+                                                            <span class="bi bi-bell-fill text-danger"></span>
+                                                            Send App Notification
+                                                        </h5>
+                                                        <span class="notif-badge">
+                                                            <i class="bi bi-person-badge"></i>
+                                                            {{ $order->user->name ?? 'User' }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="mt-1 d-flex flex-wrap gap-2">
+                                                        <span class="input-chip"><i class="bi bi-hash"></i> Order {{ $order->order_id }}</span>
+                                                        <span class="input-chip subtle"><i class="bi bi-calendar2-event"></i> Ends {{ $endFmt }}</span>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="btn-close ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
+
                                             <div class="modal-body">
                                                 <input type="hidden" name="user_id" value="{{ $order->user->userid }}">
 
-                                                <div class="mb-3">
-                                                    <label class="form-label">Title</label>
-                                                    <input type="text" name="title" class="form-control" maxlength="255" required placeholder="e.g. Your subscription ends soon">
-                                                </div>
+                                                <div class="row g-3">
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Title</label>
+                                                        <input type="text" name="title" class="form-control form-control-lg"
+                                                               maxlength="255" required
+                                                               placeholder="e.g. Your subscription ends soon" data-counter="#countTitle-{{ $order->id }}">
+                                                        <div class="d-flex justify-content-between">
+                                                            <div class="form-hint">A short, catchy title works best.</div>
+                                                            <div class="counter"><span id="countTitle-{{ $order->id }}">0</span>/255</div>
+                                                        </div>
+                                                    </div>
 
-                                                <div class="mb-3">
-                                                    <label class="form-label">Description</label>
-                                                    <textarea name="description" class="form-control" rows="4" maxlength="1000" required placeholder="Add a short message"></textarea>
-                                                </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Description</label>
+                                                        <textarea name="description" class="form-control" rows="4" maxlength="1000" required
+                                                                  placeholder="Add a short message with clear next steps…"
+                                                                  data-counter="#countDesc-{{ $order->id }}"></textarea>
+                                                        <div class="d-flex justify-content-between">
+                                                            <div class="form-hint">Keep it helpful and action-oriented.</div>
+                                                            <div class="counter"><span id="countDesc-{{ $order->id }}">0</span>/1000</div>
+                                                        </div>
+                                                    </div>
 
-                                                <div class="mb-3">
-                                                    <label class="form-label">Image (optional)</label>
-                                                    <input type="file" name="image" id="notifImage-{{ $order->id }}" class="form-control" accept="image/*">
-                                                    <div class="mt-2">
-                                                        <img id="notifPreview-{{ $order->id }}" class="img-preview d-none" />
+                                                    <div class="col-12 col-md-6">
+                                                        <label class="form-label fw-semibold">Image (optional)</label>
+                                                        <input type="file" name="image" id="notifImage-{{ $order->id }}" class="form-control" accept="image/*">
+                                                        <div class="form-hint mt-1">Square images (1:1) look best in push.</div>
+                                                    </div>
+                                                    <div class="col-12 col-md-6 d-flex align-items-end">
+                                                        <img id="notifPreview-{{ $order->id }}" class="img-preview d-none w-100" />
                                                     </div>
                                                 </div>
 
-                                                <div class="alert alert-info py-2 px-3">
-                                                    This will send an **app push notification** to this user only.
+                                                <div class="divider"></div>
+                                                <div class="form-hint">
+                                                    This will be sent as an <strong>app push notification</strong> to this user only.
                                                 </div>
                                             </div>
-                                            <div class="modal-footer">
-                                                <button type="submit" class="btn btn-warning">Send</button>
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+
+                                            <div class="modal-footer d-flex justify-content-between">
+                                                <div class="form-hint">
+                                                    <i class="bi bi-shield-check text-success"></i>
+                                                    Delivery depends on user’s device settings and connectivity.
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-gradient">
+                                                        <i class="bi bi-send-fill me-1"></i> Send Now
+                                                    </button>
+                                                </div>
                                             </div>
                                         </form>
                                     </div>
@@ -222,7 +353,7 @@
         </div>
     </div>
 
-    <!-- Existing: View Notes Modals (unchanged) -->
+    <!-- View Notes Modals (existing) -->
     @foreach ($orders as $order)
         <div class="modal fade" id="viewNotesModal-{{ $order->id }}" tabindex="-1"
             aria-labelledby="viewNotesModalLabel-{{ $order->id }}" aria-hidden="true">
@@ -259,7 +390,7 @@
         </div>
     @endforeach
 
-    <!-- Existing: Add Note Modals (unchanged) -->
+    <!-- Add Note Modals (existing) -->
     @foreach ($orders as $order)
         @if ($order->subscription)
             <div class="modal fade" id="followUpModal-{{ $order->id }}" tabindex="-1" role="dialog">
@@ -345,7 +476,7 @@
             });
         }
 
-        // ★ NEW: image preview binding for each modal
+        // Image preview binding for each modal
         document.querySelectorAll('input[id^="notifImage-"]').forEach(function(input) {
             input.addEventListener('change', function(e) {
                 const id = this.id.replace('notifImage-', '');
@@ -355,6 +486,22 @@
                 img.src = URL.createObjectURL(f);
                 img.classList.remove('d-none');
             });
+        });
+
+        // Live character counters (title + description in each modal)
+        document.querySelectorAll('[data-counter]').forEach(function(el){
+            const target = document.querySelector(el.getAttribute('data-counter'));
+            const max = el.getAttribute('maxlength') ? parseInt(el.getAttribute('maxlength')) : 9999;
+            const update = () => {
+                const len = el.value.length;
+                target.textContent = len;
+                // simple color feedback
+                if (len <= max * 0.7) { target.className = 'ok'; }
+                else if (len <= max) { target.className = 'warn'; }
+                else { target.className = 'bad'; }
+            };
+            el.addEventListener('input', update);
+            update();
         });
     </script>
 @endsection
