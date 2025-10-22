@@ -150,10 +150,8 @@
                                             <a href="tel:{{ $order->user->mobile_number }}" class="btn btn-sm btn-success"><i class="bi bi-telephone"></i> Call</a>
                                             <a href="https://wa.me/{{ preg_replace('/\D+/','',$order->user->mobile_number) }}" target="_blank" rel="noopener" class="btn btn-sm btn-success"><i class="bi bi-whatsapp"></i> WhatsApp</a>
                                             <a href="mailto:{{ $order->user->email }}" class="btn btn-sm btn-info"><i class="bi bi-envelope"></i> Mail</a>
-                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#followUpModal-{{ $order->id }}"><i class="bi bi-journal-plus"></i> Add Note</button>
-                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#viewNotesModal-{{ $order->id }}"><i class="bi bi-eye"></i> View Notes</button>
 
-                                            <!-- Send Notification -->
+                                            {{-- Open Send Notification modal --}}
                                             <button
                                                 type="button"
                                                 class="btn btn-sm btn-warning js-open-send-modal"
@@ -166,13 +164,15 @@
                                             >
                                                 <i class="bi bi-send"></i> Send Notification
                                             </button>
+
+                                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#followUpModal-{{ $order->id }}"><i class="bi bi-journal-plus"></i> Add Note</button>
+                                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#viewNotesModal-{{ $order->id }}"><i class="bi bi-eye"></i> View Notes</button>
                                         </div>
                                     </td>
                                 </tr>
 
                                 {{-- View Notes Modal --}}
-                                <div class="modal fade" id="viewNotesModal-{{ $order->id }}" tabindex="-1"
-                                     aria-labelledby="viewNotesModalLabel-{{ $order->id }}" aria-hidden="true">
+                                <div class="modal fade" id="viewNotesModal-{{ $order->id }}" tabindex="-1" aria-labelledby="viewNotesModalLabel-{{ $order->id }}" aria-hidden="true">
                                     <div class="modal-dialog modal-lg">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -258,7 +258,7 @@
                 </div>
 
                 <div class="modal-body">
-                    {{-- Fallbacks: keep old/session values if validation failed previously --}}
+                    {{-- Hidden context + hard error placeholder --}}
                     <input type="hidden" name="user_id" id="notif_user_id" value="{{ old('user_id', session('open_user_id')) }}">
                     <input type="hidden" name="context_user_name" id="context_user_name" value="{{ old('context_user_name', session('open_user_name')) }}">
                     <input type="hidden" name="context_order_id"  id="context_order_id"  value="{{ old('context_order_id',  session('open_order_id')) }}">
@@ -345,17 +345,20 @@
         const searchInput=document.getElementById('tableSearch');
         if(searchInput){ searchInput.addEventListener('keyup', function(){ table.search(this.value).draw(); }); }
 
-        // Modal logic
+        // ====== SEND NOTIFICATION MODAL LOGIC (robust) ======
         const sendModal = document.getElementById('sendNotifModal');
         const form      = document.getElementById('sendNotifForm');
-        const userField = document.getElementById('notif_user_id');
+
+        const userField = document.getElementById('notif_user_id');      // hidden input (required)
         const chipUser  = document.getElementById('chipUser');
         const chipOrder = document.getElementById('chipOrder');
         const chipEnd   = document.getElementById('chipEnd');
+
         const titleEl   = document.getElementById('notif_title');
         const descEl    = document.getElementById('notif_desc');
         const countT    = document.getElementById('count_title');
         const countD    = document.getElementById('count_desc');
+
         const imgInput  = document.getElementById('notif_image');
         const imgPrev   = document.getElementById('notif_preview');
         const inlineUidError = document.getElementById('inlineUidError');
@@ -365,6 +368,7 @@
             out.textContent = `${len}/${max}`;
             out.className = 'counter ' + (len <= max*0.7 ? 'ok' : (len <= max ? 'warn' : 'bad'));
         }
+
         titleEl.addEventListener('input', () => updateCounter(titleEl, countT, 255));
         descEl .addEventListener('input', () => updateCounter(descEl , countD, 1000));
 
@@ -375,53 +379,61 @@
             imgPrev.classList.remove('d-none');
         });
 
-        // 1) RIGHT WHEN BUTTON IS CLICKED — set user_id BEFORE modal opens
-        document.querySelectorAll('.js-open-send-modal').forEach(btn=>{
-            btn.addEventListener('click', ()=>{
-                const uid = btn.getAttribute('data-userid') || '';
-                const uname = btn.getAttribute('data-username') || 'User';
-                const oid = btn.getAttribute('data-orderid') || '-';
-                const end = btn.getAttribute('data-end') || '-';
+        // Fill fields whenever the modal is about to show
+        sendModal.addEventListener('show.bs.modal', (ev) => {
+            const btn = ev.relatedTarget; // The button that triggered the modal
+            // Prefer the triggering button's dataset if present
+            if (btn && btn.classList.contains('js-open-send-modal')) {
+                const uid  = btn.getAttribute('data-userid')  || '';
+                const uname= btn.getAttribute('data-username')|| 'User';
+                const oid  = btn.getAttribute('data-orderid') || '-';
+                const end  = btn.getAttribute('data-end')     || '-';
 
-                userField.value = uid; // critical
+                userField.value = uid; // CRITICAL
                 inlineUidError.style.display = uid ? 'none' : 'block';
 
+                // Set pretty chips
                 chipUser.innerHTML  = `<i class="bi bi-person"></i> ${uname}`;
                 chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order ${oid}`;
                 chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends ${end}`;
-            });
-        });
 
-        // 2) On modal show — DO NOT reset the form (it can wipe hidden inputs)
-        sendModal.addEventListener('show.bs.modal', ()=>{
-            // just update counters; don’t .reset()
+                // Also keep context fields in sync (used by controller on error)
+                document.getElementById('context_user_name').value = uname;
+                document.getElementById('context_order_id').value  = oid;
+                document.getElementById('context_end_date').value  = end;
+            }
+
+            // Update counters (don’t reset the form here!)
             updateCounter(titleEl, countT, 255);
             updateCounter(descEl , countD, 1000);
         });
 
-        // 3) Right before submit — hard guard
+        // Hard guard before submit
         form.addEventListener('submit', function(e){
             if(!userField.value){
                 e.preventDefault();
                 inlineUidError.style.display = 'block';
-                // keep the modal open
+                // Keep modal open
                 const modalInstance = bootstrap.Modal.getOrCreateInstance(sendModal);
                 modalInstance.show();
                 return false;
             }
         });
 
-        // Auto-reopen after server-side validation with preserved session data
+        // Auto-reopen after server-side validation or other server flags
         @if (session('open_send_modal'))
             (function reopenModal(){
                 const modal = new bootstrap.Modal(sendModal);
-                // chips
+
+                // Chips from session
                 chipUser.innerHTML  = `<i class="bi bi-person"></i> {{ session('open_user_name','User') }}`;
                 chipOrder.innerHTML = `<i class="bi bi-hash"></i> Order {{ session('open_order_id','-') }}`;
                 chipEnd.innerHTML   = `<i class="bi bi-calendar2-event"></i> Ends {{ session('open_end','-') }}`;
-                // ensure user_id is present
-                userField.value = `{{ session('open_user_id','') }}`;
+
+                // Ensure user_id is present (from old/session)
+                userField.value = `{{ old('user_id', session('open_user_id','')) }}`;
                 inlineUidError.style.display = userField.value ? 'none' : 'block';
+
                 updateCounter(titleEl, countT, 255);
                 updateCounter(descEl , countD, 1000);
                 modal.show();
