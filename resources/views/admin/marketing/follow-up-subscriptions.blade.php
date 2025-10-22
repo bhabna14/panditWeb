@@ -255,6 +255,12 @@
                                             <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
                                                 data-bs-target="#viewNotesModal-{{ $order->id }}"><i
                                                     class="bi bi-eye"></i> View Notes</button>
+
+                                        <button href="{{ route('admin.notification.create', ['user' => $order->user->user_id]) }}"
+                                        class="btn btn-sm btn-outline-primary"
+                                        title="Send notification to">
+                                        Notify
+                                    </button>
                                         </div>
                                     </td>
                                 </tr>

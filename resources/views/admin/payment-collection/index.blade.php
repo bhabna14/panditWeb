@@ -355,7 +355,6 @@
                                     @endif
                                 </td>
 
-                                {{-- 👇 NEW: Notify button (deep-link with ?user=userid) --}}
                                 <td>
                                     <a href="{{ route('admin.notification.create', ['user' => $row->user_id]) }}"
                                         class="btn btn-sm btn-outline-primary"
