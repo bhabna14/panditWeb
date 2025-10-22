@@ -571,8 +571,7 @@
                 table.search(this.value).draw();
             });
         }
-    </script>
-    <script>
+    
         // Hide flash after 3s
         setTimeout(() => {
             document.querySelectorAll('#Message').forEach(el => el.style.display = 'none');
