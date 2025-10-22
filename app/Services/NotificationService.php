@@ -4,78 +4,61 @@ namespace App\Services;
 
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification as FcmNotification;
 
 class NotificationService
 {
     protected $messaging;
 
-    // Initialize Firebase Messaging
     public function __construct($credentialsPath = null)
     {
-        // Use provided path or default to configuration value
         $path = $credentialsPath ?: config('services.firebase.user.credentials');
 
         if (!file_exists($path)) {
             throw new \InvalidArgumentException("Firebase credentials file not found at: {$path}");
         }
 
-        // Initialize Firebase Messaging
         $factory = (new Factory)->withServiceAccount($path);
         $this->messaging = $factory->createMessaging();
     }
 
-    // Send a notification to a single device
-    public function sendNotification($deviceToken, $title, $body, $data = [])
+    // One device
+    public function sendNotification($deviceToken, $title, $body, array $data = [])
     {
         $message = CloudMessage::withTarget('token', $deviceToken)
-            ->withNotification([
-                'title' => $title,
-                'body'  => $body,
-            ])
-            ->withData($data);
+            ->withNotification(FcmNotification::create($title, $body))
+            ->withData($this->stringifyValues($data));
 
         return $this->messaging->send($message);
     }
 
-    // public function sendBulkNotifications($deviceTokens, $title, $body, $data = [])
-    // {
-    //     $messages = [];
-    //     foreach ($deviceTokens as $deviceToken) {
-    //         $messages[] = CloudMessage::withTarget('token', $deviceToken)
-    //             ->withNotification([
-    //                 'title' => $title,
-    //                 'body'  => $body,
-    //             ])
-    //             ->withData($data);
-    //     }
-    //     return $this->messaging->sendAll($messages);
-    // }
-    
-    // public function sendBulkNotifications($deviceTokens, $title, $body, $data = [])
-    public function sendBulkNotifications($deviceTokens, $title, $body, $data = [])
+    // Many devices (batched)
+    public function sendBulkNotifications(array $deviceTokens, $title, $body, array $data = [])
     {
         $messages = [];
 
         foreach ($deviceTokens as $deviceToken) {
-            // Ensure the token is a valid string
-            if (is_string($deviceToken) && !empty($deviceToken)) {
-                $messages[] = CloudMessage::withTarget('token', $deviceToken)
-                    ->withNotification([
-                        'title' => $title,
-                        'body'  => $body,
-                    ])
-                    ->withData($data);
-            } else {
+            if (!is_string($deviceToken) || empty($deviceToken)) {
                 \Log::warning('Invalid device token encountered.', ['deviceToken' => $deviceToken]);
+                continue;
             }
+
+            $messages[] = CloudMessage::withTarget('token', $deviceToken)
+                ->withNotification(FcmNotification::create($title, $body))
+                ->withData($this->stringifyValues($data));
         }
 
-        if (!empty($messages)) {
-            return $this->messaging->sendAll($messages);
+        if (empty($messages)) {
+            \Log::info('No valid messages to send.');
+            return null;
         }
 
-        \Log::info('No valid messages to send.');
-        return null;
+        return $this->messaging->sendAll($messages);
     }
 
+    private function stringifyValues(array $data): array
+    {
+        // FCM `data` values must be strings
+        return array_map(fn($v) => is_scalar($v) ? (string)$v : json_encode($v), $data);
+    }
 }

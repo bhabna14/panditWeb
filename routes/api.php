@@ -150,7 +150,6 @@ Route::controller(BankController::class)->group(function() {
 Route::controller(AddressController::class)->group(function() {
     Route::post('/pandit/saveaddress', 'saveAddress');
     Route::middleware('auth:sanctum')->get('pandit/show-address','address');
-
 });
 
 Route::controller(PodcastController::class)->group(function() {

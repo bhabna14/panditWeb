@@ -8,11 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class FCMNotification extends Model
 {
     use HasFactory;
+
     protected $table = 'f_c_m_notifications';
+
     protected $fillable = [
         'title',
         'description',
         'image',
-        'status',
+        'status', // e.g. 'queued','sent','partial','failed'
+        'success_count',
+        'failure_count',
     ];
 }
